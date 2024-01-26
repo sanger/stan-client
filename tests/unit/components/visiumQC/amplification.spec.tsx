@@ -8,7 +8,6 @@ import { createFlaggedLabware } from '../../../../src/mocks/handlers/flagLabware
 import { forEach } from 'lodash';
 afterEach(() => {
   cleanup();
-  jest.resetModules();
 });
 beforeEach(() => {
   enableMapSet();

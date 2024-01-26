@@ -1,5 +1,6 @@
 import { selectOption, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
 import { RecordProbeOperationMutation, RecordProbeOperationMutationVariables } from '../../../src/types/sdk';
+import { HttpResponse } from 'msw';
 
 describe('Xenium Probe Hybridisation', () => {
   before(() => {
@@ -249,9 +250,9 @@ describe('Xenium Probe Hybridisation', () => {
           worker.use(
             graphql.mutation<RecordProbeOperationMutation, RecordProbeOperationMutationVariables>(
               'RecordProbeOperation',
-              (req, res, ctx) => {
-                return res.once(
-                  ctx.errors([
+              () => {
+                return HttpResponse.json({
+                  errors: [
                     {
                       message:
                         'Exception while fetching data (/probe_hybridisation_xenium) : The operation could not be validated.',
@@ -259,8 +260,8 @@ describe('Xenium Probe Hybridisation', () => {
                         problems: ['Labware is discarded: [STAN-3111]']
                       }
                     }
-                  ])
-                );
+                  ]
+                });
               }
             )
           );

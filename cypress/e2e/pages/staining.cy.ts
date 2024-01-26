@@ -172,7 +172,7 @@ describe('Staining Page', () => {
       cy.findByTestId('timeMeasurements.2.minutes').type('1');
       cy.findByTestId('timeMeasurements.2.seconds').type('1');
     }
-    if (stainType == 'IHC' || stainType == 'RNAscope' || stainType == 'RNAscope & IHC') {
+    if (stainType === 'IHC' || stainType === 'RNAscope' || stainType === 'RNAscope & IHC') {
       cy.findByTestId('STAN-3111-bondBarcode').type('1234');
       cy.findByTestId('STAN-3111-bondRun').type('1');
       selectOption('STAN-3111-workNumber', 'SGP1008');

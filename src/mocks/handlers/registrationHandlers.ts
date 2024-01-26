@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import { uniqueId } from 'lodash';
 import {
   GetRegistrationInfoQuery,
@@ -19,102 +19,105 @@ import solutionRepository from '../repositories/solutionRepository';
 import slotRegionRepository from '../repositories/slotRegionRepository';
 
 const registrationHandlers = [
-  graphql.query<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>('GetRegistrationInfo', (req, res, ctx) => {
-    return res(
-      ctx.data({
-        species: speciesRepository.findAll().filter((species) => species.enabled),
-        hmdmcs: hmdmcRepository.findAll().filter((hmdmc) => hmdmc.enabled),
-        labwareTypes: labwareTypeInstances,
-        tissueTypes: [
-          {
-            __typename: 'TissueType',
-            name: 'Liver',
-            spatialLocations: [
-              {
-                __typename: 'SpatialLocation',
-                name: 'Not specified',
-                code: 0
-              },
-              {
-                __typename: 'SpatialLocation',
-                name: 'Liver segments IV (left lobe)',
-                code: 1
-              },
-              {
-                __typename: 'SpatialLocation',
-                name: 'Surface cranial region',
-                code: 2
-              },
-              {
-                __typename: 'SpatialLocation',
-                name: 'Surface central region',
-                code: 3
-              },
-              {
-                __typename: 'SpatialLocation',
-                name: 'Surface caudal region',
-                code: 4
-              },
-              {
-                __typename: 'SpatialLocation',
-                name: 'Deep parenchymal central region (towards hilum)',
-                code: 5
-              },
-              {
-                __typename: 'SpatialLocation',
-                name: 'Right lobe (fine needle aspiration samples)',
-                code: 6
-              }
-            ]
-          },
-          {
-            __typename: 'TissueType',
-            name: 'Kidney',
-            spatialLocations: [
-              {
-                __typename: 'SpatialLocation',
-                name: 'Not specified',
-                code: 0
-              },
-              {
-                __typename: 'SpatialLocation',
-                name: 'Cortex',
-                code: 1
-              },
-              {
-                __typename: 'SpatialLocation',
-                name: 'Medulla at equator',
-                code: 2
-              },
-              {
-                __typename: 'SpatialLocation',
-                name: 'Pelvis at equator',
-                code: 3
-              },
-              {
-                __typename: 'SpatialLocation',
-                name: 'Upper pole',
-                code: 4
-              },
-              {
-                __typename: 'SpatialLocation',
-                name: 'Lower pole',
-                code: 5
-              }
-            ]
-          }
-        ],
-        fixatives: [{ name: 'None' }, { name: 'Formalin' }],
-        mediums: [{ name: 'OCT' }, { name: 'Paraffin' }, { name: 'None' }],
-        solutions: solutionRepository.findAll().filter((sample) => sample.enabled),
-        slotRegions: slotRegionRepository.findAll().filter((region) => region.enabled)
-      })
+  graphql.query<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>('GetRegistrationInfo', ({ variables }) => {
+    return HttpResponse.json(
+      {
+        data: {
+          species: speciesRepository.findAll().filter((species) => species.enabled),
+          hmdmcs: hmdmcRepository.findAll().filter((hmdmc) => hmdmc.enabled),
+          labwareTypes: labwareTypeInstances,
+          tissueTypes: [
+            {
+              __typename: 'TissueType',
+              name: 'Liver',
+              spatialLocations: [
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Not specified',
+                  code: 0
+                },
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Liver segments IV (left lobe)',
+                  code: 1
+                },
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Surface cranial region',
+                  code: 2
+                },
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Surface central region',
+                  code: 3
+                },
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Surface caudal region',
+                  code: 4
+                },
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Deep parenchymal central region (towards hilum)',
+                  code: 5
+                },
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Right lobe (fine needle aspiration samples)',
+                  code: 6
+                }
+              ]
+            },
+            {
+              __typename: 'TissueType',
+              name: 'Kidney',
+              spatialLocations: [
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Not specified',
+                  code: 0
+                },
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Cortex',
+                  code: 1
+                },
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Medulla at equator',
+                  code: 2
+                },
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Pelvis at equator',
+                  code: 3
+                },
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Upper pole',
+                  code: 4
+                },
+                {
+                  __typename: 'SpatialLocation',
+                  name: 'Lower pole',
+                  code: 5
+                }
+              ]
+            }
+          ],
+          fixatives: [{ name: 'None' }, { name: 'Formalin' }],
+          mediums: [{ name: 'OCT' }, { name: 'Paraffin' }, { name: 'None' }],
+          solutions: solutionRepository.findAll().filter((sample) => sample.enabled),
+          slotRegions: slotRegionRepository.findAll().filter((region) => region.enabled)
+        }
+      },
+      { status: 200 }
     );
   }),
 
-  graphql.mutation<RegisterTissuesMutation, RegisterTissuesMutationVariables>('RegisterTissues', (req, res, ctx) => {
-    return res(
-      ctx.data({
+  graphql.mutation<RegisterTissuesMutation, RegisterTissuesMutationVariables>('RegisterTissues', () => {
+    return HttpResponse.json({
+      data: {
         register: {
           clashes: [],
           labwareSolutions: [
@@ -178,15 +181,15 @@ const registrationHandlers = [
             }
           ]
         }
-      })
-    );
+      }
+    });
   }),
 
-  graphql.mutation<RegisterSectionsMutation, RegisterSectionsMutationVariables>('RegisterSections', (req, res, ctx) => {
-    return res(
-      ctx.data({
+  graphql.mutation<RegisterSectionsMutation, RegisterSectionsMutationVariables>('RegisterSections', ({ variables }) => {
+    return HttpResponse.json({
+      data: {
         registerSections: {
-          labware: req.variables.request.labware.map((labware) => {
+          labware: variables.request.labware.map((labware) => {
             let labwareId = parseInt(uniqueId());
             return {
               id: labwareId,
@@ -238,14 +241,14 @@ const registrationHandlers = [
             };
           })
         }
-      })
-    );
+      }
+    });
   }),
   graphql.mutation<RegisterOriginalSamplesMutation, RegisterOriginalSamplesMutationVariables>(
     'RegisterOriginalSamples',
-    (req, res, ctx) => {
-      return res(
-        ctx.data({
+    () => {
+      return HttpResponse.json({
+        data: {
           registerOriginalSamples: {
             labwareSolutions: [
               {
@@ -309,8 +312,8 @@ const registrationHandlers = [
               }
             ]
           }
-        })
-      );
+        }
+      });
     }
   )
 ];

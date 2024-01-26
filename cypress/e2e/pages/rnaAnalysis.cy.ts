@@ -9,6 +9,7 @@ import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFact
 import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { selectOption } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 function scanLabware(barcode: string) {
   cy.get('#labwareScanInput').should('not.be.disabled').clear().type(`${barcode}{enter}`);
 }
@@ -61,16 +62,16 @@ describe('RNA Analysis', () => {
           barcode: 'STAN-3112'
         });
         worker.use(
-          graphql.query<ExtractResultQuery, ExtractResultQueryVariables>('ExtractResult', (req, res, ctx) => {
-            return res.once(
-              ctx.data({
+          graphql.query<ExtractResultQuery, ExtractResultQueryVariables>('ExtractResult', () => {
+            return HttpResponse.json({
+              data: {
                 extractResult: {
                   result: undefined,
                   labware: newLabware as LabwareFlagged,
                   concentration: undefined
                 }
-              })
-            );
+              }
+            });
           })
         );
       });
@@ -99,18 +100,15 @@ describe('RNA Analysis', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.mutation<RecordRnaAnalysisMutation, RecordRnaAnalysisMutationVariables>(
-            'RecordRNAAnalysis',
-            (req, res, ctx) => {
-              return res(
-                ctx.errors([
-                  {
-                    message: 'Exception while fetching data (/performRnaAnalysis) : An error occured'
-                  }
-                ])
-              );
-            }
-          )
+          graphql.mutation<RecordRnaAnalysisMutation, RecordRnaAnalysisMutationVariables>('RecordRNAAnalysis', () => {
+            return HttpResponse.json({
+              errors: [
+                {
+                  message: 'Exception while fetching data (/performRnaAnalysis) : An error occured'
+                }
+              ]
+            });
+          })
         );
       });
       selectOption('analysisType', 'DV200');
@@ -127,12 +125,13 @@ describe('RNA Analysis', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.mutation<RecordRnaAnalysisMutation, RecordRnaAnalysisMutationVariables>(
-            'RecordRNAAnalysis',
-            (req, res, ctx) => {
-              return res(ctx.data({ recordRNAAnalysis: { operations: [] } }));
-            }
-          )
+          graphql.mutation<RecordRnaAnalysisMutation, RecordRnaAnalysisMutationVariables>('RecordRNAAnalysis', () => {
+            return HttpResponse.json({
+              data: {
+                recordRNAAnalysis: { operations: [] }
+              }
+            });
+          })
         );
       });
       selectOption('equipmentId', 'Bioanalyser');

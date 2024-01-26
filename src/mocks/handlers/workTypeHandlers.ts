@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   AddWorkTypeMutation,
   AddWorkTypeMutationVariables,
@@ -11,51 +11,37 @@ import workTypeRepository from '../repositories/workTypeRepository';
 import workRepository from '../repositories/workRepository';
 
 const workTypeHandlers = [
-  graphql.mutation<AddWorkTypeMutation, AddWorkTypeMutationVariables>('AddWorkType', (req, res, ctx) => {
+  graphql.mutation<AddWorkTypeMutation, AddWorkTypeMutationVariables>('AddWorkType', ({ variables }) => {
     const workType = workTypeRepository.save({
-      name: req.variables.name,
+      name: variables.name,
       enabled: true
     });
 
-    return res(
-      ctx.data({
-        addWorkType: workType
-      })
-    );
+    return HttpResponse.json({ data: { addWorkType: workType } });
   }),
 
   graphql.mutation<SetWorkTypeEnabledMutation, SetWorkTypeEnabledMutationVariables>(
     'SetWorkTypeEnabled',
-    (req, res, ctx) => {
-      const workType = workTypeRepository.find('name', req.variables.name);
+    ({ variables }) => {
+      const workType = workTypeRepository.find('name', variables.name);
 
       if (!workType) {
-        return res(
-          ctx.errors([
-            {
-              message: `Could not find Work Type "${req.variables.name}"`
-            }
-          ])
+        return HttpResponse.json(
+          { errors: [{ message: `Could not find Work Type "${variables.name}"` }] },
+          { status: 400 }
         );
       } else {
-        workType.enabled = req.variables.enabled;
+        workType.enabled = variables.enabled;
         workTypeRepository.save(workType);
-        return res(
-          ctx.data({
-            setWorkTypeEnabled: workType
-          })
-        );
+        return HttpResponse.json({ data: { setWorkTypeEnabled: workType } });
       }
     }
   ),
 
-  graphql.query<GetWorkTypesQuery, GetWorkTypesQueryVariables>('GetWorkTypes', (req, res, ctx) => {
-    return res(
-      ctx.data({
-        __typename: 'Query',
-        workTypes: workTypeRepository.findAll().concat(workRepository.findAll().map((work) => work.workType))
-      })
-    );
+  graphql.query<GetWorkTypesQuery, GetWorkTypesQueryVariables>('GetWorkTypes', () => {
+    return HttpResponse.json({
+      data: { workTypes: workTypeRepository.findAll().concat(workRepository.findAll().map((work) => work.workType)) }
+    });
   })
 ];
 

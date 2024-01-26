@@ -1,37 +1,30 @@
-import { graphql } from 'msw';
-import { ExtractResultQuery, ExtractResultQueryVariables, LabwareFlagged, PassFail } from '../../types/sdk';
+import { graphql, HttpResponse } from 'msw';
+import {
+  ExtractResultQuery,
+  ExtractResultQueryVariables,
+  LabwareFlaggedFieldsFragment,
+  PassFail
+} from '../../types/sdk';
 import labwareFactory from '../../lib/factories/labwareFactory';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../types/stan';
 
 const extractionResultHandlers = [
-  graphql.query<ExtractResultQuery, ExtractResultQueryVariables>('ExtractResult', (req, res, ctx) => {
+  graphql.query<ExtractResultQuery, ExtractResultQueryVariables>('ExtractResult', ({ variables }) => {
     // Assign a labware type
     const labwareType = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.TUBE);
     // Create the new bit of labware
     const newLabware = labwareFactory.build({
-      labwareType,
-      barcode: req.variables.barcode
-    }) as LabwareFlagged;
-    newLabware.flagged = req.variables.barcode.endsWith('00');
+      labwareType
+    });
+    newLabware.barcode = variables.barcode;
 
-    return res(
-      ctx.data({
-        extractResult: {
-          result: PassFail.Pass,
-          labware: newLabware,
-          concentration: '1.3'
-        }
-      })
-    );
-    /* if (req.variables.barcode === "STAN-3111")
-        return res(
-          ctx.errors([
-            {
-              message: `Couldn't find labware with barcode ${req.variables.barcode} in sessionStorage`,
-            },
-          ])
-        );*/
+    const labwareFlagged: LabwareFlaggedFieldsFragment = { ...newLabware, __typename: 'LabwareFlagged', flagged: true };
+    return HttpResponse.json({
+      data: {
+        extractResult: { result: PassFail.Pass, labware: labwareFlagged, concentration: '1.3' }
+      }
+    });
   })
 ];
 export default extractionResultHandlers;
