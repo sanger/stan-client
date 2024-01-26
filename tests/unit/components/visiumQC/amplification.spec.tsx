@@ -52,9 +52,11 @@ describe('Amplification', () => {
     });
   });
 
-  it('invokes remove function when labware is removed', () => {
+  it('invokes remove function when labware is removed', async () => {
     renderAmplification();
-    fireEvent.click(screen.getByTestId('remove'));
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('remove'));
+    });
     expect(mockedRemoveLabwareFct).toHaveBeenCalled();
   });
 });
