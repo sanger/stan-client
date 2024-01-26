@@ -3,6 +3,8 @@ import {
   FindMeasurementByBarcodeAndNameQueryVariables,
   RecordOpWithSlotCommentsMutation,
   RecordOpWithSlotCommentsMutationVariables,
+  RecordOpWithSlotMeasurementsMutation,
+  RecordOpWithSlotMeasurementsMutationVariables,
   RecordVisiumQcMutation,
   RecordVisiumQcMutationVariables,
   SlideCosting
@@ -57,8 +59,7 @@ describe('Visium QC Page', () => {
       it('has all slots as passed', () => {
         cy.findAllByTestId('passIcon').then(($passIcons) => {
           $passIcons.each((i, icon) => {
-            const classList = Array.from(icon.classList);
-            expect(classList).to.includes('text-green-700');
+            expect(icon.classList).to.includes('text-green-700');
           });
         });
       });
@@ -109,8 +110,7 @@ describe('Visium QC Page', () => {
       it('has all slots as passed', () => {
         cy.findAllByTestId('passIcon').then(($passIcons) => {
           $passIcons.each((i, icon) => {
-            const classList = Array.from(icon.classList);
-            expect(classList).to.includes('text-green-700');
+            expect(icon.classList).to.includes('text-green-700');
           });
         });
       });
@@ -127,8 +127,7 @@ describe('Visium QC Page', () => {
       it('fails all the slots', () => {
         cy.findAllByTestId('failIcon').then(($failIcons) => {
           $failIcons.each((indx, failIcon) => {
-            const classList = Array.from(failIcon.classList);
-            expect(classList).to.includes('text-red-700');
+            expect(failIcon.classList).to.includes('text-red-700');
           });
         });
       });
@@ -286,8 +285,7 @@ describe('Visium QC Page', () => {
             .parent()
             .then(($slot) => {
               $slot.each((i, slotElement) => {
-                const classList = Array.from(slotElement.classList);
-                expect(classList).to.includes('bg-sdb-300');
+                expect(slotElement.classList).to.includes('bg-sdb-300');
               });
             });
         });
@@ -313,12 +311,12 @@ describe('Visium QC Page', () => {
           worker.use(
             graphql.query<FindMeasurementByBarcodeAndNameQuery, FindMeasurementByBarcodeAndNameQueryVariables>(
               'FindMeasurementByBarcodeAndName',
-              (req, res, ctx) => {
-                return res.once(
-                  ctx.data({
+              () => {
+                return HttpResponse.json({
+                  data: {
                     measurementValueFromLabwareOrParent: []
-                  })
-                );
+                  }
+                });
               }
             )
           );
@@ -595,6 +593,77 @@ describe('Visium QC Page', () => {
         });
         it('shows an error', () => {
           cy.findByText('Failed to record SPRI clean up').should('be.visible');
+        });
+      });
+    });
+  });
+
+  describe('When selecting qPCR Results for QCType', () => {
+    before(() => {
+      cy.reload();
+      selectOption('qcType', 'qPCR results');
+      cy.get('#labwareScanInput').type('STAN-2100{enter}');
+    });
+
+    context('When a user enters a global CQ value', () => {
+      before(() => {
+        cy.findByTestId('all-Cq value').type('5');
+      });
+      it('updates all the Cq value inputs inside the table related to the slots', () => {
+        cy.findAllByTestId('Cq value-input').should('have.value', 5);
+      });
+    });
+
+    describe('On Save', () => {
+      it('Save button should be disabled when there is no SGP number', () => {
+        selectSGPNumber('');
+        cy.findByRole('button', { name: /Save/i }).should('be.disabled');
+      });
+
+      context('When there is no server error', () => {
+        before(() => {
+          selectSGPNumber('SGP1008');
+          cy.findByRole('button', { name: /Save/i }).should('not.be.disabled').click();
+        });
+
+        it('shows a success message', () => {
+          cy.findByText('qPCR results complete').should('be.visible');
+        });
+        after(() => {
+          cy.findByRole('button', { name: /Reset/i }).click();
+        });
+      });
+      context('With server failure', () => {
+        before(() => {
+          cy.msw().then(({ worker, graphql }) => {
+            worker.use(
+              graphql.mutation<RecordOpWithSlotMeasurementsMutation, RecordOpWithSlotMeasurementsMutationVariables>(
+                'RecordOpWithSlotMeasurements',
+                () => {
+                  return HttpResponse.json({
+                    errors: [
+                      {
+                        message: 'Exception while fetching data : The operation could not be validated.',
+                        extensions: {
+                          problems: ['Labware is discarded: [STAN-2100]']
+                        }
+                      }
+                    ]
+                  });
+                }
+              )
+            );
+          });
+          cy.reload();
+          selectSGPNumber('SGP1008');
+          selectOption('qcType', 'qPCR results');
+          cy.get('#labwareScanInput').type('STAN-2100{enter}');
+          cy.findByTestId('all-Cq value').type('5');
+          cy.findByRole('button', { name: /Save/i }).click();
+        });
+
+        it('shows an error', () => {
+          cy.findByText('Failed to record qPCR results').should('be.visible');
         });
       });
     });

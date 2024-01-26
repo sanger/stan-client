@@ -33,9 +33,9 @@ const visiumQCHandllers = [
 
   graphql.query<FindMeasurementByBarcodeAndNameQuery, FindMeasurementByBarcodeAndNameQueryVariables>(
     'FindMeasurementByBarcodeAndName',
-    (req, res, ctx) => {
-      const labwareJson = sessionStorage.getItem(`labware-${req.variables.barcode}`);
-      const labware: Labware = labwareJson ? JSON.parse(labwareJson) : createLabware(req.variables.barcode);
+    ({ variables }) => {
+      const labwareJson = sessionStorage.getItem(`labware-${variables.barcode}`);
+      const labware: Labware = labwareJson ? JSON.parse(labwareJson) : createLabware(variables.barcode);
       const fakeCqValues = labware.slots
         .filter((slot) => isSlotFilled(slot))
         .map((slot) => {
@@ -44,11 +44,11 @@ const visiumQCHandllers = [
             string: faker.number.float({ min: 0.1, max: 5, precision: 0.1 }).toString()
           };
         });
-      return res(
-        ctx.data({
+      return HttpResponse.json({
+        data: {
           measurementValueFromLabwareOrParent: fakeCqValues
-        })
-      );
+        }
+      });
     }
   )
 ];
