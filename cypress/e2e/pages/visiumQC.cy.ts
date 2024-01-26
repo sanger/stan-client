@@ -331,14 +331,14 @@ describe('Visium QC Page', () => {
         cy.get('#labwareScanInput').type('STAN-5100{enter}');
       });
       it('displays error message', () => {
-        cy.findByText('No Cq values associated to the labware slots').should('be.visible');
+        cy.findByText('No Cq values associated with the labware slots').should('be.visible');
       });
       it('hides Cycles table and input', () => {
         cy.findByRole('table').should('not.exist');
         cy.findByTestId('all-Cycles').should('not.exist');
       });
       it('displays the labware layout', () => {
-        cy.findByRole('labware').should('be.visible');
+        cy.findByTestId('labware').should('be.visible');
       });
     });
 
