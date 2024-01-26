@@ -7,6 +7,7 @@ import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 import { sampleFactory, tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import { slotFactory } from '../../../src/lib/factories/slotFactory';
 import { createLabwareFromParams } from '../../../src/mocks/handlers/labwareHandlers';
+import { HttpResponse } from 'msw';
 
 describe('Block Processing', () => {
   shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=block');
@@ -255,15 +256,15 @@ describe('Block Processing', () => {
             worker.use(
               graphql.mutation<PerformTissueBlockMutation, PerformTissueBlockMutationVariables>(
                 'PerformTissueBlock',
-                (req, res, ctx) => {
-                  return res(
-                    ctx.data({
+                () => {
+                  return HttpResponse.json({
+                    data: {
                       performTissueBlock: {
                         labware: newLabware,
                         operations: []
                       }
-                    })
-                  );
+                    }
+                  });
                 }
               )
             );
@@ -323,16 +324,16 @@ describe('Block Processing', () => {
           worker.use(
             graphql.mutation<PerformTissueBlockMutation, PerformTissueBlockMutationVariables>(
               'PerformTissueBlock',
-              (req, res, ctx) => {
-                return res.once(
-                  ctx.errors([
+              () => {
+                return HttpResponse.json({
+                  errors: [
                     {
                       extensions: {
                         problems: ['This thing went wrong', 'This other thing went wrong']
                       }
                     }
-                  ])
-                );
+                  ]
+                });
               }
             )
           );

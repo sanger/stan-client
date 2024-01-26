@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   AddReleaseRecipientMutation,
   AddReleaseRecipientMutationVariables,
@@ -13,31 +13,28 @@ import releaseRecipientRepository from '../repositories/releaseRecipientReposito
 const releaseRecipientHandlers = [
   graphql.mutation<AddReleaseRecipientMutation, AddReleaseRecipientMutationVariables>(
     'AddReleaseRecipient',
-    (req, res, ctx) => {
+    ({ variables }) => {
       const addReleaseRecipient = releaseRecipientFactory.build({
-        username: req.variables.username,
-        fullName: req.variables.fullName
+        username: variables.username,
+        fullName: variables.fullName
       });
       releaseRecipientRepository.save(addReleaseRecipient);
-      return res(ctx.data({ addReleaseRecipient }));
+      return HttpResponse.json({ data: { addReleaseRecipient } }, { status: 200 });
     }
   ),
 
   graphql.mutation<SetReleaseRecipientEnabledMutation, SetReleaseRecipientEnabledMutationVariables>(
     'SetReleaseRecipientEnabled',
-    (req, res, ctx) => {
-      const releaseRecipient = releaseRecipientRepository.find('username', req.variables.username);
+    ({ variables }) => {
+      const releaseRecipient = releaseRecipientRepository.find('username', variables.username);
       if (releaseRecipient) {
-        releaseRecipient.enabled = req.variables.enabled;
+        releaseRecipient.enabled = variables.enabled;
         releaseRecipientRepository.save(releaseRecipient);
-        return res(ctx.data({ setReleaseRecipientEnabled: releaseRecipient }));
+        return HttpResponse.json({ data: { setReleaseRecipientEnabled: releaseRecipient } }, { status: 200 });
       } else {
-        return res(
-          ctx.errors([
-            {
-              message: `Could not find release recipient: "${req.variables.username}"`
-            }
-          ])
+        return HttpResponse.json(
+          { errors: [{ message: `Could not find release recipient: "${variables.username}"` }] },
+          { status: 404 }
         );
       }
     }
@@ -45,13 +42,13 @@ const releaseRecipientHandlers = [
 
   graphql.mutation<UpdateReleaseRecipientFullNameMutation, UpdateReleaseRecipientFullNameMutationVariables>(
     'UpdateReleaseRecipientFullName',
-    (req, res, ctx) => {
+    ({ variables }) => {
       const updateReleaseRecipientFullName = releaseRecipientFactory.build({
-        username: req.variables.username,
-        fullName: req.variables.fullName
+        username: variables.username,
+        fullName: variables.fullName
       });
       releaseRecipientRepository.save(updateReleaseRecipientFullName);
-      return res(ctx.data({ updateReleaseRecipientFullName }));
+      return HttpResponse.json({ data: { updateReleaseRecipientFullName } }, { status: 200 });
     }
   )
 ];

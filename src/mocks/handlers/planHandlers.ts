@@ -1,4 +1,4 @@
-import { graphql, GraphQLContext } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   ConfirmMutation,
   ConfirmMutationVariables,
@@ -16,9 +16,9 @@ import { generateLabwareIdFromBarcode } from './labwareHandlers';
 import { buildFlaggedLabwareFragment } from './flagLabwareHandlers';
 
 const planHandlers = [
-  graphql.mutation<PlanMutation, PlanMutationVariables>('Plan', (req, res, ctx) => {
-    if (req.variables.request.operationType === 'Section') {
-      const plan: PlanMutation['plan'] = req.variables.request.labware.reduce<PlanMutation['plan']>(
+  graphql.mutation<PlanMutation, PlanMutationVariables>('Plan', ({ variables }) => {
+    if (variables.request.operationType === 'Section') {
+      const plan: PlanMutation['plan'] = variables.request.labware.reduce<PlanMutation['plan']>(
         (memo, planRequestLabware) => {
           const labwareType = labwareTypeInstances.find((lt) => lt.name === planRequestLabware.labwareType);
           const barcode = planRequestLabware.barcode ?? undefined;
@@ -67,20 +67,19 @@ const planHandlers = [
         }
       );
 
-      return res(
-        ctx.data({
-          // Response not dynamic in any way. Just need a successful response for now.
+      return HttpResponse.json({
+        data: {
           plan: {
             labware: plan.labware,
             operations: plan.operations,
             __typename: 'PlanResult'
           }
-        })
-      );
+        }
+      });
     }
   }),
 
-  graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', (req, res, ctx) => {
+  graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', ({ variables }) => {
     const sourceLabware = labwareFactory.build(
       { barcode: 'STAN-2021' },
       {
@@ -91,8 +90,8 @@ const planHandlers = [
     );
     const destinationLabware = labwareFactory.build(
       {
-        barcode: req.variables.barcode,
-        id: generateLabwareIdFromBarcode(req.variables.barcode)
+        barcode: variables.barcode,
+        id: generateLabwareIdFromBarcode(variables.barcode)
       },
       {
         associations: {
@@ -101,27 +100,23 @@ const planHandlers = [
       }
     );
 
-    return res(findPlanData(sourceLabware, destinationLabware, ctx));
+    return HttpResponse.json({ data: { ...findPlanData(sourceLabware, destinationLabware) } });
   }),
 
-  graphql.mutation<ConfirmMutation, ConfirmMutationVariables>('Confirm', (req, res, ctx) => {
-    return res(
-      ctx.data({
+  graphql.mutation<ConfirmMutation, ConfirmMutationVariables>('Confirm', () => {
+    return HttpResponse.json({
+      data: {
         confirmOperation: {
           labware: [],
           operations: []
         }
-      })
-    );
+      }
+    });
   })
 ];
 
-export function findPlanData(
-  sourceLabware: Labware,
-  destinationLabware: Labware,
-  ctx: GraphQLContext<FindPlanDataQuery>
-) {
-  return ctx.data({
+export function findPlanData(sourceLabware: Labware, destinationLabware: Labware): FindPlanDataQuery {
+  return {
     planData: {
       sources: [buildFlaggedLabwareFragment(sourceLabware)],
       destination: buildFlaggedLabwareFragment(destinationLabware),
@@ -157,7 +152,7 @@ export function findPlanData(
         ]
       }
     }
-  });
+  };
 }
 
 export default planHandlers;

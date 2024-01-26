@@ -23,8 +23,7 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
-import { SetupWorkerApi } from "msw/lib/types/setupWorker/setupWorker";
-import { graphql } from "msw";
+import {graphql, HttpResponse} from "msw";
 import { worker } from "../../src/mocks/mswSetup";
 
 // See https://testing-library.com/docs/cypress-testing-library/intro
@@ -35,9 +34,10 @@ import {
   CurrentUserQueryVariables,
   UserRole,
 } from "../../src/types/sdk";
+import {SetupWorker} from "msw/browser";
 
 interface MSW {
-  worker: SetupWorkerApi;
+  worker:  SetupWorker;
   graphql: graphqlType;
 }
 
@@ -108,18 +108,20 @@ Cypress.Commands.add("visitAsGuest", (url: string) => {
     worker.use(
       graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
         "CurrentUser",
-        (req, res, ctx) => {
-          return res.once(
-            ctx.data({
+        () => {
+          return HttpResponse.json({
+            data: {
               user: null,
-            })
-          );
+            },
+            once: true,
+          })
+
         }
       )
     );
   });
 
-  return cy.visit(url);
+   cy.visit(url);
 });
 
 Cypress.Commands.add("visitAsAdmin", (url: string) => {
@@ -127,22 +129,22 @@ Cypress.Commands.add("visitAsAdmin", (url: string) => {
     worker.use(
       graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
         "CurrentUser",
-        (req, res, ctx) => {
-          return res.once(
-            ctx.data({
-              user: {
-                __typename: "User",
-                username: "jb1",
-                role: UserRole.Admin,
-              },
-            })
-          );
+        () => {
+          return HttpResponse.json({
+            data:{
+                user: {
+                    username: "jb1",
+                    role: UserRole.Admin,
+                },
+            },
+            once: true,
+          })
         }
       )
     );
   });
 
-  return cy.visit(url);
+   cy.visit(url);
 });
 
 Cypress.Commands.add("visitAsEndUser", (url: string) => {
@@ -150,22 +152,21 @@ Cypress.Commands.add("visitAsEndUser", (url: string) => {
     worker.use(
         graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
             "CurrentUser",
-            (req, res, ctx) => {
-              return res.once(
-                  ctx.data({
-                    user: {
-                      __typename: "User",
-                      username: "user1",
-                      role: UserRole.Enduser,
-                    },
-                  })
-              );
+            () => {
+              return HttpResponse.json({
+                data:{
+                  user: {
+                    username: "jb1",
+                    role: UserRole.Enduser,
+                  },
+                },
+                once: true,
+              })
             }
         )
     );
   });
-
-  return cy.visit(url);
+   cy.visit(url);
 });
 
 
