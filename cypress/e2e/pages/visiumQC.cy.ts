@@ -58,8 +58,10 @@ describe('Visium QC Page', () => {
       });
       it('has all slots as passed', () => {
         cy.findAllByTestId('passIcon').then(($passIcons) => {
+          debugger;
           $passIcons.each((i, icon) => {
-            expect(icon.classList).to.includes('text-green-700');
+            const classList = Array.from(icon.classList);
+            expect(classList).includes('text-green-700');
           });
         });
       });
@@ -110,7 +112,8 @@ describe('Visium QC Page', () => {
       it('has all slots as passed', () => {
         cy.findAllByTestId('passIcon').then(($passIcons) => {
           $passIcons.each((i, icon) => {
-            expect(icon.classList).to.includes('text-green-700');
+            const classList = Array.from(icon.classList);
+            expect(classList).includes('text-green-700');
           });
         });
       });
@@ -127,7 +130,8 @@ describe('Visium QC Page', () => {
       it('fails all the slots', () => {
         cy.findAllByTestId('failIcon').then(($failIcons) => {
           $failIcons.each((indx, failIcon) => {
-            expect(failIcon.classList).to.includes('text-red-700');
+            const classList = Array.from(failIcon.classList);
+            expect(classList).includes('text-red-700');
           });
         });
       });
@@ -285,7 +289,8 @@ describe('Visium QC Page', () => {
             .parent()
             .then(($slot) => {
               $slot.each((i, slotElement) => {
-                expect(slotElement.classList).to.includes('bg-sdb-300');
+                const classList = Array.from(slotElement.classList);
+                expect(classList).includes('bg-sdb-300');
               });
             });
         });
@@ -294,13 +299,9 @@ describe('Visium QC Page', () => {
       it('displays scan field as disabled', () => {
         cy.get('#labwareScanInput').should('be.disabled');
       });
-    });
 
-    context('When user enters a value in Cycles text box', () => {
-      before(() => {
-        cy.findByTestId('all-Cycles').type('3');
-      });
       it('shows cq value in all text fields in CQ column of table', () => {
+        cy.findByTestId('all-Cycles').type('3');
         cy.findAllByTestId('Cycles-input').should('have.value', 3);
       });
     });
@@ -348,19 +349,11 @@ describe('Visium QC Page', () => {
         selectSGPNumber('');
         cy.findByRole('button', { name: /Save/i }).should('be.disabled');
       });
-
-      context('When there is no server error', () => {
-        before(() => {
-          selectSGPNumber('SGP1008');
-          cy.findByRole('button', { name: /Save/i }).should('not.be.disabled').click();
-        });
-
-        it('shows a success message', () => {
-          cy.findByText('Amplification complete').should('be.visible');
-        });
-        after(() => {
-          cy.findByRole('button', { name: /Reset/i }).click();
-        });
+      it('shows a success message', () => {
+        selectSGPNumber('SGP1008');
+        cy.findByTestId('all-Cycles').type('4');
+        cy.findByRole('button', { name: /Save/i }).should('not.be.disabled').click();
+        cy.findByText('Amplification complete').should('be.visible');
       });
     });
   });
@@ -600,7 +593,7 @@ describe('Visium QC Page', () => {
 
   describe('When selecting qPCR Results for QCType', () => {
     before(() => {
-      cy.reload();
+      cy.visit('/lab/visium_qc');
       selectOption('qcType', 'qPCR results');
       cy.get('#labwareScanInput').type('STAN-2100{enter}');
     });
