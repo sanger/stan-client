@@ -63,18 +63,25 @@ describe('Transfer Page', () => {
       cy.findByText('STAN-3112').should('not.exist');
       cy.findByTestId('removeButton').should('not.exist');
     });
-    it('should allow transfer to an empty slot', () => {
+  });
+
+  describe('Transfer to an empty slot', () => {
+    before(() => {
+      cy.visit('/lab/transfer');
+      cy.findByTestId('Scan Labware').click();
       cy.get('#inputLabwares').within((elem) => {
         cy.wrap(elem).get('#labwareScanInput').clear().type('STAN-3111{enter}');
       });
       cy.findByTestId('dest-scanner').within((elem) => {
         cy.wrap(elem).get('#labwareScanInput').clear().type('STAN-3000{enter}');
       });
-      cy.get('#inputLabwares').within(() => {
-        cy.findByText('A1').click({ force: true });
+    });
+    it('should allow transfer to an empty slot', () => {
+      cy.get('#inputLabwares').within((elem) => {
+        cy.wrap(elem).findByText('A1').click({ force: true, timeout: 1000 });
       });
-      cy.get('#outputLabwares').within(() => {
-        cy.findByText('A2').click({ force: true });
+      cy.get('#outputLabwares').within((elem) => {
+        cy.wrap(elem).findByText('A2').click({ force: true, timeout: 1000 });
       });
       cy.findByRole('table').contains('td', 'A1');
       cy.findByRole('table').contains('td', 'A2');
@@ -95,247 +102,186 @@ describe('Transfer Page', () => {
       it('disables the Save button', () => {
         saveButton().should('be.disabled');
       });
-    });
 
-    context('When a user scans slides', () => {
-      before(() => {
+      it('when user scans slides shows it on the page', () => {
         cy.get('#labwareScanInput').type('STAN-3100{enter}');
-      });
-
-      it('shows it on the page', () => {
         cy.findByText('STAN-3100').should('be.visible');
       });
-
       it('keeps the Save button disabled', () => {
         saveButton().should('be.disabled');
       });
-    });
-
-    context('when user scans multiple slides', () => {
-      before(() => {
+      it('updates page when user scans multipe slides', () => {
         cy.get('#labwareScanInput').type('STAN-3200{enter}');
         cy.get('#labwareScanInput').type('STAN-3300{enter}');
-      });
-
-      it('updates page with added labware ', () => {
         cy.contains('3 of 3').should('be.visible');
       });
-
       it('shows the last added labware', () => {
         cy.findByText('STAN-3300').should('be.visible');
       });
+      it('displays previously entered labware state values', () => {
+        selectOption('input-labware-state', 'used');
+        cy.findAllByTestId('left-button').eq(0).click();
+        cy.findAllByTestId('right-button').eq(0).click();
+        cy.findByText('used').should('be.visible');
+      });
+      it('displays selected source slots in table', () => {
+        cy.get('#inputLabwares').within(() => {
+          cy.findByText('A1').click({ force: true, timeout: 1000 });
+          cy.findByText('D1').click({ shiftKey: true, force: true, timeout: 1000 });
+        });
+        cy.findByRole('table').contains('td', 'A1');
+        cy.findByRole('table').contains('td', 'D1');
+      });
     });
 
-    context('when entering labware state values', () => {
+    describe('destination well plate', () => {
       before(() => {
-        selectOption('input-labware-state', 'used');
-      });
-      context('when navigating away and coming to the labware with state selected', () => {
-        before(() => {
-          cy.findAllByTestId('left-button').eq(0).click();
-          cy.findAllByTestId('right-button').eq(0).click();
-        });
-
-        it('shows the previously selected state for labware', () => {
-          cy.findByText('used').should('be.visible');
-        });
-      });
-      context('When user selects some source slots', () => {
-        before(() => {
-          cy.get('#inputLabwares').within(() => {
-            cy.findByText('A1').click();
-            cy.findByText('D1').click({ shiftKey: true });
-          });
-        });
-
-        it('displays the table with A1 slot', () => {
-          cy.findByRole('table').contains('td', 'A1');
-        });
-        it('displays the table with D1 slot', () => {
-          cy.findByRole('table').contains('td', 'D1');
-        });
-      });
-
-      context('when user adds a destination well plate', () => {
-        before(() => {
-          cy.get('#outputLabwares').within(() => {
-            cy.findByRole('button', { name: '+ Add Plate' }).click();
-          });
-        });
-        it('updates page with added labware ', () => {
-          cy.contains('2 of 2').should('be.visible');
-        });
-      });
-      context('when user removes a destination well plate', () => {
-        before(() => {
-          cy.findAllByTestId('removeButton').eq(1).click();
-        });
-        it('removes labware from  page ', () => {
-          cy.contains('1 of 1').should('be.visible');
-        });
-        it('should not display remove button', () => {
-          cy.findAllByTestId('removeButton').should('have.length', 1);
-        });
-      });
-      context('when user selects a bio-state for a destination well plate', () => {
-        before(() => {
+        cy.visit('/lab/transfer');
+        cy.get('#outputLabwares').within(() => {
           cy.findByRole('button', { name: '+ Add Plate' }).click();
-          selectOption('bioState', 'Probes');
         });
-        it('should display selected labware state', () => {
-          shouldDisplaySelectedValue('bioState', 'Probes');
+      });
+      it('updates page with added labware ', () => {
+        cy.contains('2 of 2').should('be.visible');
+      });
+      it('removes the labware from page', () => {
+        cy.findAllByTestId('removeButton').click();
+        cy.contains('1 of 1').should('be.visible');
+      });
+      it('should not display remove button', () => {
+        cy.findByTestId('removeButton').should('not.exist');
+      });
+      it('should display selected labware state', () => {
+        selectOption('bioState', 'Probes');
+        shouldDisplaySelectedValue('bioState', 'Probes');
+      });
+    });
+
+    describe('When user maps slots', () => {
+      before(() => {
+        cy.visit('/lab/transfer');
+        cy.get('#labwareScanInput').type('STAN-3200{enter}');
+      });
+      it('display the notification to user about failed slots', () => {
+        cy.get('#inputLabwares').within(() => {
+          cy.findByText('A2').click({ force: true });
         });
-        context('when user navigates away and the come back to destination plate with bio-state', () => {
-          before(() => {
-            cy.findAllByTestId('left-button').eq(1).click();
-            cy.findAllByTestId('right-button').eq(1).click();
-          });
-          it('should display previous selected labware state', () => {
-            shouldDisplaySelectedValue('bioState', 'Probes');
-          });
+        cy.get('#outputLabwares').within(() => {
+          cy.findByText('G1').scrollIntoView().click({ force: true, timeout: 1000 });
         });
-        after(() => {
-          cy.findAllByTestId('removeButton').eq(1).click();
-          cy.findAllByTestId('removeButton').eq(0).click();
+        cy.findByText('Failed slot(s)').should('be.visible');
+      });
+    });
+
+    describe('when user maps slots in one to many mode', () => {
+      before(() => {
+        cy.visit('/lab/transfer');
+        selectSGPNumber('SGP1008');
+        cy.get('#labwareScanInput').type('STAN-3100{enter}');
+        cy.findByTestId('copyMode-One to many').click({ force: true });
+        selectOption('bioState', 'Probes');
+        cy.get('#inputLabwares').within(async () => {
+          cy.findByText('A1').click({ force: true, timeout: 1000 });
+        });
+        cy.findByText('Finish mapping for A1').should('be.visible');
+        cy.get('#outputLabwares').within(() => {
+          cy.findByText('G1').scrollIntoView().click({ force: true, timeout: 1000 });
+          cy.findByText('G2').scrollIntoView().click({ force: true, timeout: 1000 });
+          cy.findByText('G5').scrollIntoView().click({ force: true, timeout: 1000 });
         });
       });
 
-      context('When user maps slots that failed in Visium QC- Slide processing', () => {
-        before(() => {
-          cy.get('#inputLabwares').within(() => {
-            cy.findByText('A2').click();
-          });
+      it('displays the table with A1 slot', () => {
+        cy.findByRole('table').scrollIntoView().contains('td', 'A1');
+      });
+      it('displays the table with G1 and G5 slots', () => {
+        cy.findByRole('table').contains('td', 'G1');
+        cy.findByRole('table').contains('td', 'G5');
+      });
+      it('removes finish transfer button when user clicks on it', () => {
+        cy.findByRole('button', { name: 'Finish mapping for A1' }).scrollIntoView().click({ force: true });
+        cy.findByRole('button', { name: 'Finish mapping for A1' }).should('not.exist');
+      });
+    });
 
-          cy.get('#outputLabwares').within(() => {
-            cy.findByText('G1').click();
-          });
+    describe('when user maps slots in many to one mode', () => {
+      before(() => {
+        cy.visit('/lab/transfer');
+        selectSGPNumber('SGP1008');
+        cy.get('#labwareScanInput').type('STAN-3100{enter}');
+        cy.findByTestId('bioState').scrollIntoView();
+        selectOption('bioState', 'Probes');
+        cy.findByTestId('copyMode-Many to one').click({ force: true });
+        cy.get('#inputLabwares').within(() => {
+          cy.findByText('A2').click({ force: true, timeout: 1000 });
+          cy.findByText('B2').click({ cmdKey: true, force: true, timeout: 1000 });
         });
-        it('display the notification to user about failed slots', () => {
-          cy.findByText('Failed slot(s)').should('be.visible');
-        });
-        after(() => {
-          cy.findByRole('button', { name: /Cancel/i }).click();
-          //Removes the current labware to  start fresh
-          cy.findAllByTestId('removeButton').eq(0).click();
+        cy.get('#outputLabwares').within(() => {
+          cy.findByText('D1').click({ force: true, timeout: 1000 });
         });
       });
-      context('when user maps slots in one to many mode', () => {
-        before(() => {
-          cy.visit('/lab/transfer');
-          selectSGPNumber('SGP1008');
-          cy.get('#labwareScanInput').type('STAN-3100{enter}');
-          cy.findByTestId('copyMode-One to many').click({ force: true });
-          selectOption('bioState', 'Probes');
-          cy.get('#inputLabwares').within(async () => {
-            cy.findByText('A1').click({ force: true });
-          });
-          cy.findByText('Finish mapping for A1').should('be.visible');
-          cy.get('#outputLabwares').within(() => {
-            cy.findByText('G1').scrollIntoView().click({ force: true });
-            cy.findByText('G2').scrollIntoView().click({ force: true });
-            cy.findByText('G5').scrollIntoView().click({ force: true });
-          });
-        });
-
-        it('displays the table with A1 slot', () => {
-          cy.findByRole('table').scrollIntoView().contains('td', 'A1');
-        });
-        it('displays the table with G1 and G5 slots', () => {
-          cy.findByRole('table').contains('td', 'G1');
-          cy.findByRole('table').contains('td', 'G5');
-        });
-
-        context('when user click on finish transfer button', () => {
-          before(() => {
-            cy.findByRole('button', { name: 'Finish mapping for A1' }).scrollIntoView().click({ force: true });
-          });
-          it('should remove the finish transfer button', () => {
-            cy.findByRole('button', { name: 'Finish mapping for A1' }).should('not.exist');
-          });
-        });
+      it('should display the many to one mode', () => {
+        cy.findByTestId('copyMode-Many to one').should('be.checked');
       });
-      context('when user maps slots in many to one mode', () => {
-        before(() => {
-          cy.visit('/lab/transfer');
-          selectSGPNumber('SGP1008');
-          cy.get('#labwareScanInput').type('STAN-3100{enter}');
-          cy.findByTestId('bioState').scrollIntoView();
-          selectOption('bioState', 'Probes');
-          cy.findByTestId('copyMode-Many to one').click({ force: true });
-          cy.get('#inputLabwares').within(() => {
-            cy.findByText('A2').click({ force: true });
-            cy.findByText('B2').click({ cmdKey: true, force: true });
-          });
-          cy.get('#outputLabwares').within(() => {
-            cy.findByText('D1').click({ force: true });
-          });
-        });
-        it('should display the many to one mode', () => {
-          cy.findByTestId('copyMode-Many to one').should('be.checked');
-        });
-        it('displays the table with A2, B2 slots mapped to D1', () => {
-          cy.findByText('Slot mapping for STAN-3100').should('be.visible');
-          cy.findByRole('table').contains('td', 'A2');
-          cy.findByRole('table').contains('td', 'B2');
-          cy.findByRole('table').contains('td', 'D1');
-        });
+      it('displays the table with A2, B2 slots mapped to D1', () => {
+        cy.findByText('Slot mapping for STAN-3100').should('be.visible');
+        cy.findByRole('table').contains('td', 'A2');
+        cy.findByRole('table').contains('td', 'B2');
+        cy.findByRole('table').contains('td', 'D1');
       });
+    });
 
-      describe('On save', () => {
+    describe('On save', () => {
+      describe('When there is a server error', () => {
         before(() => {
           selectOption('bioState', 'Probes');
           selectOption('input-labware-state', 'used');
-        });
-        context('When there is a server error', () => {
-          before(() => {
-            cy.msw().then(({ worker, graphql }) => {
-              worker.use(
-                graphql.mutation<SlotCopyMutation, SlotCopyMutationVariables>('SlotCopy', () => {
-                  return HttpResponse.json({
-                    errors: [
-                      {
-                        message: 'Exception while fetching data (/slotCopy) : The operation could not be validated.',
-                        extensions: {
-                          problems: ['Labware is discarded: [STAN-4100]']
-                        }
+          cy.msw().then(({ worker, graphql }) => {
+            worker.use(
+              graphql.mutation<SlotCopyMutation, SlotCopyMutationVariables>('SlotCopy', () => {
+                return HttpResponse.json({
+                  errors: [
+                    {
+                      message: 'Exception while fetching data (/slotCopy) : The operation could not be validated.',
+                      extensions: {
+                        problems: ['Labware is discarded: [STAN-4100]']
                       }
-                    ]
-                  });
-                })
-              );
-            });
+                    }
+                  ]
+                });
+              })
+            );
+          });
+          saveButton().click();
+        });
+        it('shows an error', () => {
+          cy.findByText('Labware is discarded: [STAN-4100]').should('be.visible');
+        });
+      });
 
-            saveButton().click();
+      describe('When there is no server error', () => {
+        before(() => {
+          cy.msw().then(({ worker }) => {
+            worker.resetHandlers();
           });
-          it('shows an error', () => {
-            cy.findByText('Labware is discarded: [STAN-4100]').should('be.visible');
-          });
+
+          saveButton().should('not.be.disabled').click();
         });
 
-        context('When there is no server error', () => {
-          before(() => {
-            cy.msw().then(({ worker }) => {
-              worker.resetHandlers();
-            });
+        it('shows a success message', () => {
+          cy.findByText('Slots copied').should('be.visible');
+        });
 
-            saveButton().should('not.be.disabled').click();
-          });
-
-          it('shows a success message', () => {
-            cy.findByText('Slots copied').should('be.visible');
-          });
-
-          it('shows the label printer component', () => {
-            cy.findByRole('button', { name: 'Print Labels' }).should('be.visible');
-          });
-          it('shows a copy label button', () => {
-            cy.findByRole('button', { name: /Copy Labels/i }).should('be.visible');
-          });
+        it('shows the label printer component', () => {
+          cy.findByRole('button', { name: 'Print Labels' }).should('be.visible');
+        });
+        it('shows a copy label button', () => {
+          cy.findByRole('button', { name: /Copy Labels/i }).should('be.visible');
         });
       });
     });
 
-    context('when scans a labwares with no perm done', () => {
+    describe('when scans a labwares with no perm done', () => {
       before(() => {
         saveSlotForLabwareWithNoPerm();
       });

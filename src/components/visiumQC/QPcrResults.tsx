@@ -1,42 +1,22 @@
 import Panel from '../Panel';
 import React from 'react';
-import { AddressString, LabwareFlaggedFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
 import SlotMeasurements, { MeasurementConfigProps, SlotMeasurement } from '../slotMeasurement/SlotMeasurements';
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
-import { stanCore } from '../../lib/sdk';
-import Warning from '../notifications/Warning';
+import { CDNAProps } from './Amplification';
 
-export type CDNAProps = {
-  labware: LabwareFlaggedFieldsFragment;
-  slotMeasurements: SlotMeasurementRequest[] | undefined;
-  removeLabware: (barcode: string) => void;
-};
-
-const fetchCqMeasurements = async (barcode: string): Promise<Array<AddressString>> => {
-  const response = await stanCore.FindMeasurementByBarcodeAndName({
-    barcode: barcode,
-    measurementName: 'Cq value'
-  });
-  return response.measurementValueFromLabwareOrParent;
-};
-
-const Amplification = ({ labware, removeLabware }: CDNAProps) => {
-  const { values, setErrors, setTouched, setFieldValue, errors, setFieldError } = useFormikContext<VisiumQCFormData>();
+const QPcrResults = ({ labware, slotMeasurements, removeLabware }: CDNAProps) => {
+  const { values, setErrors, setTouched, setFieldValue } = useFormikContext<VisiumQCFormData>();
 
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(
     () => [
       {
         name: 'Cq value',
-        readOnly: true
-      },
-      {
-        name: 'Cycles',
-        stepIncrement: '1',
-        validateFunction: validateCyclesMeasurementValue,
+        stepIncrement: '.01',
+        validateFunction: validateCqMeasurementValue,
         initialMeasurementVal: ''
       }
     ],
@@ -47,7 +27,6 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
    * When labwares changes, the slotMeasurements has to be initialized accordingly
    */
   React.useEffect(() => {
-    //Reset Errors
     setErrors({});
     setTouched({});
 
@@ -55,35 +34,16 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
       return;
     }
     setFieldValue('barcode', labware.barcode);
-    fetchCqMeasurements(labware.barcode).then((measurementValues) => {
-      if (measurementValues.length === 0) {
-        setFieldValue('slotMeasurements', [], false);
-        setFieldError('barcode', 'No Cq values associated with the labware slots');
-        return;
-      }
-      const slotMeasurements: SlotMeasurement[] = [];
-      labware.slots.filter(isSlotFilled).forEach((slot) => {
-        slotMeasurements.push(
-          ...[
-            {
-              address: slot.address,
-              name: 'Cq value',
-              value:
-                measurementValues.find((measurementValue) => measurementValue.address === slot.address)?.string ?? '',
-              samples: slot.samples
-            },
-            {
-              address: slot.address,
-              name: 'Cycles',
-              value: '',
-              samples: slot.samples
-            }
-          ]
-        );
-      });
-      setFieldValue('slotMeasurements', slotMeasurements);
+    const slotMeasurements: SlotMeasurement[] = labware.slots.filter(isSlotFilled).flatMap((slot) => {
+      return {
+        address: slot.address,
+        name: 'Cq value',
+        value: '',
+        samples: slot.samples
+      };
     });
-  }, [labware, setErrors, setTouched, setFieldValue, memoMeasurementConfig, setFieldError]);
+    setFieldValue('slotMeasurements', slotMeasurements);
+  }, [labware, setErrors, setTouched, setFieldValue, memoMeasurementConfig]);
 
   const handleChangeMeasurement = React.useCallback(
     (measurementName: string, measurementValue: string) => {
@@ -98,30 +58,25 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
       setErrors({});
       setTouched({});
       const measurements = values?.slotMeasurements ? [...values.slotMeasurements] : [];
-      measurements
-        ?.filter((measurement) => measurement.name === 'Cycles')
-        .forEach((measuerementReq) => {
-          measuerementReq.value = measurementValue;
-        });
+      measurements.forEach((measuerementReq) => {
+        measuerementReq.value = measurementValue;
+      });
       setFieldValue('slotMeasurements', values.slotMeasurements, true);
     },
     [values, setErrors, setTouched, setFieldValue]
   );
 
   /***
-   * Only accept integer values for cDNA Amplification
+   * Accept values with two decimal values for cq value
    * @param value
    */
-  function validateCyclesMeasurementValue(value: string) {
+  function validateCqMeasurementValue(value: string) {
     let error;
     if (value === '') {
       error = 'Required';
     } else {
       if (Number(value) < 0) {
         error = 'Positive value required';
-      }
-      if (!Number.isInteger(Number(value))) {
-        error = 'Integer value required';
       }
     }
     return error;
@@ -138,9 +93,8 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
     <div className="max-w-screen-xl mx-auto">
       {labware && (
         <div className={'flex flex-col mt-2'}>
-          {errors?.barcode && <Warning className={'mt-4'} message={errors.barcode} />}
           <Panel>
-            <div className="flex flex-row justify-end">
+            <div className="flex flex-row items-center justify-end">
               {
                 <RemoveButton
                   data-testid={'remove'}
@@ -150,15 +104,15 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
                 />
               }
             </div>
-            {!errors?.barcode && (
-              <div className={'flex flex-row w-1/2 mb-2'}>
+            {
+              <div className={'flex flex-row w-1/2 ml-2 space-x-6'}>
                 <div className={'flex flex-col'}>
-                  <label>Cycles</label>
+                  <label className={'mt-2'}>Cq value</label>
                   <input
                     className={'rounded-md'}
                     type={'number'}
-                    data-testid={`all-Cycles`}
-                    step={1}
+                    data-testid="all-Cq value"
+                    step="0.1"
                     onChange={(e: any) => {
                       handleChangeAllMeasurements(e.currentTarget.value);
                     }}
@@ -166,12 +120,13 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
                   />
                 </div>
               </div>
-            )}
+            }
+
             <div className={'grid grid-cols-11 gap-2 justify-between'}>
               <div className="col-span-6">
-                {values.slotMeasurements && values.slotMeasurements.length > 0 && (
+                {slotMeasurements && slotMeasurements.length > 0 && (
                   <SlotMeasurements
-                    slotMeasurements={values.slotMeasurements}
+                    slotMeasurements={slotMeasurements}
                     onChangeField={handleChangeMeasurement}
                     measurementConfig={memoMeasurementConfig}
                   />
@@ -187,4 +142,4 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
     </div>
   );
 };
-export default Amplification;
+export default QPcrResults;

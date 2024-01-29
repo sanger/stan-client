@@ -1,5 +1,5 @@
 import React from 'react';
-import { CommentFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import { CommentFieldsFragment, SampleFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import { Row } from 'react-table';
 import DataTable from '../DataTable';
 import FormikInput from '../forms/Input';
@@ -9,12 +9,17 @@ import { Dictionary, groupBy } from 'lodash';
 
 export type MeasurementConfigProps = {
   name: string;
-  stepIncrement: string;
+  stepIncrement?: string;
   validateFunction?: (value: string) => void;
-  initialMeasurementVal: string;
+  initialMeasurementVal?: string;
+  readOnly?: boolean;
 };
+
+export interface SlotMeasurement extends SlotMeasurementRequest {
+  samples?: SampleFieldsFragment[];
+}
 export type SlotMeasurementProps = {
-  slotMeasurements: SlotMeasurementRequest[];
+  slotMeasurements: SlotMeasurement[];
   measurementConfig: MeasurementConfigProps[];
   comments?: CommentFieldsFragment[];
   onChangeField: (fieldName: string, value: string) => void;
@@ -23,6 +28,7 @@ export type SlotMeasurementProps = {
 type MeasurementRow = {
   address: string;
   measurements: SlotMeasurementRequest[];
+  samples?: SampleFieldsFragment[];
 };
 const setMeasurementNameTableTitle = (measurementName: string): string => {
   return measurementName === 'cDNA concentration' || measurementName === 'Library concentration'
@@ -40,28 +46,28 @@ const setMeasurementNameTableTitle = (measurementName: string): string => {
  */
 
 const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, comments }: SlotMeasurementProps) => {
-  const [measurementRows, setMeasurementRows] = React.useState<MeasurementRow[]>([]);
   const [measurementConfigOptions, setMeasurementConfigOptions] = React.useState<MeasurementConfigProps[]>([]);
 
-  /**concatenate all mesaurements if there are multiple measurements */
+  const isWithSampleInfo = React.useMemo(
+    () => slotMeasurements.some((measurement) => measurement.samples),
+    [slotMeasurements]
+  );
 
+  /**concatenate all mesaurements if there are multiple measurements */
   React.useEffect(() => {
     if (measurementConfigOptions.length === measurementConfig.length) return;
     setMeasurementConfigOptions(measurementConfig);
   }, [measurementConfig, measurementConfigOptions, setMeasurementConfigOptions]);
 
-  React.useEffect(() => {
-    const groupedMeasurements: Dictionary<SlotMeasurementRequest[]> = groupBy(slotMeasurements, 'address');
-    if (Object.keys(groupedMeasurements).length === measurementRows?.length) return;
-    setMeasurementRows(
-      Object.keys(groupedMeasurements).map((address) => {
-        return {
-          address,
-          measurements: groupedMeasurements[address]
-        };
-      })
-    );
-  }, [slotMeasurements, measurementRows, setMeasurementRows]);
+  const measurementRowValues: MeasurementRow[] = React.useMemo(() => {
+    const groupedMeasurements: Dictionary<SlotMeasurement[]> = groupBy(slotMeasurements, 'address');
+
+    return Object.entries(groupedMeasurements).map(([address, measurements]) => ({
+      address,
+      measurements,
+      samples: isWithSampleInfo ? measurements[0]?.samples : undefined
+    }));
+  }, [slotMeasurements, isWithSampleInfo]);
 
   const columns = React.useMemo(() => {
     return [
@@ -70,14 +76,55 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
         id: 'address',
         accessor: (measurement: MeasurementRow) => measurement.address
       },
-
+      ...(isWithSampleInfo
+        ? [
+            {
+              Header: 'External ID',
+              id: 'externalId',
+              className: 'text-wrap',
+              cellClassName: 'text-wrap',
+              Cell: ({ row }: { row: Row<MeasurementRow> }) => {
+                return (
+                  <div className="grid grid-cols-1 text-wrap">
+                    {row.original.samples?.map((sample) => {
+                      return (
+                        <label className="py-1" key={sample.id}>
+                          {sample.tissue.externalName}
+                        </label>
+                      );
+                    })}
+                  </div>
+                );
+              }
+            },
+            {
+              Header: 'Section Number',
+              id: 'sectionNumber',
+              Cell: ({ row }: { row: Row<MeasurementRow> }) => {
+                return (
+                  <div className="grid grid-cols-1">
+                    {row.original.samples?.map((sample) => {
+                      return (
+                        <label className="py-1" key={sample.id}>
+                          {sample.section}
+                        </label>
+                      );
+                    })}
+                  </div>
+                );
+              }
+            }
+          ]
+        : []),
       ...measurementConfigOptions.map((measurementProp, mesaurementIndex) => {
         return {
           Header: setMeasurementNameTableTitle(measurementProp.name),
           id: measurementProp.name,
           allCapital: false,
           Cell: ({ row }: { row: Row<MeasurementRow> }) => {
-            return (
+            return measurementProp.readOnly ? (
+              <span>{row.original.measurements[0].value}</span>
+            ) : (
               <>
                 <FormikInput
                   key={row.original.address + measurementProp.name + row.index}
@@ -129,13 +176,17 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
           ]
         : [])
     ];
-  }, [comments, onChangeField, measurementConfigOptions]);
+  }, [comments, onChangeField, measurementConfigOptions, isWithSampleInfo]);
 
   return (
     <>
       {slotMeasurements && slotMeasurements.length > 0 && (
         <>
-          <DataTable columns={columns} data={measurementRows ?? []} />
+          <DataTable
+            columns={columns}
+            data={measurementRowValues ?? []}
+            cellClassName="overflow-hidden whitespace-nowrap hover:overflow-visible text-sm"
+          />
         </>
       )}
     </>
