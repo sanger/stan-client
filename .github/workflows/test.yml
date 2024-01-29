@@ -13,6 +13,10 @@ jobs:
   cypress:
     name: Run cypress tests
     runs-on: ubuntu-latest
+    container:
+      image: cypress/browsers:node18.12.0-chrome106-ff106
+
+      options: --user 1001
     steps:
       - uses: actions/checkout@v4
         name: Checkout
