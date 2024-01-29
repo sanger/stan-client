@@ -58,7 +58,6 @@ describe('Visium QC Page', () => {
       });
       it('has all slots as passed', () => {
         cy.findAllByTestId('passIcon').then(($passIcons) => {
-          debugger;
           $passIcons.each((i, icon) => {
             const classList = Array.from(icon.classList);
             expect(classList).includes('text-green-700');

@@ -63,13 +63,20 @@ describe('Transfer Page', () => {
       cy.findByText('STAN-3112').should('not.exist');
       cy.findByTestId('removeButton').should('not.exist');
     });
-    it('should allow transfer to an empty slot', () => {
+  });
+
+  describe('Transfer to empty slot', () => {
+    before(() => {
+      cy.visit('/lab/transfer');
+      cy.findByTestId('Scan Labware').click();
       cy.get('#inputLabwares').within((elem) => {
         cy.wrap(elem).get('#labwareScanInput').clear().type('STAN-3111{enter}');
       });
       cy.findByTestId('dest-scanner').within((elem) => {
         cy.wrap(elem).get('#labwareScanInput').clear().type('STAN-3000{enter}');
       });
+    });
+    it('should allow transfer to an empty slot', () => {
       cy.get('#inputLabwares').within(() => {
         cy.findByText('A1').click({ force: true });
       });
