@@ -22,6 +22,7 @@ const recordInPlaceHandlers = [
   ),
 
   graphql.mutation<RecordInPlaceMutation, RecordInPlaceMutationVariables>('RecordInPlace', () => {
+    debugger;
     return HttpResponse.json({ data: { recordInPlace: { labware: [] } } }, { status: 200 });
   })
 ];
