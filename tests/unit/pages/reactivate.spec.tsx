@@ -105,7 +105,7 @@ describe('On load', () => {
       });
     });
     it('display error message', () => {
-      screen.findByLabelText('This labware is neither discarded nor destroyed.').then((errorMessage) => {
+      screen.findByLabelText('This labware is not discarded, destroyed or used.').then((errorMessage) => {
         expect(errorMessage).toBeVisible();
       });
     });
