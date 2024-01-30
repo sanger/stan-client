@@ -189,6 +189,17 @@ export const tissue = (labware: LabwareFieldsFragment | undefined) => {
 };
 
 /**
+ *
+ * @param labware the labware to check
+ * @return tissues of all samples across all slots
+ */
+export const tissues = (labware: LabwareFieldsFragment | undefined) => {
+  if (labware && labware.slots && labware.slots.length > 0 && labware.slots.some((slot) => slot.samples.length > 0))
+    return labware.slots.flatMap((slot) => slot.samples.map((sample) => sample.tissue));
+  else return [];
+};
+
+/**
  * Checks whether the given labware has samples in any of its slots.
  * @param labware - The labware to check for samples.
  * @returns `true` if samples are found in any slot, `false` otherwise.

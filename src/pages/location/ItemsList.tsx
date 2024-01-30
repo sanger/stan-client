@@ -10,8 +10,9 @@ import { addressToLocationAddress } from '../../lib/helpers/locationHelper';
 import { Authenticated } from '../../components/Authenticated';
 import { getLabwareInLocation } from '../../lib/services/locationService';
 import { GridDirection, LabwareFieldsFragment, Maybe, SuggestedWorkFieldsFragment, UserRole } from '../../types/sdk';
-import { tissue } from '../../lib/helpers/labwareHelper';
+import { tissues } from '../../lib/helpers/labwareHelper';
 import { stanCore } from '../../lib/sdk';
+import { friendlyName } from '../../lib/helpers';
 
 interface ItemsListParams {
   freeformAddress?: boolean;
@@ -116,10 +117,13 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
                 </TableCell>
                 <TableCell>{item.barcode}</TableCell>
                 <TableCell>{labware ? workNumberForLabware(workNumbersForLabware, labware.barcode) : ''}</TableCell>
-                <TableCell>{tissue(labware)?.externalName}</TableCell>
-                <TableCell>{tissue(labware)?.donor.donorName}</TableCell>
-                <TableCell>{tissue(labware)?.spatialLocation.code}</TableCell>
-                <TableCell>{tissue(labware)?.replicate}</TableCell>
+                <TableCell>{friendlyName(tissues(labware).map((tissue) => tissue.externalName ?? ''))}</TableCell>
+                <TableCell>{friendlyName(tissues(labware).map((tissue) => tissue.donor.donorName))}</TableCell>
+                <TableCell>
+                  {friendlyName(tissues(labware).map((tissue) => String(tissue.spatialLocation.code)))}
+                </TableCell>
+                <TableCell>{friendlyName(tissues(labware).map((tissue) => tissue.replicate ?? ''))}</TableCell>
+
                 <TableCell>
                   <Authenticated role={UserRole.Normal}>
                     <RemoveButton
