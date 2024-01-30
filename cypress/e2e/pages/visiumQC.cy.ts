@@ -300,7 +300,7 @@ describe('Visium QC Page', () => {
       });
 
       it('shows cq value in all text fields in CQ column of table', () => {
-        cy.findByTestId('all-Cycles').type('3');
+        cy.findByTestId('all-Cycles').clear().type('3');
         cy.findAllByTestId('Cycles-input').should('have.value', 3);
       });
     });
