@@ -29,8 +29,7 @@ async function prepare() {
   }
 }
 
-prepare().then(() => {
-    const root = createRoot(document.getElementById("root") as HTMLElement);
+prepare().then(() => {const root = createRoot(document.getElementById("root") as HTMLElement);
     root.render(
         <React.StrictMode>
             <App />
