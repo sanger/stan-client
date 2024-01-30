@@ -391,3 +391,13 @@ export function generateRandomIntegerInRange(min: number, max: number) {
 export function isSameArray(array1: string[], array2: string[]) {
   return array1.length === array2.length && array1.every((element) => array2.includes(element));
 }
+
+/**
+ * Returns a comma separated string with unique values from the given array
+ * @param array
+ */
+export function friendlyName(array: string[]) {
+  return Array.from(new Set(array))
+    .filter((str) => str.length > 0)
+    .join(', ');
+}
