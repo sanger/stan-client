@@ -1,12 +1,11 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-
 import { Formik } from 'formik';
-import { slideFactory } from '../../../../src/lib/factories/labwareFactory';
 import { LabwareFlaggedFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
 import Amplification, { CDNAProps } from '../../../../src/components/visiumQC/Amplification';
-import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
+import { createFlaggedLabware } from '../../../../src/mocks/handlers/flagLabwareHandlers';
+import { forEach } from 'lodash';
 afterEach(() => {
   cleanup();
 });
@@ -18,16 +17,13 @@ const FormikProps = {
   initialValues: {}
 };
 
-const renderAmplification = (props?: CDNAProps) => {
-  const inputLabware = slideFactory.build() as NewFlaggedLabwareLayout;
-  const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
-  const initialProps = props ?? {
-    slotMeasurements: [
-      { address: 'A1', name: 'Cost', value: '0' },
-      { address: 'A2', name: 'Cost', value: '0' }
-    ],
+const mockedRemoveLabwareFct = jest.fn();
+const renderAmplification = () => {
+  const labware: LabwareFlaggedFieldsFragment = createFlaggedLabware('STAN-2134');
+  const initialProps: CDNAProps = {
+    slotMeasurements: [],
     labware: labware,
-    removeLabware: jest.fn()
+    removeLabware: mockedRemoveLabwareFct
   };
   return render(
     <Formik {...FormikProps}>
@@ -37,34 +33,30 @@ const renderAmplification = (props?: CDNAProps) => {
 };
 
 describe('Amplification', () => {
-  it('renders Amplification', async () => {
-    renderAmplification();
-    await waitFor(() => {
-      //Displays labware
-      expect(screen.getByTestId('labware')).toBeInTheDocument();
-      //Should not display table
-      expect(screen.queryByRole('table')).toBeInTheDocument();
-      expect(screen.getAllByTestId('Cq value-input')).toHaveLength(2);
-      expect(screen.getAllByTestId('Cycles-input')).toHaveLength(2);
+  describe('when the scanned labware slots contain Cq values', () => {
+    it('renders Amplification', async () => {
+      renderAmplification();
+      await waitFor(() => {
+        expect(screen.getByTestId('labware')).toBeInTheDocument();
+        const cqTable: HTMLTableElement | null = screen.queryByRole('table');
+        expect(cqTable).toBeVisible();
+        expect(cqTable).toHaveTextContent('External ID');
+        expect(cqTable).toHaveTextContent('Section Number');
+        expect(cqTable).toHaveTextContent('CQ VALUE');
+        expect(screen.getAllByTestId('Cycles-input')).toHaveLength(6);
+        // validate labware slots have CQ value
+        forEach(cqTable!.rows, (row) => {
+          expect(row.cells[3]).not.toHaveTextContent('');
+        });
+      });
     });
   });
+
   it('invokes remove function when labware is removed', async () => {
-    const inputLabware = slideFactory.build() as NewFlaggedLabwareLayout;
-    const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
-    const removeFunction = jest.fn();
-    const initialProps = {
-      slotMeasurements: [
-        { address: 'A1', name: 'Cost', value: '0' },
-        { address: 'A2', name: 'Cost', value: '0' }
-      ],
-      labware: labware,
-      removeLabware: removeFunction
-    };
-    renderAmplification(initialProps);
+    renderAmplification();
     await waitFor(() => {
-      const removeButton = screen.getByTestId('remove');
-      fireEvent.click(removeButton);
+      fireEvent.click(screen.getByTestId('remove'));
     });
-    expect(removeFunction).toHaveBeenCalled();
+    expect(mockedRemoveLabwareFct).toHaveBeenCalled();
   });
 });

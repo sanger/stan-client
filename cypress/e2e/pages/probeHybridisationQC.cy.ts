@@ -5,6 +5,7 @@ import {
   RecordCompletionMutation,
   RecordCompletionMutationVariables
 } from '../../../src/types/sdk';
+import { HttpResponse } from 'msw';
 
 describe('Probe Hybridisation QC', () => {
   describe('On load', () => {
@@ -29,12 +30,13 @@ describe('Probe Hybridisation QC', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>(
-              'FindLatestOperation',
-              (req, res, ctx) => {
-                return res.once(ctx.data({ findLatestOp: null }));
-              }
-            )
+            graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', () => {
+              return HttpResponse.json({
+                data: {
+                  findLatestOp: null
+                }
+              });
+            })
           );
         });
         cy.get('#labwareScanInput').type('STAN-3111{enter}');
@@ -55,12 +57,15 @@ describe('Probe Hybridisation QC', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>(
-              'FindLatestOperation',
-              (req, res, ctx) => {
-                return res.once(ctx.data({ findLatestOp: { id: 1 } }));
-              }
-            )
+            graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', () => {
+              return HttpResponse.json({
+                data: {
+                  findLatestOp: {
+                    id: 1
+                  }
+                }
+              });
+            })
           );
         });
         cy.get('#labwareScanInput').type('STAN-3111{enter}');
@@ -117,32 +122,32 @@ describe('Probe Hybridisation QC', () => {
         cy.visit('/lab/probe_hybridisation_qc');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>(
-              'FindLatestOperation',
-              (req, res, ctx) => {
-                return res.once(ctx.data({ findLatestOp: { id: 1 } }));
-              }
-            )
+            graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', () => {
+              return HttpResponse.json({
+                data: {
+                  findLatestOp: {
+                    id: 1
+                  }
+                }
+              });
+            })
           );
         });
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<RecordCompletionMutation, RecordCompletionMutationVariables>(
-              'RecordCompletion',
-              (req, res, ctx) => {
-                return res.once(
-                  ctx.errors([
-                    {
-                      message: 'The request could not be validated.',
-                      extensions: {
-                        problems: ['Repeated comment specified in: [STAN-0EB01]']
-                      }
+            graphql.mutation<RecordCompletionMutation, RecordCompletionMutationVariables>('RecordCompletion', () => {
+              return HttpResponse.json({
+                errors: [
+                  {
+                    message: 'The request could not be validated.',
+                    extensions: {
+                      problems: ['Repeated comment specified in: [STAN-0EB01]']
                     }
-                  ])
-                );
-              }
-            )
+                  }
+                ]
+              });
+            })
           );
         });
         selectSGPNumber('SGP1008');
@@ -157,22 +162,19 @@ describe('Probe Hybridisation QC', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<RecordCompletionMutation, RecordCompletionMutationVariables>(
-              'RecordCompletion',
-              (req, res, ctx) => {
-                return res.once(
-                  ctx.data({
-                    recordCompletion: {
-                      operations: [
-                        {
-                          id: 10426
-                        }
-                      ]
-                    }
-                  })
-                );
-              }
-            )
+            graphql.mutation<RecordCompletionMutation, RecordCompletionMutationVariables>('RecordCompletion', () => {
+              return HttpResponse.json({
+                data: {
+                  recordCompletion: {
+                    operations: [
+                      {
+                        id: 10426
+                      }
+                    ]
+                  }
+                }
+              });
+            })
           );
         });
         cy.findByText('Save').click();

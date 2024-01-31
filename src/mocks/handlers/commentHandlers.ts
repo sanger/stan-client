@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   AddCommentMutation,
   AddCommentMutationVariables,
@@ -12,45 +12,45 @@ import commentRepository from '../repositories/commentRepository';
 import { isEnabled } from '../../lib/helpers';
 
 const commentHandlers = [
-  graphql.mutation<AddCommentMutation, AddCommentMutationVariables>('AddComment', (req, res, ctx) => {
+  graphql.mutation<AddCommentMutation, AddCommentMutationVariables>('AddComment', ({ variables }) => {
     const addComment = commentFactory.build({
-      text: req.variables.text
+      text: variables.text
     });
     commentRepository.save(addComment);
-    return res(ctx.data({ addComment }));
+    return HttpResponse.json({ data: { addComment } }, { status: 200 });
   }),
 
   graphql.mutation<SetCommentEnabledMutation, SetCommentEnabledMutationVariables>(
     'SetCommentEnabled',
-    (req, res, ctx) => {
-      const comment = commentRepository.find('id', req.variables.commentId);
+    ({ variables }) => {
+      const comment = commentRepository.find('id', variables.commentId);
       if (comment) {
-        comment.enabled = req.variables.enabled;
+        comment.enabled = variables.enabled;
         commentRepository.save(comment);
-        return res(ctx.data({ setCommentEnabled: comment }));
+        return HttpResponse.json({ data: { setCommentEnabled: comment } }, { status: 200 });
       } else {
-        return res(
-          ctx.errors([
-            {
-              message: `Could not find comment: "${req.variables.commentId}"`
-            }
-          ])
+        return HttpResponse.json(
+          { errors: [{ message: `Could not find comment: "${variables.commentId}"` }] },
+          { status: 404 }
         );
       }
     }
   ),
 
-  graphql.query<GetCommentsQuery, GetCommentsQueryVariables>('GetComments', (req, res, ctx) => {
-    return res(
-      ctx.data({
-        comments: commentRepository
-          .findAll()
-          .filter(
-            (comment) =>
-              (!req.variables.commentCategory || req.variables.commentCategory === comment.category) &&
-              (req.variables.includeDisabled || isEnabled(comment))
-          )
-      })
+  graphql.query<GetCommentsQuery, GetCommentsQueryVariables>('GetComments', ({ variables }) => {
+    return HttpResponse.json(
+      {
+        data: {
+          comments: commentRepository
+            .findAll()
+            .filter(
+              (comment) =>
+                (!variables.commentCategory || variables.commentCategory === comment.category) &&
+                (variables.includeDisabled || isEnabled(comment))
+            )
+        }
+      },
+      { status: 200 }
     );
   })
 ];

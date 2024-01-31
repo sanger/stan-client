@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   GetDnapStudyQuery,
   GetDnapStudyQueryVariables,
@@ -9,30 +9,20 @@ import dnapStudyRepository from '../repositories/dnapStudyRepository';
 import dnapStudyFactory from '../../lib/factories/dnapStudyFactory';
 
 const dnapStudyHandlers = [
-  graphql.mutation<UpdateDnapStudiesMutation, UpdateDnapStudiesMutationVariables>(
-    'UpdateDnapStudies',
-    (req, res, ctx) => {
-      const dnapStudies = dnapStudyRepository.findAll();
-      dnapStudies.push(dnapStudyFactory.build({ ssId: 1234, name: 'new Sequencescape study', enabled: true }));
-      return res(ctx.data({ updateDnapStudies: dnapStudies }));
-    }
-  ),
-  graphql.query<GetDnapStudyQuery, GetDnapStudyQueryVariables>('GetDnapStudy', (req, res, ctx) => {
-    const study = dnapStudyRepository.find('ssId', req.variables.ssId);
+  graphql.mutation<UpdateDnapStudiesMutation, UpdateDnapStudiesMutationVariables>('UpdateDnapStudies', () => {
+    const dnapStudies = dnapStudyRepository.findAll();
+    dnapStudies.push(dnapStudyFactory.build({ ssId: 1234, name: 'new Sequencescape study', enabled: true }));
+    return HttpResponse.json({ data: { updateDnapStudies: dnapStudies } }, { status: 200 });
+  }),
+  graphql.query<GetDnapStudyQuery, GetDnapStudyQueryVariables>('GetDnapStudy', ({ variables }) => {
+    const study = dnapStudyRepository.find('ssId', variables.ssId);
     if (!study) {
-      return res(
-        ctx.errors([
-          {
-            message: `Exception while fetching data (/getDnapStudy) : Unknown Sequencescape study id:  ${req.variables.ssId}`
-          }
-        ])
+      return HttpResponse.json(
+        { errors: [{ message: `Unknown Sequencescape study id:  ${variables.ssId}` }] },
+        { status: 404 }
       );
     }
-    return res(
-      ctx.data({
-        dnapStudy: study
-      })
-    );
+    return HttpResponse.json({ data: { dnapStudy: study } }, { status: 200 });
   })
 ];
 

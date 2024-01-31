@@ -1,4 +1,6 @@
 import {
+  FindMeasurementByBarcodeAndNameQuery,
+  FindMeasurementByBarcodeAndNameQueryVariables,
   RecordOpWithSlotCommentsMutation,
   RecordOpWithSlotCommentsMutationVariables,
   RecordOpWithSlotMeasurementsMutation,
@@ -17,6 +19,7 @@ import {
   shouldDisplaySelectedValue,
   shouldHaveOption
 } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 describe('Visium QC Page', () => {
   shouldDisplyProjectAndUserNameForWorkNumber('/lab/visium_qc');
@@ -57,7 +60,7 @@ describe('Visium QC Page', () => {
         cy.findAllByTestId('passIcon').then(($passIcons) => {
           $passIcons.each((i, icon) => {
             const classList = Array.from(icon.classList);
-            expect(classList).to.includes('text-green-700');
+            expect(classList).includes('text-green-700');
           });
         });
       });
@@ -85,7 +88,7 @@ describe('Visium QC Page', () => {
           cy.get('#labwareScanInput').type('aaa{enter}');
         });
         it('shows barcode not found message', () => {
-          cy.findByText('No labware found with barcode: aaa').should('be.visible');
+          cy.findByText('Invalid barcode: aaa').should('be.visible');
         });
       });
       context('when user enters a labware which has not assigned a costing', () => {
@@ -109,7 +112,7 @@ describe('Visium QC Page', () => {
         cy.findAllByTestId('passIcon').then(($passIcons) => {
           $passIcons.each((i, icon) => {
             const classList = Array.from(icon.classList);
-            expect(classList).to.includes('text-green-700');
+            expect(classList).includes('text-green-700');
           });
         });
       });
@@ -127,7 +130,7 @@ describe('Visium QC Page', () => {
         cy.findAllByTestId('failIcon').then(($failIcons) => {
           $failIcons.each((indx, failIcon) => {
             const classList = Array.from(failIcon.classList);
-            expect(classList).to.includes('text-red-700');
+            expect(classList).includes('text-red-700');
           });
         });
       });
@@ -224,31 +227,29 @@ describe('Visium QC Page', () => {
         before(() => {
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
-              graphql.mutation<RecordVisiumQcMutation, RecordVisiumQcMutationVariables>(
-                'RecordVisiumQC',
-                (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
-                      {
-                        message: 'Exception while fetching data : The operation could not be validated.',
-                        extensions: {
-                          problems: ['Labware is discarded: [STAN-2100]']
-                        }
+              graphql.mutation<RecordVisiumQcMutation, RecordVisiumQcMutationVariables>('RecordVisiumQC', () => {
+                return HttpResponse.json({
+                  errors: [
+                    {
+                      message: 'Exception while fetching data : The operation could not be validated.',
+                      extensions: {
+                        problems: ['Labware is discarded: [STAN-2100]']
                       }
-                    ])
-                  );
-                }
-              )
+                    }
+                  ]
+                });
+              })
             );
           });
-          cy.get('#labwareScanInput').type('STAN-2100{enter}');
-          selectOption('slide-costing', 'Faculty');
-          selectSGPNumber('SGP1008');
-          cy.findByTestId('formInput').clear().type('123456');
-          cy.findByRole('button', { name: /Save/i }).click();
         });
 
         it('shows an error', () => {
+          cy.get('#labwareScanInput').type('STAN-2100{enter}');
+          selectOption('slide-costing', 'SGP');
+          selectSGPNumber('SGP1008');
+          selectOption('slide-costing', 'Faculty');
+          cy.findByTestId('formInput').clear().type('123456');
+          cy.findByRole('button', { name: /Save/i }).click();
           cy.findByText('Failed to record Slide Processing').should('be.visible');
         });
       });
@@ -288,57 +289,70 @@ describe('Visium QC Page', () => {
             .then(($slot) => {
               $slot.each((i, slotElement) => {
                 const classList = Array.from(slotElement.classList);
-                expect(classList).to.includes('bg-sdb-300');
+                expect(classList).includes('bg-sdb-300');
               });
             });
         });
       });
 
-      it('display text boxes to enter cq value for all slots with samples', () => {
-        cy.findByRole('table').within(() => {
-          cy.findAllByTestId('Cq value-input').should('have.length.above', 0);
-          cy.findAllByTestId('Cycles-input').should('have.length.above', 0);
-        });
-      });
       it('displays scan field as disabled', () => {
         cy.get('#labwareScanInput').should('be.disabled');
       });
-    });
-    context('When user enters a value in CQ value text box', () => {
-      before(() => {
-        cy.findByTestId('all-Cq value').type('5');
-      });
+
       it('shows cq value in all text fields in CQ column of table', () => {
-        cy.findAllByTestId('Cq value-input').should('have.value', 5);
-      });
-    });
-    context('When user enters a value in Cycles text box', () => {
-      before(() => {
-        cy.findByTestId('all-Cycles').type('3');
-      });
-      it('shows cq value in all text fields in CQ column of table', () => {
+        cy.findByTestId('all-Cycles').clear().type('3');
         cy.findAllByTestId('Cycles-input').should('have.value', 3);
       });
     });
 
+    describe('When the scanned labware slots does not contain Cq values', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<FindMeasurementByBarcodeAndNameQuery, FindMeasurementByBarcodeAndNameQueryVariables>(
+              'FindMeasurementByBarcodeAndName',
+              () => {
+                return HttpResponse.json({
+                  data: {
+                    measurementValueFromLabwareOrParent: []
+                  }
+                });
+              }
+            )
+          );
+        });
+        cy.reload();
+        selectOption('qcType', 'Amplification');
+        cy.get('#labwareScanInput').type('STAN-5100{enter}');
+      });
+      it('displays error message', () => {
+        cy.findByText('No Cq values associated with the labware slots').should('be.visible');
+      });
+      it('hides Cycles table and input', () => {
+        cy.findByRole('table').should('not.exist');
+        cy.findByTestId('all-Cycles').should('not.exist');
+      });
+      it('displays the labware layout', () => {
+        cy.findByTestId('labware').should('be.visible');
+      });
+    });
+
     describe('On Save', () => {
+      before(() => {
+        cy.reload();
+        selectOption('qcType', 'Amplification');
+        cy.get('#labwareScanInput').type('STAN-5100{enter}');
+        cy.findByTestId('all-Cycles').type('3');
+      });
       it('Save button should be disabled when there is no SGP number', () => {
         selectSGPNumber('');
         cy.findByRole('button', { name: /Save/i }).should('be.disabled');
       });
-
-      context('When there is no server error', () => {
-        before(() => {
-          selectSGPNumber('SGP1008');
-          cy.findByRole('button', { name: /Save/i }).should('not.be.disabled').click();
-        });
-
-        it('shows a success message', () => {
-          cy.findByText('Amplification complete').should('be.visible');
-        });
-        after(() => {
-          cy.findByRole('button', { name: /Reset/i }).click();
-        });
+      it('shows a success message', () => {
+        selectSGPNumber('SGP1008');
+        cy.findByTestId('all-Cycles').type('4');
+        cy.findByRole('button', { name: /Save/i }).should('not.be.disabled').click();
+        cy.findByText('Amplification complete').should('be.visible');
       });
     });
   });
@@ -456,17 +470,17 @@ describe('Visium QC Page', () => {
             worker.use(
               graphql.mutation<RecordOpWithSlotCommentsMutation, RecordOpWithSlotCommentsMutationVariables>(
                 'RecordOpWithSlotComments',
-                (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
+                () => {
+                  return HttpResponse.json({
+                    errors: [
                       {
                         message: 'Exception while fetching data : The operation could not be validated.',
                         extensions: {
                           problems: ['Labware is discarded: [STAN-2100]']
                         }
                       }
-                    ])
-                  );
+                    ]
+                  });
                 }
               )
             );
@@ -548,17 +562,17 @@ describe('Visium QC Page', () => {
             worker.use(
               graphql.mutation<RecordOpWithSlotCommentsMutation, RecordOpWithSlotCommentsMutationVariables>(
                 'RecordOpWithSlotComments',
-                (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
+                () => {
+                  return HttpResponse.json({
+                    errors: [
                       {
                         message: 'Exception while fetching data : The operation could not be validated.',
                         extensions: {
                           problems: ['Labware is discarded: [STAN-2100]']
                         }
                       }
-                    ])
-                  );
+                    ]
+                  });
                 }
               )
             );
@@ -578,7 +592,7 @@ describe('Visium QC Page', () => {
 
   describe('When selecting qPCR Results for QCType', () => {
     before(() => {
-      cy.reload();
+      cy.visit('/lab/visium_qc');
       selectOption('qcType', 'qPCR results');
       cy.get('#labwareScanInput').type('STAN-2100{enter}');
     });
@@ -617,17 +631,17 @@ describe('Visium QC Page', () => {
             worker.use(
               graphql.mutation<RecordOpWithSlotMeasurementsMutation, RecordOpWithSlotMeasurementsMutationVariables>(
                 'RecordOpWithSlotMeasurements',
-                (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
+                () => {
+                  return HttpResponse.json({
+                    errors: [
                       {
                         message: 'Exception while fetching data : The operation could not be validated.',
                         extensions: {
                           problems: ['Labware is discarded: [STAN-2100]']
                         }
                       }
-                    ])
-                  );
+                    ]
+                  });
                 }
               )
             );

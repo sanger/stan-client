@@ -1,32 +1,32 @@
-import { graphql, rest } from 'msw';
+import { graphql, http, HttpResponse } from 'msw';
 import { FindFilesQuery, FindFilesQueryVariables } from '../../types/sdk';
 import fileRepository from '../repositories/fileRepository';
 
 const CURRENT_USER_KEY = 'currentUser';
 const fileHandlers = [
   //Upload
-  rest.post('/files', (req, res, ctx) => {
+  http.post('/files', () => {
     const currentUser = sessionStorage.getItem(CURRENT_USER_KEY);
     if (!currentUser) {
-      return res(ctx.status(403), ctx.json({ data: { message: 'Not Authorized' } }));
+      return HttpResponse.json({ data: { message: 'Not Authorized' } }, { status: 403 });
     }
-    return res(ctx.status(200), ctx.json({ upload: 'OK' }));
+    return HttpResponse.json({ data: { message: 'OK' } }, { status: 200 });
   }),
 
-  rest.post('/register/original', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.post('/register/original', () => {
+    return HttpResponse.json(
+      {
         labwareSolutions: [
           { barcode: 'STAN-3111', solution: 'Solution 1' },
           { barcode: 'STAN-3112', solution: 'Solution 2' }
         ]
-      })
+      },
+      { status: 200 }
     );
   }),
 
   //Query files
-  graphql.query<FindFilesQuery, FindFilesQueryVariables>('FindFiles', (req, res, ctx) => {
+  graphql.query<FindFilesQuery, FindFilesQueryVariables>('FindFiles', (req) => {
     const files = fileRepository.findAll().map((file) => {
       return {
         ...file,
@@ -35,12 +35,7 @@ const fileHandlers = [
         }
       };
     });
-
-    return res(
-      ctx.data({
-        listFiles: files
-      })
-    );
+    return HttpResponse.json({ data: { listFiles: files } }, { status: 200 });
   })
 ];
 

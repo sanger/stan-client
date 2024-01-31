@@ -98,7 +98,6 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
           )}
           {location.stored.map((item, index) => {
             const labware = labwareInLocation.find((lw) => lw.barcode === item.barcode);
-            debugger;
             return (
               <tr key={index}>
                 <TableCell>
@@ -124,6 +123,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
                   {friendlyName(tissues(labware).map((tissue) => String(tissue.spatialLocation.code)))}
                 </TableCell>
                 <TableCell>{friendlyName(tissues(labware).map((tissue) => tissue.replicate ?? ''))}</TableCell>
+
                 <TableCell>
                   <Authenticated role={UserRole.Normal}>
                     <RemoveButton

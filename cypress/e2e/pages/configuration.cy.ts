@@ -5,6 +5,7 @@ import {
   UpdateReleaseRecipientFullNameMutationVariables
 } from '../../../src/types/sdk';
 import { selectOption } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 describe('Configuration Spec', () => {
   before(() => {
@@ -160,14 +161,14 @@ describe('Configuration Spec', () => {
         worker.use(
           graphql.mutation<AddReleaseRecipientMutation, AddReleaseRecipientMutationVariables>(
             'AddReleaseRecipient',
-            (req, res, ctx) => {
-              return res.once(
-                ctx.errors([
+            () => {
+              return HttpResponse.json({
+                errors: [
                   {
                     message: 'Exception while fetching data (/addReleaseRecipient) : Something went wrong'
                   }
-                ])
-              );
+                ]
+              });
             }
           )
         );
@@ -190,16 +191,16 @@ describe('Configuration Spec', () => {
         worker.use(
           graphql.mutation<UpdateReleaseRecipientFullNameMutation, UpdateReleaseRecipientFullNameMutationVariables>(
             'UpdateReleaseRecipientFullName',
-            (req, res, ctx) => {
-              return res.once(
-                ctx.data({
+            () => {
+              return HttpResponse.json({
+                data: {
                   updateReleaseRecipientFullName: {
                     username: 'et2',
                     fullName: 'Ethan Twin',
                     enabled: true
                   }
-                })
-              );
+                }
+              });
             }
           )
         );
