@@ -174,15 +174,11 @@ describe('Xenium Probe Hybridisation', () => {
           cy.findByTestId('addButton').should('exist');
         });
       });
-      after(() => {
-        cy.findByTestId('STAN-3111-1-action').within(() => {
-          cy.findByTestId('removeButton').click();
-        });
-      });
     });
   });
   describe('Multiple labware', () => {
     before(() => {
+      cy.visit('/lab/probe_hybridisation_xenium');
       cy.get('#labwareScanInput').type('STAN-3112{enter}');
     });
     it('should display probe settings for multiple labware', () => {

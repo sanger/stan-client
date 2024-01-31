@@ -70,18 +70,18 @@ describe('Transfer Page', () => {
       cy.visit('/lab/transfer');
       cy.findByTestId('Scan Labware').click();
       cy.get('#inputLabwares').within((elem) => {
-        cy.wrap(elem).get('#labwareScanInput').clear().type('STAN-3111{enter}');
+        cy.wrap(elem).get('#labwareScanInput').wait(1000).clear().type('STAN-3111{enter}');
       });
       cy.findByTestId('dest-scanner').within((elem) => {
-        cy.wrap(elem).get('#labwareScanInput').clear().type('STAN-3000{enter}');
+        cy.wrap(elem).get('#labwareScanInput').wait(1000).clear().type('STAN-3000{enter}');
       });
     });
     it('should allow transfer to an empty slot', () => {
       cy.get('#inputLabwares').within((elem) => {
-        cy.wrap(elem).findByText('A1').click({ force: true, timeout: 1000 });
+        cy.wrap(elem).findByText('A1').wait(1000).click({ force: true });
       });
       cy.get('#outputLabwares').within((elem) => {
-        cy.wrap(elem).findByText('A2').click({ force: true, timeout: 1000 });
+        cy.wrap(elem).findByText('A2').wait(1000).click({ force: true });
       });
       cy.findByRole('table').contains('td', 'A1');
       cy.findByRole('table').contains('td', 'A2');
@@ -120,14 +120,14 @@ describe('Transfer Page', () => {
       });
       it('displays previously entered labware state values', () => {
         selectOption('input-labware-state', 'used');
-        cy.findAllByTestId('left-button').eq(0).click();
-        cy.findAllByTestId('right-button').eq(0).click();
+        cy.findAllByTestId('left-button').wait(1000).eq(0).click();
+        cy.findAllByTestId('right-button').wait(1000).eq(0).click();
         cy.findByText('used').should('be.visible');
       });
       it('displays selected source slots in table', () => {
         cy.get('#inputLabwares').within(() => {
-          cy.findByText('A1').click({ force: true, timeout: 1000 });
-          cy.findByText('D1').click({ shiftKey: true, force: true, timeout: 1000 });
+          cy.findByText('A1').wait(1000).click({ force: true });
+          cy.findByText('D1').wait(1000).click({ shiftKey: true, force: true });
         });
         cy.findByRole('table').contains('td', 'A1');
         cy.findByRole('table').contains('td', 'D1');
@@ -164,10 +164,10 @@ describe('Transfer Page', () => {
       });
       it('display the notification to user about failed slots', () => {
         cy.get('#inputLabwares').within(() => {
-          cy.findByText('A2').click({ force: true });
+          cy.findByText('A2').wait(1000).click({ force: true });
         });
         cy.get('#outputLabwares').within(() => {
-          cy.findByText('G1').scrollIntoView().click({ force: true, timeout: 1000 });
+          cy.findByText('G1').wait(1000).scrollIntoView().click({ force: true });
         });
         cy.findByText('Failed slot(s)').should('be.visible');
       });
@@ -181,13 +181,13 @@ describe('Transfer Page', () => {
         cy.findByTestId('copyMode-One to many').click({ force: true });
         selectOption('bioState', 'Probes');
         cy.get('#inputLabwares').within(async () => {
-          cy.findByText('A1').click({ force: true, timeout: 1000 });
+          cy.findByText('A1').wait(1000).click({ force: true });
         });
         cy.findByText('Finish mapping for A1').should('be.visible');
         cy.get('#outputLabwares').within(() => {
-          cy.findByText('G1').scrollIntoView().click({ force: true, timeout: 1000 });
-          cy.findByText('G2').scrollIntoView().click({ force: true, timeout: 1000 });
-          cy.findByText('G5').scrollIntoView().click({ force: true, timeout: 1000 });
+          cy.findByText('G1').scrollIntoView().wait(1000).click({ force: true });
+          cy.findByText('G2').scrollIntoView().wait(1000).click({ force: true });
+          cy.findByText('G5').scrollIntoView().wait(1000).click({ force: true });
         });
       });
 
@@ -213,11 +213,11 @@ describe('Transfer Page', () => {
         selectOption('bioState', 'Probes');
         cy.findByTestId('copyMode-Many to one').click({ force: true });
         cy.get('#inputLabwares').within(() => {
-          cy.findByText('A2').click({ force: true, timeout: 1000 });
-          cy.findByText('B2').click({ cmdKey: true, force: true, timeout: 1000 });
+          cy.findByText('A2').wait(1000).click({ force: true });
+          cy.findByText('B2').wait(1000).click({ cmdKey: true, force: true });
         });
         cy.get('#outputLabwares').within(() => {
-          cy.findByText('D1').click({ force: true, timeout: 1000 });
+          cy.findByText('D1').wait(1000).click({ force: true });
         });
       });
       it('should display the many to one mode', () => {

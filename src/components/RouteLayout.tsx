@@ -341,6 +341,7 @@ const RouteLayout = () => {
                   columns.externalName(),
                   columns.bioState()
                 ]}
+                displayStoreOption={true}
               />
             }
           />
