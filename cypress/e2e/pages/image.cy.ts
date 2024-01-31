@@ -27,6 +27,9 @@ describe('Imaging Page', () => {
     it('should display a success messgae', () => {
       cy.findAllByText('Operation Complete').should('have.length.above', 1);
     });
+    it('should display a store button', () => {
+      cy.findByRole('button', { name: /Store/i }).should('be.visible');
+    });
   });
 
   context('when there is a server error', () => {

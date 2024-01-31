@@ -25,11 +25,11 @@ export const getAllSelect = (dataTestId?: string) => {
 const chooseOptionFromSelectList = (optionText: string) => {
   //If given option is empty
   if (optionText.length <= 0) {
-    cy.findByRole('combobox').should('exist').click({ force: true });
-    cy.get('[id$=-option-0]').click({ multiple: true, force: true });
+    cy.findByRole('combobox').should('exist').wait(1000).click({ force: true });
+    cy.get('[id$=-option-0]').wait(1000).click({ multiple: true, force: true });
     return;
   }
-  cy.findByRole('combobox').first().type(`${optionText}`, { force: true });
+  cy.findByRole('combobox').wait(1000).first().type(`${optionText}`, { force: true });
   cy.findByText(optionText).should('exist').click({ force: true });
 };
 

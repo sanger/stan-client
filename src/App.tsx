@@ -5,6 +5,11 @@ import { ConfigProvider } from './context/ConfigContext';
 import RouteLayout from './components/RouteLayout';
 
 function App() {
+  React.useEffect(() => {
+    /**This is important for cypress tests to run.
+     *Cypress is waiting for this event to happen in onBeforeLoad callback in cypress/support/command.ts*/
+    window.dispatchEvent(new CustomEvent('reactRenderComplete'));
+  }, []);
   return (
     <ConfigProvider>
       <StanCoreContext.Provider value={stanCore}>

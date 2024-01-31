@@ -218,13 +218,10 @@ describe('Visium QC Page', () => {
             cy.findByText('Slide Processing complete').should('be.visible');
           });
         });
-
-        after(() => {
-          cy.findByRole('button', { name: /Reset/i }).click();
-        });
       });
       context('When there is a server error', () => {
         before(() => {
+          cy.visit('/lab/visium_qc');
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
               graphql.mutation<RecordVisiumQcMutation, RecordVisiumQcMutationVariables>('RecordVisiumQC', () => {
