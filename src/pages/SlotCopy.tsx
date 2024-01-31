@@ -26,6 +26,8 @@ import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import RemoveButton from '../components/buttons/RemoveButton';
 import { objectKeys } from '../lib/helpers';
+import { StripyCardDetail } from '../components/StripyCard';
+import { LabwareStatePill } from '../components/LabwareStatePill';
 
 type PageParams = {
   title: string;
@@ -134,14 +136,23 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
             >
               {(props) => {
                 return (
-                  <div className="flex flex-row justify-end">
+                  <div className="flex flex-col">
                     {props.labwares.length > 0 && (
-                      <RemoveButton
-                        onClick={() => {
-                          labware?.labware.barcode && props.removeLabware(labware?.labware.barcode);
-                          onLabwareScan?.([]);
-                        }}
-                      />
+                      <>
+                        <div className={'flex flex-row justify-end'}>
+                          <RemoveButton
+                            onClick={() => {
+                              labware?.labware.barcode && props.removeLabware(labware?.labware.barcode);
+                              onLabwareScan?.([]);
+                            }}
+                          />
+                        </div>
+                        {labware && labware?.labware.barcode && (
+                          <StripyCardDetail term={'State'}>
+                            <LabwareStatePill labware={labware?.labware} />
+                          </StripyCardDetail>
+                        )}
+                      </>
                     )}
                   </div>
                 );
