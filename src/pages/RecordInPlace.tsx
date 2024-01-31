@@ -69,7 +69,6 @@ export default function RecordInPlace({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          debugger;
           return stanCore.RecordInPlace({ request: e.values });
         }
       }
@@ -113,7 +112,6 @@ export default function RecordInPlace({
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={async (values) => {
-              debugger;
               //Reformat data to type InPlaceOpRequest by replacing labware field with barcodes field
               const { labware, ...rest } = values;
               const submitValues: InPlaceOpRequest = { ...rest, barcodes: labware.map((l) => l.barcode) };
