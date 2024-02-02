@@ -130,7 +130,8 @@
   },
   "resolutions": {
     "babel-loader": "8.1.0",
-    "yaml": "2.2.2"
+    "yaml": "2.2.2",
+    "string-width": "4.2.3"
   },
   "msw": {
     "workerDirectory": "public"
