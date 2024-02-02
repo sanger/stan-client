@@ -118,52 +118,48 @@ export const extractResultMachine = (initExtractedResults: ExtractResultQuery[])
       actions: {
         assignBarcode: assign(({ context, event, self }) => {
           if (!(event.type === 'UPDATE_BARCODE' || event.type === 'SUBMIT_BARCODE')) return context;
-          context.currentBarcode = event.barcode;
-          return context;
+          return { ...context, currentBarcode: event.barcode };
         }),
         assignSubmitBarcodeError: assign(({ context, event }) => {
           if (event.type !== 'SUBMIT_BARCODE') return context;
-          context.scanErrorMessage = `"${event.barcode}" has already been scanned`;
-          return context;
+          return { ...context, scanErrorMessage: `"${event.barcode}" has already been scanned` };
         }),
         assignExtractResult: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.extractResult') return context;
           if (!event.output.extractResult) {
-            context.scanErrorMessage = `No extraction recorded for the tube ${context.currentBarcode}`;
-            return context;
+            return { ...context, scanErrorMessage: `No extraction recorded for the tube ${context.currentBarcode}` };
           }
           if (!event.output.extractResult.result) {
-            context.scanErrorMessage = `No result recorded for extraction of the tube ${context.currentBarcode}`;
-            return context;
+            return {
+              ...context,
+              scanErrorMessage: `No result recorded for extraction of the tube ${context.currentBarcode}`
+            };
           }
 
           if (event.output.extractResult.result === PassFail.Fail) {
-            context.scanErrorMessage = `Extraction result is 'FAIL' for the tube ${context.currentBarcode}`;
-            return context;
+            return {
+              ...context,
+              scanErrorMessage: `Extraction result is 'FAIL' for the tube ${context.currentBarcode}`
+            };
           }
-          context.extractResults.push(event.output);
-          context.currentBarcode = '';
-          return context;
+          return { ...context, extractResults: [...context.extractResults, event.output], currentBarcode: '' };
         }),
         removeExtractResult: assign(({ context, event }) => {
           if (event.type !== 'REMOVE_EXTRACT_RESULT') return context;
-          context.extractResults = context.extractResults.filter(
+          const extractResults = context.extractResults.filter(
             (res) => res.extractResult.labware.barcode !== event.barcode
           );
-          return context;
+          return { ...context, extractResults };
         }),
         assignServerError: assign(({ context, event }) => {
           if (event.type !== 'xstate.error.actor.extractResult') return context;
-          context.serverError = castDraft(event.error);
-          return context;
+          return { ...context, serverError: castDraft(event.error) };
         }),
         unassignServerError: assign(({ context }) => {
-          context.serverError = undefined;
-          return context;
+          return { ...context, serverError: undefined };
         }),
         unassignErrorMessage: assign(({ context }) => {
-          context.scanErrorMessage = '';
-          return context;
+          return { ...context, scanErrorMessage: '' };
         })
       },
 

@@ -162,7 +162,7 @@ type StoreResolveEvent = {
 };
 
 type StoreErrorEvent = {
-  type: 'error.platform.store';
+  type: 'xstate.error.actor.store';
   error: ClientError;
 };
 

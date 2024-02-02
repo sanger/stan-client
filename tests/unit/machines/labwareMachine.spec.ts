@@ -35,8 +35,7 @@ const mockedLabwareContext: LabwareContext = {
 
 describe('labwareMachine', () => {
   it('has an initial state of idle.normal', (done) => {
-    const machine = createActor(createLabwareMachine());
-
+    const machine = createActor(createLabwareMachine(), { input: mockedLabwareContext });
     machine.subscribe((state) => {
       if (state.matches('idle.normal')) {
         machine.stop();
@@ -48,7 +47,7 @@ describe('labwareMachine', () => {
 
   describe('UPDATE_CURRENT_BARCODE', () => {
     it('updates the current barcode', (done) => {
-      const machine = createActor(createLabwareMachine());
+      const machine = createActor(createLabwareMachine(), { input: mockedLabwareContext });
       machine.subscribe((state) => {
         if (
           state.matches('idle.normal') &&
@@ -66,7 +65,7 @@ describe('labwareMachine', () => {
 
   describe('UPDATE_CURRENT_BARCODE for Location scan', () => {
     it('updates the current barcode for location', (done) => {
-      const machine = createActor(createLabwareMachine());
+      const machine = createActor(createLabwareMachine(), { input: mockedLabwareContext });
       machine.subscribe((state) => {
         if (state.matches('idle.normal') && state.context.currentBarcode === 'STO-123' && state.context.locationScan) {
           machine.stop();
@@ -106,7 +105,7 @@ describe('labwareMachine', () => {
     describe('when the barcode is not in the table', () => {
       describe('when the barcode is empty', () => {
         it('assigns an error message', (done) => {
-          const machine = createActor(createLabwareMachine());
+          const machine = createActor(createLabwareMachine(), { input: mockedLabwareContext });
           machine.subscribe((state) => {
             if (state.matches('idle.error')) {
               expect(state.context.errorMessage).toEqual('Barcode is required');
@@ -129,7 +128,8 @@ describe('labwareMachine', () => {
               actions: {
                 notifyParent: log('stubbed update labwares')
               }
-            })
+            }),
+            { input: mockedLabwareContext }
           );
           machine.subscribe((state) => {
             if (state.matches('idle.normal') && state.context.labwares.length > 0) {
@@ -159,7 +159,7 @@ describe('labwareMachine', () => {
               ]
             }
           });
-          const machine = createActor(createLabwareMachine());
+          const machine = createActor(createLabwareMachine(), { input: mockedLabwareContext });
           machine.subscribe((state) => {
             if (state.matches('idle.error')) {
               expect(state.context.errorMessage).toEqual('No labware found with barcode: STAN-321');
@@ -246,11 +246,12 @@ describe('labwareMachine', () => {
               actions: {
                 notifyParent: log('stubbed update labwares')
               }
-            })
+            }),
+            { input: mockedLabwareContext }
           );
           machine.subscribe((state) => {
-            if (state.matches('idle.normal') && state.context.labwares.length > 0) {
-              expect(state.context.labwares.length).toEqual(2);
+            if (state.matches('idle.normal') && state.context.labwares.length > 1) {
+              expect(state.context.labwares.length).toEqual(3);
               machine.stop();
               done();
             }
@@ -292,7 +293,7 @@ describe('labwareMachine', () => {
     describe('LOCK/UNLOCK', () => {
       it('transitions to locked and back to idle.normal', (done) => {
         let wasLocked = false;
-        const machine = createActor(createLabwareMachine());
+        const machine = createActor(createLabwareMachine(), { input: mockedLabwareContext });
         machine.subscribe((state) => {
           if (state.matches('locked')) {
             wasLocked = true;
@@ -322,9 +323,9 @@ describe('labwareMachine', () => {
             input: { ...mockedLabwareContext, enableFlaggedLabwareCheck: true }
           });
           stateMachine.subscribe((state) => {
-            if (state.matches('idle.normal') && state.context.labwares.length > 0) {
-              expect(state.context.labwares.length).toEqual(1);
-              expect(state.context.labwares[0].flagged).toEqual(true);
+            if (state.matches('idle.normal') && state.context.labwares.length > 1) {
+              expect(state.context.labwares.length).toEqual(2);
+              expect(state.context.labwares[1].flagged).toEqual(true);
               stateMachine.stop();
               done();
             }

@@ -2,18 +2,20 @@ import { assign, createMachine, fromPromise } from 'xstate';
 import { HistoryTableEntry, ServerErrors } from '../../types/stan';
 import * as historyService from '../../lib/services/historyService';
 import { HistoryUrlParams } from '../../pages/History';
+import { ClientError } from 'graphql-request';
+import { Maybe } from 'yup';
 
 type HistoryContext = {
   historyProps: HistoryUrlParams;
   history: Array<HistoryTableEntry>;
-  serverError: ServerErrors | null;
+  serverError: Maybe<ClientError>;
 };
 
 type HistoryEvent =
   | { type: 'UPDATE_HISTORY_PROPS'; props: HistoryUrlParams }
   | { type: 'RETRY' }
   | { type: 'xstate.done.actor.findHistory'; output: Array<HistoryTableEntry> }
-  | { type: 'xstate.error.actor.findHistory'; error: ServerErrors };
+  | { type: 'xstate.error.actor.findHistory'; error: Maybe<ClientError> };
 
 const defaultMachineContext: HistoryContext = {
   historyProps: {},
@@ -70,19 +72,19 @@ export default function createHistoryMachine(context = defaultMachineContext) {
       actions: {
         assignHistory: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.findHistory') return context;
-          context.history = event.output;
-          return context;
+          return { ...context, history: event.output };
         }),
 
         assignHistoryProps: assign(({ context, event }) => {
-          if (event.type === 'UPDATE_HISTORY_PROPS') context.historyProps = event.props;
+          if (event.type === 'UPDATE_HISTORY_PROPS') {
+            return { ...context, historyProps: event.props };
+          }
           return context;
         }),
 
         assignServerError: assign(({ context, event }) => {
           if (event.type !== 'xstate.error.actor.findHistory') return context;
-          context.serverError = event.error;
-          return context;
+          return { ...context, serverError: event.error };
         })
       }
     }

@@ -118,8 +118,8 @@ type LockEvent = { type: 'LOCK' };
 type UnlockEvent = { type: 'UNLOCK' };
 
 type ValidationErrorEvent = {
-  type: 'error.platform.validateBarcode';
-  data: Yup.ValidationError;
+  type: 'xstate.error.actor.validateBarcode';
+  error: Yup.ValidationError;
 };
 
 type FindLocationDoneEvent = {
@@ -395,6 +395,12 @@ export const createLabwareMachine = () => {
           context.labwares = context.labwares.filter((_, index) => index !== removeLabwareIndex);
           context.successMessage = `"${event.value}" removed`;
           return context;
+        }),
+        assignValidationError: assign(({ context, event }) => {
+          if (event.type !== 'xstate.error.actor.validateBarcode') {
+            return context;
+          }
+          return { context, errorMessage: event.error.errors.join('\n') };
         }),
         assignFoundLabware: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.findLabware') {

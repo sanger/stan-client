@@ -1,17 +1,16 @@
-import { assign, createMachine, fromPromise, MachineConfig, raise } from 'xstate';
+import { assign, createMachine, fromPromise, MachineConfig, MachineImplementations, raise } from 'xstate';
 import {
   LocationContext,
   LocationEvent,
-  LocationSchema,
   setErrorMessage,
   setSuccessMessage,
   StoreBarcodeEvent
 } from './locationMachineTypes';
 import * as locationService from '../../services/locationService';
-import { castDraft } from 'immer';
+import produce, { castDraft } from 'immer';
 import { stanCore } from '../../sdk';
 import { buildOrderedAddresses, findNextAvailableAddress } from '../../helpers/locationHelper';
-import { GridDirection, StoredItem } from '../../../types/sdk';
+import { GridDirection } from '../../../types/sdk';
 
 enum Action {
   ASSIGN_LOCATION = 'assignLocation',
@@ -34,19 +33,13 @@ enum Service {
 /**
  * Location Machine Options
  */
-export const machineOptions = {
-  types: {} as {
-    context: LocationContext;
-    events: LocationEvent;
-    schema: LocationSchema;
-  },
+export const machineOptions: MachineImplementations<LocationContext, LocationEvent> = {
   actions: {
     [Action.ASSIGN_LOCATION_SEARCH_PARAMS]: assign(({ context, event }) => {
       if (event.type !== 'FETCH_LOCATION') {
         return context;
       }
-      context.locationSearchParams = event.locationSearchParams;
-      return context;
+      return { ...context, locationSearchParams: event.locationSearchParams };
     }),
 
     [Action.ASSIGN_LOCATION]: assign(({ context, event }) => {
@@ -61,63 +54,57 @@ export const machineOptions = {
         return context;
       }
       // Can be null if this is an unstore action
-      if (event.type !== 'UPDATE_LOCATION' && event.data == null) {
+      if (event.type !== 'UPDATE_LOCATION' && event.output == null) {
         return context;
       }
+      return produce(context, (draft) => {
+        // Set the location
+        draft.location = event.type === 'UPDATE_LOCATION' ? event.location : event.output;
 
-      // Set the location
-      context.location = event.type === 'UPDATE_LOCATION' ? event.location : event.output;
+        draft.addressToItemMap.clear();
+        // Create all the possible addresses for this location if it has a size.
+        draft.locationAddresses = context.location.size
+          ? buildOrderedAddresses(context.location.size, context.location.direction ?? GridDirection.DownRight)
+          : new Map<string, number>();
 
-      context.addressToItemMap.clear();
-      // Create all the possible addresses for this location if it has a size.
-      context.locationAddresses = context.location.size
-        ? buildOrderedAddresses(context.location.size, context.location.direction ?? GridDirection.DownRight)
-        : new Map<string, number>();
+        context.location.stored.forEach((storedItem) => {
+          if (storedItem.address) {
+            draft.addressToItemMap.set(storedItem.address, storedItem);
+          }
+        });
 
-      context.location.stored.forEach((storedItem: StoredItem) => {
-        if (storedItem.address) {
-          context.addressToItemMap.set(storedItem.address, storedItem);
-        }
+        const addresses = findNextAvailableAddress({
+          locationAddresses: context.locationAddresses,
+          addressToItemMap: context.addressToItemMap,
+          minimumAddress: context.selectedAddress
+        });
+        draft.selectedAddress = addresses.length > 0 ? addresses[0] : null;
       });
-
-      const addresses = findNextAvailableAddress({
-        locationAddresses: context.locationAddresses,
-        addressToItemMap: context.addressToItemMap,
-        minimumAddress: context.selectedAddress
-      });
-      context.selectedAddress = addresses.length > 0 ? addresses[0] : null;
-      return context;
     }),
 
     [Action.ASSIGN_SELECTED_ADDRESS]: assign(({ context, event }) => {
       if (event.type !== 'SET_SELECTED_ADDRESS') {
         return context;
       }
-      context.selectedAddress = event.address;
-      return context;
+      return { ...context, selectedAddress: event.address };
     }),
 
     [Action.UNSET_SUCCESS_MESSAGE]: assign(({ context }) => {
-      context.successMessage = null;
-      return context;
+      return { ...context, successMessage: null };
     }),
 
     [Action.ASSIGN_SUCCESS_MESSAGE]: assign(({ context, event }) => {
       if (event.type !== 'SET_SUCCESS_MESSAGE') {
         return context;
       }
-      context.successMessage = event.message;
-      context.errorMessage = null;
-      return context;
+      return { ...context, successMessage: event.message, errorMessage: null };
     }),
 
     [Action.ASSIGN_ERROR_MESSAGE]: assign(({ context, event }) => {
       if (event.type !== 'SET_ERROR_MESSAGE') {
         return context;
       }
-      context.errorMessage = event.message;
-      context.successMessage = null;
-      return context;
+      return { ...context, errorMessage: event.message, successMessage: null };
     }),
 
     [Action.ASSIGN_SERVER_ERRORS]: assign(({ context, event }) => {
@@ -130,8 +117,7 @@ export const machineOptions = {
       ) {
         return context;
       }
-      context.serverError = castDraft(event.error);
-      return context;
+      return { ...context, serverError: castDraft(event.error) };
     })
   }
 };
@@ -274,7 +260,11 @@ export const machineConfig: MachineConfig<LocationContext, LocationEvent> = {
  * Location Machine
  */
 
-export const locationMachine = createMachine({
-  ...machineConfig,
-  ...machineOptions
-});
+export const locationMachine = createMachine(
+  {
+    ...machineConfig
+  },
+  {
+    ...machineOptions
+  }
+);

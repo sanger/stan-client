@@ -45,7 +45,7 @@ describe('Analysis Component', () => {
     beforeEach(() => {
       renderAnalysis();
     });
-    it('renders tablw with information of the scanner labware and enables the Analysis button', async () => {
+    it('renders table with information of the scanner labware and enables the Analysis button', async () => {
       await act(async () => {
         await scanLabware('STAN-611');
       });
