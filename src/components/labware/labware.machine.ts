@@ -123,12 +123,16 @@ function createLabwareMachine() {
     {
       actions: {
         clearSelectedSlots: assign(({ context }) => {
-          context.selectedAddresses.clear();
-          return context;
+          return { ...context, selectedAddresses: new Set<string>() };
         }),
 
         deselectSlot: assign(({ context, event }) => {
-          'address' in event && context.selectedAddresses.delete(event.address);
+          if ('address' in event) {
+            return {
+              ...context,
+              selectedAddresses: new Set([...context.selectedAddresses].filter((a) => a !== event.address))
+            };
+          }
           return context;
         }),
 
@@ -137,12 +141,22 @@ function createLabwareMachine() {
         }),
 
         selectSlot: assign(({ context, event }) => {
-          'address' in event && context.selectedAddresses.add(event.address);
+          if ('address' in event) {
+            return {
+              ...context,
+              selectedAddresses: new Set([...context.selectedAddresses]).add(event.address)
+            };
+          }
           return context;
         }),
 
         storeLastSelectedSlot: assign(({ context, event }) => {
-          'address' in event && (context.lastSelectedAddress = event.address);
+          if ('address' in event) {
+            return {
+              ...context,
+              lastSelectedAddress: event.address
+            };
+          }
           return context;
         }),
 
@@ -171,23 +185,29 @@ function createLabwareMachine() {
           ].sort((a, b) => a - b);
 
           let selectedSlots = sortedSlots.slice(startSlotIndex, endSlotIndex + 1);
-          const state = self.getSnapshot().getMeta().state;
+          const snapshot = self.getSnapshot();
 
           // If we only want to select non-empty wells, filter out empty ones...
-          if (state.matches({ selectable: { non_empty: 'multi' } })) {
+          if (snapshot.matches({ selectable: { non_empty: 'multi' } })) {
             selectedSlots = filledSlots(selectedSlots);
 
             // If we only want to select empty wells, filter out non-empty ones...
-          } else if (state.matches({ selectable: { empty: 'multi' } })) {
+          } else if (snapshot.matches({ selectable: { empty: 'multi' } })) {
             selectedSlots = emptySlots(selectedSlots);
           }
 
-          selectedSlots.forEach((slot) => context.selectedAddresses.add(slot.address));
-          return context;
+          const selectedAddresses = new Set(context.selectedAddresses);
+          selectedSlots.forEach((slot) => selectedAddresses.add(slot.address));
+          return { ...context, selectedAddresses };
         }),
 
         updateSlots: assign(({ context, event }) => {
-          event.type === 'UPDATE_SLOTS' && (context.slots = event.slots);
+          if (event.type === 'UPDATE_SLOTS') {
+            return {
+              ...context,
+              slots: event.slots
+            };
+          }
           return context;
         })
       },

@@ -195,6 +195,7 @@ export default function createLabwareResultMachine() {
                         slotsForAddress.samples.forEach((sample) => {
                           sampleComments.push({ sampleId: sample.id, commentId: event.commentId as number });
                         });
+                        sr.sampleComments = sampleComments;
                       } else {
                         /**One comment and one section per slot**/
                         sr.commentId = event.commentId as number;

@@ -1,5 +1,5 @@
 import { assign, createMachine, fromPromise, MachineConfig, MachineImplementations } from 'xstate';
-import { LabelPrinterContext, LabelPrinterEvent, LabelPrinterSchema } from './labelPrinterMachineTypes';
+import { LabelPrinterContext, LabelPrinterEvent } from './labelPrinterMachineTypes';
 import { find } from 'lodash';
 import { castDraft } from 'immer';
 import { stanCore } from '../../sdk';
@@ -57,11 +57,6 @@ const machineConfig = (
   selectedPrinter?: Maybe<PrinterFieldsFragment>
 ): MachineConfig<LabelPrinterContext, LabelPrinterEvent> => ({
   id: 'labelPrinter',
-  types: {} as {
-    context: LabelPrinterContext;
-    schema: LabelPrinterSchema;
-    events: LabelPrinterEvent;
-  },
   context: {
     selectedPrinter: selectedPrinter ?? null,
     labwares,

@@ -13,6 +13,7 @@ import {
   SlotCopySource
 } from '../../../types/sdk';
 import { stanCore } from '../../sdk';
+import produce from 'immer';
 
 /**
  * Context for SlotCopy Machine
@@ -368,158 +369,164 @@ export const slotCopyMachine = createMachine(
         if (event.type !== 'UPDATE_SOURCE_LABWARE') {
           return context;
         }
-        context.sources = event.labware.map((newSource) => {
-          const source = context.sources.find((src) => src.labware.barcode === newSource.barcode);
-          //There is no source exists , so add this
-          if (!source) {
-            return {
-              labware: newSource
-            };
-          } else {
-            return source;
-          }
+        return produce(context, (draft) => {
+          draft.sources = event.labware.map((newSource) => {
+            const source = draft.sources.find((src) => src.labware.barcode === newSource.barcode);
+            //There is no source exists , so add this
+            if (!source) {
+              return {
+                labware: newSource
+              };
+            } else {
+              return source;
+            }
+          });
         });
-        return context;
       }),
       assignDestinationLabware: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_DESTINATION_LABWARE') {
           return context;
         }
-        context.destinations = event.labware.map((newDest) => {
-          const destination = context.destinations.find((dest) => dest.labware.id === newDest.id);
-          //There is no destination exists , so add this
-          if (!destination) {
-            return {
-              labware: newDest,
-              slotCopyDetails: { labwareType: newDest.labwareType.name, barcode: newDest.barcode, contents: [] }
-            };
-          } else {
-            return destination;
-          }
+        return produce(context, (draft) => {
+          draft.destinations = event.labware.map((newDest) => {
+            const destination = draft.destinations.find((dest) => dest.labware.id === newDest.id);
+            //There is no destination exists , so add this
+            if (!destination) {
+              return {
+                labware: newDest,
+                slotCopyDetails: { labwareType: newDest.labwareType.name, barcode: newDest.barcode, contents: [] }
+              };
+            } else {
+              return destination;
+            }
+          });
         });
-        return context;
       }),
 
       assignSCC: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_SLOT_COPY_CONTENT') {
           return context;
         }
-        const destination = context.destinations.find((dest) => dest.labware.id === event.labware.id);
-        if (destination) {
-          destination.slotCopyDetails.contents = event.slotCopyContent;
-        }
-        return context;
+        return produce(context, (draft) => {
+          const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
+          if (destination) {
+            destination.slotCopyDetails.contents = event.slotCopyContent;
+          }
+        });
       }),
 
       assignResult: assign(({ context, event }) => {
         if (event.type !== 'xstate.done.actor.copySlots') {
           return context;
         }
-        context.slotCopyResults = event.output.slotCopy.labware;
-        return context;
+        return { ...context, slotCopyResults: event.output.slotCopy.labware };
       }),
 
       assignServerError: assign(({ context, event }) => {
         if (event.type !== 'xstate.error.actor.copySlots') {
           return context;
         }
-        context.serverErrors = event.error as ServerErrors;
-        return context;
+        return { ...context, serverErrors: event.error as ServerErrors };
       }),
 
       assignWorkNumber: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_WORK_NUMBER') return context;
-        context.workNumber = event.workNumber;
-        return context;
+        return { ...context, workNumber: event.workNumber };
       }),
       assignSourceLabwarePermTimes: assign(({ context, event }) => {
         if (event.type !== 'xstate.done.actor.findPermTime') return context;
         //Sync the permData array with current input labware list
-        context.sourceLabwarePermData = context.sourceLabwarePermData?.filter((permData) =>
-          event.output.inputLabwares.some((lw) => lw.barcode === permData.visiumPermData.labware.barcode)
-        );
-        //Add newly fetched perm times if any
-        event.output.findPermTimes.forEach((permData) => {
-          context.sourceLabwarePermData?.push(permData);
-        });
-
-        //update slot copy content with updated labware
-        context.destinations.forEach((dest) => {
-          dest.slotCopyDetails.contents = dest.slotCopyDetails.contents.filter((scc) =>
-            event.output.inputLabwares.some((lw) => lw.barcode === scc.sourceBarcode)
+        return produce(context, (draft) => {
+          draft.sourceLabwarePermData = draft.sourceLabwarePermData?.filter((permData) =>
+            event.output.inputLabwares.some((lw) => lw.barcode === permData.visiumPermData.labware.barcode)
           );
+          //Add newly fetched perm times if any
+          event.output.findPermTimes.forEach((permData) => {
+            draft.sourceLabwarePermData?.push(permData);
+          });
+
+          //update slot copy content with updated labware
+          draft.destinations.forEach((dest) => {
+            dest.slotCopyDetails.contents = dest.slotCopyDetails.contents.filter((scc) =>
+              event.output.inputLabwares.some((lw) => lw.barcode === scc.sourceBarcode)
+            );
+          });
         });
-        return context;
       }),
       assignDestinationBioState: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_DESTINATION_BIO_STATE') return context;
-        const destination = context.destinations.find((dest) => dest.labware.id === event.labware.id);
-        if (!destination) {
-          return context;
-        }
-        destination.slotCopyDetails.bioState = event.bioState;
-        return context;
+        return produce(context, (draft) => {
+          const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
+          if (!destination) {
+            return context;
+          }
+          destination.slotCopyDetails.bioState = event.bioState;
+        });
       }),
       assignDestinationPreBarcode: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_DESTINATION_PRE_BARCODE') return context;
-        const destination = context.destinations.find((dest) => dest.labware.id === event.labware.id);
-        if (!destination) {
-          return context;
-        }
-        //update barcode in destination labware and in slotCopy details
-        destination.labware.barcode = event.preBarcode;
-        destination.slotCopyDetails.preBarcode = event.preBarcode;
-        return context;
+        return produce(context, (draft) => {
+          const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
+          if (!destination) {
+            return context;
+          }
+          //update barcode in destination labware and in slotCopy details
+          destination.labware.barcode = event.preBarcode;
+          destination.slotCopyDetails.preBarcode = event.preBarcode;
+        });
       }),
       assignDestinationLabwareType: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_DESTINATION_LABWARE_TYPE') return context;
-        const destination = context.destinations.find((dest) => dest.labware.id === event.labwareToReplace.id);
-        if (!destination || destination.labware.labwareType.name === event.labware.labwareType.name) {
-          return context;
-        }
-        destination.labware = event.labware;
-        destination.slotCopyDetails = {
-          ...destination.slotCopyDetails,
-          labwareType: event.labware.labwareType.name,
-          contents: []
-        };
-        return context;
+        return produce(context, (draft) => {
+          const destination = draft.destinations.find((dest) => dest.labware.id === event.labwareToReplace.id);
+          if (!destination || destination.labware.labwareType.name === event.labware.labwareType.name) {
+            return context;
+          }
+          destination.labware = event.labware;
+          destination.slotCopyDetails = {
+            ...destination.slotCopyDetails,
+            labwareType: event.labware.labwareType.name,
+            contents: []
+          };
+        });
       }),
       assignDestinationCosting: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_DESTINATION_COSTING') return context;
-        const destination = context.destinations.find((dest) => dest.labware.id === event.labware.id);
-        if (!destination) {
-          return context;
-        }
-        destination.slotCopyDetails.costing = event.labwareCosting;
-        return context;
+        return produce(context, (draft) => {
+          const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
+          if (!destination) {
+            return context;
+          }
+          destination.slotCopyDetails.costing = event.labwareCosting;
+        });
       }),
       assignDestinationLOTNumber: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_DESTINATION_LOT_NUMBER') return context;
-        const destination = context.destinations.find((dest) => dest.labware.id === event.labware.id);
-        if (!destination) {
-          return context;
-        }
-        if (event.isProbe) {
-          destination.slotCopyDetails.probeLotNumber = event.lotNumber;
-        } else {
-          destination.slotCopyDetails.lotNumber = event.lotNumber;
-        }
-        return context;
+        return produce(context, (draft) => {
+          const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
+          if (!destination) {
+            return context;
+          }
+          if (event.isProbe) {
+            destination.slotCopyDetails.probeLotNumber = event.lotNumber;
+          } else {
+            destination.slotCopyDetails.lotNumber = event.lotNumber;
+          }
+        });
       }),
       assignSourceLabwareState: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_SOURCE_LABWARE_STATE') return context;
-        const src = context.sources.find((src) => src.labware.barcode === event.labware.barcode);
-        if (src) {
-          src.labwareState = event.labwareState;
-        } else {
-          context.sources.push({ labware: event.labware, labwareState: event.labwareState });
-        }
-        return context;
+        return produce(context, (draft) => {
+          const src = draft.sources.find((src) => src.labware.barcode === event.labware.barcode);
+          if (src) {
+            src.labwareState = event.labwareState;
+          } else {
+            draft.sources.push({ labware: event.labware, labwareState: event.labwareState });
+          }
+        });
       }),
       emptyServerError: assign(({ context }) => {
-        context.serverErrors = null;
-        return context;
+        return { ...context, serverErrors: null };
       })
     }
   }

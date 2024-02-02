@@ -117,7 +117,13 @@ export default function LabwareResult({
     return false;
   };
   const getComment = (address: string) => {
-    const commentId = sampleResults.get(address)?.commentId;
+    let commentId = sampleResults.get(address)?.commentId;
+    if (!commentId) {
+      /**This is to support whe only one comment per slot allowed, but different multiple sections in slot,
+       * The machine stores the same comment the different sections within the same slot inside a sampleComments object
+       */
+      commentId = sampleResults.get(address)?.sampleComments?.flatMap((sc) => sc.commentId)[0];
+    }
     return commentId ? commentId + '' : '';
   };
   const getSampleRegion = (address: string, sampleId: number) => {

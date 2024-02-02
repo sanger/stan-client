@@ -10,7 +10,7 @@ import {
   ReagentTransfer,
   RecordReagentTransferMutation
 } from '../../../types/sdk';
-import { MachineServiceDone, MachineServiceError, OperationTypeName } from '../../../types/stan';
+import { OperationTypeName } from '../../../types/stan';
 import { stanCore } from '../../sdk';
 
 /**
@@ -93,7 +93,17 @@ type FindReagentPlateEventDone = {
 
 type FindReagentPlateEventError = {
   type: 'xstate.error.actor.findReagentPlate';
-  error: unknown;
+  error: Maybe<ClientError>;
+};
+
+type SaveReagentTransferEventDone = {
+  type: 'xstate.done.actor.reagentTransfer';
+  output: RecordReagentTransferMutation;
+};
+
+type SaveReagentTransferEvenError = {
+  type: 'xstate.done.actor.reagentTransfer';
+  error: Maybe<ClientError>;
 };
 
 export type ReagentTransferEvent =
@@ -103,10 +113,10 @@ export type ReagentTransferEvent =
   | SetPlateType
   | UpdateTransferContent
   | SaveEvent
-  | MachineServiceDone<'reagentTransfer', RecordReagentTransferMutation>
-  | MachineServiceError<'reagentTransfer'>
   | FindReagentPlateEventDone
-  | FindReagentPlateEventError;
+  | FindReagentPlateEventError
+  | SaveReagentTransferEventDone
+  | SaveReagentTransferEvenError;
 
 /**
  * Reagent Transfer Machine Config
@@ -153,7 +163,8 @@ export const reagentTransferMachine = createMachine(
           UPDATE_TRANSFER_CONTENT: [
             {
               target: 'readyToCopy',
-              guard: ({ event }) => event.reagentTransfers.length > 0,
+              guard: ({ event, context }) =>
+                context.sourceReagentPlate !== undefined && context.destLabware !== undefined,
               actions: 'assignTransfers'
             },
             {
@@ -203,20 +214,22 @@ export const reagentTransferMachine = createMachine(
               request: {
                 workNumber: input.workNumber,
                 operationType: input.operationType,
-                destinationBarcode: input.destLabware!.barcode,
-                transfers: input.reagentTransfers,
+                destinationBarcode: input.destinationBarcode,
+                transfers: input.transfers,
                 plateType: input.plateType
               }
             });
           }),
-          input: ({ context }) => ({
-            workNumber: context.workNumber,
-            operationType: context.operationType,
-            destinationBarcode: context.destLabware!.barcode,
-            transfers: context.reagentTransfers,
-            plateType: context.plateType,
-            sourceReagentPlate: context.sourceReagentPlate
-          }),
+          input: ({ context }) => {
+            return {
+              workNumber: context.workNumber,
+              operationType: context.operationType,
+              destinationBarcode: context.destLabware!.barcode,
+              transfers: context.reagentTransfers,
+              plateType: context.plateType,
+              sourceReagentPlate: context.sourceReagentPlate
+            };
+          },
           onDone: {
             target: 'transferred',
             actions: 'assignResult'
@@ -256,15 +269,15 @@ export const reagentTransferMachine = createMachine(
       }),
       assignReagentPlate: assign(({ context, event }) => {
         if (event.type !== 'xstate.done.actor.findReagentPlate' || context.sourceBarcode === undefined) return context;
-        context.sourceReagentPlate = event.data.reagentPlate
+        context.sourceReagentPlate = event.output.reagentPlate
           ? {
-              barcode: event.data.reagentPlate.barcode,
-              slots: event.data.reagentPlate.slots ?? [],
-              plateType: event.data.reagentPlate.plateType
+              barcode: event.output.reagentPlate.barcode,
+              slots: event.output.reagentPlate.slots ?? [],
+              plateType: event.output.reagentPlate.plateType
             }
           : { barcode: context.sourceBarcode, slots: [] };
-        if (event.data.reagentPlate && event.data.reagentPlate.plateType) {
-          context.plateType = event.data.reagentPlate.plateType;
+        if (event.output.reagentPlate && event.output.reagentPlate.plateType) {
+          context.plateType = event.output.reagentPlate.plateType;
         }
         return context;
       }),
@@ -277,7 +290,7 @@ export const reagentTransferMachine = createMachine(
         if (event.type !== 'xstate.done.actor.reagentTransfer') {
           return context;
         }
-        context.reagentTransferResult = event.data;
+        context.reagentTransferResult = event.output;
         return context;
       }),
 

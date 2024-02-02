@@ -168,7 +168,7 @@ export default function VisiumQC() {
 
   const [currentCDNA, sendCDNA] = useMachine(formMachine.cdnaFormMachine);
 
-  const labwareLimit = React.useRef(2);
+  const [labwareLimit, setLabwareLimit] = React.useState(2);
 
   const [currentRecordOpWithSlotComments, sendRecordOpWithSlotComments] = useMachine(
     formMachine.recordOpWithSlotCommentsMachine
@@ -293,7 +293,7 @@ export default function VisiumQC() {
                   <CustomReactSelect
                     handleChange={(val) => {
                       setFieldValue('qcType', (val as OptionType).label);
-                      labwareLimit.current = (val as OptionType).label === QCType.SLIDE_PROCESSING ? 2 : 1;
+                      setLabwareLimit((val as OptionType).label === QCType.SLIDE_PROCESSING ? 2 : 1);
                     }}
                     dataTestId={'qcType'}
                     emptyOption={true}
@@ -312,7 +312,7 @@ export default function VisiumQC() {
                   <Heading level={2}>Labware</Heading>
                   <p>Please scan in any labware you wish to QC.</p>
                   <div key={`labware-scanner-${labwareLimit}`}>
-                    <LabwareScanner limit={labwareLimit.current} enableFlaggedLabwareCheck>
+                    <LabwareScanner limit={labwareLimit} enableFlaggedLabwareCheck>
                       {({ labwares, removeLabware }) => {
                         switch (values.qcType) {
                           case QCType.SLIDE_PROCESSING:

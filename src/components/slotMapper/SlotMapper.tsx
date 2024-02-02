@@ -156,6 +156,11 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
    */
   useEffect(() => {
     if (!currentOutput && initialOutputLabware?.length === 0) return;
+    if (initialOutputLabware?.length === 0) {
+      setCurrentOutput(null);
+      send({ type: 'UPDATE_OUTPUT_LABWARE', outputSlotCopyContent: [] });
+      return;
+    }
     const matchingLabware = initialOutputLabware?.find((outputLw) => outputLw.labware.id === currentOutput?.labware.id);
     //Update changes in barcode , if any
     if (matchingLabware && matchingLabware.labware.barcode !== currentOutput?.labware.barcode) {
@@ -560,7 +565,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
    */
   useEffect(() => {
     if (!currentOutput?.slotCopyContent) return;
-    onChange?.(currentOutput.labware, currentOutput?.slotCopyContent, anySourceMapped);
+    onChange?.(currentOutput.labware, currentOutput.slotCopyContent, anySourceMapped);
   }, [onChange, currentOutput, anySourceMapped]);
 
   /**

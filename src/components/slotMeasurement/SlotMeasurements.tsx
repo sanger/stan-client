@@ -46,18 +46,10 @@ const setMeasurementNameTableTitle = (measurementName: string): string => {
  */
 
 const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, comments }: SlotMeasurementProps) => {
-  const [measurementConfigOptions, setMeasurementConfigOptions] = React.useState<MeasurementConfigProps[]>([]);
-
   const isWithSampleInfo = React.useMemo(
     () => slotMeasurements.some((measurement) => measurement.samples),
     [slotMeasurements]
   );
-
-  /**concatenate all mesaurements if there are multiple measurements */
-  React.useEffect(() => {
-    if (measurementConfigOptions.length === measurementConfig.length) return;
-    setMeasurementConfigOptions(measurementConfig);
-  }, [measurementConfig, measurementConfigOptions, setMeasurementConfigOptions]);
 
   const measurementRowValues: MeasurementRow[] = React.useMemo(() => {
     const groupedMeasurements: Dictionary<SlotMeasurement[]> = groupBy(slotMeasurements, 'address');
@@ -116,7 +108,7 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
             }
           ]
         : []),
-      ...measurementConfigOptions.map((measurementProp, mesaurementIndex) => {
+      ...measurementConfig.map((measurementProp, measurementIndex) => {
         return {
           Header: setMeasurementNameTableTitle(measurementProp.name),
           id: measurementProp.name,
@@ -132,13 +124,13 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
                   type={'number'}
                   label={''}
                   name={
-                    measurementConfigOptions.length > 1
-                      ? `slotMeasurements.${row.index * measurementConfigOptions.length + mesaurementIndex}.value`
+                    measurementConfig.length > 1
+                      ? `slotMeasurements.${row.index * measurementConfig.length + measurementIndex}.value`
                       : `slotMeasurements.${row.index}.value`
                   }
                   onChange={(e: React.FormEvent<HTMLInputElement>) => {
                     onChangeField(
-                      `slotMeasurements.${row.index * measurementConfigOptions.length + mesaurementIndex}.value`,
+                      `slotMeasurements.${row.index * measurementConfig.length + measurementIndex}.value`,
                       e.currentTarget.value
                     );
                   }}
@@ -176,7 +168,7 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
           ]
         : [])
     ];
-  }, [comments, onChangeField, measurementConfigOptions, isWithSampleInfo]);
+  }, [comments, onChangeField, isWithSampleInfo, measurementConfig]);
 
   return (
     <>

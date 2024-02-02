@@ -168,7 +168,9 @@ export default function StainingQC({ info }: StainingQCProps) {
                           availableComments={info.comments}
                           onRemoveClick={removeLabware}
                           commentsForSlotSections
-                          onChange={(labwareResult) => labwareResults.update(labwareResult)}
+                          onChange={(labwareResult) => {
+                            labwareResults.update(labwareResult);
+                          }}
                           displayComments={qcType === STAIN_QC_TYPES[0] || qcType === STAIN_QC_TYPES[2]}
                           displayPassFail={qcType === STAIN_QC_TYPES[0]}
                           displayMeasurement={qcType === STAIN_QC_TYPES[1]}

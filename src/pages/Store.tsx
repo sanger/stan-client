@@ -19,6 +19,7 @@ import { ClientError } from 'graphql-request';
 import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
 import PromptOnLeave from '../components/notifications/PromptOnLeave';
 import { Action as HistoryAction, Location } from '@remix-run/router/dist/history';
+import { useConfirmLeave } from '../lib/hooks';
 
 export type LabwareAwaitingStorageInfo = {
   barcode: string;
@@ -96,6 +97,7 @@ export function getAwaitingLabwaresFromSession() {
 const Store = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const location = useLocation();
+  const [shouldConfirm] = useConfirmLeave(true);
 
   /**Leaving to another page from a prompt dialog, so clear the sessionStorage before leaving this page**/
   const onLeave = React.useCallback(() => {
@@ -169,7 +171,7 @@ const Store = () => {
       </AppShell.Main>
       {awaitingLabwares.length > 0 && (
         <PromptOnLeave
-          when={awaitingStorageCheckOnExit}
+          when={shouldConfirm}
           message={'You have labware that is not stored. Are you sure you want to leave?'}
           onPromptLeave={onLeave}
         />
