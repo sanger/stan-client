@@ -1,5 +1,5 @@
 import { assign, createMachine, fromPromise } from 'xstate';
-import { HistoryTableEntry, ServerErrors } from '../../types/stan';
+import { HistoryTableEntry } from '../../types/stan';
 import * as historyService from '../../lib/services/historyService';
 import { HistoryUrlParams } from '../../pages/History';
 import { ClientError } from 'graphql-request';
