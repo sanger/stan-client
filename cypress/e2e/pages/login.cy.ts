@@ -20,7 +20,9 @@ describe('Login', () => {
             graphql.mutation('Login', () => {
               return HttpResponse.json({
                 data: {
-                  user: null
+                  login: {
+                    user: null
+                  }
                 }
               });
             })
@@ -99,7 +101,9 @@ describe('Self Registration', () => {
           graphql.mutation('RegisterAsEndUser', () => {
             return HttpResponse.json({
               data: {
-                user: null
+                registerAsEndUser: {
+                  user: null
+                }
               }
             });
           })

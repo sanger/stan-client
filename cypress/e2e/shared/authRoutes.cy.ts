@@ -18,7 +18,7 @@ describe('Authorized routes', () => {
       it('should redirect to /admin/registration after logging in', () => {
         cy.get("input[name='username']").type('jb1');
         cy.get("input[name='password']").type('supersecret');
-        cy.get("button[type='submit']").click();
+        cy.findByTestId('signIn').click();
 
         cy.location().should((location) => {
           expect(location.pathname).to.eq('/admin/registration');
