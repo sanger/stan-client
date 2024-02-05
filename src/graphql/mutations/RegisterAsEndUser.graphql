@@ -1,7 +1,7 @@
 mutation RegisterAsEndUser($username: String!, $password: String!) {
-    registerAsEndUser(username: $username, password: $password) {
-        user {
-            ...UserFields
-        }
+  registerAsEndUser(username: $username, password: $password) {
+    user {
+      ...UserFields
     }
+  }
 }
