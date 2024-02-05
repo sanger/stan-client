@@ -11,13 +11,15 @@ import { motion } from 'framer-motion';
 import { extractServerErrors } from '../types/stan';
 import { StanCoreContext } from '../lib/sdk';
 import { ClientError } from 'graphql-request';
+import RegisterButton from '../components/buttons/RegisterButton';
 
 /**
  * Schema used by Formik in the login form.
  */
 const LoginSchema = Yup.object().shape({
   username: Yup.string().required('Username is required'),
-  password: Yup.string().required('Password is required')
+  password: Yup.string().required('Password is required'),
+  isSelfRegistration: Yup.boolean()
 });
 
 const Login = (): JSX.Element => {
@@ -31,12 +33,13 @@ const Login = (): JSX.Element => {
   }, [auth, location]);
 
   const stanCore = useContext(StanCoreContext);
-  const [showLoginSuccess, setShowLoginSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const formInitialValues = {
     username: '',
-    password: ''
+    password: '',
+    isSelfRegistration: false
   };
 
   const submitCredentials = async (
@@ -46,24 +49,39 @@ const Login = (): JSX.Element => {
     try {
       setErrorMessage(null);
 
-      const { login } = await stanCore.Login({
-        username: credentials.username,
-        password: credentials.password
-      });
+      const { user } = credentials.isSelfRegistration
+        ? await stanCore
+            .RegisterAsEndUser({
+              username: credentials.username,
+              password: credentials.password
+            })
+            .then((response) => {
+              return response.registerAsEndUser;
+            })
+        : await stanCore
+            .Login({
+              username: credentials.username,
+              password: credentials.password
+            })
+            .then((response) => {
+              return response.login;
+            });
 
-      if (!login?.user?.username) {
-        setErrorMessage('Username or password is incorrect');
+      if (!user) {
+        setErrorMessage(
+          credentials.isSelfRegistration
+            ? `LDAP check failed for ${credentials.username}`
+            : 'Username or password is incorrect'
+        );
         formikHelpers.setSubmitting(false);
         return;
       }
 
-      setShowLoginSuccess(true);
-      const userInfo = login.user;
-
+      setSuccessMessage(credentials.isSelfRegistration ? 'Successfully registered as End User!' : 'Login Successful!');
       // Allow some time for the user to see the success message before redirecting
       setTimeout(() => {
         auth.setAuthState({
-          user: userInfo
+          user: user!
         });
         formikHelpers.setSubmitting(false);
       }, 1500);
@@ -94,13 +112,13 @@ const Login = (): JSX.Element => {
               <h2 className="mt-6 text-center text-3xl leading-9 font-extrabold text-white">Sign in to STAN</h2>
             </div>
 
-            {showLoginSuccess && <Success message={'Login Successful!'} className="mt-8" />}
+            {successMessage && <Success message={successMessage} className="mt-8" />}
 
-            {location.state?.success && !showLoginSuccess && errorMessage == null && (
+            {location.state?.success && !successMessage && errorMessage == null && (
               <Success message={location.state.success} className="mt-8" />
             )}
 
-            {location.state?.warning && !showLoginSuccess && errorMessage == null && (
+            {location.state?.warning && !successMessage && errorMessage == null && (
               <Warning className="mt-8" message={location.state.warning} />
             )}
 
@@ -108,24 +126,28 @@ const Login = (): JSX.Element => {
 
             <Formik
               initialValues={formInitialValues}
-              onSubmit={(values, formikHelpers) => {
-                submitCredentials(values, formikHelpers);
-              }}
+              onSubmit={(values, formikHelpers) => submitCredentials(values, formikHelpers)}
               validationSchema={LoginSchema}
-              validateOnChange={false}
-              validateOnBlur={false}
             >
               {(formik) => (
                 <Form className="mt-8">
-                  <ErrorMessage name="username" />
-                  <ErrorMessage name="password" />
+                  <ErrorMessage
+                    component="div"
+                    name="username"
+                    className="items-start justify-between border-l-4 border-orange-600 p-2 bg-orange-200 text-orange-800"
+                  />
+                  <ErrorMessage
+                    component="div"
+                    name="password"
+                    className="items-start justify-between border-l-4 border-orange-600 p-2 bg-orange-200 text-orange-800"
+                  />
                   <div className="rounded-md shadow-sm">
                     <div>
                       <Field
+                        data-testid="username"
                         aria-label="Sanger username"
                         name="username"
                         type="text"
-                        required
                         className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
                         placeholder="Sanger username"
                       />
@@ -134,17 +156,29 @@ const Login = (): JSX.Element => {
 
                   <div className="-mt-px">
                     <Field
+                      data-testid="password"
                       aria-label="Password"
                       name="password"
                       type="password"
-                      required
                       className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
                       placeholder="Password"
                     />
                   </div>
 
                   <div className="mt-6">
-                    <LoginButton loading={formik.isSubmitting}>Sign In</LoginButton>
+                    <LoginButton loading={formik.isSubmitting} data-testid="signIn" disabled={formik.isSubmitting}>
+                      Sign In
+                    </LoginButton>
+                  </div>
+                  <div className="mt-3">
+                    <RegisterButton
+                      disabled={formik.isSubmitting}
+                      data-testid="register"
+                      loading={formik.isSubmitting}
+                      onClick={() => formik.setFieldValue('isSelfRegistration', true)}
+                    >
+                      Register
+                    </RegisterButton>
                   </div>
                 </Form>
               )}
