@@ -17,6 +17,8 @@ import Table, { TableBody, TableCell } from '../Table';
 import { useAuth } from '../../context/AuthContext';
 import TopScrollingBar from '../TopScrollingBar';
 import { HistoryUrlParams } from '../../pages/History';
+import { LabwareFlaggedFieldsFragment } from '../../types/sdk';
+import { stanCore } from '../../lib/sdk';
 /**
  * Component for looking up and displaying the history of labware and samples
  */
@@ -33,6 +35,7 @@ export default function History(props: HistoryUrlParams) {
   const { isAuthenticated } = useAuth();
 
   const { history, historyProps, serverError } = current.context;
+  const [flaggedLabware, setFlaggedLabware] = React.useState<LabwareFlaggedFieldsFragment[]>([]);
 
   const historyColumns: Array<Column> = React.useMemo(
     () => [
@@ -191,7 +194,11 @@ export default function History(props: HistoryUrlParams) {
    * File upload option is only for authenticated users, so
    * only allow permission to view or download uploaded files if not authenticated
    */
-  const fileAccessUrlPath = (workNumber: string) => {
+  const labwareUrlPath = (barcode: string) => {
+    return `/labware/${barcode}`;
+  };
+
+  const fileUploadUrlPath = (workNumber: string) => {
     const queryParamsStr = stringify({
       workNumber: workNumber
     });
@@ -204,6 +211,27 @@ export default function History(props: HistoryUrlParams) {
       .map((key) => `${key}${keyValSeparator}${historyProps[key as keyof HistoryUrlParams]}`)
       .join(tokenSeparator);
   };
+
+  React.useEffect(() => {
+    async function flaggedLabwareFromHistory(history: HistoryTableEntry[]) {
+      try {
+        const barcodeSet = history.reduce((acc, entry) => {
+          acc.add(entry.sourceBarcode);
+          acc.add(entry.destinationBarcode);
+          return acc;
+        }, new Set<string>());
+        const labwarePromises = Array.from(barcodeSet).map((barcode) => stanCore.FindFlaggedLabware({ barcode }));
+        const labwares = await Promise.all(labwarePromises);
+        const labwareFlagged = labwares
+          .filter((labware) => labware.labwareFlagged.flagged)
+          .map((labware) => labware.labwareFlagged);
+        setFlaggedLabware(labwareFlagged);
+      } catch (error) {
+        setFlaggedLabware([]);
+      }
+    }
+    flaggedLabwareFromHistory(history);
+  }, [history, setFlaggedLabware]);
 
   return (
     <div>
@@ -222,31 +250,60 @@ export default function History(props: HistoryUrlParams) {
         (history.length > 0 ? (
           <>
             {uniqueWorkNumbers.length > 0 && (
-              <div
-                className={
-                  'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
-                }
-              >
-                <Heading level={4} showBorder={false}>
-                  Files Uploaded
-                </Heading>
-                <div className={'flex flex-col mt-4 justify-center'} data-testid="history">
-                  <Table>
-                    <TableBody>
-                      <TableCell className={'flex flex-col justify-center  p-2'}>
-                        {uniqueWorkNumbers.map((workNumber, indx) => (
-                          <StyledLink
-                            data-testid={`styled-link-${workNumber}`}
-                            key={workNumber}
-                            to={fileAccessUrlPath(workNumber)}
-                            className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
-                          >{`Files for ${workNumber}`}</StyledLink>
-                        ))}
-                      </TableCell>
-                    </TableBody>
-                  </Table>
+              <>
+                <div
+                  className={
+                    'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
+                  }
+                >
+                  <Heading level={4} showBorder={false}>
+                    Files Uploaded
+                  </Heading>
+                  <div className={'flex flex-col mt-4 justify-center'} data-testid="history">
+                    <Table>
+                      <TableBody>
+                        <TableCell className={'flex flex-col justify-center  p-2'}>
+                          {uniqueWorkNumbers.map((workNumber, indx) => (
+                            <StyledLink
+                              data-testid={`styled-link-${workNumber}`}
+                              key={workNumber}
+                              to={fileUploadUrlPath(workNumber)}
+                              className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
+                            >{`Files for ${workNumber}`}</StyledLink>
+                          ))}
+                        </TableCell>
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
-              </div>
+                {flaggedLabware.length > 0 && (
+                  <div
+                    className={
+                      'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
+                    }
+                  >
+                    <Heading level={4} showBorder={false}>
+                      Flagged Labware
+                    </Heading>
+                    <div className={'flex flex-col mt-4 justify-center'} data-testid="flagged-labware">
+                      <Table>
+                        <TableBody>
+                          <TableCell className={'flex flex-col justify-center  p-2'}>
+                            {flaggedLabware.map((labware, indx) => (
+                              <StyledLink
+                                data-testid={`styled-link-${labware.barcode}`}
+                                key={labware.barcode}
+                                to={labwareUrlPath(labware.barcode)}
+                                className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
+                              >{`${labware.barcode}`}</StyledLink>
+                            ))}
+                          </TableCell>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
             <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
               History for
