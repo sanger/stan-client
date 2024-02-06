@@ -213,6 +213,10 @@ export default function History(props: HistoryUrlParams) {
   };
 
   React.useEffect(() => {
+    /**
+     * Fetch all flagged labware from the history
+     * @param history
+     */
     async function flaggedLabwareFromHistory(history: HistoryTableEntry[]) {
       try {
         const barcodeSet = history.reduce((acc, entry) => {
@@ -220,6 +224,7 @@ export default function History(props: HistoryUrlParams) {
           acc.add(entry.destinationBarcode);
           return acc;
         }, new Set<string>());
+        // Fetch all flagged labware
         const labwarePromises = Array.from(barcodeSet).map((barcode) => stanCore.FindFlaggedLabware({ barcode }));
         const labwares = await Promise.all(labwarePromises);
         const labwareFlagged = labwares
