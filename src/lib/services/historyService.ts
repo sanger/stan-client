@@ -72,6 +72,6 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Histo
   });
   return {
     entries,
-    flggedBarcodes: history.flaggedBarcodes
+    flaggedBarcodes: history.flaggedBarcodes
   };
 }

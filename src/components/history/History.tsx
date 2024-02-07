@@ -252,7 +252,7 @@ export default function History(props: HistoryUrlParams) {
                     </Table>
                   </div>
                 </div>
-                {history.flggedBarcodes.length > 0 && (
+                {history.flaggedBarcodes.length > 0 && (
                   <div
                     className={
                       'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
@@ -265,7 +265,7 @@ export default function History(props: HistoryUrlParams) {
                       <Table>
                         <TableBody>
                           <TableCell className={'flex flex-col justify-center  p-2'}>
-                            {history.flggedBarcodes.map((barcode, indx) => (
+                            {history.flaggedBarcodes.map((barcode, indx) => (
                               <StyledLink
                                 data-testid={`styled-link-${barcode}`}
                                 key={barcode}

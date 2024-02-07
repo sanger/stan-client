@@ -25,7 +25,7 @@ export default function createHistoryMachine() {
       initial: 'searching',
       context: {
         historyProps: {},
-        history: { entries: [], flggedBarcodes: [] },
+        history: { entries: [], flaggedBarcodes: [] },
         serverError: null
       },
       states: {

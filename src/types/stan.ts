@@ -274,7 +274,7 @@ export type HistoryTableEntry = {
 
 export type HistoryData = {
   entries: Array<HistoryTableEntry>;
-  flggedBarcodes: Array<string>;
+  flaggedBarcodes: Array<string>;
 }
 
 /**
