@@ -26,11 +26,6 @@ const mockHistorySearchResults: HistoryTableEntry[] = [
 afterEach(() => {
   jest.clearAllMocks();
 });
-const initialContext = Object.assign({}, createHistoryMachine().context, {
-  historyProps: { workNumber: 'SGP8' },
-  history: [],
-  serverError: null
-});
 
 function findHistorySuccess() {
   return {
