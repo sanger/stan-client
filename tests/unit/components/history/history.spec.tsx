@@ -85,7 +85,7 @@ describe('When no search data is returned', () => {
         value: 'found',
         context: {
           historyProps: props,
-          history: [],
+          history: { entries: [] },
           serverError: undefined
         },
         matches: jest.fn((val) => val === 'found')
@@ -119,7 +119,7 @@ describe('When search data is returned', () => {
         value: 'found',
         context: {
           historyProps: props,
-          history: historyTableEntries,
+          history: { entries: historyTableEntries },
           serverError: undefined
         },
         matches: jest.fn((val) => val === 'found')
@@ -206,7 +206,7 @@ describe('when barcode search  is performed', () => {
         value: 'found',
         context: {
           historyProps: props,
-          history: historyTableEntries,
+          history: { entries: historyTableEntries },
           serverError: undefined
         },
         matches: jest.fn((val) => val === 'found')
@@ -243,11 +243,13 @@ describe('when there are mutiple history entries with SGP numbers duplicated', (
         value: 'found',
         context: {
           historyProps: props,
-          history: [
-            { ...historyTableEntries[0] },
-            { ...historyTableEntries[0] },
-            { ...historyTableEntries[0], workNumber: 'SGP1009' }
-          ],
+          history: {
+            entries: [
+              { ...historyTableEntries[0] },
+              { ...historyTableEntries[0] },
+              { ...historyTableEntries[0], workNumber: 'SGP1009' }
+            ]
+          },
           serverError: undefined
         },
         matches: jest.fn((val) => val === 'found')
@@ -275,7 +277,7 @@ describe('when release event is present', () => {
         value: 'found',
         context: {
           historyProps: props,
-          history: [{ ...historyTableEntries[0], eventType: 'Release' }],
+          history: { entries: [{ ...historyTableEntries[0], eventType: 'Release' }] },
           serverError: undefined
         },
         matches: jest.fn((val) => val === 'found')
@@ -304,7 +306,7 @@ describe('when search result includes a flagged labware', () => {
       value: 'found',
       context: {
         historyProps: props,
-        history: { entries: historyTableEntries, flggedBarcodes: ['STAN-3111'] },
+        history: { entries: historyTableEntries, flaggedBarcodes: ['STAN-3111'] },
         serverError: undefined
       },
 
