@@ -17,8 +17,6 @@ import Table, { TableBody, TableCell } from '../Table';
 import { useAuth } from '../../context/AuthContext';
 import TopScrollingBar from '../TopScrollingBar';
 import { HistoryUrlParams } from '../../pages/History';
-import { LabwareFlaggedFieldsFragment } from '../../types/sdk';
-import { stanCore } from '../../lib/sdk';
 /**
  * Component for looking up and displaying the history of labware and samples
  */
@@ -35,7 +33,6 @@ export default function History(props: HistoryUrlParams) {
   const { isAuthenticated } = useAuth();
 
   const { history, historyProps, serverError } = current.context;
-  const [flaggedLabware, setFlaggedLabware] = React.useState<LabwareFlaggedFieldsFragment[]>([]);
 
   const historyColumns: Array<Column> = React.useMemo(
     () => [
@@ -164,14 +161,14 @@ export default function History(props: HistoryUrlParams) {
       columnData: {
         columns: historyColumns
       },
-      entries: history
+      entries: history.entries
     };
   }, [history, historyColumns]);
 
   const { downloadURL, extension } = useDownload(downloadData);
 
   const uniqueWorkNumbers = React.useMemo(() => {
-    const uniqueWorkNumbers = [...new Set(history.map((item) => item.workNumber))];
+    const uniqueWorkNumbers = [...new Set(history.entries.map((item) => item.workNumber))];
     const workNumbers: string[] = [];
     uniqueWorkNumbers.forEach((wrkNumber) => {
       if (wrkNumber && wrkNumber.length > 0) {
@@ -212,32 +209,6 @@ export default function History(props: HistoryUrlParams) {
       .join(tokenSeparator);
   };
 
-  React.useEffect(() => {
-    /**
-     * Fetch all flagged labware from the history
-     * @param history
-     */
-    async function flaggedLabwareFromHistory(history: HistoryTableEntry[]) {
-      try {
-        const barcodeSet = history.reduce((acc, entry) => {
-          acc.add(entry.sourceBarcode);
-          acc.add(entry.destinationBarcode);
-          return acc;
-        }, new Set<string>());
-        // Fetch all flagged labware
-        const labwarePromises = Array.from(barcodeSet).map((barcode) => stanCore.FindFlaggedLabware({ barcode }));
-        const labwares = await Promise.all(labwarePromises);
-        const labwareFlagged = labwares
-          .filter((labware) => labware.labwareFlagged.flagged)
-          .map((labware) => labware.labwareFlagged);
-        setFlaggedLabware(labwareFlagged);
-      } catch (error) {
-        setFlaggedLabware([]);
-      }
-    }
-    flaggedLabwareFromHistory(history);
-  }, [history, setFlaggedLabware]);
-
   return (
     <div>
       {current.matches('error') && serverError && (
@@ -252,7 +223,7 @@ export default function History(props: HistoryUrlParams) {
         </div>
       )}
       {current.matches('found') &&
-        (history.length > 0 ? (
+        (history.entries.length > 0 ? (
           <>
             {uniqueWorkNumbers.length > 0 && (
               <>
@@ -281,7 +252,7 @@ export default function History(props: HistoryUrlParams) {
                     </Table>
                   </div>
                 </div>
-                {flaggedLabware.length > 0 && (
+                {history.flggedBarcodes.length > 0 && (
                   <div
                     className={
                       'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
@@ -294,13 +265,13 @@ export default function History(props: HistoryUrlParams) {
                       <Table>
                         <TableBody>
                           <TableCell className={'flex flex-col justify-center  p-2'}>
-                            {flaggedLabware.map((labware, indx) => (
+                            {history.flggedBarcodes.map((barcode, indx) => (
                               <StyledLink
-                                data-testid={`styled-link-${labware.barcode}`}
-                                key={labware.barcode}
-                                to={labwareUrlPath(labware.barcode)}
+                                data-testid={`styled-link-${barcode}`}
+                                key={barcode}
+                                to={labwareUrlPath(barcode)}
                                 className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
-                              >{`${labware.barcode}`}</StyledLink>
+                              >{`${barcode}`}</StyledLink>
                             ))}
                           </TableCell>
                         </TableBody>
@@ -323,7 +294,7 @@ export default function History(props: HistoryUrlParams) {
               </a>
             </div>
             <TopScrollingBar>
-              <DataTable columns={historyColumns} data={history} fixedHeader={true} />
+              <DataTable columns={historyColumns} data={history.entries} fixedHeader={true} />
             </TopScrollingBar>
           </>
         ) : isValidInput ? (

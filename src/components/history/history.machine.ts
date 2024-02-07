@@ -1,6 +1,6 @@
 import { createMachine } from 'xstate';
 import { Maybe } from '../../types/sdk';
-import { HistoryTableEntry, MachineServiceDone, MachineServiceError } from '../../types/stan';
+import { HistoryData, MachineServiceDone, MachineServiceError } from '../../types/stan';
 import * as historyService from '../../lib/services/historyService';
 import { assign } from '@xstate/immer';
 import { ClientError } from 'graphql-request';
@@ -8,14 +8,14 @@ import { HistoryUrlParams } from '../../pages/History';
 
 type HistoryContext = {
   historyProps: HistoryUrlParams;
-  history: Array<HistoryTableEntry>;
+  history: HistoryData;
   serverError: Maybe<ClientError>;
 };
 
 type HistoryEvent =
   | { type: 'UPDATE_HISTORY_PROPS'; props: HistoryUrlParams }
   | { type: 'RETRY' }
-  | MachineServiceDone<'findHistory', Array<HistoryTableEntry>>
+  | MachineServiceDone<'findHistory', HistoryData>
   | MachineServiceError<'findHistory'>;
 
 export default function createHistoryMachine() {
@@ -25,7 +25,7 @@ export default function createHistoryMachine() {
       initial: 'searching',
       context: {
         historyProps: {},
-        history: [],
+        history: { entries: [], flggedBarcodes: [] },
         serverError: null
       },
       states: {

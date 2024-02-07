@@ -216,38 +216,6 @@ describe('History Page', () => {
       });
     });
   });
-
-  describe('when history includes a flagged labware', () => {
-    before(() => {
-      cy.msw().then(({ worker, graphql }) => {
-        const historyEntry = buildHistory('SGP1008', true);
-        debugger;
-        worker.use(
-          graphql.query<FindHistoryQuery, FindHistoryQueryVariables>('FindHistory', () => {
-            return HttpResponse.json({
-              data: {
-                history: historyEntry
-              },
-              once: true
-            });
-          })
-        );
-      });
-      cy.visitAsAdmin('/history?workNumber=SGP1008');
-    });
-    it('displays a Flagged labware section', () => {
-      cy.findByText('Flagged Labware').should('exist');
-      cy.findByTestId('flagged-labware').should('exist');
-    });
-    it('should navigate to  labware page when clicked', () => {
-      cy.findByTestId('flagged-labware').within(() => {
-        cy.findByText('STAN-1000').should('exist');
-        cy.findByText('STAN-1000').click();
-      });
-      cy.url().should('be.equal', 'http://localhost:3000/labware/STAN-1000');
-    });
-  });
-
   describe('when a search errors', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {

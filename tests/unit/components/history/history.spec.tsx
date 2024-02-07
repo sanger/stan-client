@@ -295,6 +295,43 @@ describe('when release event is present', () => {
     expect(screen.getByTestId('release-download-link')).toBeInTheDocument();
   });
 });
+
+describe('when search result includes a flagged labware', () => {
+  const props: HistoryUrlParams = { workNumber: 'SGP1008' };
+  beforeEach(() => {});
+  jest.spyOn(xState, 'useMachine').mockReturnValue([
+    {
+      value: 'found',
+      context: {
+        historyProps: props,
+        history: { entries: historyTableEntries, flggedBarcodes: ['STAN-3111'] },
+        serverError: undefined
+      },
+
+      matches: jest.fn((val) => val === 'found')
+    },
+    jest.fn()
+  ] as any);
+
+  act(() => {
+    render(
+      <BrowserRouter>
+        <History {...props} />
+      </BrowserRouter>
+    );
+  });
+  it('should display the flagged labware section', async () => {
+    expect(screen.getByText('Flagged Labware')).toBeInTheDocument();
+    expect(screen.getByTestId('styled-link-STAN-3111')).toBeInTheDocument();
+  });
+
+  it('should navigate to the flagged labware page when the flagged labware link is clicked', () => {
+    act(() => {
+      screen.getByTestId('styled-link-STAN-3111').click();
+    });
+    expect(global.window.location.pathname).toContain('/labware/STAN-3111');
+  });
+});
 describe("when there's an error", () => {
   const sendFunction = jest.fn();
   beforeEach(() => {
