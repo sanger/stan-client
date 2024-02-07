@@ -85,7 +85,7 @@ describe('When no search data is returned', () => {
         value: 'found',
         context: {
           historyProps: props,
-          history: { entries: [] },
+          history: { entries: [], flaggedBarcodes: [] },
           serverError: undefined
         },
         matches: jest.fn((val) => val === 'found')
@@ -119,7 +119,7 @@ describe('When search data is returned', () => {
         value: 'found',
         context: {
           historyProps: props,
-          history: { entries: historyTableEntries },
+          history: { entries: historyTableEntries, flaggedBarcodes: [] },
           serverError: undefined
         },
         matches: jest.fn((val) => val === 'found')
@@ -206,7 +206,7 @@ describe('when barcode search  is performed', () => {
         value: 'found',
         context: {
           historyProps: props,
-          history: { entries: historyTableEntries },
+          history: { entries: historyTableEntries, flaggedBarcodes: [] },
           serverError: undefined
         },
         matches: jest.fn((val) => val === 'found')
@@ -248,7 +248,8 @@ describe('when there are mutiple history entries with SGP numbers duplicated', (
               { ...historyTableEntries[0] },
               { ...historyTableEntries[0] },
               { ...historyTableEntries[0], workNumber: 'SGP1009' }
-            ]
+            ],
+            flaggedBarcodes: []
           },
           serverError: undefined
         },
@@ -277,7 +278,7 @@ describe('when release event is present', () => {
         value: 'found',
         context: {
           historyProps: props,
-          history: { entries: [{ ...historyTableEntries[0], eventType: 'Release' }] },
+          history: { entries: [{ ...historyTableEntries[0], eventType: 'Release' }], flaggedBarcodes: [] },
           serverError: undefined
         },
         matches: jest.fn((val) => val === 'found')
@@ -343,7 +344,7 @@ describe("when there's an error", () => {
         value: 'error',
         context: {
           historyProps: props,
-          history: historyTableEntries,
+          history: { entries: historyTableEntries, flaggedBarcodes: [] },
           serverError: {
             response: {
               status: 500,
@@ -390,7 +391,7 @@ describe('when search is in progress', () => {
         value: 'searching',
         context: {
           historyProps: props,
-          history: [],
+          history: { entries: [], flaggedBarcodes: [] },
           serverError: undefined
         },
         matches: jest.fn((val) => val === 'searching')
