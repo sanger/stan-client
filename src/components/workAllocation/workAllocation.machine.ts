@@ -2,6 +2,7 @@ import { createMachine } from 'xstate';
 import { MachineServiceDone, MachineServiceError } from '../../types/stan';
 import {
   CommentFieldsFragment,
+  CostCode,
   CostCodeFieldsFragment,
   CreateWorkMutation,
   GetWorkAllocationInfoQuery,
@@ -95,6 +96,14 @@ type WorkAllocationEvent =
   | {
       type: 'SORT_WORKS';
       workWithComments: WorkWithCommentFieldsFragment[];
+    }
+  | {
+      type: 'ADD_NEWLY_CREATED_PROJECT';
+      project: ProjectFieldsFragment;
+    }
+  | {
+      type: 'ADD_NEWLY_CREATED_COST_CODE';
+      costCode: CostCode;
     };
 
 type WorkAllocationContext = {
@@ -203,6 +212,12 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             },
             SORT_WORKS: {
               actions: 'assignSortedWorks'
+            },
+            ADD_NEWLY_CREATED_PROJECT: {
+              actions: 'addNewlyCreatedProject'
+            },
+            ADD_NEWLY_CREATED_COST_CODE: {
+              actions: 'addNewlyCreatedCostCode'
             }
           }
         },
@@ -297,6 +312,14 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
         clearNotifications: assign((ctx) => {
           ctx.successMessage = undefined;
           ctx.requestError = undefined;
+        }),
+        addNewlyCreatedProject: assign((ctx, event) => {
+          if (event.type !== 'ADD_NEWLY_CREATED_PROJECT') return;
+          ctx.projects.push(event.project);
+        }),
+        addNewlyCreatedCostCode: assign((ctx, event) => {
+          if (event.type !== 'ADD_NEWLY_CREATED_COST_CODE') return;
+          ctx.costCodes.push(event.costCode);
         })
       },
 

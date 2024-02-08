@@ -26,6 +26,10 @@ import InfoIcon from '../icons/InfoIcon';
 import TopScrollingBar from '../TopScrollingBar';
 import { stanCore } from '../../lib/sdk';
 import Pill from '../Pill';
+import AddButton from '../buttons/AddButton';
+import AddNewConfigOption from './AddNewConfigOption';
+import projectFactory from '../../lib/factories/projectFactory';
+import costCodeFactory from '../../lib/factories/costCodeFactory';
 const initialValues: WorkAllocationFormValues = {
   workType: '',
   workRequester: '',
@@ -155,6 +159,9 @@ export default function WorkAllocation() {
     },
     [send]
   );
+  const [addNewProjectCodeCode, setAddNewProjectCodeCode] = React.useState(false);
+  const [addNewCostCode, setAddNewCostCode] = React.useState(false);
+  const addNewConfigOptionInputRef = React.useRef<HTMLInputElement>(null);
 
   /**Handler to do sorting on user action**/
   const handleSort = React.useCallback(
@@ -284,7 +291,7 @@ export default function WorkAllocation() {
           }}
           validationSchema={validationSchema}
         >
-          {({ setFieldValue, values }) => (
+          {({ setFieldValue, values, errors }) => (
             <Form>
               <div className=" md:grid md:grid-cols-3 md:px-10 sm:flex sm:flex-row md:justify-center md:items-start md:gap-y-4 md:gap-x-8">
                 <div className="md:flex-grow">
@@ -309,18 +316,51 @@ export default function WorkAllocation() {
                     })}
                   />
                 </div>
-
-                <div className="md:flex-grow">
-                  <CustomReactSelect
-                    label="Project (cost code description)"
-                    name="project"
-                    dataTestId="project"
-                    fixedWidth={210}
-                    emptyOption={true}
-                    options={selectOptionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
+                {addNewProjectCodeCode ? (
+                  <AddNewConfigOption
+                    inputRef={addNewConfigOptionInputRef}
+                    returnedDataObject="addProject"
+                    onSubmit={(value: string) => {
+                      return stanCore.AddProject({ name: value });
+                    }}
+                    onCancel={() => {
+                      setAddNewProjectCodeCode(false);
+                    }}
+                    onSuccess={() => {
+                      send({
+                        type: 'ADD_NEWLY_CREATED_PROJECT',
+                        project: projectFactory.build({ name: addNewConfigOptionInputRef.current!.value })
+                      });
+                      setFieldValue('project', addNewConfigOptionInputRef.current!.value);
+                    }}
+                    onFinish={() => {
+                      setAddNewProjectCodeCode(false);
+                    }}
+                    configLabel="Add New Project"
+                    configName="project"
                   />
-                </div>
-
+                ) : (
+                  <div className="flex">
+                    <CustomReactSelect
+                      className="w-6/7"
+                      label="Project (cost code description)"
+                      name="project"
+                      dataTestId="project"
+                      emptyOption={true}
+                      options={selectOptionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
+                      value={values.project}
+                    />
+                    <AddButton
+                      data-testid="addNewProject-btn"
+                      className={errors.project ?? 'place-self-end'}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        setAddNewProjectCodeCode(true);
+                      }}
+                    />
+                  </div>
+                )}
                 <div className="md:flex-grow">
                   <CustomReactSelect
                     label="Omero Project"
@@ -341,15 +381,52 @@ export default function WorkAllocation() {
                   />
                 </div>
 
-                <div className="md:flex-grow">
-                  <CustomReactSelect
-                    label="Cost Code"
-                    name="costCode"
-                    dataTestId="costCode"
-                    emptyOption={true}
-                    options={selectOptionValues(costCodes, 'code', 'code')}
+                {addNewCostCode ? (
+                  <AddNewConfigOption
+                    inputRef={addNewConfigOptionInputRef}
+                    returnedDataObject="addCostCode"
+                    onSubmit={(value: string) => {
+                      return stanCore.AddCostCode({ code: value });
+                    }}
+                    onCancel={() => {
+                      setAddNewCostCode(false);
+                    }}
+                    onSuccess={() => {
+                      send({
+                        type: 'ADD_NEWLY_CREATED_COST_CODE',
+                        costCode: costCodeFactory.build({ code: addNewConfigOptionInputRef.current!.value })
+                      });
+                      setFieldValue('costCode', addNewConfigOptionInputRef.current!.value);
+                    }}
+                    onFinish={() => {
+                      setAddNewCostCode(false);
+                    }}
+                    configLabel="Add New Cost Code"
+                    configName="costCode"
                   />
-                </div>
+                ) : (
+                  <div className="flex">
+                    <CustomReactSelect
+                      className="w-6/7"
+                      label="Cost Code"
+                      name="costCode"
+                      dataTestId="costCode"
+                      emptyOption={true}
+                      options={selectOptionValues(costCodes, 'code', 'code')}
+                      value={values.costCode}
+                    />
+                    <AddButton
+                      data-testid="addNewCostCode-btn"
+                      className={errors.costCode ?? 'place-self-end'}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        setAddNewCostCode(true);
+                      }}
+                    />
+                  </div>
+                )}
+
                 <div className="md:flex-grow">
                   <FormikInput
                     label={'Number of original samples'}
