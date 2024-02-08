@@ -40,7 +40,8 @@ describe('historyService.ts', () => {
 
     it('returns empty array when request is empty ', async () => {
       const results = await findHistory({});
-      expect(results).toEqual([]);
+      expect(results.entries).toEqual([]);
+      expect(results.flaggedBarcodes).toEqual([]);
     });
 
     const testProps = [
