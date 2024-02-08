@@ -142,7 +142,8 @@ describe('historyMachine', () => {
         if (state.matches('found')) {
           expect(state.context).toEqual({
             historyProps: { workNumber: 'SGP8' },
-            history: { entries: mockHistorySearchResults, flaggedBarcodes: [], serverError: null }
+            history: { entries: mockHistorySearchResults, flaggedBarcodes: [] },
+            serverError: null
           });
           expect(searchCount).toEqual(2);
           done();

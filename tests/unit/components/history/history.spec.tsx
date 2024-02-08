@@ -8,7 +8,7 @@ import { HistoryTableEntry } from '../../../../src/types/stan';
 import * as xState from '@xstate/react';
 import { spyUser } from '../../../generic/utilities';
 
-afterEach(() => {
+beforeEach(() => {
   cleanup();
   jest.clearAllMocks();
 });
@@ -307,7 +307,7 @@ describe('when search result includes a flagged labware', () => {
       value: 'found',
       context: {
         historyProps: props,
-        history: { entries: historyTableEntries, flaggedBarcodes: ['STAN-3111'] },
+        history: { entries: historyTableEntries, flaggedBarcodes: ['STAN-3100'] },
         serverError: undefined
       },
 
@@ -325,14 +325,14 @@ describe('when search result includes a flagged labware', () => {
   });
   it('should display the flagged labware section', async () => {
     expect(screen.getByText('Flagged Labware')).toBeInTheDocument();
-    expect(screen.getByTestId('styled-link-STAN-3111')).toBeInTheDocument();
+    expect(screen.getByTestId('styled-link-STAN-3100')).toBeInTheDocument();
   });
 
   it('should navigate to the flagged labware page when the flagged labware link is clicked', () => {
     act(() => {
-      screen.getByTestId('styled-link-STAN-3111').click();
+      screen.getByTestId('styled-link-STAN-3100').click();
     });
-    expect(global.window.location.pathname).toContain('/labware/STAN-3111');
+    expect(global.window.location.pathname).toContain('/labware/STAN-3100');
   });
 });
 describe("when there's an error", () => {
