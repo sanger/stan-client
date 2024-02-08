@@ -8,10 +8,6 @@ import { HistoryTableEntry } from '../../../../src/types/stan';
 import * as xState from '@xstate/react';
 import { spyUser } from '../../../generic/utilities';
 
-beforeEach(() => {
-  cleanup();
-  jest.clearAllMocks();
-});
 jest.mock('"../../../../src/lib/hooks/useDownload', () => ({
   useDownload: () => ['/download', jest.fn(), '']
 }));
@@ -79,6 +75,8 @@ function displaysHistoryTable() {
 
 describe('When no search data is returned', () => {
   beforeEach(() => {
+    cleanup();
+    jest.clearAllMocks();
     const props: HistoryUrlParams = { workNumber: 'SGP1008' };
     jest.spyOn(xState, 'useMachine').mockReturnValue([
       {
@@ -114,6 +112,8 @@ describe('When no search data is returned', () => {
 describe('When search data is returned', () => {
   const props: HistoryUrlParams = { workNumber: 'SGP1008' };
   beforeEach(() => {
+    cleanup();
+    jest.clearAllMocks();
     jest.spyOn(xState, 'useMachine').mockReturnValue([
       {
         value: 'found',
@@ -201,6 +201,8 @@ describe('When search data is returned', () => {
 describe('when barcode search  is performed', () => {
   const props: HistoryUrlParams = { barcode: 'STAN-3111' };
   beforeEach(() => {
+    cleanup();
+    jest.clearAllMocks();
     jest.spyOn(xState, 'useMachine').mockReturnValue([
       {
         value: 'found',
@@ -238,6 +240,8 @@ describe('when barcode search  is performed', () => {
 describe('when there are mutiple history entries with SGP numbers duplicated', () => {
   const props: HistoryUrlParams = { workNumber: 'SGP1008' };
   beforeEach(() => {
+    cleanup();
+    jest.clearAllMocks();
     jest.spyOn(xState, 'useMachine').mockReturnValue([
       {
         value: 'found',
@@ -273,6 +277,8 @@ describe('when there are mutiple history entries with SGP numbers duplicated', (
 describe('when release event is present', () => {
   const props: HistoryUrlParams = { workNumber: 'SGP1008' };
   beforeEach(() => {
+    cleanup();
+    jest.clearAllMocks();
     jest.spyOn(xState, 'useMachine').mockReturnValue([
       {
         value: 'found',
@@ -301,7 +307,8 @@ describe('when release event is present', () => {
 
 describe('when search result includes a flagged labware', () => {
   const props: HistoryUrlParams = { workNumber: 'SGP1008' };
-  beforeEach(() => {});
+  cleanup();
+  jest.clearAllMocks();
   jest.spyOn(xState, 'useMachine').mockReturnValue([
     {
       value: 'found',
@@ -338,6 +345,8 @@ describe('when search result includes a flagged labware', () => {
 describe("when there's an error", () => {
   const sendFunction = jest.fn();
   beforeEach(() => {
+    cleanup();
+    jest.clearAllMocks();
     const props: HistoryUrlParams = { workNumber: 'SGP1008' };
     jest.spyOn(xState, 'useMachine').mockReturnValue([
       {
@@ -385,6 +394,8 @@ describe("when there's an error", () => {
 describe('when search is in progress', () => {
   const sendFunction = jest.fn();
   beforeEach(() => {
+    cleanup();
+    jest.clearAllMocks();
     const props: HistoryUrlParams = { workNumber: 'SGP1008' };
     jest.spyOn(xState, 'useMachine').mockReturnValue([
       {
