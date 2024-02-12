@@ -40,7 +40,8 @@ describe('historyService.ts', () => {
 
     it('returns empty array when request is empty ', async () => {
       const results = await findHistory({});
-      expect(results).toEqual([]);
+      expect(results.entries).toEqual([]);
+      expect(results.flaggedBarcodes).toEqual([]);
     });
 
     const testProps = [
@@ -61,7 +62,7 @@ describe('historyService.ts', () => {
     ];
     test.each(testProps)('returns results when request has %p', async (props) => {
       const results = await findHistory(props);
-      expectSuccesResult(results);
+      expectSuccesResult(results.entries);
       let expectedProps: FindHistoryQueryVariables = props;
       if (props.donorName) {
         expectedProps = { ...props, donorName: props.donorName.split(',') };
@@ -73,7 +74,7 @@ describe('historyService.ts', () => {
     });
     it('returns results when request has sampleId', async () => {
       const results = await findHistory({ sampleId: '1' });
-      expectSuccesResult(results);
+      expectSuccesResult(results.entries);
       expect(findHistoryForSampleIdMock).toHaveBeenCalledWith({ sampleId: 1 });
     });
     it('calls the findHistoryForSampleId query when sampleId is provided even other fields are given', async () => {

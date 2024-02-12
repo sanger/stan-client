@@ -14,10 +14,10 @@ export default function HistoryInput({ eventTypes }: HistoryInputProps) {
 
   return (
     <div
-      className="mx-auto max-w-screen-lg mb-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4 shadow-lg hover:shadow-2xl"
+      className="mx-auto max-w-screen-lg mb-6 border-gray-200 bg-gray-100 rounded-md space-y-4"
       data-testid={'history-input'}
     >
-      <div className={'grid grid-cols-2 gap-x-10 gap-y-6 border border-gray-200 bg-gray-100 p-6 rounded-md'}>
+      <div className={'grid grid-cols-2 gap-x-10 gap-y-6 bg-gray-100 rounded-md'}>
         <div className={'flex flex-col '}>
           <WorkNumberSelect
             label={'SGP/R&D Number'}

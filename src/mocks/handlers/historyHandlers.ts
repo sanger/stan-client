@@ -21,11 +21,13 @@ import labwareFactory from '../../lib/factories/labwareFactory';
 import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
 import { sampleFactory } from '../../lib/factories/sampleFactory';
 
-export function buildHistory(workNumber?: string): HistoryFieldsFragment {
+export function buildHistory(workNumber?: string, flagged?: boolean): HistoryFieldsFragment {
   const sourceLabware = labwareFactory.build();
   const destinationLabware = labwareFactory.build();
   const sample = sampleFactory.build();
-
+  if (flagged) {
+    sourceLabware.barcode = 'STAN-1000';
+  }
   const entries: Array<HistoryEntry> = [
     {
       __typename: 'HistoryEntry',
@@ -47,6 +49,7 @@ export function buildHistory(workNumber?: string): HistoryFieldsFragment {
     __typename: 'History',
     samples: [sample],
     labware: [sourceLabware, destinationLabware].map(buildLabwareFragment),
+    flaggedBarcodes: [],
     entries
   };
 }

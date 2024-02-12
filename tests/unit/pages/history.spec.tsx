@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 import * as reactDom from 'react-router-dom';
 import History from '../../../src/pages/History';
 import { uniqueId } from 'lodash';
-import { HistoryTableEntry } from '../../../src/types/stan';
+import { HistoryData, HistoryTableEntry } from '../../../src/types/stan';
 import * as historyService from '../../../src/lib/services/historyService';
 import { LabwareState } from '../../../src/types/sdk';
 
@@ -137,8 +137,8 @@ describe('On load', () => {
         };
       });
       jest.spyOn(historyService, 'findHistory').mockReturnValue(
-        new Promise<HistoryTableEntry[]>((resolve) => {
-          resolve(mockHistorySearchResults);
+        new Promise<HistoryData>((resolve) => {
+          resolve({ entries: mockHistorySearchResults, flaggedBarcodes: [] });
         })
       );
       act(() => {
