@@ -45,6 +45,7 @@ interface DestinationLabwareScanPanelProps {
   onChangeBioState: (bioState: string) => void;
   onLabwareScan?: (labware: LabwareFlaggedFieldsFragment[]) => void;
   onDestinationSelectionModeChange?: (mode: DestinationSelectionMode) => void;
+  destinationSelectionMode: DestinationSelectionMode;
 }
 
 const transferTypes = [
@@ -68,9 +69,9 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
   onAddLabware,
   onChangeBioState,
   onLabwareScan,
-  onDestinationSelectionModeChange
+  onDestinationSelectionModeChange,
+  destinationSelectionMode
 }) => {
-  const [destinationSelectionMode, setDestinationSelectionMode] = React.useState(DestinationSelectionMode.DEFAULT);
   const validateLabware = useCallback(
     (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): string[] => {
       return foundLabware.state === LabwareState.Active ? [] : ['Labware is not active'];
@@ -90,7 +91,6 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
               value={mode}
               checked={mode === destinationSelectionMode}
               onChange={() => {
-                setDestinationSelectionMode(mode);
                 onDestinationSelectionModeChange?.(mode);
               }}
               label={mode}
@@ -429,6 +429,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
                 onLabwareScan={onDestinationLabwareScan}
                 onDestinationSelectionModeChange={onDestinationSelectionModeChange}
                 labware={destinations.find((dest) => dest.labware.id === selectedDestination.id)}
+                destinationSelectionMode={destinationSelectionMode.current}
               />
             }
             onSelectInputLabware={setSelectedSource}

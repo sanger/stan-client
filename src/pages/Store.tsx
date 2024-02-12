@@ -19,7 +19,6 @@ import { ClientError } from 'graphql-request';
 import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
 import PromptOnLeave from '../components/notifications/PromptOnLeave';
 import { Action as HistoryAction, Location } from '@remix-run/router/dist/history';
-import { useConfirmLeave } from '../lib/hooks';
 
 export type LabwareAwaitingStorageInfo = {
   barcode: string;
@@ -29,6 +28,12 @@ export type LabwareAwaitingStorageInfo = {
   tissueType: string;
   spatialLocation: string;
   replicate: string;
+};
+
+type BlockerFunctionParams = {
+  currentLocation: Location;
+  nextLocation: Location;
+  historyAction: HistoryAction;
 };
 
 /**
@@ -41,23 +46,22 @@ export type LabwareAwaitingStorageInfo = {
  * a) Go back and Go forward operation to a Location/Store page
  * b) Going to a new location page by invoking a store location link or through a search
  */
-export function awaitingStorageCheckOnExit(args: {
-  currentLocation: Location;
-  nextLocation: Location;
-  historyAction: HistoryAction;
-}) {
+export function awaitingStorageCheckOnExit(args: BlockerFunctionParams) {
   /**PUSH is the action for  invoking/visiting a link or for pushing a new entry onto the history stack
    * POP is the action send while you navigate using the browser's forward/back buttons.
    * **/
-  if (
-    (args.historyAction === 'POP' &&
-      ['/locations', '/store'].some((path) => args.nextLocation.pathname.startsWith(path))) ||
-    (args.historyAction === 'PUSH' && args.nextLocation.pathname.startsWith('/locations'))
-  ) {
-    return false;
-  } else {
-    return true;
+  if (args) {
+    if (
+      (args.historyAction === 'POP' &&
+        ['/locations', '/store'].some((path) => args.nextLocation.pathname.startsWith(path))) ||
+      (args.historyAction === 'PUSH' && args.nextLocation.pathname.startsWith('/locations'))
+    ) {
+      return false;
+    } else {
+      return true;
+    }
   }
+  return false;
 }
 
 /**Get awaiting labware list from session storage**/
@@ -97,7 +101,6 @@ export function getAwaitingLabwaresFromSession() {
 const Store = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const location = useLocation();
-  const [shouldConfirm] = useConfirmLeave(true);
 
   /**Leaving to another page from a prompt dialog, so clear the sessionStorage before leaving this page**/
   const onLeave = React.useCallback(() => {
@@ -171,7 +174,7 @@ const Store = () => {
       </AppShell.Main>
       {awaitingLabwares.length > 0 && (
         <PromptOnLeave
-          when={shouldConfirm}
+          when={awaitingStorageCheckOnExit}
           message={'You have labware that is not stored. Are you sure you want to leave?'}
           onPromptLeave={onLeave}
         />

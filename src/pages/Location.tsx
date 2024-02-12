@@ -26,7 +26,7 @@ import { GridDirection, LocationFieldsFragment, Maybe, StoreInput, UserRole } fr
 import { useMachine } from '@xstate/react';
 import { StoredItemFragment } from '../lib/machines/locations/locationMachineTypes';
 import { locationMachine } from '../lib/machines/locations/locationMachine';
-import { getAwaitingLabwaresFromSession, LabwareAwaitingStorageInfo } from './Store';
+import { awaitingStorageCheckOnExit, getAwaitingLabwaresFromSession, LabwareAwaitingStorageInfo } from './Store';
 import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
 import warningToast from '../components/notifications/WarningToast';
 import PromptOnLeave from '../components/notifications/PromptOnLeave';
@@ -39,7 +39,6 @@ import BlueButton from '../components/buttons/BlueButton';
 import { ClientError } from 'graphql-request';
 import { stanCore } from '../lib/sdk';
 import { useLoaderData, useSearchParams } from 'react-router-dom';
-import { useConfirmLeave } from '../lib/hooks';
 
 /**
  * The different ways of displaying stored items
@@ -156,8 +155,6 @@ const Location = () => {
   const [storagePath, setStoragePath] = React.useState<string>('');
 
   const transferInputRef = React.useRef<HTMLInputElement>(null);
-
-  const [shouldConfirm] = useConfirmLeave(true);
 
   /***When component loads, fill awaitingLabwares from sessionStorage, if any**/
   React.useEffect(() => {
@@ -660,7 +657,7 @@ const Location = () => {
       </AppShell.Main>
       {awaitingLabwares.length > 0 && (
         <PromptOnLeave
-          when={shouldConfirm}
+          when={awaitingStorageCheckOnExit}
           message={'You have unstored labware. Are you sure you want to leave?'}
           onPromptLeave={onLeave}
         />

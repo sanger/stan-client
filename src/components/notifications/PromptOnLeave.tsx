@@ -3,10 +3,11 @@ import ReactRouterPrompt from 'react-router-prompt';
 import Modal, { ModalBody, ModalFooter } from '../Modal';
 import BlueButton from '../buttons/BlueButton';
 import WhiteButton from '../buttons/WhiteButton';
+import { BlockerFunction } from 'react-router-dom';
 
 interface PromptOnLeaveProps {
   /**Should a prompt dialog be displayed?**/
-  when: boolean;
+  when: boolean | BlockerFunction;
   /**Message to display in prompt**/
   message: string;
   /**Callback when user presses Ok in Prompt, i.e leaving from current page to another page**/

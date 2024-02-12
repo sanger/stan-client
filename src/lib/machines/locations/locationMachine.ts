@@ -63,20 +63,20 @@ export const machineOptions: MachineImplementations<LocationContext, LocationEve
 
         draft.addressToItemMap.clear();
         // Create all the possible addresses for this location if it has a size.
-        draft.locationAddresses = context.location.size
-          ? buildOrderedAddresses(context.location.size, context.location.direction ?? GridDirection.DownRight)
+        draft.locationAddresses = draft.location.size
+          ? buildOrderedAddresses(draft.location.size, draft.location.direction ?? GridDirection.DownRight)
           : new Map<string, number>();
 
-        context.location.stored.forEach((storedItem) => {
+        draft.location.stored.forEach((storedItem) => {
           if (storedItem.address) {
             draft.addressToItemMap.set(storedItem.address, storedItem);
           }
         });
 
         const addresses = findNextAvailableAddress({
-          locationAddresses: context.locationAddresses,
-          addressToItemMap: context.addressToItemMap,
-          minimumAddress: context.selectedAddress
+          locationAddresses: draft.locationAddresses,
+          addressToItemMap: draft.addressToItemMap,
+          minimumAddress: draft.selectedAddress
         });
         draft.selectedAddress = addresses.length > 0 ? addresses[0] : null;
       });
@@ -214,7 +214,7 @@ export const machineConfig: MachineConfig<LocationContext, LocationEvent> = {
               return stanCore.FindLocationByBarcode({ barcode: input.barcode }).then((res) => res.location);
             }),
             input: ({ context, event }) => {
-              if (event.type !== 'FETCH_LOCATION') {
+              if (event.type !== 'UNSTORE_BARCODE') {
                 return {};
               }
               return {
