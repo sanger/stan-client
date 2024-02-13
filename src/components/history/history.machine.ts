@@ -1,5 +1,5 @@
 import { assign, createMachine, fromPromise } from 'xstate';
-import { HistoryTableEntry } from '../../types/stan';
+import { HistoryData } from '../../types/stan';
 import * as historyService from '../../lib/services/historyService';
 import { HistoryUrlParams } from '../../pages/History';
 import { ClientError } from 'graphql-request';
@@ -7,19 +7,19 @@ import { Maybe } from 'yup';
 
 type HistoryContext = {
   historyProps: HistoryUrlParams;
-  history: Array<HistoryTableEntry>;
+  history: HistoryData;
   serverError: Maybe<ClientError>;
 };
 
 type HistoryEvent =
   | { type: 'UPDATE_HISTORY_PROPS'; props: HistoryUrlParams }
   | { type: 'RETRY' }
-  | { type: 'xstate.done.actor.findHistory'; output: Array<HistoryTableEntry> }
+  | { type: 'xstate.done.actor.findHistory'; output: HistoryData }
   | { type: 'xstate.error.actor.findHistory'; error: Maybe<ClientError> };
 
 const defaultMachineContext: HistoryContext = {
   historyProps: {},
-  history: [],
+  history: { entries: [], flaggedBarcodes: [] },
   serverError: null
 };
 

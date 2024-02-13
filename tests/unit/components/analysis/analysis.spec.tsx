@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import React from 'react';

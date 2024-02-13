@@ -272,38 +272,10 @@ export type HistoryTableEntry = {
   sectionPosition?:string
 };
 
-/*
-const historyStrKeys = [
-  "externalName",
-  "donorName",
-  "labwareBarcode",
-  "workNumber",
-] as const;
-
-type HistoryStrKeys = typeof historyStrKeys[number];
-const historyNumKeys = ["sampleId"] as const;
-type HistoryNumKeys = typeof historyNumKeys[number];
-type HistoryStrProps = {
-  kind: HistoryStrKeys;
-  value: string;
-};
-type HistoryNumProps = {
-  kind: HistoryNumKeys;
-  value: number;
-};
-export const historySchema = Yup.object({
-  kind: Yup.string()
-    .oneOf([...historyStrKeys, ...historyNumKeys])
-    .required(),
-  value: Yup.mixed()
-    .when("kind", (kind)=> {
-      const val = kind as unknown as string
-      return val ==='sampleId'?Yup.number().integer().positive().required():Yup.string().required()
-    })
-    .required(),
-}).required();
-
-export type HistoryProps = HistoryStrProps | HistoryNumProps;*/
+export type HistoryData = {
+  entries: Array<HistoryTableEntry>;
+  flaggedBarcodes: Array<string>;
+}
 
 /**
  * Sort functionality for Status. The status need to be sorted in the order "active", "completed", "paused", "failed"
