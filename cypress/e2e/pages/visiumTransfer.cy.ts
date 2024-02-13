@@ -50,7 +50,7 @@ describe('Transfer Page', () => {
     it('should display scanned output labware', () => {
       cy.findByText('STAN-3112').should('be.visible');
       cy.findByTestId('removeButton').should('exist');
-      cy.findByText('ACTIVE').should('be.visible');
+      cy.findByText('Bio State').should('be.visible');
     });
     it('should display filled slots in output labware as disabled', () => {
       cy.findByTestId('labware-STAN-3112').within(() => {

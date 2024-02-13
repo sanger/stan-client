@@ -27,7 +27,7 @@ import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import RemoveButton from '../components/buttons/RemoveButton';
 import { objectKeys } from '../lib/helpers';
 import { StripyCardDetail } from '../components/StripyCard';
-import { LabwareStatePill } from '../components/LabwareStatePill';
+import Pill from '../components/Pill';
 
 type PageParams = {
   title: string;
@@ -148,8 +148,12 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
                           />
                         </div>
                         {labware && labware?.labware.barcode && (
-                          <StripyCardDetail term={'State'}>
-                            <LabwareStatePill labware={labware?.labware} />
+                          <StripyCardDetail term={'Bio State'}>
+                            <div className={'flex flex-wrap text-gray-600'}>
+                              {labware?.labware.slots
+                                .flatMap((slot) => slot.samples.flatMap((sample) => sample.bioState.name))
+                                .join(', ')}
+                            </div>
                           </StripyCardDetail>
                         )}
                       </>
