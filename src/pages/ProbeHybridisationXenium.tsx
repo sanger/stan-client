@@ -141,7 +141,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                         <LabwareScanner
                           onChange={(labware) => {
                             labware.forEach((lw) => {
-                              /**If Labware scnned not already displayed, add to probe list**/
+                              /**If Labware scanned not already displayed, add to probe list**/
                               if (!values.labware.some((valueLw) => valueLw.barcode === lw.barcode)) {
                                 helpers.push({
                                   barcode: lw.barcode,

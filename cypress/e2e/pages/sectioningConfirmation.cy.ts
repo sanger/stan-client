@@ -75,7 +75,7 @@ describe('Sectioning Confirmation', () => {
     });
 
     it('disables all section number fields', () => {
-      cy.findAllByTestId('labware-comments').each((elem) => cy.wrap(elem).find('input').should('be.disabled'));
+      cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).find('input').should('be.disabled'));
     });
     // Section numbers already filled in
     it('enables the Save button', () => {
@@ -299,10 +299,10 @@ describe('Sectioning Confirmation', () => {
         cy.get('[type = "radio"]').eq(1).click();
       });
       it('enables all section number fields ', () => {
-        cy.findAllByTestId('labware-comments').each((elem) => cy.wrap(elem).find('input').should('be.enabled'));
+        cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).find('input').should('be.enabled'));
       });
       it('should empty all section number fields', () => {
-        cy.findAllByTestId('labware-comments').each((elem) => cy.wrap(elem).find('input').should('have.value', ''));
+        cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).find('input').should('have.value', ''));
       });
       // Section numbers not filled in
       it('disables the Save button', () => {
@@ -379,7 +379,7 @@ describe('Sectioning Confirmation', () => {
       });
       it('displays Print option in updated page after success', () => {
         cy.findByTestId('print-div').within(() => {
-          cy.findByText('Tube').should('be.visible');
+          cy.findByText('Proviasette').should('be.visible');
           cy.findAllByRole('table').eq(0).contains('td', 'STAN-0001F');
           cy.findAllByRole('table').eq(0).contains('td', 'STAN-0001D');
         });

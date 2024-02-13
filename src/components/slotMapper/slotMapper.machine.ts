@@ -13,40 +13,38 @@ import { find, indexOf, intersection, map } from 'lodash';
 import { stanCore } from '../../lib/sdk';
 import { assign, createMachine, fromPromise, MachineImplementations } from 'xstate';
 import produce from 'immer';
-import { ClientError } from 'graphql-request';
 
 const colors = cycleColors();
 
-const machineConfig: MachineImplementations<SlotMapperContext, SlotMapperEvent> = {
+const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapperEvent> = {
   actions: {
     assignInputLabware: assign(({ context, event }) => {
-      event.type === 'UPDATE_INPUT_LABWARE' && (context.inputLabware = event.labware);
-      //update the failedSlots array  if it  has entries for any removed labware
-      let keys = Array.from(context.failedSlots.keys()).filter(
-        (key: string) =>
-          context.inputLabware.findIndex((labware: LabwareFlaggedFieldsFragment) => labware.barcode === key) === -1
-      );
-      const failedSlots = new Map<string, SlotPassFailFieldsFragment[]>(context.failedSlots);
-      keys.forEach((key: string) => failedSlots.delete(key));
+      if (event.type === 'UPDATE_INPUT_LABWARE') {
+        return produce(context, (draft) => {
+          draft.inputLabware = event.labware;
 
-      //update the error array  if it  has entries for any removed labware
-      keys = Array.from(context.errors.keys()).filter(
-        (key: string) =>
-          context.inputLabware.findIndex((labware: LabwareFlaggedFieldsFragment) => labware.barcode === key) === -1
-      );
-      const errors = new Map<string, ClientError>(context.errors);
-      keys.forEach((key: string) => errors.delete(key));
-
-      //Update destination slotCopyContent if it  has entries for any removed labware
-      return produce(context, (draft) => {
-        draft.errors = errors;
-        draft.failedSlots = failedSlots;
-        draft.outputSlotCopies.forEach((outputScc: OutputSlotCopyData) => {
-          outputScc.slotCopyContent = outputScc.slotCopyContent.filter((scc) =>
-            draft.inputLabware.some((lw: LabwareFlaggedFieldsFragment) => lw.barcode === scc.sourceBarcode)
+          // Update the failedSlots array if it has entries for any removed labware
+          let keys = Array.from(draft.failedSlots.keys()).filter(
+            (key) => draft.inputLabware.findIndex((labware) => labware.barcode === key) === -1
           );
+          keys.forEach((key) => draft.failedSlots.delete(key));
+
+          // Update the errors array if it has entries for any removed labware
+          keys = Array.from(draft.errors.keys()).filter(
+            (key) => draft.inputLabware.findIndex((labware) => labware.barcode === key) === -1
+          );
+          keys.forEach((key) => draft.errors.delete(key));
+
+          // Update destination slotCopyContent if it has entries for any removed labware
+          draft.outputSlotCopies.forEach((outputScc) => {
+            outputScc.slotCopyContent = outputScc.slotCopyContent.filter((scc) =>
+              draft.inputLabware.some((lw) => lw.barcode === scc.sourceBarcode)
+            );
+          });
         });
-      });
+      } else {
+        return context;
+      }
     }),
     assignOutputLabware: assign(({ context, event }) => {
       if (event.type === 'UPDATE_OUTPUT_LABWARE') {
@@ -372,7 +370,7 @@ const createSlotMapperMachine = createMachine(
     }
   },
   {
-    ...machineConfig
+    ...machineImplementations
   }
 );
 

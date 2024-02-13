@@ -141,7 +141,10 @@ const machineConfig = (
   }
 });
 const createLabelPrinterMachine = (labwares: LabwareFieldsFragment[], selectedPrinter?: Maybe<PrinterFieldsFragment>) =>
-  createMachine(machineConfig(labwares, selectedPrinter), {
-    ...machineOptions
-  });
+  createMachine(
+    { ...machineConfig(labwares, selectedPrinter) },
+    {
+      ...machineOptions
+    }
+  );
 export default createLabelPrinterMachine;

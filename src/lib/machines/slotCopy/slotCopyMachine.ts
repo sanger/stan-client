@@ -1,5 +1,5 @@
 import { assign, createMachine, fromPromise } from 'xstate';
-import { NewFlaggedLabwareLayout, OperationTypeName, ServerErrors } from '../../../types/stan';
+import { NewFlaggedLabwareLayout, OperationTypeName } from '../../../types/stan';
 import {
   FindPermDataQuery,
   LabwareFieldsFragment,
@@ -13,7 +13,8 @@ import {
   SlotCopySource
 } from '../../../types/sdk';
 import { stanCore } from '../../sdk';
-import produce from 'immer';
+import produce, { castDraft } from 'immer';
+import { ClientError } from 'graphql-request';
 
 /**
  * Context for SlotCopy Machine
@@ -62,7 +63,7 @@ export interface SlotCopyContext {
   /**
    * Errors from server, if any
    */
-  serverErrors?: Maybe<ServerErrors>;
+  serverErrors?: Maybe<ClientError>;
 }
 
 type UpdateSlotCopyContentType = {
@@ -142,7 +143,7 @@ type SlotCopyDoneEvent = {
 };
 type SlotCopyErrorEvent = {
   type: 'xstate.error.actor.copySlots';
-  error: unknown;
+  error: Maybe<ClientError>;
 };
 
 export type SlotCopyEvent =
@@ -277,8 +278,8 @@ export const slotCopyMachine = createMachine(
       },
       copying: {
         entry: ['emptyServerError'],
-        id: 'copySlots',
         invoke: {
+          id: 'copySlots',
           src: fromPromise(({ input }) =>
             stanCore.SlotCopy({
               request: {
@@ -426,7 +427,7 @@ export const slotCopyMachine = createMachine(
         if (event.type !== 'xstate.error.actor.copySlots') {
           return context;
         }
-        return { ...context, serverErrors: event.error as ServerErrors };
+        return { ...context, serverErrors: castDraft(event.error) };
       }),
 
       assignWorkNumber: assign(({ context, event }) => {

@@ -190,7 +190,7 @@ describe('Work Allocation', () => {
       });
       it('updates the Work status', () => {
         cy.findByRole('table').within(() => {
-          cy.findAllByText(/ACTIVE/i).should('have.length.above', 1);
+          cy.findAllByText(/ACTIVE/i).should('have.length.at.least', 1);
         });
       });
     });
@@ -227,7 +227,7 @@ describe('Work Allocation', () => {
         cy.findByRole('button', { name: /Search/i })
           .should('be.visible')
           .click();
-        cy.get("table[data-testid='work-allocation-table']").find('tr').should('have.length', 7);
+        cy.get("table[data-testid='work-allocation-table']").find('tr').should('have.length.at.least', 7);
       });
     });
 

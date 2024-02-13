@@ -560,7 +560,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
    */
   useEffect(() => {
     if (!currentOutput?.slotCopyContent) return;
-    onChange?.(currentOutput.labware, currentOutput.slotCopyContent, anySourceMapped);
+    onChange?.(currentOutput.labware, currentOutput?.slotCopyContent, anySourceMapped);
   }, [onChange, currentOutput, anySourceMapped]);
 
   /**
