@@ -1,12 +1,10 @@
 import React from 'react';
-import { ButtonProps } from './Button';
-import PinkButton from './PinkButton';
+import { LoginButtonProps } from './LoginButton';
+import WhiteButton from './WhiteButton';
 
-export interface LoginButtonProps extends ButtonProps {}
-
-const LoginButton = (props: LoginButtonProps) => {
+const RegisterButton = (props: LoginButtonProps) => {
   return (
-    <PinkButton {...props} type="submit" style={{ width: '100%' }} className="relative">
+    <WhiteButton {...props} type="submit" style={{ width: '100%' }} className="relative">
       <span className="absolute left-0 inset-y-0 flex items-center pl-3">
         <svg
           className="h-5 w-5 text-sdb group-hover:text-sdb-400 transition ease-in-out duration-150"
@@ -21,8 +19,8 @@ const LoginButton = (props: LoginButtonProps) => {
         </svg>
       </span>
       {props.children}
-    </PinkButton>
+    </WhiteButton>
   );
 };
 
-export default LoginButton;
+export default RegisterButton;

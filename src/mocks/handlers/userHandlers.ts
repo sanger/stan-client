@@ -8,6 +8,8 @@ import {
   LoginMutationVariables,
   LogoutMutation,
   LogoutMutationVariables,
+  RegisterAsEndUserMutation,
+  RegisterAsEndUserMutationVariables,
   SetUserRoleMutation,
   SetUserRoleMutationVariables,
   UserRole
@@ -88,7 +90,26 @@ const userHandlers = [
         { status: 404 }
       );
     }
-  })
+  }),
+
+  graphql.mutation<RegisterAsEndUserMutation, RegisterAsEndUserMutationVariables>(
+    'RegisterAsEndUser',
+    ({ variables }) => {
+      const { username } = variables;
+      sessionStorage.setItem(CURRENT_USER_KEY, username);
+      return HttpResponse.json({
+        data: {
+          registerAsEndUser: {
+            user: {
+              __typename: 'User',
+              username,
+              role: UserRole.Enduser
+            }
+          }
+        }
+      });
+    }
+  )
 ];
 
 export default userHandlers;
