@@ -20,7 +20,9 @@ describe('Login', () => {
             graphql.mutation('Login', () => {
               return HttpResponse.json({
                 data: {
-                  user: null
+                  login: {
+                    user: null
+                  }
                 }
               });
             })
@@ -29,7 +31,7 @@ describe('Login', () => {
 
         cy.get("input[name='username']").type('jb1');
         cy.get("input[name='password']").type('supersecret');
-        cy.get("button[type='submit']").click();
+        cy.findByTestId('signIn').click();
       });
 
       it('shows an error message', () => {
@@ -41,7 +43,7 @@ describe('Login', () => {
       beforeEach(() => {
         cy.get("input[name='username']").type('jb1');
         cy.get("input[name='password']").type('supersecret');
-        cy.get("button[type='submit']").click();
+        cy.findByTestId('signIn').click();
       });
 
       it('shows a success message', () => {
@@ -56,7 +58,7 @@ describe('Login', () => {
     context('When username is missing', () => {
       beforeEach(() => {
         cy.get("input[name='password']").type('supersecret');
-        cy.get("button[type='submit']").click();
+        cy.findByTestId('signIn').click();
       });
 
       it('does not submit the form', () => {
@@ -67,7 +69,7 @@ describe('Login', () => {
     describe('When password is missing', () => {
       beforeEach(() => {
         cy.get("input[name='username']").type('jb1');
-        cy.get("button[type='submit']").click();
+        cy.findByTestId('signIn').click();
       });
 
       it('does not submit the form', () => {
@@ -76,3 +78,50 @@ describe('Login', () => {
     });
   });
 });
+
+describe('Self Registration', () => {
+  describe('When Registration succeed', () => {
+    before(() => {
+      cy.visitAsGuest('/login');
+      register();
+    });
+    it('shows a success message', () => {
+      cy.findByText('Successfully registered as End User!').should('be.visible');
+    });
+    it('redirects to the Dashboard', () => {
+      cy.location('pathname').should('eq', '/');
+    });
+  });
+
+  describe('When Registration fails', () => {
+    before(() => {
+      cy.visitAsGuest('/login');
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.mutation('RegisterAsEndUser', () => {
+            return HttpResponse.json({
+              data: {
+                registerAsEndUser: {
+                  user: null
+                }
+              }
+            });
+          })
+        );
+      });
+      register();
+    });
+    it('shows an error message', () => {
+      cy.findByText('LDAP check failed for userx').should('be.visible');
+    });
+    it('remains on the login page', () => {
+      cy.location('pathname').should('eq', '/login');
+    });
+  });
+});
+
+const register = () => {
+  cy.findByTestId('username').type('userx');
+  cy.findByTestId('password').type('myPassword123');
+  cy.findByTestId('register').click();
+};

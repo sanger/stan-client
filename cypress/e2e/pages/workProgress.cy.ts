@@ -311,11 +311,11 @@ describe('Work Progress', () => {
           cy.url().should('be.equal', 'http://localhost:3000/login');
         });
       });
-      context('On succesful login, it redirects to SGP page', () => {
+      context('On successful login, it redirects to SGP page', () => {
         before(() => {
           cy.get("input[name='username']").type('jb1');
           cy.get("input[name='password']").type('supersecret');
-          cy.get("button[type='submit']").click();
+          cy.findByTestId('signIn').click();
         });
         it('goes to Login page', () => {
           cy.url().should('be.equal', 'http://localhost:3000/sgp');
