@@ -14,24 +14,47 @@ describe('Login page', () => {
       );
       expect(screen.getByTestId('username')).toBeVisible();
       expect(screen.getByTestId('password')).toBeVisible();
-      expect(screen.getByRole('button', { name: 'Sign In' })).toBeVisible();
-      expect(screen.getByRole('button', { name: 'Register' })).toBeVisible();
+      expect(screen.getByRole('button', { name: 'Sign In (Existing User)' })).toBeVisible();
+      expect(screen.getByRole('button', { name: 'Register (New User)' })).toBeVisible();
     });
   });
-  describe('When fields are not filled', () => {
-    it('displays error message', async () => {
-      render(
-        <BrowserRouter>
-          <Login />
-        </BrowserRouter>
-      );
-      act(() => {
-        fireEvent.click(screen.getByRole('button', { name: 'Register' }));
+  describe('Register New user', () => {
+    describe('When the form is not filled', () => {
+      it('displays error message', async () => {
+        render(
+          <BrowserRouter>
+            <Login />
+          </BrowserRouter>
+        );
+        act(() => {
+          fireEvent.click(screen.getByRole('button', { name: 'Register (New User)' }));
+        });
+        await waitFor(async () => {
+          expectToDisplayErrorMessage();
+        });
       });
-      await waitFor(async () => {
-        expect(screen.getByText('Username is required')).toBeVisible();
-        expect(screen.getByText('Password is required')).toBeVisible();
+    });
+  });
+  describe('Sign in existing user', () => {
+    describe('When the form is not filled', () => {
+      it('displays error message', async () => {
+        render(
+          <BrowserRouter>
+            <Login />
+          </BrowserRouter>
+        );
+        act(() => {
+          fireEvent.click(screen.getByRole('button', { name: 'Sign In (Existing User)' }));
+        });
+        await waitFor(async () => {
+          expectToDisplayErrorMessage();
+        });
       });
     });
   });
 });
+
+const expectToDisplayErrorMessage = () => {
+  expect(screen.getByText('Username is required')).toBeVisible();
+  expect(screen.getByText('Password is required')).toBeVisible();
+};

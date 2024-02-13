@@ -167,17 +167,18 @@ const Login = (): JSX.Element => {
 
                   <div className="mt-6">
                     <LoginButton loading={formik.isSubmitting} data-testid="signIn" disabled={formik.isSubmitting}>
-                      Sign In
+                      Sign In <span className=" ml-2"> (Existing User)</span>
                     </LoginButton>
                   </div>
-                  <div className="mt-3">
+                  <div className="m-3 text-white text-center">OR</div>
+                  <div className="">
                     <RegisterButton
                       disabled={formik.isSubmitting}
                       data-testid="register"
                       loading={formik.isSubmitting}
                       onClick={() => formik.setFieldValue('isSelfRegistration', true)}
                     >
-                      Register
+                      Register <span className=" ml-2"> (New User)</span>
                     </RegisterButton>
                   </div>
                 </Form>
