@@ -1,6 +1,6 @@
 import { interpret } from 'xstate';
 import createHistoryMachine from '../../../../src/components/history/history.machine';
-import { HistoryTableEntry } from '../../../../src/types/stan';
+import { HistoryData, HistoryTableEntry } from '../../../../src/types/stan';
 import { LabwareState } from '../../../../src/types/sdk';
 const mockHistorySearchResults: HistoryTableEntry[] = [
   {
@@ -26,17 +26,12 @@ const mockHistorySearchResults: HistoryTableEntry[] = [
 afterEach(() => {
   jest.clearAllMocks();
 });
-const initialContext = Object.assign({}, createHistoryMachine().context, {
-  historyProps: { workNumber: 'SGP8' },
-  history: [],
-  serverError: null
-});
 
 function findHistorySuccess() {
   return {
     findHistory() {
-      return new Promise<HistoryTableEntry[]>((resolve) => {
-        resolve(mockHistorySearchResults);
+      return new Promise<HistoryData>((resolve) => {
+        resolve({ entries: mockHistorySearchResults, flaggedBarcodes: [] });
       });
     }
   };
@@ -44,7 +39,7 @@ function findHistorySuccess() {
 function findHistoryError() {
   return {
     findHistory() {
-      return new Promise<HistoryTableEntry[]>((resolve, reject) => {
+      return new Promise<HistoryData>((resolve, reject) => {
         reject({
           response: {
             errors: [
@@ -64,7 +59,7 @@ describe('historyMachine', () => {
     const mockHistoryMachine = createHistoryMachine().withContext(
       Object.assign({}, createHistoryMachine().context, {
         historyProps: { workNumber: 'SGP8' },
-        history: [],
+        history: { entries: [], flaggedBarcodes: [] },
         serverError: null
       })
     );
@@ -72,7 +67,7 @@ describe('historyMachine', () => {
       if (state.matches('searching')) {
         expect(state.context).toEqual({
           historyProps: { workNumber: 'SGP8' },
-          history: [],
+          history: { entries: [], flaggedBarcodes: [] },
           serverError: null
         });
         done();
@@ -92,7 +87,7 @@ describe('historyMachine', () => {
           sampleId: 1,
           eventType: 'Event'
         },
-        history: [],
+        history: { entries: [], flaggedBarcodes: [] },
         serverError: null
       })
     );
@@ -108,7 +103,7 @@ describe('historyMachine', () => {
       const mockSearchMachine = createHistoryMachine()
         .withContext({
           historyProps: { workNumber: 'SGP8' },
-          history: [],
+          history: { entries: [], flaggedBarcodes: [] },
           serverError: null
         })
         .withConfig({
@@ -118,7 +113,7 @@ describe('historyMachine', () => {
         if (state.matches('found')) {
           expect(state.context).toEqual({
             historyProps: { workNumber: 'SGP8' },
-            history: mockHistorySearchResults,
+            history: { entries: mockHistorySearchResults, flaggedBarcodes: [] },
             serverError: null
           });
           done();
@@ -134,7 +129,7 @@ describe('historyMachine', () => {
       const mockSearchMachine = createHistoryMachine()
         .withContext({
           historyProps: { workNumber: 'SGP8' },
-          history: [],
+          history: { entries: [], flaggedBarcodes: [] },
           serverError: null
         })
         .withConfig({
@@ -147,7 +142,7 @@ describe('historyMachine', () => {
         if (state.matches('found')) {
           expect(state.context).toEqual({
             historyProps: { workNumber: 'SGP8' },
-            history: mockHistorySearchResults,
+            history: { entries: mockHistorySearchResults, flaggedBarcodes: [] },
             serverError: null
           });
           expect(searchCount).toEqual(2);
@@ -164,7 +159,7 @@ describe('historyMachine', () => {
       const mockHistoryMachine = createHistoryMachine()
         .withContext({
           historyProps: { workNumber: 'SGP8' },
-          history: [],
+          history: { entries: [], flaggedBarcodes: [] },
           serverError: null
         })
         .withConfig({
@@ -194,7 +189,7 @@ describe('historyMachine', () => {
       const mockSearchMachine = createHistoryMachine()
         .withContext({
           historyProps: { workNumber: 'SGP8' },
-          history: [],
+          history: { entries: [], flaggedBarcodes: [] },
           serverError: null
         })
         .withConfig({
@@ -228,7 +223,7 @@ describe('historyMachine', () => {
       const mockSearchMachine = createHistoryMachine()
         .withContext({
           historyProps: { workNumber: 'SGP8' },
-          history: [],
+          history: { entries: [], flaggedBarcodes: [] },
           serverError: null
         })
         .withConfig({

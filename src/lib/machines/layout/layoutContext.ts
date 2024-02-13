@@ -1,5 +1,5 @@
 import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, Maybe } from '../../../types/sdk';
-import { Address, NewFlaggedLabwareLayout, NewLabwareLayout } from '../../../types/stan';
+import { Address, NewFlaggedLabwareLayout } from '../../../types/stan';
 
 export interface LayoutPlan {
   /**

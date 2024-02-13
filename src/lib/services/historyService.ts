@@ -1,17 +1,19 @@
 import { stanCore } from '../sdk';
-import { HistoryTableEntry } from '../../types/stan';
+import { HistoryData } from '../../types/stan';
 import { HistoryFieldsFragment, LabwareFieldsFragment, SampleFieldsFragment } from '../../types/sdk';
 import { HistoryUrlParams } from '../../pages/History';
 
 /**
  * Retrieves the history for the given History props.
  */
-export async function findHistory(historyProps: HistoryUrlParams): Promise<Array<HistoryTableEntry>> {
+
+export async function findHistory(historyProps: HistoryUrlParams): Promise<HistoryData> {
   let result;
   let history: HistoryFieldsFragment = {
     entries: [],
     labware: [],
     samples: [],
+    flaggedBarcodes: [],
     __typename: 'History'
   };
   if (historyProps.sampleId) {
@@ -44,7 +46,7 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Array
   history.labware.forEach((lw) => labwareMap.set(lw.id, lw));
   history.samples.forEach((sample) => sampleMap.set(sample.id, sample));
 
-  return history.entries.map((entry) => {
+  const entries = history.entries.map((entry) => {
     const sourceLabware = labwareMap.get(entry.sourceLabwareId)!;
     const destinationLabware = labwareMap.get(entry.destinationLabwareId)!;
     const sample = entry.sampleId ? sampleMap.get(entry.sampleId) : undefined;
@@ -68,4 +70,8 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Array
       sectionPosition: entry.region ?? undefined
     };
   });
+  return {
+    entries,
+    flaggedBarcodes: history.flaggedBarcodes
+  };
 }
