@@ -27,7 +27,6 @@ import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import RemoveButton from '../components/buttons/RemoveButton';
 import { objectKeys } from '../lib/helpers';
 import { StripyCardDetail } from '../components/StripyCard';
-import Pill from '../components/Pill';
 
 type PageParams = {
   title: string;
