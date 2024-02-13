@@ -23,14 +23,17 @@ function createLabwareMachine() {
       }),
       on: {
         RESET_SELECTED: {
-          actions: ({ context }) => context.selectedAddresses.clear()
+          actions: 'clearSelectedSlots'
         },
         CHANGE_SELECTION_MODE: {
-          actions: ({ context, event }) => {
-            context.selectable = event.selectable;
-            context.selectionMode = event.selectionMode;
-            context.selectedAddresses.clear();
-          },
+          actions: assign(({ context, event }) => {
+            return {
+              ...context,
+              selectable: event.selectable,
+              selectionMode: event.selectionMode,
+              selectedAddresses: new Set<string>()
+            };
+          }),
           target: '.unknown'
         },
         UPDATE_SLOTS: {

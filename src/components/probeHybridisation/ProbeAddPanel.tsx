@@ -186,16 +186,18 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
                 values.labware.forEach((lw, index) => {
                   const updatedLabware: ProbeOperationLabware = {
                     ...lw,
-                    probes: lw.probes.map(() => {
-                      return {
+                    probes: [
+                      ...lw.probes,
+                      {
                         name: probeName,
                         lot: probeLot,
                         plex: Number(probePlex),
                         costing: probeCosting === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty
-                      };
-                    })
+                      }
+                    ]
                   };
                   helpers.replace(index, { ...updatedLabware });
+                  //  helpers.push(de)
                 });
               }}
             >

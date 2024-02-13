@@ -297,7 +297,9 @@ describe('Release Page', () => {
         cy.findByText('Change Release File Options').should('be.visible');
       });
       it("goes to Release Options page when 'Change Release File Options' button is clicked", () => {
-        cy.findByText('Change Release File Options').click();
+        before(() => {
+          cy.findByText('Change Release File Options').click();
+        });
         cy.url().should('include', '/releaseOptions?id=1001,1002,1003&groups=histology,sample_processing,xenium');
       });
     });
