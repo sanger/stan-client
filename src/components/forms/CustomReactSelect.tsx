@@ -154,7 +154,9 @@ export const NormalReactSelect = ({
           }}
         />
       </Label>
-      {addButton && <AddButton {...addButton} />}
+      {addButton && (
+        <AddButton data-testid={addButton.dataTestId} className={addButton.className} onClick={addButton.onClick} />
+      )}
     </div>
   );
 };
