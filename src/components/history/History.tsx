@@ -25,14 +25,14 @@ export default function History(props: HistoryProps) {
   const historyMachine = React.useMemo(() => {
     return createHistoryMachine();
   }, []);
-  const getHistoryURLParmas = (props: HistoryProps): HistoryUrlParams => {
+  const getHistoryURLParams = (props: HistoryProps): HistoryUrlParams => {
     const { displayFlaggedLabware, ...urlProps } = props;
     return urlProps;
   };
   const { displayFlaggedLabware, ...urlProps } = props;
   const [current, send] = useMachine(historyMachine, {
     context: {
-      historyProps: getHistoryURLParmas(urlProps)
+      historyProps: getHistoryURLParams(urlProps)
     }
   });
 
@@ -190,7 +190,7 @@ export default function History(props: HistoryProps) {
    * If the props change, send an update event to the machine
    */
   useEffect(() => {
-    send({ type: 'UPDATE_HISTORY_PROPS', props: getHistoryURLParmas(props) });
+    send({ type: 'UPDATE_HISTORY_PROPS', props: getHistoryURLParams(props) });
   }, [props, send, isValidInput]);
 
   /**
@@ -209,7 +209,7 @@ export default function History(props: HistoryProps) {
   };
 
   const searchString = (keyValSeparator: string, tokenSeparator: string) => {
-    return Object.keys(getHistoryURLParmas(historyProps))
+    return Object.keys(getHistoryURLParams(historyProps))
       .sort()
       .map((key) => `${key}${keyValSeparator}${historyProps[key as keyof HistoryUrlParams]}`)
       .join(tokenSeparator);
