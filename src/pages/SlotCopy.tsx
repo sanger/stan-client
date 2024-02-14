@@ -267,7 +267,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
       send({
         type: 'UPDATE_SOURCE_LABWARE_PERMTIME',
         labwares: sourcesChanged,
-        destinaton: destinations.find((dest) => dest.labware.id === selectedDestination.id)
+        destination: destinations.find((dest) => dest.labware.id === selectedDestination.id)
       });
     },
     [send, selectedDestination, destinations]

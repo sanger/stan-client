@@ -76,7 +76,7 @@ type UpdateSlotCopyContentType = {
 type UpdateSourceLabwarePermTime = {
   type: 'UPDATE_SOURCE_LABWARE_PERMTIME';
   labwares: Array<LabwareFlaggedFieldsFragment>;
-  destinaton: Destination | undefined;
+  destination: Destination | undefined;
 };
 
 type UpdateDestinationPreBarcode = {
@@ -326,15 +326,17 @@ export const slotCopyMachine = createMachine(
                 findPermDataQueries.push(val);
               }
             }
+            console.log('=== input ');
+            console.log(input);
             return {
               findPermTimes: findPermDataQueries,
               inputLabwares: input.labwares,
-              destination: input.destinaton
+              destination: input.destination
             };
           }),
           input: ({ context, event }) => ({
             labwares: (event as UpdateSourceLabwarePermTime).labwares,
-            destinaton: (event as UpdateSourceLabwarePermTime).destinaton,
+            destination: (event as UpdateSourceLabwarePermTime).destination,
             sourceLabwarePermData: context.sourceLabwarePermData
           }),
           onDone: [
@@ -438,6 +440,9 @@ export const slotCopyMachine = createMachine(
         if (event.type !== 'xstate.done.actor.findPermTime') return context;
         //Sync the permData array with current input labware list
         return produce(context, (draft) => {
+          if (!draft.sourceLabwarePermData) {
+            draft.sourceLabwarePermData = [];
+          }
           draft.sourceLabwarePermData = draft.sourceLabwarePermData?.filter((permData) =>
             event.output.inputLabwares.some((lw) => lw.barcode === permData.visiumPermData.labware.barcode)
           );
