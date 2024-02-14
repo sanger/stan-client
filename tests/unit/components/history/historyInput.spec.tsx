@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Formik } from 'formik';
 import HistoryInput from '../../../../src/components/history/HistoryInput';

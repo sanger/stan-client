@@ -163,7 +163,7 @@ describe('Staining Page', () => {
     getButton('Submit').click();
   }
   function fillInForm(stainType: string) {
-    if (stainType == 'H&E') {
+    if (stainType === 'H&E') {
       selectSGPNumber('SGP1008');
       cy.findByTestId('timeMeasurements.0.minutes').type('1');
       cy.findByTestId('timeMeasurements.0.seconds').type('1');
@@ -177,10 +177,10 @@ describe('Staining Page', () => {
       cy.findByTestId('STAN-3111-bondRun').type('1');
       selectOption('STAN-3111-workNumber', 'SGP1008');
       selectOption('STAN-3111-panel', 'Positive');
-      if (stainType == 'RNAscope' || stainType == 'RNAscope & IHC') {
+      if (stainType === 'RNAscope' || stainType === 'RNAscope & IHC') {
         cy.findByTestId('STAN-3111-plexRNAscope').type('1');
       }
-      if (stainType == 'IHC' || stainType == 'RNAscope & IHC') {
+      if (stainType === 'IHC' || stainType === 'RNAscope & IHC') {
         cy.findByTestId('STAN-3111-plexIHC').type('1');
       }
     }

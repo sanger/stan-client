@@ -58,6 +58,9 @@ describe('History Page', () => {
       it('displays uploaded files section', () => {
         cy.findByText('Files Uploaded').should('be.visible');
       });
+      it('does not display flagged labware section', () => {
+        cy.findByText('Flagged Labware').should('not.exist');
+      });
     });
   });
 
@@ -213,7 +216,6 @@ describe('History Page', () => {
       });
     });
   });
-
   describe('when a search errors', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {

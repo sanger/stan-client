@@ -161,14 +161,14 @@ export default function History(props: HistoryUrlParams) {
       columnData: {
         columns: historyColumns
       },
-      entries: history
+      entries: history.entries
     };
   }, [history, historyColumns]);
 
   const { downloadURL, extension } = useDownload(downloadData);
 
   const uniqueWorkNumbers = React.useMemo(() => {
-    const uniqueWorkNumbers = [...new Set(history.map((item) => item.workNumber))];
+    const uniqueWorkNumbers = [...new Set(history.entries.map((item) => item.workNumber))];
     const workNumbers: string[] = [];
     uniqueWorkNumbers.forEach((wrkNumber) => {
       if (wrkNumber && wrkNumber.length > 0) {
@@ -191,7 +191,11 @@ export default function History(props: HistoryUrlParams) {
    * File upload option is only for authenticated users, so
    * only allow permission to view or download uploaded files if not authenticated
    */
-  const fileAccessUrlPath = (workNumber: string) => {
+  const labwareUrlPath = (barcode: string) => {
+    return `/labware/${barcode}`;
+  };
+
+  const fileUploadUrlPath = (workNumber: string) => {
     const queryParamsStr = stringify({
       workNumber: workNumber
     });
@@ -219,34 +223,63 @@ export default function History(props: HistoryUrlParams) {
         </div>
       )}
       {current.matches('found') &&
-        (history.length > 0 ? (
+        (history.entries.length > 0 ? (
           <>
             {uniqueWorkNumbers.length > 0 && (
-              <div
-                className={
-                  'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
-                }
-              >
-                <Heading level={4} showBorder={false}>
-                  Files Uploaded
-                </Heading>
-                <div className={'flex flex-col mt-4 justify-center'} data-testid="history">
-                  <Table>
-                    <TableBody>
-                      <TableCell className={'flex flex-col justify-center  p-2'}>
-                        {uniqueWorkNumbers.map((workNumber, indx) => (
-                          <StyledLink
-                            data-testid={`styled-link-${workNumber}`}
-                            key={workNumber}
-                            to={fileAccessUrlPath(workNumber)}
-                            className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
-                          >{`Files for ${workNumber}`}</StyledLink>
-                        ))}
-                      </TableCell>
-                    </TableBody>
-                  </Table>
+              <>
+                <div
+                  className={
+                    'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
+                  }
+                >
+                  <Heading level={4} showBorder={false}>
+                    Files Uploaded
+                  </Heading>
+                  <div className={'flex flex-col mt-4 justify-center'} data-testid="history">
+                    <Table>
+                      <TableBody>
+                        <TableCell className={'flex flex-col justify-center  p-2'}>
+                          {uniqueWorkNumbers.map((workNumber, indx) => (
+                            <StyledLink
+                              data-testid={`styled-link-${workNumber}`}
+                              key={workNumber}
+                              to={fileUploadUrlPath(workNumber)}
+                              className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
+                            >{`Files for ${workNumber}`}</StyledLink>
+                          ))}
+                        </TableCell>
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
-              </div>
+                {history.flaggedBarcodes.length > 0 && (
+                  <div
+                    className={
+                      'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
+                    }
+                  >
+                    <Heading level={4} showBorder={false}>
+                      Flagged Labware
+                    </Heading>
+                    <div className={'flex flex-col mt-4 justify-center'} data-testid="flagged-labware">
+                      <Table>
+                        <TableBody>
+                          <TableCell className={'flex flex-col justify-center  p-2'}>
+                            {history.flaggedBarcodes.map((barcode, indx) => (
+                              <StyledLink
+                                data-testid={`styled-link-${barcode}`}
+                                key={barcode}
+                                to={labwareUrlPath(barcode)}
+                                className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
+                              >{`${barcode}`}</StyledLink>
+                            ))}
+                          </TableCell>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
             <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
               History for
@@ -261,7 +294,7 @@ export default function History(props: HistoryUrlParams) {
               </a>
             </div>
             <TopScrollingBar>
-              <DataTable columns={historyColumns} data={history} fixedHeader={true} />
+              <DataTable columns={historyColumns} data={history.entries} fixedHeader={true} />
             </TopScrollingBar>
           </>
         ) : isValidInput ? (
