@@ -3,6 +3,7 @@ import Label from './Label';
 import { useFormikContext } from 'formik';
 import { FormikErrorMessage } from './index';
 import ReactSelect, { components, Props } from 'react-select';
+import AddButton from '../buttons/AddButton';
 const defaultClassNames =
   'block w-full rounded-md focus:outline-0  disabled:opacity-75 disabled:bg-gray-200 disabled:cursor-not-allowed';
 
@@ -12,6 +13,12 @@ export type OptionType = {
 };
 
 type ValueType = OptionType | OptionType[] | undefined | unknown;
+
+type AddButtonProps = {
+  className?: string;
+  dataTestId: string;
+  onClick: () => void;
+};
 
 interface CustomReactSelectProps extends Props {
   label?: string;
@@ -26,6 +33,7 @@ interface CustomReactSelectProps extends Props {
   isMulti?: boolean;
   valueAsNumber?: boolean;
   fixedWidth?: number;
+  addButton?: AddButtonProps;
 }
 
 const defaultValue = (options: OptionType[], value: any, isMulti: boolean) => {
@@ -56,6 +64,7 @@ export const NormalReactSelect = ({
   dataTestId,
   isMulti = false,
   fixedWidth,
+  addButton,
   ...props
 }: CustomReactSelectProps) => {
   const onChangeValue = React.useCallback(
@@ -88,9 +97,16 @@ export const NormalReactSelect = ({
     );
   };
   const sdbColor = '#7980B9';
+  if (addButton) {
+    addButton.className = addButton.className ? `col-span-1 ${addButton.className}` : 'col-span-1';
+  }
+
   return (
-    <div data-testid={dataTestId ?? 'select-div'} className={`${className}`}>
-      <Label name={label ?? ''} className={'whitespace-nowrap'}>
+    <div
+      data-testid={dataTestId ?? 'select-div'}
+      className={addButton ? `grid grid-cols-7 grid-rows-1 ${className}` : `${className}`}
+    >
+      <Label name={label ?? ''} className={addButton ? 'whitespace-nowrap col-span-6' : 'whitespace-nowrap'}>
         <ReactSelect
           menuPosition={'fixed'}
           name={name}
@@ -138,6 +154,9 @@ export const NormalReactSelect = ({
           }}
         />
       </Label>
+      {addButton && (
+        <AddButton data-testid={addButton.dataTestId} className={addButton.className} onClick={addButton.onClick} />
+      )}
     </div>
   );
 };
