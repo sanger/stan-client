@@ -63,6 +63,7 @@ export default function History() {
   // If the URL parameters don't parse to valid HistoryProps use the default values
   const initialValues = historyProps ?? defaultInitialValues;
   const navigate = useNavigate();
+  const props = { ...historyProps, displayFlaggedLabware: true };
   return (
     <AppShell>
       <AppShell.Header>
@@ -90,7 +91,7 @@ export default function History() {
               </Form>
             </Formik>
           </div>
-          {historyProps && <HistoryComponent {...historyProps} />}
+          {historyProps && <HistoryComponent {...props} />}
         </div>
       </AppShell.Main>
     </AppShell>
