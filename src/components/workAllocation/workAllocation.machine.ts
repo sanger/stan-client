@@ -1,7 +1,7 @@
 import { assign, createMachine, fromPromise } from 'xstate';
-import { ServerErrors } from '../../types/stan';
 import {
   CommentFieldsFragment,
+  CostCode,
   CostCodeFieldsFragment,
   CreateWorkMutation,
   GetWorkAllocationInfoQuery,
@@ -14,6 +14,8 @@ import {
 } from '../../types/sdk';
 import { stanCore } from '../../lib/sdk';
 import { WorkAllocationUrlParams } from './WorkAllocation';
+import { ClientError } from 'graphql-request';
+import produce from 'immer';
 
 export type WorkAllocationFormValues = {
   /**
@@ -70,7 +72,7 @@ export type WorkAllocationFormValues = {
   studyName?: string;
 
   /**
-   * Whether or not an R&D number is being created. Will use a different prefix on call to core.
+   * Whether an R&D number is being created. Will use a different prefix on call to core.
    */
   isRnD: boolean;
 };
@@ -78,8 +80,8 @@ export type WorkAllocationFormValues = {
 type WorkAllocationEvent =
   | { type: 'xstate.done.actor.loadWorkAllocationInfo'; output: GetWorkAllocationInfoQuery }
   | { type: 'xstate.done.actor.allocateWork'; output: CreateWorkMutation }
-  | { type: 'xstate.error.actor.allocateWork'; error: ServerErrors }
-  | { type: 'xstate.error.actor.loadWorkAllocationInfo'; error: ServerErrors }
+  | { type: 'xstate.error.actor.allocateWork'; error: ClientError }
+  | { type: 'xstate.error.actor.loadWorkAllocationInfo'; error: ClientError }
   | {
       type: 'ALLOCATE_WORK';
       values: WorkAllocationFormValues;
@@ -93,6 +95,14 @@ type WorkAllocationEvent =
   | {
       type: 'SORT_WORKS';
       workWithComments: WorkWithCommentFieldsFragment[];
+    }
+  | {
+      type: 'ADD_NEWLY_CREATED_PROJECT';
+      project: ProjectFieldsFragment;
+    }
+  | {
+      type: 'ADD_NEWLY_CREATED_COST_CODE';
+      costCode: CostCode;
     };
 
 type WorkAllocationContext = {
@@ -154,7 +164,7 @@ type WorkAllocationContext = {
   /**
    * An error caused by a request to core
    */
-  requestError?: ServerErrors;
+  requestError?: ClientError;
 };
 
 type CreateWorkAllocationMachineParams = {
@@ -211,6 +221,12 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             },
             SORT_WORKS: {
               actions: 'assignSortedWorks'
+            },
+            ADD_NEWLY_CREATED_PROJECT: {
+              actions: 'addNewlyCreatedProject'
+            },
+            ADD_NEWLY_CREATED_COST_CODE: {
+              actions: 'addNewlyCreatedCostCode'
             }
           }
         },
@@ -261,8 +277,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
       actions: {
         assignUrlParams: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_URL_PARAMS') return context;
-          context.urlParams = event.urlParams;
-          return context;
+          return { ...context, urlParams: event.urlParams };
         }),
 
         assignWorkAllocationInfo: assign(({ context, event }) => {
@@ -277,15 +292,17 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             costCodes,
             releaseRecipients
           } = event.output;
-          context.availableComments = comments;
-          context.projects = projects;
-          context.programs = programs;
-          context.workWithComments = worksWithComments;
-          context.workTypes = workTypes;
-          context.costCodes = costCodes;
-          context.omeroProjects = omeroProjects;
-          context.workRequesters = releaseRecipients;
-          return context;
+          return {
+            ...context,
+            availableComments: comments,
+            projects,
+            programs,
+            omeroProjects,
+            workWithComments: worksWithComments,
+            workTypes,
+            costCodes,
+            workRequesters: releaseRecipients
+          };
         }),
 
         assignServerError: assign(({ context, event }) => {
@@ -295,8 +312,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           ) {
             return context;
           }
-          context.requestError = event.error;
-          return context;
+          return { ...context, requestError: event.error };
         }),
 
         assignSuccessMessage: assign(({ context, event }) => {
@@ -321,33 +337,48 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           ]
             .filter((msg) => msg)
             .join(' and ');
-          context.allocatedWorkNumber = workNumber;
-          context.successMessage = `Assigned ${workNumber} (${
-            workType.name
-          } - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
-            omeroProject ? `, Omero project ${omeroProject.name}` : ''
-          }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''} and program ${program.name} using cost code ${
-            costCode.code
-          } with the work requester ${workRequester?.username}`;
-          return context;
+
+          return produce(context, (draft) => {
+            draft.allocatedWorkNumber = workNumber;
+            draft.successMessage = `Assigned ${workNumber} (${
+              workType.name
+            } - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
+              omeroProject ? `, Omero project ${omeroProject.name}` : ''
+            }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''} and program ${program.name} using cost code ${
+              costCode.code
+            } with the work requester ${workRequester?.username}`;
+          });
         }),
 
         updateWork: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_WORK') return context;
-          context.workWithComments.splice(event.rowIndex, 1, event.workWithComment);
-          return context;
+          return {
+            ...context,
+            workWithComments: context.workWithComments.splice(event.rowIndex, 1, event.workWithComment)
+          };
         }),
         assignSortedWorks: assign(({ context, event }) => {
           if (event.type !== 'SORT_WORKS') return context;
-          event.workWithComments.forEach((workWithComment, indx) => {
-            context.workWithComments.splice(indx, 1, workWithComment);
+          return produce(context, (draft) => {
+            event.workWithComments.forEach((workWithComment, indx) => {
+              draft.workWithComments.splice(indx, 1, workWithComment);
+            });
           });
-          return context;
         }),
         clearNotifications: assign(({ context }) => {
-          context.successMessage = undefined;
-          context.requestError = undefined;
-          return context;
+          return { ...context, successMessage: undefined, requestError: undefined };
+        }),
+        addNewlyCreatedProject: assign(({ context, event }) => {
+          if (event.type !== 'ADD_NEWLY_CREATED_PROJECT') return context;
+          return produce(context, (draft) => {
+            draft.projects.push(event.project);
+          });
+        }),
+        addNewlyCreatedCostCode: assign(({ context, event }) => {
+          if (event.type !== 'ADD_NEWLY_CREATED_COST_CODE') return context;
+          return produce(context, (draft) => {
+            draft.costCodes.push(event.costCode);
+          });
         })
       }
     }

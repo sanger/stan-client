@@ -17,13 +17,7 @@ type HistoryEvent =
   | { type: 'xstate.done.actor.findHistory'; output: HistoryData }
   | { type: 'xstate.error.actor.findHistory'; error: Maybe<ClientError> };
 
-const defaultMachineContext: HistoryContext = {
-  historyProps: {},
-  history: { entries: [], flaggedBarcodes: [] },
-  serverError: null
-};
-
-export default function createHistoryMachine(context = defaultMachineContext) {
+export default function createHistoryMachine() {
   return createMachine(
     {
       types: {} as {
@@ -32,7 +26,9 @@ export default function createHistoryMachine(context = defaultMachineContext) {
       },
       id: 'historyMachine',
       initial: 'searching',
-      context,
+      context: ({ input }: { input: HistoryContext }): HistoryContext => ({
+        ...input
+      }),
       states: {
         searching: {
           invoke: {

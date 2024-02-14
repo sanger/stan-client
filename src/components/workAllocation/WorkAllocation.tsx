@@ -290,7 +290,7 @@ export default function WorkAllocation() {
           }}
           validationSchema={validationSchema}
         >
-          {({ setFieldValue, values, errors }) => (
+          {({ setFieldValue, values }) => (
             <Form>
               <div className=" md:grid md:grid-cols-3 md:px-10 sm:flex sm:flex-row md:justify-center md:items-start md:gap-y-4 md:gap-x-8">
                 <div className="md:flex-grow">

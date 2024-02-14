@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import createHistoryMachine from './history.machine';
 import { useMachine } from '@xstate/react';
 import DataTable from '../DataTable';
@@ -26,15 +26,16 @@ export default function History(props: HistoryProps) {
     const { displayFlaggedLabware, ...urlProps } = props;
     return urlProps;
   };
-  const { displayFlaggedLabware, ...urlProps } = props;
   const historyMachine = React.useMemo(() => {
-    return createHistoryMachine({
-      historyProps: getHistoryURLParams(urlProps),
+    return createHistoryMachine();
+  }, []);
+  const [current, send] = useMachine(historyMachine, {
+    input: {
+      historyProps: getHistoryURLParams(props),
       history: { entries: [], flaggedBarcodes: [] },
       serverError: null
-    });
-  }, [urlProps]);
-  const [current, send] = useMachine(historyMachine);
+    }
+  });
 
   const { isAuthenticated } = useAuth();
 
@@ -189,9 +190,9 @@ export default function History(props: HistoryProps) {
   /**
    * If the props change, send an update event to the machine
    */
-  useEffect(() => {
-    send({ type: 'UPDATE_HISTORY_PROPS', props: getHistoryURLParams(props) });
-  }, [props, send, isValidInput]);
+  // useEffect(() => {
+  //   send({ type: 'UPDATE_HISTORY_PROPS', props: getHistoryURLParams(props) });
+  // }, [props, send, isValidInput]);
 
   /**
    * File upload option is only for authenticated users, so
@@ -260,7 +261,7 @@ export default function History(props: HistoryProps) {
                 </div>
               </>
             )}
-            {history.flaggedBarcodes.length > 0 && displayFlaggedLabware && (
+            {history.flaggedBarcodes.length > 0 && props.displayFlaggedLabware && (
               <div
                 className={
                   'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
