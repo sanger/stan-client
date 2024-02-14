@@ -284,7 +284,7 @@ describe('Transfer Page', () => {
 
     describe('when scans a labwares with no perm done', () => {
       before(() => {
-        saveSlotForLabwareWithNoPerm(); //sabrine
+        saveSlotForLabwareWithNoPerm();
       });
       it('shows a warning message', () => {
         cy.findByText('Labware without Permeabilisation').should('be.visible');

@@ -4,6 +4,7 @@ import { tissue } from '../../helpers/labwareHelper';
 import { LabwareFieldsFragment } from '../../../types/sdk';
 import { assign, MachineImplementations, sendParent } from 'xstate';
 import { LayoutEvents } from './layoutEvents';
+import produce from 'immer';
 
 export const layoutMachineKey = 'layoutMachine';
 
@@ -26,72 +27,78 @@ export const machineOptions: MachineImplementations<LayoutContext, LayoutEvents>
       if (event.type !== 'SELECT_SOURCE') {
         return context;
       }
-      context.selected = isEqual(context.selected, event.source) ? null : event.source;
-      return context;
+      return { ...context, selected: isEqual(context.selected, event.source) ? null : event.source };
     }),
 
     [Actions.DELETE_DESTINATION_ACTION]: assign(({ context, event }) => {
       if (event.type !== 'SELECT_DESTINATION') {
         return context;
       }
-      context.layoutPlan.plannedActions.delete(event.address);
-      return context;
+      return produce(context, (draft) => {
+        draft.layoutPlan.plannedActions.delete(event.address);
+      });
     }),
 
     [Actions.ASSIGN_DESTINATION]: assign(({ context, event }) => {
       if (event.type !== 'SELECT_DESTINATION') {
         return context;
       }
-      const plannedActions = context.layoutPlan.plannedActions;
 
-      if (!context.selected || context.selected.sampleId === plannedActions.get(event.address)?.[0].sampleId) {
-        plannedActions.delete(event.address);
-      } else {
-        const action: Source = Object.assign({}, context.selected);
-        action.replicateNumber = tissue(Object.assign({}, action.labware as LabwareFieldsFragment))?.replicate ?? '';
-        plannedActions.set(event.address, [action]);
-      }
-      context.layoutPlan.plannedActions = plannedActions;
+      return produce(context, (draft) => {
+        const plannedActions = draft.layoutPlan.plannedActions;
 
-      return context;
+        if (!context.selected || context.selected.sampleId === plannedActions.get(event.address)?.[0].sampleId) {
+          plannedActions.delete(event.address);
+        } else {
+          const action: Source = Object.assign({}, draft.selected);
+          action.replicateNumber = tissue(Object.assign({}, action.labware as LabwareFieldsFragment))?.replicate ?? '';
+          plannedActions.set(event.address, [action]);
+        }
+        draft.layoutPlan.plannedActions = plannedActions;
+      });
     }),
 
     [Actions.REMOVE_PLANNED_ACTION]: assign(({ context, event }) => {
       if (event.type !== 'SELECT_DESTINATION') {
         return context;
       }
-      context.layoutPlan.plannedActions.delete(event.address);
-      return context;
+      return produce(context, (draft) => {
+        draft.layoutPlan.plannedActions.delete(event.address);
+      });
     }),
 
     [Actions.ASSIGN_DESTINATION_ACTIONS]: assign(({ context, event }) => {
       if (event.type !== 'SET_ALL_DESTINATIONS') {
         return context;
       }
-
-      context.layoutPlan.destinationLabware.slots.forEach((slot) => {
-        context.layoutPlan.plannedActions.set(slot.address, [event.source]);
+      return produce(context, (draft) => {
+        draft.layoutPlan.destinationLabware.slots.forEach((slot) => {
+          draft.layoutPlan.plannedActions.set(slot.address, [event.source]);
+        });
       });
-      return context;
     }),
 
     [Actions.ADD_SECTION]: assign(({ context, event }) => {
       if (event.type !== 'SELECT_DESTINATION') {
         return context;
       }
-      if (!context.possibleActions?.has(event.address)) {
-        return context;
-      }
-      const slotActions = context.possibleActions?.get(event.address)!;
-      //Initialise section numbers to 0 for new additions
-      Array.from(slotActions.values()).forEach((val: Source) => (val.newSection = 0));
-      const plannedActionsForSlot = context.layoutPlan.plannedActions.get(event.address);
-      if (!plannedActionsForSlot) {
-        context.layoutPlan.plannedActions.set(event.address, slotActions);
-      } else {
-        context.layoutPlan.plannedActions.set(event.address, [...plannedActionsForSlot, ...slotActions]);
-      }
-      return context;
+      return produce(context, (draft) => {
+        if (!draft.possibleActions) {
+          draft.possibleActions = new Map();
+        }
+        if (!context.possibleActions?.has(event.address)) {
+          return context;
+        }
+        const slotActions = draft.possibleActions?.get(event.address)!;
+        //Initialise section numbers to 0 for new additions
+        Array.from(slotActions.values()).forEach((val: Source) => (val.newSection = 0));
+        const plannedActionsForSlot = draft.layoutPlan.plannedActions.get(event.address);
+        if (!plannedActionsForSlot) {
+          draft.layoutPlan.plannedActions.set(event.address, slotActions);
+        } else {
+          draft.layoutPlan.plannedActions.set(event.address, [...plannedActionsForSlot, ...slotActions]);
+        }
+      });
     }),
 
     [Actions.REMOVE_SECTION]: assign(({ context, event }) => {
@@ -101,15 +108,15 @@ export const machineOptions: MachineImplementations<LayoutContext, LayoutEvents>
       if (!context.possibleActions?.has(event.address)) {
         return context;
       }
+      return produce(context, (draft) => {
+        const slotActions = draft.layoutPlan.plannedActions.get(event.address) ?? [];
 
-      const slotActions = context.layoutPlan.plannedActions.get(event.address) ?? [];
-
-      if (slotActions.length > 1) {
-        slotActions.pop();
-      } else if (slotActions.length === 1) {
-        context.layoutPlan.plannedActions.delete(event.address);
-      }
-      return context;
+        if (slotActions.length > 1) {
+          slotActions.pop();
+        } else if (slotActions.length === 1) {
+          draft.layoutPlan.plannedActions.delete(event.address);
+        }
+      });
     }),
 
     [Actions.TOGGLE_DESTINATION]: assign(({ context, event }) => {
@@ -120,20 +127,21 @@ export const machineOptions: MachineImplementations<LayoutContext, LayoutEvents>
       if (context.possibleActions && !context.possibleActions.has(event.address)) {
         return context;
       }
+      return produce(context, (draft) => {
+        const slotActions = draft.layoutPlan.plannedActions.get(event.address) ?? [];
 
-      const slotActions = context.layoutPlan.plannedActions.get(event.address) ?? [];
-
-      if (slotActions.length > 1) {
-        slotActions.pop();
-      } else if (slotActions.length === 1) {
-        context.layoutPlan.plannedActions.delete(event.address);
-      } else {
-        const source = context.possibleActions?.get(event.address);
-        if (source) {
-          context.layoutPlan.plannedActions.set(event.address, source);
+        if (slotActions.length > 1) {
+          slotActions.pop();
+        } else if (slotActions.length === 1) {
+          draft.layoutPlan.plannedActions.delete(event.address);
+        } else {
+          const source = draft.possibleActions?.get(event.address);
+          if (source) {
+            draft.layoutPlan.plannedActions.set(event.address, source);
+          }
         }
-      }
-      return context;
+        return context;
+      });
     }),
     [Actions.SEND_LAYOUT_TO_PARENT]: sendParent(({ context }) => {
       return {

@@ -202,15 +202,13 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           if (event.type !== 'ASSIGN_LAYOUT_PLAN') {
             return context;
           }
-          context.layoutPlan = event.layoutPlan;
-          return context;
+          return { ...context, layoutPlan: event.layoutPlan };
         }),
         cancelEditLayout: assign(({ context, event }) => {
           if (event.type !== 'CANCEL_EDIT_LAYOUT') {
             return context;
           }
-          context.layoutPlan.plannedActions.clear();
-          return context;
+          return { ...context, layoutPlan: { ...context.layoutPlan, plannedActions: new Map() } };
         }),
 
         assignPlanResponse: assign(({ context, event }) => {
@@ -218,16 +216,14 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
             return context;
           }
 
-          context.plan = event.output;
-          return context;
+          return { ...context, plan: event.output };
         }),
 
         assignRequestErrors: assign(({ context, event }) => {
           if (event.type !== 'xstate.error.actor.planSection') {
             return context;
           }
-          context.requestError = event.error;
-          return context;
+          return { context, requestError: event.error };
         })
       },
 

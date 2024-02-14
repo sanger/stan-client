@@ -4,6 +4,7 @@ import { LayoutPlan, Source } from '../../lib/machines/layout/layoutContext';
 import { cloneDeep } from 'lodash';
 import { Address, NewFlaggedLabwareLayout } from '../../types/stan';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
+import produce from 'immer';
 
 export interface ConfirmLabwareContext {
   /**
@@ -238,23 +239,25 @@ export const createConfirmLabwareMachine = (
           if (event.type !== 'SET_COMMENT_FOR_ADDRESS') {
             return context;
           }
-          if (event.commentId === '') {
-            context.addressToCommentMap.delete(event.address);
-          } else {
-            context.addressToCommentMap.set(event.address, Number(event.commentId));
-          }
-          return context;
+          return produce(context, (draft) => {
+            if (event.commentId === '') {
+              draft.addressToCommentMap.delete(event.address);
+            } else {
+              draft.addressToCommentMap.set(event.address, Number(event.commentId));
+            }
+          });
         }),
         assignSectionAddressComment: assign(({ context, event }) => {
           if (event.type !== 'SET_COMMENTS_FOR_SECTION') {
             return context;
           }
-          const plannedAction = context.layoutPlan.plannedActions.get(event.address);
+          return produce(context, (draft) => {
+            const plannedAction = draft.layoutPlan.plannedActions.get(event.address);
 
-          if (plannedAction && plannedAction[event.sectionIndex]) {
-            plannedAction[event.sectionIndex].commentIds = event.commentIds.map((commentID) => Number(commentID));
-          }
-          return context;
+            if (plannedAction && plannedAction[event.sectionIndex]) {
+              plannedAction[event.sectionIndex].commentIds = event.commentIds.map((commentID) => Number(commentID));
+            }
+          });
         }),
         /**
          * Assign all the addresses with planned actions in the same comment
@@ -263,20 +266,21 @@ export const createConfirmLabwareMachine = (
           if (event.type !== 'SET_COMMENT_FOR_ALL') {
             return context;
           }
-          if (event.commentIds.length === 0) {
-            context.addressToCommentMap.clear();
-          } else {
-            context.layoutPlan.plannedActions.forEach((value, key) => {
-              context.addressToCommentMap.set(key, Number(event.commentIds[0]));
-            });
-          }
-          context.commentsForAllSections = event.commentIds;
-          context.layoutPlan.plannedActions.forEach((action) => {
-            action.forEach((action) => {
-              action.commentIds = event.commentIds.map((commentID) => Number(commentID));
+          return produce(context, (draft) => {
+            if (event.commentIds.length === 0) {
+              draft.addressToCommentMap.clear();
+            } else {
+              draft.layoutPlan.plannedActions.forEach((value, key) => {
+                draft.addressToCommentMap.set(key, Number(event.commentIds[0]));
+              });
+            }
+            draft.commentsForAllSections = event.commentIds;
+            draft.layoutPlan.plannedActions.forEach((action) => {
+              action.forEach((action) => {
+                action.commentIds = event.commentIds.map((commentID) => Number(commentID));
+              });
             });
           });
-          return context;
         }),
         /**
          * Assign all the addresses with planned actions in the same comment
@@ -285,11 +289,12 @@ export const createConfirmLabwareMachine = (
           if (event.type !== 'SET_REGION_FOR_SECTION') {
             return context;
           }
-          const plannedAction = context.layoutPlan.plannedActions.get(event.address);
-          if (plannedAction && plannedAction[event.sectionIndex]) {
-            plannedAction[event.sectionIndex].region = event.region;
-          }
-          return context;
+          return produce(context, (draft) => {
+            const plannedAction = draft.layoutPlan.plannedActions.get(event.address);
+            if (plannedAction && plannedAction[event.sectionIndex]) {
+              plannedAction[event.sectionIndex].region = event.region;
+            }
+          });
         }),
 
         /**
@@ -300,16 +305,17 @@ export const createConfirmLabwareMachine = (
           if (event.type !== 'ASSIGN_LAYOUT_PLAN' || !event.layoutPlan) {
             return context;
           }
-          context.layoutPlan = event.layoutPlan;
+          return produce(context, (draft) => {
+            draft.layoutPlan = event.layoutPlan;
 
-          const unemptyAddresses = new Set(context.layoutPlan.plannedActions.keys());
-          context.addressToCommentMap.forEach((_, key) => {
-            if (!unemptyAddresses.has(key)) {
-              context.addressToCommentMap.delete(key);
-            }
+            const unemptyAddresses = new Set(draft.layoutPlan.plannedActions.keys());
+            draft.addressToCommentMap.forEach((_, key) => {
+              if (!unemptyAddresses.has(key)) {
+                draft.addressToCommentMap.delete(key);
+              }
+            });
+            draft.isLayoutUpdated = true;
           });
-          context.isLayoutUpdated = true;
-          return context;
         }),
 
         /**
@@ -319,21 +325,20 @@ export const createConfirmLabwareMachine = (
           if (event.type !== 'TOGGLE_CANCEL') {
             return context;
           }
-          context.cancelled = !context.cancelled;
-          context.isCancelToggled = true;
-          return context;
+          return { ...context, cancelled: !context.cancelled, isCancelToggled: true };
         }),
 
         updateSectionNumber: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_SECTION_NUMBER') {
             return context;
           }
-          const plannedAction = context.layoutPlan.plannedActions.get(event.slotAddress);
+          return produce(context, (draft) => {
+            const plannedAction = draft.layoutPlan.plannedActions.get(event.slotAddress);
 
-          if (plannedAction && plannedAction[event.sectionIndex]) {
-            plannedAction[event.sectionIndex].newSection = event.sectionNumber;
-          }
-          return context;
+            if (plannedAction && plannedAction[event.sectionIndex]) {
+              plannedAction[event.sectionIndex].newSection = event.sectionNumber;
+            }
+          });
         }),
 
         updateAllSources: assign(({ context, event }) => {
@@ -341,24 +346,25 @@ export const createConfirmLabwareMachine = (
             return context;
           }
           /**There is a change in sections (precisely section numbers) from parent , so update the plans in this machine context**/
-          //copy the changes to current layout plan as well
-          for (let [key, updateSources] of event.plannedActions.entries()) {
-            const currentSources = context.layoutPlan.plannedActions.get(key);
-            updateSources &&
-              updateSources.forEach((source, indx) => {
-                if (currentSources && currentSources.length > indx) {
-                  currentSources[indx] = { ...currentSources[indx], ...source };
-                }
-              });
-          }
-          return context;
+          return produce(context, (draft) => {
+            //copy the changes to current layout plan as well
+            for (let [key, updateSources] of event.plannedActions.entries()) {
+              const currentSources = draft.layoutPlan.plannedActions.get(key);
+              updateSources &&
+                updateSources.forEach((source, indx) => {
+                  if (currentSources && currentSources.length > indx) {
+                    currentSources[indx] = { ...currentSources[indx], ...source };
+                  }
+                });
+            }
+          });
         }),
         commitConfirmation: assign(({ context }) => {
           const confirmSections: Array<ConfirmSection> = [];
           for (let [destinationAddress, originalPlannedActions] of context.layoutPlan.plannedActions.entries()) {
             confirmSections.push(...buildConfirmSections(destinationAddress, originalPlannedActions));
           }
-          context.confirmSectionLabware = {
+          const confirmSectionLabware = {
             barcode: context.labware.barcode!,
             cancelled: context.cancelled,
             confirmSections: context.cancelled ? undefined : confirmSections,
@@ -367,13 +373,9 @@ export const createConfirmLabwareMachine = (
               commentId
             }))
           };
-          return context;
+          return { ...context, confirmSectionLabware };
         }),
         cancelEditLayout: assign(({ context, event }) => {
-          if (event.type !== 'CANCEL_EDIT_LAYOUT') {
-            return context;
-          }
-          context.layoutPlan = context.originalLayoutPlan;
           return context;
         })
       }

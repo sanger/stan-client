@@ -16,6 +16,7 @@ import { buildSampleColors, sortDownRight } from '../../lib/helpers/labwareHelpe
 import { SectionNumberMode } from './SectioningConfirm';
 import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
 import { ClientError } from 'graphql-request';
+import produce from 'immer';
 
 type SectioningConfirmContext = {
   /**
@@ -284,12 +285,13 @@ export function createSectioningConfirmMachine() {
             };
           }
 
-          if (cslIndex > -1) {
-            context.confirmSectionLabware[cslIndex] = confirmLabware;
-          } else {
-            context.confirmSectionLabware.push(confirmLabware);
-          }
-          return context;
+          return produce(context, (draft) => {
+            if (cslIndex > -1) {
+              draft.confirmSectionLabware[cslIndex] = confirmLabware;
+            } else {
+              draft.confirmSectionLabware.push(confirmLabware);
+            }
+          });
         }),
         assignLayoutPlans: assign(({ context }) => {
           const layoutPlans: LayoutPlan[] = Object.values(context.layoutPlansByLabwareType).flatMap((plan) => plan);
@@ -319,96 +321,95 @@ export function createSectioningConfirmMachine() {
            *   slide: [layoutPlan3],
            * }
            */
-          context.layoutPlansByLabwareType = groupBy(
-            updatedLayoutPlans,
-            (lp) => lp.destinationLabware.labwareType.name
-          );
-          return context;
+          return produce(context, (draft) => {
+            draft.layoutPlansByLabwareType = groupBy(
+              updatedLayoutPlans,
+              (lp) => lp.destinationLabware.labwareType.name
+            );
+          });
         }),
         updateSectionLayout: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_SECTION_LAYOUT') {
             return context;
           }
-          /**Find the layoutPlan in the list whose section info is changed*/
-          const planInContext = findPlan(
-            context.layoutPlansByLabwareType,
-            event.layoutPlan.destinationLabware.barcode!
-          );
-          if (planInContext) {
-            planInContext.plannedActions = event.layoutPlan.plannedActions;
-          }
-          return context;
+          return produce(context, (draft) => {
+            /**Find the layoutPlan in the list whose section info is changed*/
+            const planInContext = findPlan(
+              draft.layoutPlansByLabwareType,
+              event.layoutPlan.destinationLabware.barcode!
+            );
+            if (planInContext) {
+              planInContext.plannedActions = event.layoutPlan.plannedActions;
+            }
+          });
         }),
         assignSectionNumber: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_SECTION_NUMBER') {
             return context;
           }
-          /**Section number is changed externally in this plan, so update that in the layoutPlan in context**/
-          const planInContext = findPlan(
-            context.layoutPlansByLabwareType,
-            event.layoutPlan.destinationLabware.barcode!
-          );
-          if (planInContext) {
-            const source = Array.from(planInContext.plannedActions.values())
-              .flatMap((sources) => sources)
-              .find((source, indx) => source.address === event.slotAddress && indx === event.sectionIndex);
-            if (source) {
-              source.newSection = event.sectionNumber;
+          return produce(context, (draft) => {
+            /**Section number is changed externally in this plan, so update that in the layoutPlan in context**/
+            const planInContext = findPlan(
+              draft.layoutPlansByLabwareType,
+              event.layoutPlan.destinationLabware.barcode!
+            );
+            if (planInContext) {
+              const source = Array.from(planInContext.plannedActions.values())
+                .flatMap((sources) => sources)
+                .find((source, indx) => source.address === event.slotAddress && indx === event.sectionIndex);
+              if (source) {
+                source.newSection = event.sectionNumber;
+              }
             }
-          }
-          return context;
+          });
         }),
         assignPlans: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_PLANS') return context;
-          context.plans = event.plans;
           /**
            * If a layoutPlan has been removed, make sure to also remove the ConfirmSectionLabware for that layoutPlan
            */
           const destinationBarcodes = new Set(context.plans.map((plan) => plan.planData.destination.barcode));
 
-          context.confirmSectionLabware = context.confirmSectionLabware.filter((csl) =>
+          const confirmSectionLabware = context.confirmSectionLabware.filter((csl) =>
             destinationBarcodes.has(csl.barcode)
           );
-          return context;
+          return { ...context, confirmSectionLabware, plans: event.plans };
         }),
 
         assignSectionNumberMode: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_SECTION_NUMBERING_MODE') return context;
-          context.sectionNumberMode = event.mode;
-          return context;
+          return { ...context, sectionNumberMode: event.mode };
         }),
 
         assignSourceLabware: assign(({ context, event }) => {
-          context.sourceLabware = _(context.plans)
-            .flatMap((plan) => plan.planData.sources)
-            .uniqBy((source) => source.barcode)
-            .value();
+          return produce(context, (draft) => {
+            draft.sourceLabware = _(draft.plans)
+              .flatMap((plan) => plan.planData.sources)
+              .uniqBy((source) => source.barcode)
+              .value();
 
-          //Set all highest section numbers for all source labware
-          context.sourceLabware.forEach((sourceLabware) => {
-            context.highestSectionNumbers.set(
-              sourceLabware.barcode,
-              maybeFindSlotByAddress(sourceLabware.slots, 'A1')?.blockHighestSection ?? 0
-            );
+            //Set all highest section numbers for all source labware
+            draft.sourceLabware.forEach((sourceLabware) => {
+              draft.highestSectionNumbers.set(
+                sourceLabware.barcode,
+                maybeFindSlotByAddress(sourceLabware.slots, 'A1')?.blockHighestSection ?? 0
+              );
+            });
           });
-          return context;
         }),
 
         assignRequestError: assign(({ context, event }) => {
           if (event.type !== 'xstate.error.actor.confirmSection') return context;
-          context.requestError = event.error;
-          return context;
+          return { ...context, requestError: event.error };
         }),
 
         assignWorkNumber: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_WORK_NUMBER') return context;
-          context.workNumber = event.workNumber;
-          return context;
+          return { ...context, workNumber: event.workNumber };
         }),
         assignConfirmSectionResults: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.confirmSection') return context;
-          context.confirmSectionResultLabwares = event.output.confirmSection.labware;
-          return context;
+          return { ...context, confirmSectionResultLabwares: event.output.confirmSection.labware };
         }),
 
         fillSectionNumbers: assign(({ context, event }) => {
@@ -416,13 +417,16 @@ export function createSectioningConfirmMachine() {
             ((event.type === 'UPDATE_PLANS' || event.type === 'UPDATE_SECTION_LAYOUT') &&
               context.sectionNumberMode === SectionNumberMode.Auto) ||
             event.type === 'UPDATE_SECTION_NUMBERING_MODE';
-          updateSectionNumber &&
-            fillInSectionNumbersInLayoutPlan(
-              context.sectionNumberMode,
-              context.layoutPlansByLabwareType,
-              context.highestSectionNumbers,
-              context.confirmSectionLabware.filter((csl) => csl.cancelled).map((item) => item.barcode)
-            );
+          if (updateSectionNumber) {
+            return produce(context, (draft) => {
+              fillInSectionNumbersInLayoutPlan(
+                draft.sectionNumberMode,
+                draft.layoutPlansByLabwareType,
+                draft.highestSectionNumbers,
+                draft.confirmSectionLabware.filter((csl) => csl.cancelled).map((item) => item.barcode)
+              );
+            });
+          }
           return context;
         })
       }

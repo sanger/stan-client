@@ -111,13 +111,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
 
   useEffect(() => {
     //Notify parent only for layout changes
-    if (
-      layoutPlan &&
-      current.matches('editingLayout') &&
-      layoutMachine &&
-      layoutMachine.getSnapshot().output &&
-      notifySectionChange.current
-    ) {
+    if (layoutPlan && current.matches('editableMode') && notifySectionChange.current) {
       notifySectionChange.current = false;
       onSectionUpdate && onSectionUpdate(layoutPlan);
     }

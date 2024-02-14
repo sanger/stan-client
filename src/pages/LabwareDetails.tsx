@@ -129,7 +129,7 @@ export default function LabwareDetails() {
           </div>
           <div className="space-y-4">
             <Heading level={2}>Labware History</Heading>
-            <History barcode={labware.barcode} />
+            <History barcode={labware.barcode} displayFlaggedLabware={false} />
           </div>
         </div>
       </AppShell.Main>

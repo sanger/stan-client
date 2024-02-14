@@ -20,14 +20,20 @@ import { HistoryUrlParams } from '../../pages/History';
 /**
  * Component for looking up and displaying the history of labware and samples
  */
-export default function History(props: HistoryUrlParams) {
+type HistoryProps = HistoryUrlParams & { displayFlaggedLabware?: boolean };
+export default function History(props: HistoryProps) {
+  const getHistoryURLParams = (props: HistoryProps): HistoryUrlParams => {
+    const { displayFlaggedLabware, ...urlProps } = props;
+    return urlProps;
+  };
+  const { displayFlaggedLabware, ...urlProps } = props;
   const historyMachine = React.useMemo(() => {
     return createHistoryMachine({
-      historyProps: props,
+      historyProps: getHistoryURLParams(urlProps),
       history: { entries: [], flaggedBarcodes: [] },
       serverError: null
     });
-  }, [props]);
+  }, [urlProps]);
   const [current, send] = useMachine(historyMachine);
 
   const { isAuthenticated } = useAuth();
@@ -184,7 +190,7 @@ export default function History(props: HistoryUrlParams) {
    * If the props change, send an update event to the machine
    */
   useEffect(() => {
-    send({ type: 'UPDATE_HISTORY_PROPS', props });
+    send({ type: 'UPDATE_HISTORY_PROPS', props: getHistoryURLParams(props) });
   }, [props, send, isValidInput]);
 
   /**
@@ -203,7 +209,7 @@ export default function History(props: HistoryUrlParams) {
   };
 
   const searchString = (keyValSeparator: string, tokenSeparator: string) => {
-    return Object.keys(historyProps)
+    return Object.keys(getHistoryURLParams(historyProps))
       .sort()
       .map((key) => `${key}${keyValSeparator}${historyProps[key as keyof HistoryUrlParams]}`)
       .join(tokenSeparator);
@@ -252,34 +258,34 @@ export default function History(props: HistoryUrlParams) {
                     </Table>
                   </div>
                 </div>
-                {history.flaggedBarcodes.length > 0 && (
-                  <div
-                    className={
-                      'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
-                    }
-                  >
-                    <Heading level={4} showBorder={false}>
-                      Flagged Labware
-                    </Heading>
-                    <div className={'flex flex-col mt-4 justify-center'} data-testid="flagged-labware">
-                      <Table>
-                        <TableBody>
-                          <TableCell className={'flex flex-col justify-center  p-2'}>
-                            {history.flaggedBarcodes.map((barcode, indx) => (
-                              <StyledLink
-                                data-testid={`styled-link-${barcode}`}
-                                key={barcode}
-                                to={labwareUrlPath(barcode)}
-                                className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
-                              >{`${barcode}`}</StyledLink>
-                            ))}
-                          </TableCell>
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </div>
-                )}
               </>
+            )}
+            {history.flaggedBarcodes.length > 0 && displayFlaggedLabware && (
+              <div
+                className={
+                  'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
+                }
+              >
+                <Heading level={4} showBorder={false}>
+                  Flagged Labware
+                </Heading>
+                <div className={'flex flex-col mt-4 justify-center'} data-testid="flagged-labware">
+                  <Table>
+                    <TableBody>
+                      <TableCell className={'flex flex-col justify-center  p-2'}>
+                        {history.flaggedBarcodes.map((barcode, indx) => (
+                          <StyledLink
+                            data-testid={`styled-link-${barcode}`}
+                            key={barcode}
+                            to={labwareUrlPath(barcode)}
+                            className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
+                          >{`${barcode}`}</StyledLink>
+                        ))}
+                      </TableCell>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
             )}
             <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
               History for
