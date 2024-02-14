@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Slot } from '../../../../src/components/labware/Slot';
 import { filledSlotFactory } from '../../../../src/lib/factories/slotFactory';
 import { SlotFieldsFragment } from '../../../../src/types/sdk';

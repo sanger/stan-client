@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe } from '@jest/globals';
 import { BrowserRouter } from 'react-router-dom';
 import React from 'react';

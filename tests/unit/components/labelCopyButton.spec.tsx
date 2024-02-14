@@ -50,9 +50,7 @@ describe('LabelCopyButton', () => {
   it('should call callback function showing failure if clipboard writing failed ', async () => {
     Object.assign(navigator, {
       clipboard: {
-        writeText: () => {
-          throw 'error';
-        }
+        writeText: jest.fn()
       }
     });
     jest.spyOn(navigator.clipboard, 'writeText');
