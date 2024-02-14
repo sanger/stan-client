@@ -5,7 +5,7 @@ name: Deploy Storybook
 
 on:
   push:
-    branches: [fixes_eslint_warning_and_story_book_deployment]
+    branches: [devel]
 
 jobs:
   build:
