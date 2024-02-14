@@ -45,12 +45,8 @@ const initialContext = {
 
 describe('historyMachine', () => {
   it('transitions to searching on creation and has the correct context', (done) => {
-    const mockHistoryMachine = createHistoryMachine({
-      historyProps: { workNumber: 'SGP8' },
-      history: { entries: [], flaggedBarcodes: [] },
-      serverError: null
-    });
-    const machine = createActor(mockHistoryMachine);
+    const mockHistoryMachine = createHistoryMachine();
+    const machine = createActor(mockHistoryMachine, { input: initialContext });
     machine.subscribe((state) => {
       if (state.matches('searching')) {
         expect(state.context).toEqual(initialContext);
@@ -61,19 +57,21 @@ describe('historyMachine', () => {
   });
 
   it('has an initial state of historyProps params with all fields filled in', (done) => {
-    const mockHistoryMachine = createHistoryMachine({
-      historyProps: {
-        workNumber: 'SGP8',
-        barcode: 'STAN-3111',
-        donorName: 'DONOR1',
-        externalName: 'EXT_1',
-        sampleId: '1',
-        eventType: 'Event'
-      },
-      history: { entries: [], flaggedBarcodes: [] },
-      serverError: null
+    const mockHistoryMachine = createHistoryMachine();
+    const machine = createActor(mockHistoryMachine, {
+      input: {
+        historyProps: {
+          workNumber: 'SGP8',
+          barcode: 'STAN-3111',
+          donorName: 'DONOR1',
+          externalName: 'EXT_1',
+          sampleId: '1',
+          eventType: 'Event'
+        },
+        history: { entries: [], flaggedBarcodes: [] },
+        serverError: null
+      }
     });
-    const machine = createActor(mockHistoryMachine);
     machine.subscribe((state) => {
       if (state.matches('searching')) {
         done();
@@ -88,8 +86,8 @@ describe('historyMachine', () => {
         flaggedBarcodes: []
       });
 
-      const mockSearchMachine = createHistoryMachine(initialContext);
-      const machine = createActor(mockSearchMachine);
+      const mockSearchMachine = createHistoryMachine();
+      const machine = createActor(mockSearchMachine, { input: initialContext });
       machine.subscribe((state) => {
         if (state.matches('searching')) {
           expect(jest.fn()).toHaveBeenCalledTimes(1);
@@ -113,8 +111,8 @@ describe('historyMachine', () => {
         entries: mockHistorySearchResults,
         flaggedBarcodes: []
       });
-      const mockSearchMachine = createHistoryMachine(initialContext);
-      const machine = createActor(mockSearchMachine);
+      const mockSearchMachine = createHistoryMachine();
+      const machine = createActor(mockSearchMachine, { input: initialContext });
       machine.subscribe((state) => {
         if (state.matches('searching')) {
           searchCount++;
@@ -145,8 +143,8 @@ describe('historyMachine', () => {
           ]
         }
       });
-      const mockHistoryMachine = createHistoryMachine(initialContext);
-      const machine = createActor(mockHistoryMachine);
+      const mockHistoryMachine = createHistoryMachine();
+      const machine = createActor(mockHistoryMachine, { input: initialContext });
       machine.subscribe((state) => {
         if (state.context.serverError !== undefined && state.context.serverError !== null) {
           expect(state.context.serverError).toEqual({
@@ -177,8 +175,8 @@ describe('historyMachine', () => {
         }
       });
       let searchCount = 0;
-      const mockSearchMachine = createHistoryMachine(initialContext);
-      const machine = createActor(mockSearchMachine);
+      const mockSearchMachine = createHistoryMachine();
+      const machine = createActor(mockSearchMachine, { input: initialContext });
       machine.subscribe((state) => {
         if (state.matches('searching')) {
           searchCount++;
@@ -214,8 +212,8 @@ describe('historyMachine', () => {
       });
 
       let searchCount = 0;
-      const mockSearchMachine = createHistoryMachine(initialContext);
-      const machine = createActor(mockSearchMachine);
+      const mockSearchMachine = createHistoryMachine();
+      const machine = createActor(mockSearchMachine, { input: initialContext });
       machine.subscribe((state) => {
         if (state.matches('searching')) {
           searchCount++;
