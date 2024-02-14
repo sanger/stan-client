@@ -266,6 +266,91 @@ describe('Work Allocation', () => {
     });
   });
 
+  context('when adding a new Project (Cost code description)', () => {
+    before(() => {
+      cy.visitAsEndUser('/sgp');
+      cy.findByTestId('addNewProject-btn').click();
+    });
+    context('when a new project is been created successfully', () => {
+      before(() => {
+        cy.findByTestId('project').type('new project');
+        cy.findByRole('button', { name: /Save/i }).click();
+      });
+      it('hides the add new config option form', () => {
+        cy.findByLabelText('Add New Project').should('not.exist');
+        cy.findByRole('button', { name: /Save/i }).should('not.exist');
+      });
+      it('displays the project select box with the newly added project name', () => {
+        shouldDisplaySelectedValue('project', 'new project');
+      });
+    });
+    context('when a new project fails to be created', () => {
+      before(() => {
+        cy.msw().then(({ graphql, worker }) => {
+          worker.use(
+            graphql.mutation('AddProject', () => {
+              return HttpResponse.json({
+                data: {
+                  addProject: null
+                }
+              });
+            })
+          );
+        });
+        cy.findByTestId('addNewProject-btn').click();
+        cy.findByTestId('project').type('new project');
+        cy.findByRole('button', { name: /Save/i }).click();
+      });
+      it('keeps the add new config option form', () => {
+        cy.findByLabelText('Add New Project').should('be.visible');
+
+        cy.findByRole('button', { name: /Save/i }).should('be.visible');
+      });
+    });
+  });
+
+  context('when adding a new Cost code)', () => {
+    before(() => {
+      cy.visitAsEndUser('/sgp');
+      cy.findByTestId('addNewCostCode-btn').click();
+    });
+    context('when a new cost code is been created successfully', () => {
+      before(() => {
+        cy.findByTestId('costCode').type('S12345');
+        cy.findByRole('button', { name: /Save/i }).click();
+      });
+      it('hides the add new config option form', () => {
+        cy.findByLabelText('Add New Cost Code').should('not.exist');
+        cy.findByRole('button', { name: /Save/i }).should('not.exist');
+      });
+      it('displays the cost code select box with the newly added cost code', () => {
+        shouldDisplaySelectedValue('costCode', 'S12345');
+      });
+    });
+    context('when a new cost code fails to be created', () => {
+      before(() => {
+        cy.msw().then(({ graphql, worker }) => {
+          worker.use(
+            graphql.mutation('AddCostCode', () => {
+              return HttpResponse.json({
+                data: {
+                  addCostCode: null
+                }
+              });
+            })
+          );
+        });
+        cy.findByTestId('addNewCostCode-btn').click();
+        cy.findByTestId('costCode').type('S12345');
+        cy.findByRole('button', { name: /Save/i }).click();
+      });
+      it('keeps the add new config option form', () => {
+        cy.findByLabelText('Add New Cost Code').should('be.visible');
+        cy.findByRole('button', { name: /Save/i }).should('be.visible');
+      });
+    });
+  });
+
   /*
   describe("Comments are shown or hidden dependent on chosen new status", () => {
     before(() => {
