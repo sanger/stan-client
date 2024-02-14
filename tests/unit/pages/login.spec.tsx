@@ -1,5 +1,5 @@
 import { describe } from '@jest/globals';
-import { render, fireEvent, screen, act, cleanup, waitFor } from '@testing-library/react';
+import { render, fireEvent, screen, act, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import Login from '../../../src/pages/Login';
 import '@testing-library/jest-dom';

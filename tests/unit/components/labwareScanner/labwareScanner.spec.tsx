@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, getAllByRole, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import LabwareScanner, { useLabwareContext } from '../../../../src/components/labwareScanner/LabwareScanner';
 import { getById, scanLabware } from '../../../generic/utilities';
 import React from 'react';

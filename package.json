@@ -74,7 +74,7 @@
     "codegen:watch": "DOTENV_CONFIG_PATH=./.env.local graphql-codegen --config codegen.yml -r dotenv/config --watch",
     "codegen:machine": "npx hygen machine new",
     "storybook": "sb dev -p 6006 -s public",
-    "build-storybook": "sb build -s public",
+    "build-storybook": "export SET NODE_OPTIONS=--openssl-legacy-provider  && sb build -s public",
     "deploy-storybook": "storybook-to-ghpages",
     "format": "prettier --write .",
     "lint": "npx eslint . --ext .ts,.tsx"

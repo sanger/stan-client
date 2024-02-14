@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { selectOption } from '../../../generic/utilities';
 import React from 'react';
 import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
@@ -52,7 +52,7 @@ describe('LabwareResult', () => {
         const initialLwResult: CoreLabwareResult = {
           barcode: labware.barcode
         };
-        let { container } = render(
+        render(
           <LabwareResult
             labware={labware}
             initialLabwareResult={initialLwResult}
@@ -83,7 +83,7 @@ describe('LabwareResult', () => {
     describe('Mounting labware with filled slots', () => {
       beforeEach(() => {
         labware.slots = labware.slots.map((slot, i) => {
-          if (i === 0 || i == 1) {
+          if (i === 0 || i === 1) {
             return filledSlotFactory.build({ address: slot.address });
           } else {
             return emptySlotFactory.build({ address: slot.address });
@@ -94,7 +94,7 @@ describe('LabwareResult', () => {
         const initialLwResult: CoreLabwareResult = {
           barcode: labware.barcode
         };
-        let { container } = render(
+        render(
           <LabwareResult
             labware={labware}
             initialLabwareResult={initialLwResult}

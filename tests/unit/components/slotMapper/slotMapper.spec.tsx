@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, getAllByTestId, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, getAllByTestId, render, screen, waitFor } from '@testing-library/react';
 import SlotMapper from '../../../../src/components/slotMapper/SlotMapper';
 import { OutputSlotCopyData, SlotCopyMode } from '../../../../src/components/slotMapper/slotMapper.types';
 import { objectKeys } from '../../../../src/lib/helpers';
