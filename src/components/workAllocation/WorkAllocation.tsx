@@ -26,7 +26,6 @@ import InfoIcon from '../icons/InfoIcon';
 import TopScrollingBar from '../TopScrollingBar';
 import { stanCore } from '../../lib/sdk';
 import Pill from '../Pill';
-import AddButton from '../buttons/AddButton';
 import AddNewConfigOption from './AddNewConfigOption';
 import projectFactory from '../../lib/factories/projectFactory';
 import costCodeFactory from '../../lib/factories/costCodeFactory';
@@ -340,23 +339,20 @@ export default function WorkAllocation() {
                     configName="project"
                   />
                 ) : (
-                  <div className="flex">
+                  <div className="md:flex-grow">
                     <CustomReactSelect
-                      className="w-6/7"
                       label="Project (cost code description)"
                       name="project"
                       dataTestId="project"
                       emptyOption={true}
                       options={selectOptionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
                       value={values.project}
-                    />
-                    <AddButton
-                      data-testid="addNewProject-btn"
-                      className={errors.project ?? 'place-self-end'}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        setAddNewProjectCodeCode(true);
+                      addButton={{
+                        dataTestId: 'addNewProject-btn',
+                        onClick: () => {
+                          setAddNewProjectCodeCode(true);
+                        },
+                        className: 'mt-4'
                       }}
                     />
                   </div>
@@ -405,23 +401,20 @@ export default function WorkAllocation() {
                     configName="costCode"
                   />
                 ) : (
-                  <div className="flex">
+                  <div className="md:flex-grow">
                     <CustomReactSelect
-                      className="w-6/7"
                       label="Cost Code"
                       name="costCode"
                       dataTestId="costCode"
                       emptyOption={true}
                       options={selectOptionValues(costCodes, 'code', 'code')}
                       value={values.costCode}
-                    />
-                    <AddButton
-                      data-testid="addNewCostCode-btn"
-                      className={errors.costCode ?? 'place-self-end'}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        setAddNewCostCode(true);
+                      addButton={{
+                        dataTestId: 'addNewCostCode-btn',
+                        onClick: () => {
+                          setAddNewCostCode(true);
+                        },
+                        className: 'mt-4'
                       }}
                     />
                   </div>
