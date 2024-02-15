@@ -83,13 +83,16 @@ type GraphQLErrorWithExtensions = {
  * Builds a {@link ServerErrors} object from a ClientError
  * @param e ClientError
  */
-export function extractServerErrors(e: ClientError): ServerErrors {
+export function   extractServerErrors(e: ClientError): ServerErrors {
   return {
     message:
       e.response.errors
-        ?.map((error) => error?.message?.match(/^.*\s:\s(.*)$/)?.[1])
-        .filter((error) => !!error)
-        .join("\n") ?? null,
+        ?.map((error) => {
+          const matchedMessage = error?.message?.match(/^.*\s:\s(.*)$/)?.[1];
+          return matchedMessage || error?.message;
+        })
+        .filter(Boolean)
+        .join('\n') ?? null,
     problems:
       (e.response.errors as GraphQLErrorWithExtensions[]).reduce<string[]>(
         (memo, graphQLError, _index, _original) => {

@@ -210,7 +210,7 @@ describe('Work Allocation', () => {
     context('Selecting a value in DNAP Study Id and name cell in table', () => {
       before(() => {
         cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
-        cy.findByTestId('SGP1008-DnapStudy').clear({ force: true }).type('11', { force: true }).blur();
+        cy.findByTestId('SGP1008-DnapStudy').scrollIntoView().clear({ force: true }).type('11', { force: true }).blur();
       });
 
       it('updates dnap study column', () => {

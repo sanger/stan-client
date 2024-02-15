@@ -352,10 +352,9 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
 
         updateWork: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_WORK') return context;
-          return {
-            ...context,
-            workWithComments: context.workWithComments.splice(event.rowIndex, 1, event.workWithComment)
-          };
+          return produce(context, (draft) => {
+            draft.workWithComments.splice(event.rowIndex, 1, event.workWithComment);
+          });
         }),
         assignSortedWorks: assign(({ context, event }) => {
           if (event.type !== 'SORT_WORKS') return context;

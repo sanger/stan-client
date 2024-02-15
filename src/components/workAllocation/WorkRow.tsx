@@ -84,6 +84,7 @@ export default function WorkRow({
   /**Notify the changes in work fields*/
   React.useEffect(() => {
     if (current.context.isInvokeActorDone) {
+      console.log('work updated', work);
       onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
     }
   }, [work, comment, onWorkFieldUpdate, rowIndex, current, actor]);
@@ -119,11 +120,16 @@ export default function WorkRow({
   /**
    * List of possible events that can change the current status (excluding edit)
    */
-  // const nextStatuses = getNextEvents(current).filter(
-  //   (e) => e !== 'EDIT' && e !== 'UPDATE_NUM_SLIDES' && e !== 'UPDATE_NUM_BLOCKS' && e !== 'UPDATE_PRIORITY'
-  // );
-
-  const nextStatuses = getNextEvents(current);
+  const nextStatuses = getNextEvents(current).filter(
+    (e) =>
+      e !== 'EDIT' &&
+      e !== 'UPDATE_NUM_SLIDES' &&
+      e !== 'UPDATE_NUM_BLOCKS' &&
+      e !== 'UPDATE_PRIORITY' &&
+      e !== 'UPDATE_NUM_ORIGINAL_SAMPLES' &&
+      e !== 'UPDATE_OMERO_PROJECT' &&
+      e !== 'UPDATE_DNAP_PROJECT'
+  );
 
   /**
    * Set the initial values for the form to the first next status and first available comment
@@ -259,9 +265,9 @@ export default function WorkRow({
                       name={'priority'}
                       data-testid={`${work.workNumber}-priority`}
                       className={`border-0 border-gray-100`}
-                      onChange={async (e: React.FormEvent<HTMLInputElement>) => {
+                      onChange={(e: React.FormEvent<HTMLInputElement>) => {
                         const priority = e.currentTarget.value.toUpperCase();
-                        await setFieldValue('priority', priority);
+                        setFieldValue('priority', priority);
                         if (validateWorkPriority(priority).length === 0) {
                           send({
                             type: 'UPDATE_PRIORITY',

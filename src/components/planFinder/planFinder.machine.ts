@@ -2,6 +2,7 @@ import { FindPlanDataQuery, LabwareFlaggedFieldsFragment, Maybe } from '../../ty
 import { assign, createMachine, fromPromise } from 'xstate';
 import { stanCore } from '../../lib/sdk';
 import { ServerErrors } from '../../types/stan';
+import produce from 'immer';
 
 type PlanFinderContext = {
   /**
@@ -98,14 +99,12 @@ export const planFinderMachine = (plans: Map<string, FindPlanDataQuery>) =>
       actions: {
         assignLabware: assign(({ context, event }) => {
           if (event.type !== 'SUBMIT_LABWARE') return context;
-          context.labware = event.labware;
-          return context;
+          return { ...context, labware: event.labware };
         }),
 
         assignDuplicationError: assign(({ context, event }) => {
           if (event.type !== 'SUBMIT_LABWARE') return context;
-          context.validationError = `Plan has already been found for ${event.labware.barcode}`;
-          return context;
+          return { ...context, validationError: `Plan has already been found for ${event.labware.barcode}` };
         }),
 
         assignPlan: assign(({ context, event }) => {
@@ -114,31 +113,29 @@ export const planFinderMachine = (plans: Map<string, FindPlanDataQuery>) =>
           event.output.planData.plan.planActions = event.output.planData.plan.planActions.filter(
             (action) => action.destination.labwareId === context.labware!.id
           );
-          context.plans.set(context.labware!.barcode, event.output);
-          return context;
+          return produce(context, (draft) => {
+            draft.plans.set(draft.labware!.barcode, event.output);
+          });
         }),
 
         assignRequestError: assign(({ context, event }) => {
           if (event.type !== 'xstate.error.actor.findPlan') return context;
-          context.requestError = event.error;
-          return context;
+          return { ...context, requestError: event.error };
         }),
 
         clearErrors: assign(({ context }) => {
-          context.requestError = null;
-          context.validationError = null;
-          return context;
+          return { ...context, requestError: null, validationError: null };
         }),
 
         removePlanByBarcode: assign(({ context, event }) => {
           if (event.type !== 'REMOVE_PLAN_BY_BARCODE') return context;
-          context.plans.delete(event.barcode);
-          return context;
+          return produce(context, (draft) => {
+            draft.plans.delete(event.barcode);
+          });
         }),
 
         resetLabware: assign(({ context }) => {
-          context.labware = undefined;
-          return context;
+          return { ...context, labware: undefined };
         })
       }
     }

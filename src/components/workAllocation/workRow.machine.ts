@@ -11,7 +11,7 @@ import {
   WorkWithCommentFieldsFragment
 } from '../../types/sdk';
 import { stanCore } from '../../lib/sdk';
-import { castDraft } from 'immer';
+import produce, { castDraft } from 'immer';
 import { Maybe } from 'yup';
 import { ClientError } from 'graphql-request';
 
@@ -285,57 +285,57 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
       actions: {
         assignSgpNumber: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkStatus') return context;
-          context.workWithComment = event.output.updateWorkStatus;
-          context.isInvokeActorDone = true;
-          return context;
+          return { ...context, workWithComment: event.output.updateWorkStatus, isInvokeActorDone: true };
         }),
         assignWorkNumBlocks: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkNumBlocks') return context;
-          context.workWithComment.work = event.output.updateWorkNumBlocks;
-          context.isInvokeActorDone = true;
-          return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkNumBlocks;
+            draft.isInvokeActorDone = true;
+          });
         }),
         assignWorkNumSlides: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkNumSlides') return context;
-          context.workWithComment.work = event.output.updateWorkNumSlides;
-          context.isInvokeActorDone = true;
-          return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkNumSlides;
+            draft.isInvokeActorDone = true;
+          });
         }),
         assignWorkNumOriginalSamples: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkNumOriginalSamples') return context;
-          context.workWithComment.work = event.output.updateWorkNumOriginalSamples;
-          return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkNumOriginalSamples;
+          });
         }),
         assignWorkPriority: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkPriority') return context;
-          context.workWithComment.work = event.output.updateWorkPriority;
-          context.isInvokeActorDone = true;
-          return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkPriority;
+            draft.isInvokeActorDone = true;
+          });
         }),
         assignWorkOmeroProject: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkOmeroProject') return context;
-          context.workWithComment.work = event.output.updateWorkOmeroProject;
-          context.isInvokeActorDone = true;
-          return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkOmeroProject;
+            draft.isInvokeActorDone = true;
+          });
         }),
         assignWorkDnapProject: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkDnapProject') return context;
-          context.workWithComment.work = event.output.updateWorkDnapStudy;
-          context.serverSuccess =
-            'DNAP project successfully updated to ' + event.output.updateWorkDnapStudy.dnapStudy!.name;
-          context.isInvokeActorDone = true;
-          return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkDnapStudy;
+            draft.serverSuccess =
+              'DNAP project successfully updated to ' + event.output.updateWorkDnapStudy.dnapStudy!.name;
+            draft.isInvokeActorDone = true;
+          });
         }),
         toggleEditMode: assign(({ context, event }) => {
-          context.editModeEnabled = !context.editModeEnabled;
-          return context;
+          return { ...context, editModeEnabled: !context.editModeEnabled };
         }),
         assignServerError: assign(({ context, event }) => {
-          if (event.type !== 'xstate.error.actor.updateWorkDnapProject') {
-            return context;
-          }
-          context.serverErrors = castDraft(event.error);
-          return context;
+          if (event.type !== 'xstate.error.actor.updateWorkDnapProject') return context;
+          return { ...context, serverErrors: castDraft(event.error) };
         })
       }
     }

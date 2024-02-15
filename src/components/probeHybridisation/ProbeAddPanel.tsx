@@ -197,7 +197,6 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
                     ]
                   };
                   helpers.replace(index, { ...updatedLabware });
-                  //  helpers.push(de)
                 });
               }}
             >

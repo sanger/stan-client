@@ -85,17 +85,19 @@ export const analysisLabwareMachine = createMachine(
     actions: {
       assignAnalysisType: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_ANALYSIS_TYPE') return context;
-        context.operationType = event.value === AnalysisMeasurementType.RIN ? OperationType.RIN : OperationType.DV200;
-        const measurements = buildMeasurementFields(MeasurementValueCategory.SINGLE_VALUE_TYPE, context.operationType);
-        //Change measurement data in all labwares
-
-        context.analysisLabwares = context.analysisLabwares.map((labware) => {
-          return {
-            ...labware,
-            measurements: measurements
-          };
-        });
-        return context;
+        const operationType = event.value === AnalysisMeasurementType.RIN ? OperationType.RIN : OperationType.DV200;
+        const measurements = buildMeasurementFields(MeasurementValueCategory.SINGLE_VALUE_TYPE, operationType);
+        return {
+          ...context,
+          operationType,
+          //Change measurement data in all labwares
+          analysisLabwares: context.analysisLabwares.map((labware) => {
+            return {
+              ...labware,
+              measurements: measurements
+            };
+          })
+        };
       }),
       assignMeasurementType: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_MEASUREMENT_TYPE') return context;
@@ -106,12 +108,14 @@ export const analysisLabwareMachine = createMachine(
           ...context.analysisLabwares[indx],
           measurements: buildMeasurementFields(event.value, context.operationType)
         };
-        context.analysisLabwares = [
-          ...context.analysisLabwares.slice(0, indx),
-          updateAnalysisLabware,
-          ...context.analysisLabwares.slice(indx + 1)
-        ];
-        return context;
+        return {
+          ...context,
+          analysisLabwares: [
+            ...context.analysisLabwares.slice(0, indx),
+            updateAnalysisLabware,
+            ...context.analysisLabwares.slice(indx + 1)
+          ]
+        };
       }),
       assignLabwareData: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_LABWARE_DATA') return context;
@@ -151,12 +155,14 @@ export const analysisLabwareMachine = createMachine(
             break;
           }
         }
-        context.analysisLabwares = [
-          ...context.analysisLabwares.slice(0, indx),
-          updateAnalysisLabware,
-          ...context.analysisLabwares.slice(indx + 1)
-        ];
-        return context;
+        return {
+          ...context,
+          analysisLabwares: [
+            ...context.analysisLabwares.slice(0, indx),
+            updateAnalysisLabware,
+            ...context.analysisLabwares.slice(indx + 1)
+          ]
+        };
       }),
       assignComments: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_ALL_COMMENTS_TYPE') return context;
@@ -167,7 +173,15 @@ export const analysisLabwareMachine = createMachine(
             commentId: event.commentId !== '' ? Number(event.commentId) : undefined
           };
         });
-        return context;
+        return {
+          ...context,
+          analysisLabwares: context.analysisLabwares.map((labware) => {
+            return {
+              ...labware,
+              commentId: event.commentId !== '' ? Number(event.commentId) : undefined
+            };
+          })
+        };
       }),
       assignWorkNumbers: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_ALL_WORKNUMBERS') return context;
@@ -178,7 +192,15 @@ export const analysisLabwareMachine = createMachine(
             workNumber: event.workNumber
           };
         });
-        return context;
+        return {
+          ...context,
+          analysisLabwares: context.analysisLabwares.map((labware) => {
+            return {
+              ...labware,
+              workNumber: event.workNumber
+            };
+          })
+        };
       })
     }
   }
