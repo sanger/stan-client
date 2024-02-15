@@ -66,16 +66,11 @@ describe('Sectioning Confirmation', () => {
         .then((col) => {
           sectionNumber = Number(col.text());
         });
-      cy.findAllByTestId('labware-comments').each((elem) =>
-        cy
-          .wrap(elem)
-          .find('input')
-          .should('have.value', sectionNumber + 1 + '')
-      );
+      cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).should('have.value', sectionNumber + 1 + ''));
     });
 
     it('disables all section number fields', () => {
-      cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).find('input').should('be.disabled'));
+      cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).should('be.disabled'));
     });
     // Section numbers already filled in
     it('enables the Save button', () => {
@@ -191,11 +186,9 @@ describe('Sectioning Confirmation', () => {
             highestSectionNumber = Number(col.text());
           });
 
-        cy.findAllByTestId('labware-comments').each((elem) => {
+        cy.findAllByTestId('section-number').each((elem) => {
           highestSectionNumber++;
-          cy.wrap(elem)
-            .find('input')
-            .should('have.value', highestSectionNumber + '');
+          cy.wrap(elem).should('have.value', highestSectionNumber + '');
         });
       });
       it('should display region fields for all sections', () => {
@@ -296,13 +289,24 @@ describe('Sectioning Confirmation', () => {
     });
     context("when 'manual' mode is selected for section numbering", () => {
       before(() => {
+        cy.visit('/lab/sectioning/confirm');
+      });
+      before(() => {
+        selectSGPNumber('SGP1008');
+        findPlanByBarcode('STAN-0001F');
+        cy.findByText('Edit Layout').click();
+        cy.findByRole('dialog').within(() => {
+          cy.findByText('STAN-2021').click();
+          cy.findByText(`\u00d72`).should('be.visible');
+          cy.findByText('Done').click();
+        });
         cy.get('[type = "radio"]').eq(1).click();
       });
       it('enables all section number fields ', () => {
-        cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).find('input').should('be.enabled'));
+        cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).should('be.enabled'));
       });
       it('should empty all section number fields', () => {
-        cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).find('input').should('have.value', ''));
+        cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).should('have.value', ''));
       });
       // Section numbers not filled in
       it('disables the Save button', () => {
@@ -350,7 +354,7 @@ describe('Sectioning Confirmation', () => {
               return HttpResponse.json({
                 errors: [
                   {
-                    message: 'There was an error confirming the Sectioning operation'
+                    message: 'the Sectioning operation failed'
                   }
                 ]
               });
@@ -362,7 +366,7 @@ describe('Sectioning Confirmation', () => {
       });
 
       it('shows an error', () => {
-        cy.findByText('There was an error confirming the Sectioning operation').should('be.visible');
+        cy.findByText('the Sectioning operation failed').should('be.visible');
       });
     });
 
@@ -391,7 +395,7 @@ describe('Sectioning Confirmation', () => {
       });
       it('displays a print success message', () => {
         cy.findByTestId('print-div').within(() => {
-          cy.findByText('Tube Printer successfully printed STAN-0001F').should('be.visible');
+          cy.findByText('Proviasette Printer successfully printed STAN-2021').should('be.visible');
         });
       });
     });
