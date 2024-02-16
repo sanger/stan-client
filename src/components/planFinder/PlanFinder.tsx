@@ -4,6 +4,8 @@ import { useMachine } from '@xstate/react';
 import { planFinderMachine } from './planFinder.machine';
 import Warning from '../notifications/Warning';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
+import { usePrevious } from '../../lib/hooks';
+import { isEqual } from 'lodash';
 
 type PlanFinderParams = {
   /**
@@ -50,22 +52,22 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
       memo.set(plan.planData.destination.barcode, plan);
       return memo;
     }, new Map());
-    return planFinderMachine.withContext({
-      ...planFinderMachine.context,
-      plans: planMap
-    });
+    return planFinderMachine(planMap);
   }, [initialPlans]);
 
   const [current, send] = useMachine(memoPlanFinderMachine);
   const { plans, requestError, validationError } = current.context;
   const showError = requestError || validationError;
-
   /**
    * Whenever the plans are updated, call the onChange callback
    */
+  const plansArray = Array.from(plans.values());
+  const previousPlans = usePrevious(plansArray);
   useEffect(() => {
-    onChange(Array.from(plans.values()));
-  }, [plans, onChange]);
+    if (!isEqual(previousPlans, plansArray)) {
+      onChange(plansArray);
+    }
+  }, [plansArray, onChange, previousPlans]);
 
   /**
    * Callback for when the user submits the barcode in the <ScanInput />
@@ -84,6 +86,10 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
     (barcode: string) => send({ type: 'REMOVE_PLAN_BY_BARCODE', barcode }),
     [send]
   );
+  const memoizedChildren = React.useMemo(
+    () => children({ plans: Array.from(plans.values()), removePlanByBarcode }),
+    [plans, removePlanByBarcode, children]
+  );
 
   return (
     <div className={'max-w-screen-xl mx-auto'}>
@@ -93,7 +99,7 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
           {}
         </LabwareScanner>
       </div>
-      {children({ plans: Array.from(plans.values()), removePlanByBarcode })}
+      {memoizedChildren}
     </div>
   );
 }

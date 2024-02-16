@@ -29,6 +29,7 @@ import {
 } from '../types/sdk';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 type SampleCommentsFormData = Required<SampleProcessingCommentRequest> & {
   /**Solution to apply to all labware**/
@@ -37,16 +38,16 @@ type SampleCommentsFormData = Required<SampleProcessingCommentRequest> & {
 const SampleProcessingComments: React.FC = () => {
   const sampleCommentsInfo = useLoaderData() as GetSampleProcessingCommentsInfoQuery;
   const formMachine = React.useMemo(() => {
-    return createFormMachine<SampleProcessingCommentRequest, RecordSampleProcessingCommentsMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<SampleProcessingCommentRequest, RecordSampleProcessingCommentsMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordSampleProcessingComments({
             request: {
-              labware: e.values.labware
+              labware: input.event.values.labware
             }
           });
-        }
+        })
       }
     });
   }, []);

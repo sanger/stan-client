@@ -1,10 +1,9 @@
-import { createMachine } from 'xstate';
-import { Maybe } from '../../types/sdk';
-import { HistoryData, MachineServiceDone, MachineServiceError } from '../../types/stan';
+import { assign, createMachine, fromPromise } from 'xstate';
+import { HistoryData } from '../../types/stan';
 import * as historyService from '../../lib/services/historyService';
-import { assign } from '@xstate/immer';
-import { ClientError } from 'graphql-request';
 import { HistoryUrlParams } from '../../pages/History';
+import { ClientError } from 'graphql-request';
+import { Maybe } from 'yup';
 
 type HistoryContext = {
   historyProps: HistoryUrlParams;
@@ -15,24 +14,27 @@ type HistoryContext = {
 type HistoryEvent =
   | { type: 'UPDATE_HISTORY_PROPS'; props: HistoryUrlParams }
   | { type: 'RETRY' }
-  | MachineServiceDone<'findHistory', HistoryData>
-  | MachineServiceError<'findHistory'>;
+  | { type: 'xstate.done.actor.findHistory'; output: HistoryData }
+  | { type: 'xstate.error.actor.findHistory'; error: Maybe<ClientError> };
 
 export default function createHistoryMachine() {
-  return createMachine<HistoryContext, HistoryEvent>(
+  return createMachine(
     {
+      types: {} as {
+        events: HistoryEvent;
+        context: HistoryContext;
+      },
       id: 'historyMachine',
       initial: 'searching',
-      context: {
-        historyProps: {},
-        history: { entries: [], flaggedBarcodes: [] },
-        serverError: null
-      },
+      context: ({ input }: { input: HistoryContext }): HistoryContext => ({
+        ...input
+      }),
       states: {
         searching: {
           invoke: {
-            src: 'findHistory',
             id: 'findHistory',
+            src: fromPromise(({ input }) => historyService.findHistory(input.historyProps)),
+            input: ({ context: { historyProps } }) => ({ historyProps }),
             onDone: {
               target: 'found',
               actions: 'assignHistory'
@@ -64,26 +66,22 @@ export default function createHistoryMachine() {
     },
     {
       actions: {
-        assignHistory: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.findHistory') return;
-          ctx.history = e.data;
+        assignHistory: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.findHistory') return context;
+          return { ...context, history: event.output };
         }),
 
-        assignHistoryProps: assign((ctx, e) => {
-          if (e.type !== 'UPDATE_HISTORY_PROPS') return;
-          ctx.historyProps = e.props;
+        assignHistoryProps: assign(({ context, event }) => {
+          if (event.type === 'UPDATE_HISTORY_PROPS') {
+            return { ...context, historyProps: event.props };
+          }
+          return context;
         }),
 
-        assignServerError: assign((ctx, e) => {
-          if (e.type !== 'error.platform.findHistory') return;
-          ctx.serverError = e.data;
+        assignServerError: assign(({ context, event }) => {
+          if (event.type !== 'xstate.error.actor.findHistory') return context;
+          return { ...context, serverError: event.error };
         })
-      },
-
-      services: {
-        findHistory: (context) => {
-          return historyService.findHistory(context.historyProps);
-        }
       }
     }
   );

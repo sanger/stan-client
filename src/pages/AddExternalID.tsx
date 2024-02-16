@@ -18,17 +18,18 @@ import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { stanCore } from '../lib/sdk';
 import { AddExternalIdMutation, AddExternalIdRequest } from '../types/sdk';
+import { fromPromise } from 'xstate';
 
 export default function AddExternalID() {
   type AddExternalIDFormData = Required<AddExternalIdRequest>;
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<AddExternalIdRequest, AddExternalIdMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.AddExternalID({ request: e.values });
-        }
+    return createFormMachine<AddExternalIdRequest, AddExternalIdMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.AddExternalID({ request: input.event.values });
+        })
       }
     });
   }, []);

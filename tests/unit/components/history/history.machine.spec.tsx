@@ -1,7 +1,20 @@
-import { interpret } from 'xstate';
+import { createActor } from 'xstate';
 import createHistoryMachine from '../../../../src/components/history/history.machine';
 import { HistoryData, HistoryTableEntry } from '../../../../src/types/stan';
 import { LabwareState } from '../../../../src/types/sdk';
+import { findHistory } from '../../../../src/lib/services/historyService';
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
+afterAll(() => {
+  jest.resetAllMocks();
+});
+jest.mock('../../../../src/lib/services/historyService', () => ({
+  findHistory: jest.fn()
+}));
+
 const mockHistorySearchResults: HistoryTableEntry[] = [
   {
     eventId: 1,
@@ -23,53 +36,20 @@ const mockHistorySearchResults: HistoryTableEntry[] = [
     sectionPosition: '2'
   }
 ];
-afterEach(() => {
-  jest.clearAllMocks();
-});
 
-function findHistorySuccess() {
-  return {
-    findHistory() {
-      return new Promise<HistoryData>((resolve) => {
-        resolve({ entries: mockHistorySearchResults, flaggedBarcodes: [] });
-      });
-    }
-  };
-}
-function findHistoryError() {
-  return {
-    findHistory() {
-      return new Promise<HistoryData>((resolve, reject) => {
-        reject({
-          response: {
-            errors: [
-              {
-                message: 'Exception while fetching data (/findHistory) : No History entries found'
-              }
-            ]
-          }
-        });
-      });
-    }
-  };
-}
+const initialContext = {
+  historyProps: { workNumber: 'SGP8' },
+  history: { entries: [], flaggedBarcodes: [] },
+  serverError: null
+};
 
 describe('historyMachine', () => {
   it('transitions to searching on creation and has the correct context', (done) => {
-    const mockHistoryMachine = createHistoryMachine().withContext(
-      Object.assign({}, createHistoryMachine().context, {
-        historyProps: { workNumber: 'SGP8' },
-        history: { entries: [], flaggedBarcodes: [] },
-        serverError: null
-      })
-    );
-    const machine = interpret(mockHistoryMachine).onTransition((state) => {
+    const mockHistoryMachine = createHistoryMachine();
+    const machine = createActor(mockHistoryMachine, { input: initialContext });
+    machine.subscribe((state) => {
       if (state.matches('searching')) {
-        expect(state.context).toEqual({
-          historyProps: { workNumber: 'SGP8' },
-          history: { entries: [], flaggedBarcodes: [] },
-          serverError: null
-        });
+        expect(state.context).toEqual(initialContext);
         done();
       }
     });
@@ -77,21 +57,22 @@ describe('historyMachine', () => {
   });
 
   it('has an initial state of historyProps params with all fields filled in', (done) => {
-    const mockHistoryMachine = createHistoryMachine().withContext(
-      Object.assign({}, createHistoryMachine().context, {
+    const mockHistoryMachine = createHistoryMachine();
+    const machine = createActor(mockHistoryMachine, {
+      input: {
         historyProps: {
           workNumber: 'SGP8',
           barcode: 'STAN-3111',
           donorName: 'DONOR1',
           externalName: 'EXT_1',
-          sampleId: 1,
+          sampleId: '1',
           eventType: 'Event'
         },
         history: { entries: [], flaggedBarcodes: [] },
         serverError: null
-      })
-    );
-    const machine = interpret(mockHistoryMachine).onTransition((state) => {
+      }
+    });
+    machine.subscribe((state) => {
       if (state.matches('searching')) {
         done();
       }
@@ -100,16 +81,17 @@ describe('historyMachine', () => {
   });
   describe('searches history on initialisation', () => {
     it('calls the findHistory query and sets state to found', (done) => {
-      const mockSearchMachine = createHistoryMachine()
-        .withContext({
-          historyProps: { workNumber: 'SGP8' },
-          history: { entries: [], flaggedBarcodes: [] },
-          serverError: null
-        })
-        .withConfig({
-          services: findHistorySuccess()
-        });
-      const machine = interpret(mockSearchMachine).onTransition((state) => {
+      (findHistory as jest.MockedFunction<typeof findHistory>).mockResolvedValue({
+        entries: mockHistorySearchResults,
+        flaggedBarcodes: []
+      });
+
+      const mockSearchMachine = createHistoryMachine();
+      const machine = createActor(mockSearchMachine, { input: initialContext });
+      machine.subscribe((state) => {
+        if (state.matches('searching')) {
+          expect(jest.fn()).toHaveBeenCalledTimes(1);
+        }
         if (state.matches('found')) {
           expect(state.context).toEqual({
             historyProps: { workNumber: 'SGP8' },
@@ -125,17 +107,13 @@ describe('historyMachine', () => {
   describe('searches history again on UPDATE_HISTORY_PROPS', () => {
     it('calls the findHistory query and sets state to searching', (done) => {
       let searchCount = 0;
-
-      const mockSearchMachine = createHistoryMachine()
-        .withContext({
-          historyProps: { workNumber: 'SGP8' },
-          history: { entries: [], flaggedBarcodes: [] },
-          serverError: null
-        })
-        .withConfig({
-          services: findHistorySuccess()
-        });
-      const machine = interpret(mockSearchMachine).onTransition((state, event) => {
+      (findHistory as jest.MockedFunction<typeof findHistory>).mockResolvedValue({
+        entries: mockHistorySearchResults,
+        flaggedBarcodes: []
+      });
+      const mockSearchMachine = createHistoryMachine();
+      const machine = createActor(mockSearchMachine, { input: initialContext });
+      machine.subscribe((state) => {
         if (state.matches('searching')) {
           searchCount++;
         }
@@ -156,16 +134,18 @@ describe('historyMachine', () => {
 
   describe('when error is returned by findHistory ', () => {
     it('goes to error state when the history search returns an error', (done) => {
-      const mockHistoryMachine = createHistoryMachine()
-        .withContext({
-          historyProps: { workNumber: 'SGP8' },
-          history: { entries: [], flaggedBarcodes: [] },
-          serverError: null
-        })
-        .withConfig({
-          services: findHistoryError()
-        });
-      const machine = interpret(mockHistoryMachine).onTransition((state) => {
+      (findHistory as jest.MockedFunction<typeof findHistory>).mockRejectedValue({
+        response: {
+          errors: [
+            {
+              message: 'Exception while fetching data (/findHistory) : No History entries found'
+            }
+          ]
+        }
+      });
+      const mockHistoryMachine = createHistoryMachine();
+      const machine = createActor(mockHistoryMachine, { input: initialContext });
+      machine.subscribe((state) => {
         if (state.context.serverError !== undefined && state.context.serverError !== null) {
           expect(state.context.serverError).toEqual({
             response: {
@@ -185,17 +165,19 @@ describe('historyMachine', () => {
   });
   describe('searches history again on UPDATE_HISTORY_PROPS on error', () => {
     it('calls the findHistory query and sets state to searching', (done) => {
+      (findHistory as jest.MockedFunction<typeof findHistory>).mockRejectedValue({
+        response: {
+          errors: [
+            {
+              message: 'Exception while fetching data (/findHistory) : No History entries found'
+            }
+          ]
+        }
+      });
       let searchCount = 0;
-      const mockSearchMachine = createHistoryMachine()
-        .withContext({
-          historyProps: { workNumber: 'SGP8' },
-          history: { entries: [], flaggedBarcodes: [] },
-          serverError: null
-        })
-        .withConfig({
-          services: findHistoryError()
-        });
-      const machine = interpret(mockSearchMachine).onTransition((state, event) => {
+      const mockSearchMachine = createHistoryMachine();
+      const machine = createActor(mockSearchMachine, { input: initialContext });
+      machine.subscribe((state) => {
         if (state.matches('searching')) {
           searchCount++;
         }
@@ -219,17 +201,20 @@ describe('historyMachine', () => {
   });
   describe('searches history again on RETRY on error', () => {
     it('calls the findHistory query and sets state to searching', (done) => {
+      (findHistory as jest.MockedFunction<typeof findHistory>).mockRejectedValue({
+        response: {
+          errors: [
+            {
+              message: 'Exception while fetching data (/findHistory) : No History entries found'
+            }
+          ]
+        }
+      });
+
       let searchCount = 0;
-      const mockSearchMachine = createHistoryMachine()
-        .withContext({
-          historyProps: { workNumber: 'SGP8' },
-          history: { entries: [], flaggedBarcodes: [] },
-          serverError: null
-        })
-        .withConfig({
-          services: findHistoryError()
-        });
-      const machine = interpret(mockSearchMachine).onTransition((state, event) => {
+      const mockSearchMachine = createHistoryMachine();
+      const machine = createActor(mockSearchMachine, { input: initialContext });
+      machine.subscribe((state) => {
         if (state.matches('searching')) {
           searchCount++;
         }

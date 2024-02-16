@@ -107,7 +107,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
   }, [comments, initialLayoutPlan]);
   const [current, send, service] = useMachine(confirmLabwareMachine);
   const { cancelled, layoutPlan, labware } = current.context;
-  const { layoutMachine } = current.children;
+  const { layoutMachine } = current.context;
   const [notifyCancel, setNotifyCancel] = React.useState(false);
   const notifySectionChange = React.useRef(false);
 
@@ -118,22 +118,19 @@ const TubeRow: React.FC<TubeRowProps> = ({
       onChange(confirmOperationLabware);
     }
   }, [onChange, confirmOperationLabware]);
-
-  //Notify parent about section layout changes
   useEffect(() => {
     if (
-      layoutPlan &&
-      ((current.event.type === 'done.invoke.layoutMachine' && notifySectionChange.current) ||
-        current.event.type === 'TOGGLE_CANCEL')
+      (layoutPlan && current.context.isLayoutUpdated && notifySectionChange.current) ||
+      current.context.isCancelToggled
     ) {
       notifySectionChange.current = false;
       onSectionUpdate(layoutPlan);
     }
-  }, [layoutPlan, current.event, onSectionUpdate]);
+  }, [layoutPlan, service, onSectionUpdate, current]);
 
   /**Update for source changes in parent**/
   useEffect(() => {
-    send('UPDATE_ALL_SOURCES', initialLayoutPlan);
+    send({ type: 'UPDATE_ALL_SOURCES', plannedActions: initialLayoutPlan.plannedActions });
   }, [initialLayoutPlan, send]);
 
   const rowClassnames = classNames(
@@ -205,7 +202,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
               slotColor={(address) => buildSlotColor(layoutPlan, address)}
             />
 
-            <PinkButton disabled={current.matches('done')} onClick={() => !cancelled && send({ type: 'EDIT_LAYOUT' })}>
+            <PinkButton disabled={current.matches('.done')} onClick={() => !cancelled && send({ type: 'EDIT_LAYOUT' })}>
               Edit Layout
             </PinkButton>
           </div>
@@ -215,7 +212,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
           <span className={`${cancelled ? 'line-through' : ''}`}>{layoutPlan.destinationLabware.barcode}</span>
 
           {layoutMachine && (
-            <Modal show={true}>
+            <Modal show={current.matches('editingLayout')}>
               <ModalBody>
                 <Heading level={3}>Set Layout</Heading>
                 {layoutMachine && (

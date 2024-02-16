@@ -30,6 +30,12 @@ export type LabwareAwaitingStorageInfo = {
   replicate: string;
 };
 
+type BlockerFunctionParams = {
+  currentLocation: Location;
+  nextLocation: Location;
+  historyAction: HistoryAction;
+};
+
 /**
  *
  * @param nextLocation - location to navigate
@@ -40,23 +46,22 @@ export type LabwareAwaitingStorageInfo = {
  * a) Go back and Go forward operation to a Location/Store page
  * b) Going to a new location page by invoking a store location link or through a search
  */
-export function awaitingStorageCheckOnExit(args: {
-  currentLocation: Location;
-  nextLocation: Location;
-  historyAction: HistoryAction;
-}) {
+export function awaitingStorageCheckOnExit(args: BlockerFunctionParams) {
   /**PUSH is the action for  invoking/visiting a link or for pushing a new entry onto the history stack
    * POP is the action send while you navigate using the browser's forward/back buttons.
    * **/
-  if (
-    (args.historyAction === 'POP' &&
-      ['/locations', '/store'].some((path) => args.nextLocation.pathname.startsWith(path))) ||
-    (args.historyAction === 'PUSH' && args.nextLocation.pathname.startsWith('/locations'))
-  ) {
-    return false;
-  } else {
-    return true;
+  if (args) {
+    if (
+      (args.historyAction === 'POP' &&
+        ['/locations', '/store'].some((path) => args.nextLocation.pathname.startsWith(path))) ||
+      (args.historyAction === 'PUSH' && args.nextLocation.pathname.startsWith('/locations'))
+    ) {
+      return false;
+    } else {
+      return true;
+    }
   }
+  return false;
 }
 
 /**Get awaiting labware list from session storage**/

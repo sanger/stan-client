@@ -1,15 +1,13 @@
-import { createMachine, MachineOptions, send } from 'xstate';
-import { assign } from '@xstate/immer';
+import { assign, createMachine, fromPromise, MachineConfig, MachineImplementations, raise } from 'xstate';
 import {
   LocationContext,
   LocationEvent,
-  LocationSchema,
   setErrorMessage,
-  setSuccessMessage
+  setSuccessMessage,
+  StoreBarcodeEvent
 } from './locationMachineTypes';
 import * as locationService from '../../services/locationService';
-import { MachineConfig } from 'xstate/lib/types';
-import { castDraft } from 'immer';
+import produce, { castDraft } from 'immer';
 import { stanCore } from '../../sdk';
 import { buildOrderedAddresses, findNextAvailableAddress } from '../../helpers/locationHelper';
 import { GridDirection } from '../../../types/sdk';
@@ -35,137 +33,114 @@ enum Service {
 /**
  * Location Machine Options
  */
-export const machineOptions: Partial<MachineOptions<LocationContext, LocationEvent>> = {
+export const machineOptions: MachineImplementations<LocationContext, LocationEvent> = {
   actions: {
-    [Action.ASSIGN_LOCATION_SEARCH_PARAMS]: assign((ctx, e) => {
-      if (e.type !== 'FETCH_LOCATION') {
-        return;
+    [Action.ASSIGN_LOCATION_SEARCH_PARAMS]: assign(({ context, event }) => {
+      if (event.type !== 'FETCH_LOCATION') {
+        return context;
       }
-      ctx.locationSearchParams = e.locationSearchParams;
+      return { ...context, locationSearchParams: event.locationSearchParams };
     }),
 
-    [Action.ASSIGN_LOCATION]: assign((ctx, e) => {
+    [Action.ASSIGN_LOCATION]: assign(({ context, event }) => {
       if (
-        e.type !== 'done.invoke.fetchLocation' &&
-        e.type !== 'done.invoke.storeBarcode' &&
-        e.type !== 'done.invoke.unstoreBarcode' &&
-        e.type !== 'done.invoke.emptyLocation' &&
-        e.type !== 'done.invoke.store' &&
-        e.type !== 'UPDATE_LOCATION'
+        event.type !== 'xstate.done.actor.fetchLocation' &&
+        event.type !== 'xstate.done.actor.storeBarcode' &&
+        event.type !== 'xstate.done.actor.unstoreBarcode' &&
+        event.type !== 'xstate.done.actor.emptyLocation' &&
+        event.type !== 'xstate.done.actor.store' &&
+        event.type !== 'UPDATE_LOCATION'
       ) {
-        return;
+        return context;
       }
       // Can be null if this is an unstore action
-      if (e.type !== 'UPDATE_LOCATION' && e.data == null) {
-        return;
+      if (event.type !== 'UPDATE_LOCATION' && event.output == null) {
+        return context;
       }
+      return produce(context, (draft) => {
+        // Set the location
+        draft.location = event.type === 'UPDATE_LOCATION' ? event.location : event.output;
 
-      // Set the location
-      ctx.location = e.type === 'UPDATE_LOCATION' ? e.location : e.data;
+        draft.addressToItemMap.clear();
+        // Create all the possible addresses for this location if it has a size.
+        draft.locationAddresses = draft.location.size
+          ? buildOrderedAddresses(draft.location.size, draft.location.direction ?? GridDirection.DownRight)
+          : new Map<string, number>();
 
-      ctx.addressToItemMap.clear();
-      // Create all the possible addresses for this location if it has a size.
-      ctx.locationAddresses = ctx.location.size
-        ? buildOrderedAddresses(ctx.location.size, ctx.location.direction ?? GridDirection.DownRight)
-        : new Map<string, number>();
+        draft.location.stored.forEach((storedItem) => {
+          if (storedItem.address) {
+            draft.addressToItemMap.set(storedItem.address, storedItem);
+          }
+        });
 
-      ctx.location.stored.forEach((storedItem) => {
-        if (storedItem.address) {
-          ctx.addressToItemMap.set(storedItem.address, storedItem);
-        }
+        const addresses = findNextAvailableAddress({
+          locationAddresses: draft.locationAddresses,
+          addressToItemMap: draft.addressToItemMap,
+          minimumAddress: draft.selectedAddress
+        });
+        draft.selectedAddress = addresses.length > 0 ? addresses[0] : null;
       });
-
-      const addresses = findNextAvailableAddress({
-        locationAddresses: ctx.locationAddresses,
-        addressToItemMap: ctx.addressToItemMap,
-        minimumAddress: ctx.selectedAddress
-      });
-      ctx.selectedAddress = addresses.length > 0 ? addresses[0] : null;
     }),
 
-    [Action.ASSIGN_SELECTED_ADDRESS]: assign((ctx, e) => {
-      if (e.type !== 'SET_SELECTED_ADDRESS') {
-        return;
+    [Action.ASSIGN_SELECTED_ADDRESS]: assign(({ context, event }) => {
+      if (event.type !== 'SET_SELECTED_ADDRESS') {
+        return context;
       }
-      ctx.selectedAddress = e.address;
+      return { ...context, selectedAddress: event.address };
     }),
 
-    [Action.UNSET_SUCCESS_MESSAGE]: assign((ctx, _e) => {
-      ctx.successMessage = null;
+    [Action.UNSET_SUCCESS_MESSAGE]: assign(({ context }) => {
+      return { ...context, successMessage: null };
     }),
 
-    [Action.ASSIGN_SUCCESS_MESSAGE]: assign((ctx, e) => {
-      if (e.type !== 'SET_SUCCESS_MESSAGE') {
-        return;
+    [Action.ASSIGN_SUCCESS_MESSAGE]: assign(({ context, event }) => {
+      if (event.type !== 'SET_SUCCESS_MESSAGE') {
+        return context;
       }
-      ctx.successMessage = e.message;
-      ctx.errorMessage = null;
+      return { ...context, successMessage: event.message, errorMessage: null };
     }),
 
-    [Action.ASSIGN_ERROR_MESSAGE]: assign((ctx, e) => {
-      if (e.type !== 'SET_ERROR_MESSAGE') {
-        return;
+    [Action.ASSIGN_ERROR_MESSAGE]: assign(({ context, event }) => {
+      if (event.type !== 'SET_ERROR_MESSAGE') {
+        return context;
       }
-      ctx.errorMessage = e.message;
-      ctx.successMessage = null;
+      return { ...context, errorMessage: event.message, successMessage: null };
     }),
 
-    [Action.ASSIGN_SERVER_ERRORS]: assign((ctx, e) => {
+    [Action.ASSIGN_SERVER_ERRORS]: assign(({ context, event }) => {
       if (
-        e.type !== 'error.platform.fetchLocation' &&
-        e.type !== 'error.platform.storeBarcode' &&
-        e.type !== 'error.platform.unstoreBarcode' &&
-        e.type !== 'error.platform.emptyLocation' &&
-        e.type !== 'error.platform.store'
+        event.type !== 'xstate.error.actor.fetchLocation' &&
+        event.type !== 'xstate.error.actor.storeBarcode' &&
+        event.type !== 'xstate.error.actor.unstoreBarcode' &&
+        event.type !== 'xstate.error.actor.emptyLocation' &&
+        event.type !== 'xstate.error.actor.store'
       ) {
-        return;
+        return context;
       }
-      ctx.serverError = castDraft(e.data);
+      return { ...context, serverError: castDraft(event.error) };
     })
-  },
-
-  services: {
-    [Service.FETCH_LOCATION]: (ctx, e) => {
-      if (e.type !== 'FETCH_LOCATION') {
-        return Promise.reject();
-      }
-      return stanCore.FindLocationByBarcode({ barcode: e.barcode });
-    },
-
-    [Service.STORE_BARCODE]: (ctx, e) => {
-      if (e.type !== 'STORE_BARCODE') {
-        return Promise.reject();
-      }
-      return locationService.storeBarcode(e.barcode, ctx.location, e.address);
-    },
-
-    [Service.UNSTORE_BARCODE]: async (ctx, e) => {
-      if (e.type !== 'UNSTORE_BARCODE') {
-        return Promise.reject();
-      }
-      await locationService.unstoreBarcode(e.barcode);
-      return stanCore.FindLocationByBarcode({ barcode: ctx.location.barcode }).then((res) => res.location);
-    },
-
-    [Service.EMPTY_LOCATION]: (ctx, _e) => locationService.emptyLocation(ctx.location.barcode),
-
-    [Service.STORE]: async (ctx, e) => {
-      if (e.type !== 'STORE') {
-        return Promise.reject();
-      }
-      return locationService.store(e.data, ctx.location);
-    }
   }
 };
 
-export const machineConfig: MachineConfig<LocationContext, LocationSchema, LocationEvent> = {
+export const machineConfig: MachineConfig<LocationContext, LocationEvent> = {
   id: 'locations',
   initial: 'ready',
+  context: ({ input }) => ({
+    ...input
+  }),
   states: {
     fetching: {
       invoke: {
-        src: Service.FETCH_LOCATION,
         id: Service.FETCH_LOCATION,
+        src: fromPromise(({ input }) => stanCore.FindLocationByBarcode({ barcode: input.barcode })),
+        input: ({ event }) => {
+          if (event.type !== 'FETCH_LOCATION') {
+            return {};
+          }
+          return {
+            barcode: event.barcode
+          };
+        },
         onDone: {
           actions: [Action.ASSIGN_LOCATION],
           target: 'ready'
@@ -188,59 +163,89 @@ export const machineConfig: MachineConfig<LocationContext, LocationSchema, Locat
     },
     updating: {
       entry: Action.UNSET_SUCCESS_MESSAGE,
+      initial: 'storingBarcode',
       states: {
         storingBarcode: {
           invoke: {
-            src: Service.STORE_BARCODE,
             id: Service.STORE_BARCODE,
+            src: fromPromise(({ input }) => locationService.storeBarcode(input.barcode, input.location, input.address)),
+            input: ({ context, event }) => ({
+              barcode: (event as StoreBarcodeEvent).barcode,
+              location: context.location,
+              address: (event as StoreBarcodeEvent).address
+            }),
             onDone: {
-              actions: [Action.ASSIGN_LOCATION, send(setSuccessMessage('Barcode successfully stored'))],
+              actions: [Action.ASSIGN_LOCATION, raise(setSuccessMessage('Barcode successfully stored'))],
               target: [`#locations.ready`]
             },
             onError: {
-              actions: [send(setErrorMessage('Barcode could not be stored')), Action.ASSIGN_SERVER_ERRORS],
+              actions: [raise(setErrorMessage('Barcode could not be stored')), Action.ASSIGN_SERVER_ERRORS],
               target: [`#locations.ready`]
             }
           }
         },
         storing: {
           invoke: {
-            src: Service.STORE,
             id: Service.STORE,
+            src: fromPromise(({ input }) => locationService.store(input.data, input.location)),
+            input: ({ context, event }) => {
+              if (event.type !== 'STORE') {
+                return {};
+              }
+              return {
+                data: event.data,
+                location: context.location
+              };
+            },
             onDone: {
-              actions: [Action.ASSIGN_LOCATION, send(setSuccessMessage('Barcode successfully stored'))],
+              actions: [Action.ASSIGN_LOCATION, raise(setSuccessMessage('Barcode successfully stored'))],
               target: [`#locations.ready`]
             },
             onError: {
-              actions: [send(setErrorMessage('Barcode could not be stored')), Action.ASSIGN_SERVER_ERRORS],
+              actions: [raise(setErrorMessage('Barcode could not be stored')), Action.ASSIGN_SERVER_ERRORS],
               target: [`#locations.ready`]
             }
           }
         },
         unstoringBarcode: {
           invoke: {
-            src: Service.UNSTORE_BARCODE,
+            src: fromPromise(async ({ input }) => {
+              await locationService.unstoreBarcode(input.unstoredBarcode);
+              return stanCore.FindLocationByBarcode({ barcode: input.barcode }).then((res) => res.location);
+            }),
+            input: ({ context, event }) => {
+              if (event.type !== 'UNSTORE_BARCODE') {
+                return {};
+              }
+              return {
+                unstoredBarcode: event.barcode,
+                barcode: context.location.barcode
+              };
+            },
             id: Service.UNSTORE_BARCODE,
             onDone: {
-              actions: [Action.ASSIGN_LOCATION, send(setSuccessMessage('Barcode successfully unstored'))],
+              actions: [Action.ASSIGN_LOCATION, raise(setSuccessMessage('Barcode successfully unstored'))],
               target: ['#locations.ready']
             },
             onError: {
-              actions: [send(setErrorMessage('Barcode could not be unstored')), Action.ASSIGN_SERVER_ERRORS],
+              actions: [raise(setErrorMessage('Barcode could not be unstored')), Action.ASSIGN_SERVER_ERRORS],
               target: [`#locations.ready`]
             }
           }
         },
         emptyingLocation: {
           invoke: {
-            src: Service.EMPTY_LOCATION,
+            src: fromPromise(({ input }) => locationService.emptyLocation(input.barcode)),
+            input: ({ context }) => ({
+              barcode: context.location.barcode
+            }),
             id: Service.EMPTY_LOCATION,
             onDone: {
-              actions: [Action.ASSIGN_LOCATION, send(setSuccessMessage('Location emptied'))],
+              actions: [Action.ASSIGN_LOCATION, raise(setSuccessMessage('Location emptied'))],
               target: ['#locations.ready']
             },
             onError: {
-              actions: [send(setErrorMessage('Location could not be emptied')), Action.ASSIGN_SERVER_ERRORS],
+              actions: [raise(setErrorMessage('Location could not be emptied')), Action.ASSIGN_SERVER_ERRORS],
               target: ['#locations.ready']
             }
           }
@@ -255,7 +260,7 @@ export const machineConfig: MachineConfig<LocationContext, LocationSchema, Locat
  * Location Machine
  */
 
-export const locationMachine = createMachine<LocationContext, LocationEvent>(
+export const locationMachine = createMachine(
   {
     ...machineConfig
   },

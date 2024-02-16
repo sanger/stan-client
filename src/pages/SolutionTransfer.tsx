@@ -28,6 +28,7 @@ import { FormikErrorMessage, selectOptionValues } from '../components/forms';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import MutedText from '../components/MutedText';
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 type SolutionTransferFormData = Required<SolutionTransferRequest> & {
   /**Solution to apply to all labware**/
@@ -36,17 +37,17 @@ type SolutionTransferFormData = Required<SolutionTransferRequest> & {
 const SolutionTransfer: React.FC = () => {
   const solutionTransferInfo = useLoaderData() as GetSolutionTransferInfoQuery;
   const formMachine = React.useMemo(() => {
-    return createFormMachine<SolutionTransferRequest, PerformSolutionTransferMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<SolutionTransferRequest, PerformSolutionTransferMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.PerformSolutionTransfer({
             request: {
-              labware: e.values.labware,
-              workNumber: e.values.workNumber
+              labware: input.event.values.labware,
+              workNumber: input.event.values.workNumber
             }
           });
-        }
+        })
       }
     });
   }, []);

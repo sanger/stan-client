@@ -1,5 +1,5 @@
-import React, { createContext, useCallback, useEffect, useReducer } from 'react';
-import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, LabwareTypeFieldsFragment, Maybe } from '../../types/sdk';
+import React, { useCallback, useEffect, useReducer } from 'react';
+import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, LabwareTypeFieldsFragment } from '../../types/sdk';
 import { uniqueId } from 'lodash';
 import BlueButton from '../buttons/BlueButton';
 import { NewFlaggedLabwareLayout } from '../../types/stan';
@@ -73,28 +73,6 @@ export type PlanChangedProps<M> = {
   sourceLabware: Array<LabwareFlaggedFieldsFragment>;
   layoutPlans: Map<string, NewFlaggedLabwareLayout>;
 };
-
-/**
- * Context for planning operation
- */
-type PlannerContextType = {
-  /**
-   * The name of the planning operation
-   */
-  operationType: string;
-
-  /**
-   * Labware that can be chosen as a source
-   */
-  sourceLabware: Array<LabwareFlaggedFieldsFragment>;
-
-  /**
-   * Map of sampleId to colors. Used for showing consistent sample colours in different {@link LabwarePlan LabwarePlans}
-   */
-  sampleColors: Map<number, string>;
-};
-
-export const PlannerContext = createContext<Maybe<PlannerContextType>>(null);
 
 /**
  * State which represents the current status of planning operation

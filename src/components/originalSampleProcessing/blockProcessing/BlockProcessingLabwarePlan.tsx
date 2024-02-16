@@ -90,9 +90,9 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
     const labwarePlanMachine = React.useMemo(() => {
       return createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware));
     }, [sourceLabware, sampleColors, outputLabware]);
-    const [current, send] = useMachine(labwarePlanMachine);
+    const [current, send, actor] = useMachine(labwarePlanMachine);
     const { requestError, layoutPlan } = current.context;
-    const { layoutMachine } = current.children;
+    const { layoutMachine } = current.context;
     const { setFieldValue, values } = useFormikContext<BlockFormData>();
     const [disableRepNumber, setDisableRepNumber] = useState<boolean>(false);
 
@@ -115,15 +115,18 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
      * Notify parent about change in source (This is for auto numbering of replicate numbers)
      */
     React.useEffect(() => {
-      if (layoutPlan.plannedActions.size <= 0) return;
-      const plannedActions: Source[] | undefined = layoutPlan.plannedActions.get('A1');
-      if (plannedActions && plannedActions.length > 0) {
-        setFieldValue(`plans.${rowIndex}.sourceBarcode`, plannedActions[0].labware.barcode);
-        setFieldValue(`plans.${rowIndex}.replicateNumber`, plannedActions[0].replicateNumber);
-        setDisableRepNumber(plannedActions[0].replicateNumber!.length > 0);
-        notifySourceSelection(cid, plannedActions[0].labware.barcode);
-      }
-    }, [setFieldValue, rowIndex, layoutPlan.plannedActions, cid, notifySourceSelection, setDisableRepNumber]);
+      const subscription = actor.subscribe((state) => {
+        if (state.context.layoutPlan.plannedActions.size <= 0) return;
+        const plannedActions: Source[] | undefined = state.context.layoutPlan.plannedActions.get('A1');
+        if (plannedActions && plannedActions.length > 0) {
+          setFieldValue(`plans.${rowIndex}.sourceBarcode`, plannedActions[0].labware.barcode);
+          setFieldValue(`plans.${rowIndex}.replicateNumber`, plannedActions[0].replicateNumber);
+          setDisableRepNumber(plannedActions[0].replicateNumber!.length > 0);
+          notifySourceSelection(cid, plannedActions[0].labware.barcode);
+        }
+      });
+      return () => subscription.unsubscribe();
+    }, [setFieldValue, rowIndex, layoutPlan.plannedActions, cid, notifySourceSelection, setDisableRepNumber, actor]);
     return (
       <motion.div
         variants={variants.fadeInWithLift}
@@ -212,22 +215,24 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
               </LayoutPlanner>
             )}
           </ModalBody>
-          <ModalFooter>
-            <BlueButton
-              type={'button'}
-              onClick={() => layoutMachine.send({ type: 'DONE' })}
-              className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Done
-            </BlueButton>
-            <WhiteButton
-              type={'button'}
-              onClick={() => layoutMachine.send({ type: 'CANCEL' })}
-              className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Cancel
-            </WhiteButton>
-          </ModalFooter>
+          {layoutMachine && (
+            <ModalFooter>
+              <BlueButton
+                type={'button'}
+                onClick={() => layoutMachine.send({ type: 'DONE' })}
+                className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                Done
+              </BlueButton>
+              <WhiteButton
+                type={'button'}
+                onClick={() => layoutMachine.send({ type: 'CANCEL' })}
+                className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                Cancel
+              </WhiteButton>
+            </ModalFooter>
+          )}
         </Modal>
       </motion.div>
     );

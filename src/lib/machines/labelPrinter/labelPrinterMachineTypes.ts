@@ -1,5 +1,6 @@
 import { GetPrintersQuery, LabwareFieldsFragment, Maybe, PrinterFieldsFragment } from '../../../types/sdk';
 import { ClientError } from 'graphql-request';
+import { ServerErrors } from '../../../types/stan';
 
 export interface LabelPrinterContext {
   /**
@@ -10,7 +11,7 @@ export interface LabelPrinterContext {
   /**
    * Error message from core
    */
-  serverErrors: ClientError;
+  serverErrors?: ClientError;
 
   /**
    * The currently selected printer
@@ -43,13 +44,13 @@ export interface LabelPrinterSchema {
 }
 
 type FetchPrintersDoneEvent = {
-  type: 'done.invoke.fetchPrinters';
-  data: GetPrintersQuery;
+  type: 'xstate.done.actor.fetchPrinters';
+  output: GetPrintersQuery;
 };
 
 type FetchPrintersErrorEvent = {
-  type: 'error.platform.fetchPrinters';
-  data: ClientError;
+  type: 'xstate.error.actor.fetchPrinters';
+  error: ClientError;
 };
 
 type PrintEvent = { type: 'PRINT'; labelsPerBarcode?: number };

@@ -113,7 +113,6 @@ describe('Load location with no child ', () => {
   });
 });
 describe('Load location with a awaiting labware set in the session storage ', () => {
-  beforeAll(() => {});
   beforeEach(() => {
     const originalGetItem = Storage.prototype.getItem;
     Storage.prototype.getItem = jest.fn((key) => {

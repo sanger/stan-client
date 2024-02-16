@@ -36,12 +36,9 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
   initExtractedResults
 }) => {
   const machine = React.useMemo(() => {
-    return extractResultMachine.withContext({
-      extractResults: initExtractedResults ?? [],
-      currentBarcode: ''
-    });
+    return extractResultMachine(initExtractedResults ?? []);
   }, [initExtractedResults]);
-  const [current, send] = useMachine(() => machine);
+  const [current, send] = useMachine(machine);
 
   const { serverError, extractResults, scanErrorMessage, currentBarcode } = current.context;
 
@@ -55,7 +52,7 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
 
   const scanError = scanErrorMessage
     ? scanErrorMessage
-    : serverError
+    : serverError && serverError.message
       ? formatErrorMessage(serverError.message)
       : undefined;
 

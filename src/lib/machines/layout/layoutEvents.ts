@@ -1,5 +1,5 @@
 import { Address } from '../../../types/stan';
-import { Source } from './layoutContext';
+import { LayoutPlan, Source } from './layoutContext';
 
 type SelectSourceEvent = {
   type: 'SELECT_SOURCE';
@@ -41,6 +41,11 @@ export type RemoveSectionEvent = {
   address: Address;
 };
 
+export type SendLayoutToParent = {
+  type: 'SEND_LAYOUT_TO_PARENT';
+  output: LayoutPlan;
+};
+
 export function removeSection(address: Address): RemoveSectionEvent {
   return {
     type: 'REMOVE_SECTION',
@@ -69,4 +74,5 @@ export type LayoutEvents =
   | RequestLayoutPlanEvent
   | CancelEvent
   | DoneEvent
-  | RemoveSectionEvent;
+  | RemoveSectionEvent
+  | SendLayoutToParent;

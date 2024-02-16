@@ -1,4 +1,4 @@
-import { createMachine } from 'xstate';
+import { assign, createMachine, fromPromise } from 'xstate';
 import {
   UpdateWorkDnapStudyMutation,
   UpdateWorkNumBlocksMutation,
@@ -10,10 +10,8 @@ import {
   WorkStatus,
   WorkWithCommentFieldsFragment
 } from '../../types/sdk';
-import { MachineServiceDone, MachineServiceError } from '../../types/stan';
 import { stanCore } from '../../lib/sdk';
-import { assign } from '@xstate/immer';
-import { castDraft } from 'immer';
+import produce, { castDraft } from 'immer';
 import { Maybe } from 'yup';
 import { ClientError } from 'graphql-request';
 
@@ -37,15 +35,22 @@ type WorkRowMachineContext = {
    * success message, if any
    */
   serverSuccess?: Maybe<string>;
+
+  /**
+   * A boolean flags indicating the machine event. This is primarily used as a replacement for assertions based on context.event.type,
+   * given that the event object has been removed from the context in XState v5.
+   * In the current (snapshot, using the new terminology in XState v5), only context parameters are directly accessible.
+   */
+  isInvokeActorDone?: boolean;
 };
 
 export type WorkRowEvent =
   | { type: 'EDIT' }
   | { type: 'PAUSE'; commentId: number }
-  | { type: 'COMPLETE'; commentId: undefined }
+  | { type: 'COMPLETE'; commentId: number | undefined }
   | { type: 'FAIL'; commentId: number }
   | { type: 'WITHDRAW'; commentId: number }
-  | { type: 'REACTIVATE'; commentId: undefined }
+  | { type: 'REACTIVATE'; commentId: number | undefined }
   | { type: 'ACTIVE'; commentId: undefined }
   | { type: 'UPDATE_NUM_BLOCKS'; numBlocks: number | undefined }
   | { type: 'UPDATE_NUM_SLIDES'; numSlides: number | undefined }
@@ -56,21 +61,25 @@ export type WorkRowEvent =
   | { type: 'UPDATE_PRIORITY'; priority: string | undefined }
   | { type: 'UPDATE_OMERO_PROJECT'; omeroProject: string | undefined }
   | { type: 'UPDATE_DNAP_PROJECT'; ssStudyId: number }
-  | MachineServiceDone<'updateWorkStatus', UpdateWorkStatusMutation>
-  | MachineServiceDone<'updateWorkNumBlocks', UpdateWorkNumBlocksMutation>
-  | MachineServiceDone<'updateWorkNumSlides', UpdateWorkNumSlidesMutation>
-  | MachineServiceDone<'updateWorkPriority', UpdateWorkPriorityMutation>
-  | MachineServiceDone<'updateWorkOmeroProject', UpdateWorkOmeroProjectMutation>
-  | MachineServiceDone<'updateWorkDnapProject', UpdateWorkDnapStudyMutation>
-  | MachineServiceError<'updateWorkDnapProject'>
-  | MachineServiceDone<'updateWorkNumOriginalSamples', UpdateWorkNumOriginalSamplesMutation>;
+  | { type: 'xstate.done.actor.updateWorkStatus'; output: UpdateWorkStatusMutation }
+  | { type: 'xstate.done.actor.updateWorkNumBlocks'; output: UpdateWorkNumBlocksMutation }
+  | { type: 'xstate.done.actor.updateWorkNumSlides'; output: UpdateWorkNumSlidesMutation }
+  | { type: 'xstate.done.actor.updateWorkPriority'; output: UpdateWorkPriorityMutation }
+  | { type: 'xstate.done.actor.updateWorkOmeroProject'; output: UpdateWorkOmeroProjectMutation }
+  | { type: 'xstate.done.actor.updateWorkDnapProject'; output: UpdateWorkDnapStudyMutation }
+  | { type: 'xstate.error.actor.updateWorkDnapProject'; error: ClientError }
+  | { type: 'xstate.done.actor.updateWorkNumOriginalSamples'; output: UpdateWorkNumOriginalSamplesMutation };
 
 type CreateWorkRowMachineParams = Pick<WorkRowMachineContext, 'workWithComment'>;
 
 export default function createWorkRowMachine({ workWithComment }: CreateWorkRowMachineParams) {
-  return createMachine<WorkRowMachineContext, WorkRowEvent>(
+  return createMachine(
     {
       id: 'workRowMachine',
+      types: {} as {
+        context: WorkRowMachineContext;
+        events: WorkRowEvent;
+      },
       context: {
         workWithComment,
         editModeEnabled: false
@@ -149,7 +158,16 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         },
         updating: {
           invoke: {
-            src: 'updateWorkStatus',
+            src: fromPromise(({ input }) =>
+              stanCore.UpdateWorkStatus({
+                ...input
+              })
+            ),
+            input: ({ context, event }) => ({
+              workNumber: context.workWithComment.work.workNumber,
+              status: getWorkStatusFromEventType(event),
+              commentId: 'commentId' in event ? event.commentId : undefined
+            }),
             id: 'updateWorkStatus',
             onDone: {
               actions: ['assignSgpNumber', 'toggleEditMode'],
@@ -160,7 +178,13 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         },
         editNumberBlocks: {
           invoke: {
-            src: 'updateWorkNumBlocks',
+            src: fromPromise(({ input }) => {
+              return stanCore.UpdateWorkNumBlocks(input);
+            }),
+            input: ({ context, event }) => ({
+              workNumber: context.workWithComment.work.workNumber,
+              numBlocks: 'numBlocks' in event && event.numBlocks ? event.numBlocks : undefined
+            }),
             id: 'updateWorkNumBlocks',
             onDone: {
               actions: 'assignWorkNumBlocks',
@@ -171,7 +195,11 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         },
         editNumberSlides: {
           invoke: {
-            src: 'updateWorkNumSlides',
+            src: fromPromise(({ input }) => stanCore.UpdateWorkNumSlides(input)),
+            input: ({ context, event }) => ({
+              workNumber: context.workWithComment.work.workNumber,
+              numSlides: 'numSlides' in event && event.numSlides ? event.numSlides : undefined
+            }),
             id: 'updateWorkNumSlides',
             onDone: {
               actions: 'assignWorkNumSlides',
@@ -182,7 +210,12 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         },
         editNumberOriginalSamples: {
           invoke: {
-            src: 'updateWorkNumOriginalSamples',
+            src: fromPromise(({ input }) => stanCore.UpdateWorkNumOriginalSamples(input)),
+            input: ({ context, event }) => ({
+              workNumber: context.workWithComment.work.workNumber,
+              numOriginalSamples:
+                'numOriginalSamples' in event && event.numOriginalSamples ? event.numOriginalSamples : undefined
+            }),
             onDone: {
               actions: 'assignWorkNumOriginalSamples',
               target: 'deciding'
@@ -192,7 +225,11 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         },
         editPriority: {
           invoke: {
-            src: 'updateWorkPriority',
+            src: fromPromise(({ input }) => stanCore.UpdateWorkPriority(input)),
+            input: ({ context, event }) => ({
+              workNumber: context.workWithComment.work.workNumber,
+              priority: 'priority' in event && event.priority ? event.priority : undefined
+            }),
             id: 'updateWorkPriority',
             onDone: {
               actions: 'assignWorkPriority',
@@ -203,7 +240,11 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         },
         updateOmeroProject: {
           invoke: {
-            src: 'updateWorkOmeroProject',
+            src: fromPromise(({ input }) => stanCore.UpdateWorkOmeroProject(input)),
+            input: ({ context, event }) => ({
+              workNumber: context.workWithComment.work.workNumber,
+              omeroProject: 'omeroProject' in event && event.omeroProject ? event.omeroProject : undefined
+            }),
             id: 'updateWorkOmeroProject',
             onDone: {
               actions: 'assignWorkOmeroProject',
@@ -214,7 +255,19 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         },
         updateDnapProject: {
           invoke: {
-            src: 'updateWorkDnapProject',
+            src: fromPromise(({ input }) => {
+              if (input) return stanCore.UpdateWorkDnapStudy(input);
+              return Promise.reject();
+            }),
+            input: ({ context, event }) => {
+              if ('ssStudyId' in event) {
+                return {
+                  workNumber: context.workWithComment.work.workNumber,
+                  ssStudyId: event.ssStudyId
+                };
+              }
+              return undefined;
+            },
             id: 'updateWorkDnapProject',
             onDone: {
               actions: 'assignWorkDnapProject',
@@ -230,99 +283,60 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
     },
     {
       actions: {
-        assignSgpNumber: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.updateWorkStatus') return;
-          ctx.workWithComment = e.data.updateWorkStatus;
+        assignSgpNumber: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateWorkStatus') return context;
+          return { ...context, workWithComment: event.output.updateWorkStatus, isInvokeActorDone: true };
         }),
-        assignWorkNumBlocks: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.updateWorkNumBlocks') return;
-          ctx.workWithComment.work = e.data.updateWorkNumBlocks;
-        }),
-        assignWorkNumSlides: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.updateWorkNumSlides') return;
-          ctx.workWithComment.work = e.data.updateWorkNumSlides;
-        }),
-        assignWorkNumOriginalSamples: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.updateWorkNumOriginalSamples') return;
-          ctx.workWithComment.work = e.data.updateWorkNumOriginalSamples;
-        }),
-        assignWorkPriority: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.updateWorkPriority') return;
-          ctx.workWithComment.work = e.data.updateWorkPriority;
-        }),
-        assignWorkOmeroProject: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.updateWorkOmeroProject') return;
-          ctx.workWithComment.work = e.data.updateWorkOmeroProject;
-        }),
-        assignWorkDnapProject: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.updateWorkDnapProject') return;
-          ctx.workWithComment.work = e.data.updateWorkDnapStudy;
-          ctx.serverSuccess = 'DNAP project successfully updated to ' + e.data.updateWorkDnapStudy.dnapStudy!.name;
-        }),
-        toggleEditMode: assign((ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled)),
-        assignServerError: assign((ctx, e) => {
-          if (e.type !== 'error.platform.updateWorkDnapProject') {
-            return;
-          }
-          ctx.serverErrors = castDraft(e.data);
-        })
-      },
-
-      services: {
-        updateWorkStatus: (ctx, e) => {
-          return stanCore.UpdateWorkStatus({
-            workNumber: ctx.workWithComment.work.workNumber,
-            status: getWorkStatusFromEventType(e),
-            commentId: 'commentId' in e ? e.commentId : undefined
+        assignWorkNumBlocks: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateWorkNumBlocks') return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkNumBlocks;
+            draft.isInvokeActorDone = true;
           });
-        },
-        updateWorkNumBlocks: (ctx, e) => {
-          let params: { workNumber: string; numBlocks?: number } = {
-            workNumber: ctx.workWithComment.work.workNumber
-          };
-          if ('numBlocks' in e && e.numBlocks) params['numBlocks'] = e.numBlocks;
-
-          return stanCore.UpdateWorkNumBlocks(params);
-        },
-        updateWorkNumSlides: (ctx, e) => {
-          let params: { workNumber: string; numSlides?: number } = {
-            workNumber: ctx.workWithComment.work.workNumber
-          };
-          if ('numSlides' in e && e.numSlides) params['numSlides'] = e.numSlides;
-
-          return stanCore.UpdateWorkNumSlides(params);
-        },
-        updateWorkNumOriginalSamples: (ctx, e) => {
-          let params: { workNumber: string; numOriginalSamples?: number } = {
-            workNumber: ctx.workWithComment.work.workNumber
-          };
-          if ('numOriginalSamples' in e && e.numOriginalSamples) params['numOriginalSamples'] = e.numOriginalSamples;
-
-          return stanCore.UpdateWorkNumOriginalSamples(params);
-        },
-        updateWorkPriority: (ctx, e) => {
-          let params: { workNumber: string; priority?: string } = {
-            workNumber: ctx.workWithComment.work.workNumber
-          };
-          if ('priority' in e && e.priority) params['priority'] = e.priority;
-          return stanCore.UpdateWorkPriority(params);
-        },
-        updateWorkOmeroProject: (ctx, e) => {
-          let params: { workNumber: string; omeroProject?: string } = {
-            workNumber: ctx.workWithComment.work.workNumber
-          };
-          if ('omeroProject' in e && e.omeroProject) params['omeroProject'] = e.omeroProject;
-          return stanCore.UpdateWorkOmeroProject(params);
-        },
-        updateWorkDnapProject: (ctx, e) => {
-          if ('ssStudyId' in e) {
-            return stanCore.UpdateWorkDnapStudy({
-              workNumber: ctx.workWithComment.work.workNumber,
-              ssStudyId: e.ssStudyId
-            });
-          }
-          return Promise.reject();
-        }
+        }),
+        assignWorkNumSlides: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateWorkNumSlides') return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkNumSlides;
+            draft.isInvokeActorDone = true;
+          });
+        }),
+        assignWorkNumOriginalSamples: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateWorkNumOriginalSamples') return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkNumOriginalSamples;
+          });
+        }),
+        assignWorkPriority: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateWorkPriority') return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkPriority;
+            draft.isInvokeActorDone = true;
+          });
+        }),
+        assignWorkOmeroProject: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateWorkOmeroProject') return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkOmeroProject;
+            draft.isInvokeActorDone = true;
+          });
+        }),
+        assignWorkDnapProject: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateWorkDnapProject') return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkDnapStudy;
+            draft.serverSuccess =
+              'DNAP project successfully updated to ' + event.output.updateWorkDnapStudy.dnapStudy!.name;
+            draft.isInvokeActorDone = true;
+          });
+        }),
+        toggleEditMode: assign(({ context, event }) => {
+          return { ...context, editModeEnabled: !context.editModeEnabled };
+        }),
+        assignServerError: assign(({ context, event }) => {
+          if (event.type !== 'xstate.error.actor.updateWorkDnapProject') return context;
+          return { ...context, serverErrors: castDraft(event.error) };
+        })
       }
     }
   );
@@ -358,6 +372,7 @@ function getWorkStatusFromEventType(e: WorkRowEvent): WorkStatus {
 function maybeGoToStatus(status: string) {
   return {
     target: status,
-    cond: (ctx: WorkRowMachineContext) => ctx.workWithComment.work.status.toLowerCase() === status.toLowerCase()
+    guard: ({ context }: { context: WorkRowMachineContext }) =>
+      context.workWithComment.work.status.toLowerCase() === status.toLowerCase()
   };
 }

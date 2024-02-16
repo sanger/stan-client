@@ -31,6 +31,7 @@ import FormikInput from '../../forms/Input';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 import PromptOnLeave from '../../notifications/PromptOnLeave';
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 /**
  * Used as Formik's values
@@ -63,14 +64,14 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   const processingInfoLoaderData = useLoaderData() as GetBlockProcessingInfoQuery;
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<TissueBlockRequest, PerformTissueBlockMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<TissueBlockRequest, PerformTissueBlockMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.PerformTissueBlock({
-            request: e.values
+            request: input.event.values
           });
-        }
+        })
       }
     });
   }, []);
@@ -341,11 +342,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                     <Heading level={3}>SGP Number</Heading>
                     <p className="mt-2">Please select an SGP number to associate with the block.</p>
                     <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
-                      <WorkNumberSelect
-                        onWorkNumberChange={(workNumber) => {
-                          setFieldValue('workNumber', workNumber);
-                        }}
-                      />
+                      <WorkNumberSelect onWorkNumberChange={(workNumber) => setFieldValue('workNumber', workNumber)} />
                     </motion.div>
                   </motion.div>
                   <Planner<undefined>

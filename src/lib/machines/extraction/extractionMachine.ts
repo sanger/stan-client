@@ -1,16 +1,15 @@
-import { createMachine } from 'xstate';
-import { assign } from '@xstate/immer';
+import { assign, createMachine, fromCallback, fromPromise } from 'xstate';
 import { castDraft } from 'immer';
-import { ExtractMutation, LabwareFieldsFragment } from '../../../types/sdk';
-import { ClientError } from 'graphql-request';
+import { ExtractMutation, ExtractRequest, LabwareFieldsFragment } from '../../../types/sdk';
 import { stanCore } from '../../sdk';
+import { ServerErrors } from '../../../types/stan';
 
 export interface ExtractionContext {
   workNumber: string;
   labwares: LabwareFieldsFragment[];
   equipmentId: number;
   extraction?: ExtractMutation;
-  serverErrors?: ClientError;
+  serverErrors?: ServerErrors;
 }
 
 type UpdateLabwaresEvent = {
@@ -19,12 +18,12 @@ type UpdateLabwaresEvent = {
 };
 type ExtractEvent = { type: 'EXTRACT' };
 type ExtractDoneEvent = {
-  type: 'done.invoke.extract';
-  data: ExtractMutation;
+  type: 'xstate.done.actor.extract';
+  output: ExtractMutation;
 };
 type ExtractErrorEvent = {
-  type: 'error.platform.extract';
-  data: ClientError;
+  type: 'xstate.error.actor.extract';
+  error: ServerErrors;
 };
 
 export type ExtractionEvent =
@@ -37,9 +36,18 @@ export type ExtractionEvent =
   | ExtractDoneEvent
   | ExtractErrorEvent;
 
-export const extractionMachine = createMachine<ExtractionContext, ExtractionEvent>(
+export const extractionMachine = createMachine(
   {
     id: 'extraction',
+    types: {} as {
+      context: ExtractionContext;
+      events: ExtractionEvent;
+    },
+    context: {
+      labwares: [],
+      workNumber: '',
+      equipmentId: 0
+    },
     initial: 'ready',
     states: {
       ready: {
@@ -69,8 +77,20 @@ export const extractionMachine = createMachine<ExtractionContext, ExtractionEven
       },
       extracting: {
         invoke: {
-          src: 'extract',
           id: 'extract',
+          src: fromPromise(({ input }: { input: ExtractRequest }) =>
+            stanCore.Extract({
+              request: {
+                ...input,
+                labwareType: 'Tube'
+              }
+            })
+          ),
+          input: ({ context }) => ({
+            workNumber: context.workNumber,
+            barcodes: context.labwares.map((lw) => lw.barcode),
+            equipmentId: context.equipmentId > 0 ? context.equipmentId : undefined
+          }),
           onDone: {
             target: 'extracted',
             actions: 'assignExtraction'
@@ -83,8 +103,16 @@ export const extractionMachine = createMachine<ExtractionContext, ExtractionEven
       },
       validating: {
         invoke: {
-          src: 'validateExtraction',
-          id: 'validateExtraction'
+          id: 'validateExtraction',
+          src: fromCallback(({ sendBack, receive, input }) => {
+            const isValid = input.labwares.length > 0 && input.workNumber !== '' && input.equipmentId !== 0;
+            sendBack({ type: isValid ? 'IS_VALID' : 'IS_INVALID' });
+          }),
+          input: ({ context }) => ({
+            labwares: context.labwares,
+            workNumber: context.workNumber,
+            equipmentId: context.equipmentId
+          })
         },
         on: {
           IS_VALID: 'ready.valid',
@@ -96,53 +124,41 @@ export const extractionMachine = createMachine<ExtractionContext, ExtractionEven
   },
   {
     actions: {
-      assignLabwares: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_LABWARES') {
-          return;
+      assignLabwares: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_LABWARES') {
+          return context;
         }
-        ctx.labwares = e.labwares;
+        context.labwares = event.labwares;
+        return context;
       }),
 
-      assignExtraction: assign((ctx, e) => {
-        if (e.type !== 'done.invoke.extract') {
-          return;
+      assignExtraction: assign(({ context, event }) => {
+        if (event.type !== 'xstate.done.actor.extract') {
+          return context;
         }
-        ctx.extraction = e.data;
+        context.extraction = event.output;
+        return context;
       }),
 
-      assignServerErrors: assign((ctx, e) => {
-        if (e.type !== 'error.platform.extract') {
-          return;
+      assignServerErrors: assign(({ context, event }) => {
+        if (event.type !== 'xstate.error.actor.extract') {
+          return context;
         }
-        ctx.serverErrors = castDraft(e.data);
+        context.serverErrors = castDraft(event.error);
+        return context;
       }),
 
-      assignWorkNumber: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_WORK_NUMBER') return;
-        ctx.workNumber = e.workNumber;
+      assignWorkNumber: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_WORK_NUMBER') return context;
+        context.workNumber = event.workNumber;
+        return context;
       }),
 
-      assignEquipmentId: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_EQUIPMENT_ID') return;
-        ctx.equipmentId = e.equipmentId;
+      assignEquipmentId: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_EQUIPMENT_ID') return context;
+        context.equipmentId = event.equipmentId;
+        return context;
       })
-    },
-
-    services: {
-      extract: (ctx, _e) => {
-        return stanCore.Extract({
-          request: {
-            workNumber: ctx.workNumber,
-            labwareType: 'Tube',
-            barcodes: ctx.labwares.map((lw) => lw.barcode),
-            equipmentId: ctx.equipmentId > 0 ? ctx.equipmentId : undefined
-          }
-        });
-      },
-      validateExtraction: (ctx: ExtractionContext) => (send) => {
-        const isValid = ctx.labwares.length > 0 && ctx.workNumber !== '' && ctx.equipmentId !== 0;
-        send(isValid ? 'IS_VALID' : 'IS_INVALID');
-      }
     }
   }
 );

@@ -1,6 +1,6 @@
 import React from 'react';
 import AppShell from '../components/AppShell';
-import { Form, Formik, FormikProps } from 'formik';
+import { Form, Formik, FormikProps, FormikValues } from 'formik';
 import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
@@ -11,6 +11,7 @@ import Heading from '../components/Heading';
 import PinkButton from '../components/buttons/PinkButton';
 import createFormMachine from '../lib/machines/form/formMachine';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
+import { fromPromise } from 'xstate';
 
 type StanFormParams<V, R> = {
   /**
@@ -48,7 +49,7 @@ type StanFormParams<V, R> = {
 /**
  * A component to act as a generic parent for a page that requires a simple form
  */
-export default function StanForm<V, R>({
+export default function StanForm<V extends FormikValues, R>({
   title,
   onSubmit,
   validationSchema,
@@ -57,16 +58,16 @@ export default function StanForm<V, R>({
   children
 }: StanFormParams<V, R>) {
   const formMachine = React.useMemo(() => {
-    return createFormMachine<V, R>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return onSubmit(e.values);
-        }
+    return createFormMachine<FormikValues, R>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return onSubmit(input.event.values);
+        })
       }
     });
   }, [onSubmit]);
-  const [current, send] = useMachine(() => formMachine);
+  const [current, send] = useMachine(formMachine);
   const submitForm = async (values: V) => send({ type: 'SUBMIT_FORM', values });
   const serverError = current.context.serverError;
   const formLocked = !current.matches('fillingOutForm');

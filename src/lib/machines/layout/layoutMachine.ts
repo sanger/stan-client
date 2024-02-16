@@ -1,32 +1,46 @@
-import { Machine } from 'xstate';
 import { LayoutContext, LayoutPlan } from './layoutContext';
 import { LayoutSchema, State } from './layoutStates';
 import { LayoutEvents } from './layoutEvents';
 import { Actions, layoutMachineKey, machineOptions } from './layoutMachineOptions';
+import { createMachine } from 'xstate';
 
 export const createLayoutMachine = (layoutPlan: LayoutPlan, possibleActions?: LayoutPlan['plannedActions']) => {
-  return Machine<LayoutContext, LayoutSchema, LayoutEvents>(
+  return createMachine(
     {
-      key: layoutMachineKey,
+      id: layoutMachineKey,
+      types: {} as {
+        context: LayoutContext;
+        events: LayoutEvents;
+        schema: LayoutSchema;
+      },
       initial: State.INIT,
       context: {
         layoutPlan,
         possibleActions,
         selected: null
       },
+      output: ({ context }) => ({
+        data: {
+          layoutPlan: context.layoutPlan
+        }
+      }),
       on: {
         DONE: {
-          target: State.DONE
+          actions: Actions.SEND_LAYOUT_TO_PARENT,
+          target: `.${State.DONE}`
         },
         CANCEL: {
-          target: State.CANCELLED
+          actions: Actions.CANCEL_EDIT_LAYOUT,
+          target: `.${State.CANCELLED}`
         }
       },
       states: {
         [State.INIT]: {
           always: [
             {
-              cond: (ctx) => ctx.layoutPlan.sources.length > 0,
+              guard: ({ context }) => {
+                return context.layoutPlan.sources.length > 0;
+              },
               target: State.SOURCE_DEST_MODE
             },
             {
@@ -74,16 +88,15 @@ export const createLayoutMachine = (layoutPlan: LayoutPlan, possibleActions?: La
           }
         },
         [State.DONE]: {
-          type: 'final',
-          data: {
-            layoutPlan: (ctx: LayoutContext) => ctx.layoutPlan
-          }
+          type: 'final'
         },
         [State.CANCELLED]: {
           type: 'final'
         }
       }
     },
-    machineOptions
+    {
+      ...machineOptions
+    }
   );
 };

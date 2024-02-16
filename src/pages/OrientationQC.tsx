@@ -21,6 +21,7 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import { useMachine } from '@xstate/react';
 import { objectKeys } from '../lib/helpers';
 import { hasBlock } from '../lib/helpers/labwareHelper';
+import { fromPromise } from 'xstate';
 
 export enum OrientationType {
   Correct = 'Correct',
@@ -38,12 +39,12 @@ type OrientationQCForm = {
 };
 const OrientationQC = () => {
   const formMachine = React.useMemo(() => {
-    return createFormMachine<OrientationRequest, RecordOrientationQcMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.RecordOrientationQC({ request: e.values });
-        }
+    return createFormMachine<OrientationRequest, RecordOrientationQcMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.RecordOrientationQC({ request: input.event.values });
+        })
       }
     });
   }, []);
@@ -101,9 +102,9 @@ const OrientationQC = () => {
                     <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                       <Heading level={3}>Labware</Heading>
                       <LabwareScanner
-                        onChange={(labwares) => {
+                        onChange={async (labwares) => {
                           if (labwares.length > 0) {
-                            setFieldValue('barcode', labwares[0].barcode);
+                            await setFieldValue('barcode', labwares[0].barcode);
                           }
                         }}
                         locked={current.matches('submitted')}

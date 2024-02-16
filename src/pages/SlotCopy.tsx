@@ -44,6 +44,7 @@ interface DestinationLabwareScanPanelProps {
   onChangeBioState: (bioState: string) => void;
   onLabwareScan?: (labware: LabwareFlaggedFieldsFragment[]) => void;
   onDestinationSelectionModeChange?: (mode: DestinationSelectionMode) => void;
+  destinationSelectionMode: DestinationSelectionMode;
 }
 
 const transferTypes = [
@@ -67,9 +68,9 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
   onAddLabware,
   onChangeBioState,
   onLabwareScan,
-  onDestinationSelectionModeChange
+  onDestinationSelectionModeChange,
+  destinationSelectionMode
 }) => {
-  const [destinationSelectionMode, setDestinationSelectionMode] = React.useState(DestinationSelectionMode.DEFAULT);
   const validateLabware = useCallback(
     (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): string[] => {
       return foundLabware.state === LabwareState.Active ? [] : ['Labware is not active'];
@@ -93,7 +94,6 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
               value={mode}
               checked={mode === destinationSelectionMode}
               onChange={() => {
-                setDestinationSelectionMode(mode);
                 onDestinationSelectionModeChange?.(mode);
               }}
               label={mode}
@@ -205,18 +205,16 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     });
   }, [initialOutputLabware]);
 
-  const memoSlotCopyMachine = React.useMemo(() => {
-    return slotCopyMachine.withContext({
+  const [current, send] = useMachine(slotCopyMachine, {
+    input: {
       workNumber: '',
       operationType: 'Transfer',
       destinations: initialOutputSlotCopy,
       sources: [],
       slotCopyResults: [],
       sourceLabwarePermData: []
-    });
-  }, [initialOutputSlotCopy]);
-
-  const [current, send] = useMachine(() => memoSlotCopyMachine);
+    }
+  });
 
   /**Keep track of input labware with no permeabilisation done**/
   const [labwaresWithoutPerm, setLabwaresWithoutPerm] = React.useState<LabwareFlaggedFieldsFragment[]>([]);
@@ -269,7 +267,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
       send({
         type: 'UPDATE_SOURCE_LABWARE_PERMTIME',
         labwares: sourcesChanged,
-        destinaton: destinations.find((dest) => dest.labware.id === selectedDestination.id)
+        destination: destinations.find((dest) => dest.labware.id === selectedDestination.id)
       });
     },
     [send, selectedDestination, destinations]
@@ -434,6 +432,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
                 onLabwareScan={onDestinationLabwareScan}
                 onDestinationSelectionModeChange={onDestinationSelectionModeChange}
                 labware={destinations.find((dest) => dest.labware.id === selectedDestination.id)}
+                destinationSelectionMode={destinationSelectionMode.current}
               />
             }
             onSelectInputLabware={setSelectedSource}

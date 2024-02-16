@@ -99,7 +99,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   const confirmOperationLabware = useSelector(service, selectConfirmOperationLabware);
 
   const { addressToCommentMap, labware, layoutPlan, commentsForAllSections } = current.context;
-  const { layoutMachine } = current.children;
+  const { layoutMachine } = current.context;
   const [notifyDelete, setNotifyDelete] = React.useState(false);
   const notifySectionChange = React.useRef(false);
 
@@ -111,16 +111,16 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
 
   useEffect(() => {
     //Notify parent only for layout changes
-    if (layoutPlan && current.event.type === 'done.invoke.layoutMachine' && notifySectionChange.current) {
+    if (layoutPlan && current.matches('editableMode') && notifySectionChange.current) {
       notifySectionChange.current = false;
       onSectionUpdate && onSectionUpdate(layoutPlan);
     }
-  }, [layoutPlan, current.event, onSectionUpdate]);
+  }, [layoutPlan, service, onSectionUpdate, current, layoutMachine]);
 
   /***Update sources whenever there is an update in a source in parent**/
   useEffect(() => {
     if (originalLayoutPlan) {
-      send('UPDATE_ALL_SOURCES', originalLayoutPlan);
+      send({ type: 'UPDATE_ALL_SOURCES', plannedActions: originalLayoutPlan.plannedActions });
     }
   }, [originalLayoutPlan, send]);
 
@@ -256,20 +256,22 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             </LayoutPlanner>
           )}
         </ModalBody>
-        <ModalFooter>
-          <BlueButton
-            onClick={() => {
-              notifySectionChange.current = true;
-              layoutMachine.send({ type: 'DONE' });
-            }}
-            className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-          >
-            Done
-          </BlueButton>
-          <WhiteButton onClick={() => layoutMachine.send({ type: 'CANCEL' })} className="mt-3 w-full sm:mt-0 sm:ml-3">
-            Cancel
-          </WhiteButton>
-        </ModalFooter>
+        {layoutMachine && (
+          <ModalFooter>
+            <BlueButton
+              onClick={() => {
+                notifySectionChange.current = true;
+                layoutMachine.send({ type: 'DONE' });
+              }}
+              className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              Done
+            </BlueButton>
+            <WhiteButton onClick={() => layoutMachine.send({ type: 'CANCEL' })} className="mt-3 w-full sm:mt-0 sm:ml-3">
+              Cancel
+            </WhiteButton>
+          </ModalFooter>
+        )}
       </Modal>
       {
         <ConfirmationModal

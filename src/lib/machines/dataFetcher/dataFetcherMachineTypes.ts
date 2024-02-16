@@ -1,10 +1,3 @@
-import { Interpreter } from 'xstate';
-
-/**
- * The type of an interpreted DataFetcher Machine
- */
-export type DataFetcherMachineType = Interpreter<DataFetcherContext, DataFetcherSchema, DataFetcherEvent>;
-
 /**
  * State Schema for a DataFetcher Machine
  */

@@ -9,7 +9,7 @@ import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import FileUploader, { ConfirmUploadProps } from '../components/upload/FileUploader';
 import { FileFieldsFragment, WorkStatus } from '../types/sdk';
 import DataTable from '../components/DataTable';
-import { Cell, Column } from 'react-table';
+import { CellProps, Column } from 'react-table';
 import WhiteButton from '../components/buttons/WhiteButton';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { toast } from 'react-toastify';
@@ -176,7 +176,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true }: FileMana
     {
       Header: 'Download',
       accessor: 'url',
-      Cell: (props: Cell<FileFieldsFragment>) => {
+      Cell: (props: CellProps<FileFieldsFragment>) => {
         return (
           <WhiteButton className="sm:w-full">
             <a

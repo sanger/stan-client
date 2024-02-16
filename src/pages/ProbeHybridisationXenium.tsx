@@ -27,6 +27,7 @@ import ProbeTable from '../components/probeHybridisation/ProbeTable';
 import { getCurrentDateTime } from '../types/stan';
 import ProbeAddPanel from '../components/probeHybridisation/ProbeAddPanel';
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 export type ProbeHybridisationXeniumFormValues = {
   labware: ProbeOperationLabware[];
@@ -45,16 +46,16 @@ const ProbeHybridisationXenium: React.FC = () => {
   const probePanelInfo = useLoaderData() as GetProbePanelsQuery;
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
-    return createFormMachine<ProbeOperationRequest, RecordProbeOperationMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          const performedValue = e.values.performed!.replace('T', ' ') + ':00';
+    return createFormMachine<ProbeOperationRequest, RecordProbeOperationMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          const performedValue = input.event.values.performed!.replace('T', ' ') + ':00';
           return stanCore.RecordProbeOperation({
             // Stan-core's graphql schema describes the format of a timestamp as yyyy-mm-dd HH:MM:SS
-            request: { ...e.values, performed: performedValue }
+            request: { ...input.event.values, performed: performedValue }
           });
-        }
+        })
       }
     });
   }, [stanCore]);
@@ -140,7 +141,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                         <LabwareScanner
                           onChange={(labware) => {
                             labware.forEach((lw) => {
-                              /**If Labware scnned not already displayed, add to probe list**/
+                              /**If Labware scanned not already displayed, add to probe list**/
                               if (!values.labware.some((valueLw) => valueLw.barcode === lw.barcode)) {
                                 helpers.push({
                                   barcode: lw.barcode,

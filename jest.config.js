@@ -4,8 +4,7 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
   },
-  setupFiles: ['./jest.polyfills.js'],
-  testEnvironment: 'jest-environment-jsdom',
+  testEnvironment: '<rootDir>/jsdom-extended.js',
   /**
    * This is to fix error - Cannot find module ‘msw/node’ (JSDOM)
    * This error is thrown by your test runner because JSDOM uses the browser export condition by default. This means that when you import any third-party packages, like MSW, JSDOM forces its browser export to be used as the entrypoint. This is incorrect and dangerous because JSDOM still runs in Node.js and cannot guarantee full browser compatibility by design.

@@ -42,14 +42,12 @@ export default function AnalysisLabware({
 
   const workNumberCommon = React.useRef('');
 
-  const memoAnalysisLabwareMachine = React.useMemo(() => {
-    return analysisLabwareMachine.withContext({
+  const [current, send] = useMachine(analysisLabwareMachine, {
+    input: {
       analysisLabwares: defaultLabwareValues,
       operationType: undefined
-    });
-  }, [defaultLabwareValues]);
-
-  const [current, send] = useMachine(() => memoAnalysisLabwareMachine);
+    }
+  });
   const { operationType, analysisLabwares } = current.context;
 
   React.useEffect(() => {

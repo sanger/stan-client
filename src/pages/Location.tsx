@@ -66,7 +66,7 @@ const Location = () => {
   const storageLocation = useLoaderData() as LocationFieldsFragment;
   const [searchParams] = useSearchParams();
   const memoLabwareBarcode = React.useMemo(() => searchParams.get('labwareBarcode') ?? '', [searchParams]);
-  const memoLocationMachine = React.useMemo(() => {
+  const memoLocationMachineParams = React.useMemo(() => {
     // Create all the possible addresses for this location if it has a size.
     const locationAddresses: Map<string, number> = storageLocation.size
       ? buildOrderedAddresses(storageLocation.size, storageLocation.direction ?? GridDirection.DownRight)
@@ -87,20 +87,24 @@ const Location = () => {
     });
 
     const selectedAddress = selectedAddresses.length > 0 ? selectedAddresses[0] : null;
-    return locationMachine.withContext({
+    return {
+      selectedAddress,
+      locationAddresses,
+      addressToItemMap
+    };
+  }, [storageLocation]);
+
+  //Custom hook to retain the updated labware state
+  const [current, send] = useMachine(locationMachine, {
+    input: {
       location: storageLocation,
       locationSearchParams: { labwareBarcode: memoLabwareBarcode },
-      locationAddresses,
-      addressToItemMap,
-      selectedAddress,
+      ...memoLocationMachineParams,
       successMessage: '',
       errorMessage: '',
       serverError: null
-    });
-  }, [storageLocation, memoLabwareBarcode]);
-
-  //Custom hook to retain the updated labware state
-  const [current, send] = useMachine(() => memoLocationMachine);
+    }
+  });
   const { location, locationAddresses, successMessage, errorMessage, serverError, addressToItemMap, selectedAddress } =
     current.context;
 
@@ -108,7 +112,7 @@ const Location = () => {
 
   React.useEffect(() => {
     if (location.barcode === storageLocation.barcode) return;
-    send('UPDATE_LOCATION', { location: storageLocation });
+    send({ type: 'UPDATE_LOCATION', location: storageLocation });
   }, [send, storageLocation, location.barcode]);
 
   /**

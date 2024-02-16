@@ -22,6 +22,7 @@ import { Link, useLoaderData, useLocation, useNavigate } from 'react-router-dom'
 import { ExtractResultLabwareTable } from '../components/extractResultLabwareTable/ExtractResultLabwareTable';
 import Warning from '../components/notifications/Warning';
 import ButtonBar from '../components/ButtonBar';
+import { fromPromise } from 'xstate';
 
 export type ExtractResultLabwareForm = ExtractResultLabware & { lw: LabwareFlaggedFieldsFragment };
 
@@ -45,12 +46,12 @@ export default function ExtractionResult() {
   };
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<ExtractResultRequest, RecordExtractResultMutation>().withConfig({
-      services: {
-        submitForm: (context, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.RecordExtractResult({ request: e.values });
-        }
+    return createFormMachine<ExtractResultRequest, RecordExtractResultMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.RecordExtractResult({ request: input.event.values });
+        })
       }
     });
   }, []);

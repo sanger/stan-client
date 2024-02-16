@@ -23,6 +23,7 @@ import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 import WhiteButton from '../../components/buttons/WhiteButton';
 import { useNavigate } from 'react-router-dom';
 import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
+import { fromPromise } from 'xstate';
 
 /**
  * Type used for the values in the form.
@@ -64,12 +65,12 @@ type StainFormProps = {
 
 export default function StainForm({ stainType, stainingInfo, initialLabware, onLabwareChange }: StainFormProps) {
   const formMachine = React.useMemo(() => {
-    return createFormMachine<StainRequest, StainMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.Stain({ request: e.values });
-        }
+    return createFormMachine<StainRequest, StainMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.Stain({ request: input.event.values });
+        })
       }
     });
   }, []);

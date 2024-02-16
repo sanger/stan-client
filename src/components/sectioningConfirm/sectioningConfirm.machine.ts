@@ -7,16 +7,16 @@ import {
   LabwareFlaggedFieldsFragment,
   Maybe
 } from '../../types/sdk';
-import { createMachine } from 'xstate';
-import { assign } from '@xstate/immer';
+import { assign, createMachine, fromCallback, fromPromise } from 'xstate';
 import { stanCore } from '../../lib/sdk';
 import { LayoutPlan, Source } from '../../lib/machines/layout/layoutContext';
 import _, { Dictionary, groupBy } from 'lodash';
-import { Address, LabwareTypeName, MachineServiceDone, MachineServiceError } from '../../types/stan';
+import { Address, LabwareTypeName } from '../../types/stan';
 import { buildSampleColors, sortDownRight } from '../../lib/helpers/labwareHelper';
-import { ClientError } from 'graphql-request';
 import { SectionNumberMode } from './SectioningConfirm';
 import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
+import { ClientError } from 'graphql-request';
+import produce from 'immer';
 
 type SectioningConfirmContext = {
   /**
@@ -104,13 +104,61 @@ type SectioningConfirmEvent =
   | { type: 'IS_VALID' }
   | { type: 'IS_INVALID' }
   | { type: 'CONFIRM' }
-  | MachineServiceDone<'confirmSection', ConfirmSectionMutation>
-  | MachineServiceError<'confirmSection'>;
+  | { type: 'xstate.done.actor.confirmSection'; output: ConfirmSectionMutation }
+  | { type: 'xstate.error.actor.confirmSection'; error: ClientError };
+
+const isValidSectionLabware = (ctx: SectioningConfirmContext): boolean => {
+  return (
+    ctx.confirmSectionLabware.every((csl) => {
+      /**Check if plan has any Fetal waste labware and it has barcode information**/
+      if (
+        csl.cancelled ||
+        (ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER] &&
+          ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER].some(
+            (plan) => plan.destinationLabware.barcode === csl.barcode
+          ))
+      ) {
+        return true;
+      }
+      /** Has every section got a section number? **/
+      const validSectionNumber =
+        csl.confirmSections?.every((cs) => (cs.newSection ? cs.newSection > 0 : false)) ?? false;
+      if (!validSectionNumber) return false;
+
+      /**Create a dictionary of slot addresses
+       * key is the address
+       * value is array of all sections in thet address
+       * **/
+      let slotDictionary: Dictionary<Array<ConfirmSection>> = groupBy(
+        csl.confirmSections,
+        (cs) => cs.destinationAddress
+      );
+      let slotAddresses = Object.keys(slotDictionary);
+      for (let indx = 0; indx < slotAddresses.length; indx++) {
+        const sections = slotDictionary[slotAddresses[indx]];
+        /**If there are multiple sections in this slot address, it should have distinct regions assigned for each section**/
+        if (sections.length > 1) {
+          /** Every section in slot has a region?**/
+          let isValidRegion = sections.every((cs) => (cs.region ? cs.region.length > 0 : false)) ?? false;
+          if (!isValidRegion) return false;
+          /** Are regions defined in a slot unique? **/
+          const regionsInSection = sections.map((section) => section.region);
+          if (regionsInSection.length !== new Set(regionsInSection).size) return false;
+        }
+      }
+      return true;
+    }) && ctx.workNumber !== ''
+  );
+};
 
 export function createSectioningConfirmMachine() {
-  return createMachine<SectioningConfirmContext, SectioningConfirmEvent>(
+  return createMachine(
     {
       id: 'sectioningConfirm',
+      types: {} as {
+        context: SectioningConfirmContext;
+        events: SectioningConfirmEvent;
+      },
       context: {
         workNumber: '',
         plans: [],
@@ -163,7 +211,12 @@ export function createSectioningConfirmMachine() {
         },
         validating: {
           invoke: {
-            src: 'validateConfirmSectionLabware',
+            src: fromCallback(({ sendBack, input }) => {
+              sendBack({ type: input.isValid ? 'IS_VALID' : 'IS_INVALID' });
+            }),
+            input: ({ context }) => {
+              return { isValid: isValidSectionLabware(context) };
+            },
             id: 'validateConfirmSectionLabware'
           },
           on: {
@@ -173,7 +226,17 @@ export function createSectioningConfirmMachine() {
         },
         confirming: {
           invoke: {
-            src: 'confirmSection',
+            src: fromPromise(({ input }) =>
+              stanCore.ConfirmSection({
+                request: {
+                  ...input
+                }
+              })
+            ),
+            input: ({ context }) => ({
+              labware: context.confirmSectionLabware,
+              workNumber: context.workNumber
+            }),
             id: 'confirmSection',
             onDone: {
               target: 'confirmed',
@@ -192,27 +255,27 @@ export function createSectioningConfirmMachine() {
     },
     {
       actions: {
-        assignConfirmSectionLabware: assign((ctx, e) => {
-          if (e.type !== 'UPDATE_CONFIRM_SECTION_LABWARE') return;
-          const cslIndex = ctx.confirmSectionLabware.findIndex(
-            (csl) => csl.barcode === e.confirmSectionLabware.barcode
+        assignConfirmSectionLabware: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_CONFIRM_SECTION_LABWARE') return context;
+          const cslIndex = context.confirmSectionLabware.findIndex(
+            (csl) => csl.barcode === event.confirmSectionLabware.barcode
           );
-          let confirmLabware = e.confirmSectionLabware;
+          let confirmLabware = event.confirmSectionLabware;
           /**
            When the request is submitted for fetal waste labware, It needs to be sent with
            a ConfirmSection that has a destination address and a sample id,
            but no "newSection", since it has no section number.
            **/
           if (
-            ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER] &&
-            ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER].some(
-              (plan) => plan.destinationLabware.barcode === e.confirmSectionLabware.barcode
+            context.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER] &&
+            context.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER].some(
+              (plan) => plan.destinationLabware.barcode === event.confirmSectionLabware.barcode
             )
           ) {
             confirmLabware = {
-              ...e.confirmSectionLabware,
-              confirmSections: e.confirmSectionLabware.confirmSections
-                ? e.confirmSectionLabware.confirmSections.map((cs) => {
+              ...event.confirmSectionLabware,
+              confirmSections: event.confirmSectionLabware.confirmSections
+                ? event.confirmSectionLabware.confirmSections.map((cs) => {
                     return {
                       sampleId: cs.sampleId,
                       destinationAddress: cs.destinationAddress
@@ -222,29 +285,31 @@ export function createSectioningConfirmMachine() {
             };
           }
 
-          if (cslIndex > -1) {
-            ctx.confirmSectionLabware[cslIndex] = confirmLabware;
-          } else {
-            ctx.confirmSectionLabware.push(confirmLabware);
-          }
+          return produce(context, (draft) => {
+            if (cslIndex > -1) {
+              draft.confirmSectionLabware[cslIndex] = confirmLabware;
+            } else {
+              draft.confirmSectionLabware.push(confirmLabware);
+            }
+          });
         }),
-        assignLayoutPlans: assign((ctx) => {
-          const layoutPlans: LayoutPlan[] = Object.values(ctx.layoutPlansByLabwareType).flatMap((plan) => plan);
+        assignLayoutPlans: assign(({ context }) => {
+          const layoutPlans: LayoutPlan[] = Object.values(context.layoutPlansByLabwareType).flatMap((plan) => plan);
 
           /**Remove deleted plans**/
           let updatedLayoutPlans = layoutPlans.filter((lp) =>
-            Array.from(ctx.plans.values()).some(
+            Array.from(context.plans.values()).some(
               (plan) => plan.planData.destination.barcode === lp.destinationLabware.barcode
             )
           );
           /**Get newly added plans**/
-          const addedPlans = ctx.plans.filter(
+          const addedPlans = context.plans.filter(
             (plan) => !layoutPlans.some((lp) => plan.planData.destination.barcode === lp.destinationLabware.barcode)
           );
           /**New plans are added, so create LayoutPlan for all new plans and add to the list*/
           if (addedPlans.length > 0) {
             /**Create the layoutPlans for all newly added plans**/
-            const layoutPlans = buildLayoutPlans(addedPlans, ctx.sourceLabware);
+            const layoutPlans = buildLayoutPlans(addedPlans, context.sourceLabware);
             updatedLayoutPlans = [...updatedLayoutPlans, ...layoutPlans];
           }
 
@@ -256,146 +321,114 @@ export function createSectioningConfirmMachine() {
            *   slide: [layoutPlan3],
            * }
            */
-          ctx.layoutPlansByLabwareType = groupBy(updatedLayoutPlans, (lp) => lp.destinationLabware.labwareType.name);
+          return produce(context, (draft) => {
+            draft.layoutPlansByLabwareType = groupBy(
+              updatedLayoutPlans,
+              (lp) => lp.destinationLabware.labwareType.name
+            );
+          });
         }),
-        updateSectionLayout: assign((ctx, e) => {
-          if (e.type !== 'UPDATE_SECTION_LAYOUT') {
-            return;
+        updateSectionLayout: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_SECTION_LAYOUT') {
+            return context;
           }
-          /**Find the layoutPlan in the list whose section info is changed*/
-          const planInContext = findPlan(ctx.layoutPlansByLabwareType, e.layoutPlan.destinationLabware.barcode!);
-          if (planInContext) {
-            planInContext.plannedActions = e.layoutPlan.plannedActions;
-          }
-        }),
-        assignSectionNumber: assign((ctx, e) => {
-          if (e.type !== 'UPDATE_SECTION_NUMBER') {
-            return;
-          }
-          /**Section number is changed externally in this plan, so update that in the layoutPlan in context**/
-          const planInContext = findPlan(ctx.layoutPlansByLabwareType, e.layoutPlan.destinationLabware.barcode!);
-          if (planInContext) {
-            const source = Array.from(planInContext.plannedActions.values())
-              .flatMap((sources) => sources)
-              .find((source, indx) => source.address === e.slotAddress && indx === e.sectionIndex);
-            if (source) {
-              source.newSection = e.sectionNumber;
+          return produce(context, (draft) => {
+            /**Find the layoutPlan in the list whose section info is changed*/
+            const planInContext = findPlan(
+              draft.layoutPlansByLabwareType,
+              event.layoutPlan.destinationLabware.barcode!
+            );
+            if (planInContext) {
+              planInContext.plannedActions = event.layoutPlan.plannedActions;
             }
-          }
+          });
         }),
-        assignPlans: assign((ctx, e) => {
-          if (e.type !== 'UPDATE_PLANS') return;
-          ctx.plans = e.plans;
+        assignSectionNumber: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_SECTION_NUMBER') {
+            return context;
+          }
+          return produce(context, (draft) => {
+            /**Section number is changed externally in this plan, so update that in the layoutPlan in context**/
+            const planInContext = findPlan(
+              draft.layoutPlansByLabwareType,
+              event.layoutPlan.destinationLabware.barcode!
+            );
+            if (planInContext) {
+              const source = Array.from(planInContext.plannedActions.values())
+                .flatMap((sources) => sources)
+                .find((source, indx) => source.address === event.slotAddress && indx === event.sectionIndex);
+              if (source) {
+                source.newSection = event.sectionNumber;
+              }
+            }
+          });
+        }),
+        assignPlans: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_PLANS') return context;
           /**
            * If a layoutPlan has been removed, make sure to also remove the ConfirmSectionLabware for that layoutPlan
            */
-          const destinationBarcodes = new Set(ctx.plans.map((plan) => plan.planData.destination.barcode));
+          const destinationBarcodes = new Set(context.plans.map((plan) => plan.planData.destination.barcode));
 
-          ctx.confirmSectionLabware = ctx.confirmSectionLabware.filter((csl) => destinationBarcodes.has(csl.barcode));
+          const confirmSectionLabware = context.confirmSectionLabware.filter((csl) =>
+            destinationBarcodes.has(csl.barcode)
+          );
+          return { ...context, confirmSectionLabware, plans: event.plans };
         }),
 
-        assignSectionNumberMode: assign((ctx, e) => {
-          if (e.type !== 'UPDATE_SECTION_NUMBERING_MODE') return;
-          ctx.sectionNumberMode = e.mode;
+        assignSectionNumberMode: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_SECTION_NUMBERING_MODE') return context;
+          return { ...context, sectionNumberMode: event.mode };
         }),
 
-        assignSourceLabware: assign((ctx) => {
-          ctx.sourceLabware = _(ctx.plans)
-            .flatMap((plan) => plan.planData.sources)
-            .uniqBy((source) => source.barcode)
-            .value();
+        assignSourceLabware: assign(({ context, event }) => {
+          return produce(context, (draft) => {
+            draft.sourceLabware = _(draft.plans)
+              .flatMap((plan) => plan.planData.sources)
+              .uniqBy((source) => source.barcode)
+              .value();
 
-          //Set all highest section numbers for all source labware
-          ctx.sourceLabware.forEach((sourceLabware) => {
-            ctx.highestSectionNumbers.set(
-              sourceLabware.barcode,
-              maybeFindSlotByAddress(sourceLabware.slots, 'A1')?.blockHighestSection ?? 0
-            );
-          });
-        }),
-
-        assignRequestError: assign((ctx, e) => {
-          if (e.type !== 'error.platform.confirmSection') return;
-          ctx.requestError = e.data;
-        }),
-
-        assignWorkNumber: assign((ctx, e) => {
-          if (e.type !== 'UPDATE_WORK_NUMBER') return;
-          ctx.workNumber = e.workNumber;
-        }),
-        assignConfirmSectionResults: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.confirmSection') return;
-          ctx.confirmSectionResultLabwares = e.data.confirmSection.labware;
-        }),
-
-        fillSectionNumbers: assign((ctx, e) => {
-          const updateSectionNumber: boolean =
-            ((e.type === 'UPDATE_PLANS' || e.type === 'UPDATE_SECTION_LAYOUT') &&
-              ctx.sectionNumberMode === SectionNumberMode.Auto) ||
-            e.type === 'UPDATE_SECTION_NUMBERING_MODE';
-          updateSectionNumber &&
-            fillInSectionNumbersInLayoutPlan(
-              ctx.sectionNumberMode,
-              ctx.layoutPlansByLabwareType,
-              ctx.highestSectionNumbers,
-              ctx.confirmSectionLabware.filter((csl) => csl.cancelled).map((item) => item.barcode)
-            );
-        })
-      },
-
-      services: {
-        confirmSection: (context) => {
-          return stanCore.ConfirmSection({
-            request: {
-              labware: context.confirmSectionLabware,
-              workNumber: context.workNumber
-            }
-          });
-        },
-
-        validateConfirmSectionLabware: (ctx: SectioningConfirmContext) => (send) => {
-          const isValid =
-            ctx.confirmSectionLabware.every((csl) => {
-              /**Check if plan has any Fetal waste labware and it has barcode information**/
-              if (
-                csl.cancelled ||
-                (ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER] &&
-                  ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER].some(
-                    (plan) => plan.destinationLabware.barcode === csl.barcode
-                  ))
-              ) {
-                return true;
-              }
-              /** Has every section got a section number? **/
-              const validSectionNumber =
-                csl.confirmSections?.every((cs) => (cs.newSection ? cs.newSection > 0 : false)) ?? false;
-              if (!validSectionNumber) return false;
-
-              /**Create a dictionary of slot addresses
-               * key is the address
-               * value is array of all sections in thet address
-               * **/
-              let slotDictionary: Dictionary<Array<ConfirmSection>> = groupBy(
-                csl.confirmSections,
-                (cs) => cs.destinationAddress
+            //Set all highest section numbers for all source labware
+            draft.sourceLabware.forEach((sourceLabware) => {
+              draft.highestSectionNumbers.set(
+                sourceLabware.barcode,
+                maybeFindSlotByAddress(sourceLabware.slots, 'A1')?.blockHighestSection ?? 0
               );
-              let slotAddresses = Object.keys(slotDictionary);
-              for (let indx = 0; indx < slotAddresses.length; indx++) {
-                const sections = slotDictionary[slotAddresses[indx]];
-                /**If there are multiple sections in this slot address, it should have distinct regions assigned for each section**/
-                if (sections.length > 1) {
-                  /** Every section in slot has a region?**/
-                  let isValidRegion = sections.every((cs) => (cs.region ? cs.region.length > 0 : false)) ?? false;
-                  if (!isValidRegion) return false;
-                  /** Are regions defined in a slot unique? **/
-                  const regionsInSection = sections.map((section) => section.region);
-                  if (regionsInSection.length !== new Set(regionsInSection).size) return false;
-                }
-              }
-              return true;
-            }) && ctx.workNumber !== '';
-          send(isValid ? 'IS_VALID' : 'IS_INVALID');
-        }
+            });
+          });
+        }),
+
+        assignRequestError: assign(({ context, event }) => {
+          if (event.type !== 'xstate.error.actor.confirmSection') return context;
+          return { ...context, requestError: event.error };
+        }),
+
+        assignWorkNumber: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_WORK_NUMBER') return context;
+          return { ...context, workNumber: event.workNumber };
+        }),
+        assignConfirmSectionResults: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.confirmSection') return context;
+          return { ...context, confirmSectionResultLabwares: event.output.confirmSection.labware };
+        }),
+
+        fillSectionNumbers: assign(({ context, event }) => {
+          const updateSectionNumber: boolean =
+            ((event.type === 'UPDATE_PLANS' || event.type === 'UPDATE_SECTION_LAYOUT') &&
+              context.sectionNumberMode === SectionNumberMode.Auto) ||
+            event.type === 'UPDATE_SECTION_NUMBERING_MODE';
+          if (updateSectionNumber) {
+            return produce(context, (draft) => {
+              fillInSectionNumbersInLayoutPlan(
+                draft.sectionNumberMode,
+                draft.layoutPlansByLabwareType,
+                draft.highestSectionNumbers,
+                draft.confirmSectionLabware.filter((csl) => csl.cancelled).map((item) => item.barcode)
+              );
+            });
+          }
+          return context;
+        })
       }
     }
   );

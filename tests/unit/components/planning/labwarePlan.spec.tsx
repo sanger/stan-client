@@ -8,7 +8,7 @@ import { enableMapSet } from 'immer';
 import userEvent from '@testing-library/user-event';
 import { LabwareType } from '../../../../src/types/sdk';
 import { createLabwarePlanMachine } from '../../../../src/components/planning/labwarePlan.machine';
-import { interpret } from 'xstate';
+import { createActor } from 'xstate';
 import { convertLabwareToFlaggedLabware } from '../../../../src/lib/helpers/labwareHelper';
 beforeAll(() => {
   enableMapSet();
@@ -119,7 +119,7 @@ describe('When all the fields are correctly field', () => {
           buildFlaggedLabware(LabwareTypeName.TUBE, 'STAN-124')
         )
       );
-      const service = interpret(machine).start();
+      const service = createActor(machine).start();
       service.send({ type: 'EDIT_LAYOUT' });
     });
     waitFor(async () => {

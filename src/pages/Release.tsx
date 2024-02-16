@@ -39,6 +39,7 @@ import EditIcon from '../components/icons/EditIcon';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { Input } from '../components/forms/Input';
 import DownloadIcon from '../components/icons/DownloadIcon';
+import { fromPromise } from 'xstate';
 
 const validationSchema = Yup.object().shape({
   releaseLabware: Yup.array()
@@ -121,13 +122,13 @@ function Release() {
     recipient: ''
   };
   const formMachine = React.useMemo(() => {
-    return createFormMachine<ReleaseRequest, ReleaseLabwareMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<ReleaseRequest, ReleaseLabwareMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           const newValues: ReleaseRequest = {
-            ...e.values,
-            releaseLabware: e.values.releaseLabware.map((suggestedWork) => {
+            ...input.event.values,
+            releaseLabware: input.event.values.releaseLabware.map((suggestedWork: ReleaseLabware) => {
               if (suggestedWork.workNumber) {
                 return {
                   barcode: suggestedWork.barcode,
@@ -137,11 +138,11 @@ function Release() {
             })
           };
           return stanCore.ReleaseLabware({ releaseRequest: newValues });
-        }
+        })
       }
     });
   }, [stanCore]);
-  const [current, send] = useMachine(() => formMachine);
+  const [current, send] = useMachine(formMachine);
 
   const { serverError, submissionResult } = current.context;
   const formLocked = !current.matches('fillingOutForm');

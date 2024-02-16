@@ -1,10 +1,7 @@
-import { createMachine, send } from 'xstate';
-import { assign } from '@xstate/immer';
+import { assign, createMachine, fromPromise, raise } from 'xstate';
 import { castDraft } from 'immer';
-import { ClientError } from 'graphql-request';
-import { Maybe } from '../../../types/sdk';
 import { SearchServiceInterface } from '../../services/searchServiceInterface';
-import { SearchResultsType } from '../../../types/stan';
+import { SearchResultsType, ServerErrors } from '../../../types/stan';
 
 /**
  * Context for Search Machine
@@ -13,38 +10,40 @@ export interface SearchContext<E, T> {
   findRequest: E;
   maxRecords?: number;
   searchResult?: SearchResultsType<T>;
-  serverError?: Maybe<ClientError>;
+  serverError?: ServerErrors | null;
 }
 
 type FindEvent<E> = { type: 'FIND'; request: E };
 type SearchDoneEvent<T> = {
-  type: 'done.invoke.search';
-  data: SearchResultsType<T>;
+  type: 'xstate.done.actor.search';
+  output: SearchResultsType<T>;
 };
-type SearchErrorEvent = { type: 'error.platform.search'; data: ClientError };
+type SearchErrorEvent = { type: 'xstate.error.actor.search'; error: ServerErrors };
 
 export type SearchEvent = SearchErrorEvent;
 
 /**
  * Search Machine Config
  */
-function searchMachine<E, T>(searchService: SearchServiceInterface<E, T>) {
-  return createMachine<SearchContext<E, T>, SearchEvent | FindEvent<E> | SearchDoneEvent<T>>(
+function searchMachine<E, T>(searchService: SearchServiceInterface<E, T>, context: SearchContext<E, T>) {
+  return createMachine(
     {
+      types: {} as {
+        context: SearchContext<E, T>;
+        events: SearchEvent | SearchDoneEvent<T> | FindEvent<E>;
+      },
       id: 'searchMachine',
       initial: 'unknown',
+      context,
       states: {
         unknown: {
           always: [
             {
-              cond: (context) => {
+              guard: ({ context }) => {
                 return Object.values(context?.findRequest ?? {}).some((v) => !!v);
               },
               target: 'ready',
-              actions: send((ctx, _e) => ({
-                type: 'FIND',
-                request: ctx.findRequest
-              }))
+              actions: raise({ type: 'FIND', request: context.findRequest })
             },
             { target: 'ready' }
           ]
@@ -57,15 +56,25 @@ function searchMachine<E, T>(searchService: SearchServiceInterface<E, T>) {
         searching: {
           entry: 'unassignServerError',
           invoke: {
-            src: 'search',
             id: 'search',
+            src: fromPromise(({ input }) => {
+              return searchService.search({
+                ...input.request,
+                maxRecords: input.maxRecords
+              });
+            }),
+            input: ({ context: { maxRecords }, event }) => ({ maxRecords, request: (event as FindEvent<E>).request }),
             onDone: {
               target: 'searched',
-              actions: 'assignSearchResult'
+              actions: ({ context, event }) => {
+                context.searchResult = castDraft(event.output);
+              }
             },
             onError: {
               target: 'ready',
-              actions: 'assignServerError'
+              actions: ({ context, event }) => {
+                context.serverError = castDraft(event.error) as ServerErrors;
+              }
             }
           }
         },
@@ -78,34 +87,10 @@ function searchMachine<E, T>(searchService: SearchServiceInterface<E, T>) {
     },
     {
       actions: {
-        assignSearchResult: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.search') {
-            return;
-          }
-          ctx.searchResult = castDraft(e.data as SearchResultsType<T>);
-        }),
-
-        unassignServerError: assign((ctx, _e) => {
-          ctx.serverError = null;
-        }),
-
-        assignServerError: assign((ctx, e) => {
-          if (e.type !== 'error.platform.search') {
-            return;
-          }
-          ctx.serverError = castDraft(e.data);
+        unassignServerError: assign(({ context }) => {
+          context.serverError = null;
+          return context;
         })
-      },
-      services: {
-        search: (ctx, e) => {
-          if (e.type !== 'FIND') {
-            return Promise.reject();
-          }
-          return searchService.search({
-            ...e.request,
-            maxRecords: ctx.maxRecords
-          });
-        }
       }
     }
   );

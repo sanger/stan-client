@@ -296,9 +296,13 @@ describe('Release Page', () => {
       it('shows the change release file options button', () => {
         cy.findByText('Change Release File Options').should('be.visible');
       });
-      it("goes to Release Options page when 'Change Release File Options' button is clicked", () => {
+    });
+    context("When 'Change Release File Options' button is clicked", () => {
+      before(() => {
         cy.findByText('Change Release File Options').click();
-        cy.url().should('include', '/releaseOptions?id=1001,1002,1003&groups=histology,sample_processing,xenium');
+      });
+      it('loads to Release File Options component', () => {
+        cy.url().should('include', '/releaseOptions?id=1001,1002,1003,1004&groups=histology,sample_processing,xenium');
       });
     });
   });

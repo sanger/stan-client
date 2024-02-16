@@ -286,7 +286,7 @@ export default function SectioningConfirm({
                     <div className="flex flex-row items-center justify-end">
                       <PinkButton
                         disabled={!current.matches({ ready: 'valid' })}
-                        onClick={() => send('CONFIRM')}
+                        onClick={() => send({ type: 'CONFIRM' })}
                         action="primary"
                       >
                         Save

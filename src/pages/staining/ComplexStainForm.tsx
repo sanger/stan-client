@@ -29,6 +29,7 @@ import ComplexStainRow from './ComplexStainRow';
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 import { useNavigate } from 'react-router-dom';
 import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
+import { fromPromise } from 'xstate';
 
 type ComplexStainFormValues = ComplexStainRequest;
 
@@ -40,12 +41,12 @@ type ComplexStainFormProps = {
 
 export default function ComplexStainForm({ stainType, initialLabware, onLabwareChange }: ComplexStainFormProps) {
   const formMachine = React.useMemo(() => {
-    return createFormMachine<ComplexStainRequest, RecordComplexStainMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.RecordComplexStain({ request: e.values });
-        }
+    return createFormMachine<ComplexStainRequest, RecordComplexStainMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.RecordComplexStain({ request: input.event.values });
+        })
       }
     });
   }, []);

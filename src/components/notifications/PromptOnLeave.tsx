@@ -3,7 +3,7 @@ import ReactRouterPrompt from 'react-router-prompt';
 import Modal, { ModalBody, ModalFooter } from '../Modal';
 import BlueButton from '../buttons/BlueButton';
 import WhiteButton from '../buttons/WhiteButton';
-import { unstable_BlockerFunction as BlockerFunction } from 'react-router-dom';
+import { BlockerFunction } from 'react-router-dom';
 
 interface PromptOnLeaveProps {
   /**Should a prompt dialog be displayed?**/

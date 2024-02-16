@@ -27,6 +27,7 @@ import FileUploader from '../components/upload/FileUploader';
 import { toast } from 'react-toastify';
 import warningToast from '../components/notifications/WarningToast';
 import { UploadResult } from '../components/upload/useUpload';
+import { fromPromise } from 'xstate';
 
 const availableLabware: Array<LabwareTypeName> = [
   LabwareTypeName.FOUR_SLOT_SLIDE,
@@ -187,16 +188,16 @@ export const SectionRegistration: React.FC = () => {
   const stanCore = useContext(StanCoreContext);
   const navigate = useNavigate();
   const formMachine = React.useMemo(() => {
-    return createFormMachine<SectionRegisterRequest, RegisterSectionsMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.RegisterSections({ request: e.values });
-        }
+    return createFormMachine<SectionRegisterRequest, RegisterSectionsMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.RegisterSections({ request: input.event.values });
+        })
       }
     });
   }, [stanCore]);
-  const [current, send] = useMachine(() => formMachine);
+  const [current, send] = useMachine(formMachine);
   const [fileRegisterResult, setFileRegisterResult] = React.useState<LabwareFieldsFragment[] | undefined>(undefined);
 
   const initialLabware = useMemo(() => {
@@ -235,7 +236,7 @@ export const SectionRegistration: React.FC = () => {
         const result = results[0].response;
         //Upload success, but no result, return
         if (result && 'barcodes' in result) {
-          const barcodes: string[] = result['barcodes'];
+          const barcodes: string[] = result['barcodes'] as string[];
           const labwarePromises = barcodes.map((barcode: string) => stanCore.FindLabware({ barcode }));
           //Retrieve details of newly registered labware
           Promise.all(labwarePromises)

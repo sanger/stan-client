@@ -19,9 +19,10 @@ import { MAX_NUM_BLOCKANDSLIDES } from './WorkAllocation';
 import FormikInput, { Input } from '../forms/Input';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import Pill from '../Pill';
-import { extractServerErrors } from '../../types/stan';
 import warningToast from '../notifications/WarningToast';
 import { toast } from 'react-toastify';
+import { AnyMachineSnapshot } from 'xstate';
+import { extractServerErrors } from '../../types/stan';
 
 /**
  * The type of values for the edit form
@@ -71,7 +72,7 @@ export default function WorkRow({
   const workRowMachine = React.useMemo(() => {
     return createWorkRowMachine({ workWithComment: initialWork });
   }, [initialWork]);
-  const [current, send] = useMachine(workRowMachine);
+  const [current, send, actor] = useMachine(workRowMachine);
 
   const {
     editModeEnabled,
@@ -82,17 +83,11 @@ export default function WorkRow({
 
   /**Notify the changes in work fields*/
   React.useEffect(() => {
-    if (
-      current.event.type === 'done.invoke.updateWorkPriority' ||
-      current.event.type === 'done.invoke.updateWorkNumSlides' ||
-      current.event.type === 'done.invoke.updateWorkNumBlocks' ||
-      current.event.type === 'done.invoke.updateWorkStatus' ||
-      current.event.type === 'done.invoke.updateWorkOmeroProject' ||
-      current.event.type === 'done.invoke.updateWorkDnapProject'
-    ) {
+    if (current.context.isInvokeActorDone) {
+      console.log('work updated', work);
       onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
     }
-  }, [work, comment, onWorkFieldUpdate, rowIndex, current]);
+  }, [work, comment, onWorkFieldUpdate, rowIndex, current, actor]);
 
   /** Notify the user if enters an invalid DNAP study ID. */
   useEffect(() => {
@@ -116,13 +111,24 @@ export default function WorkRow({
   /**
    * Should the edit button by displayed to the user right now
    */
-  const showEditButton = !editModeEnabled && current.nextEvents.includes('EDIT');
+
+  function getNextEvents(snapshot: AnyMachineSnapshot) {
+    return [...new Set([...snapshot._nodes.flatMap((sn) => sn.ownEvents)])];
+  }
+  const showEditButton = !editModeEnabled && getNextEvents(current).includes('EDIT');
 
   /**
    * List of possible events that can change the current status (excluding edit)
    */
-  const nextStatuses = current.nextEvents.filter(
-    (e) => e !== 'EDIT' && e !== 'UPDATE_NUM_SLIDES' && e !== 'UPDATE_NUM_BLOCKS' && e !== 'UPDATE_PRIORITY'
+  const nextStatuses = getNextEvents(current).filter(
+    (e) =>
+      e !== 'EDIT' &&
+      e !== 'UPDATE_NUM_SLIDES' &&
+      e !== 'UPDATE_NUM_BLOCKS' &&
+      e !== 'UPDATE_PRIORITY' &&
+      e !== 'UPDATE_NUM_ORIGINAL_SAMPLES' &&
+      e !== 'UPDATE_OMERO_PROJECT' &&
+      e !== 'UPDATE_DNAP_PROJECT'
   );
 
   /**
@@ -140,8 +146,10 @@ export default function WorkRow({
    * Event handler for the form submission. Sends an event to the machine.
    * @param values the form values
    */
+
   const onFormSubmit = async (values: FormValues) => {
-    send(values.type, {
+    send({
+      type: values.type as 'COMPLETE' | 'REACTIVATE',
       commentId: requiresComment(values.type) ? Number(values.commentId) : undefined
     });
   };
@@ -211,7 +219,7 @@ export default function WorkRow({
 
   const renderWorkDnapProjectField = (workNumber: string, dnapStudy: DnapStudy | undefined) => {
     return (
-      <div className="grid  grid grid-flow-row auto-rows-max">
+      <div className="grid grid-flow-row auto-rows-max">
         <Input
           data-testid={`${workNumber}-DnapStudy`}
           type="number"

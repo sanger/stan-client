@@ -149,10 +149,12 @@ const Labware = ({
     return createLabwareMachine();
   }, []);
   const [current, send] = useMachine(labwareMachine, {
-    context: {
+    input: {
       selectionMode,
       selectable,
-      slots: labware.slots
+      slots: labware.slots,
+      selectedAddresses: new Set<string>(),
+      lastSelectedAddress: null
     }
   });
   const { selectedAddresses } = current.context;

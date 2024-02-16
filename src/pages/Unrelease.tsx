@@ -97,7 +97,7 @@ function sectionNumberInputIfBlock(unreleaseRequest: UnreleaseRequest): Column<L
   return {
     Header: 'Highest Section for Block',
     accessor: identity,
-    Cell: (props: CellProps<{}, LabwareFieldsFragment>) => {
+    Cell: (props: CellProps<LabwareFieldsFragment>) => {
       const labwareIndex = unreleaseRequest.labware.findIndex((lw) => lw.barcode === props.value.barcode);
 
       return hasBlock(props.value) ? (

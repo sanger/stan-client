@@ -1,6 +1,6 @@
 import React from 'react';
 import { CellProps, Column } from 'react-table';
-import { Labware, LabwareFieldsFragment, LabwareFlaggedFieldsFragment } from '../../types/sdk';
+import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import Circle from '../Circle';
 import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
 import { valueFromSamples } from './index';
@@ -18,8 +18,8 @@ const color: ColumnFactory<Map<number, any>> = (meta) => {
   return {
     id: 'color',
     Header: '',
-    accessor: (originalRow) => meta?.get(originalRow.slots[0]?.samples[0]?.id) ?? '#FFF',
-    Cell: (props: CellProps<Labware>) => <Circle backgroundColor={props.value} />
+    accessor: (originalRow: LabwareFieldsFragment) => meta?.get(originalRow.slots[0]?.samples[0]?.id) ?? '#FFF',
+    Cell: (props: CellProps<LabwareFieldsFragment>) => <Circle backgroundColor={props.value} />
   };
 };
 

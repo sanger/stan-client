@@ -1,13 +1,12 @@
 import { ExtractResultQuery, PassFail } from '../../types/sdk';
-import { ClientError } from 'graphql-request';
-import { createMachine } from 'xstate';
-import { assign } from '@xstate/immer';
+import { assign, createMachine, fromPromise } from 'xstate';
 import { stanCore } from '../../lib/sdk';
 import { castDraft } from 'immer';
+import { ServerErrors } from '../../types/stan';
 
 export interface ExtractResultContext {
   extractResults: ExtractResultQuery[];
-  serverError?: ClientError;
+  serverError?: ServerErrors;
   scanErrorMessage?: string;
   currentBarcode: string;
 }
@@ -21,12 +20,12 @@ type UpdateBarcodeEvent = {
   barcode: string;
 };
 type ExtractResultSuccess = {
-  type: 'done.invoke.extractResult';
-  data: ExtractResultQuery;
+  type: 'xstate.done.actor.extractResult';
+  output: ExtractResultQuery;
 };
 type ExtractResultFailure = {
-  type: 'error.platform.extractResult';
-  data: ClientError;
+  type: 'xstate.error.actor.extractResult';
+  error: ServerErrors;
 };
 type RemoveExtractResultEvent = {
   type: 'REMOVE_EXTRACT_RESULT';
@@ -40,131 +39,144 @@ export type RNAAnalysisEvent =
   | ExtractResultFailure
   | RemoveExtractResultEvent;
 
-export const extractResultMachine = createMachine<ExtractResultContext, RNAAnalysisEvent>(
-  {
-    id: 'extract_result',
-    initial: 'ready',
-    states: {
-      ready: {
-        on: {
-          SUBMIT_BARCODE: [
-            {
-              target: 'submitBarcodeSuccess',
-              actions: 'assignBarcode',
-              cond: 'SubmitBarcodeValid'
+export const extractResultMachine = (initExtractedResults: ExtractResultQuery[]) =>
+  createMachine(
+    {
+      id: 'extract_result',
+      types: {} as {
+        context: ExtractResultContext;
+        events: RNAAnalysisEvent;
+      },
+      context: {
+        extractResults: initExtractedResults ?? [],
+        currentBarcode: ''
+      },
+      initial: 'ready',
+      states: {
+        ready: {
+          on: {
+            SUBMIT_BARCODE: [
+              {
+                target: 'submitBarcodeSuccess',
+                actions: 'assignBarcode',
+                guard: 'SubmitBarcodeValid'
+              },
+              {
+                target: 'submitBarcodeFailed',
+                guard: 'SubmitBarcodeInvalid'
+              }
+            ],
+            UPDATE_BARCODE: {
+              actions: ['unassignErrorMessage', 'assignBarcode']
             },
-            {
-              target: 'submitBarcodeFailed',
-              cond: 'SubmitBarcodeInvalid'
+            REMOVE_EXTRACT_RESULT: {
+              guard: 'ExtractResultNotEmpty',
+              actions: 'removeExtractResult'
             }
-          ],
-          UPDATE_BARCODE: {
-            actions: ['unassignErrorMessage', 'assignBarcode']
-          },
-          REMOVE_EXTRACT_RESULT: {
-            cond: 'ExtractResultNotEmpty',
-            actions: 'removeExtractResult'
+          }
+        },
+        submitBarcodeSuccess: {
+          entry: ['unassignServerError', 'unassignErrorMessage'],
+          invoke: {
+            id: 'extractResult',
+            src: fromPromise(({ input }) => {
+              return stanCore.ExtractResult({
+                barcode: input.barcode
+              });
+            }),
+            input: ({ context }) => ({ barcode: context.currentBarcode }),
+            onDone: {
+              target: 'extractResultSuccess',
+              actions: 'assignExtractResult'
+            },
+            onError: {
+              target: 'extractResultFailed',
+              actions: 'assignServerError'
+            }
+          }
+        },
+        submitBarcodeFailed: {
+          entry: 'assignSubmitBarcodeError',
+          always: {
+            actions: 'assignBarcode',
+            target: 'ready'
+          }
+        },
+        extractResultSuccess: {
+          always: {
+            target: 'ready'
+          }
+        },
+        extractResultFailed: {
+          always: {
+            target: 'ready'
           }
         }
-      },
-      submitBarcodeSuccess: {
-        onEntry: ['unassignServerError', 'unassignErrorMessage'],
-        invoke: {
-          src: 'extractResult',
-          id: 'extractResult',
-          onDone: {
-            target: 'extractResultSuccess',
-            actions: 'assignExtractResult'
-          },
-          onError: {
-            target: 'extractResultFailed',
-            actions: 'assignServerError'
+      }
+    },
+    {
+      actions: {
+        assignBarcode: assign(({ context, event, self }) => {
+          if (!(event.type === 'UPDATE_BARCODE' || event.type === 'SUBMIT_BARCODE')) return context;
+          return { ...context, currentBarcode: event.barcode };
+        }),
+        assignSubmitBarcodeError: assign(({ context, event }) => {
+          if (event.type !== 'SUBMIT_BARCODE') return context;
+          return { ...context, scanErrorMessage: `"${event.barcode}" has already been scanned` };
+        }),
+        assignExtractResult: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.extractResult') return context;
+          if (!event.output.extractResult) {
+            return { ...context, scanErrorMessage: `No extraction recorded for the tube ${context.currentBarcode}` };
           }
-        }
+          if (!event.output.extractResult.result) {
+            return {
+              ...context,
+              scanErrorMessage: `No result recorded for extraction of the tube ${context.currentBarcode}`
+            };
+          }
+
+          if (event.output.extractResult.result === PassFail.Fail) {
+            return {
+              ...context,
+              scanErrorMessage: `Extraction result is 'FAIL' for the tube ${context.currentBarcode}`
+            };
+          }
+          return { ...context, extractResults: [...context.extractResults, event.output], currentBarcode: '' };
+        }),
+        removeExtractResult: assign(({ context, event }) => {
+          if (event.type !== 'REMOVE_EXTRACT_RESULT') return context;
+          const extractResults = context.extractResults.filter(
+            (res) => res.extractResult.labware.barcode !== event.barcode
+          );
+          return { ...context, extractResults };
+        }),
+        assignServerError: assign(({ context, event }) => {
+          if (event.type !== 'xstate.error.actor.extractResult') return context;
+          return { ...context, serverError: castDraft(event.error) };
+        }),
+        unassignServerError: assign(({ context }) => {
+          return { ...context, serverError: undefined };
+        }),
+        unassignErrorMessage: assign(({ context }) => {
+          return { ...context, scanErrorMessage: '' };
+        })
       },
-      submitBarcodeFailed: {
-        entry: 'assignSubmitBarcodeError',
-        always: {
-          actions: 'assignBarcode',
-          target: 'ready'
-        }
-      },
-      extractResultSuccess: {
-        always: {
-          target: 'ready'
-        }
-      },
-      extractResultFailed: {
-        always: {
-          target: 'ready'
-        }
+
+      guards: {
+        SubmitBarcodeValid: ({ context }) => {
+          return (
+            context.extractResults.filter((result) => result.extractResult.labware.barcode === context.currentBarcode)
+              .length <= 0
+          );
+        },
+        SubmitBarcodeInvalid: ({ context, event }) => {
+          return (
+            context.extractResults.filter((result) => result.extractResult.labware.barcode === context.currentBarcode)
+              .length > 0
+          );
+        },
+        ExtractResultNotEmpty: ({ context, event }) => context.extractResults && context.extractResults.length > 0
       }
     }
-  },
-  {
-    actions: {
-      assignBarcode: assign((ctx, e) => {
-        if (!(e.type === 'UPDATE_BARCODE' || e.type === 'SUBMIT_BARCODE')) return;
-
-        ctx.currentBarcode = e.barcode;
-      }),
-      assignSubmitBarcodeError: assign((ctx, e) => {
-        if (e.type !== 'SUBMIT_BARCODE') return;
-        ctx.scanErrorMessage = `"${e.barcode}" has already been scanned`;
-      }),
-      assignExtractResult: assign((ctx, e) => {
-        if (e.type !== 'done.invoke.extractResult') return;
-        if (!e.data.extractResult) {
-          ctx.scanErrorMessage = `No extraction recorded for the tube ${ctx.currentBarcode}`;
-          return;
-        }
-        if (!e.data.extractResult.result) {
-          ctx.scanErrorMessage = `No result recorded for extraction of the tube ${ctx.currentBarcode}`;
-          return;
-        }
-
-        if (e.data.extractResult.result === PassFail.Fail) {
-          ctx.scanErrorMessage = `Extraction result is 'FAIL' for the tube ${ctx.currentBarcode}`;
-          return;
-        }
-        ctx.extractResults.push(e.data);
-        ctx.currentBarcode = '';
-      }),
-      removeExtractResult: assign((ctx, e) => {
-        if (e.type !== 'REMOVE_EXTRACT_RESULT') return;
-        ctx.extractResults = ctx.extractResults.filter((res) => res.extractResult.labware.barcode !== e.barcode);
-      }),
-      assignServerError: assign((ctx, e) => {
-        if (e.type !== 'error.platform.extractResult') return;
-        ctx.serverError = castDraft(e.data);
-      }),
-      unassignServerError: assign((ctx, _e) => {
-        ctx.serverError = undefined;
-      }),
-      unassignErrorMessage: assign((ctx) => {
-        ctx.scanErrorMessage = '';
-      })
-    },
-
-    guards: {
-      SubmitBarcodeValid: (ctx) => {
-        return (
-          ctx.extractResults.filter((result) => result.extractResult.labware.barcode === ctx.currentBarcode).length <= 0
-        );
-      },
-      SubmitBarcodeInvalid: (ctx) => {
-        return (
-          ctx.extractResults.filter((result) => result.extractResult.labware.barcode === ctx.currentBarcode).length > 0
-        );
-      },
-      ExtractResultNotEmpty: (ctx) => ctx.extractResults && ctx.extractResults.length > 0
-    },
-    services: {
-      extractResult: (ctx) => {
-        return stanCore.ExtractResult({
-          barcode: ctx.currentBarcode
-        });
-      }
-    }
-  }
-);
+  );

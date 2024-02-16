@@ -2,7 +2,7 @@ import { FlagDetail, FlagSummary } from '../types/sdk';
 import Heading from './Heading';
 import React from 'react';
 import DataTable from './DataTable';
-import { Cell, Column } from 'react-table';
+import { CellProps, Column } from 'react-table';
 import { FlaggedBarcodeLink } from './dataTableColumns/labwareColumns';
 
 const columns = (): Column<FlagSummary>[] => {
@@ -17,8 +17,8 @@ const columns = (): Column<FlagSummary>[] => {
     {
       Header: 'Description',
       accessor: 'description',
-      Cell: (props: Cell<FlagSummary>) => {
-        return props.row.original.description;
+      Cell: (props: CellProps<FlagSummary>) => {
+        return <span>{props.row.original.description} </span>;
       }
     }
   ];

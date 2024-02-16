@@ -1,8 +1,7 @@
-import { createMachine } from 'xstate';
-import { assign } from '@xstate/immer';
+import { assign, createMachine, fromPromise } from 'xstate';
 import { extractServerErrors, ServerErrors } from '../../../types/stan';
-import { ClientError } from 'graphql-request';
 import { Maybe, RegisterResultFieldsFragment } from '../../../types/sdk';
+import { ClientError } from 'graphql-request';
 
 export interface RegistrationContext<F, M> {
   registrationFormInput: Maybe<F>;
@@ -23,13 +22,13 @@ type EditSubmissionEvent = {
 };
 
 type SubmittingDoneEvent = {
-  type: 'done.invoke.submitting';
-  data: RegisterResultFieldsFragment;
+  type: 'xstate.done.actor.submitting';
+  output: RegisterResultFieldsFragment;
 };
 
 type SubmittingErrorEvent = {
-  type: 'error.platform.submitting';
-  data: ClientError;
+  type: 'xstate.error.actor.submitting';
+  error: ClientError;
 };
 
 export type RegistrationEvent<F> =
@@ -45,8 +44,12 @@ export function createRegistrationMachine<F, M>(
   buildRegistrationInput: (formInput: F, existingTissues?: Array<string>) => Promise<M>,
   registrationService: (mutationInput: M) => Promise<RegisterResultFieldsFragment>
 ) {
-  return createMachine<RegistrationContext<F, M>, RegistrationEvent<F>>(
+  return createMachine(
     {
+      types: {} as {
+        context: RegistrationContext<F, M>;
+        events: RegistrationEvent<F>;
+      },
       context: {
         registrationFormInput: null,
         buildRegistrationInput,
@@ -67,7 +70,15 @@ export function createRegistrationMachine<F, M>(
         submitting: {
           invoke: {
             id: 'submitting',
-            src: 'submit',
+            src: fromPromise(({ input }) => {
+              return buildRegistrationInput(input.values, input.confirmedTissues).then(input.registrationService);
+            }),
+            input: ({ context, event }) => ({
+              values: (event as SubmitFormEvent<F>).values,
+              registrationService: context.registrationService,
+              confirmedTissues: context.confirmedTissues
+            }),
+
             onDone: {
               target: 'checkSubmissionClashes',
               actions: ['assignRegistrationResult']
@@ -81,7 +92,7 @@ export function createRegistrationMachine<F, M>(
         checkSubmissionClashes: {
           always: [
             {
-              cond: 'isClash',
+              guard: 'isClash',
               target: 'clashed'
             },
             {
@@ -107,37 +118,33 @@ export function createRegistrationMachine<F, M>(
     },
     {
       actions: {
-        emptyConfirmedTissues: assign((ctx) => (ctx.confirmedTissues = [])),
-
-        assignRegistrationResult: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.submitting' || !e.data) {
-            return;
-          }
-          ctx.registrationResult = e.data;
-
-          // Store the clashed tissues to be used for possible user confirmation
-          ctx.confirmedTissues = ctx.registrationResult.clashes.map((clash) => clash.tissue.externalName ?? '');
+        emptyConfirmedTissues: assign(({ context }) => {
+          context.confirmedTissues = [];
+          return context;
         }),
 
-        assignRegistrationError: assign((ctx, e) => {
-          if (e.type !== 'error.platform.submitting') {
-            return;
+        assignRegistrationResult: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.submitting' || !event.output) {
+            return context;
           }
-          ctx.registrationErrors = extractServerErrors(e.data);
+          context.registrationResult = event.output;
+
+          // Store the clashed tissues to be used for possible user confirmation
+          context.confirmedTissues = context.registrationResult.clashes.map((clash) => clash.tissue.externalName ?? '');
+          return context;
+        }),
+
+        assignRegistrationError: assign(({ context, event }) => {
+          if (event.type !== 'xstate.error.actor.submitting') {
+            return context;
+          }
+          context.registrationErrors = extractServerErrors(event.error);
+          return context;
         })
       },
 
       guards: {
-        isClash: (ctx) => ctx.registrationResult !== null && ctx.registrationResult.clashes.length > 0
-      },
-
-      services: {
-        submit: (context, event) => {
-          if (event.type !== 'SUBMIT_FORM') {
-            return Promise.reject();
-          }
-          return buildRegistrationInput(event.values, context.confirmedTissues).then(context.registrationService);
-        }
+        isClash: ({ context }) => context.registrationResult !== null && context.registrationResult.clashes.length > 0
       }
     }
   );

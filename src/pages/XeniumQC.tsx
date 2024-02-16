@@ -16,6 +16,7 @@ import FormikInput from '../components/forms/Input';
 import { getCurrentDateTime } from '../types/stan';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 export type XeniumQCFormData = {
   workNumberAll: string;
@@ -27,15 +28,15 @@ const XeniumQC = () => {
   const comments = useLoaderData() as CommentFieldsFragment[];
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
-    return createFormMachine<QcLabwareRequest, RecordQcLabwareMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<QcLabwareRequest, RecordQcLabwareMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordQCLabware({
             // Stan-core's graphql schema describes the format of a timestamp as yyyy-mm-dd HH:MM:SS
-            request: { ...e.values }
+            request: { ...input.event.values }
           });
-        }
+        })
       }
     });
   }, [stanCore]);

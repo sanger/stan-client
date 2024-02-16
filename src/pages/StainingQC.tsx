@@ -22,6 +22,7 @@ import Panel from '../components/Panel';
 import { useCollection } from '../lib/hooks/useCollection';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import { fromPromise } from 'xstate';
 
 type StainingQCProps = {
   info: GetStainingQcInfoQuery;
@@ -42,14 +43,14 @@ export default function StainingQC({ info }: StainingQCProps) {
   const stanCore = useContext(StanCoreContext);
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<ResultRequest, RecordStainResultMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<ResultRequest, RecordStainResultMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           let newLabwareResults: CoreLabwareResult[] = [];
-          if (e.values.operationType === STAIN_QC_TYPES[0]) {
+          if (input.event.values.operationType === STAIN_QC_TYPES[0]) {
             //Remove slotMeasurements from labwareResults if qcType is Stain QC
-            newLabwareResults = e.values.labwareResults.map((labwareResult) => {
+            newLabwareResults = input.event.values.labwareResults.map((labwareResult: CoreLabwareResult) => {
               return {
                 barcode: labwareResult.barcode,
                 sampleResults: labwareResult.sampleResults
@@ -57,9 +58,9 @@ export default function StainingQC({ info }: StainingQCProps) {
             });
           }
           //Remove sampleResults from labwareResults if qcType is Tissue coverage
-          if (e.values.operationType === STAIN_QC_TYPES[1]) {
+          if (input.event.values.operationType === STAIN_QC_TYPES[1]) {
             /**Omit all measurements for which the tissue coverage is not specified**/
-            newLabwareResults = e.values.labwareResults.map((labwareResult) => {
+            newLabwareResults = input.event.values.labwareResults.map((labwareResult: CoreLabwareResult) => {
               const slotMeasurements = labwareResult.slotMeasurements?.filter(
                 (sm) => sm.value !== '' && sm.name === TISSUE_COVERAGE_MEASUREMENT_NAME
               );
@@ -70,9 +71,9 @@ export default function StainingQC({ info }: StainingQCProps) {
                   };
             });
           }
-          if (e.values.operationType === STAIN_QC_TYPES[2]) {
+          if (input.event.values.operationType === STAIN_QC_TYPES[2]) {
             //Remove slotMeasurements from labwareResults and passFail from each sampleResult if qcType is Pretreatment QC
-            newLabwareResults = e.values.labwareResults.map((labwareResult) => {
+            newLabwareResults = input.event.values.labwareResults.map((labwareResult: CoreLabwareResult) => {
               return {
                 barcode: labwareResult.barcode,
                 sampleResults: labwareResult.sampleResults?.map((sampleResult) => {
@@ -87,11 +88,11 @@ export default function StainingQC({ info }: StainingQCProps) {
           return stanCore.RecordStainResult({
             request: {
               labwareResults: newLabwareResults,
-              workNumber: e.values.workNumber,
-              operationType: e.values.operationType
+              workNumber: input.event.values.workNumber,
+              operationType: input.event.values.operationType
             }
           });
-        }
+        })
       }
     });
   }, [stanCore]);
@@ -167,7 +168,9 @@ export default function StainingQC({ info }: StainingQCProps) {
                           availableComments={info.comments}
                           onRemoveClick={removeLabware}
                           commentsForSlotSections
-                          onChange={(labwareResult) => labwareResults.update(labwareResult)}
+                          onChange={(labwareResult) => {
+                            labwareResults.update(labwareResult);
+                          }}
                           displayComments={qcType === STAIN_QC_TYPES[0] || qcType === STAIN_QC_TYPES[2]}
                           displayPassFail={qcType === STAIN_QC_TYPES[0]}
                           displayMeasurement={qcType === STAIN_QC_TYPES[1]}

@@ -20,9 +20,8 @@ export interface DataFetcherProps<E> {
 const DataFetcher = <E extends unknown>({ dataFetcher, children }: DataFetcherProps<E>) => {
   const dataFetcherMachine = React.useMemo(() => {
     return createDataFetcherMachine({
-      context: {
-        dataFetcher
-      }
+      dataFetcher,
+      data: null
     });
   }, [dataFetcher]);
   const [state, send] = useMachine(dataFetcherMachine);

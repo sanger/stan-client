@@ -15,6 +15,7 @@ import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import ScanInput from '../components/scanInput/ScanInput';
 import PermTimeSelectField from '../components/forms/PermTimeSelectField';
 import RemoveButton from '../components/buttons/RemoveButton';
+import { fromPromise } from 'xstate';
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
@@ -25,12 +26,12 @@ const validationSchema = Yup.object().shape({
 
 export default function VisiumAnalysis() {
   const formMachine = React.useMemo(() => {
-    return createFormMachine<VisiumAnalysisRequest, VisiumAnalysisMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.VisiumAnalysis({ request: e.values });
-        }
+    return createFormMachine<VisiumAnalysisRequest, VisiumAnalysisMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.VisiumAnalysis({ request: input.event.values });
+        })
       }
     });
   }, []);

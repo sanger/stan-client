@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import createHistoryMachine from './history.machine';
 import { useMachine } from '@xstate/react';
 import DataTable from '../DataTable';
-import { Cell, Column } from 'react-table';
+import { CellProps, Column } from 'react-table';
 import { HistoryTableEntry } from '../../types/stan';
 import StyledLink from '../StyledLink';
 import Warning from '../notifications/Warning';
@@ -22,17 +22,18 @@ import { HistoryUrlParams } from '../../pages/History';
  */
 type HistoryProps = HistoryUrlParams & { displayFlaggedLabware?: boolean };
 export default function History(props: HistoryProps) {
-  const historyMachine = React.useMemo(() => {
-    return createHistoryMachine();
-  }, []);
   const getHistoryURLParams = (props: HistoryProps): HistoryUrlParams => {
     const { displayFlaggedLabware, ...urlProps } = props;
     return urlProps;
   };
-  const { displayFlaggedLabware, ...urlProps } = props;
+  const historyMachine = React.useMemo(() => {
+    return createHistoryMachine();
+  }, []);
   const [current, send] = useMachine(historyMachine, {
-    context: {
-      historyProps: getHistoryURLParams(urlProps)
+    input: {
+      historyProps: getHistoryURLParams(props),
+      history: { entries: [], flaggedBarcodes: [] },
+      serverError: null
     }
   });
 
@@ -40,7 +41,7 @@ export default function History(props: HistoryProps) {
 
   const { history, historyProps, serverError } = current.context;
 
-  const historyColumns: Array<Column> = React.useMemo(
+  const historyColumns: Array<Column<HistoryTableEntry>> = React.useMemo(
     () => [
       {
         Header: 'Date',
@@ -61,7 +62,7 @@ export default function History(props: HistoryProps) {
       {
         Header: 'Source',
         accessor: 'sourceBarcode',
-        Cell: (props: Cell<HistoryTableEntry>) => {
+        Cell: (props: CellProps<HistoryTableEntry>) => {
           const barcode = props.row.original.sourceBarcode;
           let classes =
             historyProps.barcode === barcode
@@ -81,7 +82,7 @@ export default function History(props: HistoryProps) {
       {
         Header: 'Destination',
         accessor: 'destinationBarcode',
-        Cell: (props: Cell<HistoryTableEntry>) => {
+        Cell: (props: CellProps<HistoryTableEntry>) => {
           const barcode = props.row.original.destinationBarcode;
           let classes =
             historyProps.barcode === barcode
@@ -129,14 +130,14 @@ export default function History(props: HistoryProps) {
       {
         Header: 'Labware State',
         accessor: 'labwareState',
-        Cell: (props: Cell<HistoryTableEntry>) => (
+        Cell: (props: CellProps<HistoryTableEntry>) => (
           <LabwareStatePill labware={{ state: props.row.original.labwareState }} />
         )
       },
       {
         Header: 'Details',
         accessor: 'details',
-        Cell: (props: Cell<HistoryTableEntry>) => {
+        Cell: (props: CellProps<HistoryTableEntry>) => {
           const details = props.row.original.details.map((detail) => {
             return <li key={detail}>{detail}</li>;
           });
@@ -189,7 +190,7 @@ export default function History(props: HistoryProps) {
   /**
    * If the props change, send an update event to the machine
    */
-  useEffect(() => {
+  React.useEffect(() => {
     send({ type: 'UPDATE_HISTORY_PROPS', props: getHistoryURLParams(props) });
   }, [props, send, isValidInput]);
 
@@ -260,7 +261,7 @@ export default function History(props: HistoryProps) {
                 </div>
               </>
             )}
-            {history.flaggedBarcodes.length > 0 && displayFlaggedLabware && (
+            {history.flaggedBarcodes.length > 0 && props.displayFlaggedLabware && (
               <div
                 className={
                   'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
