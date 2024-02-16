@@ -190,9 +190,9 @@ export default function History(props: HistoryProps) {
   /**
    * If the props change, send an update event to the machine
    */
-  // useEffect(() => {
-  //   send({ type: 'UPDATE_HISTORY_PROPS', props: getHistoryURLParams(props) });
-  // }, [props, send, isValidInput]);
+  React.useEffect(() => {
+    send({ type: 'UPDATE_HISTORY_PROPS', props: getHistoryURLParams(props) });
+  }, [props, send, isValidInput]);
 
   /**
    * File upload option is only for authenticated users, so
