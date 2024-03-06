@@ -622,7 +622,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
         <Heading level={4}>Input Labware</Heading>
 
         <Heading level={4}>Output Labware</Heading>
-        {slotCopyModes && (
+        {slotCopyModes && slotCopyModes.length > 1 && (
           <>
             <div className="flex flex-row p-4 space-x-4">
               <RadioGroup label="Select transfer mode" name={'sectionNumber'} withFormik={false}>

@@ -53,7 +53,6 @@ export interface VisiumQCFormData {
   reagentLot?: string;
   slotComments?: Array<AddressCommentInput>;
 }
-
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
   barcode: Yup.string().optional(),

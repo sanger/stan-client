@@ -158,6 +158,7 @@ const Labware = ({
     }
   });
   const { selectedAddresses } = current.context;
+
   const selectedAddressesRef = React.useRef<Set<string>>();
   const {
     labwareType: { numRows, numColumns },
@@ -281,7 +282,7 @@ const Labware = ({
               text={slotText}
               secondaryText={slotSecondaryText}
               color={_slotColor}
-              selected={selectedAddresses.has(address)}
+              selected={selectedAddresses?.has(address)}
             />
           ))}
         </div>

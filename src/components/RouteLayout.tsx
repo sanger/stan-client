@@ -57,6 +57,7 @@ import { Reactivate } from '../pages/Reactivate';
 import OrientationQC from '../pages/OrientationQC';
 import FlagLabware from '../pages/FlagLabware';
 import { NewFlaggedLabwareLayout } from '../types/stan';
+import { LibraryAmpAndGeneration } from '../pages/LibraryAmpAndGeneration';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -302,6 +303,9 @@ const RouteLayout = () => {
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/lab/cytassist" element={<CytAssist />} />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/lab/libraryGeneration" element={<LibraryAmpAndGeneration />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
