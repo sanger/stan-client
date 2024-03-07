@@ -185,7 +185,6 @@ export const LibraryAmpAndGeneration = () => {
       )
       .notRequired()
   });
-  // console.log('currentLibraryGeneration value', currentLibraryGeneration.value);
 
   return (
     <AppShell>
@@ -325,7 +324,7 @@ export const LibraryAmpAndGeneration = () => {
                               })
                             }
                           >
-                            {'< '} Regent Transfer
+                            {'< '} Reagent Transfer
                           </PinkButton>
                           <BlueButton
                             disabled={

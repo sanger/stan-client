@@ -216,37 +216,37 @@ const Amplification = ({ labware, removeLabware, className, slotCopyContent, onS
               <Warning className={'mt-4'} message={'No Cq values associated with the labware slots'} />
             )}
             {slotMeasurements && slotMeasurements.length > 0 && (
-              <>
-                <div className={'flex flex-row w-1/2 mb-2'}>
-                  <div className={'flex flex-col'}>
-                    <label>Cycles</label>
-                    <input
-                      className={'rounded-md'}
-                      type={'number'}
-                      data-testid={`all-Cycles`}
-                      step={1}
-                      onChange={(e: any) => {
-                        handleChangeAllMeasurements(e.currentTarget.value);
-                      }}
-                      min={0}
-                    />
-                  </div>
+              <div className={'flex flex-row w-1/2 mb-2'}>
+                <div className={'flex flex-col'}>
+                  <label>Cycles</label>
+                  <input
+                    className={'rounded-md'}
+                    type={'number'}
+                    data-testid={`all-Cycles`}
+                    step={1}
+                    onChange={(e: any) => {
+                      handleChangeAllMeasurements(e.currentTarget.value);
+                    }}
+                    min={0}
+                  />
                 </div>
-
-                <div className={'grid grid-cols-11 gap-2 justify-between'}>
-                  <div className="col-span-6">
-                    <SlotMeasurements
-                      slotMeasurements={slotMeasurements}
-                      onChangeField={handleChangeMeasurement}
-                      measurementConfig={memoMeasurementConfig}
-                    />
-                  </div>
-                  <div className="col-span-5 w-full flex items-center justify-center p-4" data-testid={'labware'}>
-                    <Labware labware={labware} name={labware.labwareType.name} />
-                  </div>
-                </div>
-              </>
+              </div>
             )}
+            <div className={'grid grid-cols-11 gap-2 justify-between'}>
+              <div className="col-span-6">
+                {slotMeasurements && slotMeasurements.length > 0 && (
+                  <SlotMeasurements
+                    slotMeasurements={slotMeasurements}
+                    onChangeField={handleChangeMeasurement}
+                    measurementConfig={memoMeasurementConfig}
+                  />
+                )}
+              </div>
+
+              <div className="col-span-5 w-full flex items-center justify-center p-4" data-testid={'labware'}>
+                <Labware labware={labware} name={labware.labwareType.name} />
+              </div>
+            </div>
           </Panel>
         </div>
       )}

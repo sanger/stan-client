@@ -32,8 +32,8 @@ describe('Transfer Page', () => {
       cy.findByRole('button', { name: '+ Add Plate' }).should('not.exist');
       cy.get('#labwareScanInput').should('be.visible');
       cy.findByTestId('copyMode-One to one').should('be.checked');
-      cy.findByTestId('copyMode-One to many').should('not.exist');
-      cy.findByTestId('copyMode-Many to one').should('not.exist');
+      cy.findByTestId('copyMode-One to many').should('not.be.checked');
+      cy.findByTestId('copyMode-Many to one').should('not.be.checked');
       cy.findByText(/96 WELL PLATE/i).should('not.exist');
       cy.findByTestId('removeButton').should('not.exist');
     });

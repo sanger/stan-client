@@ -235,6 +235,7 @@ describe('Library Amplification and Generation ', () => {
         expect(screen.getByText('SGP number to associate with these operations')).toBeVisible();
         shouldDisplayValue('workNumber', '');
         expect(screen.getByRole('button', { name: 'Save' })).toBeVisible();
+        expect(screen.getByRole('button', { name: '< Reagent Transfer' })).toBeVisible();
       });
     });
     it('displays warning message when no Cq values found', async () => {

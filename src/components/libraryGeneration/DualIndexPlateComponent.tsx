@@ -138,7 +138,7 @@ const DualIndexPlateComponent = ({ current, send, destinationLabware, outputSlot
       )}
 
       <ReagentTransferSlotMapper
-        initialDestLabware={destinationLabware}
+        initialDestLabware={destinationLabware ?? destLabware}
         initialSourceLabware={memoInputLabware ? (memoInputLabware as LabwareFlaggedFieldsFragment) : undefined}
         onChange={handleOnSlotMapperChange}
         disabled={current.matches('transferred')}

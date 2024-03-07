@@ -278,6 +278,9 @@ export const slotCopyMachine = createMachine(
           UPDATE_DESTINATION_LOT_NUMBER: {
             actions: 'assignDestinationLOTNumber'
           },
+          UPDATE_DESTINATION_SELECTION_MODE: {
+            actions: 'assignDestinationSelectionMode'
+          },
           SAVE: 'copying'
         }
       },
