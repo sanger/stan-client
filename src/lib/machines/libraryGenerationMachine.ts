@@ -70,10 +70,7 @@ type ServerSuccessEvent = {
   type: 'xstate.done.actor.submitLibraryPrep';
   output: RecordLibraryPrepMutation;
 };
-type AssignErrorEvent = {
-  type: 'ASSIGN_ERROR';
-  error: string;
-};
+
 type RemoveTransferredReagentEvent = {
   type: 'REMOVE_TRANSFERRED_REAGENT';
   newSource: Array<Source>;
@@ -93,7 +90,6 @@ type LibraryPrepEvents =
   | GoToSampleTransferEvent
   | GoToAmplificationEvent
   | RemoveTransferredReagentEvent
-  | AssignErrorEvent
   | ClearReagentTransferTypeEvent
   | ServerSuccessEvent
   | ServerErrorEvent;
@@ -182,9 +178,6 @@ export const libraryGenerationMachine = createMachine(
           SAVE: {
             actions: 'assignSlotMeasurements',
             target: 'recording'
-          },
-          ASSIGN_ERROR: {
-            actions: 'assignServerError'
           }
         }
       },
@@ -302,13 +295,10 @@ export const libraryGenerationMachine = createMachine(
         return { ...context, readyToRecord: true };
       }),
       assignServerError: assign(({ context, event }) => {
-        if (event.type === 'xstate.error.actor.submitLibraryPrep' || event.type === 'ASSIGN_ERROR') {
+        if (event.type === 'xstate.error.actor.submitLibraryPrep') {
           return {
             ...context,
-            serverErrors:
-              typeof event.error === 'string'
-                ? ({ message: event.error, problems: [] } as ServerErrors)
-                : extractServerErrors(event.error as ClientError)
+            serverErrors: extractServerErrors(event.error)
           };
         }
         return context;
@@ -331,6 +321,7 @@ export const libraryGenerationMachine = createMachine(
           });
           return {
             ...context,
+            slotMeasurements: undefined,
             reagentTransfers: updatedTransferredReagents,
             destination: { ...context.destination, contents: updatedDestination ?? [] },
             destinationLabware: updatedDestinationLabware,

@@ -62,7 +62,7 @@ export const LibraryAmpAndGeneration = () => {
       destinationLabware: defaultOutputSlotCopy?.labware,
       reagentTransfers: [],
       reagentPlateType: '',
-      slotMeasurements: []
+      slotMeasurements: undefined
     }
   });
 
@@ -95,6 +95,7 @@ export const LibraryAmpAndGeneration = () => {
     }
   });
 
+  /** Handle Reagent plate type update */
   React.useEffect(() => {
     if (currentReagentTransferMachine.context.plateType) {
       sendLibraryGeneration({
@@ -104,7 +105,7 @@ export const LibraryAmpAndGeneration = () => {
     }
   }, [currentReagentTransferMachine, sendLibraryGeneration]);
 
-  /** Handles the case when the use deletes one/all of source(s) */
+  /** Handles the case when the user deletes one/all the source(s) */
   React.useEffect(() => {
     //when a source is deleting, the sources array is not updated
     if (sources.length < currentLibraryGeneration.context.sources.length) {
@@ -185,7 +186,6 @@ export const LibraryAmpAndGeneration = () => {
       )
       .notRequired()
   });
-
   return (
     <AppShell>
       <AppShell.Header>
@@ -245,7 +245,7 @@ export const LibraryAmpAndGeneration = () => {
                         })
                       }
                     >
-                      Regent Transfer {'>'}
+                      Reagent Transfer {'>'}
                     </PinkButton>
                   </Link>
                 </ButtonBar>
@@ -276,7 +276,10 @@ export const LibraryAmpAndGeneration = () => {
                     {'<'} Sample Transfer
                   </PinkButton>
                   <PinkButton
-                    disabled={!currentLibraryGeneration.context.reagentPlateType}
+                    disabled={
+                      !currentLibraryGeneration.context.reagentPlateType ||
+                      currentReagentTransferMachine.context.reagentTransfers.length === 0
+                    }
                     action="primary"
                     onClick={() =>
                       sendLibraryGeneration({
@@ -308,6 +311,7 @@ export const LibraryAmpAndGeneration = () => {
                     return (
                       <>
                         <Amplification
+                          slotMeasurements={currentLibraryGeneration.context.slotMeasurements}
                           labware={currentLibraryGeneration.context.destinationLabware as LabwareFlaggedFieldsFragment}
                           className={'mx-auto'}
                           slotCopyContent={currentLibraryGeneration.context.destination!.contents}
@@ -330,13 +334,21 @@ export const LibraryAmpAndGeneration = () => {
                             disabled={
                               !isValid ||
                               currentLibraryGeneration.context.workNumber.length === 0 ||
-                              serverErrors !== undefined
+                              serverErrors !== undefined ||
+                              values.slotMeasurements?.length === 0
                             }
                             onClick={() => onSaveAction(values.slotMeasurements)}
                           >
                             Save
                           </BlueButton>
                         </ButtonBar>
+
+                        <LabwareWithoutPermConfirmationModal
+                          show={warnBeforeSave}
+                          labwaresWithoutPerm={labwaresWithoutPerm}
+                          onSave={() => handleOnSave(values.slotMeasurements)}
+                          setWarnBeforeSave={setWarnBeforeSave}
+                        />
                       </>
                     );
                   }}
@@ -359,12 +371,6 @@ export const LibraryAmpAndGeneration = () => {
             />
           </div>
         </div>
-        <LabwareWithoutPermConfirmationModal
-          show={warnBeforeSave}
-          labwaresWithoutPerm={labwaresWithoutPerm}
-          onSave={handleOnSave}
-          setWarnBeforeSave={setWarnBeforeSave}
-        />
       </AppShell.Main>
     </AppShell>
   );

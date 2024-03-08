@@ -33,7 +33,13 @@ export const LabwareWithoutPermConfirmationModal = ({
             setWarnBeforeSave(false);
           }
         },
-        { label: 'Continue', action: onSave },
+        {
+          label: 'Continue',
+          action: () => {
+            setWarnBeforeSave(false);
+            onSave();
+          }
+        },
         {
           label: 'Visium permeabilisation',
           action: () => {

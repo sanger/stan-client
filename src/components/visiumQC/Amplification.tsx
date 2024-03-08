@@ -54,7 +54,14 @@ const fetchCqMeasurementsBySlotCopyContent = async (
   return addresses;
 };
 
-const Amplification = ({ labware, removeLabware, className, slotCopyContent, onSlotMeasurementChange }: CDNAProps) => {
+const Amplification = ({
+  labware,
+  removeLabware,
+  className,
+  slotCopyContent,
+  onSlotMeasurementChange,
+  slotMeasurements: initSlotMeasurements
+}: CDNAProps) => {
   const { setErrors, setTouched, setFieldValue, errors, setFieldError } = useFormikContext<VisiumQCFormData>();
 
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(
@@ -92,6 +99,11 @@ const Amplification = ({ labware, removeLabware, className, slotCopyContent, onS
       return;
     }
     setFieldValue('barcode', labware.barcode);
+
+    if (initSlotMeasurements) {
+      setSlotMeasurements(initSlotMeasurements);
+      return;
+    }
 
     fetchCqMeasurements().then((measurementValues) => {
       if (measurementValues.length === 0) {
@@ -132,7 +144,8 @@ const Amplification = ({ labware, removeLabware, className, slotCopyContent, onS
     memoMeasurementConfig,
     setFieldError,
     slotCopyContent,
-    onSlotMeasurementChange
+    onSlotMeasurementChange,
+    initSlotMeasurements
   ]);
 
   const handleChangeMeasurement = React.useCallback(
