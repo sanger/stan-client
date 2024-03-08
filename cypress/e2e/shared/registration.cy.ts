@@ -68,18 +68,20 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
       }
     );
 
-    it('requires Replicate Number to be an alphanumeric string of maximum length 7 ', () => {
-      cy.findByTestId('Replicate Number').type('1.1').blur();
+    it('requires Replicate Number to be suitable', () => {
+      cy.findByTestId('Replicate Number').type('1+1').blur();
       checkReplicateWarningIsVisible();
 
-      cy.findByTestId('Replicate Number').clear().type('1ab-').blur();
+      cy.findByTestId('Replicate Number').clear().type('1ab!').blur();
       checkReplicateWarningIsVisible();
 
-      cy.findByTestId('Replicate Number').clear().type('1ab67896').blur();
+      cy.findByTestId('Replicate Number').clear().type('1ab67896df.').blur();
       checkReplicateWarningIsVisible();
 
       cy.findByTestId('Replicate Number').clear().type('1ab678A').blur();
-      cy.findByText('Replicate number must be a string of up to 7 letters and numbers.').should('not.exist');
+      cy.findByText(
+        'Replicate number must be a string of letters and numbers, with isolated hyphens, underscores or full stops.'
+      ).should('not.exist');
     });
 
     it('requires Fixative', () => {
@@ -105,6 +107,8 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
     }
   });
   const checkReplicateWarningIsVisible = () => {
-    cy.findByText('Replicate number must be a string of up to 7 letters and numbers.').should('be.visible');
+    cy.findByText(
+      'Replicate number must be a string of letters and numbers, with isolated hyphens, underscores or full stops.'
+    ).should('be.visible');
   };
 }
