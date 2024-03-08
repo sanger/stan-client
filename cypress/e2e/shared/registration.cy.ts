@@ -69,13 +69,13 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
     );
 
     it('requires Replicate Number to be an alphanumeric string of maximum length 7 ', () => {
-      cy.findByTestId('Replicate Number').type('1.1').blur();
+      cy.findByTestId('Replicate Number').type('1+1').blur();
       checkReplicateWarningIsVisible();
 
-      cy.findByTestId('Replicate Number').clear().type('1ab-').blur();
+      cy.findByTestId('Replicate Number').clear().type('1ab!').blur();
       checkReplicateWarningIsVisible();
 
-      cy.findByTestId('Replicate Number').clear().type('1ab67896').blur();
+      cy.findByTestId('Replicate Number').clear().type('1ab67896df.').blur();
       checkReplicateWarningIsVisible();
 
       cy.findByTestId('Replicate Number').clear().type('1ab678A').blur();
