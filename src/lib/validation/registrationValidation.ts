@@ -124,14 +124,14 @@ export default class RegistrationValidation {
     if (this.tissueSampleRegistration) {
       return validation.optionalString({
         label: 'Replicate Number',
-        restrictChars: /^[0-9a-z]([-_.]?[0-9a-z])$/i,
+        restrictChars: /^[0-9a-z]([-_.]?[0-9a-z])*$/i,
         errorMessage:
           'Replicate number must be a string of letters and numbers, with isolated hyphens, underscores or full stops.'
       });
     } else {
       return validation.requiredString({
         label: 'Replicate Number',
-        restrictChars: /^[0-9a-z]([-_.]?[0-9a-z])$/i,
+        restrictChars: /^[0-9a-z]([-_.]?[0-9a-z])*$/i,
         errorMessage:
           'Replicate number must be a string of letters and numbers, with isolated hyphens, underscores or full stops.'
       });

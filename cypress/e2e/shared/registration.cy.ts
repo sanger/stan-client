@@ -68,7 +68,7 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
       }
     );
 
-    it('requires Replicate Number to be an alphanumeric string of maximum length 7 ', () => {
+    it('requires Replicate Number to be suitable', () => {
       cy.findByTestId('Replicate Number').type('1+1').blur();
       checkReplicateWarningIsVisible();
 
