@@ -348,6 +348,18 @@ describe('Work Allocation', () => {
         cy.findByLabelText('Add New Cost Code').should('be.visible');
         cy.findByRole('button', { name: /Save/i }).should('be.visible');
       });
+
+      describe('When the user clicks outside of add new option', () => {
+        before(() => {
+          cy.findByRole('button', { name: /Submit/i }).click();
+        });
+        it('hides the add new option component', () => {
+          cy.findByLabelText('Add New Cost Code').should('not.exist');
+        });
+        it('displays cost code select option', () => {
+          cy.findByTestId('costCode').should('be.visible');
+        });
+      });
     });
   });
 
