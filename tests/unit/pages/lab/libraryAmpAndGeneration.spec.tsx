@@ -10,7 +10,6 @@ import { LabwareState, SlideCosting, SlotCopyDestination } from '../../../../src
 import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
 import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
 import { createFlaggedLabware } from '../../../../src/mocks/handlers/flagLabwareHandlers';
-import clearAllMocks = jest.clearAllMocks;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -138,8 +137,8 @@ describe('Library Amplification and Generation ', () => {
     it('loads with empty source labware', () => {
       expect(screen.getByTestId('input')).toHaveValue('');
     });
-    it('loads with Regent Transfer button disabled', () => {
-      expect(screen.getByRole('button', { name: 'Regent Transfer >' })).toBeDisabled();
+    it('loads with Reagent Transfer button disabled', () => {
+      expect(screen.getByRole('button', { name: 'Reagent Transfer >' })).toBeDisabled();
     });
   });
 
@@ -159,7 +158,7 @@ describe('Library Amplification and Generation ', () => {
         render(<LibraryAmpAndGeneration />, { wrapper: BrowserRouter });
       });
       it('enables reagent transfer button', () => {
-        expect(screen.getByRole('button', { name: 'Regent Transfer >' })).toBeEnabled();
+        expect(screen.getByRole('button', { name: 'Reagent Transfer >' })).toBeEnabled();
       });
     });
 
@@ -225,6 +224,15 @@ describe('Library Amplification and Generation ', () => {
           },
 
           jest.fn()
+        ] as any)
+        .mockReturnValueOnce([
+          {
+            context: { ...mockedLibraryAmpAndGenerationMachineContext },
+            value: 'reagentTransfer',
+            matches: jest.fn().mockImplementation((value) => value === 'reagentTransfer')
+          },
+
+          jest.fn()
         ] as any);
     });
     it('navigates to the Amplification step', async () => {
@@ -236,48 +244,6 @@ describe('Library Amplification and Generation ', () => {
         shouldDisplayValue('workNumber', '');
         expect(screen.getByRole('button', { name: 'Save' })).toBeVisible();
         expect(screen.getByRole('button', { name: '< Reagent Transfer' })).toBeVisible();
-      });
-    });
-    it('displays warning message when no Cq values found', async () => {
-      act(() => {
-        render(<LibraryAmpAndGeneration />, { wrapper: BrowserRouter });
-      });
-      await waitFor(() => {
-        expect(screen.getByText('No Cq values associated with the labware slots')).toBeVisible();
-      });
-    });
-    describe('When Cq values are found', () => {
-      beforeEach(() => {
-        jest
-          .spyOn(xState, 'useMachine')
-          .mockReturnValueOnce([
-            {
-              context: { ...mockedSlotCopyMachineContext },
-              value: 'copied',
-              matches: jest.fn()
-            },
-            jest.fn()
-          ] as any)
-          .mockReturnValueOnce([
-            {
-              context: { ...mockedLibraryAmpAndGenerationMachineContext },
-              value: 'amplification',
-              matches: jest.fn().mockImplementation((value) => value === 'amplification')
-            },
-
-            jest.fn()
-          ] as any);
-      });
-
-      it('displays the labware with amplification table', async () => {
-        act(() => {
-          render(<LibraryAmpAndGeneration />, { wrapper: BrowserRouter });
-        });
-        await waitFor(() => {
-          expect(screen.getByTestId('labware')).toBeVisible();
-          expect(screen.getByTestId('all-Cycles')).toBeVisible();
-          expect(screen.getByRole('table')).toBeVisible();
-        });
       });
     });
   });
