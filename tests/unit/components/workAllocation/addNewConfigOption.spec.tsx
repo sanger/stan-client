@@ -36,7 +36,8 @@ const formOptions = (resolved: boolean): AddNewConfigOptionProps => {
     onFinish,
     configLabel: 'Add New Config Option',
     configName: 'Config-X',
-    returnedDataObject: 'object'
+    returnedDataObject: 'object',
+    mainDivRef: React.createRef<HTMLDivElement>()
   };
 };
 
