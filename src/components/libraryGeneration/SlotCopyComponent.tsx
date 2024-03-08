@@ -1,13 +1,9 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import SlotMapper from '../slotMapper/SlotMapper';
 import BlueButton from '../buttons/BlueButton';
-import LabelPrinter from '../LabelPrinter';
 import { NewFlaggedLabwareLayout } from '../../types/stan';
-import Success from '../notifications/Success';
-import { toast } from 'react-toastify';
 import { LabwareFlaggedFieldsFragment, LabwareState, SlotCopyContent } from '../../types/sdk';
 import Label from '../forms/Label';
-import LabelCopyButton from '../LabelCopyButton';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { DestinationSelectionMode, SlotCopyMode } from '../slotMapper/slotMapper.types';
 import RadioGroup, { RadioButtonInput } from '../forms/RadioGroup';
@@ -29,11 +25,6 @@ type SlotCopyParams = {
   labwareDestinationSelectionMode?: DestinationSelectionMode;
   onDestinationSelectionMode?: (mode: DestinationSelectionMode) => void;
 };
-
-/**
- * Success notification when slots have been copied
- */
-const ToastSuccess = () => <Success message={'Slots copied'} />;
 
 interface DestinationLabwareScanPanelProps {
   labware: Destination | undefined;
@@ -210,7 +201,7 @@ function SlotCopyComponent({
   addPlateOption = true,
   labwareDestinationSelectionMode = DestinationSelectionMode.DEFAULT
 }: SlotCopyParams) {
-  const { sources, destinations, slotCopyResults } = current.context;
+  const { sources, destinations } = current.context;
 
   /** State to keep  track of selected source labware**/
   const [selectedSource, setSelectedSource] = React.useState<LabwareFlaggedFieldsFragment | undefined>(
@@ -320,19 +311,6 @@ function SlotCopyComponent({
     [send]
   );
 
-  /**
-   * When we get into the "copied" state, show a success message
-   */
-  useEffect(() => {
-    if (current.value === 'copied') {
-      toast(ToastSuccess, {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 4000,
-        hideProgressBar: true
-      });
-    }
-  }, [current.value]);
-
   return (
     <>
       <div className="mx-auto">
@@ -367,29 +345,6 @@ function SlotCopyComponent({
           onSelectOutputLabware={setSelectedDestination}
           slotCopyModes={slotCopyModes}
         />
-
-        {slotCopyResults.length > 0 && (
-          <div className="mt-8 flex flex-col items-end sm:justify-end space-y-2">
-            <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
-              <LabelPrinter labwares={slotCopyResults} />
-            </div>
-            <div className="sm:max-w-xl w-full  border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2 ">
-              <div className={'flex items-center space-x-2'}>
-                <div className={'font-bold'}>Labels:</div>
-                <div>{slotCopyResults.map((res) => res.barcode).join(',')}</div>
-              </div>
-              <div className={'flex items-end sm:justify-end'}>
-                <LabelCopyButton
-                  labels={slotCopyResults.map((scr) => scr.barcode)}
-                  copyButtonText={'Copy Labels'}
-                  buttonClass={
-                    'text-white bg-sdb-400 shadow-sm hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600'
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );

@@ -1,6 +1,6 @@
 import { createActor } from 'xstate';
 import createHistoryMachine from '../../../../src/components/history/history.machine';
-import { HistoryData, HistoryTableEntry } from '../../../../src/types/stan';
+import { HistoryTableEntry } from '../../../../src/types/stan';
 import { LabwareState } from '../../../../src/types/sdk';
 import { findHistory } from '../../../../src/lib/services/historyService';
 

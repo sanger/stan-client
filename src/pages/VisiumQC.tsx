@@ -267,7 +267,7 @@ export default function VisiumQC() {
               barcode: '',
               workNumber: '',
               qcType: QCType.SLIDE_PROCESSING,
-              slotMeasurements: [],
+              slotMeasurements: undefined,
               labwareResult: undefined,
               slotComments: []
             }}
@@ -293,6 +293,7 @@ export default function VisiumQC() {
                     handleChange={(val) => {
                       setFieldValue('qcType', (val as OptionType).label);
                       setLabwareLimit((val as OptionType).label === QCType.SLIDE_PROCESSING ? 2 : 1);
+                      setFieldValue('slotMeasurements', undefined);
                     }}
                     dataTestId={'qcType'}
                     emptyOption={true}
