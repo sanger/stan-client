@@ -29,6 +29,7 @@ import Pill from '../Pill';
 import AddNewConfigOption from './AddNewConfigOption';
 import projectFactory from '../../lib/factories/projectFactory';
 import costCodeFactory from '../../lib/factories/costCodeFactory';
+import { useComponentVisible } from '../../lib/hooks';
 const initialValues: WorkAllocationFormValues = {
   workType: '',
   workRequester: '',
@@ -224,6 +225,9 @@ export default function WorkAllocation() {
     })
   });
 
+  /** Used to close the 'add new option component' whenever the user clicks outside of it. */
+  const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(true);
+
   return (
     <div>
       <div className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
@@ -315,8 +319,9 @@ export default function WorkAllocation() {
                     })}
                   />
                 </div>
-                {addNewProjectCodeCode ? (
+                {addNewProjectCodeCode && isComponentVisible ? (
                   <AddNewConfigOption
+                    mainDivRef={ref}
                     inputRef={addNewConfigOptionInputRef}
                     returnedDataObject="addProject"
                     onSubmit={(value: string) => {
@@ -351,6 +356,7 @@ export default function WorkAllocation() {
                         dataTestId: 'addNewProject-btn',
                         onClick: () => {
                           setAddNewProjectCodeCode(true);
+                          setIsComponentVisible(true);
                         },
                         className: 'mt-4'
                       }}
@@ -377,8 +383,9 @@ export default function WorkAllocation() {
                   />
                 </div>
 
-                {addNewCostCode ? (
+                {addNewCostCode && isComponentVisible ? (
                   <AddNewConfigOption
+                    mainDivRef={ref}
                     inputRef={addNewConfigOptionInputRef}
                     returnedDataObject="addCostCode"
                     onSubmit={(value: string) => {
@@ -413,6 +420,7 @@ export default function WorkAllocation() {
                         dataTestId: 'addNewCostCode-btn',
                         onClick: () => {
                           setAddNewCostCode(true);
+                          setIsComponentVisible(true);
                         },
                         className: 'mt-4'
                       }}

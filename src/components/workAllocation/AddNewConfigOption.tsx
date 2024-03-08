@@ -18,6 +18,8 @@ export type AddNewConfigOptionProps = {
   configLabel: string;
   configName: string;
   returnedDataObject: string;
+  /** Reference to the main div of the component, used to detect when the user clicks outside of the component */
+  mainDivRef: React.RefObject<HTMLDivElement>;
 };
 
 const AddNewConfigOption = (props: AddNewConfigOptionProps) => {
@@ -69,7 +71,7 @@ const AddNewConfigOption = (props: AddNewConfigOptionProps) => {
   };
 
   return (
-    <div className="border border-2 border-gray-200 bg-white p-3 rounded-md space-y-4">
+    <div className="border border-2 border-gray-200 bg-white p-3 rounded-md space-y-4" ref={props.mainDivRef}>
       <Label htmlFor={props.configName} name={props.configLabel} />
       <Input id={props.configName} type="text" ref={props.inputRef} data-testid={props.configName} />
       <div className="flex flex-row items-center justify-end space-x-2">
