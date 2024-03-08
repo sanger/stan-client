@@ -7,3 +7,7 @@ updates:
       time: '07:00'
       timezone: Europe/London
     open-pull-requests-limit: 10
+
+# Define the environment variable for the Snyk token
+environment:
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
