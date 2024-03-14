@@ -113,9 +113,8 @@ describe('RegistrationForm', () => {
         //Fetal should be selected by default in life stage
         expect(screen.getByText('Life Stage')).toBeInTheDocument();
         expect(screen.getByTestId('n/a')).toBeInTheDocument();
-        expect(screen.getByTestId('fetal')).toBeChecked();
+        expect(screen.getByTestId('adult')).toBeChecked();
 
-        expect(screen.getByText('Sample Collection Date')).toBeInTheDocument();
         expect(screen.getByRole('combobox', { name: 'Species' })).toBeInTheDocument();
 
         //Tissue Information
@@ -294,8 +293,7 @@ describe('RegistrationForm', () => {
         expect(screen.getByLabelText('Donor ID')).toBeInTheDocument();
         //Fetal should be selected by default in life stage
         expect(screen.getByText('Life Stage')).toBeInTheDocument();
-        expect(screen.getByTestId('fetal')).toBeChecked();
-        expect(screen.getByText('Sample Collection Date')).toBeInTheDocument();
+        expect(screen.getByTestId('adult')).toBeChecked();
         expect(screen.getByRole('combobox', { name: 'Species' })).toBeInTheDocument();
 
         //Tissue Information

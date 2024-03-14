@@ -76,7 +76,7 @@ export function getRegistrationFormTissueSample(): RegistrationFormOriginalSampl
     clientId: Date.now(),
     donorId: '',
     species: '',
-    lifeStage: LifeStage.Fetal,
+    lifeStage: LifeStage.Adult,
     hmdmc: '',
     tissueType: '',
     blocks: [getRegistrationFormSample()],

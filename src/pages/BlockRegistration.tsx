@@ -74,7 +74,7 @@ export function getRegistrationFormTissue(): RegistrationFormTissue {
     clientId: Date.now(),
     donorId: '',
     species: '',
-    lifeStage: LifeStage.Fetal,
+    lifeStage: LifeStage.Adult,
     hmdmc: '',
     tissueType: '',
     blocks: [getRegistrationFormBlock()],
