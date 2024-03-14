@@ -112,6 +112,7 @@ describe('RegistrationForm', () => {
 
         //Fetal should be selected by default in life stage
         expect(screen.getByText('Life Stage')).toBeInTheDocument();
+        expect(screen.getByTestId('n/a')).toBeInTheDocument();
         expect(screen.getByTestId('fetal')).toBeChecked();
 
         expect(screen.getByText('Sample Collection Date')).toBeInTheDocument();

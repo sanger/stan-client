@@ -48,6 +48,16 @@ type SectionFormParams = {
   onScreen: (slotAddress: string) => void;
 };
 
+export const LifeStageMap: Record<string, string> = {
+  ...Object.entries(LifeStage).reduce(
+    (acc, [key, value]) => {
+      acc[key] = value;
+      return acc;
+    },
+    {} as Record<string, string>
+  ),
+  'N/A': 'n/a'
+};
 export default function SectionForm({
   registrationInfo,
   slotAddress,
@@ -112,8 +122,8 @@ export default function SectionForm({
       <FormikInput label="Donor ID" name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.donorId`} />
 
       <RadioGroup label="Life Stage" name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.lifeStage`}>
-        {objectKeys(LifeStage).map((key, index) => {
-          return <RadioButton key={index} name={key} value={LifeStage[key]} />;
+        {objectKeys(LifeStageMap).map((key, index) => {
+          return <RadioButton key={index} name={key} value={LifeStageMap[key]} />;
         })}
       </RadioGroup>
 
