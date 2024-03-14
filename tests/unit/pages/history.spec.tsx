@@ -93,6 +93,7 @@ describe('On load', () => {
     it('loads all the page fields correctly', async () => {
       await waitFor(() => {
         expect(screen.getAllByText('History').length).toBeGreaterThan(0);
+        expect(screen.getByTestId('result-format')).toHaveTextContent('Table');
         expect(screen.getByTestId('barcode')).toHaveValue('');
         expect(screen.getByTestId('external-name')).toHaveValue('');
         expect(screen.getByTestId('donor-name')).toHaveValue('');
