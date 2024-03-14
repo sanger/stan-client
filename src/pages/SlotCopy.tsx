@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
 import AppShell from '../components/AppShell';
-import SlotMapper from '../components/slotMapper/SlotMapper';
 import BlueButton from '../components/buttons/BlueButton';
 import LabelPrinter from '../components/LabelPrinter';
 import { NewFlaggedLabwareLayout } from '../types/stan';
@@ -9,24 +8,17 @@ import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
 import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
-import { LabwareFlaggedFieldsFragment, LabwareState, SlotCopyContent } from '../types/sdk';
-import slotCopyMachine, { Destination, Source } from '../lib/machines/slotCopy/slotCopyMachine';
+import { LabwareFlaggedFieldsFragment } from '../types/sdk';
+import slotCopyMachine from '../lib/machines/slotCopy/slotCopyMachine';
 import { Link, useNavigate } from 'react-router-dom';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Heading from '../components/Heading';
-import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
-import { ConfirmationModal } from '../components/modal/ConfirmationModal';
-import Label from '../components/forms/Label';
-import { plateFactory } from '../lib/factories/labwareFactory';
 import LabelCopyButton from '../components/LabelCopyButton';
-import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { DestinationSelectionMode, SlotCopyMode } from '../components/slotMapper/slotMapper.types';
-import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
-import LabwareScanner from '../components/labwareScanner/LabwareScanner';
-import RemoveButton from '../components/buttons/RemoveButton';
 import { objectKeys } from '../lib/helpers';
-import { StripyCardDetail } from '../components/StripyCard';
+import SlotCopyComponent from '../components/libraryGeneration/SlotCopyComponent';
+import { LabwareWithoutPermConfirmationModal } from '../components/libraryGeneration/LabwareWithoutPermConfirmationModal';
 
 type PageParams = {
   title: string;
@@ -37,159 +29,6 @@ type PageParams = {
  * Success notification when slots have been copied
  */
 const ToastSuccess = () => <Success message={'Slots copied'} />;
-
-interface DestinationLabwareScanPanelProps {
-  labware: Destination | undefined;
-  onAddLabware: () => void;
-  onChangeBioState: (bioState: string) => void;
-  onLabwareScan?: (labware: LabwareFlaggedFieldsFragment[]) => void;
-  onDestinationSelectionModeChange?: (mode: DestinationSelectionMode) => void;
-  destinationSelectionMode: DestinationSelectionMode;
-}
-
-const transferTypes = [
-  'cDNA',
-  'Probes',
-  'Library',
-  'Library pre-clean',
-  'Library post-clean',
-  'Probes pre-clean',
-  'Probes post-clean'
-];
-
-interface SourceLabwareScanPanelProps {
-  selectedSource: Source | undefined;
-  onChangeState: (state: string) => void;
-}
-
-/**Component to display fields above the output labware**/
-const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps> = ({
-  labware,
-  onAddLabware,
-  onChangeBioState,
-  onLabwareScan,
-  onDestinationSelectionModeChange,
-  destinationSelectionMode
-}) => {
-  const validateLabware = useCallback(
-    (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): string[] => {
-      return foundLabware.state === LabwareState.Active ? [] : ['Labware is not active'];
-    },
-    []
-  );
-  const bioStatesStr = (destination: Destination) =>
-    [...new Set(destination.labware.slots.flatMap((slot) => slot.samples.map((sample) => sample.bioState.name)))].join(
-      ', '
-    );
-
-  return (
-    <div className={'w-full flex flex-col space-y-2'} data-testid="input-labware">
-      <div className="flex flex-row w-1/2 pb-2">
-        <RadioGroup label="Output labware selection " name={'selectDestination'} withFormik={false}>
-          {Object.values(DestinationSelectionMode).map((mode) => (
-            <RadioButtonInput
-              key={mode}
-              data-testid={`${mode}`}
-              name={'destinationMode'}
-              value={mode}
-              checked={mode === destinationSelectionMode}
-              onChange={() => {
-                onDestinationSelectionModeChange?.(mode);
-              }}
-              label={mode}
-            />
-          ))}
-        </RadioGroup>
-      </div>
-      <div className={'w-full flex flex-row space-x-4 mb-8'} data-testid="input-labware">
-        {destinationSelectionMode === DestinationSelectionMode.DEFAULT ? (
-          <>
-            <div className={'w-1/2 flex flex-col'}>
-              <Label className={'flex items-center whitespace-nowrap'} name={'Bio State'} />
-              <CustomReactSelect
-                handleChange={(val) => onChangeBioState((val as OptionType).label)}
-                value={labware && labware.slotCopyDetails.bioState ? labware.slotCopyDetails.bioState : ''}
-                emptyOption={true}
-                dataTestId="bioState"
-                options={transferTypes.map((type) => {
-                  return {
-                    label: type,
-                    value: type
-                  };
-                })}
-              />
-            </div>
-            <div className={'w-1/2 flex justify-end items-center'}>
-              <BlueButton
-                data-testid={'add-plate'}
-                onClick={onAddLabware}
-                className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                + Add Plate
-              </BlueButton>
-            </div>
-          </>
-        ) : (
-          <div className={'flex flex-col w-full space-y-2'} data-testid={'dest-scanner'}>
-            <LabwareScanner
-              onChange={onLabwareScan}
-              limit={1}
-              labwareCheckFunction={validateLabware}
-              enableFlaggedLabwareCheck
-            >
-              {(props) => {
-                return (
-                  <div className="flex flex-col">
-                    {props.labwares.length > 0 && (
-                      <>
-                        <div className={'flex flex-row justify-end'}>
-                          <RemoveButton
-                            onClick={() => {
-                              labware?.labware.barcode && props.removeLabware(labware?.labware.barcode);
-                              onLabwareScan?.([]);
-                            }}
-                          />
-                        </div>
-                        {labware && labware?.labware.barcode && (
-                          <StripyCardDetail term={'Bio State'}>
-                            <div className={'flex flex-wrap text-gray-600'}>{labware && bioStatesStr(labware)}</div>
-                          </StripyCardDetail>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-              }}
-            </LabwareScanner>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-/**Component to display fields above the input labware**/
-const SlotCopySourceConfigPanel: React.FC<SourceLabwareScanPanelProps> = ({ selectedSource, onChangeState }) => {
-  return (
-    <div className={'w-1/2 mt-4 flex flex-col'} data-testid="input-labware">
-      <Label name={'Labware state'} className={'whitespace-nowrap'} />
-      <CustomReactSelect
-        handleChange={(val) => {
-          onChangeState((val as OptionType).label);
-        }}
-        value={selectedSource && selectedSource.labwareState ? selectedSource.labwareState : ''}
-        emptyOption={true}
-        dataTestId="input-labware-state"
-        options={[LabwareState.Active, LabwareState.Used, LabwareState.Discarded].map((state) => {
-          return {
-            label: state,
-            value: state
-          };
-        })}
-      />
-    </div>
-  );
-};
 
 function SlotCopy({ title, initialOutputLabware }: PageParams) {
   /**Reformat the props to 'Destination' type**/
@@ -221,30 +60,10 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
 
-  /** State to keep  track of selected source labware**/
-  const [selectedSource, setSelectedSource] = React.useState<LabwareFlaggedFieldsFragment | undefined>(undefined);
-
-  /** State to keep track of selected destination labware**/
-  const [selectedDestination, setSelectedDestination] = React.useState<NewFlaggedLabwareLayout>(
-    initialOutputSlotCopy[0].labware
-  );
   const { serverErrors, sourceLabwarePermData, sources, destinations, slotCopyResults } = current.context;
 
   const navigate = useNavigate();
   const destinationSelectionMode = React.useRef(DestinationSelectionMode.DEFAULT);
-
-  /**Handler action to perform when a mapping is done  between source and destination**/
-  const handleOnSlotMapperChange = useCallback(
-    (labware: NewFlaggedLabwareLayout, slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
-      send({
-        type: 'UPDATE_SLOT_COPY_CONTENT',
-        labware,
-        slotCopyContent,
-        anySourceMapped
-      });
-    },
-    [send]
-  );
 
   /**Handler for work number chnage**/
   const handleWorkNumberChange = useCallback(
@@ -260,84 +79,6 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     send({ type: 'SAVE' });
   }, [setWarnBeforeSave, send]);
 
-  /**Action callback(from SlotMapper) when there is a change in source labware (addition/deletion)**/
-  const handleInputLabwareChange = React.useCallback(
-    (sourcesChanged: LabwareFlaggedFieldsFragment[]) => {
-      send({ type: 'UPDATE_SOURCE_LABWARE', labware: sourcesChanged });
-      send({
-        type: 'UPDATE_SOURCE_LABWARE_PERMTIME',
-        labwares: sourcesChanged,
-        destination: destinations.find((dest) => dest.labware.id === selectedDestination.id)
-      });
-    },
-    [send, selectedDestination, destinations]
-  );
-
-  /**Action callback(from SlotMapper) when there is a change in destination labware
-   * (It will be normally a deletion operation as the addition is handled within SlotCopy itself)
-   * **/
-  const handleOutputLabwareChange = React.useCallback(
-    (destinations: NewFlaggedLabwareLayout[]) => {
-      send({ type: 'UPDATE_DESTINATION_LABWARE', labware: destinations });
-    },
-    [send]
-  );
-
-  /**Handler for output labware selection mode change**/
-  const onDestinationSelectionModeChange = React.useCallback(
-    (mode: DestinationSelectionMode) => {
-      destinationSelectionMode.current = mode;
-      const labware = mode === DestinationSelectionMode.DEFAULT ? [initialOutputSlotCopy[0].labware] : [];
-      send({ type: 'UPDATE_DESTINATION_LABWARE', labware });
-    },
-    [initialOutputSlotCopy, send]
-  );
-
-  /**Handler for 'Add Plate' button click**/
-  const onAddDestinationLabware = React.useCallback(() => {
-    const labware = plateFactory.build({}) as NewFlaggedLabwareLayout;
-    const labwareArray = destinations.map((dest) => dest.labware);
-    labwareArray.push(labware);
-    send({ type: 'UPDATE_DESTINATION_LABWARE', labware: labwareArray });
-  }, [send, destinations]);
-
-  /**Handler for a labware state change in source**/
-  const onSourceLabwareStateChange = React.useCallback(
-    (labwareState: string) => {
-      if (!selectedSource) {
-        return;
-      }
-      send({
-        type: 'UPDATE_SOURCE_LABWARE_STATE',
-        labware: selectedSource,
-        labwareState: labwareState as unknown as LabwareState
-      });
-    },
-    [send, selectedSource]
-  );
-
-  /**Handler for Bio-state change in destination**/
-  const onChangeBioState = React.useCallback(
-    (bioState: string) => {
-      if (!selectedDestination) {
-        return;
-      }
-      send({
-        type: 'UPDATE_DESTINATION_BIO_STATE',
-        labware: selectedDestination,
-        bioState
-      });
-    },
-    [selectedDestination, send]
-  );
-
-  /**Handler for output labware selection mode change**/
-  const onDestinationLabwareScan = React.useCallback(
-    (labware: LabwareFlaggedFieldsFragment[]) => {
-      send({ type: 'UPDATE_DESTINATION_LABWARE', labware: labware });
-    },
-    [send]
-  );
   /**
    * Save action invoked, so check whether a warning to be given to user if any labware and it's ancestral labware
    * with no perm done is copied
@@ -408,35 +149,12 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
               <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
             </div>
           </div>
-
-          <SlotMapper
-            locked={current.matches('copied')}
-            initialOutputLabware={destinations.map((output) => {
-              return { labware: output.labware, slotCopyContent: output.slotCopyDetails.contents };
-            })}
-            onInputLabwareChange={handleInputLabwareChange}
-            onChange={handleOnSlotMapperChange}
-            onOutputLabwareChange={handleOutputLabwareChange}
-            inputLabwareConfigPanel={
-              sources.length > 0 && (
-                <SlotCopySourceConfigPanel
-                  onChangeState={onSourceLabwareStateChange}
-                  selectedSource={sources.find((src) => src.labware.barcode === selectedSource?.barcode)}
-                />
-              )
-            }
-            outputLabwareConfigPanel={
-              <SlotCopyDestinationConfigPanel
-                onAddLabware={onAddDestinationLabware}
-                onChangeBioState={onChangeBioState}
-                onLabwareScan={onDestinationLabwareScan}
-                onDestinationSelectionModeChange={onDestinationSelectionModeChange}
-                labware={destinations.find((dest) => dest.labware.id === selectedDestination.id)}
-                destinationSelectionMode={destinationSelectionMode.current}
-              />
-            }
-            onSelectInputLabware={setSelectedSource}
-            onSelectOutputLabware={setSelectedDestination}
+          <SlotCopyComponent
+            title={'Transfer to Sample'}
+            initialOutputLabware={initialOutputLabware}
+            current={current}
+            send={send}
+            initialOutputSlotCopy={initialOutputSlotCopy}
             slotCopyModes={
               destinationSelectionMode.current === DestinationSelectionMode.DEFAULT
                 ? objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])
@@ -492,59 +210,12 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           )}
         </div>
       </div>
-      {
-        <ConfirmationModal
-          show={warnBeforeSave}
-          header={'Save transferred slots'}
-          message={{
-            type: 'Warning',
-            text: 'Labware without Permeabilisation'
-          }}
-          confirmOptions={[
-            {
-              label: 'Cancel',
-              action: () => {
-                setWarnBeforeSave(false);
-              }
-            },
-            { label: 'Continue', action: handleSave },
-            {
-              label: 'Visium permeabilisation',
-              action: () => {
-                navigate('/lab/visium_perm');
-                setWarnBeforeSave(false);
-              }
-            }
-          ]}
-        >
-          <p className={'font-bold mt-8'}>{'Permeabilisation has not been recorded on the following labware'}</p>
-          <Table className={'mt-6 w-full overflow-y-visible'}>
-            <TableHead>
-              <tr>
-                <TableHeader>Barcode</TableHeader>
-                <TableHeader>Type</TableHeader>
-              </tr>
-            </TableHead>
-            <TableBody>
-              {labwaresWithoutPerm.map((lw) => (
-                <tr key={lw.barcode}>
-                  <TableCell>{lw.barcode}</TableCell>
-                  <TableCell>{lw.labwareType.name}</TableCell>
-                </tr>
-              ))}
-            </TableBody>
-          </Table>
-          <p className="mt-8 my-3 text-gray-800 text-center text-sm  leading-normal">
-            If you wish to cancel this operation and record permeabilisation on these slides, click the
-            <span className="font-bold text-gray-900"> Visium Permeabilisation </span>
-            button.
-          </p>{' '}
-          <p className="my-3 text-gray-800 text-center text-sm  leading-normal">
-            Otherwise click <span className="font-bold text-gray-900">Continue or Cancel</span> to record or cancel this
-            operation.
-          </p>
-        </ConfirmationModal>
-      }
+      <LabwareWithoutPermConfirmationModal
+        show={warnBeforeSave}
+        labwaresWithoutPerm={labwaresWithoutPerm}
+        onSave={handleSave}
+        setWarnBeforeSave={setWarnBeforeSave}
+      />
     </AppShell>
   );
 }

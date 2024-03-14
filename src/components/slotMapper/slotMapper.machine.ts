@@ -267,10 +267,12 @@ const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapp
       return { ...context, failedSlots };
     }),
     assignPassFailError: assign(({ context, event }) => {
-      if (event.type !== 'xstate.error.actor.passFailsSlots') return context;
-      return produce(context, (draft) => {
-        draft.errors.set(event.barcode, event.error);
-      });
+      if (event.type === 'xstate.error.actor.passFailsSlots' && event.barcode) {
+        return produce(context, (draft) => {
+          draft.errors.set(event.barcode, event.error);
+        });
+      }
+      return context;
     })
   }
 };

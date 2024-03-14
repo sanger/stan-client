@@ -1,6 +1,5 @@
 import { GetPrintersQuery, LabwareFieldsFragment, Maybe, PrinterFieldsFragment } from '../../../types/sdk';
 import { ClientError } from 'graphql-request';
-import { ServerErrors } from '../../../types/stan';
 
 export interface LabelPrinterContext {
   /**

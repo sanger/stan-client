@@ -15,6 +15,7 @@ import {
 import { stanCore } from '../../sdk';
 import produce, { castDraft } from 'immer';
 import { ClientError } from 'graphql-request';
+import { DestinationSelectionMode } from '../../../components/slotMapper/slotMapper.types';
 
 /**
  * Context for SlotCopy Machine
@@ -64,6 +65,8 @@ export interface SlotCopyContext {
    * Errors from server, if any
    */
   serverErrors?: Maybe<ClientError>;
+
+  destinationSelectionMode?: DestinationSelectionMode;
 }
 
 type UpdateSlotCopyContentType = {
@@ -146,6 +149,11 @@ type SlotCopyErrorEvent = {
   error: Maybe<ClientError>;
 };
 
+type UpdateDestinationSelectionModeEvent = {
+  type: 'UPDATE_DESTINATION_SELECTION_MODE';
+  mode: DestinationSelectionMode;
+};
+
 export type SlotCopyEvent =
   | { type: 'UPDATE_WORK_NUMBER'; workNumber: string }
   | UpdateSourceLabware
@@ -158,6 +166,7 @@ export type SlotCopyEvent =
   | UpdateDestinationCosting
   | UpdateDestinationBioState
   | UpdateDestinationLOTNumber
+  | UpdateDestinationSelectionModeEvent
   | SaveEvent
   | FindPermDataEvent
   | SlotCopyDoneEvent
@@ -174,20 +183,13 @@ export const slotCopyMachine = createMachine(
       context: SlotCopyContext;
       events: SlotCopyEvent;
     },
-    context: ({
-      input: { workNumber, operationType, sources, destinations, slotCopyResults }
-    }: {
-      input: SlotCopyContext;
-    }): SlotCopyContext => ({
-      workNumber,
-      operationType,
-      sources,
-      destinations,
-      slotCopyResults
+    context: ({ input }: { input: SlotCopyContext }): SlotCopyContext => ({
+      ...input
     }),
     initial: 'mapping',
     states: {
       mapping: {
+        entry: ['emptyServerError'],
         on: {
           UPDATE_SOURCE_LABWARE: {
             actions: 'assignSourceLabware'
@@ -228,6 +230,9 @@ export const slotCopyMachine = createMachine(
           },
           UPDATE_DESTINATION_LOT_NUMBER: {
             actions: 'assignDestinationLOTNumber'
+          },
+          UPDATE_DESTINATION_SELECTION_MODE: {
+            actions: 'assignDestinationSelectionMode'
           }
         }
       },
@@ -272,6 +277,9 @@ export const slotCopyMachine = createMachine(
           },
           UPDATE_DESTINATION_LOT_NUMBER: {
             actions: 'assignDestinationLOTNumber'
+          },
+          UPDATE_DESTINATION_SELECTION_MODE: {
+            actions: 'assignDestinationSelectionMode'
           },
           SAVE: 'copying'
         }
@@ -531,6 +539,10 @@ export const slotCopyMachine = createMachine(
       }),
       emptyServerError: assign(({ context }) => {
         return { ...context, serverErrors: null };
+      }),
+      assignDestinationSelectionMode: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_DESTINATION_SELECTION_MODE') return context;
+        return { ...context, destinationSelectionMode: event.mode };
       })
     }
   }

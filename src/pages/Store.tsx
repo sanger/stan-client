@@ -30,7 +30,7 @@ export type LabwareAwaitingStorageInfo = {
   replicate: string;
 };
 
-type BlockerFunctionParams = {
+export type BlockerFunctionParams = {
   currentLocation: Location;
   nextLocation: Location;
   historyAction: HistoryAction;
