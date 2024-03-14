@@ -373,12 +373,7 @@ export default function History(props: HistoryProps) {
                     />
                   </div>
                 </div>
-                <img
-                  src={`data:image/svg+xml;base64,${btoa(historyGraph)}`}
-                  alt="History Graph"
-                  width="21508"
-                  height="44768"
-                />
+                <img src={`data:image/svg+xml;base64,${btoa(historyGraph)}`} alt="History Graph" />
               </div>
             )}
             {history.entries.length > 0 && (
