@@ -14,8 +14,6 @@ const machineOptions: MachineImplementations<LabelPrinterContext, LabelPrinterEv
       if (event.type !== 'xstate.done.actor.fetchPrinters') {
         return context;
       }
-      console.log('context ', context);
-      console.log('event.output.printers', event.output.printers);
       return produce(context, (draft) => {
         const labwareLabelTypes = new Set(
           draft.labwares.map((lw: LabwareFieldsFragment) => lw.labwareType?.labelType?.name)

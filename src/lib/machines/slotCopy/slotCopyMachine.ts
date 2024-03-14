@@ -326,8 +326,6 @@ export const slotCopyMachine = createMachine(
                 findPermDataQueries.push(val);
               }
             }
-            console.log('=== input ');
-            console.log(input);
             return {
               findPermTimes: findPermDataQueries,
               inputLabwares: input.labwares,
