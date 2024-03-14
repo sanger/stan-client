@@ -84,7 +84,7 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware }: CDNAProps) =>
 
   const onRemoveLabware = React.useCallback(
     (barcode: string) => {
-      removeLabware(barcode);
+      if (removeLabware) removeLabware(barcode);
     },
     [removeLabware]
   );

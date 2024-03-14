@@ -11,6 +11,7 @@ import Heading from '../Heading';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import RemoveButton from '../buttons/RemoveButton';
 import createSlotMapperMachine from './slotMapper.machine';
+import { OutputSlotCopyData } from './slotMapper.types';
 
 export interface ReagentTransferMappingProps {
   /**
@@ -35,13 +36,19 @@ export interface ReagentTransferMappingProps {
    * Initial output labware
    */
   initialDestLabware: LabwareFlaggedFieldsFragment | undefined;
+
+  /**
+   * Initial the component with a set of the slot copies
+   */
+  outputSlotCopies?: Array<OutputSlotCopyData>;
 }
 
 function ReagentTransferSlotMapper({
   onChange,
   initialSourceLabware,
   initialDestLabware,
-  disabled
+  disabled,
+  outputSlotCopies
 }: ReagentTransferMappingProps) {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine;
@@ -50,7 +57,11 @@ function ReagentTransferSlotMapper({
   const [current, send] = useMachine(memoSlotMapperMachine, {
     input: {
       inputLabware: initialSourceLabware ? [initialSourceLabware] : [],
-      outputSlotCopies: initialDestLabware ? [{ labware: initialDestLabware, slotCopyContent: [] }] : []
+      outputSlotCopies: outputSlotCopies
+        ? outputSlotCopies
+        : initialDestLabware
+          ? [{ labware: initialDestLabware, slotCopyContent: [] }]
+          : []
     }
   });
 
@@ -160,7 +171,8 @@ function ReagentTransferSlotMapper({
     (givenDestinationAddress?: string) => {
       if (!initialSourceLabware || !initialDestLabware) return;
       const address = destinationAddress ? destinationAddress : givenDestinationAddress;
-      if (initialSourceLabware.barcode && initialDestLabware.barcode && address) {
+      // if (initialSourceLabware.barcode && initialDestLabware.barcode && address) {
+      if (initialSourceLabware.barcode && address) {
         send({
           type: 'COPY_ONE_TO_ONE_SLOTS',
           inputLabwareId: initialSourceLabware.id,

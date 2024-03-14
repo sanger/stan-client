@@ -41,7 +41,7 @@ const visiumQCHandllers = [
         .map((slot) => {
           return {
             address: slot.address,
-            string: faker.number.float({ min: 0.1, max: 5, precision: 0.1 }).toString()
+            string: faker.number.float({ multipleOf: 0.1 }).toString()
           };
         });
       return HttpResponse.json({

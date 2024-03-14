@@ -1,0 +1,7 @@
+mutation RecordLibraryPrep($request: LibraryPrepRequest!) {
+  libraryPrep(request: $request) {
+    operations {
+      id
+    }
+  }
+}

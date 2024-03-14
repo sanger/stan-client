@@ -247,6 +247,14 @@ function AppShell({ children }: AppShellParams) {
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Record the transfer of sections to a CytAssist slide.'}
                     />
+                    <NavLinkMenuItem
+                      caption={'Library Amplification and Generation'}
+                      path={'/lab/libraryGeneration'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={
+                        'Record the library amplification, dual index plate, and the cycle number for the Visium CytAssist.'
+                      }
+                    />
                   </Menu>
                   <Menu
                     caption={'Probe Hybridisation'}

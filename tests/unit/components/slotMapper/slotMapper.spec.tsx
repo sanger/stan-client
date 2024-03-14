@@ -18,6 +18,7 @@ afterEach(() => {
   cleanup();
 });
 
+const defaultInputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
 jest.mock('../../../../src/components/labware/Labware', () => {
   return {
     __esModule: true,
@@ -62,11 +63,10 @@ describe('slotMapper.spec.tsx', () => {
   });
 
   it('displays multiple input  labware from props', () => {
-    const inputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const labware: LabwareFlaggedFieldsFragment[] = [
-      { ...inputLabware, barcode: 'STAN-5111' },
-      { ...inputLabware, barcode: 'STAN-5112' }
+      { ...defaultInputLabware, barcode: 'STAN-5111' },
+      { ...defaultInputLabware, barcode: 'STAN-5112' }
     ];
     const { container } = render(
       <SlotMapper
@@ -90,11 +90,10 @@ describe('slotMapper.spec.tsx', () => {
   });
 
   it('removes input labware on remove button click', async () => {
-    const inputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const labware: LabwareFlaggedFieldsFragment[] = [
-      { ...inputLabware, barcode: 'STAN-5111' },
-      { ...inputLabware, barcode: 'STAN-5112' }
+      { ...defaultInputLabware, barcode: 'STAN-5111' },
+      { ...defaultInputLabware, barcode: 'STAN-5112' }
     ];
     const { container } = render(
       <SlotMapper
@@ -113,11 +112,10 @@ describe('slotMapper.spec.tsx', () => {
     expect(getById(container, 'inputLabwares')).toHaveTextContent('STAN-5112');
   });
   it('displays previous and next input labware on previous and next button clicks', async () => {
-    const inputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const labware: LabwareFlaggedFieldsFragment[] = [
-      { ...inputLabware, barcode: 'STAN-5111' },
-      { ...inputLabware, barcode: 'STAN-5112' }
+      { ...defaultInputLabware, barcode: 'STAN-5111' },
+      { ...defaultInputLabware, barcode: 'STAN-5112' }
     ];
     act(() => {
       render(
@@ -143,9 +141,8 @@ describe('slotMapper.spec.tsx', () => {
     expect(screen.getByTestId('input-labware-div')).toHaveTextContent('STAN-5111');
   });
   it('displays slot information in table when user selects input slots', async () => {
-    const inputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
     //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const labware: LabwareFlaggedFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
+    const labware: LabwareFlaggedFieldsFragment[] = [{ ...defaultInputLabware, barcode: 'STAN-5111' }];
     act(() => {
       render(
         <SlotMapper
@@ -240,32 +237,42 @@ describe('slotMapper.spec.tsx', () => {
     expect(screen).not.toContain(screen.getByTestId('mapping-div'));
   });
   describe('when a scanned labware is passed in as initialOutputLabware props', () => {
-    const inputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
-    //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const inputLw: LabwareFlaggedFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
-    const outputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
-    //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const outputLw: OutputSlotCopyData[] = [
-      { labware: { ...outputLabware, barcode: 'STAN-5112' }, slotCopyContent: [] }
-    ];
     beforeEach(() => {
       render(
         <SlotMapper
-          slotCopyModes={[SlotCopyMode.ONE_TO_ONE]}
-          initialInputLabware={inputLw}
-          initialOutputLabware={outputLw}
+          slotCopyModes={[SlotCopyMode.ONE_TO_ONE, SlotCopyMode.ONE_TO_MANY]}
+          initialInputLabware={[{ ...defaultInputLabware, barcode: 'STAN-5111' }]}
+          initialOutputLabware={[{ labware: { ...defaultInputLabware, barcode: 'STAN-5112' }, slotCopyContent: [] }]}
         />
       );
     });
     it('should render the component properly', () => {
       //It should display the given slot copy modes
-      expect(screen.queryByTestId('copyMode-One to one')).toBeInTheDocument();
+      expect(screen.getByText('Select transfer mode')).toBeVisible();
+      expect(screen.getByTestId('copyMode-One to one')).toBeVisible();
+      expect(screen.getByTestId('copyMode-One to many')).toBeVisible();
 
       //It should display the input and output labwares
       expect(screen.getByText('Input Labware')).toBeInTheDocument();
       expect(screen.getByText('Output Labware')).toBeInTheDocument();
       expect(screen.getByText('Labware-STAN-5111')).toBeInTheDocument();
       expect(screen.getByText('Labware-STAN-5112')).toBeInTheDocument();
+    });
+  });
+  describe('when Slot Mapper is called with one copy mode', () => {
+    beforeEach(() => {
+      render(
+        <SlotMapper
+          slotCopyModes={[SlotCopyMode.ONE_TO_ONE]}
+          initialInputLabware={[{ ...defaultInputLabware, barcode: 'STAN-5111' }]}
+          initialOutputLabware={[{ labware: { ...defaultInputLabware, barcode: 'STAN-5112' }, slotCopyContent: [] }]}
+        />
+      );
+    });
+    it('hides the select transfer mode options', () => {
+      //It should display the given slot copy modes
+      expect(screen.queryByTestId('Select transfer mode')).toBeNull();
+      expect(screen.queryByTestId('copyMode-One to one')).toBeNull();
     });
   });
 });

@@ -1,6 +1,6 @@
 import Panel from '../Panel';
 import React from 'react';
-import { AddressString, LabwareFlaggedFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import { AddressString, LabwareFlaggedFieldsFragment, SlotCopyContent, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
@@ -9,14 +9,18 @@ import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
 import { stanCore } from '../../lib/sdk';
 import Warning from '../notifications/Warning';
+import { groupBy } from 'lodash';
 
 export type CDNAProps = {
   labware: LabwareFlaggedFieldsFragment;
-  slotMeasurements: SlotMeasurementRequest[] | undefined;
-  removeLabware: (barcode: string) => void;
+  slotMeasurements?: SlotMeasurementRequest[];
+  removeLabware?: (barcode: string) => void;
+  className?: string;
+  slotCopyContent?: SlotCopyContent[];
+  onSlotMeasurementChange?: (slotMeasurements?: SlotMeasurementRequest[]) => void;
 };
 
-const fetchCqMeasurements = async (barcode: string): Promise<Array<AddressString>> => {
+const fetchCqMeasurementsByBarcode = async (barcode: string): Promise<Array<AddressString>> => {
   const response = await stanCore.FindMeasurementByBarcodeAndName({
     barcode: barcode,
     measurementName: 'Cq value'
@@ -24,8 +28,41 @@ const fetchCqMeasurements = async (barcode: string): Promise<Array<AddressString
   return response.measurementValueFromLabwareOrParent;
 };
 
-const Amplification = ({ labware, removeLabware }: CDNAProps) => {
-  const { values, setErrors, setTouched, setFieldValue, errors, setFieldError } = useFormikContext<VisiumQCFormData>();
+/* Building the Cq values for different samples transferred from different labware */
+const fetchCqMeasurementsBySlotCopyContent = async (
+  slotCopyContent: Array<SlotCopyContent>
+): Promise<AddressString[]> => {
+  const slotCopyContentByBarcode = groupBy(slotCopyContent, 'sourceBarcode');
+  const addresses: AddressString[] = [];
+
+  // Fetch measurements for each barcode concurrently
+  await Promise.all(
+    Object.keys(slotCopyContentByBarcode).map(async (barcode) => {
+      const measurementValues = await fetchCqMeasurementsByBarcode(barcode);
+
+      slotCopyContentByBarcode[barcode].forEach((slotCopy) => {
+        const mv = measurementValues.find((measurementValue) => measurementValue.address === slotCopy.sourceAddress);
+        if (mv) {
+          addresses.push({
+            address: slotCopy.destinationAddress,
+            string: mv.string
+          });
+        }
+      });
+    })
+  );
+  return addresses;
+};
+
+const Amplification = ({
+  labware,
+  removeLabware,
+  className,
+  slotCopyContent,
+  onSlotMeasurementChange,
+  slotMeasurements: initSlotMeasurements
+}: CDNAProps) => {
+  const { setErrors, setTouched, setFieldValue, errors, setFieldError } = useFormikContext<VisiumQCFormData>();
 
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(
     () => [
@@ -43,10 +80,17 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
     []
   );
 
+  const [slotMeasurements, setSlotMeasurements] = React.useState<SlotMeasurementRequest[]>();
+
   /***
    * When labwares changes, the slotMeasurements has to be initialized accordingly
    */
   React.useEffect(() => {
+    const fetchCqMeasurements = async (): Promise<Array<AddressString>> => {
+      return slotCopyContent
+        ? fetchCqMeasurementsBySlotCopyContent(slotCopyContent)
+        : fetchCqMeasurementsByBarcode(labware.barcode);
+    };
     //Reset Errors
     setErrors({});
     setTouched({});
@@ -55,10 +99,17 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
       return;
     }
     setFieldValue('barcode', labware.barcode);
-    fetchCqMeasurements(labware.barcode).then((measurementValues) => {
+
+    if (initSlotMeasurements) {
+      setSlotMeasurements(initSlotMeasurements);
+      return;
+    }
+
+    fetchCqMeasurements().then((measurementValues) => {
       if (measurementValues.length === 0) {
-        setFieldValue('slotMeasurements', [], false);
-        setFieldError('barcode', 'No Cq values associated with the labware slots');
+        setFieldValue('slotMeasurements', []);
+        setSlotMeasurements([]);
+        if (onSlotMeasurementChange) onSlotMeasurementChange([]);
         return;
       }
       const slotMeasurements: SlotMeasurement[] = [];
@@ -82,14 +133,36 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
         );
       });
       setFieldValue('slotMeasurements', slotMeasurements);
+      setSlotMeasurements(slotMeasurements);
+      if (onSlotMeasurementChange) onSlotMeasurementChange(slotMeasurements);
     });
-  }, [labware, setErrors, setTouched, setFieldValue, memoMeasurementConfig, setFieldError]);
+  }, [
+    labware,
+    setErrors,
+    setTouched,
+    setFieldValue,
+    memoMeasurementConfig,
+    setFieldError,
+    slotCopyContent,
+    onSlotMeasurementChange,
+    initSlotMeasurements
+  ]);
 
   const handleChangeMeasurement = React.useCallback(
     (measurementName: string, measurementValue: string) => {
       setFieldValue(measurementName, measurementValue, true);
+      const measurementIndex = parseInt(measurementName.split('.')[1]);
+      setSlotMeasurements((prevSlotMeasurements) => {
+        return prevSlotMeasurements?.map((measurement, index) => {
+          if (index + 1 === measurementIndex * 2) {
+            measurement.value = measurementValue;
+          }
+          return measurement;
+        });
+      });
+      if (onSlotMeasurementChange) onSlotMeasurementChange(slotMeasurements);
     },
-    [setFieldValue]
+    [setFieldValue, onSlotMeasurementChange, slotMeasurements]
   );
 
   const handleChangeAllMeasurements = React.useCallback(
@@ -97,15 +170,17 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
       //Reset Errors
       setErrors({});
       setTouched({});
-      const measurements = values?.slotMeasurements ? [...values.slotMeasurements] : [];
+      const measurements = slotMeasurements ? [...slotMeasurements] : [];
       measurements
         ?.filter((measurement) => measurement.name === 'Cycles')
         .forEach((measuerementReq) => {
           measuerementReq.value = measurementValue;
         });
-      setFieldValue('slotMeasurements', values.slotMeasurements, true);
+      setFieldValue('slotMeasurements', measurements, true);
+      setSlotMeasurements(measurements);
+      onSlotMeasurementChange && onSlotMeasurementChange(measurements);
     },
-    [values, setErrors, setTouched, setFieldValue]
+    [setErrors, setTouched, setFieldValue, onSlotMeasurementChange, slotMeasurements]
   );
 
   /***
@@ -129,28 +204,31 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
 
   const onRemoveLabware = React.useCallback(
     (barcode: string) => {
-      removeLabware(barcode);
+      if (removeLabware) removeLabware(barcode);
     },
     [removeLabware]
   );
 
   return (
-    <div className="max-w-screen-xl mx-auto">
+    <div className={className ? className : 'max-w-screen-xl mx-auto'}>
       {labware && (
         <div className={'flex flex-col mt-2'}>
           {errors?.barcode && <Warning className={'mt-4'} message={errors.barcode} />}
           <Panel>
             <div className="flex flex-row justify-end">
-              {
+              {removeLabware && (
                 <RemoveButton
                   data-testid={'remove'}
                   onClick={() => {
                     onRemoveLabware(labware.barcode);
                   }}
                 />
-              }
+              )}
             </div>
-            {!errors?.barcode && (
+            {slotMeasurements && slotMeasurements.length === 0 && (
+              <Warning className={'mt-4'} message={'No Cq values associated with the labware slots'} />
+            )}
+            {slotMeasurements && slotMeasurements.length > 0 && (
               <div className={'flex flex-row w-1/2 mb-2'}>
                 <div className={'flex flex-col'}>
                   <label>Cycles</label>
@@ -169,14 +247,15 @@ const Amplification = ({ labware, removeLabware }: CDNAProps) => {
             )}
             <div className={'grid grid-cols-11 gap-2 justify-between'}>
               <div className="col-span-6">
-                {values.slotMeasurements && values.slotMeasurements.length > 0 && (
+                {slotMeasurements && slotMeasurements.length > 0 && (
                   <SlotMeasurements
-                    slotMeasurements={values.slotMeasurements}
+                    slotMeasurements={slotMeasurements}
                     onChangeField={handleChangeMeasurement}
                     measurementConfig={memoMeasurementConfig}
                   />
                 )}
               </div>
+
               <div className="col-span-5 w-full flex items-center justify-center p-4" data-testid={'labware'}>
                 <Labware labware={labware} name={labware.labwareType.name} />
               </div>

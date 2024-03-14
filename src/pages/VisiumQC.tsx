@@ -53,7 +53,6 @@ export interface VisiumQCFormData {
   reagentLot?: string;
   slotComments?: Array<AddressCommentInput>;
 }
-
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
   barcode: Yup.string().optional(),
@@ -268,7 +267,7 @@ export default function VisiumQC() {
               barcode: '',
               workNumber: '',
               qcType: QCType.SLIDE_PROCESSING,
-              slotMeasurements: [],
+              slotMeasurements: undefined,
               labwareResult: undefined,
               slotComments: []
             }}
@@ -294,6 +293,7 @@ export default function VisiumQC() {
                     handleChange={(val) => {
                       setFieldValue('qcType', (val as OptionType).label);
                       setLabwareLimit((val as OptionType).label === QCType.SLIDE_PROCESSING ? 2 : 1);
+                      setFieldValue('slotMeasurements', undefined);
                     }}
                     dataTestId={'qcType'}
                     emptyOption={true}
