@@ -153,7 +153,7 @@ function OriginalSampleRegistration() {
               externalIdentifier: block.externalIdentifier ? block.externalIdentifier.trim() : undefined,
               hmdmc: tissue.hmdmc.trim(),
               labwareType: block.labwareType.trim(),
-              lifeStage: tissue.lifeStage,
+              lifeStage: tissue.lifeStage in LifeStage ? tissue.lifeStage : undefined,
               tissueType: tissue.tissueType.trim(),
               spatialLocation: block.spatialLocation,
               replicateNumber: block.replicateNumber ?? undefined,
