@@ -109,7 +109,7 @@ export default class RegistrationValidation {
   get sectionExternalIdentifier() {
     return validation.requiredString({
       label: 'Section External Identifier',
-      restrictChars: validation.DEFAULT_PERMITTED_CHARS
+      restrictChars: validation.ALPHANUMERIC_WITH_DOT_AND_DASH
     });
   }
 
