@@ -26,6 +26,9 @@ describe('Xenium Probe Hybridisation', () => {
       //Table should display barcode of labware scanned
       cy.findAllByRole('table').contains('td', 'STAN-3111');
     });
+    it('updates start time field', () => {
+      cy.findByTestId('performed').should('contain.value', new Date().toISOString().split('T')[0]);
+    });
     it('should display Probe Settings', () => {
       cy.findByText('Probe Settings').should('be.visible');
       //Should display start time field
