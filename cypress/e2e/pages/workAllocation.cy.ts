@@ -3,7 +3,8 @@ import {
   removeSelections,
   selectOption,
   selectOptionForMultiple,
-  shouldDisplaySelectedValue
+  shouldDisplaySelectedValue,
+  shouldHaveOption
 } from '../shared/customReactSelect.cy';
 import { HttpResponse } from 'msw';
 
@@ -250,6 +251,9 @@ describe('Work Allocation', () => {
       cy.findByText('Allocate a new SGP number').scrollIntoView().should('be.visible');
       cy.findByText('Filter SGP Numbers').should('not.exist');
       cy.findByRole('table').should('not.exist');
+    });
+    it('includes the current username within the work requester select options ', () => {
+      shouldHaveOption('workRequester', 'jb1');
     });
     context('when a work is allocated', () => {
       before(() => {
