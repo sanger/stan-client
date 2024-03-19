@@ -1,6 +1,7 @@
 import * as validation from './index';
 import * as Yup from 'yup';
 import { GetRegistrationInfoQuery, LifeStage } from '../../types/sdk';
+import { LifeStageMap } from '../../pages/registration/SectionForm';
 
 export default class RegistrationValidation {
   private registrationInfo: GetRegistrationInfoQuery;
@@ -62,7 +63,7 @@ export default class RegistrationValidation {
   get lifeStage() {
     return validation.requiredString({
       label: 'Life Stage',
-      oneOf: Object.values(LifeStage)
+      oneOf: Object.values(LifeStageMap)
     });
   }
 

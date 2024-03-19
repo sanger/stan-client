@@ -72,7 +72,7 @@ describe('On load', () => {
     beforeEach(async () => {
       await scanLabware('STAN-3113');
     });
-    it('should display labware result panel', async () => {
+    it('should display labware result panel', () => {
       shouldDisplayIntialFields();
       expect(screen.getByTestId('labwareResult')).toBeInTheDocument();
     });
