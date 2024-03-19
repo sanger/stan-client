@@ -21,7 +21,7 @@ const isTextData = (x: any): x is ColumnTextData => Object.keys(x).includes('col
 
 type FileType = {
   type: 'excel' | 'graph';
-  extension: '.xlsx' | '.png';
+  extension: '.xlsx' | '.html';
 };
 
 type DownloadProps<T extends StringKeyedProps> = {
@@ -32,7 +32,7 @@ type DownloadProps<T extends StringKeyedProps> = {
 };
 
 export const ExcelFileType: FileType = { type: 'excel', extension: '.xlsx' };
-export const GraphFileType: FileType = { type: 'graph', extension: '.png' };
+export const GraphFileType: FileType = { type: 'graph', extension: '.html' };
 
 const generateDownloadExcelFileUrl = <T extends StringKeyedProps>(
   columnData: ColumnDataType<T>,
@@ -65,32 +65,22 @@ const generateDownloadExcelFileUrl = <T extends StringKeyedProps>(
   return URL.createObjectURL(downloadBlob);
 };
 
-const generateDownloadGraphFileUrl = (graph: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = function () {
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-
-      canvas.width = img.width;
-      canvas.height = img.height;
-      if (context) {
-        context.drawImage(img, 0, 0);
-        const dataUrl = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        //link.download = 'graph.png';
-
-        resolve(link.href);
-      } else {
-        reject(new Error('Failed to get 2D context for canvas.'));
-      }
-    };
-    img.onerror = function () {
-      reject(new Error('Failed to load the SVG image.'));
-    };
-    img.src = 'data:image/svg+xml;base64,' + btoa(graph);
-  });
+const downloadAsHtmlFile = (svgData: string) => {
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>History Result Graph</title>
+    </head>
+    <body>
+        ${svgData}
+    </body>
+    </html>
+  `;
+  const blob = new Blob([htmlContent], { type: 'text/html' });
+  return URL.createObjectURL(blob);
 };
 
 export function useDownload<T extends StringKeyedProps>({
@@ -106,7 +96,7 @@ export function useDownload<T extends StringKeyedProps>({
     let downloadFileURL: string = '';
     if (downloadProps.fileType === GraphFileType) {
       try {
-        downloadFileURL = await generateDownloadGraphFileUrl(downloadProps.graph!);
+        downloadFileURL = downloadAsHtmlFile(downloadProps.graph!);
       } catch (error) {
         console.error('Error generating the graph download URL:', error);
       }
