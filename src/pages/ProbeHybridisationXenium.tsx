@@ -62,13 +62,22 @@ const ProbeHybridisationXenium: React.FC = () => {
 
   const [current, send] = useMachine(formMachine);
 
+  const [currentTime, setCurrentTime] = React.useState<string>(getCurrentDateTime());
+
+  React.useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentTime(getCurrentDateTime());
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
   const { serverError, submissionResult } = current.context;
   /**
    * Validation schema for the form
    */
   const validationSchema = Yup.object().shape({
     performed: Yup.date()
-      .max(new Date(), 'Please select a date and time on or before current time')
+      .max(currentTime, 'Please select a date and time on or before current time')
       .required('Start Time is a required field')
       .label('Start Time'),
     labware: Yup.array()
@@ -90,7 +99,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                   }),
                 lot: Yup.string()
                   .required('LOT number is a required field')
-                  .max(20)
+                  .max(25)
                   .matches(
                     lotRegx,
                     'LOT number should be a string of maximum length 20 of capital letters, numbers and underscores.'
@@ -156,6 +165,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                                 helpers.remove(index);
                               }
                             });
+                            setFieldValue('performed', currentTime);
                           }}
                           enableFlaggedLabwareCheck
                         >
@@ -211,7 +221,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                           data-testid={'performed'}
                           type="datetime-local"
                           name={'performed'}
-                          max={getCurrentDateTime()}
+                          max={currentTime}
                         />
                       </div>
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4 w-full">

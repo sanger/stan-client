@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 
 export const DEFAULT_PERMITTED_CHARS = /^[a-z0-9-_]+$/i;
+export const ALPHANUMERIC_WITH_DOT_AND_DASH = /^[a-z0-9_.-]+$/i;
 
 /**
  * Returns a valdiator for a required string

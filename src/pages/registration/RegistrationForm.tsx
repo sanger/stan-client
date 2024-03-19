@@ -17,6 +17,7 @@ import { RegistrationFormValues } from '../BlockRegistration';
 import { TissueValues } from './Registration';
 import CustomReactSelect from '../../components/forms/CustomReactSelect';
 import { RegistrationFormBlockSample } from '../OriginalSampleRegistration';
+import { LifeStageMap } from './SectionForm';
 
 export type TextType = 'Block' | 'Embedding';
 
@@ -102,8 +103,8 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
               <FormikInput label="Donor ID" name={`tissues.${currentIndex}.donorId`} />
 
               <RadioGroup label="Life Stage" name={`tissues.${currentIndex}.lifeStage`}>
-                {objectKeys(LifeStage).map((key, index) => {
-                  return <RadioButton key={index} name={key} value={LifeStage[key]} />;
+                {objectKeys(LifeStageMap).map((key, index) => {
+                  return <RadioButton key={index} name={key} value={LifeStageMap[key]} />;
                 })}
               </RadioGroup>
 

@@ -4,11 +4,14 @@ import {
   CostCode,
   CostCodeFieldsFragment,
   CreateWorkMutation,
+  CurrentUserQuery,
   GetWorkAllocationInfoQuery,
   OmeroProjectFieldsFragment,
   ProgramFieldsFragment,
   ProjectFieldsFragment,
   ReleaseRecipientFieldsFragment,
+  UserRole,
+  WorkStatus,
   WorkTypeFieldsFragment,
   WorkWithCommentFieldsFragment
 } from '../../types/sdk';
@@ -78,7 +81,10 @@ export type WorkAllocationFormValues = {
 };
 
 type WorkAllocationEvent =
-  | { type: 'xstate.done.actor.loadWorkAllocationInfo'; output: GetWorkAllocationInfoQuery }
+  | {
+      type: 'xstate.done.actor.loadWorkAllocationInfo';
+      output: { workAllocation: GetWorkAllocationInfoQuery; currentUser: CurrentUserQuery };
+    }
   | { type: 'xstate.done.actor.allocateWork'; output: CreateWorkMutation }
   | { type: 'xstate.error.actor.allocateWork'; error: ClientError }
   | { type: 'xstate.error.actor.loadWorkAllocationInfo'; error: ClientError }
@@ -171,6 +177,19 @@ type CreateWorkAllocationMachineParams = {
   urlParams: WorkAllocationUrlParams;
 };
 
+const getWorkAllocationInfo = ({ input }: { input: { status: WorkStatus } }) =>
+  stanCore.GetWorkAllocationInfo({
+    commentCategory: 'Work status',
+    workStatuses: input.status
+  });
+
+const getCurrentUser = () => stanCore.CurrentUser();
+
+const fetchWorkAllocationAndCurrentUser = ({ input }: { input: { status: WorkStatus } }) =>
+  Promise.all([getWorkAllocationInfo({ input }), getCurrentUser()]).then(([workAllocationInfo, currentUser]) => {
+    return { workAllocation: workAllocationInfo, currentUser };
+  });
+
 export default function createWorkAllocationMachine({ urlParams }: CreateWorkAllocationMachineParams) {
   /**Hook to sort table*/
   return createMachine(
@@ -196,12 +215,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
         loading: {
           invoke: {
             id: 'loadWorkAllocationInfo',
-            src: fromPromise(({ input }) =>
-              stanCore.GetWorkAllocationInfo({
-                commentCategory: 'Work status',
-                workStatuses: input.status
-              })
-            ),
+            src: fromPromise(({ input }) => fetchWorkAllocationAndCurrentUser({ input })),
             input: ({ context }) => ({ status: context.urlParams.status }),
             onDone: { actions: 'assignWorkAllocationInfo', target: 'ready' },
             onError: { actions: 'assignServerError', target: 'ready' }
@@ -282,6 +296,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
 
         assignWorkAllocationInfo: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.loadWorkAllocationInfo') return context;
+          const { workAllocation, currentUser } = event.output;
           const {
             comments,
             projects,
@@ -291,7 +306,14 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             workTypes,
             costCodes,
             releaseRecipients
-          } = event.output;
+          } = workAllocation;
+          if (currentUser.user && currentUser.user.role === UserRole.Enduser) {
+            releaseRecipients.push({
+              username: currentUser.user!.username,
+              fullName: currentUser.user!.username,
+              enabled: true
+            });
+          }
           return {
             ...context,
             availableComments: comments,
