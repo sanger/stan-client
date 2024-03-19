@@ -69,10 +69,8 @@ describe('On load', () => {
     });
   });
   describe('When labware have been scanned', () => {
-    beforeEach(async () => {
+    it('should display labware result panel', async () => {
       await scanLabware('STAN-3113');
-    });
-    it('should display labware result panel', () => {
       shouldDisplayIntialFields();
       expect(screen.getByTestId('labwareResult')).toBeInTheDocument();
     });
