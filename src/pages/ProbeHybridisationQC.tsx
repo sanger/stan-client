@@ -1,147 +1,129 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 
 import {
   CommentFieldsFragment,
-  CompletionRequest,
-  LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   LabwareSampleComments,
-  RecordCompletionMutation,
   SampleAddressComment
 } from '../types/sdk';
 import AppShell from '../components/AppShell';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import Heading from '../components/Heading';
-import { useCollection } from '../lib/hooks/useCollection';
-import { Form, Formik } from 'formik';
-import { useMachine } from '@xstate/react';
-import createFormMachine from '../lib/machines/form/formMachine';
 import { StanCoreContext } from '../lib/sdk';
-
 import Panel from '../components/Panel';
 import RemoveButton from '../components/buttons/RemoveButton';
 import Labware from '../components/labware/Labware';
-import FormikInput from '../components/forms/Input';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { selectOptionValues } from '../components/forms';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
-import { mapify } from '../lib/helpers';
 import { formatDateTimeForCore, getCurrentDateTime } from '../types/stan';
 import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
-import * as Yup from 'yup';
-import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
-
 import { useLoaderData } from 'react-router-dom';
-import { fromPromise } from 'xstate';
+import Label from '../components/forms/Label';
+import warningToast from '../components/notifications/WarningToast';
+import { toast } from 'react-toastify';
+import { omit } from 'lodash';
+import { ClientError } from 'graphql-request';
+import Success from '../components/notifications/Success';
 
-type SampleAddressFormRow = {
-  [key: string]: string[]; //key: address-sampleId, values: the selected comments
-};
-
-type LabwareCompletionDateForm = {
-  globalComments: string[];
-  completionDateTime: string;
-  sampleAddressComments: SampleAddressFormRow;
-};
-type ProbeHybridisationQCFormValues = {
+type CompletionRequestForm = {
+  operationType: string;
   workNumber: string;
-  labwares: { [key: string]: LabwareCompletionDateForm }; //key: barcode
+  globalComments: number[];
+  labware: LabwareSampleComments;
+};
+
+type ProbeHybridisationQCFormValues = {
+  request: Array<CompletionRequestForm>;
 };
 
 const getCommentTextFromField = (
-  availableComments: CommentFieldsFragment[],
   values: ProbeHybridisationQCFormValues,
   barcode: string,
   address: string,
   sampleId: number
 ): string[] => {
-  const commentsMap = mapify(availableComments, 'id');
-  const labwareComments = values.labwares[barcode];
-  if (labwareComments && labwareComments.sampleAddressComments) {
-    const comments = labwareComments.sampleAddressComments[`${address}-${sampleId}`];
+  const labwareComments = values.request.find((rq) => rq.labware.barcode === barcode);
+  if (labwareComments && labwareComments.labware.comments) {
+    const comments = labwareComments.labware.comments.filter((c) => c.sampleId === sampleId && c.address === address);
     if (comments) {
-      return comments
-        .map((commentId) => commentsMap.get(Number(commentId)))
-        .filter((comment) => comment !== undefined)
-        .map((comment) => comment!.text);
+      return comments.map((comment) => comment.commentId.toString());
     }
   }
   return [];
 };
 
-const mapSampleAddressCommentIds = (
-  address: string,
-  sampleId: number,
-  commentIds: string[]
-): SampleAddressComment[] => {
-  return commentIds.map((commentId) => ({
-    address: address,
-    sampleId: Number(sampleId),
-    commentId: Number(commentId)
-  }));
-};
-
-const convertProbeHybridisationQCFormValuesToCompletionRequest = (
-  probeHybridisationQCFormValues: ProbeHybridisationQCFormValues,
-  allScannedLabware: LabwareFieldsFragment[]
-) => {
-  const completionRequest: CompletionRequest = {
-    operationType: 'Probe hybridisation QC',
-    workNumber: probeHybridisationQCFormValues.workNumber,
-    labware: []
-  };
-
-  allScannedLabware.forEach((labware) => {
-    const labwareSampleComments: LabwareSampleComments = {
-      barcode: labware.barcode,
-      comments: []
-    };
-    const labwareForm = probeHybridisationQCFormValues.labwares[labware.barcode];
-    if (labwareForm !== undefined) {
-      if (labwareForm.completionDateTime) {
-        labwareSampleComments.completion = formatDateTimeForCore(labwareForm.completionDateTime);
-      }
-      if (labwareForm.sampleAddressComments) {
-        for (const addressSampleId in labwareForm.sampleAddressComments) {
-          const [address, sampleId] = addressSampleId.split('-');
-          labwareSampleComments.comments.push(
-            ...mapSampleAddressCommentIds(address, Number(sampleId), labwareForm.sampleAddressComments[addressSampleId])
-          );
-        }
-      }
-    }
-    completionRequest.labware.push(labwareSampleComments);
+const displayWarningMsg = (msg: string) => {
+  warningToast({
+    message: msg,
+    position: toast.POSITION.TOP_RIGHT,
+    autoClose: 5000
   });
-  return completionRequest;
-};
-
-const formInitialValues: ProbeHybridisationQCFormValues = {
-  workNumber: '',
-  labwares: {
-    '': {
-      globalComments: [],
-      completionDateTime: getCurrentDateTime(),
-      sampleAddressComments: { '': [] }
-    }
-  }
 };
 
 export default function ProbeHybridisationQC() {
   const comments = useLoaderData() as CommentFieldsFragment[];
   const stanCore = useContext(StanCoreContext);
-
-  const labwares = useCollection<LabwareFieldsFragment>({
-    getKey: (item) => item.barcode
+  const resultRef = useRef<HTMLDivElement>(null);
+  // Scroll the mutation result into view if it appears
+  useEffect(() => {
+    resultRef.current?.scrollIntoView({ behavior: 'smooth' });
   });
+
+  const [globalWorkNumber, setGlobalWorkNumber] = React.useState('');
+  const [formValues, setFormValues] = React.useState<ProbeHybridisationQCFormValues>({ request: [] });
+  const [submissionError, setSubmissionError] = React.useState<Array<ClientError>>([]);
+  const [submissionSuccess, setSubmissionSuccess] = React.useState<Array<String>>([]);
+
+  const resetSubmissionResult = useCallback(() => {
+    setSubmissionError([]);
+    setSubmissionSuccess([]);
+  }, []);
+
+  const updateWorkNumbersFromGlobal = useCallback(
+    (workNumber: string) => {
+      resetSubmissionResult();
+      setFormValues((prev) => {
+        return {
+          ...prev,
+          request: prev.request.map((rq) => {
+            return {
+              ...rq,
+              workNumber
+            };
+          })
+        };
+      });
+    },
+    [resetSubmissionResult]
+  );
 
   const onAddLabware = useCallback(
     (labware: LabwareFlaggedFieldsFragment) => {
-      labwares.append(extractLabwareFromFlagged([labware])[0]);
+      resetSubmissionResult();
+      setFormValues((prev) => {
+        return {
+          ...prev,
+          request: prev.request.concat({
+            labware: {
+              barcode: labware.barcode,
+              completion: formatDateTimeForCore(getCurrentDateTime()),
+              comments: []
+            },
+            globalComments: [],
+            workNumber: '',
+            operationType: 'Probe hybridisation QC'
+          })
+        };
+      });
+      if (globalWorkNumber) {
+        updateWorkNumbersFromGlobal(globalWorkNumber);
+      }
     },
-    [labwares]
+    [globalWorkNumber, updateWorkNumbersFromGlobal, resetSubmissionResult]
   );
 
   const validateProbeHybridisationQcLabware = useCallback(
@@ -162,76 +144,101 @@ export default function ProbeHybridisationQC() {
     [stanCore]
   );
 
-  const onRemoveLabware = useCallback(
-    (labware: LabwareFlaggedFieldsFragment) => {
-      labwares.remove(labware.barcode);
-    },
-    [labwares]
-  );
-
   const removeLabwareFromForm = useCallback(
-    (removeLabware: (barcode: string) => void, barcode: string, values: ProbeHybridisationQCFormValues) => {
+    (removeLabware: (barcode: string) => void, barcode: string) => {
       removeLabware(barcode);
-      delete values.labwares[barcode];
+      resetSubmissionResult();
+
+      setFormValues((prev) => {
+        return {
+          ...prev,
+          request: prev.request.filter((rq) => rq.labware.barcode !== barcode)
+        };
+      });
     },
-    []
+    [resetSubmissionResult]
   );
 
-  const formSubmitMachine = React.useMemo(() => {
-    return createFormMachine<CompletionRequest, RecordCompletionMutation>().provide({
-      actors: {
-        submitForm: fromPromise(({ input }) => {
-          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.RecordCompletion({
-            request: input.event.values
+  const convertValuesAndSubmit = () => {
+    resetSubmissionResult();
+    formValues.request.forEach(async (data) => {
+      await stanCore
+        .RecordCompletion({
+          request: {
+            ...omit(data, 'globalComments'),
+            labware: [
+              {
+                ...data.labware
+              }
+            ]
+          }
+        })
+        .then((response) => {
+          setSubmissionSuccess((prev) => {
+            return [...prev, data.labware.barcode];
           });
         })
-      }
+        .catch((error) => {
+          setSubmissionError((prev) => {
+            return [...prev, error];
+          });
+        });
     });
-  }, [stanCore]);
-  const [currentForm, sendForm] = useMachine(formSubmitMachine);
-
-  const { serverError, submissionResult } = currentForm.context;
-
-  const validationWorkNumber = Yup.object().shape({
-    workNumber: Yup.string().required('SGP Number is required')
-  });
-
-  const submitForm = async (values: CompletionRequest) => sendForm({ type: 'SUBMIT_FORM', values });
-  const convertValuesAndSubmit = async (formValues: ProbeHybridisationQCFormValues) => {
-    const values: CompletionRequest = convertProbeHybridisationQCFormValuesToCompletionRequest(
-      formValues,
-      labwares.items
-    );
-    await submitForm(values);
   };
 
   const mapCommentOptionsToValues = useCallback((options: OptionType[]) => {
-    return options.map((v) => v.value);
+    return options.map((v) => parseInt(v.value));
   }, []);
 
   const updateSectionCommentsFromGlobal = useCallback(
-    (
-      options: OptionType[],
-      labware: LabwareFlaggedFieldsFragment,
-      setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void
-    ) => {
-      labware.slots.forEach((slot) => {
-        slot.samples.forEach((sample) => {
-          const sampleAddressId = `${slot.address}-${sample.id}`;
-          setFieldValue(
-            `labwares[${labware.barcode}].sampleAddressComments[${sampleAddressId}]`,
-            mapCommentOptionsToValues(options)
-          );
+    (options: OptionType[], labware: LabwareFlaggedFieldsFragment) => {
+      resetSubmissionResult();
+      const selectedComments = mapCommentOptionsToValues(options);
+      const updatedSampleAddressComments: Array<SampleAddressComment> = labware.slots.flatMap((slot) => {
+        return slot.samples.flatMap((sample) => {
+          return selectedComments.map((commentId) => {
+            return {
+              sampleId: sample.id,
+              address: slot.address,
+              commentId
+            };
+          });
         });
       });
+      setFormValues((prev) => {
+        return {
+          ...prev,
+          request: prev.request.map((rq) => {
+            if (rq.labware.barcode === labware.barcode) {
+              return {
+                ...rq,
+                globalComments: selectedComments,
+                labware: {
+                  ...rq.labware,
+                  comments: updatedSampleAddressComments
+                }
+              };
+            } else {
+              return rq;
+            }
+          })
+        };
+      });
     },
-    [mapCommentOptionsToValues]
+    [mapCommentOptionsToValues, resetSubmissionResult]
   );
 
   const validateCompletionDateTime = (selectedTime: string) => {
-    return new Date(selectedTime) > new Date() ? 'Please select a time on or before current time' : undefined;
+    if (new Date(selectedTime) > new Date()) {
+      displayWarningMsg('Please select a time on or before current time');
+      return false;
+    }
+    return true;
   };
+
+  const isFormValid = React.useCallback(() => {
+    return formValues.request.length > 0 && formValues.request.every((rq) => rq.workNumber !== '');
+  }, [formValues]);
 
   return (
     <AppShell>
@@ -239,163 +246,240 @@ export default function ProbeHybridisationQC() {
         <AppShell.Title>Probe Hybridisation QC</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
-        <Formik<ProbeHybridisationQCFormValues>
-          initialValues={formInitialValues}
-          validationSchema={validationWorkNumber}
-          onSubmit={convertValuesAndSubmit}
-        >
-          {({ values, setFieldValue }) => (
-            <Form>
-              <div className="max-w-screen-xl mx-auto">
-                <div className="space-y-2">
-                  {serverError && <Warning error={serverError} />}
-                  <Heading level={2}>SGP Number</Heading>
-                  <p>Select an SGP number to associate with this operation.</p>
-                  <div className="mt-4 md:w-1/2">
-                    <WorkNumberSelect
-                      name="workNumber"
-                      onWorkNumberChange={(workNumber) => {
-                        setFieldValue('workNumber', workNumber);
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="mt-8 space-y-2">
-                  <Heading level={2}>Slides</Heading>
-                  <p>Please scan a slide</p>
-                  <LabwareScanner
-                    onAdd={onAddLabware}
-                    onRemove={onRemoveLabware}
-                    labwareCheckFunction={validateProbeHybridisationQcLabware}
-                  >
-                    {({ labwares, removeLabware }) =>
-                      labwares.map((labware) => (
-                        <Panel key={labware.barcode}>
-                          <div className="flex flex-row items-center justify-end">
-                            {
-                              <RemoveButton
-                                data-testid={'remove'}
-                                onClick={() => {
-                                  removeLabwareFromForm(removeLabware, labware.barcode, values);
-                                }}
-                              />
-                            }
-                          </div>
-                          <div className="flex flex-row">
-                            <div className="flex flex-col w-full" data-testid={'labware'}>
-                              <Labware labware={labware} name={labware.labwareType.name} />
-                            </div>
-                            <div className="flex flex-col w-full bg-gray-100">
-                              <div className="p-4">
-                                <FormikInput
-                                  label={'Completion Time'}
-                                  data-testid={'completionDateTime'}
-                                  type="datetime-local"
-                                  name={`labwares[${labware.barcode}].completionDateTime`}
-                                  max={getCurrentDateTime()}
-                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                    setFieldValue(`labwares.${labware.barcode}.completionDateTime`, e.target.value);
-                                  }}
-                                  value={values.labwares[labware.barcode]?.completionDateTime || getCurrentDateTime()}
-                                  className="w-1/2"
-                                  validate={validateCompletionDateTime}
-                                />
-                              </div>
-                              <div className="flex flex-row w-full p-4">
-                                <CustomReactSelect
-                                  label={'Comment'}
-                                  name={`labwares[${labware.barcode}].globalComments`}
-                                  dataTestId="globalComment"
-                                  emptyOption={true}
-                                  options={selectOptionValues(comments, 'text', 'id')}
-                                  isMulti={true}
-                                  handleChange={(options) => {
-                                    updateSectionCommentsFromGlobal(options as OptionType[], labware, setFieldValue);
-                                  }}
-                                  value={() => {
-                                    const labwareData = values.labwares[labware.barcode];
-                                    return labwareData ? labwareData.globalComments : [];
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="pt-4">
-                            <Table>
-                              <TableHead>
-                                <tr>
-                                  <TableHeader>Address</TableHeader>
-                                  <TableHeader>Section Number</TableHeader>
-                                  <TableHeader>Donor Id </TableHeader>
-                                  <TableHeader>Tissue type</TableHeader>
-                                  <TableHeader>Spatial Location</TableHeader>
-                                  <TableHeader>Replicate</TableHeader>
-                                  <TableHeader>Comment</TableHeader>
-                                </tr>
-                              </TableHead>
-                              <TableBody>
-                                {labware.slots.flatMap((slot) => {
-                                  return slot.samples.flatMap((sample) => {
-                                    return (
-                                      <tr key={`${labware.barcode}-${slot.address}-${sample.id}`}>
-                                        <TableCell width={100}>{slot.address}</TableCell>
-                                        <TableCell width={120}>{sample.section}</TableCell>
-                                        <TableCell width={200}>{sample.tissue.donor.donorName}</TableCell>
-                                        <TableCell width={200}>
-                                          {sample.tissue.spatialLocation.tissueType.name}
-                                        </TableCell>
-                                        <TableCell width={100}>{sample.tissue.spatialLocation.code}</TableCell>
-                                        <TableCell>{sample.tissue.replicate!}</TableCell>
-                                        <TableCell className="w-full">
-                                          <CustomReactSelect
-                                            isMulti={true}
-                                            options={selectOptionValues(comments, 'text', 'id')}
-                                            name={`labwares[${labware.barcode}].sampleAddressComments[${slot.address}-${sample.id}]`}
-                                            value={getCommentTextFromField(
-                                              comments,
-                                              values,
-                                              labware.barcode,
-                                              slot.address,
-                                              sample.id
-                                            )}
-                                            handleChange={(values) => {
-                                              setFieldValue(
-                                                `labwares.${labware.barcode}.sampleAddressComments.${slot.address}-${sample.id}`,
-                                                mapCommentOptionsToValues(values as OptionType[])
-                                              );
-                                            }}
-                                          />
-                                        </TableCell>
-                                      </tr>
-                                    );
-                                  });
-                                })}
-                              </TableBody>
-                            </Table>
-                          </div>
-                        </Panel>
-                      ))
-                    }
-                  </LabwareScanner>
-                  {labwares.items.length > 0 && (
-                    <div className={'sm:flex mt-4 sm:flex-row justify-end'} key="submit">
-                      <BlueButton type="submit">Save</BlueButton>
-                    </div>
-                  )}
-                </div>
+        <div className="max-w-screen-xl mx-auto">
+          <div className="space-y-2">
+            {submissionError.length > 0 && (
+              <div className="mt-4" ref={resultRef}>
+                {submissionError.map((error, index) => (
+                  <Warning error={error} key={index} />
+                ))}
+                {submissionSuccess.length > 0 && (
+                  <Success
+                    message={`Probe Hybridisation QC recorded for the following labware: ${submissionSuccess.join(
+                      ', '
+                    )}`}
+                  />
+                )}
               </div>
-              <OperationCompleteModal
-                show={submissionResult !== undefined}
-                message="Probe Hybridisation QC recorded for all labware(s)"
-              >
-                <p>
-                  If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the
-                  Home screen.
-                </p>
-              </OperationCompleteModal>
-            </Form>
-          )}
-        </Formik>
+            )}
+            <Heading level={2}>SGP Number</Heading>
+            <p>Select an SGP number to associate all the scanned labware.</p>
+            <div className="mt-4 md:w-1/2">
+              <WorkNumberSelect
+                dataTestId="globalWorkNumber"
+                onWorkNumberChange={(workNumber) => {
+                  setGlobalWorkNumber(workNumber);
+                  updateWorkNumbersFromGlobal(workNumber);
+                }}
+              />
+            </div>
+          </div>
+          <div className="mt-8 space-y-2">
+            <Heading level={2}>Slides</Heading>
+            <p>Please scan a slide</p>
+            <LabwareScanner onAdd={onAddLabware} labwareCheckFunction={validateProbeHybridisationQcLabware}>
+              {({ labwares, removeLabware }) =>
+                labwares.map((labware) => {
+                  return (
+                    <Panel key={labware.barcode}>
+                      <div className="flex flex-row items-center justify-end">
+                        {
+                          <RemoveButton
+                            data-testid={'remove'}
+                            onClick={() => {
+                              removeLabwareFromForm(removeLabware, labware.barcode);
+                            }}
+                          />
+                        }
+                      </div>
+                      <div className="flex flex-row">
+                        <div className="flex flex-col w-full mr-3" data-testid={'labware'}>
+                          <Labware labware={labware} name={labware.labwareType.name} />
+                        </div>
+                        <div className="flex flex-col w-full bg-gray-100 ml-3">
+                          <div className="grid grid-cols-2 gap-4 m-4">
+                            <div>
+                              <Label name="SGP Number" className={'whitespace-nowrap'} />
+                              <WorkNumberSelect
+                                onWorkNumberChange={(workNumber) => {
+                                  resetSubmissionResult();
+                                  setFormValues((prev) => {
+                                    return {
+                                      ...prev,
+                                      request: prev.request.map((rq) => {
+                                        if (rq.labware.barcode === labware.barcode) {
+                                          return {
+                                            ...rq,
+                                            workNumber
+                                          };
+                                        } else {
+                                          return rq;
+                                        }
+                                      })
+                                    };
+                                  });
+                                }}
+                                workNumber={
+                                  formValues.request.find((rq) => rq.labware.barcode === labware.barcode)?.workNumber ||
+                                  ''
+                                }
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor={'completionDateTime'} className={'whitespace-nowrap'}>
+                                Completion Time
+                              </label>
+                              <input
+                                data-testid={'completionDateTime'}
+                                type="datetime-local"
+                                max={getCurrentDateTime()}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                  resetSubmissionResult();
+                                  if (validateCompletionDateTime(e.target.value)) {
+                                    setFormValues((prev) => {
+                                      return {
+                                        ...prev,
+                                        request: prev.request.map((rq) => {
+                                          if (rq.labware.barcode === labware.barcode) {
+                                            return {
+                                              ...rq,
+                                              labware: {
+                                                ...rq.labware,
+                                                completion: formatDateTimeForCore(e.target.value)
+                                              }
+                                            };
+                                          } else {
+                                            return rq;
+                                          }
+                                        })
+                                      };
+                                    });
+                                  }
+                                }}
+                                value={
+                                  formValues.request.find((rq) => rq.labware.barcode === labware.barcode)?.labware
+                                    .completion || formatDateTimeForCore(getCurrentDateTime())
+                                }
+                              />
+                            </div>
+                          </div>
+                          <div className="flex flex-row w-full p-4">
+                            <CustomReactSelect
+                              className="w-3/4"
+                              label={'Comment'}
+                              dataTestId="globalComment"
+                              emptyOption={true}
+                              options={selectOptionValues(comments, 'text', 'id')}
+                              isMulti={true}
+                              handleChange={(options) => {
+                                updateSectionCommentsFromGlobal(options as OptionType[], labware);
+                              }}
+                              value={() => {
+                                return (
+                                  formValues.request.find((rq) => rq.labware.barcode === labware.barcode)
+                                    ?.globalComments || []
+                                );
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="pt-4">
+                        <Table>
+                          <TableHead>
+                            <tr>
+                              <TableHeader>Address</TableHeader>
+                              <TableHeader>Section Number</TableHeader>
+                              <TableHeader>Donor Id </TableHeader>
+                              <TableHeader>Tissue type</TableHeader>
+                              <TableHeader>Spatial Location</TableHeader>
+                              <TableHeader>Replicate</TableHeader>
+                              <TableHeader>Comment</TableHeader>
+                            </tr>
+                          </TableHead>
+                          <TableBody>
+                            {labware.slots.flatMap((slot) => {
+                              return slot.samples.flatMap((sample) => {
+                                return (
+                                  <tr key={`${labware.barcode}-${slot.address}-${sample.id}`}>
+                                    <TableCell width={100}>{slot.address}</TableCell>
+                                    <TableCell width={120}>{sample.section}</TableCell>
+                                    <TableCell width={200}>{sample.tissue.donor.donorName}</TableCell>
+                                    <TableCell width={200}>{sample.tissue.spatialLocation.tissueType.name}</TableCell>
+                                    <TableCell width={100}>{sample.tissue.spatialLocation.code}</TableCell>
+                                    <TableCell>{sample.tissue.replicate!}</TableCell>
+                                    <TableCell className="w-full">
+                                      <CustomReactSelect
+                                        isMulti={true}
+                                        options={selectOptionValues(comments, 'text', 'id')}
+                                        value={getCommentTextFromField(
+                                          formValues,
+                                          labware.barcode,
+                                          slot.address,
+                                          sample.id
+                                        )}
+                                        handleChange={(values) => {
+                                          const updatedSampleAddressComments: Array<SampleAddressComment> =
+                                            mapCommentOptionsToValues(values as OptionType[]).map((commentId) => {
+                                              return {
+                                                sampleId: sample.id,
+                                                address: slot.address,
+                                                commentId
+                                              };
+                                            });
+                                          setFormValues((prev) => {
+                                            return {
+                                              ...prev,
+                                              request: prev.request.map((rq) => {
+                                                if (rq.labware.barcode === labware.barcode) {
+                                                  return {
+                                                    ...rq,
+                                                    labware: {
+                                                      ...rq.labware,
+                                                      comments: updatedSampleAddressComments.concat(
+                                                        rq.labware.comments.filter((c) => {
+                                                          return c.sampleId !== sample.id || c.address !== slot.address;
+                                                        })
+                                                      )
+                                                    }
+                                                  };
+                                                } else {
+                                                  return rq;
+                                                }
+                                              })
+                                            };
+                                          });
+                                        }}
+                                      />
+                                    </TableCell>
+                                  </tr>
+                                );
+                              });
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </Panel>
+                  );
+                })
+              }
+            </LabwareScanner>
+            <div className={'sm:flex mt-4 sm:flex-row justify-end'} key="submit">
+              <BlueButton type="submit" disabled={!isFormValid()} onClick={convertValuesAndSubmit}>
+                Save
+              </BlueButton>
+            </div>
+          </div>
+        </div>
+        <OperationCompleteModal
+          show={submissionSuccess.length > 0 && submissionError.length === 0}
+          message="Probe Hybridisation QC recorded for all labware(s)"
+        >
+          <p>
+            If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the Home
+            screen.
+          </p>
+        </OperationCompleteModal>
       </AppShell.Main>
     </AppShell>
   );
