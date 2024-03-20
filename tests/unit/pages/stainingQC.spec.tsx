@@ -69,16 +69,13 @@ describe('On load', () => {
     });
   });
   describe('When labware have been scanned', () => {
-    beforeEach(async () => {
+    it('should display labware result panel', async () => {
       await scanLabware('STAN-3113');
-    });
-    it('should display labware result panel', () => {
       shouldDisplayIntialFields();
       expect(screen.getByTestId('labwareResult')).toBeInTheDocument();
     });
-    it('should not enable save button without qcType', async () => {
-      await selectSGPNumber('SGP1008');
-      shouldDisplayIntialFields();
+    it('should not enable save button without qcType', () => {
+      expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
     });
     it('should not enable save button without workNumber', async () => {
       await selectOption('qcType', 'Stain QC');

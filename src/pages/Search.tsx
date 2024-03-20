@@ -167,14 +167,14 @@ function Search() {
   /**
    * Rebuild the blob object on download action
    */
-  const handleDownload = React.useCallback(() => {
+  const handleDownload = React.useCallback(async () => {
     let data;
     if (viewAllRecords) {
       data = sortedTableDataRef.current ? sortedTableDataRef.current : searchResult ? searchResult.entries : [];
     } else {
       data = uniqueTableDataRef.current ? uniqueTableDataRef.current : memoUniqueBarcodeData;
     }
-    const fileurl = requestDownload({
+    const fileurl = await requestDownload({
       columnData: {
         columns: columns
       },

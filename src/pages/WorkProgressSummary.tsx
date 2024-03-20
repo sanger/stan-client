@@ -147,9 +147,9 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
   /**
    * Rebuild the blob object on download action
    */
-  const handleDownload = React.useCallback(() => {
+  const handleDownload = React.useCallback(async () => {
     let data = sortedTableDataRef.current ? sortedTableDataRef.current : workProgressSummaryData ?? [];
-    const fileurl = requestDownload({
+    const fileurl = await requestDownload({
       columnData: {
         columns: columns
       },

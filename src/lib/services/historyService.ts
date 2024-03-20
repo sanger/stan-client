@@ -1,45 +1,32 @@
 import { stanCore } from '../sdk';
-import { HistoryData } from '../../types/stan';
+import { HistoryTableEntry } from '../../types/stan';
 import { HistoryFieldsFragment, LabwareFieldsFragment, SampleFieldsFragment } from '../../types/sdk';
 import { HistoryUrlParams } from '../../pages/History';
+import { omit } from 'lodash';
 
 /**
  * Retrieves the history for the given History props.
  */
 
-export async function findHistory(historyProps: HistoryUrlParams): Promise<HistoryData> {
-  let result;
-  let history: HistoryFieldsFragment = {
-    entries: [],
-    labware: [],
-    samples: [],
-    flaggedBarcodes: [],
-    __typename: 'History'
-  };
-  if (historyProps.sampleId) {
-    result = await stanCore.FindHistoryForSampleId({
-      sampleId: Number(historyProps.sampleId)
-    });
-    history = result.historyForSampleId;
-  } else {
-    if (
-      historyProps.workNumber ||
-      historyProps.barcode ||
-      historyProps.donorName ||
-      historyProps.externalName ||
-      historyProps.eventType
-    ) {
-      result = await stanCore.FindHistory({
-        workNumber: historyProps.workNumber,
-        barcode: historyProps.barcode,
-        externalName: historyProps.externalName?.split(','),
-        donorName: historyProps.donorName?.split(','),
-        eventType: historyProps.eventType
-      });
-      history = result.history;
-    }
-  }
+const initHistory: HistoryFieldsFragment = {
+  entries: [],
+  labware: [],
+  samples: [],
+  flaggedBarcodes: [],
+  __typename: 'History'
+};
 
+export type HistoryService = {
+  history: {
+    entries: Array<HistoryTableEntry>;
+    flaggedBarcodes: Array<string>;
+  };
+  historyGraph?: string;
+  zoom?: number;
+  fontSize?: number;
+};
+
+export const buildHistoryEntries = (history: HistoryFieldsFragment): Array<HistoryTableEntry> => {
   const labwareMap: Map<number, LabwareFieldsFragment> = new Map();
   const sampleMap: Map<number, SampleFieldsFragment> = new Map();
 
@@ -70,8 +57,62 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Histo
       sectionPosition: entry.region ?? undefined
     };
   });
+  return entries;
+};
+
+export async function findHistory(historyProps: HistoryUrlParams): Promise<HistoryService> {
+  let result;
+  let history: HistoryFieldsFragment = initHistory;
+  let historyGraph: string | undefined;
+  let zoom: number = 1;
+  let fontSize: number = 16;
+  if (
+    historyProps.resultFormat === 'graph' &&
+    (historyProps.workNumber || historyProps.barcode || historyProps.donorName || historyProps.externalName)
+  ) {
+    result = await stanCore.FindHistoryGraph({
+      ...omit(historyProps, ['resultFormat']),
+      zoom: historyProps.zoom || 1,
+      fontSize: historyProps.fontSize || 16
+    });
+    historyGraph = result.historyGraph.svg;
+    history = initHistory;
+    zoom = historyProps.zoom || zoom;
+    fontSize = historyProps.fontSize || fontSize;
+  } else {
+    if (historyProps.sampleId) {
+      result = await stanCore.FindHistoryForSampleId({
+        sampleId: Number(historyProps.sampleId)
+      });
+      history = result.historyForSampleId;
+    } else {
+      if (
+        historyProps.workNumber ||
+        historyProps.barcode ||
+        historyProps.donorName ||
+        historyProps.externalName ||
+        historyProps.eventType
+      ) {
+        result = await stanCore.FindHistory({
+          workNumber: historyProps.workNumber,
+          barcode: historyProps.barcode,
+          externalName: historyProps.externalName?.split(','),
+          donorName: historyProps.donorName?.split(','),
+          eventType: historyProps.eventType
+        });
+        history = result.history;
+        historyGraph = undefined;
+      }
+    }
+  }
+
   return {
-    entries,
-    flaggedBarcodes: history.flaggedBarcodes
+    history: {
+      entries: buildHistoryEntries(history),
+      flaggedBarcodes: history.flaggedBarcodes
+    },
+    historyGraph,
+    fontSize,
+    zoom
   };
 }

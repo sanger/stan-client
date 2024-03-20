@@ -1,0 +1,19 @@
+query FindHistoryGraph(
+  $workNumber: String
+  $barcode: String
+  $donorName: [String!]
+  $externalName: [String!]
+  $zoom: Float
+  $fontSize: Int
+) {
+  historyGraph(
+    workNumber: $workNumber
+    barcode: $barcode
+    donorName: $donorName
+    externalName: $externalName
+    zoom: $zoom
+    fontSize: $fontSize
+  ) {
+    ...GraphSVGFields
+  }
+}

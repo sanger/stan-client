@@ -2,7 +2,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Formik } from 'formik';
 import HistoryInput from '../../../../src/components/history/HistoryInput';
-import { optionsShouldHaveLength, shouldDisplayValue } from '../../../generic/utilities';
+import { optionsShouldHaveLength, shouldDisplayValue, shouldHaveOption } from '../../../generic/utilities';
 import React from 'react';
 
 afterEach(() => {
@@ -27,7 +27,14 @@ jest.mock('../../../../src/components/WorkNumberSelect', () => {
   };
 });
 
-const initialFormValues = {};
+const initialFormValues = {
+  workNumber: undefined,
+  barcode: undefined,
+  donorName: undefined,
+  externalName: undefined,
+  eventType: '',
+  resultFormat: 'table'
+};
 const inputProps = { eventTypes: ['Section', 'Stain'] };
 describe('History Input', () => {
   describe('When an empty prop is given', () => {
@@ -40,6 +47,7 @@ describe('History Input', () => {
     });
 
     it('displays all input fields', () => {
+      expect(screen.getByTestId('result-format')).toBeInTheDocument();
       expect(screen.getByTestId('history-input')).toBeInTheDocument();
       expect(screen.getByTestId('workNumber')).toBeInTheDocument();
       expect(screen.getByTestId('barcode')).toBeInTheDocument();
@@ -47,14 +55,18 @@ describe('History Input', () => {
       expect(screen.getByTestId('donor-name')).toBeInTheDocument();
       expect(screen.getByTestId('event-type')).toBeInTheDocument();
     });
-    it('displays event types as ptions in dropdown', () => {
+    it('displays event types as options in dropdown', () => {
       optionsShouldHaveLength('event-type', 2);
     });
-    it('should display all input fields as empty', () => {
+    it('default the result format to table', () => {
+      expect(screen.getByTestId('result-format')).toHaveTextContent('Table');
+    });
+    it('should display all search fields as empty', () => {
       expect(screen.getByTestId('barcode')).toHaveTextContent('');
       expect(screen.getByTestId('external-name')).toHaveTextContent('');
       expect(screen.getByTestId('donor-name')).toHaveTextContent('');
-      // expect(screen.getByTestId('event-type')).toHaveValue('');
+      expect(shouldHaveOption('event-type', ''));
+      expect(shouldHaveOption('workNumber', ''));
     });
   });
   describe('when a Formik Context has valid initial values', () => {
@@ -64,7 +76,8 @@ describe('History Input', () => {
         externalName: 'EXT1',
         donorName: 'Donor1',
         workNumber: 'SGP1008',
-        eventType: 'Section'
+        eventType: 'Section',
+        resultFormat: 'table'
       };
       render(
         <Formik initialValues={initialFormValues} onSubmit={() => {}}>
@@ -92,7 +105,12 @@ describe('History Input', () => {
   });
   describe('when a invalid value given for event type', () => {
     it('should not select event type', () => {
-      const initialFormValues = { eventType: 'Invalid', barcode: 'STAN-3111', donorName: 'Donor1' };
+      const initialFormValues = {
+        eventType: 'Invalid',
+        barcode: 'STAN-3111',
+        donorName: 'Donor1',
+        resultFormat: 'table'
+      };
       render(
         <Formik initialValues={initialFormValues} onSubmit={() => {}}>
           <HistoryInput {...inputProps} />
@@ -102,6 +120,19 @@ describe('History Input', () => {
       expect(screen.getByTestId('donor-name')).toHaveValue('Donor1');
       expect(screen.getByTestId('external-name')).toHaveValue('');
       expect(screen.getByTestId('event-type')).not.toHaveValue('Invalid');
+    });
+  });
+  describe('when Plot is selected as the result format', () => {
+    beforeEach(() => {
+      const initialFormValues = { barcode: 'STAN-3111', donorName: 'Donor1', resultFormat: 'graph' };
+      render(
+        <Formik initialValues={initialFormValues} onSubmit={() => {}}>
+          <HistoryInput {...inputProps} />
+        </Formik>
+      );
+    });
+    it('hides event type select box', () => {
+      expect(screen.queryByTestId('event-type')).not.toBeInTheDocument();
     });
   });
 });

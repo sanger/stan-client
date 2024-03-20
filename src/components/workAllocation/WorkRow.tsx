@@ -84,7 +84,6 @@ export default function WorkRow({
   /**Notify the changes in work fields*/
   React.useEffect(() => {
     if (current.context.isInvokeActorDone) {
-      console.log('work updated', work);
       onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
     }
   }, [work, comment, onWorkFieldUpdate, rowIndex, current, actor]);

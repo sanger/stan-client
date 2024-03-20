@@ -10,6 +10,8 @@ import {
   FindHistoryForSampleIdQueryVariables,
   FindHistoryForWorkNumberQuery,
   FindHistoryForWorkNumberQueryVariables,
+  FindHistoryGraphQuery,
+  FindHistoryGraphQueryVariables,
   FindHistoryQuery,
   FindHistoryQueryVariables,
   GetEventTypesQuery,
@@ -20,6 +22,7 @@ import {
 import labwareFactory from '../../lib/factories/labwareFactory';
 import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
 import { sampleFactory } from '../../lib/factories/sampleFactory';
+import { HistorySvgPlot } from '../../static/HistorySvgPlot';
 
 export function buildHistory(workNumber?: string, flagged?: boolean): HistoryFieldsFragment {
   const sourceLabware = labwareFactory.build();
@@ -98,6 +101,9 @@ const historyHandlers = [
   ),
   graphql.query<GetEventTypesQuery, GetEventTypesQueryVariables>('GetEventTypes', () => {
     return HttpResponse.json({ data: { __typename: 'Query', eventTypes: ['Event 1', 'Event 2'] } }, { status: 200 });
+  }),
+  graphql.query<FindHistoryGraphQuery, FindHistoryGraphQueryVariables>('FindHistoryGraph', () => {
+    return HttpResponse.json({ data: { historyGraph: { svg: HistorySvgPlot } } }, { status: 200 });
   })
 ];
 

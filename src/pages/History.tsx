@@ -20,6 +20,9 @@ export type HistoryUrlParams = {
   externalName?: string;
   sampleId?: string;
   eventType?: string;
+  resultFormat?: string;
+  fontSize?: number;
+  zoom?: number;
 };
 
 /**
@@ -31,7 +34,10 @@ export const historySearchSchema = () => {
     barcode: Yup.string(),
     donorName: Yup.string(),
     externalName: Yup.string(),
-    eventType: Yup.string()
+    eventType: Yup.string(),
+    resultFormat: Yup.string().oneOf(['table', 'graph']).default('table'),
+    zoom: Yup.number().optional().default(1).min(0.1).max(10),
+    fontSize: Yup.number().optional().default(16).min(6).max(20)
   });
 };
 
@@ -49,7 +55,8 @@ export default function History() {
     barcode: undefined,
     donorName: undefined,
     externalName: undefined,
-    eventType: undefined
+    eventType: undefined,
+    resultFormat: 'table'
   };
 
   React.useEffect(() => {

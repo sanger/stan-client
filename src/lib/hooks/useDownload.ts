@@ -19,52 +19,99 @@ const isColumnData = (x: any): x is ColumnData<any> => Object.keys(x).includes('
 const isColumnTextData = (x: any): x is ColumnTextData => Object.keys(x).includes('columnAccessPath');
 const isTextData = (x: any): x is ColumnTextData => Object.keys(x).includes('columnNames');
 
-type DownloadProps<T extends StringKeyedProps> = {
-  columnData: ColumnDataType<T>;
-  entries: Array<T> | Array<Array<string>>;
+type FileType = {
+  type: 'excel' | 'graph';
+  extension: '.xlsx' | '.html';
 };
 
-export function useDownload<T extends StringKeyedProps>(downloadPropsInput: DownloadProps<T>) {
+type DownloadProps<T extends StringKeyedProps> = {
+  columnData?: ColumnDataType<T>;
+  entries?: Array<T> | Array<Array<string>>;
+  graph?: string;
+  fileType?: FileType;
+};
+
+export const ExcelFileType: FileType = { type: 'excel', extension: '.xlsx' };
+export const GraphFileType: FileType = { type: 'graph', extension: '.html' };
+
+const generateDownloadExcelFileUrl = <T extends StringKeyedProps>(
+  columnData: ColumnDataType<T>,
+  entries: Array<T> | Array<Array<string>>
+) => {
+  const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+  let downloadData: string[][] = [];
+  if (isColumnData(columnData)) {
+    downloadData = createDownloadFileContent(columnData.columns, entries);
+  }
+  if (isColumnTextData(columnData)) {
+    downloadData = createDownloadFileContentFromObjectKeys(
+      columnData.columnNames,
+      columnData.columnAccessPath,
+      entries
+    );
+  }
+  if (isTextData(columnData)) {
+    const colNames = columnData.columnNames;
+    downloadData = entries.map((entry) => {
+      return Array.isArray(entry) ? entry : [];
+    });
+    downloadData.splice(0, 0, colNames);
+  }
+  const ws = utils.aoa_to_sheet(downloadData);
+  const wb = { Sheets: { data: ws }, SheetNames: ['data'] };
+  const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
+  const downloadBlob = new Blob([excelBuffer], { type: fileType });
+
+  return URL.createObjectURL(downloadBlob);
+};
+
+const downloadAsHtmlFile = (svgData: string) => {
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>History Result Graph</title>
+    </head>
+    <body>
+        ${svgData}
+    </body>
+    </html>
+  `;
+  const blob = new Blob([htmlContent], { type: 'text/html' });
+  return URL.createObjectURL(blob);
+};
+
+export function useDownload<T extends StringKeyedProps>({
+  columnData,
+  entries,
+  graph,
+  fileType = ExcelFileType
+}: DownloadProps<T>) {
   const [downloadURL, setDownloadURL] = useState<string>(URL.createObjectURL(new Blob()));
 
   /**External request for download**/
-  const requestDownload = React.useCallback(
-    (downloadProps: DownloadProps<T>): string => {
-      const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-      let downloadData: string[][] = [];
-      if (isColumnData(downloadProps.columnData)) {
-        downloadData = createDownloadFileContent(downloadProps.columnData.columns, downloadProps.entries);
+  const requestDownload = React.useCallback(async (downloadProps: DownloadProps<T>) => {
+    let downloadFileURL: string = '';
+    if (downloadProps.fileType === GraphFileType) {
+      try {
+        downloadFileURL = downloadAsHtmlFile(downloadProps.graph!);
+      } catch (error) {
+        console.error('Error generating the graph download URL:', error);
       }
-      if (isColumnTextData(downloadProps.columnData)) {
-        downloadData = createDownloadFileContentFromObjectKeys(
-          downloadProps.columnData.columnNames,
-          downloadProps.columnData.columnAccessPath,
-          downloadProps.entries
-        );
-      }
-      if (isTextData(downloadProps.columnData)) {
-        const colNames = downloadProps.columnData.columnNames;
-        downloadData = downloadProps.entries.map((entry) => {
-          return Array.isArray(entry) ? entry : [];
-        });
-        downloadData.splice(0, 0, colNames);
-      }
-      const ws = utils.aoa_to_sheet(downloadData);
-      const wb = { Sheets: { data: ws }, SheetNames: ['data'] };
-      const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
-      const downloadBlob = new Blob([excelBuffer], { type: fileType });
+    } else {
+      downloadFileURL = generateDownloadExcelFileUrl(downloadProps.columnData!, downloadProps.entries!);
+    }
 
-      const downloadFileURL = URL.createObjectURL(downloadBlob);
-      setDownloadURL(downloadFileURL);
-      return downloadFileURL;
-    },
-    [setDownloadURL]
-  );
+    setDownloadURL(downloadFileURL);
+    return downloadFileURL;
+  }, []);
 
   /**update download properties whenever input parameters change**/
   React.useEffect(() => {
-    requestDownload(downloadPropsInput);
-  }, [downloadPropsInput, requestDownload]);
+    requestDownload({ columnData, entries, graph, fileType });
+  }, [columnData, entries, graph, fileType, requestDownload]);
 
   /**
    * Cleanup function that revokes the URL when it's no longer needed
@@ -73,5 +120,5 @@ export function useDownload<T extends StringKeyedProps>(downloadPropsInput: Down
     return () => URL.revokeObjectURL(downloadURL);
   }, [downloadURL]);
 
-  return { downloadURL, requestDownload, extension: '.xlsx' };
+  return { downloadURL, requestDownload, extension: fileType?.extension };
 }

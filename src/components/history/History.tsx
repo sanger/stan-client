@@ -11,12 +11,17 @@ import LoadingSpinner from '../icons/LoadingSpinner';
 import { LabwareStatePill } from '../LabwareStatePill';
 import DownloadIcon from '../icons/DownloadIcon';
 import { getTimestampStr, stringify } from '../../lib/helpers';
-import { useDownload } from '../../lib/hooks/useDownload';
+import { ExcelFileType, GraphFileType, useDownload } from '../../lib/hooks/useDownload';
 import Heading from '../Heading';
 import Table, { TableBody, TableCell } from '../Table';
 import { useAuth } from '../../context/AuthContext';
 import TopScrollingBar from '../TopScrollingBar';
 import { HistoryUrlParams } from '../../pages/History';
+import { ZoomInIcon } from '../icons/ZoomInIcon';
+import { ZoomOutIcon } from '../icons/ZoomOutIcon';
+import { FontSizeIcon } from '../icons/FontSizeIcon';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { omit } from 'lodash';
 /**
  * Component for looking up and displaying the history of labware and samples
  */
@@ -33,14 +38,16 @@ export default function History(props: HistoryProps) {
     input: {
       historyProps: getHistoryURLParams(props),
       history: { entries: [], flaggedBarcodes: [] },
-      serverError: null
+      serverError: null,
+      historyGraph: undefined,
+      historyGraphZoom: 1,
+      historyGraphFontSize: 16
     }
   });
 
   const { isAuthenticated } = useAuth();
 
-  const { history, historyProps, serverError } = current.context;
-
+  const { history, historyProps, serverError, historyGraph, historyGraphZoom, historyGraphFontSize } = current.context;
   const historyColumns: Array<Column<HistoryTableEntry>> = React.useMemo(
     () => [
       {
@@ -164,13 +171,20 @@ export default function History(props: HistoryProps) {
    * Rebuild the file object whenever the history changes
    */
   const downloadData = React.useMemo(() => {
+    if (historyProps.resultFormat === 'graph') {
+      return {
+        graph: historyGraph,
+        fileType: GraphFileType
+      };
+    }
     return {
       columnData: {
         columns: historyColumns
       },
-      entries: history.entries
+      entries: history.entries,
+      fileType: ExcelFileType
     };
-  }, [history, historyColumns]);
+  }, [history, historyColumns, historyGraph, historyProps]);
 
   const { downloadURL, extension } = useDownload(downloadData);
 
@@ -210,7 +224,7 @@ export default function History(props: HistoryProps) {
   };
 
   const searchString = (keyValSeparator: string, tokenSeparator: string) => {
-    return Object.keys(getHistoryURLParams(historyProps))
+    return Object.keys(omit(getHistoryURLParams(historyProps), ['resultFormat', 'zoom', 'fontSize']))
       .sort()
       .map((key) => `${key}${keyValSeparator}${historyProps[key as keyof HistoryUrlParams]}`)
       .join(tokenSeparator);
@@ -230,7 +244,7 @@ export default function History(props: HistoryProps) {
         </div>
       )}
       {current.matches('found') &&
-        (history.entries.length > 0 ? (
+        (history.entries.length > 0 || historyGraph ? (
           <>
             {uniqueWorkNumbers.length > 0 && (
               <>
@@ -300,9 +314,73 @@ export default function History(props: HistoryProps) {
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>
             </div>
-            <TopScrollingBar>
-              <DataTable columns={historyColumns} data={history.entries} fixedHeader={true} />
-            </TopScrollingBar>
+
+            {historyProps.resultFormat === 'graph' && historyGraph && (
+              <div className="flex flex-col overflow-auto p-4" data-testid={'history-graph'}>
+                <div className="flex flex-row justify-between border border-gray-200 bg-gray-100 p-3 rounded-md mb-8">
+                  <span className="text-lg font-medium tracking-tight leading-relaxed">History Graph</span>
+                  <div className="flex flex-row justify-end space-x-3">
+                    <ZoomInIcon
+                      onClick={() => {
+                        send({
+                          type: 'UPDATE_HISTORY_PROPS',
+                          props: {
+                            ...getHistoryURLParams(props),
+                            fontSize: historyGraphFontSize,
+                            zoom: historyGraphZoom + 0.1
+                          }
+                        });
+                      }}
+                      disabled={historyGraphZoom >= 10}
+                    />
+                    <ZoomOutIcon
+                      onClick={() => {
+                        send({
+                          type: 'UPDATE_HISTORY_PROPS',
+                          props: {
+                            ...getHistoryURLParams(props),
+                            fontSize: historyGraphFontSize,
+                            zoom: historyGraphZoom - 0.1
+                          }
+                        });
+                      }}
+                      disabled={historyGraphZoom <= 0.1}
+                    />
+                    <FontSizeIcon />
+                    <CustomReactSelect
+                      options={[
+                        { value: '6', label: '6' },
+                        { value: '8', label: '8' },
+                        { value: '10', label: '10' },
+                        { value: '12', label: '12' },
+                        { value: '14', label: '14' },
+                        { value: '16', label: '16' },
+                        { value: '18', label: '18' },
+                        { value: '20', label: '20' }
+                      ]}
+                      onChange={(val) =>
+                        send({
+                          type: 'UPDATE_HISTORY_PROPS',
+                          props: {
+                            ...getHistoryURLParams(props),
+                            fontSize: parseInt((val as OptionType).value),
+                            zoom: historyGraphZoom
+                          }
+                        })
+                      }
+                      value={historyGraphFontSize.toString()}
+                      dataTestId="font-size-select"
+                    />
+                  </div>
+                </div>
+                <img src={`data:image/svg+xml;base64,${btoa(historyGraph)}`} alt="History Graph" />
+              </div>
+            )}
+            {history.entries.length > 0 && (
+              <TopScrollingBar>
+                <DataTable columns={historyColumns} data={history.entries} fixedHeader={true} />
+              </TopScrollingBar>
+            )}
           </>
         ) : isValidInput ? (
           <Warning data-testid={'warning'} message={'No results found.'} />

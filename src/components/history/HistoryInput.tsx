@@ -19,6 +19,18 @@ export default function HistoryInput({ eventTypes }: HistoryInputProps) {
     >
       <div className={'grid grid-cols-2 gap-x-10 gap-y-6 bg-gray-100 rounded-md'}>
         <div className={'flex flex-col '}>
+          <CustomReactSelect
+            name="resultFormat"
+            label="Result Format"
+            dataTestId={'result-format'}
+            options={[
+              { label: 'Table', value: 'table' },
+              { label: 'Graph', value: 'graph' }
+            ]}
+            value={values.resultFormat}
+          />
+        </div>
+        <div className={'flex flex-col '}>
           <WorkNumberSelect
             label={'SGP/R&D Number'}
             emptyOption={true}
@@ -65,16 +77,18 @@ export default function HistoryInput({ eventTypes }: HistoryInputProps) {
             }
           />
         </div>
-        <div className={'flex flex-col '}>
-          <CustomReactSelect
-            name="eventType"
-            label="Event Type"
-            emptyOption
-            dataTestId={'event-type'}
-            options={eventTypes.sort().map((evtType) => ({ label: evtType, value: evtType }))}
-            value={values.eventType}
-          />
-        </div>
+        {values.resultFormat === 'table' && (
+          <div className={'flex flex-col '}>
+            <CustomReactSelect
+              name="eventType"
+              label="Event Type"
+              emptyOption
+              dataTestId={'event-type'}
+              options={eventTypes.sort().map((evtType) => ({ label: evtType, value: evtType }))}
+              value={values.eventType}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ afterEach(() => {
 afterAll(() => {
   jest.resetAllMocks();
 });
+
 jest.mock('../../../../src/lib/services/historyService', () => ({
   findHistory: jest.fn()
 }));
@@ -40,7 +41,10 @@ const mockHistorySearchResults: HistoryTableEntry[] = [
 const initialContext = {
   historyProps: { workNumber: 'SGP8' },
   history: { entries: [], flaggedBarcodes: [] },
-  serverError: null
+  serverError: null,
+  historyGraph: '',
+  historyGraphZoom: 1,
+  historyGraphFontSize: 16
 };
 
 describe('historyMachine', () => {
@@ -69,7 +73,10 @@ describe('historyMachine', () => {
           eventType: 'Event'
         },
         history: { entries: [], flaggedBarcodes: [] },
-        serverError: null
+        serverError: null,
+        historyGraph: '',
+        historyGraphZoom: 1,
+        historyGraphFontSize: 16
       }
     });
     machine.subscribe((state) => {
@@ -80,36 +87,88 @@ describe('historyMachine', () => {
     machine.start();
   });
   describe('searches history on initialisation', () => {
-    it('calls the findHistory query and sets state to found', (done) => {
-      (findHistory as jest.MockedFunction<typeof findHistory>).mockResolvedValue({
-        entries: mockHistorySearchResults,
-        flaggedBarcodes: []
-      });
+    describe('When Result Format is set to Table', () => {
+      it('calls the findHistory query and sets state to found', (done) => {
+        (findHistory as jest.MockedFunction<typeof findHistory>).mockResolvedValueOnce({
+          history: {
+            entries: mockHistorySearchResults,
+            flaggedBarcodes: []
+          },
+          historyGraph: undefined,
+          fontSize: 16,
+          zoom: 1
+        });
 
-      const mockSearchMachine = createHistoryMachine();
-      const machine = createActor(mockSearchMachine, { input: initialContext });
-      machine.subscribe((state) => {
-        if (state.matches('searching')) {
-          expect(jest.fn()).toHaveBeenCalledTimes(1);
-        }
-        if (state.matches('found')) {
-          expect(state.context).toEqual({
-            historyProps: { workNumber: 'SGP8' },
-            history: { entries: mockHistorySearchResults, flaggedBarcodes: [] },
-            serverError: null
-          });
-          done();
-        }
+        const actor = createActor(createHistoryMachine(), { input: initialContext });
+        actor.subscribe((state) => {
+          if (state.matches('searching')) {
+            expect(jest.fn()).toHaveBeenCalledTimes(1);
+          }
+          if (state.matches('found')) {
+            expect(state.context).toEqual({
+              historyProps: { workNumber: 'SGP8' },
+              history: { entries: mockHistorySearchResults, flaggedBarcodes: [] },
+              serverError: null,
+              historyGraph: undefined,
+              historyGraphFontSize: 16,
+              historyGraphZoom: 1
+            });
+            done();
+          }
+        });
+        actor.start();
       });
-      machine.start();
+    });
+    describe('When Result Format is set to Graph', () => {
+      it('calls FindHistoryGraph query and sets state to found', (done) => {
+        (findHistory as jest.MockedFunction<typeof findHistory>).mockResolvedValueOnce({
+          history: {
+            entries: [],
+            flaggedBarcodes: []
+          },
+          historyGraph: 'mockGraph',
+          fontSize: 16,
+          zoom: 1
+        });
+
+        const actor = createActor(createHistoryMachine(), {
+          input: {
+            history: { entries: [], flaggedBarcodes: [] },
+            serverError: null,
+            historyGraph: '',
+            historyGraphZoom: 1,
+            historyGraphFontSize: 16,
+            historyProps: { resultFormat: 'graph', workNumber: 'SGP8' }
+          }
+        });
+        actor.subscribe((state) => {
+          if (state.matches('found')) {
+            expect(state.context).toEqual({
+              historyProps: { workNumber: 'SGP8', resultFormat: 'graph' },
+              history: { entries: [], flaggedBarcodes: [] },
+              serverError: null,
+              historyGraph: 'mockGraph',
+              historyGraphFontSize: 16,
+              historyGraphZoom: 1
+            });
+            done();
+          }
+        });
+        actor.start();
+      });
     });
   });
   describe('searches history again on UPDATE_HISTORY_PROPS', () => {
     it('calls the findHistory query and sets state to searching', (done) => {
       let searchCount = 0;
       (findHistory as jest.MockedFunction<typeof findHistory>).mockResolvedValue({
-        entries: mockHistorySearchResults,
-        flaggedBarcodes: []
+        history: {
+          entries: mockHistorySearchResults,
+          flaggedBarcodes: []
+        },
+        historyGraph: undefined,
+        fontSize: 16,
+        zoom: 1
       });
       const mockSearchMachine = createHistoryMachine();
       const machine = createActor(mockSearchMachine, { input: initialContext });
@@ -121,7 +180,10 @@ describe('historyMachine', () => {
           expect(state.context).toEqual({
             historyProps: { workNumber: 'SGP8' },
             history: { entries: mockHistorySearchResults, flaggedBarcodes: [] },
-            serverError: null
+            serverError: null,
+            historyGraph: undefined,
+            historyGraphFontSize: 16,
+            historyGraphZoom: 1
           });
           expect(searchCount).toEqual(2);
           done();
@@ -234,6 +296,85 @@ describe('historyMachine', () => {
       });
       machine.start();
       machine.send({ type: 'RETRY' });
+    });
+  });
+
+  describe('when updating the font size', () => {
+    it('keeps the same history results between re-render ', (done) => {
+      (findHistory as jest.MockedFunction<typeof findHistory>).mockResolvedValueOnce({
+        history: {
+          entries: [],
+          flaggedBarcodes: []
+        },
+        historyGraph: 'mockGraph',
+        fontSize: 8,
+        zoom: 1
+      });
+
+      const actor = createActor(createHistoryMachine(), {
+        input: {
+          history: { entries: [], flaggedBarcodes: [] },
+          serverError: null,
+          historyGraph: 'mockGraph',
+          historyGraphZoom: 1,
+          historyGraphFontSize: 16,
+          historyProps: { resultFormat: 'graph', workNumber: 'SGP8' }
+        }
+      });
+      actor.subscribe((state) => {
+        if (state.matches('found')) {
+          expect(state.context).toEqual({
+            historyProps: { workNumber: 'SGP8', resultFormat: 'graph' },
+            history: { entries: [], flaggedBarcodes: [] },
+            serverError: null,
+            historyGraph: 'mockGraph',
+            historyGraphFontSize: 8,
+            historyGraphZoom: 1
+          });
+          done();
+        }
+      });
+      actor.start();
+      actor.send({ type: 'UPDATE_HISTORY_PROPS', props: { fontSize: 8 } });
+    });
+  });
+  describe('when zooming in/out', () => {
+    it('keeps the same history results between re-render ', (done) => {
+      (findHistory as jest.MockedFunction<typeof findHistory>).mockResolvedValueOnce({
+        history: {
+          entries: [],
+          flaggedBarcodes: []
+        },
+        historyGraph: 'mockGraph',
+        fontSize: 8,
+        zoom: 3
+      });
+
+      const actor = createActor(createHistoryMachine(), {
+        input: {
+          history: { entries: [], flaggedBarcodes: [] },
+          serverError: null,
+          historyGraph: 'mockGraph',
+          historyGraphZoom: 1,
+          historyGraphFontSize: 8,
+          historyProps: { resultFormat: 'graph', workNumber: 'SGP8' }
+        }
+      });
+      actor.subscribe((state) => {
+        if (state.matches('found')) {
+          expect(state.context).toEqual({
+            historyProps: { workNumber: 'SGP8', resultFormat: 'graph' },
+            history: { entries: [], flaggedBarcodes: [] },
+            serverError: null,
+            historyGraph: 'mockGraph',
+            historyGraphFontSize: 8,
+            historyGraphZoom: 3
+          });
+          done();
+        }
+      });
+      actor.start();
+      actor.send({ type: 'UPDATE_HISTORY_PROPS', props: { zoom: 3 } });
     });
   });
 });
