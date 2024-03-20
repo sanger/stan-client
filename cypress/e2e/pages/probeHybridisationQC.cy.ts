@@ -21,8 +21,8 @@ describe('Probe Hybridisation QC', () => {
     it('displays the labware scanner', () => {
       cy.findByTestId('input').should('be.visible');
     });
-    it('save button should be hidden', () => {
-      cy.findByText('Save').should('not.exist');
+    it('save button should be disabled', () => {
+      cy.findByText('Save').should('be.disabled');
     });
   });
   describe('When a labware is scanned', () => {
@@ -49,8 +49,8 @@ describe('Probe Hybridisation QC', () => {
       it('should not render the labware image', () => {
         cy.findByTestId('labware').should('not.exist');
       });
-      it('should not show the save button', () => {
-        cy.findByText('Save').should('not.exist');
+      it('should not enable the save button', () => {
+        cy.findByText('Save').should('be.disabled');
       });
     });
     describe('labware has a Probe Hybridisation Xenium operation recorded', () => {
@@ -75,17 +75,18 @@ describe('Probe Hybridisation QC', () => {
         cy.findByTestId('labware').should('be.visible');
       });
       it('shows the completion Date time select box', () => {
-        cy.findByLabelText('Completion Time').should('be.visible');
+        cy.findByText('Completion Time').should('be.visible');
       });
       it('should init completed time to the current time', () => {
-        cy.findByLabelText('Completion Time').should('contain.value', new Date().toISOString().split('T')[0]);
+        cy.findByTestId('completionDateTime').should('contain.value', new Date().toISOString().split('T')[0]);
       });
       it('shows the global comments select box', () => {
         cy.findByTestId('globalComment').should('be.visible');
       });
-      it('shows the save button', () => {
-        cy.findByText('Save').should('be.visible');
+      it('shows the labware sgp number', () => {
+        cy.findByTestId('workNumber').should('be.visible');
       });
+
       describe('When a selecting a comment from the global comment select box', () => {
         before(() => {
           selectOption('globalComment', 'Issue with thermal cycler');
@@ -94,30 +95,44 @@ describe('Probe Hybridisation QC', () => {
           cy.get('tbody tr').eq(0).find('td').eq(6).should('have.text', 'Issue with thermal cycler');
         });
       });
+
+      describe('When selecting a global SGP number', () => {
+        before(() => {
+          selectOption('globalWorkNumber', 'SGP1008');
+        });
+        it('should populate all the sgp number relative to the scanned labware', () => {
+          cy.findAllByTestId('workNumber').each((el) => {
+            expect(el).to.have.text('SGP1008');
+          });
+        });
+      });
     });
   });
+
   describe('Validation', () => {
-    describe('When the SCP number is not selected', () => {
+    describe('When the SGP number is not selected', () => {
       before(() => {
-        cy.findByText('Save').click();
+        selectOption('globalWorkNumber', '');
       });
-      it('should display an error message requires SGP number', () => {
-        cy.findByText('SGP Number is required').should('be.visible');
+      it('disables save button', () => {
+        cy.findByText('Save').should('be.disabled');
       });
     });
-    describe('When completion time is selected in the future', () => {
+    describe('The user can not select a future date', () => {
       before(() => {
-        cy.findByLabelText('Completion Time').clear().type('2075-01-01T10:00');
-        cy.findByText('Save').click();
+        cy.findByTestId('completionDateTime').clear().type('2075-01-01T10:00');
       });
-      it('should display an error message', () => {
+      it('displays an error message', () => {
         cy.findByText('Please select a time on or before current time').should('be.visible');
+      });
+      it('keeps the current date', () => {
+        cy.findByTestId('completionDateTime').should('contain.value', new Date().toISOString().split('T')[0]);
       });
     });
   });
 
   describe('Submission', () => {
-    context('should fail when  repeated comment specified for the same section', () => {
+    context('When fail with repeated comment specified for the same section', () => {
       before(() => {
         cy.visit('/lab/probe_hybridisation_qc');
         cy.msw().then(({ worker, graphql }) => {
@@ -150,7 +165,7 @@ describe('Probe Hybridisation QC', () => {
             })
           );
         });
-        selectSGPNumber('SGP1008');
+        selectOption('globalWorkNumber', 'SGP1008');
         cy.get('#labwareScanInput').type('STAN-0EB01{enter}');
         cy.findByText('Save').click();
       });
@@ -182,6 +197,58 @@ describe('Probe Hybridisation QC', () => {
 
       it('shows a success message', () => {
         cy.findByText('Probe Hybridisation QC recorded for all labware(s)').should('be.visible');
+      });
+    });
+    context('When request successes for some labware and fails for others', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.mutation<RecordCompletionMutation, RecordCompletionMutationVariables>(
+              'RecordCompletion',
+              ({ variables }) => {
+                if (variables.request.labware[0].barcode === 'STAN-11B01') {
+                  return HttpResponse.json({
+                    errors: [
+                      {
+                        message: 'The request could not be validated.',
+                        extensions: {
+                          problems: ['Repeated comment specified in: [STAN-0EB01]']
+                        }
+                      }
+                    ]
+                  });
+                }
+                return HttpResponse.json({
+                  data: {
+                    recordCompletion: {
+                      operations: [
+                        {
+                          id: 10426
+                        }
+                      ]
+                    }
+                  }
+                });
+              }
+            )
+          );
+        });
+
+        cy.reload();
+        selectOption('globalWorkNumber', 'SGP1008');
+        cy.get('#labwareScanInput').type('STAN-11B01{enter}');
+        selectOption('globalComment', 'Issue with thermal cycler');
+        cy.get('#labwareScanInput').type('STAN-21B01{enter}');
+        cy.findByText('Save').click();
+      });
+      it('shows an error message', () => {
+        cy.findByText('Repeated comment specified in: [STAN-0EB01]').should('be.visible');
+      });
+      it('shows a success message', () => {
+        cy.findByText('Probe Hybridisation QC recorded for the following labware: STAN-21B01').should('be.visible');
+      });
+      it('keeps save button enabled', () => {
+        cy.findByText('Save').should('be.enabled');
       });
     });
   });
