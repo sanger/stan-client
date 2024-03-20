@@ -16,7 +16,7 @@ const RadioGroup = ({ label, name, children, withFormik = true }: RadioGroupProp
     <>
       <div className="mt-2">
         <span className="text-gray-800">{label}</span>
-        <div className="space-x-6">
+        <div className="lg:space-x-6">
           <RadioGroupContext.Provider value={{ name }}>{children}</RadioGroupContext.Provider>
         </div>
       </div>

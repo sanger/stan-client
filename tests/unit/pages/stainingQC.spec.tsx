@@ -69,9 +69,11 @@ describe('On load', () => {
     });
   });
   describe('When labware have been scanned', () => {
+    beforeEach(async () => {
+      await scanLabware('STAN-3112');
+      await selectOption('qcType', 'Stain QC');
+    });
     it('should display labware result panel', async () => {
-      await scanLabware('STAN-3113');
-      shouldDisplayIntialFields();
       expect(screen.getByTestId('labwareResult')).toBeInTheDocument();
     });
     it('should not enable save button without qcType', () => {
