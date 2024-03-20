@@ -640,7 +640,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
               </RadioGroup>
             </div>
             <div className={'flex flex-row w-full my-2 '}>
-              <div className={'flex flex-col my-2 text-gray-700 text-xs italic'}>
+              <div className={'flex flex-col my-2 text-gray-700 lg:text-xs italic'}>
                 <p>For selection of multiple slots :</p>
                 <p>Hold 'Shift' key to select consecutive items</p>
                 <p>Hold 'Ctrl' (Cmd for Mac) key to select non-consecutive items</p>
