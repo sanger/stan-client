@@ -329,9 +329,65 @@ describe('LibraryAmpAndGeneration Page', () => {
       });
     });
 
-    describe('On server error', () => {
+    describe('On Reset Form click', () => {
+      before(() => {
+        cy.visit('/lab/libraryGeneration');
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<FindPermDataQuery, FindPermDataQueryVariables>('FindPermData', () => {
+              return HttpResponse.json({
+                data: {
+                  visiumPermData: {
+                    samplePositionResults: [],
+                    addressPermData: [],
+                    labware: createFlaggedLabware('STAN-5345')
+                  }
+                }
+              });
+            })
+          );
+        });
+        fillInTheRequest();
+        cy.findByRole('button', { name: 'Save' }).click();
+        cy.findByRole('button', { name: 'Reset Form' }).click();
+      });
+      it('resets the form to the sample transfer step ', () => {
+        cy.get('#labwareScanInput').should('be.visible').and('have.value', '');
+        cy.findByTestId('Default').should('be.visible').and('be.checked');
+        cy.findByTestId('bioState').should('be.visible').and('have.value', '');
+      });
+    });
+
+    describe('On Return Home  click', () => {
       before(() => {
         cy.reload();
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<FindPermDataQuery, FindPermDataQueryVariables>('FindPermData', () => {
+              return HttpResponse.json({
+                data: {
+                  visiumPermData: {
+                    samplePositionResults: [],
+                    addressPermData: [],
+                    labware: createFlaggedLabware('STAN-5345')
+                  }
+                }
+              });
+            })
+          );
+        });
+        fillInTheRequest();
+        cy.findByRole('button', { name: 'Save' }).click();
+        cy.findByRole('button', { name: 'Return Home' }).click();
+      });
+      it('displays the home page ', () => {
+        cy.findByText('Summary Dashboard').should('be.visible');
+      });
+    });
+
+    describe('On server error', () => {
+      before(() => {
+        cy.visit('/lab/libraryGeneration');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<RecordLibraryPrepMutation, RecordLibraryPrepMutationVariables>('RecordLibraryPrep', () => {

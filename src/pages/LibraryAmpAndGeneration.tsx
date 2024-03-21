@@ -29,7 +29,6 @@ export const LibraryAmpAndGeneration = () => {
   /**
    * For tracking whether the user gets a prompt if they tried to navigate to another page
    */
-  const shouldConfirmBeforeLeave = (args: BlockerFunctionParams): boolean => args && args.historyAction !== 'REPLACE';
 
   const warningRef = useRef<HTMLDivElement>(null);
   // Scroll the error notification into view if it appears
@@ -81,6 +80,9 @@ export const LibraryAmpAndGeneration = () => {
       })
     };
   }, [currentLibraryGeneration.context.reagentTransfers, currentLibraryGeneration.context.destinationLabware]);
+
+  const shouldConfirmBeforeLeave = (args: BlockerFunctionParams): boolean =>
+    args && args.historyAction !== 'REPLACE' && !serverSuccess;
 
   /** Handle 'Clear all' SlotMapper functionality */
   React.useEffect(() => {
