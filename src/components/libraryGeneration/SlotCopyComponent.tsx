@@ -72,7 +72,7 @@ export const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPane
 
   return (
     <div className={'w-full flex flex-col space-y-2'} data-testid="input-labware">
-      <div className="flex flex-row w-1/2 pb-2">
+      <div className="flex flex-row pb-2">
         <RadioGroup label="Output labware selection " name={'selectDestination'} withFormik={false}>
           {Object.values(DestinationSelectionMode).map((mode) => (
             <RadioButtonInput

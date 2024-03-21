@@ -624,7 +624,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
         <Heading level={4}>Output Labware</Heading>
         {slotCopyModes && slotCopyModes.length > 1 && (
           <>
-            <div className="flex flex-row p-4 space-x-4">
+            <div className="grid grid-cols-2 gap-3">
               <RadioGroup label="Select transfer mode" name={'sectionNumber'} withFormik={false}>
                 {slotCopyModes.map((mode) => (
                   <RadioButtonInput
@@ -640,7 +640,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
               </RadioGroup>
             </div>
             <div className={'flex flex-row w-full my-2 '}>
-              <div className={'flex flex-col my-2 text-gray-700 text-xs italic'}>
+              <div className={'flex flex-col my-2 text-gray-700 lg:text-xs italic'}>
                 <p>For selection of multiple slots :</p>
                 <p>Hold 'Shift' key to select consecutive items</p>
                 <p>Hold 'Ctrl' (Cmd for Mac) key to select non-consecutive items</p>

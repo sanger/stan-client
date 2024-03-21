@@ -104,7 +104,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
     [setCostingValidationError, onChangeCosting]
   );
   return (
-    <div className={'w-full grid grid-cols-3 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
+    <div className={'w-full grid lg:grid-cols-3 grid-cols-2 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
       <div data-testid="external-barcode">
         <Label name={'External barcode'} />
         <ScanInput
