@@ -73,16 +73,16 @@ describe('ProbeAddPanel', () => {
       });
       expect(
         screen.getByText(
-          'Lot number should be a string of maximum length 20 of capital letters, numbers and underscores'
+          'Lot number should be a string of maximum length 25 of capital letters, numbers and underscores'
         )
       ).toBeVisible();
 
       await waitFor(() => {
-        fireEvent.change(input, { target: { value: '123456789012345678912345' } });
+        fireEvent.change(input, { target: { value: '123456789012345678901234567' } });
       });
       expect(
         screen.getByText(
-          'Lot number should be a string of maximum length 20 of capital letters, numbers and underscores'
+          'Lot number should be a string of maximum length 25 of capital letters, numbers and underscores'
         )
       ).toBeVisible();
       expect(screen.getByRole('button', { name: 'Add to all' })).toBeDisabled();

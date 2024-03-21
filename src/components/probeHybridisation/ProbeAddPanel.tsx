@@ -45,7 +45,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
       if (!lotRegx.test(probeLot)) {
         setProbeLotError((prev) => ({
           ...prev,
-          lot: 'Lot number should be a string of maximum length 20 of capital letters, numbers and underscores'
+          lot: 'Lot number should be a string of maximum length 25 of capital letters, numbers and underscores'
         }));
         return;
       }
