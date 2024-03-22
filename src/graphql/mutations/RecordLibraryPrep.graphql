@@ -3,5 +3,8 @@ mutation RecordLibraryPrep($request: LibraryPrepRequest!) {
     operations {
       id
     }
+    labware {
+      ...LabwareFields
+    }
   }
 }
