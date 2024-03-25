@@ -3,7 +3,7 @@ import Heading from '../components/Heading';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { NewFlaggedLabwareLayout } from '../types/stan';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PinkButton from '../components/buttons/PinkButton';
 import ButtonBar from '../components/ButtonBar';
 import SlotCopyComponent, { defaultOutputSlotCopy } from '../components/libraryGeneration/SlotCopyComponent';
@@ -11,7 +11,6 @@ import slotCopyMachine from '../lib/machines/slotCopy/slotCopyMachine';
 import { useMachine } from '@xstate/react';
 import { OutputSlotCopyData, SlotCopyMode } from '../components/slotMapper/slotMapper.types';
 import { libraryGenerationMachine } from '../lib/machines/libraryGenerationMachine';
-import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
 import reagentTransferMachine from '../lib/machines/reagentTransfer/reagentTransferMachine';
 import DualIndexPlateComponent from '../components/libraryGeneration/DualIndexPlateComponent';
@@ -24,12 +23,16 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { SlotMeasurement } from '../components/slotMeasurement/SlotMeasurements';
 import { LabwareWithoutPermConfirmationModal } from '../components/libraryGeneration/LabwareWithoutPermConfirmationModal';
+import LabelPrinter from '../components/LabelPrinter';
+import LabelCopyButton from '../components/LabelCopyButton';
+import { reload } from '../lib/sdk';
+import Success from '../components/notifications/Success';
+import { toast } from 'react-toastify';
+
+const ToastSuccess = () => <Success message={'Library Amplification and Generation successfully completed'} />;
 
 export const LibraryAmpAndGeneration = () => {
-  /**
-   * For tracking whether the user gets a prompt if they tried to navigate to another page
-   */
-  const shouldConfirmBeforeLeave = (args: BlockerFunctionParams): boolean => args && args.historyAction !== 'REPLACE';
+  const navigate = useNavigate();
 
   const warningRef = useRef<HTMLDivElement>(null);
   // Scroll the error notification into view if it appears
@@ -81,6 +84,13 @@ export const LibraryAmpAndGeneration = () => {
       })
     };
   }, [currentLibraryGeneration.context.reagentTransfers, currentLibraryGeneration.context.destinationLabware]);
+
+  /**
+   * For tracking whether the user gets a prompt if they tried to navigate to another page
+   */
+  const shouldConfirmBeforeLeave = (args: BlockerFunctionParams): boolean => {
+    return args && args.historyAction !== 'REPLACE' && currentLibraryGeneration.value !== 'recorded';
+  };
 
   /** Handle 'Clear all' SlotMapper functionality */
   React.useEffect(() => {
@@ -167,6 +177,16 @@ export const LibraryAmpAndGeneration = () => {
     [currentSlotCopyMachine.context, handleOnSave]
   );
 
+  React.useEffect(() => {
+    if (serverSuccess) {
+      toast(ToastSuccess, {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 4000,
+        hideProgressBar: true
+      });
+    }
+  });
+
   const canGoToSampleTransfer = React.useMemo(() => {
     let isValid = destinations[0] && destinations[0].slotCopyDetails.contents.length > 0;
     if (isValid) {
@@ -186,6 +206,7 @@ export const LibraryAmpAndGeneration = () => {
       )
       .notRequired()
   });
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -321,6 +342,7 @@ export const LibraryAmpAndGeneration = () => {
                         <ButtonBar className="flex flex-row justify-between">
                           <PinkButton
                             action="primary"
+                            disabled={currentLibraryGeneration.value === 'recorded'}
                             onClick={() =>
                               sendLibraryGeneration({
                                 type: 'GO_TO_REAGENT_TRANSFER',
@@ -330,17 +352,29 @@ export const LibraryAmpAndGeneration = () => {
                           >
                             {'< '} Reagent Transfer
                           </PinkButton>
-                          <BlueButton
-                            disabled={
-                              !isValid ||
-                              currentLibraryGeneration.context.workNumber.length === 0 ||
-                              serverErrors !== undefined ||
-                              values.slotMeasurements?.length === 0
-                            }
-                            onClick={() => onSaveAction(values.slotMeasurements)}
-                          >
-                            Save
-                          </BlueButton>
+                          {!currentLibraryGeneration.matches('recorded') && (
+                            <BlueButton
+                              disabled={
+                                !isValid ||
+                                currentLibraryGeneration.context.workNumber.length === 0 ||
+                                serverErrors !== undefined ||
+                                values.slotMeasurements?.length === 0
+                              }
+                              onClick={() => onSaveAction(values.slotMeasurements)}
+                            >
+                              Save
+                            </BlueButton>
+                          )}
+                          {currentLibraryGeneration.matches('recorded') && (
+                            <div>
+                              <BlueButton onClick={() => reload(navigate)} action="tertiary">
+                                Reset Form
+                              </BlueButton>
+                              <Link to={'/'}>
+                                <BlueButton action="primary">Return Home</BlueButton>
+                              </Link>
+                            </div>
+                          )}
                         </ButtonBar>
 
                         <LabwareWithoutPermConfirmationModal
@@ -355,15 +389,28 @@ export const LibraryAmpAndGeneration = () => {
                 </Formik>
               </>
             )}
-            <OperationCompleteModal
-              show={serverSuccess !== undefined}
-              message={'Library Amplification and Generation Complete'}
-            >
-              <p>
-                If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the
-                Home screen.
-              </p>
-            </OperationCompleteModal>
+            {serverSuccess && (
+              <div className="mt-8 flex flex-col items-end sm:justify-end space-y-2">
+                <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
+                  <LabelPrinter labwares={serverSuccess.libraryPrep.labware} />
+                </div>
+                <div className="sm:max-w-xl w-full  border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2 ">
+                  <div className={'flex items-center space-x-2'}>
+                    <div className={'font-bold'}>Labels:</div>
+                    <div>{serverSuccess.libraryPrep.labware.map((lw) => lw.barcode).join(',')}</div>
+                  </div>
+                  <div className={'flex items-end sm:justify-end'}>
+                    <LabelCopyButton
+                      labels={serverSuccess.libraryPrep.labware.map((lw) => lw.barcode)}
+                      copyButtonText={'Copy Labels'}
+                      buttonClass={
+                        'text-white bg-sdb-400 shadow-sm hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600'
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
             <PromptOnLeave
               when={shouldConfirmBeforeLeave}
               message={'You have unsaved changes. Are you sure you want to leave?'}
