@@ -305,8 +305,26 @@ describe('LibraryAmpAndGeneration Page', () => {
         fillInTheRequest();
         cy.findByRole('button', { name: 'Save' }).click();
       });
-      it('displays the operation complete pop-up', () => {
-        cy.findByText('Library Amplification and Generation Complete').should('be.visible');
+      it('displays the operation success message', () => {
+        cy.findByText('Library Amplification and Generation successfully completed').should('be.visible');
+      });
+      it('displays the print label select box', () => {
+        cy.findByText('Print Labels').should('be.visible');
+      });
+      it('displays copy barcode section', () => {
+        cy.findByTestId('copyButton').should('be.visible');
+      });
+      it('disables Transfer Reagent button', () => {
+        cy.findByRole('button', { name: '< Reagent Transfer' }).should('be.disabled');
+      });
+      it('hides save button', () => {
+        cy.findByRole('button', { name: 'Save' }).should('not.exist');
+      });
+      it('displays Return Home button', () => {
+        cy.findByRole('button', { name: 'Return Home' }).should('be.visible');
+      });
+      it('displays Reset Form button', () => {
+        cy.findByRole('button', { name: 'Reset Form' }).should('be.visible');
       });
     });
 
@@ -324,14 +342,42 @@ describe('LibraryAmpAndGeneration Page', () => {
           cy.findByRole('button', { name: 'Continue' }).click();
         });
         it('saves the operation', () => {
-          cy.findByText('Library Amplification and Generation Complete').should('be.visible');
+          cy.findByText('Library Amplification and Generation successfully completed').should('be.visible');
         });
+      });
+    });
+
+    describe('When clicking on Reset Form button', () => {
+      before(() => {
+        cy.visit('/lab/libraryGeneration');
+        fillInTheRequest();
+        cy.findByRole('button', { name: 'Save' }).click();
+        cy.findByRole('button', { name: 'Continue' }).click();
+        cy.findByRole('button', { name: 'Reset Form' }).click();
+      });
+      it('resets the form to the Transfer Sample step', () => {
+        cy.get('#labwareScanInput').should('be.visible').and('have.value', '');
+        cy.findByTestId('Default').should('be.visible').and('be.checked');
+        cy.findByTestId('bioState').should('be.visible').and('have.value', '');
+      });
+    });
+
+    describe('When clicking on Return Home button', () => {
+      before(() => {
+        cy.visit('/lab/libraryGeneration');
+        fillInTheRequest();
+        cy.findByRole('button', { name: 'Save' }).click();
+        cy.findByRole('button', { name: 'Continue' }).click();
+        cy.findByRole('button', { name: 'Return Home' }).click();
+      });
+      it('displays the home page ', () => {
+        cy.findByText('Summary Dashboard').should('be.visible');
       });
     });
 
     describe('On server error', () => {
       before(() => {
-        cy.reload();
+        cy.visit('/lab/libraryGeneration');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<RecordLibraryPrepMutation, RecordLibraryPrepMutationVariables>('RecordLibraryPrep', () => {
