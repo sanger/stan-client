@@ -13,7 +13,7 @@ import {
   SlotCopySource
 } from '../../../types/sdk';
 import { stanCore } from '../../sdk';
-import produce, { castDraft } from 'immer';
+import { castDraft, produce } from '../../../dependencies/immer';
 import { ClientError } from 'graphql-request';
 import { DestinationSelectionMode } from '../../../components/slotMapper/slotMapper.types';
 

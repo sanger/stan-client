@@ -3,7 +3,7 @@ import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, LabwareTypeFieldsF
 import { uniqueId } from 'lodash';
 import BlueButton from '../buttons/BlueButton';
 import { NewFlaggedLabwareLayout } from '../../types/stan';
-import produce, { castDraft } from 'immer';
+import { castDraft, produce } from '../../dependencies/immer';
 import { unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
 import LabwareScanTable from '../labwareScanPanel/LabwareScanPanel';
 import LabwareScanner from '../labwareScanner/LabwareScanner';

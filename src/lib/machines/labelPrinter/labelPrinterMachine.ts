@@ -1,7 +1,7 @@
 import { assign, createMachine, fromPromise, MachineConfig, MachineImplementations } from 'xstate';
 import { LabelPrinterContext, LabelPrinterEvent } from './labelPrinterMachineTypes';
 import { find } from 'lodash';
-import produce, { castDraft } from 'immer';
+import { castDraft, produce } from '../../../dependencies/immer';
 import { stanCore } from '../../sdk';
 import { LabelType, LabwareFieldsFragment, PrinterFieldsFragment } from '../../../types/sdk';
 

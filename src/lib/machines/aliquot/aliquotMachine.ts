@@ -1,6 +1,6 @@
 import { AliquotMutation, LabwareFieldsFragment } from '../../../types/sdk';
 import { assign, createMachine, fromPromise } from 'xstate';
-import { castDraft } from 'immer';
+import { castDraft } from '../../../dependencies/immer';
 import { stanCore } from '../../sdk';
 import { ClientError } from 'graphql-request';
 

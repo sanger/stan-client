@@ -6,7 +6,7 @@ import {
   SampleIdCommentId,
   SlotFieldsFragment
 } from '../../types/sdk';
-import produce from 'immer';
+import { produce } from '../../dependencies/immer';
 
 export type LabwareResultContext = {
   /**

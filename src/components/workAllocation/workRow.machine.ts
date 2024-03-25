@@ -11,7 +11,7 @@ import {
   WorkWithCommentFieldsFragment
 } from '../../types/sdk';
 import { stanCore } from '../../lib/sdk';
-import produce, { castDraft } from 'immer';
+import { castDraft, produce } from '../../dependencies/immer';
 import { Maybe } from 'yup';
 import { ClientError } from 'graphql-request';
 

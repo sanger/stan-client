@@ -4,7 +4,7 @@ import { LayoutPlan, Source } from '../../lib/machines/layout/layoutContext';
 import { cloneDeep } from 'lodash';
 import { Address, NewFlaggedLabwareLayout } from '../../types/stan';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
-import produce from 'immer';
+import { produce } from '../../dependencies/immer';
 
 export interface ConfirmLabwareContext {
   /**
