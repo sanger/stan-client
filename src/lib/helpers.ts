@@ -105,14 +105,14 @@ export function safeParseQueryString<T>(params: SafeParseQueryStringParams<T>): 
  * Parse a query string into an object
  * @param query the query string
  */
-export const parseQueryString = queryString.parse;
+export const parseQueryString = queryString.default.parse;
 
 /**
  * Stringify an object to be used as a query string
  * @param obj the object to stringify
  */
 export function stringify(obj: object): string {
-  return queryString.stringify(obj, {
+  return queryString.default.stringify(obj, {
     skipEmptyString: true,
     arrayFormat: 'bracket'
   });
