@@ -8,7 +8,6 @@ import {
 } from "./sdk";
 import { Location } from "history";
 import { ClientError } from "graphql-request";
-import * as Yup from "yup";
 import { regexSort } from "../lib/helpers";
 import {FunctionComponent} from "react";
 /**

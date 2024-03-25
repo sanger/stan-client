@@ -1,6 +1,5 @@
-import * as queryString from 'query-string';
 import * as Yup from 'yup';
-import { GridDirection, Maybe } from '../types/sdk';
+import { GridDirection } from '../types/sdk';
 import { HasEnabled, SizeInput } from '../types/stan';
 import _, { isNaN } from 'lodash';
 import { Key } from 'react';
@@ -76,17 +75,14 @@ type SafeParseQueryStringParams<T> = GuardAndTransformParams<T> | SchemaParams;
  * Will attempt to deserialize a URL query string into a given type <T>
  * @return object if query can be parsed and conforms to the type guard or schema; null otherwise
  */
-export function safeParseQueryString<T>(params: SafeParseQueryStringParams<T>): Maybe<T> {
-  let parsed = parseQueryString(params.query, {
-    arrayFormat: 'bracket',
-    parseNumbers: false,
-    parseBooleans: true
-  });
+
+export function safeParseQueryString<T>(params: SafeParseQueryStringParams<T>): T | null {
+  const parsed = parseQueryString(params.query);
 
   if ('schema' in params) {
     try {
       const castValue = params.schema.cast(parsed);
-      return params.schema.isValidSync(castValue) ? (castValue as unknown as T) ?? null : null;
+      return params.schema.isValidSync(castValue) ? (castValue as unknown as T) : null;
     } catch {
       return null;
     }
@@ -94,28 +90,52 @@ export function safeParseQueryString<T>(params: SafeParseQueryStringParams<T>): 
 
   const { transform, guard } = params;
 
-  if (transform) {
-    parsed = transform(parsed);
-  }
-
-  return guard(parsed) ? parsed : null;
+  const transformed = transform ? transform(parsed) : parsed;
+  return guard(transformed) ? (transformed as unknown as T) : null;
 }
 
 /**
+ * This is an alternative for query-string parse method
  * Parse a query string into an object
  * @param query the query string
  */
-export const parseQueryString = queryString.default.parse;
+type ParsedQuery = Record<string, string | string[]>;
+export function parseQueryString(queryString: string): ParsedQuery {
+  const params = new URLSearchParams(queryString);
+  const parsedQuery: ParsedQuery = {};
+
+  for (const [key, value] of params.entries()) {
+    if (parsedQuery.hasOwnProperty(key)) {
+      if (Array.isArray(parsedQuery[key])) {
+        (parsedQuery[key] as string[]).push(value);
+      } else {
+        parsedQuery[key] = [parsedQuery[key] as string, value];
+      }
+    } else {
+      parsedQuery[key] = value;
+    }
+  }
+
+  return parsedQuery;
+}
 
 /**
+ * This is an alternative for query-string stringify method
  * Stringify an object to be used as a query string
  * @param obj the object to stringify
  */
-export function stringify(obj: object): string {
-  return queryString.default.stringify(obj, {
-    skipEmptyString: true,
-    arrayFormat: 'bracket'
+export function stringify(obj: Record<string, any>): string {
+  const params = new URLSearchParams();
+  Object.entries(obj).forEach(([key, value]) => {
+    if (value !== undefined) {
+      if (Array.isArray(value)) {
+        value.forEach((v) => params.append(key, v.toString()));
+      } else {
+        params.append(key, JSON.stringify(value));
+      }
+    }
   });
+  return params.toString();
 }
 
 /**
