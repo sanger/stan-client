@@ -35,7 +35,7 @@ export type ProbeHybridisationXeniumFormValues = {
   workNumberAll: string;
 };
 export const probeLotDefault = { name: '', lot: '', plex: 0 };
-export const lotRegx = /^[A-Z0-9_]{1,20}$/;
+export const lotRegx = /^[A-Z0-9_]{1,25}$/;
 
 const formInitialValues: ProbeHybridisationXeniumFormValues = {
   labware: [],
@@ -102,7 +102,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                   .max(25)
                   .matches(
                     lotRegx,
-                    'LOT number should be a string of maximum length 20 of capital letters, numbers and underscores.'
+                    'LOT number should be a string of maximum length 25 of capital letters, numbers and underscores.'
                   ),
                 plex: Yup.number()
                   .required('Plex is a required field')
