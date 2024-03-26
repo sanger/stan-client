@@ -12,7 +12,7 @@ import { sortWithDirection } from '../../lib/helpers/addressHelper';
 import { find, indexOf, intersection, map } from 'lodash';
 import { stanCore } from '../../lib/sdk';
 import { assign, createMachine, fromPromise, MachineImplementations } from 'xstate';
-import produce from 'immer';
+import { produce } from '../../dependencies/immer';
 
 const colors = cycleColors();
 

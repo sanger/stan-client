@@ -7,7 +7,7 @@ import {
   StoreBarcodeEvent
 } from './locationMachineTypes';
 import * as locationService from '../../services/locationService';
-import produce, { castDraft } from 'immer';
+import { castDraft, produce } from '../../../dependencies/immer';
 import { stanCore } from '../../sdk';
 import { buildOrderedAddresses, findNextAvailableAddress } from '../../helpers/locationHelper';
 import { GridDirection } from '../../../types/sdk';

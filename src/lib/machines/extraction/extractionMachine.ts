@@ -1,5 +1,5 @@
 import { assign, createMachine, fromCallback, fromPromise } from 'xstate';
-import { castDraft } from 'immer';
+import { castDraft } from '../../../dependencies/immer';
 import { ExtractMutation, ExtractRequest, LabwareFieldsFragment } from '../../../types/sdk';
 import { stanCore } from '../../sdk';
 import { ServerErrors } from '../../../types/stan';

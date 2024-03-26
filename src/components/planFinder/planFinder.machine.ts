@@ -2,7 +2,7 @@ import { FindPlanDataQuery, LabwareFlaggedFieldsFragment, Maybe } from '../../ty
 import { assign, createMachine, fromPromise } from 'xstate';
 import { stanCore } from '../../lib/sdk';
 import { ServerErrors } from '../../types/stan';
-import produce from 'immer';
+import { produce } from '../../dependencies/immer';
 
 type PlanFinderContext = {
   /**
