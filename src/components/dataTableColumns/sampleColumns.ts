@@ -75,7 +75,7 @@ export const spatialLocation: ColumnFactory = () => ({
 
 export const lifeStage: ColumnFactory = () => ({
   Header: 'Life Stage',
-  accessor: (sample) => capitalize(sample.tissue.donor.lifeStage ?? 'N/A')
+  accessor: (sample) => (sample.tissue.donor.lifeStage ? capitalize(sample.tissue.donor.lifeStage) : 'N/A')
 });
 
 export const donorName: ColumnFactory = () => ({
