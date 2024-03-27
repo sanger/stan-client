@@ -1,4 +1,4 @@
-import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
+import { selectOption } from '../shared/customReactSelect.cy';
 import {
   FindLatestOperationQuery,
   FindLatestOperationQueryVariables,
