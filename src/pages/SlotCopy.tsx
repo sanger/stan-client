@@ -51,7 +51,8 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
       destinations: initialOutputSlotCopy,
       sources: [],
       slotCopyResults: [],
-      sourceLabwarePermData: []
+      sourceLabwarePermData: [],
+      destinationSelectionMode: DestinationSelectionMode.DEFAULT
     }
   });
 
@@ -155,11 +156,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             current={current}
             send={send}
             initialOutputSlotCopy={initialOutputSlotCopy}
-            slotCopyModes={
-              destinationSelectionMode === DestinationSelectionMode.DEFAULT
-                ? objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])
-                : [SlotCopyMode.ONE_TO_ONE]
-            }
+            slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
           />
 
           {slotCopyResults.length > 0 && (

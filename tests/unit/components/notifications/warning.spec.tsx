@@ -2,6 +2,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 import Warning from '../../../../src/components/notifications/Warning';
 import { ClientError } from 'graphql-request';
 import '@testing-library/jest-dom';
+import { GraphQLFormattedError } from 'graphql';
 
 afterEach(() => {
   cleanup();
@@ -19,7 +20,20 @@ const warningProps = {
           message: 'Exception while fetching data : The operation could not be validated.',
           extensions: {
             problems: ['There is a problem', 'and another problem']
-          }
+          },
+          locations: undefined,
+          path: undefined,
+          nodes: undefined,
+          source: undefined,
+          positions: undefined,
+          originalError: undefined,
+          toJSON: function (): GraphQLFormattedError {
+            return {
+              message: this.message
+            };
+          },
+          [Symbol.toStringTag]: '',
+          name: ''
         }
       ]
     },
