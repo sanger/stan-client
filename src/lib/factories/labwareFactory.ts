@@ -131,6 +131,9 @@ export const visiumLPCytAssistFactory = unregisteredLabwareFactory.associations(
 export const visiumLPCytAssistXLFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.VISIUM_LP_CYTASSIST_XL].build()
 });
+export const visiumLPCytAssistHDFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.VISIUM_LP_CYTASSIST_HD].build()
+});
 export const xeniumFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.XENIUM].build()
 });
@@ -151,5 +154,6 @@ export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>
   [LabwareTypeName.POT]: potFactory,
   [LabwareTypeName.VISIUM_LP_CYTASSIST]: visiumLPCytAssistFactory,
   [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory,
+  [LabwareTypeName.VISIUM_LP_CYTASSIST_HD]: visiumLPCytAssistHDFactory,
   [LabwareTypeName.XENIUM]: xeniumFactory
 };
