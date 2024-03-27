@@ -1,4 +1,3 @@
-import * as queryString from 'query-string';
 import * as Yup from 'yup';
 import { GridDirection, Maybe } from '../types/sdk';
 import { HasEnabled, SizeInput } from '../types/stan';
@@ -77,12 +76,7 @@ type SafeParseQueryStringParams<T> = GuardAndTransformParams<T> | SchemaParams;
  * @return object if query can be parsed and conforms to the type guard or schema; null otherwise
  */
 export function safeParseQueryString<T>(params: SafeParseQueryStringParams<T>): Maybe<T> {
-  let parsed = parseQueryString(params.query, {
-    arrayFormat: 'bracket',
-    parseNumbers: false,
-    parseBooleans: true
-  });
-
+  let parsed = parseQueryString(params.query);
   if ('schema' in params) {
     try {
       const castValue = params.schema.cast(parsed);
@@ -102,20 +96,72 @@ export function safeParseQueryString<T>(params: SafeParseQueryStringParams<T>): 
 }
 
 /**
+ * This is an alternative for query-string parse method
  * Parse a query string into an object
  * @param query the query string
  */
-export const parseQueryString = queryString.parse;
+type ParsedQuery = Record<string, string | string[]>;
+export function parseQueryString(queryString: string): ParsedQuery {
+  const params = new URLSearchParams(queryString);
+  const parsedQuery: ParsedQuery = {};
+  for (const [key, value] of params.entries()) {
+    const normalizedKey = key.replace('[]', '');
+    const currentValue = parsedQuery[normalizedKey];
+    if (Array.isArray(currentValue)) {
+      parsedQuery[normalizedKey] = [...currentValue, value];
+    } else if (currentValue !== undefined) {
+      parsedQuery[normalizedKey] = [currentValue, value];
+    } else {
+      parsedQuery[normalizedKey] = key.includes('[]') ? [value] : value;
+    }
+  }
+
+  return parsedQuery;
+}
 
 /**
+ * @returns A function that takes a key and returns a function that encodes the key-value pair.
+ */
+function encoderForArrayFormat() {
+  return (key: string) => (result: string, value: string) => {
+    if (value === undefined) {
+      return result;
+    }
+    if (value === null) {
+      return [...result, [encodeURIComponent(key), '[]'].join('')];
+    }
+    return [...result, [encodeURIComponent(key), '[]=', encodeURIComponent(value)].join('')];
+  };
+}
+
+/**
+ * This is an alternative for query-string stringify method
  * Stringify an object to be used as a query string
  * @param obj the object to stringify
  */
-export function stringify(obj: object): string {
-  return queryString.stringify(obj, {
-    skipEmptyString: true,
-    arrayFormat: 'bracket'
-  });
+export function stringify(obj: Record<string, any>): string {
+  const formatter = encoderForArrayFormat();
+  const keys = Object.keys(obj);
+  return keys
+    .map((key) => {
+      const value = obj[key];
+      if (value === undefined) {
+        return '';
+      }
+      if (value === null) {
+        return encodeURIComponent(key);
+      }
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          return encodeURIComponent(key) + '[]';
+        }
+        return value.reduce(formatter(key), []).join('&');
+      }
+
+      return encodeURIComponent(key) + '=' + encodeURIComponent(value);
+    })
+    .filter((x) => x.length > 0)
+    .join('&');
 }
 
 /**
