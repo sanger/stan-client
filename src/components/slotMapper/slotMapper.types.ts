@@ -6,6 +6,7 @@ import {
   SlotPassFailFieldsFragment
 } from '../../types/sdk';
 import { ClientError } from 'graphql-request';
+import { Draft } from 'immer';
 
 export enum DestinationSelectionMode {
   DEFAULT = 'Default',
@@ -176,7 +177,7 @@ type SlotPassFailEvent = {
 type SlotPassFailErrorEvent = {
   type: 'xstate.error.actor.passFailsSlots';
   barcode: string;
-  error: ClientError;
+  error: Draft<ClientError>;
 };
 
 type LockEvent = { type: 'LOCK' };

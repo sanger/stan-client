@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 import * as reactDom from 'react-router-dom';
 import History from '../../../src/pages/History';
 import { uniqueId } from 'lodash';
-import { HistoryData, HistoryTableEntry } from '../../../src/types/stan';
+import { HistoryTableEntry } from '../../../src/types/stan';
 import * as historyService from '../../../src/lib/services/historyService';
 import { LabwareState } from '../../../src/types/sdk';
 import { HistoryService } from '../../../src/lib/services/historyService';

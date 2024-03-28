@@ -7,7 +7,6 @@ import {
 import { buildHistory } from '../../../src/mocks/handlers/historyHandlers';
 import { shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
 import { HttpResponse } from 'msw';
-import { de } from '@faker-js/faker';
 describe('History Page', () => {
   describe('Result Format is set to Table', () => {
     describe('By Labware Barcode', () => {

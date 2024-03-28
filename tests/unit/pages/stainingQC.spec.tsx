@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import { CommentFieldsFragment } from '../../../src/types/sdk';
 import StainingQC from '../../../src/pages/StainingQC';
-import { scanLabware, selectOption, selectSGPNumber, shouldDisplayValue } from '../../generic/utilities';
+import { scanLabware, selectOption, shouldDisplayValue } from '../../generic/utilities';
 import { enableMapSet } from 'immer';
 
 afterEach(() => {
