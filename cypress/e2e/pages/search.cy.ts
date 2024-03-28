@@ -8,7 +8,7 @@ describe('Search', () => {
     before(() => {
       cy.visit(
         '/search?donorNames=DNR123&labwareBarcode=STAN-0001F&tissueExternalNames=EXT987&tissueTypeName=Tissue Type 1&workNumber=SGP1008' +
-          '&createdMin=2021-07-01&createdMax=2021-07-31'
+          '&createdMin=2021-07-01&createdMax=2021-07-31&labwareTypeName=Pot'
       );
     });
 
@@ -21,6 +21,7 @@ describe('Search', () => {
       cy.contains('SGP Number').should('be.visible');
       cy.findByLabelText('Created After').should('have.value', '2021-07-01');
       cy.findByLabelText('Created Before').should('have.value', '2021-07-31');
+      shouldDisplaySelectedValue('labwareTypeName', 'Pot');
     });
 
     it('should display view panel ', () => {
@@ -73,6 +74,7 @@ describe('Search', () => {
         cy.findByLabelText('SGP Number').should('have.value', '');
         cy.findByLabelText('Created After').should('have.value', '');
         cy.findByLabelText('Created Before').should('have.value', '');
+        cy.findByLabelText('Labware Type').should('have.value', '');
       });
     });
   });

@@ -2,4 +2,7 @@ query GetSearchInfo {
   tissueTypes {
     name
   }
+  labwareTypes {
+    name
+  }
 }
