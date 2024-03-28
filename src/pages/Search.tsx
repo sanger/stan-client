@@ -92,7 +92,7 @@ function Search() {
   const findRequest = React.useMemo(() => {
     const request: FormFindRequest = emptyFindRequestKeys.reduce((request, key) => {
       const value = searchParams.get(key) ?? '';
-      return { ...request, [key]: (value.trim()) };
+      return { ...request, [key]: value.trim() };
     }, emptyFindRequest);
     return request;
   }, [searchParams]);

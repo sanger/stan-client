@@ -142,7 +142,8 @@ function encoderForArrayFormat() {
 export function stringify(obj: Record<string, any>): string {
   const formatter = encoderForArrayFormat();
   const keys = Object.keys(obj);
-  return keys.filter((key) => obj[key] !== undefined && obj[key] !== null && obj[key].length > 0)
+  return keys
+    .filter((key) => obj[key] !== undefined && obj[key] !== null && obj[key].length > 0)
     .map((key) => {
       const value = obj[key];
       if (Array.isArray(value)) {

@@ -18,8 +18,10 @@ import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 
 const findHandlers = [
   graphql.query<GetSearchInfoQuery, GetSearchInfoQueryVariables>('GetSearchInfo', () => {
-    return HttpResponse.json({ data: { tissueTypes: tissueTypeRepository.findAll(),
-        labwareTypes: labwareTypeInstances } }, { status: 200 });
+    return HttpResponse.json(
+      { data: { tissueTypes: tissueTypeRepository.findAll(), labwareTypes: labwareTypeInstances } },
+      { status: 200 }
+    );
   }),
 
   graphql.query<FindQuery, FindQueryVariables>('Find', ({ variables }) => {
