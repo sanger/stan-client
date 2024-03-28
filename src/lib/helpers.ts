@@ -142,22 +142,12 @@ function encoderForArrayFormat() {
 export function stringify(obj: Record<string, any>): string {
   const formatter = encoderForArrayFormat();
   const keys = Object.keys(obj);
-  return keys
+  return keys.filter((key) => obj[key] !== undefined && obj[key] !== null && obj[key].length > 0)
     .map((key) => {
       const value = obj[key];
-      if (value === undefined) {
-        return '';
-      }
-      if (value === null) {
-        return encodeURIComponent(key);
-      }
       if (Array.isArray(value)) {
-        if (value.length === 0) {
-          return encodeURIComponent(key) + '[]';
-        }
         return value.reduce(formatter(key), []).join('&');
       }
-
       return encodeURIComponent(key) + '=' + encodeURIComponent(value);
     })
     .filter((x) => x.length > 0)
