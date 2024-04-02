@@ -227,6 +227,7 @@ describe('labwareMachine', () => {
                             enabled: false
                           },
                           spatialLocation: {
+                            name: 'Upper pole',
                             code: 3,
                             tissueType: {
                               name: 'Lung'
