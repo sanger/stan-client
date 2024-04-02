@@ -133,6 +133,7 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
               name: sample.tissue.spatialLocation.tissueType.name,
               __typename: 'TissueType'
             },
+            name: sample.tissue.spatialLocation.name,
             code: sample.tissue.spatialLocation.code,
             __typename: 'SpatialLocation'
           },
