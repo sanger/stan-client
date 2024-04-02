@@ -84,10 +84,10 @@ const tissueType: ColumnFactory = () => {
  */
 
 export const spatialLocationColumnDiv = (samples: SampleFieldsFragment[]) => (
-    <div>
-      {joinUnique(samples.map((sample) => String(sample.tissue.spatialLocation.code)))}
-      <MutedText>{joinUnique(samples.map((sample) => String(sample.tissue.spatialLocation.name)))}</MutedText>
-    </div>
+  <div>
+    {joinUnique(samples.map((sample) => String(sample.tissue.spatialLocation.code)))}
+    <MutedText>{joinUnique(samples.map((sample) => String(sample.tissue.spatialLocation.name)))}</MutedText>
+  </div>
 );
 const spatialLocation: ColumnFactory = () => {
   return {
