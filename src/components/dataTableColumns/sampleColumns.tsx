@@ -7,7 +7,7 @@ import MutedText from '../MutedText';
  * Type that can be used for displaying a Sample in a table row, along with its slot address
  */
 export type SampleDataTableRow = SampleFieldsFragment & { slotAddress: string } & {
-  sectionPosition?: string
+  sectionPosition?: string;
 } & { barcode?: string } & { labwareType?: string };
 
 type ColumnFactory<E = any> = (meta?: E) => Column<SampleDataTableRow>;

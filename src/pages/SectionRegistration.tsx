@@ -257,9 +257,10 @@ export const SectionRegistration: React.FC = () => {
     [setFileRegisterResult, stanCore]
   );
 
-  const registrationResult = current.matches('submitted') && submissionResult ? submissionResult.registerSections.labware : fileRegisterResult;
+  const registrationResult =
+    current.matches('submitted') && submissionResult ? submissionResult.registerSections.labware : fileRegisterResult;
   const result = registrationResult || fileRegisterResult;
-  if(result) {
+  if (result) {
     const columnsToDisplay = [
       sampleColumns.barcode(),
       sampleColumns.labwareType(),
@@ -267,19 +268,19 @@ export const SectionRegistration: React.FC = () => {
       sampleColumns.tissueType(),
       sampleColumns.sectionNumber()
     ];
-    const samples  : SampleDataTableRow[] = result.flatMap((labware) => {
+    const samples: SampleDataTableRow[] = result.flatMap((labware) => {
       return labware.slots.flatMap((slot) => {
         return slot.samples.map((sample) => {
           return {
             ...sample,
             barcode: labware.barcode,
             labwareType: labware.labwareType.name,
-            slotAddress: slot.address,
+            slotAddress: slot.address
           };
         });
       });
     });
-    return (<RegistrationSuccess successData={samples} columns={columnsToDisplay} />)
+    return <RegistrationSuccess successData={samples} columns={columnsToDisplay} />;
   }
 
   return (
