@@ -6,9 +6,9 @@ import MutedText from '../MutedText';
 /**
  * Type that can be used for displaying a Sample in a table row, along with its slot address
  */
-type SampleDataTableRow = SampleFieldsFragment & { slotAddress: string } & {
-  sectionPosition: string | undefined;
-};
+export type SampleDataTableRow = SampleFieldsFragment & { slotAddress: string } & {
+  sectionPosition?: string
+} & { barcode?: string } & { labwareType?: string };
 
 type ColumnFactory<E = any> = (meta?: E) => Column<SampleDataTableRow>;
 
@@ -30,7 +30,7 @@ const samplePositionMapBySampleIdSlotId = (
 export function buildSampleDataTableRows(
   labware: LabwareFieldsFragment,
   samplePositionResults: SamplePositionFieldsFragment[]
-): Array<SampleDataTableRow> {
+): SampleDataTableRow[] {
   const samplePositionResultsMap = samplePositionMapBySampleIdSlotId(samplePositionResults);
 
   return labware.slots.flatMap((slot) => {
@@ -113,5 +113,18 @@ export const huMFre: ColumnFactory = () => {
   return {
     Header: 'HuMFre',
     accessor: (sample) => sample.tissue.hmdmc?.hmdmc
+  };
+};
+
+export const barcode: ColumnFactory = () => {
+  return {
+    Header: 'Barcode',
+    accessor: (sample) => sample.barcode
+  };
+};
+export const labwareType: ColumnFactory = () => {
+  return {
+    Header: 'Labware Type',
+    accessor: (sample) => sample.labwareType
   };
 };
