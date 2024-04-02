@@ -13,7 +13,7 @@ import RegistrationValidation from '../lib/validation/registrationValidation';
 import { LabwareTypeName } from '../types/stan';
 import { PartialBy } from '../lib/helpers';
 import { RegistrationFormBlock, RegistrationFormTissue, RegistrationMethod } from './BlockRegistration';
-import { valueFromSamples } from '../components/dataTableColumns';
+import { samplesFromLabwareOrSLot, valueFromSamples } from '../components/dataTableColumns';
 import { Column } from 'react-table';
 import AppShell from '../components/AppShell';
 import Heading from '../components/Heading';
@@ -27,6 +27,7 @@ import { toast } from 'react-toastify';
 import { stanCore } from '../lib/sdk';
 import { UploadResult } from '../components/upload/useUpload';
 import { useLoaderData } from 'react-router-dom';
+import { spatialLocationColumnDiv } from '../components/dataTableColumns/labwareColumns';
 
 /**Following modifications required for RegistrationFormBlock Type so that it can be reused
  - "medium" and "lastknownSectionNumber" fields are omitted
@@ -213,8 +214,11 @@ function OriginalSampleRegistration() {
       {
         Header: 'Spatial location',
         id: 'spatialLocation',
-        accessor: (result: LabwareResultData) =>
-          valueFromSamples(result.labware, (sample: SampleFieldsFragment) => String(sample.tissue.spatialLocation.code))
+        accessor: (result: LabwareResultData) => {
+          const samples = samplesFromLabwareOrSLot(result.labware);
+          return spatialLocationColumnDiv(samples);
+        }
+
       },
       {
         Header: 'Replicate',
