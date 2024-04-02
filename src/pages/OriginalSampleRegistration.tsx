@@ -218,7 +218,6 @@ function OriginalSampleRegistration() {
           const samples = samplesFromLabwareOrSLot(result.labware);
           return spatialLocationColumnDiv(samples);
         }
-
       },
       {
         Header: 'Replicate',
