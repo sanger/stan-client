@@ -27,15 +27,18 @@ import { FormikErrorMessage } from '../components/forms';
 import { LabwareFlagDetails } from '../components/LabwareFlagDetails';
 import { Column } from 'react-table';
 import { fromPromise } from 'xstate';
+import WorkNumberSelect from '../components/WorkNumberSelect';
 
 type FormFlagLabware = {
   labware: LabwareFieldsFragment | undefined;
   description: string;
+  workNumber: string;
 };
 
-const initialValues: FormFlagLabware = { labware: undefined, description: '' };
+const initialValues: FormFlagLabware = { labware: undefined, description: '', workNumber: '' };
 function buildValidationSchema() {
   return Yup.object().shape({
+    workNumber: Yup.string().label('Work Number').optional(),
     labware: Yup.object().label('Labware').required('Labware is required'),
     description: Yup.string()
       .label('Description')
@@ -64,7 +67,8 @@ const FlagLabware = () => {
     if (!values.labware) return;
     const requestValues: FlagLabwareRequest = {
       barcode: values.labware!.barcode,
-      description: values.description
+      description: values.description,
+      workNumber: values.workNumber
     };
     send({ type: 'SUBMIT_FORM', values: requestValues });
   };
@@ -113,6 +117,16 @@ const FlagLabware = () => {
                   <div className="md:w-3/4">
                     <div className="space-y-4">
                       {serverError && <Warning error={serverError} />}
+                      <Heading level={3}>SGP Number</Heading>
+                      <p className="mt-2">SGP number is optional for this operation</p>
+                      <div className="mt-4 md:w-1/2">
+                        <WorkNumberSelect
+                          name="workNumber"
+                          onWorkNumberChange={(workNumber) => {
+                            setFieldValue('workNumber', workNumber);
+                          }}
+                        />
+                      </div>
                       <Heading level={3}>Labware</Heading>
                       <MutedText>Please scan in the labware you wish to flag.</MutedText>
                       <LabwareScanner
