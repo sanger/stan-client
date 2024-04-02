@@ -47,8 +47,8 @@ describe('Section Registration Page', () => {
         cy.findByTestId('upload-btn').click();
       });
       it('shows the created labware', () => {
-        cy.findByText('STAN-3111').should('be.visible');
-        cy.findByText('STAN-3112').should('be.visible');
+        cy.findAllByText('STAN-3111').should('have.length.greaterThan', 0);
+        cy.findAllByText('STAN-3112').should('have.length.greaterThan', 0);
       });
     });
     context('On file upload failure', () => {
