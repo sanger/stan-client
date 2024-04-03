@@ -285,26 +285,6 @@ export default function WorkRow({
           )
         }
       </TableCell>
-      <TableCell>{work.workNumber}</TableCell>
-      <TableCell>{work.workType.name}</TableCell>
-      <TableCell>{work.workRequester?.username}</TableCell>
-      <TableCell>{work.project.name}</TableCell>
-      <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
-      <TableCell colSpan={2}>{renderWorkDnapProjectField(work.workNumber, work.dnapStudy ?? undefined)}</TableCell>
-      <TableCell>{work.program.name}</TableCell>
-      <TableCell>{work.costCode.code}</TableCell>
-      <TableCell>
-        {isEditEnabledForStatus(work.status) &&
-          renderWorkNumValueField(work.workNumber, work.numBlocks ?? undefined, 'block')}
-      </TableCell>
-      <TableCell>
-        {isEditEnabledForStatus(work.status) &&
-          renderWorkNumValueField(work.workNumber, work.numSlides ?? undefined, 'slide')}
-      </TableCell>
-      <TableCell>
-        {isEditEnabledForStatus(work.status) &&
-          renderWorkNumValueField(work.workNumber, work.numOriginalSamples ?? undefined, 'originalSamples')}
-      </TableCell>
       {!editModeEnabled && (
         <TableCell>
           <div className="uppercase">{work.status}</div>
@@ -359,6 +339,27 @@ export default function WorkRow({
           </Formik>
         )}
       </TableCell>
+      <TableCell>{work.workNumber}</TableCell>
+      <TableCell>{work.workType.name}</TableCell>
+      <TableCell>{work.workRequester?.username}</TableCell>
+      <TableCell>{work.project.name}</TableCell>
+      <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
+      <TableCell colSpan={2}>{renderWorkDnapProjectField(work.workNumber, work.dnapStudy ?? undefined)}</TableCell>
+      <TableCell>{work.program.name}</TableCell>
+      <TableCell>{work.costCode.code}</TableCell>
+      <TableCell>
+        {isEditEnabledForStatus(work.status) &&
+          renderWorkNumValueField(work.workNumber, work.numBlocks ?? undefined, 'block')}
+      </TableCell>
+      <TableCell>
+        {isEditEnabledForStatus(work.status) &&
+          renderWorkNumValueField(work.workNumber, work.numSlides ?? undefined, 'slide')}
+      </TableCell>
+      <TableCell>
+        {isEditEnabledForStatus(work.status) &&
+          renderWorkNumValueField(work.workNumber, work.numOriginalSamples ?? undefined, 'originalSamples')}
+      </TableCell>
+
     </tr>
   );
 }
