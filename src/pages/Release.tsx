@@ -188,7 +188,11 @@ function Release() {
     [stanCore]
   );
   const handleSelectWorkNumberForRelease = React.useCallback(
-    (workNumber: string, setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void, values: ReleaseRequest) => {
+    (
+      workNumber: string,
+      setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void,
+      values: ReleaseRequest
+    ) => {
       const releaseLabware = values.releaseLabware;
       async function updateLabwareFromSGP(workNumber: string) {
         const res = await stanCore.GetSuggestedLabwareForWork({ workNumber: workNumber, forRelease: true });
@@ -486,8 +490,7 @@ function Release() {
                     {values.releaseLabware.length > 0 ? (
                       <p>
                         <span className="font-semibold">{values.releaseLabware.length}</span> piece(s) of labware will
-                        be
-                        released
+                        be released
                         {values.destination && <span className="font-semibold"> to {values.destination}</span>}.
                       </p>
                     ) : (
