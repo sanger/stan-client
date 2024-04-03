@@ -13,9 +13,10 @@ import {
   SlotCopySource
 } from '../../../types/sdk';
 import { stanCore } from '../../sdk';
-import produce, { castDraft } from 'immer';
+import { castDraft, produce } from '../../../dependencies/immer';
 import { ClientError } from 'graphql-request';
 import { DestinationSelectionMode } from '../../../components/slotMapper/slotMapper.types';
+import { Draft } from 'immer';
 
 /**
  * Context for SlotCopy Machine
@@ -470,7 +471,7 @@ export const slotCopyMachine = createMachine(
         return produce(context, (draft) => {
           const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
           if (!destination) {
-            return context;
+            return draft;
           }
           destination.slotCopyDetails.bioState = event.bioState;
         });
@@ -480,7 +481,7 @@ export const slotCopyMachine = createMachine(
         return produce(context, (draft) => {
           const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
           if (!destination) {
-            return context;
+            return draft;
           }
           //update barcode in destination labware and in slotCopy details
           destination.labware.barcode = event.preBarcode;
@@ -492,7 +493,7 @@ export const slotCopyMachine = createMachine(
         return produce(context, (draft) => {
           const destination = draft.destinations.find((dest) => dest.labware.id === event.labwareToReplace.id);
           if (!destination || destination.labware.labwareType.name === event.labware.labwareType.name) {
-            return context;
+            return draft;
           }
           destination.labware = event.labware;
           destination.slotCopyDetails = {
@@ -507,23 +508,24 @@ export const slotCopyMachine = createMachine(
         return produce(context, (draft) => {
           const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
           if (!destination) {
-            return context;
+            return draft;
           }
           destination.slotCopyDetails.costing = event.labwareCosting;
         });
       }),
       assignDestinationLOTNumber: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_DESTINATION_LOT_NUMBER') return context;
-        return produce(context, (draft) => {
+        return produce(context, (draft): Draft<SlotCopyContext> => {
           const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
           if (!destination) {
-            return context;
+            return draft;
           }
           if (event.isProbe) {
             destination.slotCopyDetails.probeLotNumber = event.lotNumber;
           } else {
             destination.slotCopyDetails.lotNumber = event.lotNumber;
           }
+          return draft;
         });
       }),
       assignSourceLabwareState: assign(({ context, event }) => {

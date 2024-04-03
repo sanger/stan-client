@@ -12,6 +12,7 @@ fragment SampleFields on Sample {
         name
       }
       code
+      name
     }
     hmdmc {
       hmdmc

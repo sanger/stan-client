@@ -18,7 +18,7 @@ import {
 import { stanCore } from '../../lib/sdk';
 import { WorkAllocationUrlParams } from './WorkAllocation';
 import { ClientError } from 'graphql-request';
-import produce from 'immer';
+import { produce } from '../../dependencies/immer';
 
 export type WorkAllocationFormValues = {
   /**

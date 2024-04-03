@@ -167,6 +167,7 @@ const registrationHandlers = [
                           lifeStage: LifeStage.Adult
                         },
                         spatialLocation: {
+                          name: 'Cortex',
                           code: 3,
                           tissueType: {
                             name: 'Lung'
@@ -215,6 +216,7 @@ const registrationHandlers = [
                     id: parseInt(uniqueId()),
                     tissue: {
                       spatialLocation: {
+                        name: 'Cortex',
                         code: content.spatialLocation,
                         tissueType: {
                           name: content.tissueType
@@ -299,6 +301,7 @@ const registrationHandlers = [
                           },
                           spatialLocation: {
                             code: 3,
+                            name: 'Surface cranial region',
                             tissueType: {
                               name: 'Lung'
                             }

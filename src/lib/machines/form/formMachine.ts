@@ -1,5 +1,5 @@
 import { assign, createMachine } from 'xstate';
-import { castDraft } from 'immer';
+import { castDraft } from '../../../dependencies/immer';
 import { ClientError } from 'graphql-request';
 
 export interface FormContext<R> {

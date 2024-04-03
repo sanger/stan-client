@@ -12,7 +12,7 @@ import { sortWithDirection } from '../../lib/helpers/addressHelper';
 import { find, indexOf, intersection, map } from 'lodash';
 import { stanCore } from '../../lib/sdk';
 import { assign, createMachine, fromPromise, MachineImplementations } from 'xstate';
-import produce from 'immer';
+import { produce } from '../../dependencies/immer';
 
 const colors = cycleColors();
 
@@ -116,7 +116,7 @@ const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapp
         );
 
         if (!inputLabware || !outputScc) {
-          return context;
+          return draft;
         }
 
         // Get all the addresses of the output labware
@@ -126,7 +126,7 @@ const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapp
         const destinationAddressIndex = indexOf(outputAddresses, event.outputAddress);
 
         if (destinationAddressIndex === -1) {
-          return context;
+          return draft;
         }
 
         // Sort the input addresses
@@ -145,12 +145,12 @@ const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapp
           intersection(map(outputScc.slotCopyContent, 'destinationAddress'), Object.values(sourceToDestination))
             .length > 0
         ) {
-          return context;
+          return draft;
         }
 
         // Don't map if all source addresses can not fit where user has clicked
         if (destinationAddressIndex + event.inputAddresses.length > outputAddresses.length) {
-          return context;
+          return draft;
         }
 
         // Everything looks good, so we can create the list of SlotCopyContent
@@ -184,7 +184,7 @@ const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapp
         );
 
         if (!inputLabware || !outputScc) {
-          return context;
+          return draft;
         }
         // Get all the addresses of the output labware
         const outputAddresses = buildAddresses(outputScc.labware.labwareType, GridDirection.DownRight);
@@ -193,11 +193,11 @@ const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapp
         const destinationAddressIndex = indexOf(outputAddresses, event.outputAddress);
 
         if (destinationAddressIndex === -1) {
-          return context;
+          return draft;
         }
         // Don't map if the destination addresses are already filled.
         if (outputScc.slotCopyContent.find((scc: SlotCopyContent) => scc.destinationAddress === event.outputAddress)) {
-          return context;
+          return draft;
         }
         //Create mapping between all selected input addresses and output address
         event.inputAddresses.forEach((inputAddress: string) =>
@@ -221,7 +221,7 @@ const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapp
         );
 
         if (!inputLabware || !outputScc) {
-          return context;
+          return draft;
         }
 
         // Get all the addresses of the output labware
@@ -231,11 +231,11 @@ const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapp
         const destinationAddressIndex = indexOf(outputAddresses, event.outputAddress);
 
         if (destinationAddressIndex === -1) {
-          return context;
+          return draft;
         }
         // Don't map if the destination addresses are already filled.
         if (outputScc.slotCopyContent.find((scc: SlotCopyContent) => scc.destinationAddress === event.outputAddress)) {
-          return context;
+          return draft;
         }
         //Update Slot content with the mapping
         outputScc.slotCopyContent.push({

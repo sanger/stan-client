@@ -10,7 +10,7 @@ import {
 import { stanCore } from '../sdk';
 import { Source } from './slotCopy/slotCopyMachine';
 import { extractServerErrors, NewFlaggedLabwareLayout, ServerErrors } from '../../types/stan';
-import produce from 'immer';
+import { produce } from '../../dependencies/immer';
 import { ClientError } from 'graphql-request';
 
 type UpdateWorkNumberEvent = {

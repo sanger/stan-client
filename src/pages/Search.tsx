@@ -33,6 +33,7 @@ export type FormFindRequest = {
   donorNames?: string;
   tissueExternalNames?: string;
   tissueTypeName?: string;
+  labwareTypeName?: string;
   maxRecords?: number;
   workNumber?: string;
   createdMin?: string;
@@ -48,7 +49,8 @@ const validationSchema = Yup.object()
     tissueTypeName: Yup.string().ensure(),
     workNumber: Yup.string().ensure(),
     createdAfter: Yup.date().notRequired(),
-    createdBefore: Yup.date().notRequired()
+    createdBefore: Yup.date().notRequired(),
+    labwareTypeName: Yup.string().ensure()
   })
   .test({
     name: 'atLeastOneRequired',
@@ -77,6 +79,7 @@ const emptyFindRequest: FormFindRequest = {
   labwareBarcode: '',
   tissueExternalNames: '',
   tissueTypeName: '',
+  labwareTypeName: '',
   workNumber: ''
 };
 
@@ -272,6 +275,16 @@ function Search() {
                         emptyOption={true}
                         value={values.tissueTypeName}
                         options={selectOptionValues(searchInfo.tissueTypes, 'name', 'name')}
+                      />
+                    </div>
+                    <div>
+                      <CustomReactSelect
+                        dataTestId={'labwareTypeName'}
+                        label="Labware Type"
+                        name="labwareTypeName"
+                        emptyOption={true}
+                        value={values.labwareTypeName}
+                        options={selectOptionValues(searchInfo.labwareTypes, 'name', 'name')}
                       />
                     </div>
                   </div>

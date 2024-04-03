@@ -1,5 +1,5 @@
 import { assign, createMachine, fromPromise, raise } from 'xstate';
-import { castDraft } from 'immer';
+import { castDraft } from '../../../dependencies/immer';
 import { SearchServiceInterface } from '../../services/searchServiceInterface';
 import { SearchResultsType, ServerErrors } from '../../../types/stan';
 

@@ -14,7 +14,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Heading from '../components/Heading';
-import { visiumLPCytAssistFactory, visiumLPCytAssistXLFactory } from '../lib/factories/labwareFactory';
+import {
+  visiumLPCytAssistFactory,
+  visiumLPCytAssistHDFactory,
+  visiumLPCytAssistXLFactory
+} from '../lib/factories/labwareFactory';
 import MutedText from '../components/MutedText';
 import ScanInput from '../components/scanInput/ScanInput';
 import { objectKeys } from '../lib/helpers';
@@ -124,7 +128,11 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
           value={labwareType}
           emptyOption={true}
           dataTestId="output-labware-type"
-          options={[LabwareTypeName.VISIUM_LP_CYTASSIST, LabwareTypeName.VISIUM_LP_CYTASSIST_XL].map((key) => {
+          options={[
+            LabwareTypeName.VISIUM_LP_CYTASSIST,
+            LabwareTypeName.VISIUM_LP_CYTASSIST_XL,
+            LabwareTypeName.VISIUM_LP_CYTASSIST_HD
+          ].map((key) => {
             return {
               label: key,
               value: key
@@ -293,7 +301,8 @@ const CytAssist = () => {
     (labwareType: string) => {
       const labwareFactories: Record<string, NewLabwareLayout> = {
         [LabwareTypeName.VISIUM_LP_CYTASSIST]: visiumLPCytAssistFactory.build(),
-        [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory.build()
+        [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory.build(),
+        [LabwareTypeName.VISIUM_LP_CYTASSIST_HD]: visiumLPCytAssistHDFactory.build()
       };
       if (!selectedDestination) return;
       const destLabware = (labwareFactories[labwareType] as NewFlaggedLabwareLayout) || initialOutputLabwarePlaceHolder;

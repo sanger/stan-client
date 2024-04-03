@@ -1,7 +1,7 @@
 import { ExtractResultQuery, PassFail } from '../../types/sdk';
 import { assign, createMachine, fromPromise } from 'xstate';
 import { stanCore } from '../../lib/sdk';
-import { castDraft } from 'immer';
+import { castDraft } from '../../dependencies/immer';
 import { ServerErrors } from '../../types/stan';
 
 export interface ExtractResultContext {

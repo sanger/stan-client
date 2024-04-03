@@ -624,7 +624,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
         <Heading level={4}>Output Labware</Heading>
         {slotCopyModes && slotCopyModes.length > 1 && (
           <>
-            <div className="grid grid-cols-2 gap-3">
+            <div>
               <RadioGroup label="Select transfer mode" name={'sectionNumber'} withFormik={false}>
                 {slotCopyModes.map((mode) => (
                   <RadioButtonInput

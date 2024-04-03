@@ -16,7 +16,7 @@ import { buildSampleColors, sortDownRight } from '../../lib/helpers/labwareHelpe
 import { SectionNumberMode } from './SectioningConfirm';
 import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
 import { ClientError } from 'graphql-request';
-import produce from 'immer';
+import { produce } from '../../dependencies/immer';
 
 type SectioningConfirmContext = {
   /**

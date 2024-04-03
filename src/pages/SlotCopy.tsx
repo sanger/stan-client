@@ -51,7 +51,8 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
       destinations: initialOutputSlotCopy,
       sources: [],
       slotCopyResults: [],
-      sourceLabwarePermData: []
+      sourceLabwarePermData: [],
+      destinationSelectionMode: DestinationSelectionMode.DEFAULT
     }
   });
 
@@ -60,10 +61,10 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
 
-  const { serverErrors, sourceLabwarePermData, sources, destinations, slotCopyResults } = current.context;
+  const { serverErrors, sourceLabwarePermData, sources, destinations, slotCopyResults, destinationSelectionMode } =
+    current.context;
 
   const navigate = useNavigate();
-  const destinationSelectionMode = React.useRef(DestinationSelectionMode.DEFAULT);
 
   /**Handler for work number chnage**/
   const handleWorkNumberChange = useCallback(
@@ -112,7 +113,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   /**Check Labware state and Bio state is selected respectively for all source and destinations**/
   const isValidationFailure = () => {
-    if (destinationSelectionMode.current === DestinationSelectionMode.DEFAULT) {
+    if (destinationSelectionMode === DestinationSelectionMode.DEFAULT) {
       return sources.some((src) => !src.labwareState) || destinations.some((dest) => !dest.slotCopyDetails.bioState);
     } else {
       return sources.some((src) => !src.labwareState);
@@ -155,11 +156,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             current={current}
             send={send}
             initialOutputSlotCopy={initialOutputSlotCopy}
-            slotCopyModes={
-              destinationSelectionMode.current === DestinationSelectionMode.DEFAULT
-                ? objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])
-                : [SlotCopyMode.ONE_TO_ONE]
-            }
+            slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
           />
 
           {slotCopyResults.length > 0 && (

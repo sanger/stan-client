@@ -8,9 +8,9 @@ import {
 } from "./sdk";
 import { Location } from "history";
 import { ClientError } from "graphql-request";
-import * as Yup from "yup";
 import { regexSort } from "../lib/helpers";
 import {FunctionComponent} from "react";
+import { GraphQLError } from 'graphql/error';
 /**
  * Union of STAN's {@link OperationType} names
  */
@@ -35,6 +35,7 @@ export enum LabwareTypeName {
   PRE_BARCODED_TUBE = "Prebarcoded tube",
   VISIUM_LP_CYTASSIST= "Visium LP CytAssist",
   VISIUM_LP_CYTASSIST_XL= "Visium LP CytAssist XL",
+  VISIUM_LP_CYTASSIST_HD= "Visium LP CytAssist HD",
   XENIUM = "Xenium"
 
 }
@@ -67,8 +68,8 @@ export interface ServerErrors {
   problems: string[];
 }
 
-type GraphQLErrorWithExtensions = {
-  extensions?: {
+interface GraphQLErrorWithExtensions extends GraphQLError {
+  extensions: {
     problems: Array<string>;
   };
   message: string;
@@ -77,7 +78,7 @@ type GraphQLErrorWithExtensions = {
     column: number;
   }[];
   path: string[];
-};
+}
 
 /**
  * Builds a {@link ServerErrors} object from a ClientError

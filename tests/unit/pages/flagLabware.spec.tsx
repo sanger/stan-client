@@ -16,6 +16,9 @@ describe('On load', () => {
     it('renders page the page without clutching', () => {
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Flag Labware');
     });
+    it('renders SGP number select number', () => {
+      expect(screen.getByTestId('workNumber')).toBeVisible();
+    });
     it('renders the labware scanner', () => {
       expect(screen.getByTestId('input')).toBeVisible();
     });

@@ -4,7 +4,7 @@ import { tissue } from '../../helpers/labwareHelper';
 import { LabwareFieldsFragment } from '../../../types/sdk';
 import { assign, MachineImplementations, sendParent } from 'xstate';
 import { LayoutEvents } from './layoutEvents';
-import produce from 'immer';
+import { produce } from '../../../dependencies/immer';
 
 export const layoutMachineKey = 'layoutMachine';
 

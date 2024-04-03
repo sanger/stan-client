@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import {createRoot} from 'react-dom/client';
-import { enableAllPlugins } from "immer";
+import { enableAllPlugins } from './dependencies/immer';
 import "./styles/index.css";
 import App from "./App";
 

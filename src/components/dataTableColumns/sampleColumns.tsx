@@ -1,6 +1,7 @@
 import { Column } from 'react-table';
 import { LabwareFieldsFragment, SampleFieldsFragment, SamplePositionFieldsFragment } from '../../types/sdk';
 import { capitalize } from 'lodash';
+import MutedText from '../MutedText';
 
 /**
  * Type that can be used for displaying a Sample in a table row, along with its slot address
@@ -70,7 +71,12 @@ export const replicateNumber: ColumnFactory = () => ({
 
 export const spatialLocation: ColumnFactory = () => ({
   Header: 'Spatial Location',
-  accessor: (sample) => sample.tissue.spatialLocation.code
+  accessor: (sample) => (
+    <div>
+      {sample.tissue.spatialLocation.code}
+      <MutedText>{sample.tissue.spatialLocation.name}</MutedText>
+    </div>
+  )
 });
 
 export const lifeStage: ColumnFactory = () => ({

@@ -1,5 +1,5 @@
 import "../src/styles/index.css";
-import { enableAllPlugins } from "immer";
+import { enableAllPlugins } from '../src/dependencies/immer';
 enableAllPlugins();
 
 /**
