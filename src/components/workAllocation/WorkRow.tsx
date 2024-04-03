@@ -359,7 +359,6 @@ export default function WorkRow({
         {isEditEnabledForStatus(work.status) &&
           renderWorkNumValueField(work.workNumber, work.numOriginalSamples ?? undefined, 'originalSamples')}
       </TableCell>
-
     </tr>
   );
 }
