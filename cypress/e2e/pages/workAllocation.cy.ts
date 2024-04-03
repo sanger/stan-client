@@ -238,7 +238,7 @@ describe('Work Allocation', () => {
       });
 
       it('displays the table sorted with SGP number in ascending order', () => {
-        cy.get('td').eq(1).should('have.text', 'R&D1005');
+        cy.get('td').eq(3).should('have.text', 'R&D1005');
       });
     });
   });
