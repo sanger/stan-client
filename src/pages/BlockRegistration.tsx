@@ -172,7 +172,7 @@ const displayWarningMsg = (msg: string) => {
 
 function BlockRegistration() {
   const registrationInfo = useLoaderData() as GetRegistrationInfoQuery;
-  const resultColumns = [columns.barcode(), columns.labwareType(), columns.externalName()];
+  const resultColumns = [columns.barcode(), columns.labwareType(), columns.externalName(), columns.tissueType()];
   const validationSchema = useMemo(() => {
     return buildRegistrationSchema(registrationInfo);
   }, [registrationInfo]);

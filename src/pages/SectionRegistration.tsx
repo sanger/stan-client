@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import AppShell from '../components/AppShell';
 import { Formik } from 'formik';
 import SectionRegistrationForm from './registration/SectionRegistrationForm';
-import columns from '../components/dataTableColumns/labwareColumns';
 import RegistrationSuccess from './registration/RegistrationSuccess';
 import Warning from '../components/notifications/Warning';
 import {
@@ -28,6 +27,8 @@ import { toast } from 'react-toastify';
 import warningToast from '../components/notifications/WarningToast';
 import { UploadResult } from '../components/upload/useUpload';
 import { fromPromise } from 'xstate';
+import * as sampleColumns from '../components/dataTableColumns/sampleColumns';
+import { SampleDataTableRow } from '../components/dataTableColumns/sampleColumns';
 
 const availableLabware: Array<LabwareTypeName> = [
   LabwareTypeName.FOUR_SLOT_SLIDE,
@@ -258,14 +259,28 @@ export const SectionRegistration: React.FC = () => {
 
   const registrationResult =
     current.matches('submitted') && submissionResult ? submissionResult.registerSections.labware : fileRegisterResult;
-  if (registrationResult) {
-    return (
-      <RegistrationSuccess successData={registrationResult} columns={[columns.barcode(), columns.labwareType()]} />
-    );
-  } else if (fileRegisterResult) {
-    return (
-      <RegistrationSuccess successData={fileRegisterResult} columns={[columns.barcode(), columns.labwareType()]} />
-    );
+  const result = registrationResult || fileRegisterResult;
+  if (result) {
+    const columnsToDisplay = [
+      sampleColumns.barcode(),
+      sampleColumns.labwareType(),
+      sampleColumns.externalId(),
+      sampleColumns.tissueType(),
+      sampleColumns.sectionNumber()
+    ];
+    const samples: SampleDataTableRow[] = result.flatMap((labware) => {
+      return labware.slots.flatMap((slot) => {
+        return slot.samples.map((sample) => {
+          return {
+            ...sample,
+            barcode: labware.barcode,
+            labwareType: labware.labwareType.name,
+            slotAddress: slot.address
+          };
+        });
+      });
+    });
+    return <RegistrationSuccess successData={samples} columns={columnsToDisplay} />;
   }
 
   return (

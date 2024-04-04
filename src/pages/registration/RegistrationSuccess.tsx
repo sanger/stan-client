@@ -12,18 +12,19 @@ import ButtonBar from '../../components/ButtonBar';
 import AppShell from '../../components/AppShell';
 import { Column } from 'react-table';
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
+import { SampleDataTableRow } from '../../components/dataTableColumns/sampleColumns';
 
 /**Represent an object containing LabwareFieldsFragment member**/
 export interface LabwareContainType extends Object {
   labware: LabwareFieldsFragment;
 }
 /**Registration results on success should be either of LabwareContainType ( to accommodate any fields additional to LabwareFieldsFragment members) or LabwareFieldsFragment**/
-type RegistrationSuccessProps<T extends Required<LabwareContainType> | LabwareFieldsFragment> = {
+type RegistrationSuccessProps<T extends Required<LabwareContainType> | LabwareFieldsFragment | SampleDataTableRow> = {
   successData: T[];
   columns: Column<T>[];
 };
 
-const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFieldsFragment>({
+const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFieldsFragment | SampleDataTableRow>({
   successData,
   columns
 }: RegistrationSuccessProps<T>) => {
