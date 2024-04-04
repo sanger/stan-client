@@ -9,6 +9,10 @@ import { ConfirmationModal } from '../modal/ConfirmationModal';
 import UploadIcon from '../icons/UploadIcon';
 import MutedText from '../MutedText';
 import PassIcon from '../icons/PassIcon';
+import ClashModal from '../../pages/registration/ClashModal';
+import { RegisterClash, RegisterResultFieldsFragment } from '../../types/sdk';
+import labwareFactory from '../../lib/factories/labwareFactory';
+import { tissueFactory } from '../../lib/factories/sampleFactory';
 
 export type ConfirmUploadProps = {
   confirmMessage: string;
@@ -35,6 +39,18 @@ interface FileUploaderProps<T extends object> {
  * @param allowMultipleFiles - Allow multiple files to be selected and uploaded
  * @constructor
  */
+
+const toRegisterCrashArray = (clashes: Record<string, any>[]): RegisterClash[] => {
+  return clashes.map(
+    (clash) =>
+      ({
+        tissue: tissueFactory.build({ externalName: clash.tissue.externalName }),
+        labware: clash.labware.map((lw: Record<string, any>) =>
+          labwareFactory.build({ barcode: lw.barcode, labwareType: { name: lw.labwareType.name } })
+        )
+      }) as RegisterClash
+  );
+};
 const FileUploader = <T extends object>({
   url,
   enableUpload,
@@ -48,6 +64,7 @@ const FileUploader = <T extends object>({
   const [confirmUploadOutcome, setConfirmUploadOutcome] = React.useState<ConfirmUploadProps | undefined>();
   const [fileAlreadySelectedError, setFileAlreadySelectedError] = React.useState<string>('');
   const [filesUploadResult, setFilesUploadResult] = React.useState<UploadResult<any>[]>([]);
+  const [clashes, setClashes] = React.useState<RegisterResultFieldsFragment | undefined>(undefined);
 
   const { initialiseUpload, requestUpload, uploadResult } = useUpload(url, errorField);
 
@@ -75,6 +92,16 @@ const FileUploader = <T extends object>({
 
       //If some files are uploaded successfully, notify upload outcome with success results
       if (successResults.length > 0) {
+        const resultWithClashes = successResults.filter((successResult) => successResult.response.clashes);
+        if (resultWithClashes.length > 0) {
+          const clashes = resultWithClashes.flatMap((res) => toRegisterCrashArray(res.response.clashes));
+          setClashes((prev) => {
+            if (!prev) return { clashes, labware: [], labwareSolutions: [] };
+            return { ...prev, clashes: [...prev.clashes, ...clashes] };
+          });
+          return;
+        }
+
         notifyUploadOutcome?.(successResults);
         //If all files are uploaded successfully, reset files and upload results
         if (failedResults.length === 0) {
@@ -100,14 +127,17 @@ const FileUploader = <T extends object>({
   ]);
 
   /**Callback function to perform upload**/
-  const uploadFiles = React.useCallback(() => {
-    if (files.length === 0) return;
-    setUploadInProgress(undefined);
-    setConfirmUploadOutcome(undefined);
-    files.forEach((file) => {
-      requestUpload(file, setUploadInProgress);
-    });
-  }, [setUploadInProgress, setConfirmUploadOutcome, files, requestUpload]);
+  const uploadFiles = React.useCallback(
+    (existingExternalNames?: string[]) => {
+      if (files.length === 0) return;
+      setUploadInProgress(undefined);
+      setConfirmUploadOutcome(undefined);
+      files.forEach((file) => {
+        requestUpload(file, setUploadInProgress, existingExternalNames);
+      });
+    },
+    [setUploadInProgress, setConfirmUploadOutcome, files, requestUpload]
+  );
 
   /**Callback function to handle file change**/
   const onFileChange = React.useCallback(
@@ -184,6 +214,19 @@ const FileUploader = <T extends object>({
           <MutedText className={'text-gray-600'}>Please select an SGP Number to enable file selection</MutedText>
         )}
         {fileAlreadySelectedError && <MutedText className={'text-red-400'}>{fileAlreadySelectedError}</MutedText>}
+        {clashes && (
+          <ClashModal
+            registrationResult={clashes}
+            onConfirm={() => {
+              const existingExternalNames: string[] = clashes.clashes.map((clash) => clash.tissue.externalName!);
+              uploadFiles(existingExternalNames);
+              setClashes(undefined);
+            }}
+            onCancel={() => {
+              setClashes(undefined);
+            }}
+          />
+        )}
       </div>
 
       <div data-testid={'file-description'} className={'flex flex-col w-full p-2 border-b-2 border-gray-200 bg-white'}>

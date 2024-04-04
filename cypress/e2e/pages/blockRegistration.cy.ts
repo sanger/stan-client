@@ -4,6 +4,7 @@ import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/r
 import { RegisterTissuesMutation, RegisterTissuesMutationVariables } from '../../../src/types/sdk';
 import { tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
+
 describe('Block Registration Page', () => {
   beforeEach(() => {
     cy.msw().then(({ worker, graphql }) => {
@@ -70,6 +71,40 @@ describe('Block Registration Page', () => {
       });
       it('should display an error', () => {
         cy.findByText('Error Message').should('be.visible');
+      });
+    });
+    context('File contains existing external names', () => {
+      context('should alert the user', () => {
+        before(() => {
+          uploadFileWithClashes();
+        });
+        it('displays the clashModal', () => {
+          cy.findByText('External Name Already In Use').should('be.visible');
+        });
+      });
+      context('On confirm', () => {
+        before(() => {
+          cy.msw().then(({ worker, graphql }) => {
+            worker.use(
+              http.post('/register/block', () => {
+                return HttpResponse.json({ barcodes: ['STAN-18418'] }, { status: 200 });
+              })
+            );
+          });
+          cy.findByRole('button', { name: 'Confirm' }).click({ force: true });
+        });
+        it('should show the registered block', () => {
+          cy.findByText('Registration complete').should('be.visible');
+        });
+      });
+      context('On cancel', () => {
+        before(() => {
+          uploadFileWithClashes();
+          cy.findByRole('button', { name: 'Cancel' }).click({ force: true });
+        });
+        it('should not upload the file', () => {
+          cy.findByTestId('upload-btn').should('be.enabled');
+        });
       });
     });
   });
@@ -303,3 +338,44 @@ function fillInRegistrationForm() {
   selectOption('Fixative', 'None');
   selectOption('Medium', 'Paraffin');
 }
+
+const uploadFileWithClashes = () => {
+  cy.visit('/admin/registration');
+  cy.get('[type="radio"][name="file-registration-btn"]').check();
+  cy.msw().then(({ worker, graphql }) => {
+    worker.use(
+      http.post('/register/block', () => {
+        return HttpResponse.json(
+          {
+            clashes: [
+              {
+                labware: [
+                  {
+                    labwareType: {
+                      name: 'Proviasette'
+                    },
+                    barcode: 'STAN-18418'
+                  }
+                ],
+                tissue: {
+                  externalName: 'EXT17'
+                }
+              }
+            ]
+          },
+          { status: 200 }
+        );
+      })
+    );
+  });
+  cy.get('input[type=file]').selectFile(
+    {
+      contents: Cypress.Buffer.from('file contents'),
+      fileName: 'file2.xlsx',
+      mimeType: 'text/plain',
+      lastModified: Date.now()
+    },
+    { force: true }
+  );
+  cy.findByTestId('upload-btn').click();
+};

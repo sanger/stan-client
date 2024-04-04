@@ -24,13 +24,24 @@ export function useUpload<T>(url: string, errorField?: string) {
     setUploadResult(undefined);
   }, [setUploadResult]);
 
-  /**External request for upload**/
+  /**External request for upload
+   * @param {File} - The file to be uploaded.
+   * @param {function} - A callback function to notify upload progress.
+   * @param {string[]} - An array of clashing external names that the user confirmed to upload (used by block registration by file upload)
+   */
   const requestUpload = React.useCallback(
-    (file: File, notifyUploadProgress?: (uploadProgress: UploadProgress | undefined) => void) => {
+    (
+      file: File,
+      notifyUploadProgress?: (uploadProgress: UploadProgress | undefined) => void,
+      existingExternalNames?: string[]
+    ) => {
       const retUploadResult: UploadResult<T> = { file, success: false, error: undefined, response: undefined };
       async function postUpload(url: string, file: File) {
         const formData = new FormData();
         formData.append('file', file);
+        if (existingExternalNames) {
+          formData.append('existingExternalNames', existingExternalNames.join(','));
+        }
         return await fetch(url, {
           method: 'POST',
           credentials: 'include',
