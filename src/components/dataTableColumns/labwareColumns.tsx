@@ -1,11 +1,12 @@
 import React from 'react';
 import { CellProps, Column } from 'react-table';
-import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment } from '../../types/sdk';
+import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, SampleFieldsFragment } from '../../types/sdk';
 import Circle from '../Circle';
 import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
-import { valueFromSamples } from './index';
+import { joinUnique, samplesFromLabwareOrSLot, valueFromSamples } from './index';
 import StyledLink from '../StyledLink';
 import FlagIcon from '../icons/FlagIcon';
+import MutedText from '../MutedText';
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
@@ -81,10 +82,20 @@ const tissueType: ColumnFactory = () => {
 /**
  * Spatial location code for the first sample in the first slot of the labware
  */
+
+export const spatialLocationColumnDiv = (samples: SampleFieldsFragment[]) => (
+  <div>
+    {joinUnique(samples.map((sample) => String(sample.tissue.spatialLocation.code)))}
+    <MutedText>{joinUnique(samples.map((sample) => String(sample.tissue.spatialLocation.name)))}</MutedText>
+  </div>
+);
 const spatialLocation: ColumnFactory = () => {
   return {
     Header: 'Spatial location',
-    accessor: (labware) => valueFromSamples(labware, (sample) => String(sample.tissue.spatialLocation.code))
+    accessor: (labware) => {
+      const samples = samplesFromLabwareOrSLot(labware);
+      return spatialLocationColumnDiv(samples);
+    }
   };
 };
 
