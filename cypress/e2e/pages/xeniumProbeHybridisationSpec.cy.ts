@@ -48,7 +48,7 @@ describe('Xenium Probe Hybridisation', () => {
       cy.findByTestId('STAN-3111-workNumber').should('be.visible');
       cy.findByTestId('STAN-3111-0-name').should('be.visible');
       cy.findByTestId('STAN-3111-0-lot').should('be.visible');
-      cy.findByTestId('STAN-3111-0-plex').should('be.visible');
+      cy.findByTestId('STAN-3111-0-plex').scrollIntoView().should('be.visible');
       cy.findByTestId('STAN-3111-0-costing').should('be.visible');
       cy.findByTestId('STAN-3111-0-action').should('be.visible');
       //Should not display remove button
@@ -103,7 +103,7 @@ describe('Xenium Probe Hybridisation', () => {
       before(() => {
         selectOption('probe-name', 'Custom breast');
         cy.findByTestId('probe-lot').type('1234');
-        cy.findByTestId('probe-plex').type('2');
+        cy.findByTestId('probe-plex').scrollIntoView().type('2');
         selectOption('probe-costing', 'Faculty');
         cy.findByRole('button', { name: 'Add to all' }).click();
       });
@@ -111,11 +111,8 @@ describe('Xenium Probe Hybridisation', () => {
         //Should display added row
         cy.findByTestId('STAN-3111-1-name').should('be.visible');
         shouldDisplaySelectedValue('STAN-3111-1-name', 'Custom breast');
-        cy.findByTestId('STAN-3111-1-lot').should('be.visible');
         cy.findByTestId('STAN-3111-1-lot').should('have.value', '1234');
-        cy.findByTestId('STAN-3111-1-plex').should('be.visible');
-        cy.findByTestId('STAN-3111-1-plex').should('have.value', '2');
-        cy.findByTestId('STAN-3111-1-costing').scrollIntoView();
+        cy.findByTestId('STAN-3111-1-plex').scrollIntoView().should('have.value', '2');
         shouldDisplaySelectedValue('STAN-3111-1-costing', 'Faculty');
 
         //Display only remove for first row
@@ -148,8 +145,7 @@ describe('Xenium Probe Hybridisation', () => {
         //Displays only one row with value
         shouldDisplaySelectedValue('STAN-3111-0-name', 'Custom breast');
         cy.findByTestId('STAN-3111-0-lot').should('have.value', '1234');
-        cy.findByTestId('STAN-3111-0-plex').should('have.value', '2');
-        cy.findByTestId('STAN-3111-0-costing').scrollIntoView();
+        cy.findByTestId('STAN-3111-0-plex').scrollIntoView().should('have.value', '2');
         shouldDisplaySelectedValue('STAN-3111-0-costing', 'Faculty');
         //Action column updated
         cy.findByTestId('STAN-3111-0-action').within(() => {
@@ -169,7 +165,7 @@ describe('Xenium Probe Hybridisation', () => {
         //Displays only one row with value
         shouldDisplaySelectedValue('STAN-3111-1-name', '');
         cy.findByTestId('STAN-3111-1-lot').should('have.value', '');
-        cy.findByTestId('STAN-3111-1-plex').should('have.value', '');
+        cy.findByTestId('STAN-3111-1-plex').scrollIntoView().should('have.value', '');
         shouldDisplaySelectedValue('STAN-3111-1-costing', '');
         //Action column updated
         cy.findByTestId('STAN-3111-1-action').within(() => {
@@ -188,7 +184,7 @@ describe('Xenium Probe Hybridisation', () => {
       cy.findByTestId('STAN-3112-workNumber').should('be.visible');
       cy.findByTestId('STAN-3112-0-name').should('be.visible');
       cy.findByTestId('STAN-3112-0-lot').should('be.visible');
-      cy.findByTestId('STAN-3112-0-plex').should('be.visible');
+      cy.findByTestId('STAN-3112-0-plex').scrollIntoView().should('be.visible');
       cy.findByTestId('STAN-3112-0-costing').should('be.visible');
       cy.findByTestId('STAN-3112-0-action').should('be.visible');
     });
@@ -200,7 +196,7 @@ describe('Xenium Probe Hybridisation', () => {
         selectOption('STAN-3112-workNumber', 'SGP1008');
         selectOption('STAN-3112-0-name', 'Custom breast');
         cy.findByTestId('STAN-3112-0-lot').type('1234');
-        cy.findByTestId('STAN-3112-0-plex').type('2');
+        cy.findByTestId('STAN-3112-0-plex').scrollIntoView().type('2');
         selectOption('STAN-3112-0-costing', 'SGP');
       });
       it('should enable save button', () => {
@@ -231,7 +227,7 @@ describe('Xenium Probe Hybridisation', () => {
         cy.findByRole('button', { name: 'Save' }).should('be.enabled');
       });
       it('changes status on  plex field', () => {
-        cy.findByTestId('STAN-3112-0-plex').clear();
+        cy.findByTestId('STAN-3112-0-plex').scrollIntoView().clear();
         cy.findByRole('button', { name: 'Save' }).should('be.disabled');
         cy.findByTestId('STAN-3112-0-plex').type('2');
         cy.findByRole('button', { name: 'Save' }).should('be.enabled');
