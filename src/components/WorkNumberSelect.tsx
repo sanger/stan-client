@@ -150,16 +150,10 @@ export default function WorkNumberSelect({
 
   const validateWorkNumber = () => {
     if (requiredField) {
-      if (multiple) {
-        if (Array.isArray(selectedWork) && selectedWork.length === 0) {
-          setError('At least one work number must be selected');
-        }
+      if (!selectedWork || (Array.isArray(selectedWork) && selectedWork.length === 0)) {
+        setError(multiple ? 'At least one work number must be selected' : 'SGP number is required');
       } else {
-        if (!currentSelectedWork) {
-          setError('SGP number is required');
-        } else {
-          setError('');
-        }
+        setError('');
       }
     }
   };
