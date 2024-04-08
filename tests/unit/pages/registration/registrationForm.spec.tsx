@@ -1,4 +1,4 @@
-import { act, screen, render, cleanup, waitFor, fireEvent, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { GetRegistrationInfoQuery, LabwareType, LifeStage } from '../../../../src/types/sdk';
 import solutionRepository from '../../../../src/mocks/repositories/solutionRepository';
 import hmdmcRepository from '../../../../src/mocks/repositories/hmdmcRepository';
@@ -232,7 +232,8 @@ describe('RegistrationForm', () => {
                 replicateNumber: '1'
               }
             ],
-            sampleCollectionDate: ''
+            sampleCollectionDate: '',
+            workNumber: ''
           };
           renderOriginalRegistrationForm(tissues);
         });
@@ -401,7 +402,8 @@ describe('RegistrationForm', () => {
                   medium: 'OCT'
                 }
               ],
-              sampleCollectionDate: ''
+              sampleCollectionDate: '',
+              workNumber: ''
             };
 
             renderBlockRegistrationForm(tissues);
