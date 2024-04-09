@@ -1,7 +1,13 @@
 import React from 'react';
 import StanForm from './StanForm';
 import { stanCore } from '../lib/sdk';
-import { LabwareFieldsFragment, UnreleaseMutation, UnreleaseRequest } from '../types/sdk';
+import {
+  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
+  UnreleaseLabware,
+  UnreleaseMutation,
+  UnreleaseRequest
+} from '../types/sdk';
 import * as Yup from 'yup';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
@@ -17,6 +23,9 @@ import FormikInput from '../components/forms/Input';
 import { FieldArray } from 'formik';
 import { identity } from 'lodash';
 import WorkNumberSelect from '../components/WorkNumberSelect';
+import { parseQueryString } from '../lib/helpers';
+import { useLocation } from 'react-router-dom';
+import LoadingSpinner from '../components/icons/LoadingSpinner';
 
 const validationSchema = Yup.object().shape({
   labware: Yup.array()
@@ -31,15 +40,56 @@ const validationSchema = Yup.object().shape({
     )
 });
 
+const toUnreleaseLabware = (labware: LabwareFlaggedFieldsFragment, workNumber: string): UnreleaseLabware => ({
+  barcode: labware.barcode,
+  highestSection: hasBlock(labware) ? labware.slots[0].blockHighestSection : undefined,
+  workNumber
+});
+
+const fetchInitialLabware = async (initialBarcodes: string[]) => {
+  if (initialBarcodes.length === 0) return [];
+  return await Promise.all(
+    initialBarcodes.map((barcode) => stanCore.FindFlaggedLabware({ barcode }).then((labware) => labware.labwareFlagged))
+  );
+};
+
 export default function Unrelease() {
   const [workNumber, setWorkNumber] = React.useState('');
+
+  const location = useLocation();
+
+  const initialBarcodes: string[] = React.useMemo(() => {
+    const queryString = parseQueryString(location.search);
+    if (!queryString['barcode']) return [];
+    return Array.isArray(queryString['barcode'])
+      ? queryString['barcode'].map((barcode: string) => decodeURIComponent(barcode))
+      : [decodeURIComponent(queryString['barcode'])];
+  }, [location.search]);
+
+  const [isFetching, setIsFetching] = React.useState(true);
+  const initialLabware = React.useRef<LabwareFlaggedFieldsFragment[]>([]);
+  fetchInitialLabware(initialBarcodes)
+    .then((labwares) => {
+      initialLabware.current = labwares;
+      setIsFetching(false);
+    })
+    .catch((error) => {
+      console.error(error);
+    })
+    .finally(() => {
+      setIsFetching(false);
+    });
+
+  if (isFetching) {
+    return <LoadingSpinner />;
+  }
   return (
     <StanForm<UnreleaseRequest, UnreleaseMutation>
       title={'Unrelease'}
       onSubmit={(request) => stanCore.Unrelease({ request })}
       validationSchema={validationSchema}
       initialValues={{
-        labware: []
+        labware: initialLabware.current.map((lw) => toUnreleaseLabware(lw, workNumber))
       }}
       summary={(props) => (
         <p>
@@ -47,45 +97,49 @@ export default function Unrelease() {
         </p>
       )}
     >
-      {(formikProps) => (
-        <motion.div variants={variants.fadeInWithLift}>
-          <motion.div variants={variants.fadeInWithLift} className={'mb-8'}>
-            <Heading level={3}>SGP Number</Heading>
-            <p className="mt-2">Please select an SGP number to associate with all labware</p>
-            <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
-              <WorkNumberSelect
-                onWorkNumberChange={(workNumber) => {
-                  setWorkNumber(workNumber);
-                  formikProps.values.labware.forEach((lw) => (lw.workNumber = workNumber));
+      {(formikProps) => {
+        return (
+          <motion.div variants={variants.fadeInWithLift}>
+            <motion.div variants={variants.fadeInWithLift} className={'mb-8'}>
+              <Heading level={3}>SGP Number</Heading>
+              <p className="mt-2">Please select an SGP number to associate with all labware</p>
+              <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
+                <WorkNumberSelect
+                  onWorkNumberChange={(workNumber) => {
+                    setWorkNumber(workNumber);
+                    formikProps.values.labware.forEach((lw) => (lw.workNumber = workNumber));
+                  }}
+                />
+              </motion.div>
+            </motion.div>
+
+            <motion.div variants={variants.fadeInWithLift} className="space-y-4">
+              <Heading level={3}>Labware</Heading>
+              <MutedText>Please scan in the labware you wish to unrelease.</MutedText>
+              <FieldArray name={'labware'}>
+                {(helpers) => {
+                  return (
+                    <LabwareScanner
+                      initialLabwares={initialLabware.current}
+                      onAdd={(lw) => helpers.push(toUnreleaseLabware(lw, workNumber))}
+                      onRemove={(labware, index) => helpers.remove(index)}
+                    >
+                      <LabwareScanPanel
+                        columns={[
+                          columns.barcode(),
+                          columns.externalName(),
+                          sectionNumberInputIfBlock(formikProps.values)
+                        ]}
+                      />
+                    </LabwareScanner>
+                  );
                 }}
-              />
+              </FieldArray>
+              <FormikErrorMessage name={'barcodes'} />
             </motion.div>
           </motion.div>
-          <motion.div variants={variants.fadeInWithLift} className="space-y-4">
-            <Heading level={3}>Labware</Heading>
-            <MutedText>Please scan in the labware you wish to unrelease.</MutedText>
-            <FieldArray name={'labware'}>
-              {(helpers) => (
-                <LabwareScanner
-                  onAdd={(lw) =>
-                    helpers.push({
-                      barcode: lw.barcode,
-                      highestSection: hasBlock(lw) ? lw.slots[0].blockHighestSection : undefined,
-                      workNumber: workNumber
-                    })
-                  }
-                  onRemove={(labware, index) => helpers.remove(index)}
-                >
-                  <LabwareScanPanel
-                    columns={[columns.barcode(), columns.externalName(), sectionNumberInputIfBlock(formikProps.values)]}
-                  />
-                </LabwareScanner>
-              )}
-            </FieldArray>
-            <FormikErrorMessage name={'barcodes'} />
-          </motion.div>
-        </motion.div>
-      )}
+        );
+      }}
     </StanForm>
   );
 }

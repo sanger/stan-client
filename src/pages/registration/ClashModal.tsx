@@ -3,9 +3,10 @@ import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../components/Mod
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../components/Table';
 import StyledLink from '../../components/StyledLink';
 import ExternalIcon from '../../components/icons/ExternalIcon';
-import PinkButton from '../../components/buttons/PinkButton';
-import WhiteButton from '../../components/buttons/WhiteButton';
 import { RegisterResultFieldsFragment } from '../../types/sdk';
+import { Link } from 'react-router-dom';
+import BlueButton from '../../components/buttons/BlueButton';
+import MutedText from '../../components/MutedText';
 
 type ClashModalProps = {
   registrationResult: RegisterResultFieldsFragment;
@@ -14,6 +15,12 @@ type ClashModalProps = {
 };
 
 export default function ClashModal({ registrationResult, onConfirm, onCancel }: ClashModalProps) {
+  const linkToUnrelease: string = registrationResult.clashes
+    .map((clash) => {
+      return clash.labware.map((lw) => `barcode=${lw.barcode}`).join('&');
+    })
+    .join('&');
+
   return (
     <Modal show={true}>
       <ModalHeader>External Name Already In Use</ModalHeader>
@@ -51,15 +58,19 @@ export default function ClashModal({ registrationResult, onConfirm, onCancel }: 
             Are you sure you want to continue? New labware will be created for tissues with pre-existing external
             identifiers.
           </p>
+          <MutedText>Click on Unrelease, to navigate to the Unrelease page</MutedText>
         </div>
       </ModalBody>
       <ModalFooter>
-        <PinkButton type="button" onClick={onConfirm} className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm">
+        <BlueButton onClick={onConfirm} className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm">
           Confirm
-        </PinkButton>
-        <WhiteButton type="button" onClick={onCancel} className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+        </BlueButton>
+        <Link to={`/admin/unrelease?${linkToUnrelease}`} className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+          <BlueButton action="tertiary">Unrelease</BlueButton>
+        </Link>
+        <BlueButton action="secondary" onClick={onCancel} className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
           Cancel
-        </WhiteButton>
+        </BlueButton>
       </ModalFooter>
     </Modal>
   );
