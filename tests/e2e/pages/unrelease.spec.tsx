@@ -3,13 +3,32 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe } from '@jest/globals';
+import * as reactDom from 'react-router-dom';
 import { BrowserRouter } from 'react-router-dom';
 import Unrelease from '../../../src/pages/Unrelease';
 import { selectFocusBlur, selectSGPNumber, waitFor } from '../../generic/utilities';
 import { server } from '../../../src/mocks/server';
 import { graphql, HttpResponse } from 'msw';
+import * as sdk from '../../../src/lib/sdk';
+import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHandlers';
+import { uniqueId } from 'lodash';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom')
+}));
+require('react-router-dom').useLocation = jest.fn();
+
 describe('Unrelease', () => {
   beforeEach(() => {
+    jest.spyOn(reactDom, 'useLocation').mockImplementation(() => {
+      return {
+        key: uniqueId(),
+        pathname: '/admin/unrelease',
+        search: '',
+        hash: '',
+        state: null
+      };
+    });
     render(
       <BrowserRouter>
         <Unrelease />
@@ -20,8 +39,10 @@ describe('Unrelease', () => {
     jest.resetAllMocks();
   });
   describe('on initialisation', () => {
-    it('should render without crashing', () => {
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Unrelease');
+    it('should render without crashing', async () => {
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Unrelease');
+      });
     });
     it('should display a SGP number field', async () => {
       await waitFor(() => {
@@ -30,7 +51,7 @@ describe('Unrelease', () => {
     });
     it('should display an enabled labware scan input', async () => {
       await waitFor(() => {
-        const labwareInput = screen.getByText('Labware');
+        const labwareInput = screen.getByTestId('input');
         expect(labwareInput).toBeVisible();
         expect(labwareInput).toBeEnabled();
       });
@@ -55,10 +76,8 @@ describe('Unrelease', () => {
       });
     });
     it('when SGP Number not given, it shows an error', async () => {
-      act(() => {
-        selectFocusBlur('workNumber');
-      });
-      await waitFor(() => {
+      await waitFor(async () => {
+        await selectFocusBlur('workNumber');
         expect(screen.getByText('SGP number is required')).toBeInTheDocument();
       });
     });
@@ -104,6 +123,64 @@ describe('Unrelease', () => {
           expect(screen.getAllByText('Operation Complete')[0]).toBeVisible();
         });
       });
+    });
+  });
+});
+describe('loading the page with valid barcode(s) in the query string', () => {
+  beforeEach(() => {
+    jest.spyOn(sdk.stanCore, 'FindFlaggedLabware').mockResolvedValue({
+      labwareFlagged: createFlaggedLabware('STAN-2233')
+    });
+    jest.spyOn(reactDom, 'useLocation').mockImplementation(() => {
+      return {
+        key: uniqueId(),
+        pathname: '/admin/unrelease',
+        search: 'barcode=STAN-2233',
+        hash: '',
+        state: null
+      };
+    });
+  });
+  it('should load the page with the labware ready to unrelease', async () => {
+    act(() => {
+      render(
+        <BrowserRouter>
+          <Unrelease />
+        </BrowserRouter>
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('table')).toBeVisible();
+      expect(screen.getByText('STAN-2233')).toBeVisible();
+    });
+  });
+});
+
+describe('loading the page with invalid query string', () => {
+  beforeEach(() => {
+    jest.spyOn(reactDom, 'useLocation').mockImplementation(() => {
+      return {
+        key: uniqueId(),
+        pathname: '/admin/unrelease',
+        search: 'nothing=here',
+        hash: '',
+        state: null
+      };
+    });
+  });
+  it('should load the page ignoring the invalid string query', async () => {
+    act(() => {
+      render(
+        <BrowserRouter>
+          <Unrelease />
+        </BrowserRouter>
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Unrelease');
+      expect(screen.getByText('SGP Number')).toBeVisible();
+      expect(screen.getByTestId('input')).toBeVisible();
+      expect(screen.queryByRole('table')).not.toBeInTheDocument();
     });
   });
 });
