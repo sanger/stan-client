@@ -120,7 +120,7 @@ export const CellSegmentation = ({ initialFormValues = defaultFormValues }) => {
               validationSchema={validationSchema}
               validateOnMount={true}
             >
-              {({ values, setValues, isValid }) => (
+              {({ values, setValues, setFieldValue, isValid }) => (
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
                     <Heading level={3}>Labware</Heading>
@@ -263,7 +263,9 @@ export const CellSegmentation = ({ initialFormValues = defaultFormValues }) => {
                                             emptyOption={true}
                                             isMulti={true}
                                             onChange={async (val) => {
-                                              const commentsAll = (val as OptionType[]).map((v) => v.value);
+                                              const commentsAll = (val as OptionType[])
+                                                .filter((v) => v.label.length > 0)
+                                                .map((v) => v.value);
                                               await setValues((prev) => {
                                                 let cellSegmentation = [...prev.cellSegmentation];
                                                 cellSegmentation.forEach((cellSeg) => {
@@ -297,9 +299,14 @@ export const CellSegmentation = ({ initialFormValues = defaultFormValues }) => {
                                             <TableCell>{cellSeg.labware.barcode}</TableCell>
                                             <TableCell>
                                               <WorkNumberSelect
-                                                name={`cellSegmentation.${index}.workNumber`}
                                                 dataTestId={`cellSegmentation.${index}.workNumber`}
                                                 workNumber={cellSeg.workNumber}
+                                                onWorkNumberChange={async (workNumber) => {
+                                                  await setFieldValue(
+                                                    `cellSegmentation.${index}.workNumber`,
+                                                    workNumber
+                                                  );
+                                                }}
                                               />
                                             </TableCell>
                                             <TableCell>
@@ -321,12 +328,18 @@ export const CellSegmentation = ({ initialFormValues = defaultFormValues }) => {
                                             </TableCell>
                                             <TableCell>
                                               <CustomReactSelect
-                                                options={selectOptionValues(comments, 'text', 'id')}
                                                 name={`cellSegmentation.${index}.comments`}
+                                                options={selectOptionValues(comments, 'text', 'id')}
                                                 dataTestId={`cellSegmentation.${index}.comments`}
                                                 emptyOption={true}
                                                 isMulti={true}
                                                 value={cellSeg.comments ?? []}
+                                                onChange={async (val) => {
+                                                  const selected = (val as OptionType[])
+                                                    .filter((v) => v.label.length > 0)
+                                                    .map((v) => v.value);
+                                                  await setFieldValue(`cellSegmentation.${index}.comments`, selected);
+                                                }}
                                               />
                                             </TableCell>
                                           </tr>
