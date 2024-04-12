@@ -1,0 +1,10 @@
+mutation Segmentation($request: SegmentationRequest!) {
+    segmentation(request: $request) {
+        operations {
+            id
+        }
+        labware {
+            ...LabwareFields
+        }
+    }
+}
