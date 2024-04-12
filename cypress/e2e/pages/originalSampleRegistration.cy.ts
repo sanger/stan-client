@@ -84,6 +84,11 @@ describe('Registration', () => {
     describe('Validation', () => {
       shouldBehaveLikeARegistrationForm(RegistrationType.TISSUE_SAMPLE);
 
+      it('requires SGP number', () => {
+        selectFocusBlur('workNumber');
+        cy.findByText('SGP number is required').should('be.visible');
+      });
+
       it('does not require External Identifier', () => {
         cy.findByTestId('External Identifier').focus().blur();
         cy.findByText('External Identifier is a required field').should('not.exist');
@@ -259,6 +264,7 @@ describe('Registration', () => {
 
 function fillInForm() {
   cy.get('[type="radio"][name="manual"]').check();
+  selectOption('workNumber', 'SGP1008');
   cy.findByLabelText('Donor ID').type('DONOR_1');
   cy.findByLabelText('Fetal').click();
   cy.findByLabelText('Sample Collection Date').type('2022-01-01', {

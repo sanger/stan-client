@@ -81,7 +81,8 @@ export function getRegistrationFormTissueSample(): RegistrationFormOriginalSampl
     hmdmc: '',
     tissueType: '',
     blocks: [getRegistrationFormSample()],
-    sampleCollectionDate: ''
+    sampleCollectionDate: '',
+    workNumber: ''
   };
 }
 
@@ -109,7 +110,8 @@ function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
                 fixative: validation.fixative,
                 solution: validation.solution
               })
-            )
+            ),
+          workNumber: Yup.string().required('SGP number is required')
         })
       )
   });
@@ -142,13 +144,18 @@ function OriginalSampleRegistration() {
    * @param formValues
    * @return Promise<RegisterTissueSamplesMutationVariables> mutation variables wrapped in a promise
    */
+  const workNumber = React.useRef<string>('');
   const buildOriginalSampleMutationVariables = React.useCallback(
     (formValues: RegistrationFormOriginalSampleValues): Promise<RegisterOriginalSamplesMutationVariables> => {
       const samples = formValues.tissues.reduce<OriginalSampleData[]>((memo, tissue) => {
+        if (tissue.workNumber.length > 0 && workNumber.current.length === 0) {
+          workNumber.current = tissue.workNumber;
+        }
         return [
           ...memo,
           ...tissue.blocks.map<OriginalSampleData>((block) => {
             const sampleRegisterData: OriginalSampleData = {
+              workNumber: workNumber.current,
               species: tissue.species.trim(),
               donorIdentifier: tissue.donorId.trim(),
               externalIdentifier: block.externalIdentifier ? block.externalIdentifier.trim() : undefined,

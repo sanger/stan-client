@@ -173,25 +173,28 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
             >
               {({ values, setFieldValue }) => (
                 <>
-                  {isBlock && (
-                    <motion.div variants={variants.fadeInWithLift}>
-                      <Heading level={3}>SGP Number</Heading>
-                      <p className="mt-2">
-                        Please select SGP numbers to associate with all block registering operations
-                      </p>
-                      <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
-                        <WorkNumberSelect
-                          onWorkNumberChangeInMulti={(workNumbers) => {
-                            setFieldValue('workNumbers', [...workNumbers]);
-                          }}
-                          workNumber={values.workNumbers}
-                          multiple={true}
-                          emptyOption={false}
-                        />
-                        {values.workNumbers.length <= 0 && <FormikErrorMessage name={'workNumbers'} />}
-                      </motion.div>
+                  <motion.div variants={variants.fadeInWithLift}>
+                    <Heading level={3}>SGP Number</Heading>
+                    <p className="mt-2">Please select SGP numbers to associate with all block registering operations</p>
+                    <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
+                      <WorkNumberSelect
+                        onWorkNumberChangeInMulti={(workNumbers) => {
+                          setFieldValue('workNumbers', [...workNumbers]);
+                        }}
+                        onWorkNumberChange={(workNumber) => {
+                          setFieldValue(
+                            'tissues',
+                            values.tissues.map((tissue) => ({ ...tissue, workNumber }))
+                          );
+                        }}
+                        workNumber={values.workNumbers}
+                        multiple={isBlock}
+                        emptyOption={false}
+                      />
+                      {values.workNumbers.length <= 0 && <FormikErrorMessage name={'workNumbers'} />}
                     </motion.div>
-                  )}
+                  </motion.div>
+
                   <RegistrationForm
                     registrationInfo={registrationInfo}
                     availableLabwareTypes={availableLabwareTypes}

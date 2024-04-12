@@ -43,6 +43,7 @@ export interface RegistrationFormTissue {
   tissueType: string;
   sampleCollectionDate?: Date | string;
   blocks: RegistrationFormBlock[];
+  workNumber: string;
 }
 
 export interface RegistrationFormValues {
@@ -78,7 +79,8 @@ export function getRegistrationFormTissue(): RegistrationFormTissue {
     hmdmc: '',
     tissueType: '',
     blocks: [getRegistrationFormBlock()],
-    sampleCollectionDate: ''
+    sampleCollectionDate: '',
+    workNumber: ''
   };
 }
 
