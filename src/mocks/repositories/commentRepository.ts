@@ -149,6 +149,18 @@ const seeds: Array<CommentFieldsFragment> = [
     text: 'Issue with thermal cycler'
   }),
   commentFactory.build({
+    category: 'Cell Segmentation',
+    text: 'Looks good'
+  }),
+  commentFactory.build({
+    category: 'Cell Segmentation',
+    text: 'Not that good'
+  }),
+  commentFactory.build({
+    category: 'Cell Segmentation',
+    text: 'Looks very bad'
+  }),
+  commentFactory.build({
     category: 'cell segmentation qc',
     text: 'Cell segmentation QC comment 1'
   }),
