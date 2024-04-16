@@ -159,14 +159,6 @@ const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({
     category: 'Cell Segmentation',
     text: 'Looks very bad'
-  }),
-  commentFactory.build({
-    category: 'cell segmentation qc',
-    text: 'Cell segmentation QC comment 1'
-  }),
-  commentFactory.build({
-    category: 'cell segmentation qc',
-    text: 'Cell segmentation QC comment 2'
   })
 ];
 

@@ -71,7 +71,7 @@ const toSegmentationQcRequest = (values: CellSegmentationQcFormProps): Segmentat
     };
   });
   return {
-    operationType: 'Cell segmentation qc',
+    operationType: 'Cell Segmentation QC',
     labware
   };
 };

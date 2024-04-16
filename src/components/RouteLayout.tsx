@@ -320,7 +320,7 @@ const RouteLayout = () => {
             path="/lab/cell_segmentation_qc"
             loader={async () => {
               const res = await stanCore.GetComments({
-                commentCategory: 'cell segmentation qc'
+                commentCategory: 'Cell Segmentation'
               });
               return res.comments;
             }}

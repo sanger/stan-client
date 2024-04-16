@@ -16,7 +16,7 @@ describe('Cell Segmentation Page', () => {
     describe('when work number is missing', () => {
       beforeEach(() => {
         selectOption('cellSegmentation.0.workNumber', '');
-        selectOption('cellSegmentation.0.comments', 'Cell segmentation QC comment 1');
+        selectOption('cellSegmentation.0.comments', 'Looks good');
       });
       it('displays error message and disables save button', () => {
         cy.findByText('SGP number is required').should('be.visible');
@@ -83,7 +83,7 @@ describe('Cell Segmentation Page', () => {
 
 const fillInRequest = () => {
   selectOption('cellSegmentation.0.workNumber', 'SGP1008');
-  selectOption('cellSegmentation.0.comments', 'Cell segmentation QC comment 1');
+  selectOption('cellSegmentation.0.comments', 'Looks good');
 };
 
 const submitRequest = () => {
