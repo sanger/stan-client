@@ -57,6 +57,7 @@ import reactivateHandlers from './handlers/reactivateHandlers';
 import orientationQCHandlers from './handlers/orientationQCHandlers';
 import { flagLabwareHandlers } from './handlers/flagLabwareHandlers';
 import { libraryGenerationHandlers } from './handlers/libraryGenerationHandlers';
+import segmentationHandlers from './handlers/segmentationHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -114,5 +115,6 @@ export const handlers = [
   ...dnapStudyHandlers,
   ...orientationQCHandlers,
   ...flagLabwareHandlers,
-  ...libraryGenerationHandlers
+  ...libraryGenerationHandlers,
+  ...segmentationHandlers
 ];

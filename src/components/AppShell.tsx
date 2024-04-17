@@ -291,6 +291,11 @@ function AppShell({ children }: AppShellParams) {
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording Xenium QC'}
                     />
+                    <NavLinkMenuItem
+                      caption={'Cell Segmentation'}
+                      path={'/lab/cell_segmentation'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    />
                   </Menu>
                   <NavLinkMenuItem
                     caption={'Imaging'}
@@ -495,6 +500,7 @@ function AppShell({ children }: AppShellParams) {
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/xenium_analyser">Xenium Analyser</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/xenium_qc">Xenium QC</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/cell_segmentation">Cell Segmentation</StanMobileNavLink>
                     </div>
                     <div className="grid grid-cols-2 mt-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/imaging">Imaging</StanMobileNavLink>

@@ -58,6 +58,7 @@ import OrientationQC from '../pages/OrientationQC';
 import FlagLabware from '../pages/FlagLabware';
 import { NewFlaggedLabwareLayout } from '../types/stan';
 import { LibraryAmpAndGeneration } from '../pages/LibraryAmpAndGeneration';
+import { CellSegmentation } from '../pages/CellSegmentation';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -299,6 +300,18 @@ const RouteLayout = () => {
               return res.equipments;
             }}
             element={<XeniumAnalyser />}
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/cell_segmentation"
+            loader={async () => {
+              const commentsQuery = await stanCore.GetComments({
+                commentCategory: 'Cell Segmentation'
+              });
+              return commentsQuery.comments;
+            }}
+            element={<CellSegmentation />}
           />
         </Route>
         <Route element={<AuthLayout />}>
