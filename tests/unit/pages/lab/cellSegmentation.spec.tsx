@@ -27,7 +27,7 @@ jest.mock('../../../../src/components/labwareScanner/LabwareScanner', () => ({
   }
 }));
 
-describe('Cell Segmentation CQ', () => {
+describe('Cell Segmentation', () => {
   describe('Cell segmentation page is loaded correctly', () => {
     it('renders page the page without clutching', () => {
       render(

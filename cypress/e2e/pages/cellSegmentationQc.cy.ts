@@ -2,7 +2,7 @@ import { HttpResponse } from 'msw';
 import { SegmentationMutation, SegmentationMutationVariables } from '../../../src/types/sdk';
 import { selectOption } from '../shared/customReactSelect.cy';
 
-describe('Cell Segmentation Page', () => {
+describe('Cell Segmentation QC Page', () => {
   context('Validation', () => {
     beforeEach(() => {
       cy.visitAsAdmin('/lab/cell_segmentation_qc');
