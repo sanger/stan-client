@@ -45,6 +45,7 @@ describe('Xenium analyser', () => {
           expect(screen.getByTestId('equipmentId')).toBeVisible();
           expect(screen.getByTestId('lotNumberA')).toBeVisible();
           expect(screen.getByTestId('lotNumberB')).toBeVisible();
+          expect(screen.getByTestId('cellSegmentationLot')).toBeVisible();
           expect(screen.getByTestId('workNumberAll')).toBeVisible();
           expect(screen.getAllByRole('table')).toHaveLength(2);
           expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
@@ -137,6 +138,15 @@ describe('Xenium analyser', () => {
             await userEvent.type(screen.getByTestId('STAN-011-0-roi'), new Array(66).join('a'));
             await userEvent.tab();
             expect(screen.getByText('Region of interest field should be string of maximum length 64')).toBeVisible();
+          });
+        });
+      });
+      describe('Cell segmentation lot number', () => {
+        it('should display an error message when entered value is longer than 25 characters', () => {
+          waitFor(async () => {
+            await userEvent.type(screen.getByTestId('cellSegmentationLot'), new Array(26).join('a'));
+            await userEvent.tab();
+            expect(screen.getByText('Cell segmentation lot number must be at most 25 characters')).toBeVisible();
           });
         });
       });

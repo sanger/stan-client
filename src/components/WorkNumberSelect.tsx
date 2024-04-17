@@ -61,6 +61,21 @@ export type WorkInfo = {
   status: WorkStatus;
 };
 
+async function fetchAllWorkNumbers() {
+  const response = await stanCore.GetAllWorkInfo();
+  return response.works
+    .map((workInfo) => {
+      return {
+        workNumber: workInfo.workNumber,
+        workRequester: workInfo.workRequester ? workInfo.workRequester.username : '',
+        project: workInfo.project.name,
+        status: workInfo.status
+      };
+    })
+    .sort((work1, work2) => alphaNumericSortDefault(work1.workNumber, work2.workNumber))
+    .reverse();
+}
+
 /**
  * Component for displaying a list of active or all work numbers
  */
@@ -78,93 +93,40 @@ export default function WorkNumberSelect({
   worksInfoOptions
 }: WorkSelectProps) {
   /**
-   * State for holding all  work
-   */
-  const [allWorks, setAllWorks] = useState<Array<WorkInfo>>([]);
-  /**
    * State for holding work based on the list criteria -'workNumberType'
    */
   const [works, setWorks] = useState<Array<WorkInfo>>([]);
 
-  const [selectedWork, setSelectedWork] = useState<WorkInfo | WorkInfo[] | undefined>(
-    workNumber ? works.find((work) => work.workNumber === workNumber) : undefined
-  );
-  const [selectedIndex, setSelectedIndex] = useState(0);
   /**
    * State for validating select field
    */
   const [error, setError] = useState<string>('');
   /**
-   * Fetch all works and set them to state
+   * Fetch all works and set them to state depending on the workNumberType
    */
-  useEffect(() => {
-    /**
-     * isMounted is used to avoid “Can’t perform a React state update on an unmounted component” warning
-     * This happens when you make an async call inside a component and the component which made call gets
-     * unmounted due to some user action. The async call responds after the unmount and setState function will
-     * be called in an unmounted component in this case.
-     */
-    let isMounted = true;
-
-    async function fetchAllWorkNumbers() {
-      const response = await stanCore.GetAllWorkInfo();
-      const works = response.works
-        .map((workInfo) => {
-          return {
-            workNumber: workInfo.workNumber,
-            workRequester: workInfo.workRequester ? workInfo.workRequester.username : '',
-            project: workInfo.project.name,
-            status: workInfo.status
-          };
-        })
-        .sort((work1, work2) => {
-          return alphaNumericSortDefault(work1.workNumber, work2.workNumber);
-        })
-        .reverse();
-      /**Only update state if it is mounted **/
-      if (isMounted) {
-        setAllWorks(works);
-      }
-    }
-    if (worksInfoOptions) {
-      setAllWorks(worksInfoOptions);
-    } else {
-      fetchAllWorkNumbers();
-    }
-    /**Unmount call, cleanup by setting mount status to false**/
-    return () => {
-      isMounted = false;
-    };
-  }, [setAllWorks, worksInfoOptions]);
-
-  /**
-   * Fetch  works based on workNumberType criteria
-   */
-  useEffect(() => {
+  const availableWorks = React.useMemo(async () => {
+    const allWorks = worksInfoOptions ? worksInfoOptions : await fetchAllWorkNumbers();
     if (workNumberType && workNumberType === 'ALL') {
-      setWorks(allWorks);
+      return allWorks;
     } else {
       const status = workNumberType ?? WorkStatus.Active;
-      setWorks(allWorks.filter((work) => work.status === status));
+      return allWorks.filter((work) => work.status === status);
     }
-  }, [setWorks, workNumberType, allWorks]);
+  }, [workNumberType, worksInfoOptions]);
 
   useEffect(() => {
-    if (!workNumber) {
-      setSelectedWork(undefined);
-      return;
-    }
-    const work = works.find((work) => work.workNumber === workNumber);
-    if (work) {
-      setSelectedWork(work);
-    }
-  }, [workNumber, works, setSelectedWork, multiple]);
+    availableWorks.then((works) => setWorks(works));
+  }, [availableWorks]);
+
+  const [selectedWork, setSelectedWork] = useState<WorkInfo | WorkInfo[] | undefined>(
+    workNumber ? works.find((work) => work.workNumber === workNumber) : undefined
+  );
 
   /**
    * Callback for when the select changes
    */
   const handleWorkNumberChange = useCallback(
-    (selectedWorkNumbers: string[], selectedIndex?: number) => {
+    (selectedWorkNumbers: string[]) => {
       if (multiple) {
         setSelectedWork(
           works.filter((work) => selectedWorkNumbers.some((workNumber) => workNumber === work.workNumber))
@@ -176,25 +138,20 @@ export default function WorkNumberSelect({
         setSelectedWork(work);
         onWorkNumberChange?.(selectedVal);
       }
-      setSelectedIndex(selectedIndex ?? 0);
     },
-    [onWorkNumberChange, setSelectedWork, works, onWorkNumberChangeInMulti, multiple, setSelectedIndex]
+    [onWorkNumberChange, setSelectedWork, works, onWorkNumberChangeInMulti, multiple]
   );
 
   const currentSelectedWork = Array.isArray(selectedWork)
     ? selectedWork.length > 0
-      ? selectedWork[selectedIndex >= 0 ? selectedIndex : selectedWork.length - 1]
+      ? selectedWork[selectedWork.length - 1]
       : undefined
     : selectedWork;
 
   const validateWorkNumber = () => {
-    if (multiple) {
-      if (!currentSelectedWork && requiredField) {
-        setError('At least one work number must be selected');
-      }
-    } else {
-      if (!currentSelectedWork && requiredField) {
-        setError('SGP number is required');
+    if (requiredField) {
+      if (!selectedWork || (Array.isArray(selectedWork) && selectedWork.length === 0)) {
+        setError(multiple ? 'At least one work number must be selected' : 'SGP number is required');
       } else {
         setError('');
       }
