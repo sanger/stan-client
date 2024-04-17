@@ -55,7 +55,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
   // Available spatial locations are determined by the current tissue type
   const availableSpatialLocations: GetRegistrationInfoQuery['tissueTypes'][number]['spatialLocations'] = useMemo(() => {
     return (
-      registrationInfo.tissueTypes.find((tt) => tt.name === values.tissues[currentIndex].tissueType)
+      registrationInfo.tissueTypes.find((tt) => tt.name === values.tissues[currentIndex]?.tissueType)
         ?.spatialLocations ?? []
     );
   }, [registrationInfo.tissueTypes, values.tissues, currentIndex]);

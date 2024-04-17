@@ -33,14 +33,18 @@ export function useUpload<T>(url: string, errorField?: string) {
     (
       file: File,
       notifyUploadProgress?: (uploadProgress: UploadProgress | undefined) => void,
-      existingExternalNames?: string[]
+      existingExternalNames?: string[],
+      ignoreExternalNames: boolean = false
     ) => {
       const retUploadResult: UploadResult<T> = { file, success: false, error: undefined, response: undefined };
       async function postUpload(url: string, file: File) {
         const formData = new FormData();
         formData.append('file', file);
         if (existingExternalNames) {
-          formData.append('existingExternalNames', existingExternalNames.join(','));
+          formData.append(
+            ignoreExternalNames ? 'ignoreExternalNames' : 'existingExternalNames',
+            existingExternalNames.join(',')
+          );
         }
         return await fetch(url, {
           method: 'POST',
