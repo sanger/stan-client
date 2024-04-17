@@ -32,6 +32,7 @@ import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { FormikErrorMessage, selectOptionValues } from '../components/forms';
 import { useLoaderData } from 'react-router-dom';
 import { fromPromise } from 'xstate';
+import { lotRegx } from './ProbeHybridisationXenium';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
@@ -50,6 +51,7 @@ type LabwareSamples = {
 export type XeniumAnalyserFormValues = {
   lotNumberA: string;
   lotNumberB: string;
+  cellSegmentationLot: string;
   equipmentId: number | undefined;
   runName: string;
   performed: string;
@@ -60,6 +62,7 @@ const formInitialValues: XeniumAnalyserFormValues = {
   runName: '',
   lotNumberB: '',
   lotNumberA: '',
+  cellSegmentationLot: '',
   equipmentId: undefined,
   labware: [],
   performed: getCurrentDateTime(),
@@ -98,6 +101,14 @@ const XeniumAnalyser = () => {
       .label('B Lot Number')
       .max(32, 'Decoding reagent lot number should be a string of up to 32 letters and numbers.')
       .matches(/^[A-Za-z0-9]+$/, 'Decoding reagent lot number should be a string of letters and numbers.'),
+    cellSegmentationLot: Yup.string()
+      .optional()
+      .label('Cell segmentation lot number')
+      .max(25)
+      .matches(
+        lotRegx,
+        'LOT number should be a string of maximum length 25 of capital letters, numbers and underscores.'
+      ),
     runName: Yup.string().required().label('Run Name').max(255, 'Run name should be a string of maximum length 255'),
     performed: Yup.date()
       .max(new Date(), 'Please select a date and time on or before current time')
@@ -227,6 +238,7 @@ const XeniumAnalyser = () => {
                     runName: values.runName,
                     lotNumberA: values.lotNumberA,
                     lotNumberB: values.lotNumberB,
+                    cellSegmentationLot: values.cellSegmentationLot,
                     labware: labwareROIData,
                     operationType: 'Xenium analyser'
                   }
@@ -326,9 +338,18 @@ const XeniumAnalyser = () => {
                               className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                             />
                           </div>
+                          <div className={'flex flex-col'}>
+                            <FormikInput
+                              label={'Cell segmentation lot number'}
+                              type="text"
+                              name="cellSegmentationLot"
+                              data-testid="cellSegmentationLot"
+                              className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            />
+                          </div>
                         </div>
                       </motion.div>
-                      <motion.div variants={variants.fadeInWithLift} className="mt-4 py-4 md:w-1/2">
+                      <motion.div variants={variants.fadeInWithLift} className="mt-4 py-4 pr-6 w-1/3">
                         <WorkNumberSelect
                           label={'SGP Number'}
                           name={'workNumberAll'}
