@@ -564,6 +564,7 @@ export default function WorkAllocation() {
                     <tr>
                       <TableHeader sortProps={getTableSortProps('Priority')}>Priority</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Status')}>Status</TableHeader>
+                      <TableHeader />
                       <TableHeader sortProps={getTableSortProps('SGP Number')}>SGP Number</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
@@ -581,8 +582,6 @@ export default function WorkAllocation() {
                       <TableHeader sortProps={getTableSortProps('Number of Original Samples')}>
                         Number of Original Samples
                       </TableHeader>
-
-                      <TableHeader />
                     </tr>
                   </TableHead>
                   <TableBody>
