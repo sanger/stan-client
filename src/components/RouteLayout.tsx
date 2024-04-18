@@ -58,6 +58,7 @@ import OrientationQC from '../pages/OrientationQC';
 import FlagLabware from '../pages/FlagLabware';
 import { NewFlaggedLabwareLayout } from '../types/stan';
 import { LibraryAmpAndGeneration } from '../pages/LibraryAmpAndGeneration';
+import { CellSegmentationQc } from '../pages/CellSegmentationQc';
 import { CellSegmentation } from '../pages/CellSegmentation';
 
 const RouteLayout = () => {
@@ -312,6 +313,18 @@ const RouteLayout = () => {
               return commentsQuery.comments;
             }}
             element={<CellSegmentation />}
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/cell_segmentation_qc"
+            loader={async () => {
+              const res = await stanCore.GetComments({
+                commentCategory: 'Cell Segmentation'
+              });
+              return res.comments;
+            }}
+            element={<CellSegmentationQc />}
           />
         </Route>
         <Route element={<AuthLayout />}>
