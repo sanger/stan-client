@@ -124,10 +124,11 @@ function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
  */
 export function buildRegisterTissuesMutationVariables(
   formValues: RegistrationFormValues,
-  existingTissues: Array<string> = []
+  existingTissues: Array<string> = [],
+  ignoreExistingTissues: boolean = false
 ): Promise<RegisterTissuesMutationVariables> {
-  return new Promise((resolve) => {
-    const blocks = formValues.tissues.reduce<BlockRegisterRequest[]>((memo, tissue) => {
+  return new Promise((resolve, reject) => {
+    let blocks = formValues.tissues.reduce<BlockRegisterRequest[]>((memo, tissue) => {
       return [
         ...memo,
         ...tissue.blocks.map<BlockRegisterRequest>((block) => {
@@ -138,7 +139,7 @@ export function buildRegisterTissuesMutationVariables(
             highestSection: block.lastKnownSectionNumber,
             hmdmc: tissue.hmdmc.trim(),
             labwareType: block.labwareType.trim(),
-            lifeStage: tissue.lifeStage in LifeStage ? tissue.lifeStage : undefined,
+            lifeStage: Object.values(LifeStage).includes(tissue.lifeStage) ? tissue.lifeStage : undefined,
             tissueType: tissue.tissueType.trim(),
             spatialLocation: block.spatialLocation,
             replicateNumber: block.replicateNumber,
@@ -151,7 +152,7 @@ export function buildRegisterTissuesMutationVariables(
               : undefined
           };
 
-          if (existingTissues.includes(blockRegisterRequest.externalIdentifier)) {
+          if (!ignoreExistingTissues && existingTissues.includes(blockRegisterRequest.externalIdentifier)) {
             blockRegisterRequest.existingTissue = true;
           }
 
@@ -160,6 +161,12 @@ export function buildRegisterTissuesMutationVariables(
       ];
     }, []);
 
+    if (ignoreExistingTissues) {
+      blocks = blocks.filter((block) => !existingTissues.includes(block.externalIdentifier));
+    }
+    if (blocks.length === 0) {
+      reject({ problems: ['No blocks to register after filtering the ones with existing tissues'] });
+    }
     resolve({ request: { blocks, workNumbers: formValues.workNumbers } });
   });
 }

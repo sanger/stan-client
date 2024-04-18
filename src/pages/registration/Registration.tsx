@@ -206,6 +206,7 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
                     <ClashModal
                       registrationResult={registrationResult}
                       onConfirm={() => send({ type: 'SUBMIT_FORM', values })}
+                      onConfirmAndUnrelease={() => send({ type: 'SUBMIT_FORM', values, ignoreExistingTissues: true })}
                       onCancel={() => send({ type: 'EDIT_SUBMISSION' })}
                     />
                   )}

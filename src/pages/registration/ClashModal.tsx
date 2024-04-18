@@ -12,9 +12,15 @@ type ClashModalProps = {
   registrationResult: RegisterResultFieldsFragment;
   onConfirm: () => void;
   onCancel: () => void;
+  onConfirmAndUnrelease: () => void;
 };
 
-export default function ClashModal({ registrationResult, onConfirm, onCancel }: ClashModalProps) {
+export default function ClashModal({
+  registrationResult,
+  onConfirm,
+  onCancel,
+  onConfirmAndUnrelease
+}: ClashModalProps) {
   const linkToUnrelease: string = registrationResult.clashes
     .map((clash) => {
       return clash.labware.map((lw) => `barcode=${lw.barcode}`).join('&');
@@ -65,8 +71,14 @@ export default function ClashModal({ registrationResult, onConfirm, onCancel }: 
         <BlueButton onClick={onConfirm} className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm">
           Confirm
         </BlueButton>
-        <Link to={`/admin/unrelease?${linkToUnrelease}`} className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-          <BlueButton action="tertiary">Unrelease</BlueButton>
+        <Link
+          to={`/admin/unrelease?${linkToUnrelease}`}
+          target="_blank"
+          className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+        >
+          <BlueButton action="tertiary" onClick={onConfirmAndUnrelease}>
+            Confirm and Unrelease
+          </BlueButton>
         </Link>
         <BlueButton action="secondary" onClick={onCancel} className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
           Cancel

@@ -5,7 +5,11 @@ import { ClientError } from 'graphql-request';
 
 export interface RegistrationContext<F, M> {
   registrationFormInput: Maybe<F>;
-  buildRegistrationInput: (formInput: F, existingTissues?: Array<string>) => Promise<M>;
+  buildRegistrationInput: (
+    formInput: F,
+    existingTissues?: Array<string>,
+    ignoreExistingTissues?: boolean
+  ) => Promise<M>;
   registrationService: (mutationInput: M) => Promise<RegisterResultFieldsFragment>;
   registrationResult: Maybe<RegisterResultFieldsFragment>;
   registrationErrors: Maybe<ServerErrors>;
@@ -15,6 +19,7 @@ export interface RegistrationContext<F, M> {
 type SubmitFormEvent<F> = {
   type: 'SUBMIT_FORM';
   values: F;
+  ignoreExistingTissues?: boolean;
 };
 
 type EditSubmissionEvent = {
@@ -41,7 +46,11 @@ export type RegistrationEvent<F> =
  * XState state machine for Registration
  */
 export function createRegistrationMachine<F, M>(
-  buildRegistrationInput: (formInput: F, existingTissues?: Array<string>) => Promise<M>,
+  buildRegistrationInput: (
+    formInput: F,
+    existingTissues?: Array<string>,
+    ignoreExistingTissues?: boolean
+  ) => Promise<M>,
   registrationService: (mutationInput: M) => Promise<RegisterResultFieldsFragment>
 ) {
   return createMachine(
@@ -71,12 +80,15 @@ export function createRegistrationMachine<F, M>(
           invoke: {
             id: 'submitting',
             src: fromPromise(({ input }) => {
-              return buildRegistrationInput(input.values, input.confirmedTissues).then(input.registrationService);
+              return buildRegistrationInput(input.values, input.confirmedTissues, input.ignoreExistingTissues).then(
+                input.registrationService
+              );
             }),
             input: ({ context, event }) => ({
               values: (event as SubmitFormEvent<F>).values,
               registrationService: context.registrationService,
-              confirmedTissues: context.confirmedTissues
+              confirmedTissues: context.confirmedTissues,
+              ignoreExistingTissues: (event as SubmitFormEvent<F>).ignoreExistingTissues
             }),
 
             onDone: {
@@ -138,7 +150,8 @@ export function createRegistrationMachine<F, M>(
           if (event.type !== 'xstate.error.actor.submitting') {
             return context;
           }
-          context.registrationErrors = extractServerErrors(event.error);
+          context.registrationErrors =
+            event.error instanceof ClientError ? extractServerErrors(event.error) : event.error;
           return context;
         })
       },

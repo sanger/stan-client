@@ -128,12 +128,12 @@ const FileUploader = <T extends object>({
 
   /**Callback function to perform upload**/
   const uploadFiles = React.useCallback(
-    (existingExternalNames?: string[]) => {
+    (existingExternalNames?: string[], ignoreExternalNames?: boolean) => {
       if (files.length === 0) return;
       setUploadInProgress(undefined);
       setConfirmUploadOutcome(undefined);
       files.forEach((file) => {
-        requestUpload(file, setUploadInProgress, existingExternalNames);
+        requestUpload(file, setUploadInProgress, existingExternalNames, ignoreExternalNames);
       });
     },
     [setUploadInProgress, setConfirmUploadOutcome, files, requestUpload]
@@ -218,8 +218,14 @@ const FileUploader = <T extends object>({
           <ClashModal
             registrationResult={clashes}
             onConfirm={() => {
-              const existingExternalNames: string[] = clashes.clashes.map((clash) => clash.tissue.externalName!);
-              uploadFiles(existingExternalNames);
+              uploadFiles(clashes.clashes.map((clash) => clash.tissue.externalName!));
+              setClashes(undefined);
+            }}
+            onConfirmAndUnrelease={() => {
+              uploadFiles(
+                clashes.clashes.map((clash) => clash.tissue.externalName!),
+                true
+              );
               setClashes(undefined);
             }}
             onCancel={() => {
