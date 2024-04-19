@@ -34,7 +34,7 @@ describe('ReleaseOptions', () => {
   });
   it('On initial loading release options are selected based on query params', () => {
     const router = createMemoryRouter([{ path: '/releaseOptions', element: <ReleaseOptions /> }], {
-      initialEntries: ['/releaseOptions?id=123&groups=option_1,option_2']
+      initialEntries: ['/releaseOptions?id=123&groups=option_1,option_2&type=xlsx']
     });
     render(<RouterProvider router={router} />);
     ['Option 1', 'Option 2'].forEach((option, indx) => {
@@ -43,8 +43,10 @@ describe('ReleaseOptions', () => {
     });
     const option3 = screen.getAllByRole('checkbox')[2];
     expect(option3).not.toBeChecked();
+
+    expect(screen.getByTestId('excel-file')).toBeChecked();
   });
-  it('calls navigate function with updated url when user selects release options', async () => {
+  it('calls navigate function with updated url when user updates release file columns', async () => {
     const router = createMemoryRouter([{ path: '/releaseOptions', element: <ReleaseOptions /> }], {
       initialEntries: ['/releaseOptions?id=123']
     });
@@ -53,17 +55,28 @@ describe('ReleaseOptions', () => {
       const option1 = screen.getAllByRole('checkbox')[0];
       fireEvent.click(option1);
     });
-    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=option_1', { replace: true });
+    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=option_1&type=tsv', { replace: true });
+  });
+  it('calls navigate function with updated url when user updates release file type', async () => {
+    const router = createMemoryRouter([{ path: '/releaseOptions', element: <ReleaseOptions /> }], {
+      initialEntries: ['/releaseOptions?id=123&type=tsv']
+    });
+    render(<RouterProvider router={router} />);
+    await waitFor(() => {
+      const option1 = screen.getByTestId('excel-file');
+      fireEvent.click(option1);
+    });
+    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=&type=xlsx', { replace: true });
   });
   it('calls navigate function with updated url when user deselects release options', async () => {
     const router = createMemoryRouter([{ path: '/releaseOptions', element: <ReleaseOptions /> }], {
-      initialEntries: ['/releaseOptions?id=123&groups=option_1,option_2']
+      initialEntries: ['/releaseOptions?id=123&groups=option_1,option_2&type=xlsx']
     });
     render(<RouterProvider router={router} />);
     await waitFor(() => {
       const option1 = screen.getAllByRole('checkbox')[0];
       fireEvent.click(option1);
     });
-    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=option_2', { replace: true });
+    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=option_2&type=xlsx', { replace: true });
   });
 });

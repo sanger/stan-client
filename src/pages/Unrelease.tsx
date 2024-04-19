@@ -54,7 +54,7 @@ const fetchInitialLabware = async (initialBarcodes: string[]) => {
 };
 
 export default function Unrelease() {
-  const [workNumber, setWorkNumber] = React.useState('');
+  const workNumberRef = React.useRef('');
 
   const location = useLocation();
 
@@ -89,7 +89,7 @@ export default function Unrelease() {
       onSubmit={(request) => stanCore.Unrelease({ request })}
       validationSchema={validationSchema}
       initialValues={{
-        labware: initialLabware.current.map((lw) => toUnreleaseLabware(lw, workNumber))
+        labware: initialLabware.current.map((lw) => toUnreleaseLabware(lw, workNumberRef.current))
       }}
       summary={(props) => (
         <p>
@@ -106,7 +106,7 @@ export default function Unrelease() {
               <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
                 <WorkNumberSelect
                   onWorkNumberChange={(workNumber) => {
-                    setWorkNumber(workNumber);
+                    workNumberRef.current = workNumber;
                     formikProps.values.labware.forEach((lw) => (lw.workNumber = workNumber));
                   }}
                 />
@@ -121,7 +121,7 @@ export default function Unrelease() {
                   return (
                     <LabwareScanner
                       initialLabwares={initialLabware.current}
-                      onAdd={(lw) => helpers.push(toUnreleaseLabware(lw, workNumber))}
+                      onAdd={(lw) => helpers.push(toUnreleaseLabware(lw, workNumberRef.current))}
                       onRemove={(labware, index) => helpers.remove(index)}
                     >
                       <LabwareScanPanel

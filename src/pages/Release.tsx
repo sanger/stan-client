@@ -106,6 +106,11 @@ enum ReleaseType {
   LABWARE_LOCATION = 'Labware/Location'
 }
 
+export enum FileType {
+  EXCEL = 'xlsx',
+  TSV = 'tsv'
+}
+
 function Release() {
   const releaseInfo = useLoaderData() as GetReleaseInfoQuery;
   const stanCore = useContext(StanCoreContext);
@@ -114,6 +119,7 @@ function Release() {
   const [selectedReleaseColumns, setSelectedReleaseColumns] = React.useState<ReleaseFileOptionFieldsFragment[]>(
     releaseInfo.releaseColumnOptions ?? []
   );
+  const [selectedFileType, setSelectedFileType] = React.useState<FileType>(FileType.TSV);
   const navigate = useNavigate();
   const initialValues: ReleaseRequest = {
     releaseLabware: [],
@@ -151,9 +157,9 @@ function Release() {
       const releaseIds = submissionResult.release.releases.map((r) => r.id);
       return `/releaseOptions?id=${releaseIds.join(',')}&groups=${selectedReleaseColumns
         .map((releaseOption) => releaseOption.queryParamName)
-        .join(',')}`;
+        .join(',')}&type=${selectedFileType}`;
     }
-  }, [submissionResult, selectedReleaseColumns]);
+  }, [submissionResult, selectedReleaseColumns, selectedFileType]);
 
   useEffect(() => {
     if (current.matches('submitted')) {
@@ -446,38 +452,62 @@ function Release() {
                     </motion.div>
                     {releaseInfo.releaseColumnOptions && releaseInfo.releaseColumnOptions.length > 0 && (
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4 ">
-                        <Heading level={3}>Release Columns</Heading>
-                        {releaseInfo.releaseColumnOptions.map((releaseOption) => (
-                          <div className="flex flex-row items-center gap-x-2" key={releaseOption.displayName}>
-                            <Input
-                              type="checkbox"
-                              data-testid={`${releaseOption.displayName}-checkbox`}
-                              className={'w-5 rounded'}
-                              checked={selectedReleaseColumns.some(
-                                (column) =>
-                                  column.displayName === releaseOption.displayName &&
-                                  column.queryParamName === releaseOption.queryParamName
-                              )}
-                              onChange={() => {
-                                setSelectedReleaseColumns((prevSelected) => {
-                                  const findIndex = prevSelected.findIndex(
-                                    (option) =>
-                                      option.displayName === releaseOption.displayName &&
-                                      option.queryParamName === releaseOption.queryParamName
-                                  );
-                                  if (findIndex < 0) {
-                                    return [...prevSelected, releaseOption];
-                                  } else {
-                                    const newSelected = [...prevSelected];
-                                    newSelected.splice(findIndex, 1);
-                                    return newSelected;
-                                  }
-                                });
-                              }}
-                            />
-                            <label className={'whitespace-nowrap'}>{releaseOption.displayName}</label>
+                        <Heading level={3}>Release File Options</Heading>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="font-semibold mb-3">Release Columns</div>
+                            {releaseInfo.releaseColumnOptions.map((releaseOption) => (
+                              <div className="flex flex-row items-center gap-x-2" key={releaseOption.displayName}>
+                                <Input
+                                  type="checkbox"
+                                  data-testid={`${releaseOption.displayName}-checkbox`}
+                                  className={'w-5 rounded'}
+                                  checked={selectedReleaseColumns.some(
+                                    (column) =>
+                                      column.displayName === releaseOption.displayName &&
+                                      column.queryParamName === releaseOption.queryParamName
+                                  )}
+                                  onChange={() => {
+                                    setSelectedReleaseColumns((prevSelected) => {
+                                      const findIndex = prevSelected.findIndex(
+                                        (option) =>
+                                          option.displayName === releaseOption.displayName &&
+                                          option.queryParamName === releaseOption.queryParamName
+                                      );
+                                      if (findIndex < 0) {
+                                        return [...prevSelected, releaseOption];
+                                      } else {
+                                        const newSelected = [...prevSelected];
+                                        newSelected.splice(findIndex, 1);
+                                        return newSelected;
+                                      }
+                                    });
+                                  }}
+                                />
+                                <label className={'whitespace-nowrap'}>{releaseOption.displayName}</label>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                          <div>
+                            <div className="font-semibold mb-3 grid grid-cols-2 gap-7">File Type</div>
+                            <div>
+                              <RadioButtonInput
+                                name="excel-file"
+                                checked={selectedFileType === FileType.EXCEL}
+                                onChange={() => setSelectedFileType(FileType.EXCEL)}
+                                label={`Excel File`}
+                              />
+                            </div>
+                            <div>
+                              <RadioButtonInput
+                                name="tsv-file"
+                                checked={selectedFileType === FileType.TSV}
+                                onChange={() => setSelectedFileType(FileType.TSV)}
+                                label={`TSV File`}
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </motion.div>
                     )}
                   </motion.div>
@@ -524,6 +554,12 @@ function Release() {
                         .
                       </p>
                     )}
+                    {selectedFileType && (
+                      <p>
+                        The selected file type is <span
+                        className="font-semibold">{selectedFileType === FileType.EXCEL ? 'Excel' : 'TSV'}</span>
+                      </p>
+                    )}
                     <PinkButton
                       disabled={formLocked}
                       loading={current.matches('submitting')}
@@ -536,10 +572,10 @@ function Release() {
                       <PinkButton className="sm:w-full">
                         <a
                           className="w-full text-gray-800 focus:outline-none"
-                          download={'release.tsv'}
+                          download={`release.${selectedFileType}`}
                           href={`/release?id=${submissionResult.release.releases.map(
                             (r) => r.id
-                          )}&groups=${selectedReleaseColumns.map((col) => col.queryParamName).join(',')}`}
+                          )}&groups=${selectedReleaseColumns.map((col) => col.queryParamName).join(',')}&type=${selectedFileType}`}
                         >
                           <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
                           Download Release File
