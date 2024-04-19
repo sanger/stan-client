@@ -56,13 +56,14 @@ const ReleaseOptions = () => {
                       checked={memoReleaseParams.type === FileType.EXCEL}
                       onChange={() => {
                         navigate(
-                          `/releaseOptions?id=${memoReleaseParams.id}&groups=${memoReleaseParams.groups.join(',')}&type=xlsx`,
+                          `/releaseOptions?id=${memoReleaseParams.id}&groups=${memoReleaseParams.groups.join(
+                            ','
+                          )}&type=xlsx`,
                           {
                             replace: true
                           }
                         );
                       }}
-
                     />
                   </div>
                   <div>
@@ -73,7 +74,9 @@ const ReleaseOptions = () => {
                       checked={memoReleaseParams.type === FileType.TSV}
                       onChange={() => {
                         navigate(
-                          `/releaseOptions?id=${memoReleaseParams.id}&groups=${memoReleaseParams.groups.join(',')}&type=tsv`,
+                          `/releaseOptions?id=${memoReleaseParams.id}&groups=${memoReleaseParams.groups.join(
+                            ','
+                          )}&type=tsv`,
                           {
                             replace: true
                           }
@@ -100,7 +103,9 @@ const ReleaseOptions = () => {
                             ]
                           };
                           navigate(
-                            `/releaseOptions?id=${valuesToSend.id.join(',')}&groups=${valuesToSend.groups.join(',')}&type=${memoReleaseParams.type}`,
+                            `/releaseOptions?id=${valuesToSend.id.join(',')}&groups=${valuesToSend.groups.join(
+                              ','
+                            )}&type=${memoReleaseParams.type}`,
                             {
                               replace: true
                             }
@@ -134,7 +139,9 @@ const ReleaseOptions = () => {
                 <a
                   className="w-full text-gray-800 focus:outline-none"
                   download={`release.${memoReleaseParams.type}`}
-                  href={`/release?id=${memoReleaseParams.id.join(',')}&groups=${memoReleaseParams.groups.join(',')}&type=${memoReleaseParams.type}`}
+                  href={`/release?id=${memoReleaseParams.id.join(',')}&groups=${memoReleaseParams.groups.join(
+                    ','
+                  )}&type=${memoReleaseParams.type}`}
                 >
                   <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
                   Download Release File

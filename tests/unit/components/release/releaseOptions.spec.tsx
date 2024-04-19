@@ -55,7 +55,9 @@ describe('ReleaseOptions', () => {
       const option1 = screen.getAllByRole('checkbox')[0];
       fireEvent.click(option1);
     });
-    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=option_1&type=tsv', { replace: true });
+    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=option_1&type=tsv', {
+      replace: true
+    });
   });
   it('calls navigate function with updated url when user updates release file type', async () => {
     const router = createMemoryRouter([{ path: '/releaseOptions', element: <ReleaseOptions /> }], {
@@ -77,6 +79,8 @@ describe('ReleaseOptions', () => {
       const option1 = screen.getAllByRole('checkbox')[0];
       fireEvent.click(option1);
     });
-    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=option_2&type=xlsx', { replace: true });
+    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=option_2&type=xlsx', {
+      replace: true
+    });
   });
 });

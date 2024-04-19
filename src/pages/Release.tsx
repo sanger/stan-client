@@ -556,8 +556,8 @@ function Release() {
                     )}
                     {selectedFileType && (
                       <p>
-                        The selected file type is <span
-                        className="font-semibold">{selectedFileType === FileType.EXCEL ? 'Excel' : 'TSV'}</span>
+                        The selected file type is{' '}
+                        <span className="font-semibold">{selectedFileType === FileType.EXCEL ? 'Excel' : 'TSV'}</span>
                       </p>
                     )}
                     <PinkButton
@@ -575,7 +575,9 @@ function Release() {
                           download={`release.${selectedFileType}`}
                           href={`/release?id=${submissionResult.release.releases.map(
                             (r) => r.id
-                          )}&groups=${selectedReleaseColumns.map((col) => col.queryParamName).join(',')}&type=${selectedFileType}`}
+                          )}&groups=${selectedReleaseColumns
+                            .map((col) => col.queryParamName)
+                            .join(',')}&type=${selectedFileType}`}
                         >
                           <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
                           Download Release File
