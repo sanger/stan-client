@@ -80,15 +80,6 @@ describe('Cell Segmentation Page', () => {
         cy.findByText('Performed time is required').should('be.visible');
       });
     });
-    describe('when no comment is selected', () => {
-      beforeEach(() => {
-        selectOption('cellSegmentation.0.comments', '');
-        selectOption('cellSegmentation.0.costing', 'SGP');
-      });
-      it('displays error message and disables save button', () => {
-        cy.findByText('Comment is required').should('be.visible');
-      });
-    });
     describe('when all values are entered', () => {
       beforeEach(() => {
         fillInRequest();
@@ -132,7 +123,6 @@ describe('Cell Segmentation Page', () => {
 const fillInRequest = () => {
   selectOption('cellSegmentation.0.workNumber', 'SGP1008');
   selectOption('cellSegmentation.0.costing', 'SGP');
-  selectOption('cellSegmentation.0.comments', 'Looks good');
 };
 
 const submitRequest = () => {

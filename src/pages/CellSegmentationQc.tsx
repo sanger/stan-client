@@ -24,17 +24,7 @@ type CellSegmentationQcProps = {
   labware: LabwareFlaggedFieldsFragment;
   workNumber: string;
   performed: string;
-  comments: string[];
-};
-
-type CellSegmentationProps = CellSegmentationQcProps & { costing: string };
-
-export type CellSegmentationFormProps = {
-  cellSegmentation: CellSegmentationProps[];
-  workNumberAll: string;
-  performedAll: string;
-  costingAll: string;
-  commentsAll: string[];
+  comments?: string[];
 };
 
 export type CellSegmentationQcFormProps = {
@@ -56,7 +46,7 @@ const validationSchema = Yup.object().shape({
     Yup.object().shape({
       workNumber: Yup.string().required('SGP number is required'),
       performed: Yup.string().required('Performed time is required'),
-      comments: Yup.array().of(Yup.string()).min(1, 'Comment is required')
+      comments: Yup.array().of(Yup.string()).optional()
     })
   )
 });
@@ -67,7 +57,7 @@ const toSegmentationQcRequest = (values: CellSegmentationQcFormProps): Segmentat
       barcode: cellSeg.labware.barcode,
       workNumber: cellSeg.workNumber,
       performed: formatDateTimeForCore(cellSeg.performed),
-      commentIds: cellSeg.comments.map((comment) => parseInt(comment))
+      commentIds: cellSeg.comments ? cellSeg.comments.map((comment) => parseInt(comment)) : []
     };
   });
   return {

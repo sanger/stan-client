@@ -26,7 +26,7 @@ type CellSegmentationProps = {
   workNumber: string;
   performed: string;
   costing: string;
-  comments: string[];
+  comments?: string[];
 };
 
 export type CellSegmentationFormProps = {
@@ -51,7 +51,7 @@ const validationSchema = Yup.object().shape({
       workNumber: Yup.string().required('SGP number is required'),
       performed: Yup.string().required('Performed time is required'),
       costing: Yup.string().oneOf(Object.keys(SlideCosting)).required('Costing is required'),
-      comments: Yup.array().of(Yup.string()).min(1, 'Comment is required')
+      comments: Yup.array().of(Yup.string()).optional()
     })
   )
 });
@@ -63,7 +63,7 @@ const toSegmentationRequest = (values: CellSegmentationFormProps): SegmentationR
       workNumber: cellSeg.workNumber,
       performed: formatDateTimeForCore(cellSeg.performed),
       costing: SlideCosting[cellSeg.costing as keyof typeof SlideCosting],
-      commentIds: cellSeg.comments.map((comment) => parseInt(comment))
+      commentIds: cellSeg.comments ? cellSeg.comments.map((comment) => parseInt(comment)) : []
     };
   });
   return {

@@ -32,15 +32,6 @@ describe('Cell Segmentation QC Page', () => {
         cy.findByText('Performed time is required').should('be.visible');
       });
     });
-    describe('when no comment is selected', () => {
-      beforeEach(() => {
-        selectOption('cellSegmentation.0.comments', '');
-        selectOption('cellSegmentation.0.workNumber', 'SGP1008');
-      });
-      it('displays error message and disables save button', () => {
-        cy.findByText('Comment is required').should('be.visible');
-      });
-    });
     describe('when all values are entered', () => {
       beforeEach(() => {
         fillInRequest();

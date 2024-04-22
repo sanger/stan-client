@@ -27,7 +27,7 @@ type CellSegmentationProps = {
   costing?: string;
   workNumber: string;
   performed: string;
-  comments: string[];
+  comments?: string[];
 };
 
 type CellSegmentationFormProps = {
@@ -35,7 +35,7 @@ type CellSegmentationFormProps = {
   workNumberAll: string;
   performedAll: string;
   costingAll?: string;
-  commentsAll: string[];
+  commentsAll?: string[];
 };
 
 const slideCostingOptions: OptionType[] = Object.values(SlideCosting).map((val) => {
