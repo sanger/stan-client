@@ -1,8 +1,8 @@
 import { selectOptionValues } from '../forms';
 import FormikInput from '../forms/Input';
-import { FieldArray, useFormikContext } from 'formik';
+import { useFormikContext } from 'formik';
 import WhiteButton from '../buttons/WhiteButton';
-import { ProbeOperationLabware, ProbePanelFieldsFragment, SlideCosting } from '../../types/sdk';
+import { ProbePanelFieldsFragment, SlideCosting } from '../../types/sdk';
 import AddIcon from '../icons/AddIcon';
 import React from 'react';
 import { lotRegx, ProbeHybridisationXeniumFormValues } from '../../pages/ProbeHybridisationXenium';
@@ -22,7 +22,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
   const [probeLotError, setProbeLotError] = React.useState({ name: '', lot: '', plex: '', costing: '' });
   const isTouched = React.useRef(false);
 
-  const { values } = useFormikContext<ProbeHybridisationXeniumFormValues>();
+  const { values, setValues, setTouched } = useFormikContext<ProbeHybridisationXeniumFormValues>();
 
   const validateProbeName = React.useCallback(
     (probeName: string) => {
@@ -178,33 +178,37 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
       </div>
 
       <div className="sm:flex sm:flex-row mt-2 items-center justify-end">
-        <FieldArray name={'labware'}>
-          {(helpers) => (
-            <WhiteButton
-              disabled={isAddToAllDisabled()}
-              onClick={() => {
-                values.labware.forEach((lw, index) => {
-                  const updatedLabware: ProbeOperationLabware = {
-                    ...lw,
-                    probes: [
-                      ...lw.probes,
-                      {
-                        name: probeName,
-                        lot: probeLot,
-                        plex: Number(probePlex),
-                        costing: probeCosting === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty
-                      }
-                    ]
-                  };
-                  helpers.replace(index, { ...updatedLabware });
-                });
-              }}
-            >
-              <AddIcon className="inline-block text-green-500 h-4 w-4 mt-1 mr-2" />
-              Add to all
-            </WhiteButton>
-          )}
-        </FieldArray>
+        <WhiteButton
+          type="button"
+          disabled={isAddToAllDisabled()}
+          onClick={async (event) => {
+            await setValues((prev) => {
+              const labware = prev.labware.map((lw) => ({
+                ...lw,
+                probes: lw.probes.map(() => ({
+                  name: probeName,
+                  lot: probeLot,
+                  plex: Number(probePlex),
+                  costing: probeCosting === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty
+                }))
+              }));
+              return { ...prev, labware };
+            });
+            await setTouched({
+              labware: Array.from({ length: values.labware.length + 1 }, () => ({
+                probes: Array.from({ length: values.labware.length + 1 }, () => ({
+                  name: true,
+                  lot: true,
+                  plex: true,
+                  costing: true
+                }))
+              }))
+            });
+          }}
+        >
+          <AddIcon className="inline-block text-green-500 h-4 w-4 mt-1 mr-2" />
+          Add to all
+        </WhiteButton>
       </div>
     </div>
   );
