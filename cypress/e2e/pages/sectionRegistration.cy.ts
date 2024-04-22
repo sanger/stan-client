@@ -275,6 +275,11 @@ describe('Section Registration Page', () => {
         it('shows the created labware', () => {
           cy.findByText('ExtBC1').should('be.visible');
         });
+
+        it('displays the print labels button', () => {
+          cy.findByLabelText('printers').should('be.visible');
+          cy.findByLabelText('printers').children().should('have.length.greaterThan', 0);
+        });
       });
     });
 

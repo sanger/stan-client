@@ -5,10 +5,10 @@ import {
   GetRegistrationInfoQueryVariables,
   LabwareState,
   LifeStage,
-  RegisterSectionsMutation,
-  RegisterSectionsMutationVariables,
   RegisterOriginalSamplesMutation,
   RegisterOriginalSamplesMutationVariables,
+  RegisterSectionsMutation,
+  RegisterSectionsMutationVariables,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables
 } from '../../types/sdk';
@@ -203,7 +203,10 @@ const registrationHandlers = [
                 name: labware.labwareType,
                 // numRows and numColumns not correct but don't need to be for this particular mock
                 numRows: 1,
-                numColumns: 1
+                numColumns: 1,
+                labelType: {
+                  name: 'Label Type 1'
+                }
               },
               barcode: labware.externalBarcode,
               slots: labware.contents.map((content) => ({

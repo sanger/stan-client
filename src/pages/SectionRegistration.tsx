@@ -274,7 +274,7 @@ export const SectionRegistration: React.FC = () => {
           return {
             ...sample,
             barcode: labware.barcode,
-            labwareType: labware.labwareType.name,
+            labwareType: labware.labwareType,
             slotAddress: slot.address
           };
         });
