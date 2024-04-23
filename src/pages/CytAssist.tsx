@@ -84,7 +84,6 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   onChangeLOTNumber,
   labwareType
 }) => {
-
   const initialValues: CytAssistOutputLabwareForm = {
     preBarcode: '',
     labwareType: labwareType,
@@ -109,7 +108,9 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
                 onScan={(barcode) => onChangeBarcode(barcode)}
                 onBlur={(e) => onChangeBarcode(e.currentTarget.value)}
                 allowEmptyValue={true}
-                placeholder={values.labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD ? 'H1-9D8VN2V' : 'V42A20-3752023-10-20'}
+                placeholder={
+                  values.labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD ? 'H1-9D8VN2V' : 'V42A20-3752023-10-20'
+                }
                 name={'preBarcode'}
               />
               {errors.preBarcode && <MutedText className={'text-red-400'}>{errors.preBarcode}</MutedText>}
