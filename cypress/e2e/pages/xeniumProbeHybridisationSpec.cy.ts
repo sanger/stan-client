@@ -101,6 +101,8 @@ describe('Xenium Probe Hybridisation', () => {
   describe('Probe for all', () => {
     context('When probe is added for all', () => {
       before(() => {
+        cy.reload();
+        cy.get('#labwareScanInput').type('STAN-3111{enter}');
         selectOption('probe-name', 'Custom breast');
         cy.findByTestId('probe-lot').type('1234');
         cy.findByTestId('probe-plex').scrollIntoView().type('2');
@@ -108,27 +110,17 @@ describe('Xenium Probe Hybridisation', () => {
         cy.findByRole('button', { name: 'Add to all' }).click();
       });
       it('should display probe information added for all labware', () => {
-        //Should display added row
-        cy.findByTestId('STAN-3111-1-name').should('be.visible');
-        shouldDisplaySelectedValue('STAN-3111-1-name', 'Custom breast');
-        cy.findByTestId('STAN-3111-1-lot').should('have.value', '1234');
-        cy.findByTestId('STAN-3111-1-plex').scrollIntoView().should('have.value', '2');
-        shouldDisplaySelectedValue('STAN-3111-1-costing', 'Faculty');
-
-        //Display only remove for first row
-        cy.findByTestId('STAN-3111-0-action').within(() => {
-          cy.findByTestId('removeButton').should('exist');
-          cy.findByTestId('addButton').should('not.exist');
-        });
-        //Display remove and add button for added row
-        cy.findByTestId('STAN-3111-1-action').within(() => {
-          cy.findByTestId('removeButton').should('exist');
-          cy.findByTestId('addButton').scrollIntoView().should('exist');
-        });
+        //Should adds probe information to the existing rows
+        cy.findByTestId('STAN-3111-0-name').should('be.visible');
+        shouldDisplaySelectedValue('STAN-3111-0-name', 'Custom breast');
+        cy.findByTestId('STAN-3111-0-lot').should('have.value', '1234');
+        cy.findByTestId('STAN-3111-0-plex').scrollIntoView().should('have.value', '2');
+        shouldDisplaySelectedValue('STAN-3111-0-costing', 'Faculty');
       });
 
       it('displays error when same panel is selected for multiple probes in same labware', () => {
-        selectOption('STAN-3111-0-name', 'Custom breast');
+        cy.findByTestId('addButton').click();
+        cy.findByRole('button', { name: 'Add to all' }).click();
         cy.findAllByText('Unique value required for Probe Panel').should('be.visible');
       });
     });
