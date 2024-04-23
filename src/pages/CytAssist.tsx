@@ -98,6 +98,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
       onSubmit={() => {
       }}
       validationSchema={validationSchema}
+      validateOnChange={true}
     >
       {({ setFieldValue, errors, setTouched, values }) => (
         <Form>
