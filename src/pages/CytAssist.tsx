@@ -26,6 +26,8 @@ import Label from '../components/forms/Label';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { SlotCopyMode } from '../components/slotMapper/slotMapper.types';
+import { Form, Formik } from 'formik';
+import * as Yup from 'yup';
 
 /**
  * Success notification when slots have been copied
@@ -41,6 +43,39 @@ interface OutputLabwareScanPanelProps {
   onChangeLOTNumber: (lotNumber: string, isProbe: boolean) => void;
 }
 
+type CytAssistOutputLabwareForm = {
+  preBarcode: string;
+  labwareType: string;
+  costing: string;
+  slideLotNumber: string;
+  probeLotNumber: string;
+};
+
+const lotNumberRegex = /^\d{6,7}$/;
+
+const validationSchema = () => {
+  return Yup.object().shape({
+    labwareType: Yup.string().required('Required field'),
+    preBarcode: Yup.string().when('labwareType', (labwareType, schema) => {
+      const val = labwareType[0] as unknown as string;
+      return val === LabwareTypeName.VISIUM_LP_CYTASSIST_HD
+        ? Yup.string()
+          .required('Required field')
+          .matches(/[A-Z0-9]{2}-[A-Z0-9]{7}/, 'Invalid format for a labware type of VISIUM_LP_CYTASSIST_HD')
+        : Yup.string()
+          .required('Required field')
+          .matches(/[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}/, 'Invalid format');
+    }),
+    costing: Yup.string().required('Required field'),
+    probeLotNumber: Yup.string()
+      .required('Required field')
+      .matches(lotNumberRegex, 'Invalid format: Required 6-7 digit number'),
+    slideLotNumber: Yup.string()
+      .required('Required field')
+      .matches(lotNumberRegex, 'Invalid format: Required 6-7 digit number')
+  });
+};
+
 /**Component to configure the output CytAssist labware**/
 const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = ({
   onChangeBarcode,
@@ -49,143 +84,107 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   onChangeLOTNumber,
   labwareType
 }) => {
-  /**State to store preBarcode validation errors**/
-  const [preBarcodeValidationError, setPreBarcodeValidationError] = React.useState('');
-  const [slideLOTNumberValidationError, setSlideLOTNumberValidationError] = React.useState('');
-  const [costingValidationError, setCostingValidationError] = React.useState('');
-  const [probLOTNumberValidationError, setProbeLOTNumberValidationError] = React.useState('');
 
-  const validatePreBarcode = React.useCallback(
-    (preBarcode: string) => {
-      let error;
-      if (preBarcode.length === 0) {
-        error = 'Required field';
-      } else {
-        const valid = /[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}/.test(preBarcode);
-        if (!valid) {
-          error = 'Invalid format';
-        } else {
-          error = '';
-        }
-      }
-      setPreBarcodeValidationError(error);
-      onChangeBarcode(preBarcode);
-    },
-    [setPreBarcodeValidationError, onChangeBarcode]
-  );
-  const validateLotNumber = React.useCallback(
-    (slideLotNumber: string, isProbe: boolean) => {
-      let error;
-      if (slideLotNumber.length === 0) {
-        error = 'Required field';
-      } else {
-        const valid = /^\d{6,7}$/.test(slideLotNumber);
-        if (!valid) {
-          error = 'Invalid format: Required 6-7 digit number';
-        } else {
-          error = '';
-        }
-      }
-      if (isProbe) {
-        setProbeLOTNumberValidationError(error);
-      } else {
-        setSlideLOTNumberValidationError(error);
-      }
-      onChangeLOTNumber(slideLotNumber, isProbe);
-    },
-    [setSlideLOTNumberValidationError, onChangeLOTNumber]
-  );
+  const initialValues: CytAssistOutputLabwareForm = {
+    preBarcode: '',
+    labwareType: labwareType,
+    costing: '',
+    slideLotNumber: '',
+    probeLotNumber: ''
+  };
 
-  const validateCosting = React.useCallback(
-    (costing: string) => {
-      let error = '';
-      if (costing.length === 0) {
-        error = 'Required field';
-      }
-      setCostingValidationError(error);
-      onChangeCosting(costing);
-    },
-    [setCostingValidationError, onChangeCosting]
-  );
   return (
-    <div className={'w-full grid lg:grid-cols-3 grid-cols-2 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
-      <div data-testid="external-barcode">
-        <Label name={'External barcode'} />
-        <ScanInput
-          onScan={validatePreBarcode}
-          onBlur={(e) => validatePreBarcode(e.currentTarget.value)}
-          allowEmptyValue={true}
-          placeholder={'e.g V42A20-3752023-10-20'}
-        />
-        {preBarcodeValidationError && <MutedText className={'text-red-400'}>{preBarcodeValidationError}</MutedText>}
-      </div>
-      <div>
-        <Label name={'Labware Type'} />
-        <CustomReactSelect
-          handleChange={(val) => {
-            onChangeLabwareType((val as OptionType).label);
-          }}
-          value={labwareType}
-          emptyOption={true}
-          dataTestId="output-labware-type"
-          options={[
-            LabwareTypeName.VISIUM_LP_CYTASSIST,
-            LabwareTypeName.VISIUM_LP_CYTASSIST_XL,
-            LabwareTypeName.VISIUM_LP_CYTASSIST_HD
-          ].map((key) => {
-            return {
-              label: key,
-              value: key
-            };
-          })}
-        />
-      </div>
-      <div>
-        <Label name={'Slide costings'} />
-        <CustomReactSelect
-          handleChange={(val) => {
-            validateCosting((val as OptionType).label);
-          }}
-          handleBlur={(val) => {
-            val && validateCosting((val as OptionType).label);
-          }}
-          emptyOption={true}
-          dataTestId="output-labware-costing"
-          options={objectKeys(SlideCosting).map((key) => {
-            return {
-              label: SlideCosting[key],
-              value: SlideCosting[key]
-            };
-          })}
-        />
-        {costingValidationError && <MutedText className={'text-red-400'}>{costingValidationError}</MutedText>}
-      </div>
-      <div data-testid={'lot-number'}>
-        <Label name={'Slide LOT number'} />
-        <ScanInput
-          onScan={(val) => validateLotNumber(val, false)}
-          onBlur={(e) => {
-            validateLotNumber(e.currentTarget.value, false);
-          }}
-          allowEmptyValue={true}
-        />
-        {slideLOTNumberValidationError && (
-          <MutedText className={'text-red-400'}>{slideLOTNumberValidationError}</MutedText>
-        )}
-      </div>
-      <div data-testid={'probe-lot-number'}>
-        <Label name={'Transcriptome Probe LOT number'} className={'whitespace-nowrap'} />
-        <ScanInput
-          onScan={(val) => validateLotNumber(val, true)}
-          onBlur={(e) => {
-            validateLotNumber(e.currentTarget.value, true);
-          }}
-        />
-        {probLOTNumberValidationError && (
-          <MutedText className={'text-red-400'}>{probLOTNumberValidationError}</MutedText>
-        )}
-      </div>
-    </div>
+    <Formik<CytAssistOutputLabwareForm>
+      initialValues={initialValues}
+      onSubmit={() => {
+      }}
+      validationSchema={validationSchema}
+    >
+      {({ setFieldValue, errors, setTouched, values }) => (
+        <Form>
+          <div className={'w-full grid lg:grid-cols-3 grid-cols-2 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
+            <div data-testid="external-barcode">
+              <Label name={'External barcode'} />
+              <ScanInput
+                onScan={(barcode) => onChangeBarcode(barcode)}
+                onBlur={(e) => onChangeBarcode(e.currentTarget.value)}
+                allowEmptyValue={true}
+                placeholder={values.labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD ? 'H1-9D8VN2V' : 'V42A20-3752023-10-20'}
+                name={'preBarcode'}
+              />
+              {errors.preBarcode && <MutedText className={'text-red-400'}>{errors.preBarcode}</MutedText>}
+            </div>
+            <div>
+              <Label name={'Labware Type'} />
+              <CustomReactSelect
+                handleChange={async (val) => {
+                  await setTouched({ preBarcode: true });
+                  onChangeLabwareType((val as OptionType).label);
+                }}
+                name={'labwareType'}
+                value={values.labwareType}
+                emptyOption={true}
+                dataTestId="output-labware-type"
+                options={[
+                  LabwareTypeName.VISIUM_LP_CYTASSIST,
+                  LabwareTypeName.VISIUM_LP_CYTASSIST_XL,
+                  LabwareTypeName.VISIUM_LP_CYTASSIST_HD
+                ].map((key) => {
+                  return {
+                    label: key,
+                    value: key
+                  };
+                })}
+              />
+            </div>
+            <div>
+              <Label name={'Slide costings'} />
+              <CustomReactSelect
+                handleChange={(val) => {
+                  onChangeCosting((val as OptionType).label);
+                }}
+                handleBlur={(val) => {
+                  val && onChangeCosting((val as OptionType).label);
+                }}
+                name={'costing'}
+                emptyOption={true}
+                dataTestId="output-labware-costing"
+                options={objectKeys(SlideCosting).map((key) => {
+                  return {
+                    label: SlideCosting[key],
+                    value: SlideCosting[key]
+                  };
+                })}
+              />
+            </div>
+            <div data-testid={'lot-number'}>
+              <Label name={'Slide LOT number'} />
+              <ScanInput
+                onScan={(val) => setFieldValue('slideLotNumber', val)}
+                onBlur={(e) => {
+                  setFieldValue('slideLotNumber', e.currentTarget.value);
+                  onChangeLOTNumber(e.currentTarget.value, false);
+                }}
+                allowEmptyValue={true}
+                name={'slideLotNumber'}
+              />
+              {errors.slideLotNumber && <MutedText className={'text-red-400'}>{errors.slideLotNumber}</MutedText>}
+            </div>
+            <div data-testid={'probe-lot-number'}>
+              <Label name={'Transcriptome Probe LOT number'} className={'whitespace-nowrap'} />
+              <ScanInput
+                name="probeLotNumber"
+                onScan={(val) => onChangeLOTNumber(val, true)}
+                onBlur={(e) => {
+                  onChangeLOTNumber(e.currentTarget.value, true);
+                }}
+              />
+              {errors.probeLotNumber && <MutedText className={'text-red-400'}>{errors.probeLotNumber}</MutedText>}
+            </div>
+          </div>
+        </Form>
+      )}
+    </Formik>
   );
 };
 
