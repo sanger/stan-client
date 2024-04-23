@@ -340,23 +340,23 @@ describe('CytAssist Page', () => {
 });
 
 function saveButton() {
-  return cy.findByRole('button', { name: /Save/i });
+  return cy.findByRole('button', { name: /Save/i }).scrollIntoView();
 }
 
 function enterOutputLabwareExternalID() {
   cy.findByTestId('external-barcode').within(() => {
-    cy.findByRole('textbox').clear().type('V42A20-3752023-10-20{enter}');
+    cy.findByRole('textbox').clear().type('V42A20-3752023-10-20{enter}').blur();
   });
 }
 
 function enterLOTNumber() {
   cy.findByTestId('lot-number').within(() => {
-    cy.findByRole('textbox').clear().type('1234567{enter}');
+    cy.findByRole('textbox').clear().type('1234567{enter}').blur();
   });
 }
 function enterProbeLOTNumber() {
   cy.findByTestId('probe-lot-number').within(() => {
-    cy.findByRole('textbox').clear().type('1234567{enter}');
+    cy.findByRole('textbox').clear().type('1234567{enter}').blur();
   });
 }
 function selectLabwareType(type: string) {
