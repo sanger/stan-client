@@ -1,5 +1,10 @@
 import { Column } from 'react-table';
-import { LabwareFieldsFragment, SampleFieldsFragment, SamplePositionFieldsFragment } from '../../types/sdk';
+import {
+  LabwareFieldsFragment,
+  LabwareType,
+  SampleFieldsFragment,
+  SamplePositionFieldsFragment
+} from '../../types/sdk';
 import { capitalize } from 'lodash';
 import MutedText from '../MutedText';
 
@@ -8,7 +13,7 @@ import MutedText from '../MutedText';
  */
 export type SampleDataTableRow = SampleFieldsFragment & { slotAddress: string } & {
   sectionPosition?: string;
-} & { barcode?: string } & { labwareType?: string };
+} & { barcode?: string } & { labwareType?: LabwareType };
 
 type ColumnFactory<E = any> = (meta?: E) => Column<SampleDataTableRow>;
 
@@ -125,6 +130,6 @@ export const barcode: ColumnFactory = () => {
 export const labwareType: ColumnFactory = () => {
   return {
     Header: 'Labware Type',
-    accessor: (sample) => sample.labwareType
+    accessor: (sample) => sample.labwareType?.name
   };
 };
