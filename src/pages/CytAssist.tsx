@@ -60,11 +60,11 @@ const validationSchema = () => {
       const val = labwareType[0] as unknown as string;
       return val === LabwareTypeName.VISIUM_LP_CYTASSIST_HD
         ? Yup.string()
-          .required('Required field')
-          .matches(/[A-Z0-9]{2}-[A-Z0-9]{7}/, 'Invalid format for a labware type of VISIUM_LP_CYTASSIST_HD')
+            .required('Required field')
+            .matches(/[A-Z0-9]{2}-[A-Z0-9]{7}/, 'Invalid format for a labware type of VISIUM_LP_CYTASSIST_HD')
         : Yup.string()
-          .required('Required field')
-          .matches(/[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}/, 'Invalid format');
+            .required('Required field')
+            .matches(/[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}/, 'Invalid format');
     }),
     costing: Yup.string().required('Required field'),
     probeLotNumber: Yup.string()
@@ -95,8 +95,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   return (
     <Formik<CytAssistOutputLabwareForm>
       initialValues={initialValues}
-      onSubmit={() => {
-      }}
+      onSubmit={() => {}}
       validationSchema={validationSchema}
       validateOnChange={true}
     >
