@@ -136,7 +136,7 @@ export function buildRegisterTissuesMutationVariables(
             highestSection: block.lastKnownSectionNumber,
             hmdmc: tissue.hmdmc.trim(),
             labwareType: block.labwareType.trim(),
-            lifeStage: tissue.lifeStage in LifeStage ? tissue.lifeStage : undefined,
+            lifeStage: Object.values(LifeStage).includes(tissue.lifeStage) ? tissue.lifeStage : undefined,
             tissueType: tissue.tissueType.trim(),
             spatialLocation: block.spatialLocation,
             replicateNumber: block.replicateNumber,
