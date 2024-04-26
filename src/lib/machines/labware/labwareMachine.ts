@@ -86,6 +86,18 @@ export interface LabwareContext {
    * When set to true runs FindFlaggedLabware instead of FindLabware
    */
   enableFlaggedLabwareCheck?: boolean;
+
+  /**
+   * When set to true checks for cleaned out addresses
+   */
+  checkForCleanedOutAddresses?: boolean;
+
+  /**
+   * Map to store the cleaned out addresses for the different scanned labware
+   * key: the labware id
+   * value: list of cleaned out addresses
+   */
+  cleanedOutAddresses: Map<number, string[]>;
 }
 
 /**
@@ -156,6 +168,16 @@ type FoundLabwareCheckErrorEvent = {
   error: string[];
 };
 
+type FindCleanedOutAddressesEvent = {
+  type: 'xstate.done.actor.cleanedOutAddress';
+  output: { cleanedOutAddresses: string[]; id: number };
+};
+
+type FindCleanedOutAddressesErrorEvent = {
+  type: 'xstate.error.actor.cleanedOutAddress';
+  error: ClientError;
+};
+
 export type LabwareEvents =
   | UpdateCurrentBarcodeEvent
   | SubmitBarcodeEvent
@@ -169,7 +191,9 @@ export type LabwareEvents =
   | FindLocationDoneEvent
   | FindLocationErrorEvent
   | AddFoundLabwareEvent
-  | FoundLabwareCheckErrorEvent;
+  | FoundLabwareCheckErrorEvent
+  | FindCleanedOutAddressesEvent
+  | FindCleanedOutAddressesErrorEvent;
 
 /**
  * State machine for managing a collection of {@link Labware Labwares}
@@ -195,7 +219,8 @@ export const createLabwareMachine = () => {
         context: LabwareContext;
       },
       context: ({ input }: { input: LabwareContext }): LabwareContext => ({
-        ...input
+        ...input,
+        cleanedOutAddresses: new Map<number, string[]>()
       }),
       id: 'labwareScanner',
       initial: 'checking_full',
@@ -348,12 +373,49 @@ export const createLabwareMachine = () => {
               foundLabwareCheck: context.foundLabwareCheck
             }),
             onDone: {
-              target: '#labwareScanner.checking_full',
+              target: 'gettingCleanedOutAddress',
               actions: ['addFoundLabware']
             },
             onError: {
               target: '#labwareScanner.idle.error',
               actions: ['foundLabwareCheckError']
+            }
+          }
+        },
+        gettingCleanedOutAddress: {
+          invoke: {
+            id: 'cleanedOutAddress',
+            src: fromPromise(({ input }) => {
+              if (!input.runCheck)
+                return new Promise((resolve) =>
+                  resolve({
+                    cleanedOutAddresses: [],
+                    id: input.labwareId
+                  })
+                );
+              return new Promise((resolve, reject) => {
+                stanCore
+                  .GetCleanedOutAddresses({
+                    barcode: input.barcode
+                  })
+                  .then((response) => {
+                    resolve({ ...response, id: input.labwareId });
+                  })
+                  .catch(reject);
+              });
+            }),
+            input: ({ context }) => ({
+              barcode: context.labwares[context.labwares.length - 1].barcode,
+              labwareId: context.labwares[context.labwares.length - 1].id,
+              runCheck: context.checkForCleanedOutAddresses
+            }),
+            onDone: {
+              target: '#labwareScanner.checking_full',
+              actions: ['assignCleanedOutAddresses']
+            },
+            onError: {
+              target: '#labwareScanner.idle.error',
+              actions: ['assignCleanedOutLabwareError']
             }
           }
         }
@@ -392,9 +454,10 @@ export const createLabwareMachine = () => {
             labware: context.labwares[removeLabwareIndex],
             index: removeLabwareIndex
           };
-          context.labwares = context.labwares.filter((_, index) => index !== removeLabwareIndex);
-          context.successMessage = `"${event.value}" removed`;
-          return context;
+          if (context.checkForCleanedOutAddresses)
+            context.cleanedOutAddresses.delete(context.labwares[removeLabwareIndex].id);
+          const labwares = context.labwares.filter((_, index) => index !== removeLabwareIndex);
+          return { ...context, successMessage: `"${event.value}" removed`, labwares };
         }),
         assignValidationError: assign(({ context, event }) => {
           if (event.type !== 'xstate.error.actor.validateBarcode') {
@@ -411,6 +474,20 @@ export const createLabwareMachine = () => {
             : convertLabwareToFlaggedLabware([(event as FindLabwareDoneEvent).output.labware])[0];
           context.currentBarcode = '';
           return context;
+        }),
+        assignCleanedOutAddresses: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.cleanedOutAddress') {
+            return context;
+          }
+          const cleanedOutAddresses = context.cleanedOutAddresses || new Map<number, string[]>();
+          cleanedOutAddresses.set(event.output.id, event.output.cleanedOutAddresses);
+          return { ...context, cleanedOutAddresses };
+        }),
+        assignCleanedOutLabwareError: assign(({ context, event }) => {
+          if (event.type !== 'xstate.error.actor.cleanedOutAddress') {
+            return context;
+          }
+          return { ...context, errorMessage: event.error.message };
         }),
 
         addFoundLabware: assign(({ context, event }) => {

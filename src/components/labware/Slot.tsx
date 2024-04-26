@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import { brightenColor } from '../../lib/helpers/tailwindHelper';
 import { LabwareProps } from './Labware';
 import { SlotFieldsFragment } from '../../types/sdk';
+import CrossOverIcon from '../icons/CrossOverIcon';
 
 type SlotProps = {
   address: string;
@@ -17,6 +18,7 @@ type SlotProps = {
   text?: LabwareProps['slotText'];
   secondaryText?: LabwareProps['slotSecondaryText'];
   selected: boolean;
+  isCleanedOut?: boolean;
 };
 
 export function Slot({
@@ -31,7 +33,8 @@ export function Slot({
   color,
   text,
   secondaryText,
-  selected
+  selected,
+  isCleanedOut
 }: SlotProps) {
   const slotText = (text && text(address, slot)) ?? address;
   const slotSecondaryText = (secondaryText && secondaryText(address, slot)) ?? null;
@@ -39,9 +42,9 @@ export function Slot({
 
   const slotClassNames = classNames(
     {
-      'transition duration-150 ease-in-out cursor-pointer': onClick,
-      'hover:bg-gray-200': onClick && !bgColor,
-      [`hover:${brightenColor(bgColor)}`]: onClick && bgColor,
+      'transition duration-150 ease-in-out cursor-pointer': onClick && !isCleanedOut,
+      'hover:bg-gray-200': onClick && !bgColor && !isCleanedOut,
+      [`hover:${brightenColor(bgColor)}`]: onClick && bgColor && !isCleanedOut,
       [`${bgColor} text-gray-100`]: bgColor,
       'bg-gray-100 text-gray-800': !bgColor,
       'ring ring-pink-600 ring-offset-2': selected,
@@ -74,7 +77,17 @@ export function Slot({
     onMouseLeave?.(address, slot);
   }, [onMouseLeave, address, slot]);
 
-  return (
+  return isCleanedOut ? (
+    <div
+      onMouseEnter={onMouseEnterHandler}
+      onMouseLeave={onMouseLeaveHandler}
+      className={slotClassNames}
+      data-testid={'slot'}
+    >
+      <CrossOverIcon />
+      {secondaryText && <p className="truncate">{slotSecondaryText}</p>}
+    </div>
+  ) : (
     <div
       onClick={onClickHandler}
       onMouseEnter={onMouseEnterHandler}

@@ -154,6 +154,7 @@ export default function VisiumPerm() {
                         }}
                         limit={1}
                         enableFlaggedLabwareCheck
+                        checkForCleanedOutAddresses
                       >
                         <LabwareScannerSlotsTable />
                         <VisiumPermForm />
@@ -217,7 +218,7 @@ export default function VisiumPerm() {
 }
 
 function VisiumPermForm() {
-  const { labwares } = useLabwareContext();
+  const { labwares, cleanedOutAddresses } = useLabwareContext();
   const { values, setFieldValue } = useFormikContext<RecordPermRequest>();
   const [controlTube, setControlTube] = useState<LabwareFieldsFragment | undefined>(undefined);
 
@@ -274,6 +275,7 @@ function VisiumPermForm() {
             }}
             limit={1}
             enableFlaggedLabwareCheck
+            checkForCleanedOutAddresses
           >
             <LabwareScanPanel columns={[columns.barcode()]} />
           </LabwareScanner>
@@ -299,6 +301,7 @@ function VisiumPermForm() {
               return null;
             }
           }}
+          cleanedOutAddresses={cleanedOutAddresses?.get(labwares[0].id)}
         />
       </div>
     </div>

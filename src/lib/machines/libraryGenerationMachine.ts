@@ -30,6 +30,7 @@ type GoToReagentTransferEvent = {
   destination?: SlotCopyDestination;
   destinationLabware?: NewFlaggedLabwareLayout;
   slotMeasurements?: SlotMeasurementRequest[];
+  cleanedOutAddresses?: string[];
 };
 
 type GoToSampleTransferEvent = {
@@ -112,6 +113,8 @@ type LibraryPrepContext = {
   serverErrors?: ServerErrors;
 
   serverSuccess?: RecordLibraryPrepMutation;
+  /** cleaned out addresses in the destination labware */
+  cleanedOutAddresses?: string[];
 };
 
 export const libraryGenerationMachine = createMachine(
@@ -231,7 +234,8 @@ export const libraryGenerationMachine = createMachine(
         if (event.type === 'GO_TO_REAGENT_TRANSFER' && event.destinationLabware) {
           return {
             ...context,
-            destinationLabware: event.destinationLabware
+            destinationLabware: event.destinationLabware,
+            cleanedOutAddresses: event.cleanedOutAddresses
           };
         }
         return context;

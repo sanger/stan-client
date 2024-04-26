@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import * as sdk from '../../../src/lib/sdk';
 import { cleanup } from '@testing-library/react';
 import { buildLabwareFragment, convertLabwareToFlaggedLabware } from '../../../src/lib/helpers/labwareHelper';
+import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
 
 afterAll(() => {
   jest.resetAllMocks();
@@ -17,7 +18,7 @@ beforeEach(() => {
   cleanup();
 });
 
-const mockedLabware = buildLabwareFragment(labwareFactory.build({ barcode: 'STAN-123' }));
+const mockedLabware = buildLabwareFragment(labwareFactory.build({ barcode: 'STAN-123', id: 123 }));
 const mockedFlaggedLabware = convertLabwareToFlaggedLabware([mockedLabware]);
 
 const mockedLabwareContext: LabwareContext = {
@@ -30,7 +31,8 @@ const mockedLabwareContext: LabwareContext = {
   successMessage: null,
   errorMessage: null,
   locationScan: false,
-  limit: undefined
+  limit: undefined,
+  cleanedOutAddresses: new Map<number, string[]>()
 };
 
 describe('labwareMachine', () => {
@@ -339,6 +341,39 @@ describe('labwareMachine', () => {
           });
           stateMachine.send({ type: 'SUBMIT_BARCODE' });
           expect(stateMachine.getSnapshot().context.enableFlaggedLabwareCheck).toEqual(true);
+        });
+      });
+    });
+
+    describe('When checkCleanedOutAddresses is set to true', () => {
+      describe('when a labware is scanned with cleaned out addresses', () => {
+        it('runs GetCleanedOutAddresses query', (done) => {
+          jest.spyOn(sdk.stanCore, 'FindLabware').mockResolvedValueOnce({
+            labware: mockedLabware
+          });
+          jest.spyOn(sdk.stanCore, 'GetCleanedOutAddresses').mockResolvedValueOnce({
+            cleanedOutAddresses: ['B1', 'B2']
+          });
+          const labwareMachine = createLabwareMachine();
+          const stateMachine = createActor(labwareMachine, {
+            input: { ...mockedLabwareContext, checkForCleanedOutAddresses: true }
+          });
+          stateMachine.subscribe((state) => {
+            if (state.matches('idle.normal') && state.context.cleanedOutAddresses.size > 0) {
+              expect(state.context.cleanedOutAddresses.size).toEqual(1);
+              expect(state.context.cleanedOutAddresses.has(mockedLabware.id));
+              stateMachine.stop();
+              done();
+            }
+          });
+          stateMachine.start();
+          stateMachine.send({
+            type: 'UPDATE_CURRENT_BARCODE',
+            value: 'STO-123',
+            locationScan: false
+          });
+          stateMachine.send({ type: 'SUBMIT_BARCODE' });
+          expect(stateMachine.getSnapshot().context.checkForCleanedOutAddresses).toEqual(true);
         });
       });
     });

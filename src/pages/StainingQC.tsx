@@ -156,10 +156,15 @@ export default function StainingQC({ info }: StainingQCProps) {
 
             <p>Please scan in any slides you wish to QC.</p>
 
-            <LabwareScanner onAdd={onAddLabware} onRemove={onRemoveLabware} enableFlaggedLabwareCheck>
-              {({ labwares, removeLabware }) =>
+            <LabwareScanner
+              onAdd={onAddLabware}
+              onRemove={onRemoveLabware}
+              enableFlaggedLabwareCheck
+              checkForCleanedOutAddresses
+            >
+              {({ labwares, removeLabware, cleanedOutAddresses }) =>
                 labwares.map(
-                  (labware) =>
+                  (labware, index) =>
                     labwareResults.getItem(labware.barcode) && (
                       <Panel key={labware.barcode}>
                         <LabwareResult
@@ -174,6 +179,7 @@ export default function StainingQC({ info }: StainingQCProps) {
                           displayComments={qcType === STAIN_QC_TYPES[0] || qcType === STAIN_QC_TYPES[2]}
                           displayPassFail={qcType === STAIN_QC_TYPES[0]}
                           displayMeasurement={qcType === STAIN_QC_TYPES[1]}
+                          cleanedOutAddresses={cleanedOutAddresses?.get(labware.id)}
                         />
                       </Panel>
                     )

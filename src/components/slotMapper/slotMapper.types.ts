@@ -91,6 +91,7 @@ export interface SlotMapperProps {
 export type OutputSlotCopyData = {
   labware: NewFlaggedLabwareLayout;
   slotCopyContent: Array<SlotCopyContent>;
+  cleanedOutAddresses?: Array<string>;
 };
 export interface SlotMapperContext {
   /**All input labware scanned**/

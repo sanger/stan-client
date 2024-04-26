@@ -113,8 +113,9 @@ const XeniumQC = () => {
                           }
                         }}
                         enableFlaggedLabwareCheck
+                        checkForCleanedOutAddresses
                       >
-                        {({ labwares, removeLabware }) => (
+                        {({ labwares, removeLabware, cleanedOutAddresses }) => (
                           <>
                             {labwares.length > 0 && (
                               <>
@@ -158,6 +159,7 @@ const XeniumQC = () => {
                                     comments={comments}
                                     index={index}
                                     removeLabware={removeLabware}
+                                    cleanedOutAddress={cleanedOutAddresses ? cleanedOutAddresses.get(lw.id) : undefined}
                                   />
                                 ))}
                                 <div className={'sm:flex mt-4 sm:flex-row justify-end'}>

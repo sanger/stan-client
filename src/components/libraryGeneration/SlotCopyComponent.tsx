@@ -30,7 +30,7 @@ interface DestinationLabwareScanPanelProps {
   labware: Destination | undefined;
   onAddLabware?: () => void;
   onChangeBioState: (bioState: string) => void;
-  onLabwareScan?: (labware: LabwareFlaggedFieldsFragment[]) => void;
+  onLabwareScan?: (labware: LabwareFlaggedFieldsFragment[], cleanedOutAddresses?: Map<number, string[]>) => void;
   onDestinationSelectionModeChange?: (mode: DestinationSelectionMode) => void;
   destinationSelectionMode: DestinationSelectionMode;
 }
@@ -127,16 +127,17 @@ export const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPane
               labwareCheckFunction={validateLabware}
               enableFlaggedLabwareCheck
               locked={labware?.labware.barcode !== undefined}
+              checkForCleanedOutAddresses
             >
-              {(props) => {
+              {({ labwares, removeLabware, cleanedOutAddresses }) => {
                 return (
                   <div className="flex flex-col">
-                    {props.labwares.length > 0 && (
+                    {labwares.length > 0 && (
                       <>
                         <div className={'flex flex-row justify-end'}>
                           <RemoveButton
                             onClick={() => {
-                              labware?.labware.barcode && props.removeLabware(labware?.labware.barcode);
+                              labware?.labware.barcode && removeLabware(labware?.labware.barcode);
                               onLabwareScan?.([]);
                             }}
                           />
@@ -305,8 +306,8 @@ function SlotCopyComponent({
 
   /**Handler for output labware selection mode change**/
   const onDestinationLabwareScan = React.useCallback(
-    (labware: LabwareFlaggedFieldsFragment[]) => {
-      send({ type: 'UPDATE_DESTINATION_LABWARE', labware: labware });
+    (labware: LabwareFlaggedFieldsFragment[], cleanedOutAddresses?: Map<number, string[]>) => {
+      send({ type: 'UPDATE_DESTINATION_LABWARE', labware: labware, cleanedOutAddresses: cleanedOutAddresses });
     },
     [send]
   );
@@ -317,7 +318,11 @@ function SlotCopyComponent({
         <SlotMapper
           locked={current.matches('copied')}
           initialOutputLabware={destinations.map((output) => {
-            return { labware: output.labware, slotCopyContent: output.slotCopyDetails.contents };
+            return {
+              labware: output.labware,
+              slotCopyContent: output.slotCopyDetails.contents,
+              cleanedOutAddresses: output.cleanedOutAddresses
+            };
           })}
           initialInputLabware={sources.map((source) => source.labware)}
           onInputLabwareChange={handleInputLabwareChange}

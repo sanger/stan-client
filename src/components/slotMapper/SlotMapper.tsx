@@ -165,7 +165,8 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
             ...prev,
             labware: {
               ...prev.labware,
-              barcode: matchingLabware.labware.barcode
+              barcode: matchingLabware.labware.barcode,
+              cleanedOutAddresses: matchingLabware.cleanedOutAddresses
             }
           };
         } else return prev;
@@ -301,7 +302,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   }, [outputSlotCopies.length, goToLastOutputPage, previousOutputLength]);
 
   /**
-   * Whenever the current page changes, set the current input labware
+   * Whenever the current page changes, set the current output labware
    * and also notify parent using callback function
    */
   useEffect(() => {
@@ -655,8 +656,9 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
             onChange={onLabwareScannerChange}
             limit={inputLabwareLimit}
             enableFlaggedLabwareCheck
+            checkForCleanedOutAddresses
           >
-            {(props) => {
+            {({ removeLabware, cleanedOutAddresses }) => {
               if (!currentInputLabware) {
                 return <MutedText>Add labware using the scan input above</MutedText>;
               }
@@ -667,7 +669,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
                     <div className="flex flex-row justify-end">
                       <RemoveButton
                         onClick={() => {
-                          props.removeLabware(currentInputLabware.barcode);
+                          removeLabware(currentInputLabware.barcode);
                           onInputLabwareChange?.(inputLabware);
                         }}
                       />
@@ -685,6 +687,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
                         }}
                         name={currentInputLabware.labwareType.name}
                         onSelect={handleOnInputLabwareSlotClick}
+                        cleanedOutAddresses={cleanedOutAddresses?.get(currentInputLabware.id)}
                       />
                     </div>
                   )}
@@ -728,6 +731,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
                     onSlotClick={handleOnOutputLabwareSlotClick}
                     onSelect={setSelectedOutputAddresses}
                     slotColor={(address) => getDestinationSlotColor(currentOutput, address)}
+                    cleanedOutAddresses={currentOutput.cleanedOutAddresses}
                   />
                 )}
               </div>

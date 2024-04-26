@@ -54,6 +54,8 @@ type LabwareResultComponentProps = {
 
   /**Display measurement? */
   displayMeasurement?: boolean;
+
+  cleanedOutAddresses?: string[];
 };
 
 /**
@@ -68,7 +70,8 @@ export default function LabwareResult({
   commentsForSlotSections = false,
   displayPassFail = true,
   displayComments = true,
-  displayMeasurement = true
+  displayMeasurement = true,
+  cleanedOutAddresses
 }: LabwareResultComponentProps) {
   const labwareResultMachine = React.useMemo(() => {
     return createLabwareResultMachine();
@@ -269,7 +272,7 @@ export default function LabwareResult({
       <div className="flex flex-col items-center justify-around">
         {/* Display the layout of the labware */}
         <div className="flex bg-blue-100" data-testid={'passFailComments'}>
-          <Labware labware={labware} slotBuilder={slotBuilder} />
+          <Labware labware={labware} slotBuilder={slotBuilder} cleanedOutAddresses={cleanedOutAddresses} />
         </div>
 
         {/* Display the list of pass/fail comments */}

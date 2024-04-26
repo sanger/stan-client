@@ -25,6 +25,7 @@ import { Draft } from 'immer';
 export type Destination = {
   labware: NewFlaggedLabwareLayout;
   slotCopyDetails: SlotCopyDestination;
+  cleanedOutAddresses?: string[];
 };
 
 /**
@@ -128,6 +129,7 @@ type UpdateSourceLabware = {
 type UpdateDestinationLabware = {
   type: 'UPDATE_DESTINATION_LABWARE';
   labware: NewFlaggedLabwareLayout[];
+  cleanedOutAddresses?: Map<number, string[]>;
 };
 
 type FindPermDataEvent = {
@@ -404,7 +406,8 @@ export const slotCopyMachine = createMachine(
             if (!destination) {
               return {
                 labware: newDest,
-                slotCopyDetails: { labwareType: newDest.labwareType.name, barcode: newDest.barcode, contents: [] }
+                slotCopyDetails: { labwareType: newDest.labwareType.name, barcode: newDest.barcode, contents: [] },
+                cleanedOutAddresses: event.cleanedOutAddresses?.get(newDest.id) ?? [] //go back to this update to number so it is supports id instead of barcode
               };
             } else {
               return destination;
