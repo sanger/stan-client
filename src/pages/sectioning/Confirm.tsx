@@ -64,13 +64,13 @@ function Confirm() {
                 <div className="space-y-6">
                   <Heading level={2}>{'Operation Complete'}</Heading>
                   <ModalBody>{<Success message={'Sections Confirmed'} />}</ModalBody>
-                  {labwaresGroupedByType.map((labwaresByType) => (
+                  {labwaresGroupedByType.map((labwaresByType) => ((
                     <ConfirmPrintLabware
                       key={labwaresByType[0].labwareType.name}
                       labwareType={`${labwaresByType[0].labwareType.name}`}
                       labwares={labwaresByType}
                     />
-                  ))}
+                  )))}
                 </div>
                 <div className="flex-shrink-0 max-w-screen-xl mx-auto mt-12">
                   <div className="my-4 mx-4 sm:mx-auto p-4 rounded-md bg-gray-100">
