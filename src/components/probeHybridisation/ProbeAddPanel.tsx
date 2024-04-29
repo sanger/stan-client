@@ -2,7 +2,7 @@ import { selectOptionValues } from '../forms';
 import FormikInput from '../forms/Input';
 import { useFormikContext } from 'formik';
 import WhiteButton from '../buttons/WhiteButton';
-import { ProbePanelFieldsFragment, SlideCosting } from '../../types/sdk';
+import { ProbeLot, ProbePanelFieldsFragment, SlideCosting } from '../../types/sdk';
 import AddIcon from '../icons/AddIcon';
 import React from 'react';
 import { lotRegx, ProbeHybridisationXeniumFormValues } from '../../pages/ProbeHybridisationXenium';
@@ -12,6 +12,19 @@ import { objectKeys } from '../../lib/helpers';
 
 type ProbeLotAddPanelProps = {
   probePanels: ProbePanelFieldsFragment[];
+};
+
+const isAnEmptyProbeRow = (probeRow: Array<ProbeLot>) => {
+  return (
+    probeRow.length === 1 &&
+    probeRow.every(
+      (probe) =>
+        probe.name === '' &&
+        probe.lot === '' &&
+        probe.plex === 0 &&
+        ![SlideCosting.Sgp, SlideCosting.Faculty].includes(probe.costing)
+    )
+  );
 };
 
 const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
@@ -183,15 +196,28 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
           disabled={isAddToAllDisabled()}
           onClick={async (event) => {
             await setValues((prev) => {
-              const labware = prev.labware.map((lw) => ({
-                ...lw,
-                probes: lw.probes.map(() => ({
-                  name: probeName,
-                  lot: probeLot,
-                  plex: Number(probePlex),
-                  costing: probeCosting === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty
-                }))
-              }));
+              const labware = prev.labware.map((lw) => {
+                const newProbes = isAnEmptyProbeRow(lw.probes)
+                  ? lw.probes.map(() => ({
+                      name: probeName,
+                      lot: probeLot,
+                      plex: Number(probePlex),
+                      costing: probeCosting === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty
+                    }))
+                  : [
+                      ...lw.probes,
+                      {
+                        name: probeName,
+                        lot: probeLot,
+                        plex: Number(probePlex),
+                        costing: probeCosting === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty
+                      }
+                    ];
+                return {
+                  ...lw,
+                  probes: newProbes
+                };
+              });
               return { ...prev, labware };
             });
             await setTouched({
