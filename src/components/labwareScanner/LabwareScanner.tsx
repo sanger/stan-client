@@ -96,15 +96,20 @@ export default function LabwareScanner({
     } else return initialLabwares;
   }, [initialLabwares, limit]);
 
-  React.useEffect(() => {
-    if (initialLabwares && initialLabwares.length > 0 && initCleanedOutAddresses.size !== initialLabwares?.length) {
-      initialLabwares.forEach((labware) => {
-        if (!initCleanedOutAddresses.has(labware.id)) {
-          initCleanedOutAddresses.set(labware.id, []);
-        }
+  const slicedInitialCleanedOutAddresses = React.useMemo(() => {
+    if (
+      slicedInitialLabware &&
+      slicedInitialLabware.length > 0 &&
+      initCleanedOutAddresses.size !== slicedInitialLabware?.length
+    ) {
+      const cleanedOutAddresses = new Map<number, string[]>([...initCleanedOutAddresses]);
+      slicedInitialLabware.forEach((labware) => {
+        cleanedOutAddresses.set(labware.id, initCleanedOutAddresses.get(labware.id) || []);
       });
+      return cleanedOutAddresses;
     }
-  }, [initCleanedOutAddresses, initialLabwares]);
+    return initCleanedOutAddresses;
+  }, [initCleanedOutAddresses, slicedInitialLabware]);
 
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine();
@@ -124,7 +129,7 @@ export default function LabwareScanner({
       errorMessage: null,
       locationScan: false,
       checkForCleanedOutAddresses,
-      cleanedOutAddresses: initCleanedOutAddresses
+      cleanedOutAddresses: slicedInitialCleanedOutAddresses
     }
   });
 

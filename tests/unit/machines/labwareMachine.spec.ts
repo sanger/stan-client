@@ -7,13 +7,14 @@ import * as Yup from 'yup';
 import * as sdk from '../../../src/lib/sdk';
 import { cleanup } from '@testing-library/react';
 import { buildLabwareFragment, convertLabwareToFlaggedLabware } from '../../../src/lib/helpers/labwareHelper';
-import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
+import { enableMapSet } from 'immer';
 
 afterAll(() => {
   jest.resetAllMocks();
 });
 
 beforeEach(() => {
+  enableMapSet();
   jest.restoreAllMocks();
   cleanup();
 });
