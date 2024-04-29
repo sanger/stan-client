@@ -236,7 +236,7 @@ export const Reactivate = () => {
                       <p className="italic text-sm">Please scan labwares.</p>
                     )}
 
-                    <PinkButton disabled={!values.labwareToReactivate} type="submit" className="sm:w-full">
+                    <PinkButton disabled={values.labwareToReactivate.length === 0} type="submit" className="sm:w-full">
                       Reactivate
                     </PinkButton>
                   </Sidebar>
