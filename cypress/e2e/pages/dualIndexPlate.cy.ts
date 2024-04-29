@@ -19,7 +19,7 @@ function scanInSourceLabware(barcode: string) {
 }
 
 function saveButton() {
-  return cy.findByRole('button', { name: /Save/i });
+  return cy.findByRole('button', { name: /Save/i }).scrollIntoView();
 }
 
 describe('Dual Index Plate', () => {
