@@ -231,10 +231,11 @@ function SlotCopyComponent({
 
   /**Action callback(from SlotMapper) when there is a change in source labware (addition/deletion)**/
   const handleInputLabwareChange = React.useCallback(
-    (sourcesChanged: LabwareFlaggedFieldsFragment[]) => {
+    (sourcesChanged: LabwareFlaggedFieldsFragment[], cleanedOutAddresses?: Map<number, string[]>) => {
       send({
         type: 'UPDATE_SOURCE_LABWARE',
-        labware: sourcesChanged
+        labware: sourcesChanged,
+        cleanedOutAddresses
       });
       send({
         type: 'UPDATE_SOURCE_LABWARE_PERMTIME',
@@ -312,6 +313,11 @@ function SlotCopyComponent({
     [send]
   );
 
+  const cleanedOutInputAddresses: Map<number, string[]> = new Map();
+  sources.forEach((source) => {
+    cleanedOutInputAddresses.set(source.labware.id, source.cleanedOutAddresses ?? []);
+  });
+
   return (
     <>
       <div className="mx-auto">
@@ -349,6 +355,7 @@ function SlotCopyComponent({
           onSelectInputLabware={setSelectedSource}
           onSelectOutputLabware={setSelectedDestination}
           slotCopyModes={slotCopyModes}
+          cleanedOutInputAddresses={cleanedOutInputAddresses}
         />
       </div>
     </>

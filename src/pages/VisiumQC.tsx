@@ -332,7 +332,9 @@ export default function VisiumQC() {
                                 comments={cleanupComments}
                                 removeLabware={removeLabware}
                                 cleanedOutAddress={
-                                  cleanedOutAddresses ? cleanedOutAddresses.get(labwares[0].id) : undefined
+                                  cleanedOutAddresses && labwares[0]
+                                    ? cleanedOutAddresses.get(labwares[0].id)
+                                    : undefined
                                 }
                               />
                             );
@@ -344,7 +346,9 @@ export default function VisiumQC() {
                                 labware={labwares[0]}
                                 removeLabware={removeLabware}
                                 cleanedOutAddress={
-                                  cleanedOutAddresses ? cleanedOutAddresses.get(labwares[0].id) : undefined
+                                  cleanedOutAddresses && labwares[0]
+                                    ? cleanedOutAddresses.get(labwares[0].id)
+                                    : undefined
                                 }
                               />
                             );
@@ -356,7 +360,9 @@ export default function VisiumQC() {
                                 removeLabware={removeLabware}
                                 concentrationComments={concentrationComments}
                                 cleanedOutAddress={
-                                  cleanedOutAddresses ? cleanedOutAddresses.get(labwares[0].id) : undefined
+                                  cleanedOutAddresses && labwares[0]
+                                    ? cleanedOutAddresses.get(labwares[0].id)
+                                    : undefined
                                 }
                               />
                             );
@@ -367,7 +373,9 @@ export default function VisiumQC() {
                                 labware={labwares[0]}
                                 removeLabware={removeLabware}
                                 cleanedOutAddress={
-                                  cleanedOutAddresses ? cleanedOutAddresses.get(labwares[0].id) : undefined
+                                  cleanedOutAddresses && labwares[0]
+                                    ? cleanedOutAddresses.get(labwares[0].id)
+                                    : undefined
                                 }
                               />
                             );

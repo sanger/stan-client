@@ -43,7 +43,8 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   onSelectInputLabware,
   onSelectOutputLabware,
   displayMappedTable = true,
-  labwareType = undefined
+  labwareType = undefined,
+  cleanedOutInputAddresses
 }) => {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine;
@@ -53,7 +54,8 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
     input: {
       inputLabware: initialInputLabware,
       outputSlotCopies: initialOutputLabware,
-      failedSlotsCheck
+      failedSlotsCheck,
+      cleanedOutInputAddresses
     }
   });
 
@@ -568,9 +570,9 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
    * Callback whenever the input labware is added or removed by the labware scanner
    */
   const onLabwareScannerChange = React.useCallback(
-    (labware: LabwareFlaggedFieldsFragment[]) => {
-      send({ type: 'UPDATE_INPUT_LABWARE', labware });
-      onInputLabwareChange?.(labware);
+    (labware: LabwareFlaggedFieldsFragment[], cleanedOutAddresses?: Map<number, string[]>) => {
+      send({ type: 'UPDATE_INPUT_LABWARE', labware, cleanedOutAddresses });
+      onInputLabwareChange?.(labware, cleanedOutAddresses);
     },
     [send, onInputLabwareChange]
   );
@@ -657,6 +659,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
             limit={inputLabwareLimit}
             enableFlaggedLabwareCheck
             checkForCleanedOutAddresses
+            initCleanedOutAddresses={current.context.cleanedOutInputAddresses}
           >
             {({ removeLabware, cleanedOutAddresses }) => {
               if (!currentInputLabware) {
@@ -687,7 +690,10 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
                         }}
                         name={currentInputLabware.labwareType.name}
                         onSelect={handleOnInputLabwareSlotClick}
-                        cleanedOutAddresses={cleanedOutAddresses?.get(currentInputLabware.id)}
+                        cleanedOutAddresses={
+                          current.context.cleanedOutInputAddresses?.get(currentInputLabware.id) ??
+                          cleanedOutAddresses?.get(currentInputLabware.id)
+                        }
                       />
                     </div>
                   )}

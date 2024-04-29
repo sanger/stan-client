@@ -68,6 +68,11 @@ export type LabwareScannerProps = {
    * defaults to false, when set to true labwareMachine runs the cleanedOutAddresses query
    */
   checkForCleanedOutAddresses?: boolean;
+
+  /**
+   * The initial map of cleaned out addresses linked to the initial labwares list
+   */
+  initCleanedOutAddresses?: Map<number, string[]>;
 };
 
 export default function LabwareScanner({
@@ -81,7 +86,8 @@ export default function LabwareScanner({
   children,
   enableLocationScanner,
   enableFlaggedLabwareCheck = false,
-  checkForCleanedOutAddresses = false
+  checkForCleanedOutAddresses = false,
+  initCleanedOutAddresses = new Map<number, string[]>()
 }: LabwareScannerProps) {
   const slicedInitialLabware = React.useMemo(() => {
     if (!initialLabwares) return [];
@@ -89,6 +95,16 @@ export default function LabwareScanner({
       return initialLabwares.slice(0, limit);
     } else return initialLabwares;
   }, [initialLabwares, limit]);
+
+  React.useEffect(() => {
+    if (initialLabwares && initialLabwares.length > 0 && initCleanedOutAddresses.size !== initialLabwares?.length) {
+      initialLabwares.forEach((labware) => {
+        if (!initCleanedOutAddresses.has(labware.id)) {
+          initCleanedOutAddresses.set(labware.id, []);
+        }
+      });
+    }
+  }, [initCleanedOutAddresses, initialLabwares]);
 
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine();
@@ -108,7 +124,7 @@ export default function LabwareScanner({
       errorMessage: null,
       locationScan: false,
       checkForCleanedOutAddresses,
-      cleanedOutAddresses: new Map<number, string[]>()
+      cleanedOutAddresses: initCleanedOutAddresses
     }
   });
 

@@ -240,7 +240,7 @@ describe('Dual Index Plate', () => {
         });
         selectSGPNumber('SGP1008');
         selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
-        saveButton().click();
+        saveButton().click({ force: true });
       });
       it('shows an error', () => {
         cy.findByText('Labware is discarded: [STAN-5111]').should('be.visible');

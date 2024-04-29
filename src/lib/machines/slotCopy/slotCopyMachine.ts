@@ -34,6 +34,7 @@ export type Destination = {
 export type Source = {
   labware: LabwareFlaggedFieldsFragment;
   labwareState?: LabwareState;
+  cleanedOutAddresses?: string[];
 };
 
 export interface SlotCopyContext {
@@ -124,6 +125,7 @@ type UpdateSourceLabwareState = {
 type UpdateSourceLabware = {
   type: 'UPDATE_SOURCE_LABWARE';
   labware: LabwareFlaggedFieldsFragment[];
+  cleanedOutAddresses?: Map<number, string[]>;
 };
 
 type UpdateDestinationLabware = {
@@ -387,7 +389,8 @@ export const slotCopyMachine = createMachine(
             //There is no source exists , so add this
             if (!source) {
               return {
-                labware: newSource
+                labware: newSource,
+                cleanedOutAddresses: event.cleanedOutAddresses?.get(newSource.id) ?? []
               };
             } else {
               return source;

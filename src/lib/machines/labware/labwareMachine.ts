@@ -12,6 +12,7 @@ import { stanCore } from '../../sdk';
 import { ClientError } from 'graphql-request';
 import { findIndex } from 'lodash';
 import { convertLabwareToFlaggedLabware } from '../../helpers/labwareHelper';
+import { produce } from '../../../dependencies/immer';
 
 const resolveStringArrayPromise = (data: string[] | Promise<string[]>): string[] => {
   let resolvedData: string[] = [];
@@ -219,8 +220,7 @@ export const createLabwareMachine = () => {
         context: LabwareContext;
       },
       context: ({ input }: { input: LabwareContext }): LabwareContext => ({
-        ...input,
-        cleanedOutAddresses: new Map<number, string[]>()
+        ...input
       }),
       id: 'labwareScanner',
       initial: 'checking_full',
@@ -454,10 +454,12 @@ export const createLabwareMachine = () => {
             labware: context.labwares[removeLabwareIndex],
             index: removeLabwareIndex
           };
-          if (context.checkForCleanedOutAddresses)
-            context.cleanedOutAddresses.delete(context.labwares[removeLabwareIndex].id);
-          const labwares = context.labwares.filter((_, index) => index !== removeLabwareIndex);
-          return { ...context, successMessage: `"${event.value}" removed`, labwares };
+          return produce(context, (draft) => {
+            if (draft.checkForCleanedOutAddresses)
+              draft.cleanedOutAddresses.delete(context.labwares[removeLabwareIndex].id);
+            draft.labwares = draft.labwares.filter((_, index) => index !== removeLabwareIndex);
+            draft.successMessage = `"${event.value}" removed`;
+          });
         }),
         assignValidationError: assign(({ context, event }) => {
           if (event.type !== 'xstate.error.actor.validateBarcode') {
@@ -479,9 +481,9 @@ export const createLabwareMachine = () => {
           if (event.type !== 'xstate.done.actor.cleanedOutAddress') {
             return context;
           }
-          const cleanedOutAddresses = context.cleanedOutAddresses || new Map<number, string[]>();
-          cleanedOutAddresses.set(event.output.id, event.output.cleanedOutAddresses);
-          return { ...context, cleanedOutAddresses };
+          return produce(context, (draft) => {
+            draft.cleanedOutAddresses.set(event.output.id, event.output.cleanedOutAddresses);
+          });
         }),
         assignCleanedOutLabwareError: assign(({ context, event }) => {
           if (event.type !== 'xstate.error.actor.cleanedOutAddress') {
