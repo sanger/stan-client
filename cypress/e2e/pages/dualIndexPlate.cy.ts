@@ -230,18 +230,18 @@ describe('Dual Index Plate', () => {
           );
         });
         cy.url().reload();
+        selectSGPNumber('SGP1008');
         scanInSourceLabware('300051128832186720221202');
         scanInDestinationLabware();
+        selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
         cy.get('#sourceLabwares').within(() => {
           cy.findByText('A1').click();
         });
         cy.get('#destLabwares').within(() => {
           cy.findByText('A1').click();
         });
-        cy.screenshot()
-        selectSGPNumber('SGP1008');
-        selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
-        saveButton().click({ force: true });
+        cy.screenshot();
+        saveButton().click();
       });
       it('shows an error', () => {
         cy.findByText('Labware is discarded: [STAN-5111]').should('be.visible');
