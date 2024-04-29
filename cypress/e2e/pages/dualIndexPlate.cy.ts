@@ -9,7 +9,7 @@ import { selectOption, selectSGPNumber, shouldBeDisabled } from '../shared/custo
 import { HttpResponse } from 'msw';
 
 function scanInDestinationLabware() {
-  cy.get('#labwareScanInput').type('STAN-5111{enter}');
+  cy.get('#labwareScanInput').type('STAN-5311{enter}');
 }
 
 function scanInSourceLabware(barcode: string) {
@@ -238,6 +238,7 @@ describe('Dual Index Plate', () => {
         cy.get('#destLabwares').within(() => {
           cy.findByText('A1').click();
         });
+        cy.screenshot()
         selectSGPNumber('SGP1008');
         selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
         saveButton().click({ force: true });
