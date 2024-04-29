@@ -61,9 +61,6 @@ import { LibraryAmpAndGeneration } from '../pages/LibraryAmpAndGeneration';
 import { CellSegmentationQc } from '../pages/CellSegmentationQc';
 import { CellSegmentation } from '../pages/CellSegmentation';
 import CleanOut from '../pages/CleanOut';
-import { objectKeys } from '../lib/helpers';
-import { SlotCopyMode } from './slotMapper/slotMapper.types';
-import SlotMapper from './slotMapper/SlotMapper';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
