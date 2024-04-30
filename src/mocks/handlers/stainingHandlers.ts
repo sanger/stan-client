@@ -2,12 +2,15 @@ import { graphql, HttpResponse } from 'msw';
 import {
   GetStainInfoQuery,
   GetStainInfoQueryVariables,
+  GetStainReagentTypesQuery,
+  GetStainReagentTypesQueryVariables,
   RecordComplexStainMutation,
   RecordComplexStainMutationVariables,
   StainMutation,
   StainMutationVariables
 } from '../../types/sdk';
 import stainTypeRepository from '../repositories/stainTypeRepository';
+import commentRepository from '../repositories/commentRepository';
 
 const stainingHandlers = [
   graphql.query<GetStainInfoQuery, GetStainInfoQueryVariables>('GetStainInfo', () => {
@@ -37,6 +40,18 @@ const stainingHandlers = [
 
   graphql.mutation<RecordComplexStainMutation, RecordComplexStainMutationVariables>('RecordComplexStain', () => {
     return HttpResponse.json({ data: { recordComplexStain: { operations: [{ id: 1 }] } } });
+  }),
+  graphql.query<GetStainReagentTypesQuery, GetStainReagentTypesQueryVariables>('GetStainReagentTypes', () => {
+    return HttpResponse.json(
+      {
+        data: {
+          stainReagentTypes: commentRepository
+            .findAll()
+            .filter((comment) => ['Haematoxylin', 'Blueing', 'Eosin'].includes(comment.category))
+        }
+      },
+      { status: 200 }
+    );
   })
 ];
 
