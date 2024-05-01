@@ -27,7 +27,7 @@ import { omit } from 'lodash';
  */
 type HistoryProps = HistoryUrlParams & { displayFlaggedLabware?: boolean };
 
-const  downloadAndRedirect = (releaseId: number) => {
+const downloadAndRedirect = (releaseId: number) => {
   const downloadUrl = `/release?id=${releaseId}`;
   const downloadAnchor = document.createElement('a');
   downloadAnchor.href = downloadUrl;
@@ -35,7 +35,7 @@ const  downloadAndRedirect = (releaseId: number) => {
   downloadAnchor.click();
   const redirectUrl = `/releaseOptions?id=${releaseId}`;
   window.open(redirectUrl, '_blank');
-}
+};
 export default function History(props: HistoryProps) {
   const getHistoryURLParams = (props: HistoryProps): HistoryUrlParams => {
     const { displayFlaggedLabware, ...urlProps } = props;
