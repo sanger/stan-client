@@ -26,6 +26,16 @@ import { omit } from 'lodash';
  * Component for looking up and displaying the history of labware and samples
  */
 type HistoryProps = HistoryUrlParams & { displayFlaggedLabware?: boolean };
+
+const  downloadAndRedirect = (releaseId: number) => {
+  const downloadUrl = `/release?id=${releaseId}`;
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.href = downloadUrl;
+  downloadAnchor.download = 'release.tsv';
+  downloadAnchor.click();
+  const redirectUrl = `/releaseOptions?id=${releaseId}`;
+  window.open(redirectUrl, '_blank');
+}
 export default function History(props: HistoryProps) {
   const getHistoryURLParams = (props: HistoryProps): HistoryUrlParams => {
     const { displayFlaggedLabware, ...urlProps } = props;
@@ -150,13 +160,12 @@ export default function History(props: HistoryProps) {
           });
           if (props.row.original.eventType?.toLowerCase() === 'release') {
             const releaseId = props.row.original.eventId;
-            const releaseUrl = `/release?id=${releaseId}`;
             details.push(
-              <li key={releaseUrl}>
-                <a data-testid="release-download-link" href={releaseUrl} download={'release.tsv'}>
+              <li key={releaseId}>
+                <button data-testid="release-download-link" onClick={() => downloadAndRedirect(releaseId)}>
                   <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
                   Release file
-                </a>
+                </button>
               </li>
             );
           }
