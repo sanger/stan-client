@@ -240,7 +240,6 @@ describe('Dual Index Plate', () => {
         cy.get('#destLabwares').within(() => {
           cy.findByText('A1').click();
         });
-        cy.screenshot();
         saveButton().click();
       });
       it('shows an error', () => {
