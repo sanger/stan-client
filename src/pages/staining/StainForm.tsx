@@ -1,7 +1,13 @@
 import React, { useMemo } from 'react';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../../lib/machines/form/formMachine';
-import { GetStainInfoQuery, LabwareFlaggedFieldsFragment, StainMutation, StainRequest } from '../../types/sdk';
+import {
+  CommentFieldsFragment,
+  GetStainInfoQuery,
+  LabwareFlaggedFieldsFragment,
+  StainMutation,
+  StainRequest
+} from '../../types/sdk';
 import { stanCore } from '../../lib/sdk';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
@@ -11,7 +17,7 @@ import variants from '../../lib/motionVariants';
 import Warning from '../../components/notifications/Warning';
 import Heading from '../../components/Heading';
 import WorkNumberSelect from '../../components/WorkNumberSelect';
-import { FormikErrorMessage } from '../../components/forms';
+import { FormikErrorMessage, selectOptionValues } from '../../components/forms';
 import MutedText from '../../components/MutedText';
 import LabwareScanner from '../../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../../components/labwareScanPanel/LabwareScanPanel';
@@ -24,6 +30,7 @@ import WhiteButton from '../../components/buttons/WhiteButton';
 import { useNavigate } from 'react-router-dom';
 import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 import { fromPromise } from 'xstate';
+import CustomReactSelect from '../../components/forms/CustomReactSelect';
 
 /**
  * Type used for the values in the form.
@@ -31,7 +38,11 @@ import { fromPromise } from 'xstate';
  * Varies slightly from {@link StainRequest} as the form will show minutes and seconds (i.e. the {@code _minutes}
  * and {@code _seconds} properties) for the duration. These are used to update {@code seconds} when changed.
  */
-type StainFormValues = Omit<StainRequest, 'timeMeasurements'> & {
+type StainFormValues = {
+  stainType: string;
+  barcodes: Array<string>;
+  workNumber: string;
+  commentIds: Array<string | undefined>;
   timeMeasurements: Array<{
     /**
      * The name of the measurement
@@ -61,9 +72,16 @@ type StainFormProps = {
   stainingInfo: GetStainInfoQuery;
   initialLabware: LabwareFlaggedFieldsFragment[];
   onLabwareChange: (labware: LabwareFlaggedFieldsFragment[]) => void;
+  comments: CommentFieldsFragment[];
 };
 
-export default function StainForm({ stainType, stainingInfo, initialLabware, onLabwareChange }: StainFormProps) {
+export default function StainForm({
+  stainType,
+  stainingInfo,
+  initialLabware,
+  onLabwareChange,
+  comments
+}: StainFormProps) {
   const formMachine = React.useMemo(() => {
     return createFormMachine<StainRequest, StainMutation>().provide({
       actors: {
@@ -105,6 +123,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
         seconds: Yup.number().integer().min(1).required().label('Duration')
       })
     ),
+    commentIds: Yup.array().of(Yup.string()),
     workNumber: Yup.string().required().label('SGP Number')
   });
 
@@ -124,7 +143,8 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
           _seconds: 0,
           seconds: 0
         })),
-        workNumber: ''
+        workNumber: '',
+        commentIds: []
       }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
@@ -134,7 +154,8 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
           timeMeasurements: values.timeMeasurements.map((tm) => ({
             name: tm.name,
             seconds: tm.seconds
-          }))
+          })),
+          commentIds: values.commentIds?.filter((commentId) => commentId).map((commentId) => Number(commentId)) ?? []
         };
 
         send({ type: 'SUBMIT_FORM', values: stainRequest });
@@ -251,6 +272,20 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
                         </div>
 
                         <FormikInput label={''} name={`timeMeasurements.${i}.seconds`} type="hidden" />
+
+                        <CustomReactSelect
+                          emptyOption={true}
+                          options={selectOptionValues(
+                            comments.filter(
+                              (comment) => comment.category.toLowerCase() === measurementType.name.toLowerCase()
+                            ),
+                            'text',
+                            'id'
+                          )}
+                          name={`commentIds.${i}`}
+                          dataTestId={`${measurementType.name}-comment`}
+                          className="mt-4"
+                        />
                       </div>
                     ))}
                   </div>

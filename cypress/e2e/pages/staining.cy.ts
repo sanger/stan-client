@@ -171,6 +171,8 @@ describe('Staining Page', () => {
       cy.findByTestId('timeMeasurements.1.seconds').type('1');
       cy.findByTestId('timeMeasurements.2.minutes').type('1');
       cy.findByTestId('timeMeasurements.2.seconds').type('1');
+      selectOption('Haematoxylin-comment', 'Gills');
+      selectOption('Eosin-comment', 'Alcoholic');
     }
     if (stainType === 'IHC' || stainType === 'RNAscope' || stainType === 'RNAscope & IHC') {
       cy.findByTestId('STAN-3111-bondBarcode').type('1234');
