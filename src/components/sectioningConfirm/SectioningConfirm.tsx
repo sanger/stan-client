@@ -77,8 +77,8 @@ export default function SectioningConfirm({
   useEffect(() => {
     const subscription = service.subscribe((state) => {
       if (state.matches('confirmed')) {
-        const sources = extractLabwareFromFlagged(sourceLabware);
-        onConfirmed([...confirmSectionResultLabwares, ...sources]);
+        const sources = extractLabwareFromFlagged(state.context.sourceLabware);
+        onConfirmed([...state.context.confirmSectionResultLabwares, ...sources]);
       }
     });
     return subscription.unsubscribe;
