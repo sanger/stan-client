@@ -41,6 +41,7 @@ const transferTypes = [
   'Library',
   'Library pre-clean',
   'Library post-clean',
+  'Library post-clean 1:20 dilution',
   'Probes pre-clean',
   'Probes post-clean'
 ];
