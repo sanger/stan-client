@@ -391,7 +391,7 @@ describe('Sectioning Confirmation', () => {
 
     context('when print button is clicked for labware', () => {
       before(() => {
-        cy.get('[id=printButton]').eq(0).click();
+        cy.get('[id=printButton]').last().click();
       });
       it('displays a print success message', () => {
         cy.findByTestId('print-div').within(() => {
