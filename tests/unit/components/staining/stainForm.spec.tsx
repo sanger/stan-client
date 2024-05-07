@@ -102,8 +102,8 @@ describe('stainForm.spec.tsx', () => {
     describe('validation', () => {
       it('when the user clicks on Submit without filling the required fields', async () => {
         const { getByRole, getByText, getAllByText } = render(<StainForm {...stainHeFormProps} />);
+        await userEvent.click(getByRole('button', { name: 'Submit' }));
         await waitFor(async () => {
-          await userEvent.click(getByRole('button', { name: 'Submit' }));
           expect(getByText('SGP Number is a required field')).toBeVisible();
           expect(getAllByText('Duration must be greater than or equal to 1')).toHaveLength(3);
         });
