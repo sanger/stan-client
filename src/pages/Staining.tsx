@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GetStainInfoQuery, LabwareFlaggedFieldsFragment } from '../types/sdk';
+import { GetStainInfoQuery, GetStainReagentTypesQuery, LabwareFlaggedFieldsFragment } from '../types/sdk';
 import AppShell from '../components/AppShell';
 import StainForm from './staining/StainForm';
 import { selectOptionValues } from '../components/forms';
@@ -16,11 +16,15 @@ import { useLoaderData } from 'react-router-dom';
 const complexStains = new Set(['RNAscope', 'IHC', 'RNAscope & IHC']);
 const isComplexStain = (stainName: string) => complexStains.has(stainName);
 
+type StainingPageParam = {
+  stainingInfo: GetStainInfoQuery;
+  reagentTypes: GetStainReagentTypesQuery;
+};
+
 export default function Staining() {
-  const stainingInfo = useLoaderData() as GetStainInfoQuery;
+  const { stainingInfo, reagentTypes } = useLoaderData() as StainingPageParam;
   const [stainType, setStainType] = useState<string>('');
   const [labwares, setLabwares] = useState<LabwareFlaggedFieldsFragment[]>([]);
-
   return (
     <AppShell>
       <AppShell.Header>
@@ -59,6 +63,7 @@ export default function Staining() {
               stainingInfo={stainingInfo}
               initialLabware={labwares}
               onLabwareChange={setLabwares}
+              comments={reagentTypes.stainReagentTypes}
             />
           )}
 

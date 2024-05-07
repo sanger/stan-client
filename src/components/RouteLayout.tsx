@@ -338,8 +338,12 @@ const RouteLayout = () => {
           <Route
             path="/lab/staining"
             loader={async () => {
-              const res = await stanCore.GetStainInfo();
-              return res;
+              const stainingInfo = await stanCore.GetStainInfo();
+              const reagentTypes = await stanCore.GetStainReagentTypes();
+              return {
+                stainingInfo,
+                reagentTypes
+              };
             }}
             element={<Staining />}
           />

@@ -159,6 +159,31 @@ const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({
     category: 'Cell Segmentation',
     text: 'Looks very bad'
+  }),
+
+  commentFactory.build({
+    category: 'Haematoxylin',
+    text: 'Gills'
+  }),
+  commentFactory.build({
+    category: 'Haematoxylin',
+    text: "Meyer's"
+  }),
+  commentFactory.build({
+    category: 'Blueing',
+    text: 'Dako'
+  }),
+  commentFactory.build({
+    category: 'Blueing',
+    text: "Scott's tap water"
+  }),
+  commentFactory.build({
+    category: 'Eosin',
+    text: 'Alcoholic'
+  }),
+  commentFactory.build({
+    category: 'Eosin',
+    text: 'Aqueous'
   })
 ];
 
