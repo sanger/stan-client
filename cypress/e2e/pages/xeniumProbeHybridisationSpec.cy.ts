@@ -152,7 +152,6 @@ describe('Xenium Probe Hybridisation', () => {
         });
       });
       it('should remove the first row', () => {
-        cy.screenshot();
         cy.findByTestId('STAN-3111-1-action').should('exist');
         //Displays only one row with value
         shouldDisplaySelectedValue('STAN-3111-1-name', '');
