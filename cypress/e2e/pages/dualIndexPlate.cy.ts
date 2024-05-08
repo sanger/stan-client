@@ -9,7 +9,7 @@ import { selectOption, selectSGPNumber, shouldBeDisabled } from '../shared/custo
 import { HttpResponse } from 'msw';
 
 function scanInDestinationLabware() {
-  cy.get('#labwareScanInput').type('STAN-5111{enter}');
+  cy.get('#labwareScanInput').type('STAN-5311{enter}');
 }
 
 function scanInSourceLabware(barcode: string) {
@@ -19,7 +19,7 @@ function scanInSourceLabware(barcode: string) {
 }
 
 function saveButton() {
-  return cy.findByRole('button', { name: /Save/i });
+  return cy.findByRole('button', { name: /Save/i }).scrollIntoView();
 }
 
 describe('Dual Index Plate', () => {
@@ -230,16 +230,16 @@ describe('Dual Index Plate', () => {
           );
         });
         cy.url().reload();
+        selectSGPNumber('SGP1008');
         scanInSourceLabware('300051128832186720221202');
         scanInDestinationLabware();
+        selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
         cy.get('#sourceLabwares').within(() => {
           cy.findByText('A1').click();
         });
         cy.get('#destLabwares').within(() => {
           cy.findByText('A1').click();
         });
-        selectSGPNumber('SGP1008');
-        selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
         saveButton().click();
       });
       it('shows an error', () => {

@@ -22,8 +22,15 @@ type SlideProcessingProps = {
   labware: LabwareFlaggedFieldsFragment[];
   labwaresResultsProps: CoreLabwareResult[] | undefined;
   removeLabware: (barcode: string) => void;
+  cleanedOutAddress?: Map<number, string[]>;
 };
-const SlideProcessing = ({ comments, labware, labwaresResultsProps, removeLabware }: SlideProcessingProps) => {
+const SlideProcessing = ({
+  comments,
+  labware,
+  labwaresResultsProps,
+  removeLabware,
+  cleanedOutAddress
+}: SlideProcessingProps) => {
   const { setFieldValue, values } = useFormikContext<VisiumQCFormData>();
   /***
    * When labwares changes, the labwareResults has to be initialized accordingly
@@ -130,6 +137,7 @@ const SlideProcessing = ({ comments, labware, labwaresResultsProps, removeLabwar
                         return prev;
                       });
                     }}
+                    cleanedOutAddresses={cleanedOutAddress?.get(lw.id)}
                   />
                 </Panel>
               </div>

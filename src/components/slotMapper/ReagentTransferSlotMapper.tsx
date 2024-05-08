@@ -41,6 +41,8 @@ export interface ReagentTransferMappingProps {
    * Initial the component with a set of the slot copies
    */
   outputSlotCopies?: Array<OutputSlotCopyData>;
+
+  cleanedOutAddresses?: string[];
 }
 
 function ReagentTransferSlotMapper({
@@ -48,7 +50,8 @@ function ReagentTransferSlotMapper({
   initialSourceLabware,
   initialDestLabware,
   disabled,
-  outputSlotCopies
+  outputSlotCopies,
+  cleanedOutAddresses
 }: ReagentTransferMappingProps) {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine;
@@ -282,6 +285,7 @@ function ReagentTransferSlotMapper({
               onSlotClick={handleOnOutputLabwareSlotClick}
               onSelect={setSelectedOutputAddresses}
               slotColor={(address, slot) => getDestinationSlotColor(initialDestLabware, address, slot)}
+              cleanedOutAddresses={cleanedOutAddresses}
             />
           )}
         </div>

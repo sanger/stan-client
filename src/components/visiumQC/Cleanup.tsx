@@ -20,8 +20,9 @@ type CleanupProps = {
   comments: CommentFieldsFragment[];
   labware: LabwareFlaggedFieldsFragment;
   removeLabware: (barcode: string) => void;
+  cleanedOutAddress?: string[];
 };
-const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
+const Cleanup = ({ comments, labware, removeLabware, cleanedOutAddress }: CleanupProps) => {
   const { setFieldValue } = useFormikContext<VisiumQCFormData>();
   const [slotComments, setSlotComments] = React.useState<AddressCommentInput[]>([]);
   const initialSlotComments = React.useMemo(
@@ -120,13 +121,17 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
                     />
                   )}
                   <div className="flex flex-col mt-2" data-testid={'labware'}>
-                    <Labware labware={labware} name={labware.labwareType.name} />
+                    <Labware
+                      labware={labware}
+                      name={labware.labwareType.name}
+                      cleanedOutAddresses={cleanedOutAddress}
+                    />
                   </div>
                 </div>
               </Panel>
             ) : (
               <div className="bg-blue-100" data-testid={'labware'}>
-                <Labware labware={labware} slotBuilder={slotBuilder} />
+                <Labware labware={labware} slotBuilder={slotBuilder} cleanedOutAddresses={cleanedOutAddress} />
               </div>
             )}
 

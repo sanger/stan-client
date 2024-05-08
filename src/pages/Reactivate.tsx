@@ -41,21 +41,18 @@ const validationSchema = Yup.object().shape({
     )
 });
 
+type ReactiveLabware = {
+  barcode: string;
+  commentId: number | undefined;
+};
 type ReactivateFormValues = {
   workNumber?: string;
-  labwareToReactivate:
-    | [
-        {
-          barcode: string;
-          commentId: number | undefined;
-        }
-      ]
-    | undefined;
+  labwareToReactivate: ReactiveLabware[];
 };
 
 const formInitialValues: ReactivateFormValues = {
   workNumber: undefined,
-  labwareToReactivate: undefined
+  labwareToReactivate: []
 };
 
 export const Reactivate = () => {
@@ -82,7 +79,6 @@ export const Reactivate = () => {
       }
     });
   }, []);
-  const [labwareToReactivate, setLabwareToReactivate] = React.useState<LabwareFlaggedFieldsFragment[]>([]);
   const [currentForm, sendForm] = useMachine(formSubmitMachine);
 
   const { serverError, submissionResult } = currentForm.context;
@@ -111,7 +107,7 @@ export const Reactivate = () => {
             validationSchema={validationSchema}
             onSubmit={convertValuesAndSubmit}
           >
-            {({ values, setFieldValue }) => (
+            {({ values, setFieldValue, setValues }) => (
               <Form>
                 <GrayBox>
                   <div className="md:w-3/4">
@@ -132,13 +128,14 @@ export const Reactivate = () => {
                       <Heading level={3}>Labware</Heading>
                       <MutedText>Please scan in the labware you wish to reactivate.</MutedText>
                       <LabwareScanner
-                        onAdd={(lw) => {
+                        onAdd={async (lw) => {
                           const lwToReactivate = { barcode: lw.barcode, commentId: undefined };
-                          values.labwareToReactivate === undefined
-                            ? (values.labwareToReactivate = [lwToReactivate])
-                            : values.labwareToReactivate.push(lwToReactivate);
-
-                          setLabwareToReactivate((prevState) => [...prevState, lw]);
+                          await setValues((prev) => {
+                            const labwareToReactivate = prev.labwareToReactivate
+                              ? [...prev.labwareToReactivate, lwToReactivate]
+                              : [lwToReactivate];
+                            return { ...prev, labwareToReactivate };
+                          });
                         }}
                         labwareCheckFunction={isLabwareInactive}
                       >
@@ -149,18 +146,15 @@ export const Reactivate = () => {
                                 {
                                   <RemoveButton
                                     data-testid={'remove'}
-                                    onClick={() => {
-                                      setFieldValue(
-                                        'labwareToReactivate',
-                                        values.labwareToReactivate!.filter((lw) => {
-                                          return lw.barcode !== labware.barcode;
-                                        })
-                                      );
-                                      setLabwareToReactivate((prevState) =>
-                                        prevState.filter((lw) => {
-                                          return lw.barcode !== labware.barcode;
-                                        })
-                                      );
+                                    onClick={async () => {
+                                      await setValues((prev) => {
+                                        return {
+                                          ...prev,
+                                          labwareToReactivate: prev.labwareToReactivate.filter(
+                                            (lw) => lw.barcode !== labware.barcode
+                                          )
+                                        };
+                                      });
                                       removeLabware(labware.barcode);
                                     }}
                                   />
@@ -178,10 +172,10 @@ export const Reactivate = () => {
                                       dataTestId={`labwareToReactivate[${index}].commentId`}
                                       emptyOption={true}
                                       options={selectOptionValues(comments, 'text', 'id')}
-                                      handleChange={(option) => {
+                                      handleChange={async (option) => {
                                         const selectedComment = option as OptionType;
                                         if (selectedComment) {
-                                          setFieldValue(
+                                          await setFieldValue(
                                             `labwareToReactivate[${index}].commentId`,
                                             Number(selectedComment.value)
                                           );
@@ -233,16 +227,16 @@ export const Reactivate = () => {
                       Summary
                     </Heading>
 
-                    {labwareToReactivate.length > 0 ? (
+                    {values.labwareToReactivate && values.labwareToReactivate.length > 0 ? (
                       <p>
-                        <span className="font-semibold">{labwareToReactivate.length}</span> piece(s) of labware will be
-                        reactivated
+                        <span className="font-semibold">{values.labwareToReactivate.length}</span> piece(s) of labware
+                        will be reactivated
                       </p>
                     ) : (
                       <p className="italic text-sm">Please scan labwares.</p>
                     )}
 
-                    <PinkButton disabled={labwareToReactivate.length === 0} type="submit" className="sm:w-full">
+                    <PinkButton disabled={values.labwareToReactivate.length === 0} type="submit" className="sm:w-full">
                       Reactivate
                     </PinkButton>
                   </Sidebar>

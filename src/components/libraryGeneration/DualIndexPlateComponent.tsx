@@ -25,10 +25,17 @@ type DualIndexPlateParams = {
   send: (event: ReagentTransferEvent) => void;
   current: MachineSnapshot<ReagentTransferContext, any, any, any, any, any>;
   outputSlotCopies?: Array<OutputSlotCopyData>;
+  destinationCleanedOutAddresses?: string[];
 };
 
-const DualIndexPlateComponent = ({ current, send, destinationLabware, outputSlotCopies }: DualIndexPlateParams) => {
-  const { sourceReagentPlate, destLabware, plateType, validationError } = current.context;
+const DualIndexPlateComponent = ({
+  current,
+  send,
+  destinationLabware,
+  outputSlotCopies,
+  destinationCleanedOutAddresses
+}: DualIndexPlateParams) => {
+  const { sourceReagentPlate, destLabware, plateType, validationError, cleanedOutAddresses } = current.context;
   React.useEffect(() => {
     if (destinationLabware) {
       send({
@@ -103,13 +110,15 @@ const DualIndexPlateComponent = ({ current, send, destinationLabware, outputSlot
           {!destinationLabware && (
             <div>
               <LabwareScanner
-                onChange={(labwares) =>
+                onChange={(labwares, cleanedOutAddresses) =>
                   send({
                     type: 'SET_DESTINATION_LABWARE',
-                    labware: labwares[0]
+                    labware: labwares[0],
+                    cleanedOutAddresses: cleanedOutAddresses?.get(labwares[0].id)
                   })
                 }
                 locked={destLabware !== undefined}
+                checkForCleanedOutAddresses
               ></LabwareScanner>
               <MutedText>Add destination labware using the scan input above</MutedText>
             </div>
@@ -143,6 +152,7 @@ const DualIndexPlateComponent = ({ current, send, destinationLabware, outputSlot
         onChange={handleOnSlotMapperChange}
         disabled={current.matches('transferred')}
         outputSlotCopies={outputSlotCopies}
+        cleanedOutAddresses={destinationCleanedOutAddresses ?? cleanedOutAddresses}
       />
     </div>
   );

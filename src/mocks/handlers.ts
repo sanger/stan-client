@@ -58,6 +58,7 @@ import orientationQCHandlers from './handlers/orientationQCHandlers';
 import { flagLabwareHandlers } from './handlers/flagLabwareHandlers';
 import { libraryGenerationHandlers } from './handlers/libraryGenerationHandlers';
 import segmentationHandlers from './handlers/segmentationHandlers';
+import cleanOutHandlers from './handlers/cleanOutHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -116,5 +117,6 @@ export const handlers = [
   ...orientationQCHandlers,
   ...flagLabwareHandlers,
   ...libraryGenerationHandlers,
-  ...segmentationHandlers
+  ...segmentationHandlers,
+  ...cleanOutHandlers
 ];

@@ -1,0 +1,7 @@
+mutation CleanOut($request: CleanOutRequest!) {
+  cleanOut(request: $request) {
+    operations {
+      id
+    }
+  }
+}

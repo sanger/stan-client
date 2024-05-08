@@ -28,7 +28,10 @@ export interface SlotMapperProps {
   /**
    * Callback to notify whenever an input labware is scanned/removed
    */
-  onInputLabwareChange?: (labwaresWithoutPerm: LabwareFlaggedFieldsFragment[]) => void;
+  onInputLabwareChange?: (
+    labwaresWithoutPerm: LabwareFlaggedFieldsFragment[],
+    cleanedOutAddresses?: Map<number, string[]>
+  ) => void;
 
   /**
    * Callback to notify whenever an output labware is removed
@@ -87,10 +90,13 @@ export interface SlotMapperProps {
   onOutputLabwareSelectionModeChange?: (mode: DestinationSelectionMode) => void;
 
   selectedDestinationMode?: DestinationSelectionMode;
+
+  cleanedOutInputAddresses?: Map<number, string[]>;
 }
 export type OutputSlotCopyData = {
   labware: NewFlaggedLabwareLayout;
   slotCopyContent: Array<SlotCopyContent>;
+  cleanedOutAddresses?: Array<string>;
 };
 export interface SlotMapperContext {
   /**All input labware scanned**/
@@ -105,6 +111,8 @@ export interface SlotMapperContext {
   errors: Map<string, ClientError>;
   /**Is it required to failed slots check**/
   failedSlotsCheck: boolean;
+  /**cleaned out addresses related to the input labware**/
+  cleanedOutInputAddresses?: Map<number, string[]>;
 }
 
 export interface SlotMapperSchema {
@@ -118,6 +126,7 @@ export interface SlotMapperSchema {
 type UpdateInputLabwareEvent = {
   type: 'UPDATE_INPUT_LABWARE';
   labware: Array<LabwareFlaggedFieldsFragment>;
+  cleanedOutAddresses?: Map<number, string[]>;
 };
 type UpdateOutputLabwareEvent = {
   type: 'UPDATE_OUTPUT_LABWARE';

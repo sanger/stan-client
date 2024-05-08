@@ -14,8 +14,15 @@ type XeniumLabwareQCProps = {
   labware: LabwareFlaggedFieldsFragment;
   index: number;
   removeLabware: (barcode: string) => void;
+  cleanedOutAddress?: string[];
 };
-export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: XeniumLabwareQCProps) => {
+export const XeniumLabwareQC = ({
+  labware,
+  comments,
+  index,
+  removeLabware,
+  cleanedOutAddress
+}: XeniumLabwareQCProps) => {
   const { values, setFieldValue } = useFormikContext<XeniumQCFormData>();
   return (
     <div className="max-w-screen-xl mx-auto" data-testid={'xenium-labware-qc'}>
@@ -65,7 +72,11 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                     </div>
                   </div>
                   <div className="flex flex-col w-full items-center justify-center p-4" data-testid={'labware'}>
-                    <Labware labware={labware} name={labware.labwareType.name} />
+                    <Labware
+                      labware={labware}
+                      name={labware.labwareType.name}
+                      cleanedOutAddresses={cleanedOutAddress}
+                    />
                   </div>
                 </div>
               </Panel>

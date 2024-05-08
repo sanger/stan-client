@@ -36,13 +36,13 @@ export type LabwareScannerProps = {
    * Called when labware is added or removed
    * @param labwares the list of current labwares
    */
-  onChange?: (labwares: LabwareFlaggedFieldsFragment[]) => void;
+  onChange?: (labwares: LabwareFlaggedFieldsFragment[], cleanedOutAddresses?: Map<number, string[]>) => void;
 
   /**
    * Callback for when a labware is added
    * @param labware the added labware
    */
-  onAdd?: (labware: LabwareFlaggedFieldsFragment) => void;
+  onAdd?: (labware: LabwareFlaggedFieldsFragment, cleanedOutAddresses?: Map<number, string[]>) => void;
 
   /**
    * Callback for when a labware is removed
@@ -63,6 +63,16 @@ export type LabwareScannerProps = {
    * defaults to false, when set to true labwareMachine runs the FindFlaggedLabware query instead of the FindLabware query.
    */
   enableFlaggedLabwareCheck?: boolean;
+
+  /**
+   * defaults to false, when set to true labwareMachine runs the cleanedOutAddresses query
+   */
+  checkForCleanedOutAddresses?: boolean;
+
+  /**
+   * The initial map of cleaned out addresses linked to the initial labwares list
+   */
+  initCleanedOutAddresses?: Map<number, string[]>;
 };
 
 export default function LabwareScanner({
@@ -75,7 +85,9 @@ export default function LabwareScanner({
   onRemove,
   children,
   enableLocationScanner,
-  enableFlaggedLabwareCheck = false
+  enableFlaggedLabwareCheck = false,
+  checkForCleanedOutAddresses = false,
+  initCleanedOutAddresses = new Map<number, string[]>()
 }: LabwareScannerProps) {
   const slicedInitialLabware = React.useMemo(() => {
     if (!initialLabwares) return [];
@@ -83,6 +95,21 @@ export default function LabwareScanner({
       return initialLabwares.slice(0, limit);
     } else return initialLabwares;
   }, [initialLabwares, limit]);
+
+  const slicedInitialCleanedOutAddresses = React.useMemo(() => {
+    if (
+      slicedInitialLabware &&
+      slicedInitialLabware.length > 0 &&
+      initCleanedOutAddresses.size !== slicedInitialLabware?.length
+    ) {
+      const cleanedOutAddresses = new Map<number, string[]>([...initCleanedOutAddresses]);
+      slicedInitialLabware.forEach((labware) => {
+        cleanedOutAddresses.set(labware.id, initCleanedOutAddresses.get(labware.id) || []);
+      });
+      return cleanedOutAddresses;
+    }
+    return initCleanedOutAddresses;
+  }, [initCleanedOutAddresses, slicedInitialLabware]);
 
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine();
@@ -100,26 +127,36 @@ export default function LabwareScanner({
       validator: Yup.string().trim().required('Barcode is required'),
       successMessage: null,
       errorMessage: null,
-      locationScan: false
+      locationScan: false,
+      checkForCleanedOutAddresses,
+      cleanedOutAddresses: slicedInitialCleanedOutAddresses
     }
   });
 
-  const { labwares, removedLabware, successMessage, errorMessage, currentBarcode, locationScan } = current.context;
+  const { labwares, removedLabware, successMessage, errorMessage, currentBarcode, locationScan, cleanedOutAddresses } =
+    current.context;
   /**
    * After transition into the "idle" state, focus the scan input
    */
   const inputRef = useRef<HTMLInputElement>(null);
   const previousLabwareLength = service.getSnapshot().context.labwares.length;
+  const prevCleanedOutAddressesLength = service.getSnapshot().context.cleanedOutAddresses.size;
   useEffect(() => {
     const subscription = service.subscribe((observer) => {
       if (observer.matches('idle') && !observer.context.locationScan) {
         inputRef.current?.focus();
       }
       const currentLabwareLength = observer.context.labwares.length;
+      const curCleanedOutAddressesLength = observer.context.cleanedOutAddresses.size;
       const labwares = observer.context.labwares;
       if (typeof previousLabwareLength !== 'undefined') {
-        if (currentLabwareLength !== previousLabwareLength) {
+        if (!checkForCleanedOutAddresses && currentLabwareLength !== previousLabwareLength) {
           onChange?.(labwares);
+        }
+
+        //wait until the machine updates cleanedOutAddresses map
+        if (checkForCleanedOutAddresses && curCleanedOutAddressesLength !== prevCleanedOutAddressesLength) {
+          onChange?.(labwares, cleanedOutAddresses);
         }
 
         if (currentLabwareLength > previousLabwareLength) {
@@ -133,7 +170,18 @@ export default function LabwareScanner({
       }
     });
     return subscription.unsubscribe;
-  }, [service, onChange, onAdd, onRemove, labwares, removedLabware, previousLabwareLength]);
+  }, [
+    service,
+    onChange,
+    onAdd,
+    onRemove,
+    labwares,
+    removedLabware,
+    previousLabwareLength,
+    cleanedOutAddresses,
+    prevCleanedOutAddressesLength,
+    checkForCleanedOutAddresses
+  ]);
 
   useEffect(() => {
     send(locked ? { type: 'LOCK' } : { type: 'UNLOCK' });
@@ -148,7 +196,8 @@ export default function LabwareScanner({
       },
       [send]
     ),
-    enableFlaggedLabwareCheck
+    enableFlaggedLabwareCheck,
+    cleanedOutAddresses: cleanedOutAddresses
   };
 
   const handleOnScanInputChange = useCallback(
@@ -217,13 +266,15 @@ type LabwareScannerContextType = {
   labwares: LabwareFlaggedFieldsFragment[];
   removeLabware: (barcode: string) => void;
   enableFlaggedLabwareCheck?: boolean;
+  cleanedOutAddresses?: Map<number, string[]>;
 };
 
 const LabwareScannerContext = React.createContext<LabwareScannerContextType>({
   locked: false,
   labwares: [],
   removeLabware: (_barcode) => {},
-  enableFlaggedLabwareCheck: false
+  enableFlaggedLabwareCheck: false,
+  cleanedOutAddresses: new Map<number, string[]>()
 });
 
 export function useLabwareContext() {

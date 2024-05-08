@@ -18,6 +18,7 @@ export type CDNAProps = {
   className?: string;
   slotCopyContent?: SlotCopyContent[];
   onSlotMeasurementChange?: (slotMeasurements?: SlotMeasurementRequest[]) => void;
+  cleanedOutAddress?: string[];
 };
 
 const fetchCqMeasurementsByBarcode = async (barcode: string): Promise<Array<AddressString>> => {
@@ -60,7 +61,8 @@ const Amplification = ({
   className,
   slotCopyContent,
   onSlotMeasurementChange,
-  slotMeasurements: initSlotMeasurements
+  slotMeasurements: initSlotMeasurements,
+  cleanedOutAddress
 }: CDNAProps) => {
   const { setErrors, setTouched, setFieldValue, errors, setFieldError } = useFormikContext<VisiumQCFormData>();
 
@@ -257,7 +259,7 @@ const Amplification = ({
               </div>
 
               <div className="col-span-5 w-full flex items-center justify-center p-4" data-testid={'labware'}>
-                <Labware labware={labware} name={labware.labwareType.name} />
+                <Labware labware={labware} name={labware.labwareType.name} cleanedOutAddresses={cleanedOutAddress} />
               </div>
             </div>
           </Panel>

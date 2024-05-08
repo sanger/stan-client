@@ -335,6 +335,12 @@ function AppShell({ children }: AppShellParams) {
                     description={'Register tissue samples which can be either fixed or fresh into STAN.'}
                   />
                   <NavLinkMenuItem
+                    caption={'Clean Out'}
+                    path={'/admin/cleanout'}
+                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Clean the wells/slots of a labware.'}
+                  />
+                  <NavLinkMenuItem
                     caption={'Destroy'}
                     path={'/admin/destroy'}
                     icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
@@ -525,6 +531,7 @@ function AppShell({ children }: AppShellParams) {
                         <StanMobileNavLink to="/admin/slide_registration">Slide Registration</StanMobileNavLink>
                         <StanMobileNavLink to={'/admin/tissue_registration'}>Tissue Registration</StanMobileNavLink>
 
+                        <StanMobileNavLink to="/admin/cleanout">Clean Out</StanMobileNavLink>
                         <StanMobileNavLink to="/admin/destroy">Destroy</StanMobileNavLink>
                         <StanMobileNavLink to={'/admin/flagLabware'}>Flag Labware</StanMobileNavLink>
 
