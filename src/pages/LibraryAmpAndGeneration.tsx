@@ -135,18 +135,6 @@ export const LibraryAmpAndGeneration = () => {
     [sendLibraryGeneration]
   );
 
-  const handleSlotMeasurementChange = useCallback(
-    (slotMeasurements?: SlotMeasurement[]) => {
-      if (slotMeasurements) {
-        sendLibraryGeneration({
-          type: 'UPDATE_SLOT_MEASUREMENTS',
-          slotMeasurements: slotMeasurements
-        });
-      }
-    },
-    [sendLibraryGeneration]
-  );
-
   const handleOnSave = useCallback(
     (slotMeasurement?: SlotMeasurement[]) => {
       sendLibraryGeneration({
@@ -338,7 +326,6 @@ export const LibraryAmpAndGeneration = () => {
                           labware={currentLibraryGeneration.context.destinationLabware as LabwareFlaggedFieldsFragment}
                           className={'mx-auto'}
                           slotCopyContent={currentLibraryGeneration.context.destination!.contents}
-                          onSlotMeasurementChange={handleSlotMeasurementChange}
                           cleanedOutAddress={currentLibraryGeneration.context.cleanedOutAddresses}
                         />
 
