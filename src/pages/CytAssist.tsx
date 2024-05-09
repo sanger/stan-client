@@ -373,7 +373,8 @@ const CytAssist = () => {
                 ? [
                     {
                       labware: selectedDestination.labware,
-                      slotCopyContent: selectedDestination.slotCopyDetails.contents
+                      slotCopyContent: selectedDestination.slotCopyDetails.contents,
+                      cleanedOutAddresses: selectedDestination.cleanedOutAddresses
                     }
                   ]
                 : []

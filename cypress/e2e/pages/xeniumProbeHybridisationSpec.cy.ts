@@ -109,7 +109,7 @@ describe('Xenium Probe Hybridisation', () => {
         selectOption('probe-costing', 'Faculty');
         cy.findByRole('button', { name: 'Add to all' }).click();
       });
-      it('should display probe information added for all labware', () => {
+      it('adds a new probe row to all the scanned labware', () => {
         //Should adds probe information to the existing rows
         cy.findByTestId('STAN-3111-0-name').should('be.visible');
         shouldDisplaySelectedValue('STAN-3111-0-name', 'Custom breast');
@@ -119,7 +119,6 @@ describe('Xenium Probe Hybridisation', () => {
       });
 
       it('displays error when same panel is selected for multiple probes in same labware', () => {
-        cy.findByTestId('addButton').click();
         cy.findByRole('button', { name: 'Add to all' }).click();
         cy.findAllByText('Unique value required for Probe Panel').should('be.visible');
       });

@@ -22,6 +22,7 @@ const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapp
       if (event.type === 'UPDATE_INPUT_LABWARE') {
         return produce(context, (draft) => {
           draft.inputLabware = event.labware;
+          draft.cleanedOutInputAddresses = event.cleanedOutAddresses;
 
           // Update the failedSlots array if it has entries for any removed labware
           let keys = Array.from(draft.failedSlots.keys()).filter(
@@ -281,6 +282,7 @@ interface SlotMapperMachineParams {
   inputLabware: Array<LabwareFlaggedFieldsFragment>;
   outputSlotCopies: Array<OutputSlotCopyData>;
   failedSlotsCheck?: boolean;
+  cleanedOutInputAddresses?: Map<number, string[]>;
 }
 
 const createSlotMapperMachine = createMachine(

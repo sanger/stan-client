@@ -17,7 +17,7 @@ export type CDNAProps = {
   removeLabware?: (barcode: string) => void;
   className?: string;
   slotCopyContent?: SlotCopyContent[];
-  onSlotMeasurementChange?: (slotMeasurements?: SlotMeasurementRequest[]) => void;
+  cleanedOutAddress?: string[];
 };
 
 const fetchCqMeasurementsByBarcode = async (barcode: string): Promise<Array<AddressString>> => {
@@ -59,10 +59,10 @@ const Amplification = ({
   removeLabware,
   className,
   slotCopyContent,
-  onSlotMeasurementChange,
-  slotMeasurements: initSlotMeasurements
+  slotMeasurements: initSlotMeasurements,
+  cleanedOutAddress
 }: CDNAProps) => {
-  const { setErrors, setTouched, setFieldValue, errors, setFieldError } = useFormikContext<VisiumQCFormData>();
+  const { values, setErrors, setTouched, setFieldValue, errors, setFieldError } = useFormikContext<VisiumQCFormData>();
 
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(
     () => [
@@ -79,8 +79,6 @@ const Amplification = ({
     ],
     []
   );
-
-  const [slotMeasurements, setSlotMeasurements] = React.useState<SlotMeasurementRequest[]>();
 
   /***
    * When labwares changes, the slotMeasurements has to be initialized accordingly
@@ -101,15 +99,13 @@ const Amplification = ({
     setFieldValue('barcode', labware.barcode);
 
     if (initSlotMeasurements) {
-      setSlotMeasurements(initSlotMeasurements);
+      setFieldValue('slotMeasurements', initSlotMeasurements);
       return;
     }
 
     fetchCqMeasurements().then((measurementValues) => {
       if (measurementValues.length === 0) {
         setFieldValue('slotMeasurements', []);
-        setSlotMeasurements([]);
-        if (onSlotMeasurementChange) onSlotMeasurementChange([]);
         return;
       }
       const slotMeasurements: SlotMeasurement[] = [];
@@ -133,8 +129,6 @@ const Amplification = ({
         );
       });
       setFieldValue('slotMeasurements', slotMeasurements);
-      setSlotMeasurements(slotMeasurements);
-      if (onSlotMeasurementChange) onSlotMeasurementChange(slotMeasurements);
     });
   }, [
     labware,
@@ -144,43 +138,30 @@ const Amplification = ({
     memoMeasurementConfig,
     setFieldError,
     slotCopyContent,
-    onSlotMeasurementChange,
     initSlotMeasurements
   ]);
 
   const handleChangeMeasurement = React.useCallback(
     (measurementName: string, measurementValue: string) => {
       setFieldValue(measurementName, measurementValue, true);
-      const measurementIndex = parseInt(measurementName.split('.')[1]);
-      setSlotMeasurements((prevSlotMeasurements) => {
-        return prevSlotMeasurements?.map((measurement, index) => {
-          if (index + 1 === measurementIndex * 2) {
-            measurement.value = measurementValue;
-          }
-          return measurement;
-        });
-      });
-      if (onSlotMeasurementChange) onSlotMeasurementChange(slotMeasurements);
     },
-    [setFieldValue, onSlotMeasurementChange, slotMeasurements]
+    [setFieldValue]
   );
 
   const handleChangeAllMeasurements = React.useCallback(
-    (measurementValue: string) => {
+    async (measurementValue: string) => {
       //Reset Errors
       setErrors({});
-      setTouched({});
-      const measurements = slotMeasurements ? [...slotMeasurements] : [];
+      await setTouched({});
+      const measurements = values.slotMeasurements ?? [];
       measurements
         ?.filter((measurement) => measurement.name === 'Cycles')
         .forEach((measuerementReq) => {
           measuerementReq.value = measurementValue;
         });
-      setFieldValue('slotMeasurements', measurements, true);
-      setSlotMeasurements(measurements);
-      onSlotMeasurementChange && onSlotMeasurementChange(measurements);
+      await setFieldValue('slotMeasurements', measurements, true);
     },
-    [setErrors, setTouched, setFieldValue, onSlotMeasurementChange, slotMeasurements]
+    [setErrors, setTouched, setFieldValue, values.slotMeasurements]
   );
 
   /***
@@ -225,10 +206,12 @@ const Amplification = ({
                 />
               )}
             </div>
-            {slotMeasurements && slotMeasurements.length === 0 && (
-              <Warning className={'mt-4'} message={'No Cq values associated with the labware slots'} />
-            )}
-            {slotMeasurements && slotMeasurements.length > 0 && (
+            {values.slotMeasurements &&
+              (values.slotMeasurements.length === 0 ||
+                values.slotMeasurements?.some(
+                  (measurement) => measurement.name === 'Cq value' && measurement.value === ''
+                )) && <Warning className={'mt-4'} message={'No Cq values associated with the labware slots'} />}
+            {values.slotMeasurements && values.slotMeasurements.length > 0 && (
               <div className={'flex flex-row w-1/2 mb-2'}>
                 <div className={'flex flex-col'}>
                   <label>Cycles</label>
@@ -237,8 +220,8 @@ const Amplification = ({
                     type={'number'}
                     data-testid={`all-Cycles`}
                     step={1}
-                    onChange={(e: any) => {
-                      handleChangeAllMeasurements(e.currentTarget.value);
+                    onChange={async (e: any) => {
+                      await handleChangeAllMeasurements(e.currentTarget.value);
                     }}
                     min={0}
                   />
@@ -247,9 +230,9 @@ const Amplification = ({
             )}
             <div className={'grid grid-cols-11 gap-2 justify-between'}>
               <div className="col-span-6">
-                {slotMeasurements && slotMeasurements.length > 0 && (
+                {values.slotMeasurements && values.slotMeasurements.length > 0 && (
                   <SlotMeasurements
-                    slotMeasurements={slotMeasurements}
+                    slotMeasurements={values.slotMeasurements}
                     onChangeField={handleChangeMeasurement}
                     measurementConfig={memoMeasurementConfig}
                   />
@@ -257,7 +240,7 @@ const Amplification = ({
               </div>
 
               <div className="col-span-5 w-full flex items-center justify-center p-4" data-testid={'labware'}>
-                <Labware labware={labware} name={labware.labwareType.name} />
+                <Labware labware={labware} name={labware.labwareType.name} cleanedOutAddresses={cleanedOutAddress} />
               </div>
             </div>
           </Panel>

@@ -277,9 +277,14 @@ export default function ProbeHybridisationQC() {
           <div className="mt-8 space-y-2">
             <Heading level={2}>Slides</Heading>
             <p>Please scan a slide</p>
-            <LabwareScanner onAdd={onAddLabware} labwareCheckFunction={validateProbeHybridisationQcLabware}>
-              {({ labwares, removeLabware }) =>
-                labwares.map((labware) => {
+            <LabwareScanner
+              onAdd={onAddLabware}
+              labwareCheckFunction={validateProbeHybridisationQcLabware}
+              checkForCleanedOutAddresses
+              enableFlaggedLabwareCheck
+            >
+              {({ labwares, removeLabware, cleanedOutAddresses }) =>
+                labwares.map((labware, index) => {
                   return (
                     <Panel key={labware.barcode}>
                       <div className="flex flex-row items-center justify-end">
@@ -294,7 +299,11 @@ export default function ProbeHybridisationQC() {
                       </div>
                       <div className="flex flex-row">
                         <div className="flex flex-col w-full mr-3" data-testid={'labware'}>
-                          <Labware labware={labware} name={labware.labwareType.name} />
+                          <Labware
+                            labware={labware}
+                            name={labware.labwareType.name}
+                            cleanedOutAddresses={cleanedOutAddresses?.get(labware.id)}
+                          />
                         </div>
                         <div className="flex flex-col w-full bg-gray-100 ml-3">
                           <div className="grid grid-cols-2 gap-4 m-4">

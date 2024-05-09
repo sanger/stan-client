@@ -9,6 +9,7 @@ import { enableMapSet } from 'immer';
 import { getById } from '../../../generic/utilities';
 import '@testing-library/jest-dom';
 import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
+import userEvent from '@testing-library/user-event';
 
 beforeEach(() => {
   enableMapSet();
@@ -104,9 +105,8 @@ describe('slotMapper.spec.tsx', () => {
 
     const pagerTexts = getAllByTestId(container, 'pager-text-div');
     expect(pagerTexts[0]).toHaveTextContent('1 of 2');
-    await waitFor(() => {
-      screen.getAllByTestId('removeButton')[0].click();
-    });
+
+    await userEvent.click(screen.getAllByTestId('removeButton')[0]);
     expect(pagerTexts[0]).toHaveTextContent('1 of 1');
     //It shows the next labware
     expect(getById(container, 'inputLabwares')).toHaveTextContent('STAN-5112');

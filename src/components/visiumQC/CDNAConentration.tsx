@@ -14,13 +14,15 @@ export type CDNAConcentrationProps = {
   slotMeasurements: SlotMeasurementRequest[] | undefined;
   concentrationComments: CommentFieldsFragment[];
   removeLabware: (barcode: string) => void;
+  cleanedOutAddress?: string[];
 };
 
 const CDNAConcentration = ({
   labware,
   slotMeasurements,
   removeLabware,
-  concentrationComments
+  concentrationComments,
+  cleanedOutAddress
 }: CDNAConcentrationProps) => {
   const { setErrors, setTouched, setFieldValue } = useFormikContext<VisiumQCFormData>();
   const [measurementName, setMeasurementName] = useState('');
@@ -139,7 +141,7 @@ const CDNAConcentration = ({
                 )}
               </div>
               <div className="flex flex-col w-full items-end justify-center p-4" data-testid={'labware'}>
-                <Labware labware={labware} name={labware.labwareType.name} />
+                <Labware labware={labware} name={labware.labwareType.name} cleanedOutAddresses={cleanedOutAddress} />
               </div>
             </div>
           </Panel>

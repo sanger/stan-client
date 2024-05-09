@@ -3,6 +3,10 @@ import createLabwareMachine from '../../../../src/components/labware/labware.mac
 import { createSlots } from './slotColumnInfo.spec';
 import { enableMapSet } from 'immer';
 
+beforeEach(() => {
+  enableMapSet();
+});
+
 describe('labwareMachine', () => {
   describe('Initial states', () => {
     it('has an initial state of non_selectable for machine params  none and single', (done) => {

@@ -60,6 +60,7 @@ import { NewFlaggedLabwareLayout } from '../types/stan';
 import { LibraryAmpAndGeneration } from '../pages/LibraryAmpAndGeneration';
 import { CellSegmentationQc } from '../pages/CellSegmentationQc';
 import { CellSegmentation } from '../pages/CellSegmentation';
+import CleanOut from '../pages/CleanOut';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -337,8 +338,12 @@ const RouteLayout = () => {
           <Route
             path="/lab/staining"
             loader={async () => {
-              const res = await stanCore.GetStainInfo();
-              return res;
+              const stainingInfo = await stanCore.GetStainInfo();
+              const reagentTypes = await stanCore.GetStainReagentTypes();
+              return {
+                stainingInfo,
+                reagentTypes
+              };
             }}
             element={<Staining />}
           />
@@ -451,6 +456,9 @@ const RouteLayout = () => {
               />
             }
           />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/admin/cleanout" element={<CleanOut />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route

@@ -25,6 +25,7 @@ import { Draft } from 'immer';
 export type Destination = {
   labware: NewFlaggedLabwareLayout;
   slotCopyDetails: SlotCopyDestination;
+  cleanedOutAddresses?: string[];
 };
 
 /**
@@ -33,6 +34,7 @@ export type Destination = {
 export type Source = {
   labware: LabwareFlaggedFieldsFragment;
   labwareState?: LabwareState;
+  cleanedOutAddresses?: string[];
 };
 
 export interface SlotCopyContext {
@@ -123,11 +125,13 @@ type UpdateSourceLabwareState = {
 type UpdateSourceLabware = {
   type: 'UPDATE_SOURCE_LABWARE';
   labware: LabwareFlaggedFieldsFragment[];
+  cleanedOutAddresses?: Map<number, string[]>;
 };
 
 type UpdateDestinationLabware = {
   type: 'UPDATE_DESTINATION_LABWARE';
   labware: NewFlaggedLabwareLayout[];
+  cleanedOutAddresses?: Map<number, string[]>;
 };
 
 type FindPermDataEvent = {
@@ -385,7 +389,8 @@ export const slotCopyMachine = createMachine(
             //There is no source exists , so add this
             if (!source) {
               return {
-                labware: newSource
+                labware: newSource,
+                cleanedOutAddresses: event.cleanedOutAddresses?.get(newSource.id) ?? []
               };
             } else {
               return source;
@@ -404,7 +409,8 @@ export const slotCopyMachine = createMachine(
             if (!destination) {
               return {
                 labware: newDest,
-                slotCopyDetails: { labwareType: newDest.labwareType.name, barcode: newDest.barcode, contents: [] }
+                slotCopyDetails: { labwareType: newDest.labwareType.name, barcode: newDest.barcode, contents: [] },
+                cleanedOutAddresses: event.cleanedOutAddresses?.get(newDest.id) ?? [] //go back to this update to number so it is supports id instead of barcode
               };
             } else {
               return destination;

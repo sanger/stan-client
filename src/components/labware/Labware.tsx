@@ -114,6 +114,12 @@ export interface LabwareProps {
    * @param slot a slot on the given labware
    */
   slotBuilder?: (slot: SlotFieldsFragment) => React.ReactNode;
+
+  /**
+   * Cleaned out addresses are addresses that have been cleaned out and should not be used for storing samples.
+   * Cleaned out addresses are displayed crossed over in the UI.
+   */
+  cleanedOutAddresses?: string[];
 }
 
 export type LabwareImperativeRef = {
@@ -143,7 +149,8 @@ const Labware = ({
   slotSecondaryText,
   slotColor,
   labwareRef,
-  slotBuilder
+  slotBuilder,
+  cleanedOutAddresses
 }: React.PropsWithChildren<LabwareProps>) => {
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine();
@@ -283,6 +290,7 @@ const Labware = ({
               secondaryText={slotSecondaryText}
               color={_slotColor}
               selected={selectedAddresses?.has(address)}
+              isCleanedOut={cleanedOutAddresses?.includes(address)}
             />
           ))}
         </div>

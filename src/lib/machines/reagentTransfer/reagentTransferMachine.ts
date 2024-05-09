@@ -57,6 +57,8 @@ export interface ReagentTransferContext {
   serverErrors?: Maybe<ClientError>;
 
   validationError?: string;
+
+  cleanedOutAddresses?: string[];
 }
 
 type UpdateTransferContent = {
@@ -77,6 +79,7 @@ type SetSourceLabware = {
 type SetDestinationLabware = {
   type: 'SET_DESTINATION_LABWARE';
   labware: LabwareFlaggedFieldsFragment;
+  cleanedOutAddresses?: string[];
 };
 
 type SetPlateType = {
@@ -272,7 +275,7 @@ export const reagentTransferMachine = createMachine(
       }),
       assignDestination: assign(({ context, event }) => {
         if (event.type !== 'SET_DESTINATION_LABWARE') return context;
-        return { ...context, destLabware: event.labware };
+        return { ...context, destLabware: event.labware, cleanedOutAddresses: event.cleanedOutAddresses };
       }),
       assignPlateType: assign(({ context, event }) => {
         if (event.type !== 'SET_PLATE_TYPE') return context;

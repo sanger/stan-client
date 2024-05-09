@@ -9,6 +9,7 @@ import { FindFlaggedLabwareQuery, FindFlaggedLabwareQueryVariables } from '../..
 import { server } from '../../../../src/mocks/server';
 import { graphql, HttpResponse } from 'msw';
 import { createFlaggedLabware } from '../../../../src/mocks/handlers/flagLabwareHandlers';
+import { enableMapSet } from 'immer';
 
 afterEach(() => {
   cleanup();
@@ -17,6 +18,7 @@ afterEach(() => {
 
 describe('Orientation QC', () => {
   beforeEach(() => {
+    enableMapSet();
     server.resetHandlers();
     server.use(
       graphql.query<FindFlaggedLabwareQuery, FindFlaggedLabwareQueryVariables>(

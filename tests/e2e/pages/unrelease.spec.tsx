@@ -12,6 +12,7 @@ import { graphql, HttpResponse } from 'msw';
 import * as sdk from '../../../src/lib/sdk';
 import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHandlers';
 import { uniqueId } from 'lodash';
+import { enableMapSet } from 'immer';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom')
@@ -20,6 +21,7 @@ require('react-router-dom').useLocation = jest.fn();
 
 describe('Unrelease', () => {
   beforeEach(() => {
+    enableMapSet();
     jest.spyOn(reactDom, 'useLocation').mockImplementation(() => {
       return {
         key: uniqueId(),

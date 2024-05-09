@@ -8,7 +8,7 @@ import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
 import { CDNAProps } from './Amplification';
 
-const QPcrResults = ({ labware, slotMeasurements, removeLabware }: CDNAProps) => {
+const QPcrResults = ({ labware, slotMeasurements, removeLabware, cleanedOutAddress }: CDNAProps) => {
   const { values, setErrors, setTouched, setFieldValue } = useFormikContext<VisiumQCFormData>();
 
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(
@@ -133,7 +133,7 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware }: CDNAProps) =>
                 )}
               </div>
               <div className="col-span-5 w-full flex items-center justify-center p-4" data-testid={'labware'}>
-                <Labware labware={labware} name={labware.labwareType.name} />
+                <Labware labware={labware} name={labware.labwareType.name} cleanedOutAddresses={cleanedOutAddress} />
               </div>
             </div>
           </Panel>

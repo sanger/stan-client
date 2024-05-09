@@ -1,0 +1,3 @@
+query GetCleanedOutAddresses($barcode: String!) {
+  cleanedOutAddresses(barcode: $barcode)
+}

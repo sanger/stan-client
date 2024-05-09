@@ -8,7 +8,11 @@ import '@testing-library/jest-dom';
 import LabwareScanTable from '../../../../src/components/labwareScanPanel/LabwareScanPanel';
 import columns from '../../../../src/components/dataTableColumns/labwareColumns';
 import { MemoryRouter } from 'react-router';
+import { enableMapSet } from 'immer';
 
+beforeEach(() => {
+  enableMapSet();
+});
 afterEach(() => {
   cleanup();
 });

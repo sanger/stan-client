@@ -312,8 +312,8 @@ export default function VisiumQC() {
                   <Heading level={2}>Labware</Heading>
                   <p>Please scan in any labware you wish to QC.</p>
                   <div key={`labware-scanner-${labwareLimit}`}>
-                    <LabwareScanner limit={labwareLimit} enableFlaggedLabwareCheck>
-                      {({ labwares, removeLabware }) => {
+                    <LabwareScanner limit={labwareLimit} enableFlaggedLabwareCheck checkForCleanedOutAddresses>
+                      {({ labwares, removeLabware, cleanedOutAddresses }) => {
                         switch (values.qcType) {
                           case QCType.SLIDE_PROCESSING:
                             return (
@@ -322,11 +322,21 @@ export default function VisiumQC() {
                                 removeLabware={removeLabware}
                                 comments={slideProcessingComments}
                                 labwaresResultsProps={values.labwareResult}
+                                cleanedOutAddress={cleanedOutAddresses}
                               />
                             );
                           case QCType.SPRI_CLEANUP:
                             return (
-                              <Cleanup labware={labwares[0]} comments={cleanupComments} removeLabware={removeLabware} />
+                              <Cleanup
+                                labware={labwares[0]}
+                                comments={cleanupComments}
+                                removeLabware={removeLabware}
+                                cleanedOutAddress={
+                                  cleanedOutAddresses && labwares[0]
+                                    ? cleanedOutAddresses.get(labwares[0].id)
+                                    : undefined
+                                }
+                              />
                             );
 
                           case QCType.CDNA_AMPLIFICATION:
@@ -335,6 +345,11 @@ export default function VisiumQC() {
                                 slotMeasurements={values.slotMeasurements}
                                 labware={labwares[0]}
                                 removeLabware={removeLabware}
+                                cleanedOutAddress={
+                                  cleanedOutAddresses && labwares[0]
+                                    ? cleanedOutAddresses.get(labwares[0].id)
+                                    : undefined
+                                }
                               />
                             );
                           case QCType.VISIUM_CONCENTRATION:
@@ -344,6 +359,11 @@ export default function VisiumQC() {
                                 labware={labwares[0]}
                                 removeLabware={removeLabware}
                                 concentrationComments={concentrationComments}
+                                cleanedOutAddress={
+                                  cleanedOutAddresses && labwares[0]
+                                    ? cleanedOutAddresses.get(labwares[0].id)
+                                    : undefined
+                                }
                               />
                             );
                           case QCType.QPCR_RESULTS:
@@ -352,6 +372,11 @@ export default function VisiumQC() {
                                 slotMeasurements={values.slotMeasurements}
                                 labware={labwares[0]}
                                 removeLabware={removeLabware}
+                                cleanedOutAddress={
+                                  cleanedOutAddresses && labwares[0]
+                                    ? cleanedOutAddresses.get(labwares[0].id)
+                                    : undefined
+                                }
                               />
                             );
                         }

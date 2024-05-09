@@ -135,18 +135,6 @@ export const LibraryAmpAndGeneration = () => {
     [sendLibraryGeneration]
   );
 
-  const handleSlotMeasurementChange = useCallback(
-    (slotMeasurements?: SlotMeasurement[]) => {
-      if (slotMeasurements) {
-        sendLibraryGeneration({
-          type: 'UPDATE_SLOT_MEASUREMENTS',
-          slotMeasurements: slotMeasurements
-        });
-      }
-    },
-    [sendLibraryGeneration]
-  );
-
   const handleOnSave = useCallback(
     (slotMeasurement?: SlotMeasurement[]) => {
       sendLibraryGeneration({
@@ -262,7 +250,8 @@ export const LibraryAmpAndGeneration = () => {
                           type: 'GO_TO_REAGENT_TRANSFER',
                           sources,
                           slotCopyDetails: destinations[0].slotCopyDetails,
-                          destinationLabware: destinations[0].labware
+                          destinationLabware: destinations[0].labware,
+                          cleanedOutAddresses: destinations[0].cleanedOutAddresses
                         })
                       }
                     >
@@ -281,6 +270,7 @@ export const LibraryAmpAndGeneration = () => {
                     currentLibraryGeneration.context.destinationLabware as LabwareFlaggedFieldsFragment
                   }
                   outputSlotCopies={transferredReagents ? [transferredReagents] : undefined}
+                  destinationCleanedOutAddresses={currentLibraryGeneration.context.cleanedOutAddresses}
                 />
                 <ButtonBar className="flex flex-row justify-between">
                   <PinkButton
@@ -336,7 +326,7 @@ export const LibraryAmpAndGeneration = () => {
                           labware={currentLibraryGeneration.context.destinationLabware as LabwareFlaggedFieldsFragment}
                           className={'mx-auto'}
                           slotCopyContent={currentLibraryGeneration.context.destination!.contents}
-                          onSlotMeasurementChange={handleSlotMeasurementChange}
+                          cleanedOutAddress={currentLibraryGeneration.context.cleanedOutAddresses}
                         />
 
                         <ButtonBar className="flex flex-row justify-between">
