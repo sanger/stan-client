@@ -1816,11 +1816,11 @@ svg.logo.loading rect:nth-child(3n+1) {
 .w-5 {
   width: 1.25rem;
 }
-.w-auto {
-  width: auto;
-}
 .w-1\/2 {
   width: 50%;
+}
+.w-auto {
+  width: auto;
 }
 .w-3\/4 {
   width: 75%;
@@ -4336,4 +4336,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.1bf0587f.css.map*/
+/*# sourceMappingURL=main.8be830bd.css.map*/
