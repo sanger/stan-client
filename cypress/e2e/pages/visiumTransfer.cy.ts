@@ -153,8 +153,8 @@ describe('Transfer Page', () => {
         cy.findByTestId('removeButton').should('not.exist');
       });
       it('should display selected labware state', () => {
-        selectOption('bioState', 'Probes');
-        shouldDisplaySelectedValue('bioState', 'Probes');
+        selectOption('bioState', 'Probes pre-clean');
+        shouldDisplaySelectedValue('bioState', 'Probes pre-clean');
       });
     });
 
@@ -180,7 +180,7 @@ describe('Transfer Page', () => {
         selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').type('STAN-3100{enter}');
         cy.findByTestId('copyMode-One to many').click({ force: true });
-        selectOption('bioState', 'Probes');
+        selectOption('bioState', 'Probes pre-clean');
         cy.get('#inputLabwares').within(async () => {
           cy.findByText('A1').wait(1000).click({ force: true });
         });
@@ -211,7 +211,7 @@ describe('Transfer Page', () => {
         selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').type('STAN-3100{enter}');
         cy.findByTestId('bioState').scrollIntoView();
-        selectOption('bioState', 'Probes');
+        selectOption('bioState', 'Probes pre-clean');
         cy.findByTestId('copyMode-Many to one').click({ force: true });
         cy.get('#inputLabwares').within(() => {
           cy.findByText('A2').wait(1000).click({ force: true });
@@ -235,7 +235,7 @@ describe('Transfer Page', () => {
     describe('On save', () => {
       describe('When there is a server error', () => {
         before(() => {
-          selectOption('bioState', 'Probes');
+          selectOption('bioState', 'Probes pre-clean');
           selectOption('input-labware-state', 'used');
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
@@ -351,7 +351,7 @@ function saveSlotForLabwareWithNoPerm() {
   cy.get('#outputLabwares').within(() => {
     cy.findByText('A1').click();
   });
-  selectOption('bioState', 'Probes');
+  selectOption('bioState', 'Probes pre-clean');
   selectOption('input-labware-state', 'used');
   cy.get('#outputLabwares').within(() => {
     cy.findByText('A1').click();

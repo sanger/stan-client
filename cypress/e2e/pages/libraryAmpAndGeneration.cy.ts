@@ -22,7 +22,7 @@ describe('LibraryAmpAndGeneration Page', () => {
           cy.get('#labwareScanInput').type('STAN-5345{enter}');
           mappingSamples('A1', 'A2');
           selectOption('input-labware-state', 'used');
-          selectOption('bioState', 'Probes');
+          selectOption('bioState', 'Probes pre-clean');
         });
         it('enables Transfer Reagent button', () => {
           cy.findByRole('button', { name: 'Reagent Transfer >' }).should('be.enabled');
@@ -87,7 +87,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             shouldDisplaySelectedValue('input-labware-state', 'used');
           });
           it('displays the previously selected bio state', () => {
-            shouldDisplaySelectedValue('bioState', 'Probes');
+            shouldDisplaySelectedValue('bioState', 'Probes pre-clean');
           });
           it('displays the previously selected output labware selection option', () => {
             cy.findByTestId('Default').should('be.checked');
@@ -418,7 +418,7 @@ const fillInSampleTransferStep = () => {
   cy.get('#labwareScanInput').type('STAN-5345{enter}');
   mappingSamples('A1', 'A1');
   selectOption('input-labware-state', 'used');
-  selectOption('bioState', 'Probes');
+  selectOption('bioState', 'Probes pre-clean');
   cy.findByRole('button', { name: 'Reagent Transfer >' }).click();
 };
 

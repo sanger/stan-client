@@ -37,8 +37,6 @@ interface DestinationLabwareScanPanelProps {
 
 const transferTypes = [
   'cDNA',
-  'Probes',
-  'Library',
   'Library pre-clean',
   'Library post-clean',
   'Library post-clean 1:20 dilution',
