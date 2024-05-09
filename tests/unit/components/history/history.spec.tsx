@@ -298,9 +298,9 @@ describe('History Page', () => {
         );
       });
     });
-    it('should  display the release download link in details column', () => {
+    it('should  display the release options page link in details column', () => {
       expect(screen.getByText('Release')).toBeInTheDocument();
-      expect(screen.getByTestId('release-download-link')).toBeInTheDocument();
+      expect(screen.getByTestId('release-options-link')).toBeInTheDocument();
     });
   });
 

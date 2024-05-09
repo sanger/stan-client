@@ -22,20 +22,12 @@ import { ZoomOutIcon } from '../icons/ZoomOutIcon';
 import { FontSizeIcon } from '../icons/FontSizeIcon';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { omit } from 'lodash';
+import BlueButton from '../buttons/BlueButton';
+
 /**
  * Component for looking up and displaying the history of labware and samples
  */
 type HistoryProps = HistoryUrlParams & { displayFlaggedLabware?: boolean };
-
-const downloadAndRedirect = (releaseId: number) => {
-  const downloadUrl = `/release?id=${releaseId}`;
-  const downloadAnchor = document.createElement('a');
-  downloadAnchor.href = downloadUrl;
-  downloadAnchor.download = 'release.tsv';
-  downloadAnchor.click();
-  const redirectUrl = `/releaseOptions?id=${releaseId}`;
-  window.open(redirectUrl, '_blank');
-};
 export default function History(props: HistoryProps) {
   const getHistoryURLParams = (props: HistoryProps): HistoryUrlParams => {
     const { displayFlaggedLabware, ...urlProps } = props;
@@ -162,10 +154,9 @@ export default function History(props: HistoryProps) {
             const releaseId = props.row.original.eventId;
             details.push(
               <li key={releaseId}>
-                <button data-testid="release-download-link" onClick={() => downloadAndRedirect(releaseId)}>
-                  <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
-                  Release file
-                </button>
+                <StyledLink data-testid="release-options-link" to={`/releaseOptions?id=${releaseId}`} target={'_blank'}>
+                  <BlueButton action="tertiary">Release Options </BlueButton>
+                </StyledLink>
               </li>
             );
           }
