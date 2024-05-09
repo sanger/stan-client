@@ -28,6 +28,8 @@ import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSe
 import { SlotCopyMode } from '../components/slotMapper/slotMapper.types';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
+import LabelPrinter from '../components/LabelPrinter';
+import ButtonBar from '../components/ButtonBar';
 
 /**
  * Success notification when slots have been copied
@@ -430,18 +432,25 @@ const CytAssist = () => {
               Save
             </BlueButton>
           )}
-
-          {current.matches('copied') && (
-            <>
+        </div>
+        {current.matches('copied') && (
+          <div className="flex flex-col items-end">
+            {selectedDestination &&
+              selectedDestination.slotCopyDetails.labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD && (
+                <div className="w-1/2 py-4">
+                  <LabelPrinter labwares={current.context.slotCopyResults} />
+                </div>
+              )}
+            <ButtonBar>
               <BlueButton onClick={() => reload(navigate)} action="tertiary">
                 Reset Form
               </BlueButton>
               <Link to={'/'}>
                 <BlueButton action="primary">Return Home</BlueButton>
               </Link>
-            </>
-          )}
-        </div>
+            </ButtonBar>
+          </div>
+        )}
       </div>
     </AppShell>
   );

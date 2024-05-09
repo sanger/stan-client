@@ -334,6 +334,30 @@ describe('CytAssist Page', () => {
           saveButton().should('not.be.disabled').click();
           cy.findByText('Slots copied').should('be.visible');
         });
+        describe('When user selects Visium LP CytAssist HD labwareType', () => {
+          before(() => {
+            cy.reload();
+            selectSGPNumber('SGP1008');
+            selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD);
+            selectSlideCostings('Faculty');
+            enterLOTNumber();
+            enterProbeLOTNumber();
+            cy.findByTestId('external-barcode').within(() => {
+              cy.findByRole('textbox').clear().type('H1-9D8VN2V{enter}').blur();
+            });
+            cy.get('#labwareScanInput').type('STAN-3100{enter}');
+            cy.get('#inputLabwares').within(() => {
+              cy.findByText('A1').click();
+            });
+            cy.get('#outputLabwares').within(() => {
+              cy.findByText('A1').click();
+            });
+            saveButton().click();
+          });
+          it('displays print labels', () => {
+            cy.findByText('Print Labels').should('be.visible');
+          });
+        });
       });
     });
   });
