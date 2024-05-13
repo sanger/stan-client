@@ -2,12 +2,16 @@ import React from 'react';
 import { CommentFieldsFragment, LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import RemoveButton from '../buttons/RemoveButton';
 import Panel from '../Panel';
-import Labware from '../labware/Labware';
 import WorkNumberSelect from '../WorkNumberSelect';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { selectOptionValues } from '../forms';
 import { FieldArray, useFormikContext } from 'formik';
-import { XeniumQCFormData } from '../../pages/XeniumQC';
+import { SampleComment, XeniumQCFormData } from '../../pages/XeniumQC';
+import DataTable from '../DataTable';
+import { CellProps } from 'react-table';
+import StyledLink from '../StyledLink';
+import Warning from '../notifications/Warning';
+import { FlaggedBarcodeLink } from '../dataTableColumns/labwareColumns';
 
 type XeniumLabwareQCProps = {
   comments: CommentFieldsFragment[];
@@ -16,71 +20,145 @@ type XeniumLabwareQCProps = {
   removeLabware: (barcode: string) => void;
   cleanedOutAddress?: string[];
 };
-export const XeniumLabwareQC = ({
-  labware,
-  comments,
-  index,
-  removeLabware,
-  cleanedOutAddress
-}: XeniumLabwareQCProps) => {
-  const { values, setFieldValue } = useFormikContext<XeniumQCFormData>();
+export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: XeniumLabwareQCProps) => {
+  const { values, setFieldValue, setValues } = useFormikContext<XeniumQCFormData>();
   return (
     <div className="max-w-screen-xl mx-auto" data-testid={'xenium-labware-qc'}>
       {labware && (
         <FieldArray name={'labware'}>
           {({ remove }) => (
-            <div className={'flex flex-col py-4'}>
-              <Panel>
-                <div className="flex flex-row items-center justify-end">
-                  {
-                    <RemoveButton
-                      onClick={() => {
-                        remove(index);
-                        removeLabware(labware.barcode);
-                      }}
-                    />
-                  }
-                </div>
-                <div className={'flex flex-row mt-8 justify-between'}>
-                  <div className={'flex flex-col w-full px-2 space-y-6'}>
-                    <WorkNumberSelect
-                      label={'SGP Number'}
-                      name={`labware.${index}.workNumber`}
-                      dataTestId={`${labware.barcode}-workNumber`}
-                      onWorkNumberChange={(workNumber) => {
-                        setFieldValue(`labware.${index}.workNumber`, workNumber);
-                      }}
-                      workNumber={values.labware[index]?.workNumber}
-                    />
+            <Panel>
+              <div className="grid grid-cols-2 mb-4">
+                {labware.flagged && FlaggedBarcodeLink(labware.barcode)}
+                {!labware.flagged && (
+                  <StyledLink to={`/labware/${labware.barcode}`} target="_blank">
+                    {labware.barcode}
+                  </StyledLink>
+                )}
 
-                    <div className={'flex w-full'}>
-                      <CustomReactSelect
-                        label={'Comments'}
-                        dataTestId={`${labware.barcode}-comments`}
-                        name={`labware.${index}.comments`}
-                        emptyOption={true}
-                        options={selectOptionValues(comments, 'text', 'id')}
-                        handleChange={(val) => {
-                          const comments = (val as OptionType[]).map((option) => option.value);
-                          setFieldValue(`labware.${index}.comments`, comments);
-                        }}
-                        isMulti={true}
-                        value={values.labware[index]?.comments?.map(
-                          (commentId) => comments.find((comment) => comment.id === Number(commentId))?.text
-                        )}
-                      />
-                    </div>
+                <div className="flex flex-row items-center justify-end">
+                  <RemoveButton
+                    onClick={() => {
+                      remove(index);
+                      removeLabware(labware.barcode);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-row items-center justify-start"></div>
+              <div className={'grid grid-cols-2 gap-4'}>
+                <WorkNumberSelect
+                  label={'SGP Number'}
+                  name={`labware.${index}.workNumber`}
+                  dataTestId={`${labware.barcode}-workNumber`}
+                  onWorkNumberChange={async (workNumber) => {
+                    await setFieldValue(`labware.${index}.workNumber`, workNumber);
+                  }}
+                  workNumber={values.labware[index]?.workNumber}
+                />
+
+                <CustomReactSelect
+                  label={'Comments'}
+                  dataTestId={`${labware.barcode}-comments`}
+                  name={`labware.${index}.comments`}
+                  emptyOption={true}
+                  options={selectOptionValues(comments, 'text', 'id')}
+                  handleChange={async (val) => {
+                    await setFieldValue(
+                      `labware.${index}.comments`,
+                      (val as OptionType[]).map((option) => option.value)
+                    );
+                  }}
+                  isMulti={true}
+                  value={values.labware[index]?.comments?.map(
+                    (commentId) => comments.find((comment) => comment.id === Number(commentId))?.text
+                  )}
+                />
+              </div>
+              <div>
+                <header className="text-lg font-bold py-8">Region of interest</header>
+              </div>
+              {!values.labware[index]?.sampleComments && (
+                <Warning data-testid={'warning'} message={'No regions of interest recorded for this labware.'} />
+              )}
+              {values.labware[index]?.sampleComments?.length > 0 && (
+                <div className="grid grid-cols-6 gap-4">
+                  <div className="col-span-2">
+                    <CustomReactSelect
+                      label={'Apply to all'}
+                      dataTestId={`labware.${index}.roi-comments`}
+                      name={`labware.${index}.roiComments`}
+                      emptyOption={true}
+                      options={selectOptionValues(comments, 'text', 'id')}
+                      handleChange={async (val) => {
+                        const comments = (val as OptionType[]).map((option) => option.value);
+                        await setValues((prev) => {
+                          return {
+                            ...prev,
+                            labware: prev.labware.map((labware, i) => {
+                              if (i === index) {
+                                return {
+                                  ...labware,
+                                  roiComments: comments,
+                                  sampleComments: labware.sampleComments.map((sampleComment) => {
+                                    return {
+                                      ...sampleComment,
+                                      comments
+                                    };
+                                  })
+                                };
+                              }
+                              return labware;
+                            })
+                          };
+                        });
+                      }}
+                      isMulti={true}
+                      value={values.labware[index]?.roiComments?.map(
+                        (commentId) => comments.find((comment) => comment.id === Number(commentId))?.text
+                      )}
+                    />
                   </div>
-                  <div className="flex flex-col w-full items-center justify-center p-4" data-testid={'labware'}>
-                    <Labware
-                      labware={labware}
-                      name={labware.labwareType.name}
-                      cleanedOutAddresses={cleanedOutAddress}
+                  <div className={'col-span-4'}>
+                    <DataTable
+                      columns={[
+                        {
+                          Header: 'Sample ID',
+                          accessor: 'sampleId'
+                        },
+                        {
+                          Header: 'Address',
+                          accessor: 'address'
+                        },
+                        {
+                          Header: 'Region',
+                          accessor: 'roi'
+                        },
+                        {
+                          Header: 'Comment',
+                          accessor: 'comments',
+                          Cell: (props: CellProps<SampleComment>) => {
+                            return (
+                              <CustomReactSelect
+                                dataTestId={`labware.${index}.sampleComments`}
+                                name={`labware.${index}.sampleComments.${props.row.index}.comments`}
+                                emptyOption={true}
+                                options={selectOptionValues(comments, 'text', 'id')}
+                                isMulti={true}
+                                value={values.labware[index]?.sampleComments?.[props.row.index]?.comments?.map(
+                                  (commentId) => comments.find((comment) => comment.id === Number(commentId))?.text
+                                )}
+                              />
+                            );
+                          }
+                        }
+                      ]}
+                      data={values.labware[index]?.sampleComments}
                     />
                   </div>
                 </div>
-              </Panel>
-            </div>
+              )}
+            </Panel>
           )}
         </FieldArray>
       )}

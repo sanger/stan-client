@@ -1,0 +1,5 @@
+fragment RoiFields on Roi {
+  sampleId
+  address
+  roi
+}

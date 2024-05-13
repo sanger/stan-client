@@ -96,6 +96,18 @@ describe('Xenium QC', () => {
     });
   });
 
+  describe('Region of interest comments', () => {
+    describe('When apply to all is set ', () => {
+      before(() => {
+        selectOption('labware.0.roi-comments', comments[0].text);
+      });
+      it('sets the comment to all labware regions of interest', () => {
+        cy.findAllByTestId('labware.0.sampleComments').each((comment) => {
+          cy.wrap(comment).should('contain.text', comments[0].text);
+        });
+      });
+    });
+  });
   describe('Save button enabling', () => {
     before(() => {
       fillInForm();

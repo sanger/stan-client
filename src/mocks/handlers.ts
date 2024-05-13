@@ -59,6 +59,7 @@ import { flagLabwareHandlers } from './handlers/flagLabwareHandlers';
 import { libraryGenerationHandlers } from './handlers/libraryGenerationHandlers';
 import segmentationHandlers from './handlers/segmentationHandlers';
 import cleanOutHandlers from './handlers/cleanOutHandlers';
+import regionOfInterestHandlers from './handlers/regionOfInterestHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -118,5 +119,6 @@ export const handlers = [
   ...flagLabwareHandlers,
   ...libraryGenerationHandlers,
   ...segmentationHandlers,
-  ...cleanOutHandlers
+  ...cleanOutHandlers,
+  ...regionOfInterestHandlers
 ];
