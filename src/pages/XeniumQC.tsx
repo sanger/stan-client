@@ -193,7 +193,6 @@ const XeniumQC = () => {
                           }
                         }}
                         enableFlaggedLabwareCheck
-                        checkForCleanedOutAddresses
                         labwareCheckFunction={(
                           labwares: LabwareFlaggedFieldsFragment[],
                           foundLabware: LabwareFlaggedFieldsFragment
@@ -201,7 +200,7 @@ const XeniumQC = () => {
                           return getRegionsOfInterest(foundLabware, setValues);
                         }}
                       >
-                        {({ labwares, removeLabware, cleanedOutAddresses }) => (
+                        {({ labwares, removeLabware }) => (
                           <>
                             {labwares.length > 0 && (
                               <>
@@ -245,7 +244,6 @@ const XeniumQC = () => {
                                     comments={comments}
                                     index={index}
                                     removeLabware={removeLabware}
-                                    cleanedOutAddress={cleanedOutAddresses ? cleanedOutAddresses.get(lw.id) : undefined}
                                   />
                                 ))}
                                 <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
