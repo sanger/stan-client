@@ -39,7 +39,7 @@ export const buildHistoryEntries = (history: HistoryFieldsFragment): Array<Histo
     const sample = entry.sampleId ? sampleMap.get(entry.sampleId) : undefined;
     return {
       eventId: entry.eventId,
-      date: new Date(entry.time).toLocaleDateString(),
+      date: entry.time,
       sourceBarcode: sourceLabware ? sourceLabware.barcode : '',
       destinationBarcode: destinationLabware ? destinationLabware.barcode : '',
       labwareType: destinationLabware.labwareType.name,
