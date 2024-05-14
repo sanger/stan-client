@@ -1,0 +1,5 @@
+query GetRegionsOfInterest($barcodes: [String!]!) {
+  rois(barcodes: $barcodes) {
+    ...LabwareRoiFields
+  }
+}

@@ -1,0 +1,6 @@
+fragment LabwareRoiFields on LabwareRoi {
+  barcode
+  rois {
+    ...RoiFields
+  }
+}

@@ -1,5 +1,10 @@
-import React, { useContext } from 'react';
-import { CommentFieldsFragment, QcLabware, QcLabwareRequest, RecordQcLabwareMutation } from '../types/sdk';
+import React, { SetStateAction, useCallback, useContext } from 'react';
+import {
+  CommentFieldsFragment,
+  LabwareFlaggedFieldsFragment,
+  QcLabwareRequest,
+  RecordQcLabwareMutation
+} from '../types/sdk';
 import * as Yup from 'yup';
 import { StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
@@ -18,9 +23,25 @@ import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { useLoaderData } from 'react-router-dom';
 import { fromPromise } from 'xstate';
 
+export type SampleComment = {
+  roi: string;
+  address: string;
+  sampleId: number;
+  comments: string[];
+};
+
+type QcFormLabware = {
+  barcode: string;
+  workNumber: string;
+  completion: string;
+  comments: string[];
+  roiComments: string[];
+  sampleComments: Array<SampleComment>;
+};
+
 export type XeniumQCFormData = {
   workNumberAll: string;
-  labware: Array<QcLabware>;
+  labware: Array<QcFormLabware>;
   completion: string;
 };
 
@@ -44,11 +65,6 @@ const XeniumQC = () => {
   const { serverError, submissionResult } = current.context;
 
   const currentTime = getCurrentDateTime();
-  const initialValues: XeniumQCFormData = {
-    workNumberAll: '',
-    labware: [],
-    completion: currentTime
-  };
 
   const validationSchema = Yup.object().shape({
     workNumberAll: Yup.string().optional(),
@@ -61,12 +77,65 @@ const XeniumQC = () => {
         Yup.object().shape({
           barcode: Yup.string().required(),
           workNumber: Yup.string().required().label('SGP Number'),
-          comments: Yup.array().min(0).optional()
+          comments: Yup.array().min(0).optional(),
+          roiComments: Yup.array().min(0).optional(),
+          sampleComments: Yup.array()
+            .of(
+              Yup.object().shape({
+                roi: Yup.string(),
+                address: Yup.string(),
+                sampleId: Yup.number(),
+                comments: Yup.array().of(Yup.string()).optional()
+              })
+            )
+            .optional()
         })
       )
       .required()
       .min(1)
   });
+
+  const initialValues: XeniumQCFormData = {
+    workNumberAll: '',
+    labware: [],
+    completion: currentTime
+  };
+
+  const getRegionsOfInterest = useCallback(
+    async (
+      foundLabware: LabwareFlaggedFieldsFragment,
+      setValues: (values: SetStateAction<XeniumQCFormData>, shouldValidate?: boolean) => {}
+    ): Promise<string[]> => {
+      try {
+        const response = await stanCore.GetRegionsOfInterest({
+          barcodes: [foundLabware.barcode]
+        });
+        if (response.rois.length > 0) {
+          setValues((prev) => {
+            prev.labware.push({
+              barcode: foundLabware.barcode,
+              workNumber: prev.workNumberAll,
+              completion: prev.completion,
+              comments: [],
+              roiComments: [],
+              sampleComments: response.rois[0].rois.map((regionOfInterest) => ({
+                roi: regionOfInterest.roi,
+                address: regionOfInterest.address,
+                sampleId: regionOfInterest.sampleId,
+                comments: []
+              }))
+            });
+            return prev;
+          });
+        }
+
+        return [];
+      } catch (error) {
+        return ['Error fetching the regions of interests related to the labware ' + foundLabware.barcode];
+      }
+    },
+    [stanCore]
+  );
 
   return (
     <AppShell>
@@ -84,15 +153,26 @@ const XeniumQC = () => {
                 operationType: 'XENIUM QC',
                 labware: values.labware.map((lw) => {
                   return {
-                    ...lw,
-                    completion: lw.completion!.replace('T', ' ') + ':00'
+                    completion: lw.completion!.replace('T', ' ') + ':00',
+                    barcode: lw.barcode,
+                    workNumber: lw.workNumber,
+                    comments: lw.comments.map((comment) => Number(comment)),
+                    sampleComments: lw.sampleComments?.flatMap((sampleComment) => {
+                      return sampleComment.comments.map((comment) => {
+                        return {
+                          address: sampleComment.address,
+                          sampleId: sampleComment.sampleId,
+                          commentId: Number(comment)
+                        };
+                      });
+                    })
                   };
                 })
               };
               send({ type: 'SUBMIT_FORM', values: request });
             }}
           >
-            {({ values, setFieldValue, isValid }) => (
+            {({ values, setFieldValue, isValid, setValues }) => (
               <Form>
                 <div className="mt-8 space-y-2">
                   <Heading level={2}>Labware</Heading>
@@ -113,9 +193,14 @@ const XeniumQC = () => {
                           }
                         }}
                         enableFlaggedLabwareCheck
-                        checkForCleanedOutAddresses
+                        labwareCheckFunction={(
+                          labwares: LabwareFlaggedFieldsFragment[],
+                          foundLabware: LabwareFlaggedFieldsFragment
+                        ) => {
+                          return getRegionsOfInterest(foundLabware, setValues);
+                        }}
                       >
-                        {({ labwares, removeLabware, cleanedOutAddresses }) => (
+                        {({ labwares, removeLabware }) => (
                           <>
                             {labwares.length > 0 && (
                               <>
@@ -159,7 +244,6 @@ const XeniumQC = () => {
                                     comments={comments}
                                     index={index}
                                     removeLabware={removeLabware}
-                                    cleanedOutAddress={cleanedOutAddresses ? cleanedOutAddresses.get(lw.id) : undefined}
                                   />
                                 ))}
                                 <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
