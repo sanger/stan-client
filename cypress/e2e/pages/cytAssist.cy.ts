@@ -342,6 +342,7 @@ describe('CytAssist Page', () => {
             selectSlideCostings('Faculty');
             enterLOTNumber();
             enterProbeLOTNumber();
+            cy.screenshot();
             cy.findByTestId('external-barcode').within(() => {
               cy.findByRole('textbox').clear().type('H1-9D8VN2V{enter}').blur();
             });
