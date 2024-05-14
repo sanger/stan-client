@@ -1573,6 +1573,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 .col-span-2 {
   grid-column: span 2 / span 2;
 }
+.col-span-4 {
+  grid-column: span 4 / span 4;
+}
 .col-start-3 {
   grid-column-start: 3;
 }
@@ -2735,6 +2738,10 @@ svg.logo.loading rect:nth-child(3n+1) {
 .px-10 {
   padding-left: 2.5rem;
   padding-right: 2.5rem;
+}
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 .py-10 {
   padding-top: 2.5rem;
@@ -4336,4 +4343,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.8be830bd.css.map*/
+/*# sourceMappingURL=main.c9d7cc46.css.map*/
