@@ -347,12 +347,14 @@ describe('CytAssist Page', () => {
               cy.findByRole('textbox').clear().type('H1-9D8VN2V{enter}').blur();
             });
             cy.get('#labwareScanInput').type('STAN-3100{enter}');
+            cy.screenshot();
             cy.get('#inputLabwares').within(() => {
               cy.findByText('A1').click();
             });
             cy.get('#outputLabwares').within(() => {
               cy.findByText('A1').click();
             });
+            cy.screenshot();
             saveButton().click();
           });
           it('displays print labels', () => {
