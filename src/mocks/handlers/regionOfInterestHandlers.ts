@@ -1,5 +1,11 @@
 import { graphql, HttpResponse } from 'msw';
-import { GetRegionsOfInterestQuery, GetRegionsOfInterestQueryVariables, LabwareRoi } from '../../types/sdk';
+import {
+  GetRegionsOfInterestQuery,
+  GetRegionsOfInterestQueryVariables,
+  LabwareRoi,
+  RecordMetricsMutation,
+  RecordMetricsMutationVariables
+} from '../../types/sdk';
 import { createLabware } from './labwareHandlers';
 import { faker } from '@faker-js/faker';
 
@@ -15,6 +21,8 @@ const regionOfInterestHandlers = [
           barcode: labware.barcode,
           rois: labware.slots.flatMap((slot) =>
             slot.samples.map((sample) => ({
+              slotId: slot.id,
+              operationId: faker.number.int(19),
               sampleId: sample.id,
               address: slot.address,
               roi: faker.helpers.arrayElement(['top left', 'top right', 'bottom left', 'bottom right', 'center'])
@@ -25,7 +33,11 @@ const regionOfInterestHandlers = [
       });
       return HttpResponse.json({ data: { rois: regionsOfInterests } }, { status: 200 });
     }
-  )
+  ),
+
+  graphql.mutation<RecordMetricsMutation, RecordMetricsMutationVariables>('RecordMetrics', () => {
+    return HttpResponse.json({ data: { recordSampleMetrics: { operations: [{ id: 1 }] } } }, { status: 200 });
+  })
 ];
 
 export default regionOfInterestHandlers;

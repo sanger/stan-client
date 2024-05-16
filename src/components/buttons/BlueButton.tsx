@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 interface BlueButtonProps extends ButtonProps {}
 
-const BlueButton = ({ children, className, action = 'primary', ...rest }: BlueButtonProps) => {
+const BlueButton = ({ children, className, action = 'primary', miniButton, ...rest }: BlueButtonProps) => {
   const buttonClasses = classNames(
     {
       'text-white bg-sdb-400 shadow-sm hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600':
@@ -18,7 +18,7 @@ const BlueButton = ({ children, className, action = 'primary', ...rest }: BlueBu
   );
 
   return (
-    <Button {...rest} className={buttonClasses}>
+    <Button {...rest} className={buttonClasses} miniButton={miniButton}>
       {children}
     </Button>
   );

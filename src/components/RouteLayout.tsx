@@ -61,6 +61,7 @@ import { LibraryAmpAndGeneration } from '../pages/LibraryAmpAndGeneration';
 import { CellSegmentationQc } from '../pages/CellSegmentationQc';
 import { CellSegmentation } from '../pages/CellSegmentation';
 import CleanOut from '../pages/CleanOut';
+import XeniumMetrics from '../pages/XeniumMetrics';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -303,6 +304,9 @@ const RouteLayout = () => {
             }}
             element={<XeniumAnalyser />}
           />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/lab/xenium_metrics" element={<XeniumMetrics />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
