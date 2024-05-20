@@ -154,7 +154,7 @@ const XeniumMetrics = () => {
             validationSchema={validationSchema}
             onSubmit={(values) => {
               const request: SampleMetricsRequest = {
-                operationType: 'Xenium metricS',
+                operationType: 'Xenium metrics',
                 workNumber: values.workNumber,
                 barcode: values.labware!.barcode,
                 metrics: values.sampleMetricData.flatMap((data) =>
