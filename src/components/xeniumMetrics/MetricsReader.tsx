@@ -17,7 +17,6 @@ interface FileParserProps {
  * Parses CSV data into an array of objects where each object represents a row in the CSV file.
  * The keys of each object are column names (extracted from the CSV header), and the values
  * are cell values from the corresponding row.
- * are cell values from the corresponding row.
  *
  * @param csvData The CSV data to parse as a string.
  * @returns An array of objects representing rows in the CSV file, with keys as column names
