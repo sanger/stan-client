@@ -39,9 +39,9 @@ const CDNAConcentration = ({
     []
   );
 
-  const selectedMeasurement = React.useMemo(() => {
-    return measurementConfig.find((measurement) => measurement.name === measurementName);
-  }, [measurementName, measurementConfig]);
+  const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(() => {
+    return measurementConfig.filter((measurement) => measurement.name === measurementName);
+  }, [measurementConfig, measurementName]);
 
   /***
    * When labwares changes, the slotMeasurements has to be initialized accordingly
@@ -117,7 +117,10 @@ const CDNAConcentration = ({
                   emptyOption={true}
                   className={'rounded-md'}
                   dataTestId={'measurementType'}
-                  handleChange={(val) => setMeasurementName((val as OptionType).label)}
+                  handleChange={async (val) => {
+                    setMeasurementName((val as OptionType).label);
+                    await setFieldValue('slotMeasurements', []);
+                  }}
                   options={measurementConfig.map((measurement) => {
                     return {
                       label: measurement.name,
@@ -133,9 +136,7 @@ const CDNAConcentration = ({
                   <SlotMeasurements
                     slotMeasurements={slotMeasurements}
                     onChangeField={handleChangeField}
-                    measurementConfig={measurementConfig.filter(
-                      (measurement) => measurement.name === selectedMeasurement?.name
-                    )}
+                    measurementConfig={memoMeasurementConfig}
                     comments={concentrationComments}
                   />
                 )}
