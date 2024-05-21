@@ -1,0 +1,7 @@
+mutation RecordMetrics($request: SampleMetricsRequest!) {
+  recordSampleMetrics(request: $request) {
+    operations {
+      id
+    }
+  }
+}

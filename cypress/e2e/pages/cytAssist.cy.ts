@@ -342,16 +342,15 @@ describe('CytAssist Page', () => {
             selectSlideCostings('Faculty');
             enterLOTNumber();
             enterProbeLOTNumber();
-            cy.screenshot();
             cy.findByTestId('external-barcode').within(() => {
-              cy.findByRole('textbox').clear().type('H1-9D8VN2V{enter}').blur();
+              cy.findByRole('textbox').wait(500).clear().type('H1-9D8VN2V{enter}').blur();
             });
-            cy.get('#labwareScanInput').type('STAN-3100{enter}');
+            cy.get('#labwareScanInput').type('STAN-3100{enter}').wait(500);
             cy.get('#inputLabwares').within(() => {
-              cy.findByText('A1').click();
+              cy.findByText('A1').wait(500).click();
             });
             cy.get('#outputLabwares').within(() => {
-              cy.findByText('A1').click();
+              cy.findByText('A1').wait(500).click();
             });
             saveButton().click();
           });
