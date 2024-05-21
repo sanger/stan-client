@@ -8,37 +8,12 @@ import UploadIcon from '../icons/UploadIcon';
 import PassIcon from '../icons/PassIcon';
 import { useFormikContext } from 'formik';
 import { Metric, XeniumMetricsForm } from '../../pages/XeniumMetrics';
+import Papa from 'papaparse';
 
 interface FileParserProps {
   rowIndex: number;
 }
 
-/**
- * Parses CSV data into an array of objects where each object represents a row in the CSV file.
- * The keys of each object are column names (extracted from the CSV header), and the values
- * are cell values from the corresponding row.
- *
- * @param csvData The CSV data to parse as a string.
- * @returns An array of objects representing rows in the CSV file, with keys as column names
- * and values as cell values.
- */
-const parseCSV = (csvData: string): { [key: string]: string }[] => {
-  const lines = csvData.split('\n');
-  const headers = lines[0].split(',').map((header) => header.trim());
-  const result: { [key: string]: string }[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',');
-    const row: { [key: string]: string } = {};
-    if (values.every((value) => value.trim() === '')) {
-      continue;
-    }
-    for (let j = 0; j < headers.length; j++) {
-      row[headers[j]] = values[j] ? values[j].trim() : '';
-    }
-    result.push(row);
-  }
-  return result;
-};
 const MetricsReader = ({ rowIndex }: FileParserProps) => {
   const { setFieldValue, setValues, values } = useFormikContext<XeniumMetricsForm>();
   /**Callback function to handle file change**/
@@ -94,50 +69,51 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
   const onUploadAction = React.useCallback(async () => {
     if (!values.sampleMetricData[rowIndex].file) return;
     await setFieldValue(`sampleMetricData[${rowIndex}].uploadInProgress`, { progress: true });
-    const reader = new FileReader();
-    reader.onload = async (event: ProgressEvent<FileReader>) => {
-      if (event.target) {
-        const result = event.target.result as string;
-        const data = parseCSV(result);
-        if (data.length === 0) {
+    Papa.parse(values.sampleMetricData[rowIndex].file as File, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async function (results, parser) {
+        if (results.errors.length > 0) {
           await setFieldValue(`sampleMetricData[${rowIndex}].uploadResult`, {
-            error: new Error('Error while parsing the uploaded file'),
+            error: new Error(
+              'Error while parsing the uploaded file: ' + results.errors.map((error) => error.message).join(', ')
+            ),
             success: false
           });
           return;
-        }
-        const metrics: Metric[] = [];
-        data.forEach((row) => {
-          Object.keys(row).forEach((key) => {
-            metrics.push({
-              name: key,
-              value: row[key]
+        } else {
+          const metrics: Metric[] = [];
+          results.data.forEach((row) => {
+            Object.keys(row as Record<string, string>).forEach((key) => {
+              metrics.push({
+                name: key,
+                value: (row as Record<string, string>)[key]
+              });
             });
           });
-        });
-        await setValues((prev) => {
-          return {
-            ...prev,
-            sampleMetricData: prev.sampleMetricData.map((data, index) => {
-              if (index === rowIndex) {
-                return {
-                  ...data,
-                  uploadResult: {
-                    error: undefined,
-                    success: true,
-                    file: values.sampleMetricData[rowIndex].file!
-                  },
-                  uploadInProgress: undefined,
-                  metrics: metrics
-                };
-              }
-              return data;
-            })
-          };
-        });
+          await setValues((prev) => {
+            return {
+              ...prev,
+              sampleMetricData: prev.sampleMetricData.map((data, index) => {
+                if (index === rowIndex) {
+                  return {
+                    ...data,
+                    uploadResult: {
+                      error: undefined,
+                      success: true,
+                      file: values.sampleMetricData[rowIndex].file!
+                    },
+                    uploadInProgress: undefined,
+                    metrics: metrics
+                  };
+                }
+                return data;
+              })
+            };
+          });
+        }
       }
-    };
-    reader.readAsText(values.sampleMetricData[rowIndex].file!);
+    });
   }, [setFieldValue, setValues, rowIndex, values.sampleMetricData]);
 
   const onRemoveFile = React.useCallback(async () => {
