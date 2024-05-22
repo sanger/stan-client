@@ -219,7 +219,9 @@ function BlockRegistration() {
     [setFileRegisterResult, stanCore]
   );
   if (fileRegisterResult && fileRegisterResult.length > 0) {
-    return <RegistrationSuccess successData={fileRegisterResult} columns={resultColumns} />;
+    return (
+      <RegistrationSuccess successData={fileRegisterResult} columns={resultColumns} labware={fileRegisterResult} />
+    );
   }
 
   const ManualRegistrationForm = (
