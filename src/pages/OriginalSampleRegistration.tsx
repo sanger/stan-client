@@ -281,7 +281,13 @@ function OriginalSampleRegistration() {
   );
 
   if (fileRegisterResult && fileRegisterResult.length > 0) {
-    return <RegistrationSuccess<LabwareResultData> successData={fileRegisterResult} columns={resultColumns} />;
+    return (
+      <RegistrationSuccess<LabwareResultData>
+        successData={fileRegisterResult}
+        columns={resultColumns}
+        labware={fileRegisterResult.map((res) => res.labware)}
+      />
+    );
   }
 
   /**These are changes required for labels in Registration page for Original sample registration

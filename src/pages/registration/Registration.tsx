@@ -139,6 +139,7 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
       <RegistrationSuccess<R>
         successData={formatSuccessData(registrationResult)}
         columns={successDisplayTableColumns}
+        labware={registrationResult.labware}
       />
     );
   }

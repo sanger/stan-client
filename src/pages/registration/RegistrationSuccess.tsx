@@ -22,30 +22,15 @@ export interface LabwareContainType extends Object {
 type RegistrationSuccessProps<T extends Required<LabwareContainType> | LabwareFieldsFragment | SampleDataTableRow> = {
   successData: T[];
   columns: Column<T>[];
+  labware: LabwareFieldsFragment[];
 };
 
 const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFieldsFragment | SampleDataTableRow>({
   successData,
-  columns
+  columns,
+  labware
 }: RegistrationSuccessProps<T>) => {
   const navigate = useNavigate();
-
-  /**Memoised labware from successData**/
-  const labware = React.useMemo(() => {
-    /**Is Result of type LabwareFieldsFragment**/
-    if (successData.length > 0 && 'id' in successData[0] && 'barcode' in successData[0]) {
-      return successData as LabwareFieldsFragment[];
-    } else {
-      /**Is Result of type LabwareContainType**/
-      if (successData.length > 0 && 'labware' in successData[0]) {
-        return successData.map((data) => {
-          const labwareType: LabwareContainType = data as LabwareContainType;
-          return labwareType.labware;
-        });
-      }
-    }
-    return [];
-  }, [successData]);
 
   return (
     <AppShell>

@@ -280,7 +280,7 @@ export const SectionRegistration: React.FC = () => {
         });
       });
     });
-    return <RegistrationSuccess successData={samples} columns={columnsToDisplay} />;
+    return <RegistrationSuccess successData={samples} columns={columnsToDisplay} labware={result} />;
   }
 
   return (
