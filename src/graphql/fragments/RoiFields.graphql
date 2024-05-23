@@ -1,5 +1,7 @@
 fragment RoiFields on Roi {
-  sampleId
+  sample {
+    ...SampleFields
+  }
   address
   roi
 }

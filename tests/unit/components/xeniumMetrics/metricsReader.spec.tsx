@@ -32,7 +32,7 @@ const renderMetricReader = (sampleMetricData: SampleMetricData[]) => {
 describe('metricsReader', () => {
   describe('on first load', () => {
     const sampleMetricData: SampleMetricData[] = [
-      { sampleIdAddress: [{ sampleId: 1, address: 'A1' }], roi: 'top left', metrics: [] }
+      { externalIdAddress: [{ externalId: 'id1', address: 'A1' }], roi: 'top left', metrics: [] }
     ];
     it('enables the select file button', () => {
       const { getByTestId } = renderMetricReader(sampleMetricData);
@@ -46,7 +46,7 @@ describe('metricsReader', () => {
   describe('when the user selects a file', () => {
     const sampleMetricData: SampleMetricData[] = [
       {
-        sampleIdAddress: [{ sampleId: 1, address: 'A1' }],
+        externalIdAddress: [{ externalId: 'id1', address: 'A1' }],
         roi: 'top left',
         metrics: [],
         file: new File([''], 'test.csv')
@@ -74,7 +74,7 @@ describe('metricsReader', () => {
   describe('when the user uploads a file', () => {
     const sampleMetricData: SampleMetricData[] = [
       {
-        sampleIdAddress: [{ sampleId: 1, address: 'A1' }],
+        externalIdAddress: [{ externalId: 'id1', address: 'A1' }],
         roi: 'top left',
         metrics: [{ name: 'metric1', value: '1' }],
         file: new File([''], 'test.csv'),
@@ -110,7 +110,7 @@ describe('metricsReader', () => {
   describe('when the user uploads another file', () => {
     const sampleMetricData: SampleMetricData[] = [
       {
-        sampleIdAddress: [{ sampleId: 1, address: 'A1' }],
+        externalIdAddress: [{ externalId: 'id1', address: 'A1' }],
         roi: 'top left',
         metrics: [{ name: 'metric1', value: '1' }],
         file: new File([''], 'test2.csv'),
@@ -130,7 +130,7 @@ describe('metricsReader', () => {
   describe('when the user removes the uploaded file', () => {
     const sampleMetricData: SampleMetricData[] = [
       {
-        sampleIdAddress: [{ sampleId: 1, address: 'A1' }],
+        externalIdAddress: [{ externalId: 'id1', address: 'A1' }],
         roi: 'top left',
         metrics: []
       }
@@ -152,7 +152,7 @@ describe('metricsReader', () => {
   describe('when the user selects a file thar is not in CSV format', () => {
     const sampleMetricData: SampleMetricData[] = [
       {
-        sampleIdAddress: [{ sampleId: 1, address: 'A1' }],
+        externalIdAddress: [{ externalId: 'id1', address: 'A1' }],
         roi: 'top left',
         metrics: [],
         uploadResult: {

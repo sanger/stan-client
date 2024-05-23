@@ -23,7 +23,7 @@ const regionOfInterestHandlers = [
             slot.samples.map((sample) => ({
               slotId: slot.id,
               operationId: faker.number.int(19),
-              sampleId: sample.id,
+              sample,
               address: slot.address,
               roi: faker.helpers.arrayElement(['top left', 'top right', 'bottom left', 'bottom right', 'center'])
             }))

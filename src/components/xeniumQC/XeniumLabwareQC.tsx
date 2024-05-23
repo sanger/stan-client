@@ -7,11 +7,11 @@ import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { selectOptionValues } from '../forms';
 import { FieldArray, useFormikContext } from 'formik';
 import { SampleComment, XeniumQCFormData } from '../../pages/XeniumQC';
-import DataTable from '../DataTable';
 import { CellProps } from 'react-table';
 import StyledLink from '../StyledLink';
 import Warning from '../notifications/Warning';
 import { FlaggedBarcodeLink } from '../dataTableColumns/labwareColumns';
+import RoiTable from '../xeniumMetrics/RoiTable';
 
 type XeniumLabwareQCProps = {
   comments: CommentFieldsFragment[];
@@ -20,8 +20,10 @@ type XeniumLabwareQCProps = {
   removeLabware: (barcode: string) => void;
   cleanedOutAddress?: string[];
 };
+
 export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: XeniumLabwareQCProps) => {
   const { values, setFieldValue, setValues } = useFormikContext<XeniumQCFormData>();
+  console.log('XeniumLabwareQC', values.labware[index]?.sampleComments);
   return (
     <div className="max-w-screen-xl mx-auto" data-testid={'xenium-labware-qc'}>
       {labware && (
@@ -119,22 +121,21 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                       )}
                     />
                   </div>
-                  <div className={'col-span-4'}>
-                    <DataTable
-                      columns={[
-                        {
-                          Header: 'Sample ID',
-                          accessor: 'sampleId'
-                        },
-                        {
-                          Header: 'Address',
-                          accessor: 'address'
-                        },
-                        {
-                          Header: 'Region',
-                          accessor: 'roi'
-                        },
-                        {
+                  {values.labware[index]?.sampleComments.length > 0 && (
+                    <div className={'col-span-4'}>
+                      <RoiTable
+                        data={values.labware[index]?.sampleComments.map((data) => {
+                          return {
+                            roi: data.roi,
+                            externalIdAddress: data.sampleAddress.map((sampleAddress) => {
+                              return {
+                                externalId: sampleAddress.sample.tissue.externalName ?? '',
+                                address: sampleAddress.address
+                              };
+                            })
+                          };
+                        })}
+                        actionColumn={{
                           Header: 'Comment',
                           accessor: 'comments',
                           Cell: (props: CellProps<SampleComment>) => {
@@ -151,11 +152,10 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                               />
                             );
                           }
-                        }
-                      ]}
-                      data={values.labware[index]?.sampleComments}
-                    />
-                  </div>
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </Panel>
