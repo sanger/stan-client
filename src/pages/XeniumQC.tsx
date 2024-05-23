@@ -167,7 +167,6 @@ const XeniumQC = () => {
                         return sampleComment.comments.map((commentId) => {
                           return {
                             sampleId: sampleAdress.sample.id,
-                            roi: sampleComment.roi,
                             address: sampleAdress.address,
                             commentId: Number(commentId)
                           };

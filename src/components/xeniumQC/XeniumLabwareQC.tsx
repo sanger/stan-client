@@ -23,7 +23,6 @@ type XeniumLabwareQCProps = {
 
 export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: XeniumLabwareQCProps) => {
   const { values, setFieldValue, setValues } = useFormikContext<XeniumQCFormData>();
-  console.log('XeniumLabwareQC', values.labware[index]?.sampleComments);
   return (
     <div className="max-w-screen-xl mx-auto" data-testid={'xenium-labware-qc'}>
       {labware && (
