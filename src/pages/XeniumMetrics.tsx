@@ -3,18 +3,12 @@ import Heading from '../components/Heading';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import React, { SetStateAction, useCallback, useContext } from 'react';
 import { Form, Formik } from 'formik';
-import {
-  LabwareFlaggedFieldsFragment,
-  RecordMetricsMutation,
-  RoiFieldsFragment,
-  SampleMetricsRequest
-} from '../types/sdk';
+import { LabwareFlaggedFieldsFragment, RecordMetricsMutation, SampleMetricsRequest } from '../types/sdk';
 import { StanCoreContext } from '../lib/sdk';
 import Panel from '../components/Panel';
 import RemoveButton from '../components/buttons/RemoveButton';
 import { FlaggedBarcodeLink } from '../components/dataTableColumns/labwareColumns';
 import StyledLink from '../components/StyledLink';
-import DataTable from '../components/DataTable';
 import { Row } from 'react-table';
 import { UploadProgress, UploadResult } from '../components/upload/useUpload';
 import MetricsReader from '../components/xeniumMetrics/MetricsReader';
@@ -26,6 +20,7 @@ import { fromPromise } from 'xstate';
 import { useMachine } from '@xstate/react';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
+import RoiTable, { groupByRoi } from '../components/xeniumMetrics/RoiTable';
 
 export type Metric = {
   name: string;
@@ -33,7 +28,7 @@ export type Metric = {
 };
 
 export type SampleMetricData = {
-  sampleIdAddress: Array<{ sampleId: number; address: string }>;
+  externalIdAddress: Array<{ externalId: string; address: string }>;
   roi: string;
   metrics: Array<Metric>;
   file?: File;
@@ -76,19 +71,6 @@ const validationSchema = Yup.object().shape({
     })
 });
 
-export const groupByRoi = (rois: RoiFieldsFragment[]): Record<string, RoiFieldsFragment[]> => {
-  const grouped = rois.reduce(
-    (acc, data) => {
-      if (!acc[data.roi]) {
-        acc[data.roi] = [];
-      }
-      acc[data.roi].push(data);
-      return acc;
-    },
-    {} as Record<string, RoiFieldsFragment[]>
-  );
-  return grouped;
-};
 const XeniumMetrics = () => {
   const stanCore = useContext(StanCoreContext);
 
@@ -108,8 +90,8 @@ const XeniumMetrics = () => {
             labware: foundLabware,
             sampleMetricData: Object.keys(groupedByRoi).map((roi) => {
               return {
-                sampleIdAddress: groupedByRoi[roi].map((data) => {
-                  return { sampleId: data.sampleId, address: data.address };
+                externalIdAddress: groupedByRoi[roi].map((data) => {
+                  return { externalId: data.sample.tissue.externalName ?? '', address: data.address };
                 }),
                 roi,
                 metrics: []
@@ -212,55 +194,24 @@ const XeniumMetrics = () => {
                               />
                             </div>
                           </div>
-                          <div className="my-4">
-                            <DataTable
-                              columns={[
-                                {
-                                  Header: 'Region of interest',
-                                  accessor: 'roi'
-                                },
-                                {
-                                  Header: 'Sample ID',
-                                  Cell: ({ row }: { row: Row<SampleMetricData> }) => {
-                                    return (
-                                      <div className="grid grid-cols-1 text-wrap">
-                                        {row.original.sampleIdAddress.map((data, index) => {
-                                          return (
-                                            <label className="py-1" key={`${data.sampleId}-${index}`}>
-                                              {data.sampleId}
-                                            </label>
-                                          );
-                                        })}
-                                      </div>
-                                    );
-                                  }
-                                },
-                                {
-                                  Header: 'Address',
-                                  Cell: ({ row }: { row: Row<SampleMetricData> }) => {
-                                    return (
-                                      <div className="grid grid-cols-1 text-wrap">
-                                        {row.original.sampleIdAddress.map((data, index) => {
-                                          return (
-                                            <label className="py-1" key={`${data.address}-${index}`}>
-                                              {data.address}
-                                            </label>
-                                          );
-                                        })}
-                                      </div>
-                                    );
-                                  }
-                                },
-                                {
+                          {values.sampleMetricData.length > 0 && (
+                            <div className="my-4">
+                              <RoiTable
+                                data={values.sampleMetricData.map((data) => {
+                                  return {
+                                    roi: data.roi,
+                                    externalIdAddress: data.externalIdAddress
+                                  };
+                                })}
+                                actionColumn={{
                                   Header: 'File Metrics',
                                   Cell: ({ row }: { row: Row<SampleMetricData> }) => {
                                     return <MetricsReader rowIndex={row.index} />;
                                   }
-                                }
-                              ]}
-                              data={values.sampleMetricData}
-                            />
-                          </div>
+                                }}
+                              />
+                            </div>
+                          )}
                         </Panel>
                       ))
                     }

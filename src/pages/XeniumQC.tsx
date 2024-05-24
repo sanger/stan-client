@@ -3,7 +3,8 @@ import {
   CommentFieldsFragment,
   LabwareFlaggedFieldsFragment,
   QcLabwareRequest,
-  RecordQcLabwareMutation
+  RecordQcLabwareMutation,
+  SampleFieldsFragment
 } from '../types/sdk';
 import * as Yup from 'yup';
 import { StanCoreContext } from '../lib/sdk';
@@ -22,11 +23,11 @@ import { getCurrentDateTime } from '../types/stan';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { useLoaderData } from 'react-router-dom';
 import { fromPromise } from 'xstate';
+import { groupByRoi } from '../components/xeniumMetrics/RoiTable';
 
 export type SampleComment = {
   roi: string;
-  address: string;
-  sampleId: number;
+  sampleAddress: Array<{ sample: SampleFieldsFragment; address: string }>;
   comments: string[];
 };
 
@@ -110,6 +111,7 @@ const XeniumQC = () => {
         const response = await stanCore.GetRegionsOfInterest({
           barcodes: [foundLabware.barcode]
         });
+        const groupedByRoi = groupByRoi(response.rois[0]!.rois!);
         if (response.rois.length > 0) {
           setValues((prev) => {
             prev.labware.push({
@@ -118,12 +120,15 @@ const XeniumQC = () => {
               completion: prev.completion,
               comments: [],
               roiComments: [],
-              sampleComments: response.rois[0].rois.map((regionOfInterest) => ({
-                roi: regionOfInterest.roi,
-                address: regionOfInterest.address,
-                sampleId: regionOfInterest.sampleId,
-                comments: []
-              }))
+              sampleComments: Object.keys(groupedByRoi).map((roi) => {
+                return {
+                  sampleAddress: groupedByRoi[roi].map((data) => {
+                    return { sample: data.sample ?? '', address: data.address };
+                  }),
+                  roi,
+                  comments: []
+                };
+              })
             });
             return prev;
           });
@@ -158,12 +163,14 @@ const XeniumQC = () => {
                     workNumber: lw.workNumber,
                     comments: lw.comments.map((comment) => Number(comment)),
                     sampleComments: lw.sampleComments?.flatMap((sampleComment) => {
-                      return sampleComment.comments.map((comment) => {
-                        return {
-                          address: sampleComment.address,
-                          sampleId: sampleComment.sampleId,
-                          commentId: Number(comment)
-                        };
+                      return sampleComment.sampleAddress.flatMap((sampleAdress) => {
+                        return sampleComment.comments.map((commentId) => {
+                          return {
+                            sampleId: sampleAdress.sample.id,
+                            address: sampleAdress.address,
+                            commentId: Number(commentId)
+                          };
+                        });
                       });
                     })
                   };
