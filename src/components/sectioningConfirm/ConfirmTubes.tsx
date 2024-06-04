@@ -118,11 +118,10 @@ const TubeRow: React.FC<TubeRowProps> = ({
       onChange(confirmOperationLabware);
     }
   }, [onChange, confirmOperationLabware]);
+
+  /** Notify section confirm machine when increasing/decreasing the number of section  */
   useEffect(() => {
-    if (
-      (layoutPlan && current.context.isLayoutUpdated && notifySectionChange.current) ||
-      current.context.isCancelToggled
-    ) {
+    if (layoutPlan && current.context.isLayoutUpdated && notifySectionChange.current) {
       notifySectionChange.current = false;
       onSectionUpdate(layoutPlan);
     }
