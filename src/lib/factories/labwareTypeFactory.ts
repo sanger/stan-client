@@ -64,8 +64,8 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
   [LabwareTypeName.XENIUM]: labwareTypeFactory.params({
     __typename: 'LabwareType',
     name: LabwareTypeName.XENIUM,
-    numRows: 5,
-    numColumns: 3
+    numRows: 10,
+    numColumns: 4
   }),
   [LabwareTypeName.VISIUM_ADH]: labwareTypeFactory.params({
     __typename: 'LabwareType',
