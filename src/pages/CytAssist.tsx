@@ -15,6 +15,7 @@ import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Heading from '../components/Heading';
 import {
+  stripeTubeFactory,
   visiumLPCytAssistFactory,
   visiumLPCytAssistHDFactory,
   visiumLPCytAssistXLFactory
@@ -131,7 +132,8 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
                 options={[
                   LabwareTypeName.VISIUM_LP_CYTASSIST,
                   LabwareTypeName.VISIUM_LP_CYTASSIST_XL,
-                  LabwareTypeName.VISIUM_LP_CYTASSIST_HD
+                  LabwareTypeName.VISIUM_LP_CYTASSIST_HD,
+                  LabwareTypeName.STRIPE_TUBE
                 ].map((key) => {
                   return {
                     label: key,
@@ -304,7 +306,8 @@ const CytAssist = () => {
       const labwareFactories: Record<string, NewLabwareLayout> = {
         [LabwareTypeName.VISIUM_LP_CYTASSIST]: visiumLPCytAssistFactory.build(),
         [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory.build(),
-        [LabwareTypeName.VISIUM_LP_CYTASSIST_HD]: visiumLPCytAssistHDFactory.build()
+        [LabwareTypeName.VISIUM_LP_CYTASSIST_HD]: visiumLPCytAssistHDFactory.build(),
+        [LabwareTypeName.STRIPE_TUBE]: stripeTubeFactory.build()
       };
       if (!selectedDestination) return;
       const destLabware = (labwareFactories[labwareType] as NewFlaggedLabwareLayout) || initialOutputLabwarePlaceHolder;

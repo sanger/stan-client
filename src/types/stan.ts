@@ -1,16 +1,18 @@
 import {
-  LabwareFieldsFragment, LabwareFlaggedFieldsFragment,
+  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   LabwareState,
   Maybe,
   PrinterFieldsFragment,
   Size,
-  WorkStatus,
-} from "./sdk";
-import { Location } from "history";
-import { ClientError } from "graphql-request";
-import { regexSort } from "../lib/helpers";
-import {FunctionComponent} from "react";
+  WorkStatus
+} from './sdk';
+import { Location } from 'history';
+import { ClientError } from 'graphql-request';
+import { regexSort } from '../lib/helpers';
+import { FunctionComponent } from 'react';
 import { GraphQLError } from 'graphql/error';
+
 /**
  * Union of STAN's {@link OperationType} names
  */
@@ -36,7 +38,8 @@ export enum LabwareTypeName {
   VISIUM_LP_CYTASSIST= "Visium LP CytAssist",
   VISIUM_LP_CYTASSIST_XL= "Visium LP CytAssist XL",
   VISIUM_LP_CYTASSIST_HD= "Visium LP CytAssist HD",
-  XENIUM = "Xenium"
+  XENIUM = "Xenium",
+  STRIPE_TUBE = "8 Strip Tube"
 
 }
 
