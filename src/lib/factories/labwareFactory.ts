@@ -139,7 +139,7 @@ export const xeniumFactory = unregisteredLabwareFactory.associations({
 });
 
 export const stripeTubeFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.STRIPE_TUBE].build()
+  labwareType: labwareTypes[LabwareTypeName.STRIP_TUBE].build()
 });
 
 export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>> = {
@@ -160,5 +160,5 @@ export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>
   [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory,
   [LabwareTypeName.VISIUM_LP_CYTASSIST_HD]: visiumLPCytAssistHDFactory,
   [LabwareTypeName.XENIUM]: xeniumFactory,
-  [LabwareTypeName.STRIPE_TUBE]: stripeTubeFactory
+  [LabwareTypeName.STRIP_TUBE]: stripeTubeFactory
 };

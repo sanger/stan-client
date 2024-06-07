@@ -39,7 +39,7 @@ export enum LabwareTypeName {
   VISIUM_LP_CYTASSIST_XL= "Visium LP CytAssist XL",
   VISIUM_LP_CYTASSIST_HD= "Visium LP CytAssist HD",
   XENIUM = "Xenium",
-  STRIPE_TUBE = "8 Strip Tube"
+  STRIP_TUBE = "8 Strip Tube"
 
 }
 
