@@ -321,7 +321,7 @@ export function createSessionStorageForLabwareAwaiting( labware:LabwareFieldsFra
       labware
           .map(
               (lw: LabwareFieldsFragment) => {
-                const sample = lw.slots.length && lw.slots[0].samples.length ? lw.slots[0].samples[0]:undefined;
+                const sample =  lw.slots.find(slot => slot.samples.length > 0)?.samples.find(sample => sample.tissue !== undefined);
                 return `${lw.barcode},${lw.labwareType.name},${sample?sample.tissue.externalName:""},${sample?sample.tissue.donor.donorName:""},${sample?sample.tissue.spatialLocation.tissueType.name:""},${sample?sample.tissue.spatialLocation.code:""},${sample?sample.tissue.replicate:""}`
               }
               )
