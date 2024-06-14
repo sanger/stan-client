@@ -13,18 +13,36 @@ describe('Transfer Page', () => {
     before(() => {
       cy.visit('/lab/transfer');
     });
-    it('should display default and scan options', () => {
-      cy.findByTestId('Default').should('be.checked');
+    it('loads with no output labware type is checked', () => {
+      cy.findByTestId('96 Well Plate').should('not.be.checked');
+      cy.findByTestId('8 Strip Tube').should('not.be.checked');
       cy.findByTestId('Scan Labware').should('not.be.checked');
+      cy.findByTestId('outputLabwares').within((elem) => {
+        cy.wrap(elem).findByTestId('labware-').should('not.exist');
+      });
     });
 
-    it('should display default option when user selects default option', () => {
+    it('should display 96 Well Plate layout when user selects 96 Well Plate option', () => {
+      cy.get('[type="radio"][name="96 Well Plate"]').check();
       cy.findByTestId('bioState').should('be.visible');
       cy.findByRole('button', { name: '+ Add Plate' }).should('be.visible');
       cy.findByTestId('copyMode-One to one').should('be.checked');
       cy.findByTestId('copyMode-One to many').should('exist');
       cy.findByTestId('copyMode-Many to one').should('exist');
-      cy.findByText(/96 WELL PLATE/i).should('exist');
+      cy.findByTestId('outputLabwares').within((elem) => {
+        cy.wrap(elem).findByTestId('labware-').should('be.visible');
+      });
+    });
+    it('should display 8 Strip Tube layout when user selects 8 Strip Tube option', () => {
+      cy.get('[type="radio"][name="8 Strip Tube"]').check();
+      cy.findByTestId('bioState').should('be.visible');
+      cy.findByRole('button', { name: '+ Add Plate' }).should('be.visible');
+      cy.findByTestId('copyMode-One to one').should('be.checked');
+      cy.findByTestId('copyMode-One to many').should('exist');
+      cy.findByTestId('copyMode-Many to one').should('exist');
+      cy.findByTestId('outputLabwares').within((elem) => {
+        cy.wrap(elem).findByTestId('labware-').should('be.visible');
+      });
     });
     it('should display scan option when user selects scan option', () => {
       cy.findByTestId('Scan Labware').click();
@@ -34,8 +52,6 @@ describe('Transfer Page', () => {
       cy.findByTestId('copyMode-One to one').should('be.checked');
       cy.findByTestId('copyMode-One to many').should('not.be.checked');
       cy.findByTestId('copyMode-Many to one').should('not.be.checked');
-      cy.findByText(/96 WELL PLATE/i).should('not.exist');
-      cy.findByTestId('removeButton').should('not.exist');
     });
   });
 
@@ -89,15 +105,16 @@ describe('Transfer Page', () => {
     });
   });
 
-  describe('Default option for Output labware', () => {
+  describe('96 Well Plate option for Output labware', () => {
     before(() => {
       cy.visit('/lab/transfer');
       selectSGPNumber('SGP1008');
+      cy.get('[type="radio"][name="96 Well Plate"]').check();
     });
 
     describe('On load', () => {
       it('shows a 96 well plate for the output', () => {
-        cy.findByText(/96 WELL PLATE/i).should('be.visible');
+        cy.findAllByText(/96 WELL PLATE/i).should('be.visible');
       });
 
       it('disables the Save button', () => {
@@ -138,6 +155,7 @@ describe('Transfer Page', () => {
     describe('destination well plate', () => {
       before(() => {
         cy.visit('/lab/transfer');
+        cy.get('[type="radio"][name="96 Well Plate"]').check();
         cy.get('#outputLabwares').within(() => {
           cy.findByRole('button', { name: '+ Add Plate' }).click();
         });
@@ -161,6 +179,7 @@ describe('Transfer Page', () => {
     describe('When user maps slots', () => {
       before(() => {
         cy.visit('/lab/transfer');
+        cy.get('[type="radio"][name="96 Well Plate"]').check();
         cy.get('#labwareScanInput').type('STAN-3200{enter}');
       });
       it('display the notification to user about failed slots', () => {
@@ -178,6 +197,7 @@ describe('Transfer Page', () => {
       before(() => {
         cy.visit('/lab/transfer');
         selectSGPNumber('SGP1008');
+        cy.get('[type="radio"][name="96 Well Plate"]').check();
         cy.get('#labwareScanInput').type('STAN-3100{enter}');
         cy.findByTestId('copyMode-One to many').click({ force: true });
         selectOption('bioState', 'Probes pre-clean');
@@ -209,6 +229,7 @@ describe('Transfer Page', () => {
       before(() => {
         cy.visit('/lab/transfer');
         selectSGPNumber('SGP1008');
+        cy.get('[type="radio"][name="96 Well Plate"]').check();
         cy.get('#labwareScanInput').type('STAN-3100{enter}');
         cy.findByTestId('bioState').scrollIntoView();
         selectOption('bioState', 'Probes pre-clean');
@@ -343,6 +364,7 @@ function saveSlotForLabwareWithNoPerm() {
       })
     );
   });
+  cy.get('[type="radio"][name="96 Well Plate"]').check();
   cy.get('#labwareScanInput').type('STAN-3200{enter}');
   cy.get('#inputLabwares').within(() => {
     cy.findByText('A1').click();

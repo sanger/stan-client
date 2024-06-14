@@ -48,11 +48,10 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     input: {
       workNumber: '',
       operationType: 'Transfer',
-      destinations: initialOutputSlotCopy,
+      destinations: [],
       sources: [],
       slotCopyResults: [],
-      sourceLabwarePermData: [],
-      destinationSelectionMode: DestinationSelectionMode.DEFAULT
+      sourceLabwarePermData: []
     }
   });
 
@@ -113,7 +112,10 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   /**Check Labware state and Bio state is selected respectively for all source and destinations**/
   const isValidationFailure = () => {
-    if (destinationSelectionMode === DestinationSelectionMode.DEFAULT) {
+    if (
+      destinationSelectionMode === DestinationSelectionMode.STRIP_TUBE ||
+      destinationSelectionMode === DestinationSelectionMode.PLATE
+    ) {
       return sources.some((src) => !src.labwareState) || destinations.some((dest) => !dest.slotCopyDetails.bioState);
     } else {
       return sources.some((src) => !src.labwareState);

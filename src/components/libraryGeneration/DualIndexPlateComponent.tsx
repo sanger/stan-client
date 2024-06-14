@@ -106,7 +106,7 @@ const DualIndexPlateComponent = ({
           </div>
         </div>
         <div className="space-y-4">
-          <Heading level={4}>96 Well Plate</Heading>
+          <Heading level={4}>Destination Labware</Heading>
           {!destinationLabware && (
             <div>
               <LabwareScanner
