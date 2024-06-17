@@ -24,6 +24,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
         <tr>
           <TableHeader>Barcode</TableHeader>
           <TableHeader>SGP Number</TableHeader>
+          <TableHeader>Labware Cost</TableHeader>
           <TableHeader>Probe</TableHeader>
         </tr>
       </TableHead>
@@ -39,6 +40,20 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                   setFieldValue(`labware.${lwIndex}.workNumber`, workNumber);
                 }}
                 workNumber={values.labware[lwIndex].workNumber}
+              />
+            </TableCell>
+            <TableCell>
+              <CustomReactSelect
+                dataTestId={`${probeLw.barcode}-kitCosting`}
+                name={`labware.${lwIndex}.kitCosting`}
+                options={objectKeys(SlideCosting).map((key) => {
+                  return {
+                    label: SlideCosting[key],
+                    value: SlideCosting[key]
+                  };
+                })}
+                value={probeLw.kitCosting}
+                emptyOption={true}
               />
             </TableCell>
             <TableCell>
