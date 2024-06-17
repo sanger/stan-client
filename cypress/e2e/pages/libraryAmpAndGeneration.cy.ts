@@ -357,9 +357,8 @@ describe('LibraryAmpAndGeneration Page', () => {
         cy.findByRole('button', { name: 'Reset Form' }).click();
       });
       it('resets the form to the Transfer Sample step', () => {
-        cy.screenshot();
         cy.get('#labwareScanInput').should('be.visible').and('have.value', '');
-        cy.findByTestId('outputLabwares').should('not.exist');
+        cy.findByTestId('labware-').should('not.exist');
         cy.findByTestId('bioState').should('not.exist');
       });
     });
