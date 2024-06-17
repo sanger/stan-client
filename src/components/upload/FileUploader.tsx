@@ -302,7 +302,7 @@ const FileUploader = <T extends object>({
               setConfirmUploadOutcome(undefined);
             }
           },
-          { label: 'Continue', action: uploadFiles }
+          { label: 'Continue', action: () => uploadFiles() }
         ]}
       >
         <p className={'mt-6 font-bold'}>Do you wish to continue or cancel?</p>{' '}
