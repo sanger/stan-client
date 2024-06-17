@@ -40,7 +40,8 @@ describe('searchService.ts', () => {
       labwareBarcode: 'STAN-3000',
       tissueExternalNames: '',
       tissueTypeName: '',
-      workNumber: ''
+      workNumber: '',
+      species: ''
     };
 
     it('returns numDisplayed, numRecords and entries when given a valid request', async () => {
