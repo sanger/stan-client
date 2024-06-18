@@ -6,7 +6,7 @@ import { NewFlaggedLabwareLayout } from '../types/stan';
 import { Link, useNavigate } from 'react-router-dom';
 import PinkButton from '../components/buttons/PinkButton';
 import ButtonBar from '../components/ButtonBar';
-import SlotCopyComponent, { defaultOutputSlotCopy } from '../components/libraryGeneration/SlotCopyComponent';
+import SlotCopyComponent, { plateOutputSlotCopy } from '../components/libraryGeneration/SlotCopyComponent';
 import slotCopyMachine from '../lib/machines/slotCopy/slotCopyMachine';
 import { useMachine } from '@xstate/react';
 import { OutputSlotCopyData, SlotCopyMode } from '../components/slotMapper/slotMapper.types';
@@ -49,7 +49,7 @@ export const LibraryAmpAndGeneration = () => {
     input: {
       workNumber: '',
       operationType: 'Transfer',
-      destinations: [defaultOutputSlotCopy],
+      destinations: [],
       sources: [],
       slotCopyResults: [],
       sourceLabwarePermData: []
@@ -62,7 +62,7 @@ export const LibraryAmpAndGeneration = () => {
     input: {
       workNumber: '',
       sources: [],
-      destinationLabware: defaultOutputSlotCopy?.labware,
+      destinationLabware: plateOutputSlotCopy?.labware,
       reagentTransfers: [],
       reagentPlateType: '',
       slotMeasurements: undefined

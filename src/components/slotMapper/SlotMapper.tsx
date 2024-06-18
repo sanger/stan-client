@@ -60,6 +60,11 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   });
 
   const { inputLabware, outputSlotCopies, colorByBarcode, failedSlots, errors } = current.context;
+  useEffect(() => {
+    if (initialOutputLabware.length !== outputSlotCopies.length) {
+      send({ type: 'UPDATE_OUTPUT_LABWARE', outputSlotCopyContent: initialOutputLabware });
+    }
+  });
 
   /**
    * State to track the current input labware (for paging)
@@ -654,7 +659,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
 
         <div id="inputLabwares" className="bg-gray-100 p-4">
           <LabwareScanner
-            initialLabwares={inputLabware}
+            initialLabwares={inputLabware.filter((labware) => labware.barcode.length > 0)}
             onChange={onLabwareScannerChange}
             limit={inputLabwareLimit}
             enableFlaggedLabwareCheck
@@ -703,7 +708,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
           </LabwareScanner>
           {}
         </div>
-        <div id="outputLabwares" className="p-4 flex flex-col  bg-gray-100 border-l-2">
+        <div id="outputLabwares" data-testid="outputLabwares" className="p-4 flex flex-col  bg-gray-100 border-l-2">
           <div className="flex mb-8">{outputLabwareConfigPanel}</div>
           {initialOutputLabware?.length > 1 && (
             <div className="flex flex-row justify-end">

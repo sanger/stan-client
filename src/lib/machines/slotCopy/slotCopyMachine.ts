@@ -410,7 +410,7 @@ export const slotCopyMachine = createMachine(
               return {
                 labware: newDest,
                 slotCopyDetails: { labwareType: newDest.labwareType.name, barcode: newDest.barcode, contents: [] },
-                cleanedOutAddresses: event.cleanedOutAddresses?.get(newDest.id) ?? [] //go back to this update to number so it is supports id instead of barcode
+                cleanedOutAddresses: event.cleanedOutAddresses?.get(newDest.id) ?? []
               };
             } else {
               return destination;
