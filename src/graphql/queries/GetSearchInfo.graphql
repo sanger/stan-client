@@ -5,4 +5,7 @@ query GetSearchInfo {
   labwareTypes {
     name
   }
+  species {
+    name
+  }
 }

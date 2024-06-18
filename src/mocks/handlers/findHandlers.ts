@@ -15,11 +15,18 @@ import labwareFactory from '../../lib/factories/labwareFactory';
 import locationFactory from '../../lib/factories/locationFactory';
 import tissueTypeRepository from '../repositories/tissueTypeRepository';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
+import speciesRepository from '../repositories/speciesRepository';
 
 const findHandlers = [
   graphql.query<GetSearchInfoQuery, GetSearchInfoQueryVariables>('GetSearchInfo', () => {
     return HttpResponse.json(
-      { data: { tissueTypes: tissueTypeRepository.findAll(), labwareTypes: labwareTypeInstances } },
+      {
+        data: {
+          tissueTypes: tissueTypeRepository.findAll(),
+          labwareTypes: labwareTypeInstances,
+          species: speciesRepository.findAll()
+        }
+      },
       { status: 200 }
     );
   }),
