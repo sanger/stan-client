@@ -98,6 +98,16 @@ describe('Xenium Probe Hybridisation', () => {
       });
     });
   });
+  describe('Labware Costing for all', () => {
+    context('When labware costing is selected for all labware', () => {
+      before(() => {
+        selectOption('costingAll', 'SGP');
+      });
+      it('should select costing for all labware', () => {
+        shouldDisplaySelectedValue('STAN-3111-kitCosting', 'SGP');
+      });
+    });
+  });
   describe('Probe for all', () => {
     context('When probe is added for all', () => {
       before(() => {
@@ -185,6 +195,7 @@ describe('Xenium Probe Hybridisation', () => {
     context('On save button status check', () => {
       before(() => {
         selectOption('STAN-3112-workNumber', 'SGP1008');
+        selectOption('STAN-3112-kitCosting', 'SGP');
         selectOption('STAN-3112-0-name', 'Custom breast');
         cy.findByTestId('STAN-3112-0-lot').type('1234');
         cy.findByTestId('STAN-3112-0-plex').scrollIntoView().type('2');

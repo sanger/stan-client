@@ -15,7 +15,7 @@ import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Heading from '../components/Heading';
 import {
-  stripeTubeFactory,
+  stripTubeFactory,
   visiumLPCytAssistFactory,
   visiumLPCytAssistHDFactory,
   visiumLPCytAssistXLFactory
@@ -307,7 +307,7 @@ const CytAssist = () => {
         [LabwareTypeName.VISIUM_LP_CYTASSIST]: visiumLPCytAssistFactory.build(),
         [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory.build(),
         [LabwareTypeName.VISIUM_LP_CYTASSIST_HD]: visiumLPCytAssistHDFactory.build(),
-        [LabwareTypeName.STRIP_TUBE]: stripeTubeFactory.build()
+        [LabwareTypeName.STRIP_TUBE]: stripTubeFactory.build()
       };
       if (!selectedDestination) return;
       const destLabware = (labwareFactories[labwareType] as NewFlaggedLabwareLayout) || initialOutputLabwarePlaceHolder;

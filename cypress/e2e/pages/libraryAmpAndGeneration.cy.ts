@@ -16,11 +16,12 @@ describe('LibraryAmpAndGeneration Page', () => {
       cy.visit('/lab/libraryGeneration');
       selectSGPNumber('SGP1008');
     });
-    describe('Mapping Source with Default Output labware', () => {
+    describe('Mapping Source with 8 Strip Tube Output labware', () => {
       describe('When all required fields for mapping are fulfilled', () => {
         before(() => {
+          cy.get('[type="radio"][name="8 Strip Tube"]').check();
           cy.get('#labwareScanInput').type('STAN-5345{enter}');
-          mappingSamples('A1', 'A2');
+          mappingSamples('A1', 'B1');
           selectOption('input-labware-state', 'used');
           selectOption('bioState', 'Probes pre-clean');
         });
@@ -90,7 +91,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             shouldDisplaySelectedValue('bioState', 'Probes pre-clean');
           });
           it('displays the previously selected output labware selection option', () => {
-            cy.findByTestId('Default').should('be.checked');
+            cy.findByTestId('8 Strip Tube').should('be.checked');
           });
           it('displays the previously mapped samples', () => {
             cy.findByTestId('mapping_table').should('be.visible');
@@ -141,7 +142,7 @@ describe('LibraryAmpAndGeneration Page', () => {
           before(() => {
             cy.findByRole('button', { name: '< Reagent Transfer' }).click();
             cy.findByRole('button', { name: '< Sample Transfer' }).click();
-            //scan a destination labware instead of using the Default Layout
+            //scan a destination labware instead of using a pre-defined Layout
             cy.findByTestId('Scan Labware').click();
             cy.findByTestId('dest-scanner').within((elem) => {
               cy.wrap(elem).get('#labwareScanInput').type('STAN-5345{enter}');
@@ -357,8 +358,8 @@ describe('LibraryAmpAndGeneration Page', () => {
       });
       it('resets the form to the Transfer Sample step', () => {
         cy.get('#labwareScanInput').should('be.visible').and('have.value', '');
-        cy.findByTestId('Default').should('be.visible').and('be.checked');
-        cy.findByTestId('bioState').should('be.visible').and('have.value', '');
+        cy.findByTestId('labware-').should('not.exist');
+        cy.findByTestId('bioState').should('not.exist');
       });
     });
 
@@ -415,6 +416,7 @@ const fillInTheRequest = () => {
 };
 
 const fillInSampleTransferStep = () => {
+  cy.get('[type="radio"][name="96 Well Plate"]').check();
   cy.get('#labwareScanInput').type('STAN-5345{enter}');
   mappingSamples('A1', 'A1');
   selectOption('input-labware-state', 'used');

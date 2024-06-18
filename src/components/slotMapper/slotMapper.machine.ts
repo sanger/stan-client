@@ -294,13 +294,15 @@ const createSlotMapperMachine = createMachine(
       events: SlotMapperEvent;
     },
     initial: 'ready',
-    context: ({ input }: { input: SlotMapperMachineParams }): SlotMapperContext => ({
-      ...input,
-      failedSlotsCheck: input.failedSlotsCheck || true,
-      colorByBarcode: new Map(),
-      failedSlots: new Map(),
-      errors: new Map()
-    }),
+    context: ({ input }: { input: SlotMapperMachineParams }): SlotMapperContext => {
+      return {
+        ...input,
+        failedSlotsCheck: input.failedSlotsCheck || true,
+        colorByBarcode: new Map(),
+        failedSlots: new Map(),
+        errors: new Map()
+      };
+    },
     states: {
       ready: {
         entry: 'assignLabwareColors',
