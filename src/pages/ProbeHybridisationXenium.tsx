@@ -28,11 +28,15 @@ import { getCurrentDateTime } from '../types/stan';
 import ProbeAddPanel from '../components/probeHybridisation/ProbeAddPanel';
 import { useLoaderData } from 'react-router-dom';
 import { fromPromise } from 'xstate';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import { selectOptionValues } from '../components/forms';
+import { slideCostingOptions } from '../components/CellSegmentation/CellSegmentation';
 
 export type ProbeHybridisationXeniumFormValues = {
   labware: ProbeOperationLabware[];
   performed: string;
   workNumberAll: string;
+  costingAll?: string;
 };
 export const probeLotDefault = { name: '', lot: '', plex: 0 };
 export const lotRegx = /^[A-Z0-9_]{1,25}$/;
@@ -85,6 +89,7 @@ const ProbeHybridisationXenium: React.FC = () => {
         Yup.object().shape({
           barcode: Yup.string().required().label('Barcode'),
           workNumber: Yup.string().required().label('SGP Number'),
+          kitCosting: Yup.string().oneOf(Object.values(SlideCosting)).required('Labware costing is a required field'),
           probes: Yup.array()
             .of(
               Yup.object().shape({
@@ -141,7 +146,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                 });
               }}
             >
-              {({ values, setFieldValue, isValid }) => (
+              {({ values, setFieldValue, setValues, isValid }) => (
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
                     <Heading level={3}>Labware</Heading>
@@ -204,6 +209,31 @@ const ProbeHybridisationXenium: React.FC = () => {
                                       );
                                     }}
                                     requiredField={false}
+                                  />
+                                </div>
+                                <div className={'basis-1/4'}>
+                                  <CustomReactSelect
+                                    isMulti={false}
+                                    label={'Labware Cost'}
+                                    name={'costingAll'}
+                                    value={'costingAll'}
+                                    handleChange={async (val) => {
+                                      const kitCosting =
+                                        (val as OptionType).label === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty;
+                                      await setValues((prev) => {
+                                        return {
+                                          ...prev,
+                                          costingAll: kitCosting,
+                                          labware: prev.labware.map((lw) => ({
+                                            ...lw,
+                                            kitCosting
+                                          }))
+                                        };
+                                      });
+                                    }}
+                                    emptyOption={true}
+                                    dataTestId="costingAll"
+                                    options={selectOptionValues(slideCostingOptions, 'label', 'value')}
                                   />
                                 </div>
                                 <ProbeAddPanel probePanels={probePanelInfo.probePanels} />

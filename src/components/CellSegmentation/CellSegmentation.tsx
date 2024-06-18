@@ -38,7 +38,7 @@ type CellSegmentationFormProps = {
   commentsAll?: string[];
 };
 
-const slideCostingOptions: OptionType[] = Object.values(SlideCosting).map((val) => {
+export const slideCostingOptions: OptionType[] = Object.values(SlideCosting).map((val) => {
   return { value: capitalize(val), label: val };
 });
 export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
