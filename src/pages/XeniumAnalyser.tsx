@@ -21,7 +21,6 @@ import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import columns from '../components/dataTableColumns/labwareColumns';
 import { FieldArray, Form, Formik } from 'formik';
-import { getCurrentDateTime } from '../types/stan';
 import FormikInput from '../components/forms/Input';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Table, { TabelSubHeader, TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
@@ -65,7 +64,7 @@ const formInitialValues: XeniumAnalyserFormValues = {
   cellSegmentationLot: '',
   equipmentId: undefined,
   labware: [],
-  performed: getCurrentDateTime(),
+  performed: '',
   workNumberAll: ''
 };
 
@@ -110,10 +109,7 @@ const XeniumAnalyser = () => {
         'LOT number should be a string of maximum length 25 of capital letters, numbers and underscores.'
       ),
     runName: Yup.string().required().label('Run Name').max(255, 'Run name should be a string of maximum length 255'),
-    performed: Yup.date()
-      .max(new Date(), 'Please select a date and time on or before current time')
-      .required('Time is a required field')
-      .label('Time'),
+    performed: Yup.date().required('Time is a required field').label('Time'),
     equipmentId: Yup.number().required().label('Equipment').required('Equipment is a required field'),
     labware: Yup.array()
       .of(
@@ -297,7 +293,6 @@ const XeniumAnalyser = () => {
                               data-testid={'performed'}
                               type="datetime-local"
                               name={'performed'}
-                              max={getCurrentDateTime()}
                             />
                           </div>
                           <div className={'flex flex-col'}>
