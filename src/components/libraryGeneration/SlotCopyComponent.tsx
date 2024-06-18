@@ -12,7 +12,9 @@ import RemoveButton from '../buttons/RemoveButton';
 import { StripyCardDetail } from '../StripyCard';
 import { MachineSnapshot } from 'xstate';
 import { Destination, SlotCopyContext, SlotCopyEvent, Source } from '../../lib/machines/slotCopy/slotCopyMachine';
-import { plateFactory } from '../../lib/factories/labwareFactory';
+import { plateFactory, stripTubeFactory } from '../../lib/factories/labwareFactory';
+import Success from '../notifications/Success';
+import { toast } from 'react-toastify';
 
 type SlotCopyParams = {
   title: string;
@@ -32,7 +34,7 @@ interface DestinationLabwareScanPanelProps {
   onChangeBioState: (bioState: string) => void;
   onLabwareScan?: (labware: LabwareFlaggedFieldsFragment[], cleanedOutAddresses?: Map<number, string[]>) => void;
   onDestinationSelectionModeChange?: (mode: DestinationSelectionMode) => void;
-  destinationSelectionMode: DestinationSelectionMode;
+  destinationSelectionMode?: DestinationSelectionMode;
 }
 
 const transferTypes = [
@@ -77,7 +79,7 @@ export const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPane
             <RadioButtonInput
               key={mode}
               data-testid={`${mode}`}
-              name={'destinationMode'}
+              name={`${mode}`}
               value={mode}
               checked={mode === destinationSelectionMode}
               onChange={() => {
@@ -89,7 +91,8 @@ export const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPane
         </RadioGroup>
       </div>
       <div className={'w-full flex flex-row space-x-4 mb-8'} data-testid="input-labware">
-        {destinationSelectionMode === DestinationSelectionMode.DEFAULT ? (
+        {(destinationSelectionMode === DestinationSelectionMode.PLATE ||
+          destinationSelectionMode === DestinationSelectionMode.STRIP_TUBE) && (
           <>
             <div className={'w-1/2 flex flex-col'}>
               <Label className={'flex items-center whitespace-nowrap'} name={'Bio State'} />
@@ -118,7 +121,8 @@ export const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPane
               </div>
             )}
           </>
-        ) : (
+        )}
+        {destinationSelectionMode === DestinationSelectionMode.SCAN && (
           <div className={'flex flex-col w-full space-y-2'} data-testid={'dest-scanner'}>
             <LabwareScanner
               onChange={onLabwareScan}
@@ -183,14 +187,52 @@ export const SlotCopySourceConfigPanel: React.FC<SourceLabwareScanPanelProps> = 
 };
 
 /**Reformat the props to 'Destination' type**/
-const defaultOutputLabware: NewFlaggedLabwareLayout = plateFactory.build() as NewFlaggedLabwareLayout;
+const plateOutputLabware: NewFlaggedLabwareLayout = plateFactory.build() as NewFlaggedLabwareLayout;
 
-export const defaultOutputSlotCopy: Destination = {
-  labware: { ...defaultOutputLabware, id: Date.parse(defaultOutputLabware.created) },
+export const plateOutputSlotCopy: Destination = {
+  labware: { ...plateOutputLabware, id: Date.parse(plateOutputLabware.created) },
   slotCopyDetails: {
-    labwareType: defaultOutputLabware.labwareType.name,
+    labwareType: plateOutputLabware.labwareType.name,
     contents: []
   }
+};
+
+function newPlateOutputLabware(): Destination {
+  const plateLayout: NewFlaggedLabwareLayout = plateFactory.build() as NewFlaggedLabwareLayout;
+  return {
+    labware: { ...plateLayout, id: Date.parse(plateLayout.created) },
+    slotCopyDetails: {
+      labwareType: plateLayout.labwareType.name,
+      contents: []
+    }
+  };
+}
+
+function newStripTubeOutputLabware(): Destination {
+  const stripTubeLayout: NewFlaggedLabwareLayout = stripTubeFactory.build() as NewFlaggedLabwareLayout;
+  return {
+    labware: { ...stripTubeLayout, id: Date.parse(stripTubeLayout.created) },
+    slotCopyDetails: {
+      labwareType: stripTubeLayout.labwareType.name,
+      contents: []
+    }
+  };
+}
+
+function newOutputLabwareBySelectionMode(mode: string): NewFlaggedLabwareLayout[] {
+  return mode === DestinationSelectionMode.PLATE
+    ? [newPlateOutputLabware().labware]
+    : mode === DestinationSelectionMode.STRIP_TUBE
+      ? [newStripTubeOutputLabware().labware]
+      : [];
+}
+
+const addDestinationPlateNotification = (plateType: string) => (
+  <Success message={`A new destination ${plateType} is added`} />
+);
+
+const containsScannedLabware = (destinations: Destination[]) => {
+  return destinations.map((dest) => dest.labware).some((lw) => lw.barcode && lw.barcode.length > 0);
 };
 
 function SlotCopyComponent({
@@ -199,7 +241,7 @@ function SlotCopyComponent({
   initialOutputSlotCopy,
   slotCopyModes,
   addPlateOption = true,
-  labwareDestinationSelectionMode = DestinationSelectionMode.DEFAULT
+  labwareDestinationSelectionMode
 }: SlotCopyParams) {
   const { sources, destinations } = current.context;
 
@@ -259,18 +301,40 @@ function SlotCopyComponent({
   const onDestinationSelectionModeChange = React.useCallback(
     (mode: DestinationSelectionMode) => {
       destinationSelectionMode.current = mode;
-      const labware = mode === DestinationSelectionMode.DEFAULT ? [defaultOutputSlotCopy.labware] : [];
+      let labware: NewFlaggedLabwareLayout[] = [];
+      const newLabware = newOutputLabwareBySelectionMode(mode);
+      if (addPlateOption && newLabware.length > 0) {
+        toast(addDestinationPlateNotification(newLabware[0].labwareType.name), {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 4000,
+          hideProgressBar: true
+        });
+      }
+      labware =
+        !containsScannedLabware(destinations) && newLabware.length > 0
+          ? [...destinations.map((dest) => dest.labware), ...newLabware]
+          : newLabware;
+
       send({ type: 'UPDATE_DESTINATION_LABWARE', labware });
       send({ type: 'UPDATE_DESTINATION_SELECTION_MODE', mode });
     },
-    [send]
+    [send, destinations, addPlateOption]
   );
 
   /**Handler for 'Add Plate' button click**/
   const onAddDestinationLabware = React.useCallback(() => {
-    const labware = plateFactory.build({}) as NewFlaggedLabwareLayout;
+    const labware =
+      destinationSelectionMode.current === DestinationSelectionMode.PLATE
+        ? (plateFactory.build() as NewFlaggedLabwareLayout)
+        : (stripTubeFactory.build() as NewFlaggedLabwareLayout);
+
     const labwareArray = destinations.map((dest) => dest.labware);
     labwareArray.push(labware);
+    toast(addDestinationPlateNotification(labware.labwareType.name), {
+      position: toast.POSITION.TOP_RIGHT,
+      autoClose: 4000,
+      hideProgressBar: true
+    });
     send({ type: 'UPDATE_DESTINATION_LABWARE', labware: labwareArray });
   }, [send, destinations]);
 

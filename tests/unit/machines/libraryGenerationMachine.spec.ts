@@ -1,6 +1,5 @@
 import { createActor, getInitialSnapshot } from 'xstate';
 import { libraryGenerationMachine } from '../../../src/lib/machines/libraryGenerationMachine';
-import { defaultOutputSlotCopy } from '../../../src/components/libraryGeneration/SlotCopyComponent';
 import {
   LabwareState,
   ReagentTransfer,
@@ -12,11 +11,12 @@ import { Source } from '../../../src/lib/machines/slotCopy/slotCopyMachine';
 import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHandlers';
 import { SlotMeasurement } from '../../../src/components/slotMeasurement/SlotMeasurements';
 import * as sdk from '../../../src/lib/sdk';
+import { plateOutputSlotCopy } from '../../../src/components/libraryGeneration/SlotCopyComponent';
 
 const mockedMachineInput = {
   workNumber: '',
   sources: [],
-  destinationLabware: defaultOutputSlotCopy?.labware,
+  destinationLabware: plateOutputSlotCopy?.labware,
   reagentTransfers: [],
   reagentPlateType: '',
   slotMeasurements: []
@@ -93,7 +93,7 @@ describe('libraryGenerationMachine', () => {
         actor.start();
         actor.send({
           type: 'GO_TO_REAGENT_TRANSFER',
-          destinationLabware: defaultOutputSlotCopy?.labware
+          destinationLabware: plateOutputSlotCopy?.labware
         });
       });
       it('updates destination labware', (done) => {
@@ -102,7 +102,7 @@ describe('libraryGenerationMachine', () => {
         });
         actor.subscribe((state) => {
           if (state.matches('reagentTransfer')) {
-            expect(state.context.destinationLabware).toEqual(defaultOutputSlotCopy?.labware);
+            expect(state.context.destinationLabware).toEqual(plateOutputSlotCopy?.labware);
             actor.stop();
             done();
           }
@@ -110,7 +110,7 @@ describe('libraryGenerationMachine', () => {
         actor.start();
         actor.send({
           type: 'GO_TO_REAGENT_TRANSFER',
-          destinationLabware: defaultOutputSlotCopy?.labware
+          destinationLabware: plateOutputSlotCopy?.labware
         });
       });
 
@@ -158,7 +158,7 @@ describe('libraryGenerationMachine', () => {
         });
         actor.subscribe((state) => {
           if (state.matches('reagentTransfer')) {
-            expect(state.context.destinationLabware).not.toEqual(defaultOutputSlotCopy?.labware);
+            expect(state.context.destinationLabware).not.toEqual(plateOutputSlotCopy?.labware);
             actor.stop();
             done();
           }
@@ -200,7 +200,7 @@ describe('libraryGenerationMachine', () => {
               context: {
                 workNumber: 'SGP106',
                 sources: mockedSlotCopySources,
-                destinationLabware: defaultOutputSlotCopy?.labware,
+                destinationLabware: plateOutputSlotCopy?.labware,
                 reagentTransfers: [],
                 reagentPlateType: '',
                 slotMeasurements: []
@@ -231,7 +231,7 @@ describe('libraryGenerationMachine', () => {
               context: {
                 workNumber: 'SGP106',
                 sources: mockedSlotCopySources,
-                destinationLabware: defaultOutputSlotCopy?.labware,
+                destinationLabware: plateOutputSlotCopy?.labware,
                 reagentTransfers: [],
                 reagentPlateType: '',
                 slotMeasurements: []
@@ -260,7 +260,7 @@ describe('libraryGenerationMachine', () => {
               context: {
                 workNumber: 'SGP106',
                 sources: mockedSlotCopySources,
-                destinationLabware: defaultOutputSlotCopy?.labware,
+                destinationLabware: plateOutputSlotCopy?.labware,
                 reagentTransfers: [],
                 reagentPlateType: '',
                 slotMeasurements: []
@@ -293,7 +293,7 @@ describe('libraryGenerationMachine', () => {
               context: {
                 workNumber: 'SGP108',
                 sources: mockedSlotCopySources,
-                destinationLabware: defaultOutputSlotCopy?.labware,
+                destinationLabware: plateOutputSlotCopy?.labware,
                 reagentTransfers: mockedReagentTransfer,
                 reagentPlateType: '',
                 slotMeasurements: [
@@ -325,7 +325,7 @@ describe('libraryGenerationMachine', () => {
               context: {
                 workNumber: 'SGP106',
                 sources: mockedSlotCopySources,
-                destinationLabware: defaultOutputSlotCopy?.labware,
+                destinationLabware: plateOutputSlotCopy?.labware,
                 reagentTransfers: mockedReagentTransfer,
                 reagentPlateType: '',
                 slotMeasurements: [
@@ -359,7 +359,7 @@ describe('libraryGenerationMachine', () => {
                 context: {
                   workNumber: 'SGP106',
                   sources: mockedSlotCopySources,
-                  destinationLabware: defaultOutputSlotCopy?.labware,
+                  destinationLabware: plateOutputSlotCopy?.labware,
                   reagentTransfers: mockedReagentTransfer,
                   reagentPlateType: '',
                   slotMeasurements: []
@@ -398,7 +398,7 @@ describe('libraryGenerationMachine', () => {
                 context: {
                   workNumber: 'SGP106',
                   sources: mockedSlotCopySources,
-                  destinationLabware: defaultOutputSlotCopy?.labware,
+                  destinationLabware: plateOutputSlotCopy?.labware,
                   reagentTransfers: mockedReagentTransfer,
                   reagentPlateType: '',
                   slotMeasurements: []

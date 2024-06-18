@@ -128,11 +128,9 @@ describe('Library Amplification and Generation ', () => {
       expect(screen.getByText('Output Labware')).toBeVisible();
     });
     it('loads with default destination as 96 plate', () => {
-      expect(screen.getByTestId('Default')).toBeChecked();
-      expect(screen.getByTestId('labware-')).toBeVisible();
-    });
-    it('loads with destination Bio State select box default to empty', () => {
-      shouldDisplayValue('bioState', '');
+      expect(screen.getByTestId('96 Well Plate')).not.toBeChecked();
+      expect(screen.getByTestId('8 Strip Tube')).not.toBeChecked();
+      expect(screen.getByTestId('Scan Labware')).not.toBeChecked();
     });
     it('loads with empty source labware', () => {
       expect(screen.getByTestId('input')).toHaveValue('');
@@ -200,7 +198,7 @@ describe('Library Amplification and Generation ', () => {
         expect(screen.getByRole('button', { name: '< Sample Transfer' })).toBeVisible();
         expect(screen.getByRole('button', { name: 'Record Cycle >' })).toBeVisible();
         expect(screen.getByText('Dual Index Plate')).toBeVisible();
-        expect(screen.getByText('96 Well Plate')).toBeVisible();
+        expect(screen.getByText('Destination Labware')).toBeVisible();
       });
     });
   });
