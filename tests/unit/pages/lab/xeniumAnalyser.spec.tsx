@@ -60,9 +60,9 @@ describe('Xenium analyser', () => {
         });
       });
       describe('Time', () => {
-        it('should display the current date', () => {
+        it('defaults to no time', () => {
           waitFor(async () => {
-            expect(screen.getByTestId('performed')).toHaveTextContent(new Date().toISOString().split('T')[0]);
+            expect(screen.getByTestId('performed')).toHaveTextContent('');
           });
         });
         describe('Entering no value', () => {
@@ -70,14 +70,6 @@ describe('Xenium analyser', () => {
             waitFor(async () => {
               await userEvent.clear(screen.getByTestId('performed'));
               expect(screen.getByText('Time is a required field')).toBeVisible();
-            });
-          });
-        });
-        describe('Entering a future date', () => {
-          it('should display an error message', () => {
-            waitFor(async () => {
-              await userEvent.type(screen.getByTestId('performed'), '2075-01-01T10:00');
-              expect(screen.getByText('Please select a date and time on or before current time')).toBeVisible();
             });
           });
         });
@@ -211,6 +203,7 @@ describe('Xenium analyser', () => {
 });
 
 const fillInTheForm = async () => {
+  await userEvent.type(screen.getByTestId('performed'), new Date().toISOString().split('T')[0]);
   await userEvent.type(screen.getByTestId('runName'), 'Run 123');
   await userEvent.type(screen.getByTestId('lotNumberA'), 'Lot123');
   await selectOption('STAN-3111-position', 'Left');
