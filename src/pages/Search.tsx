@@ -7,7 +7,7 @@ import { selectOptionValues } from '../components/forms';
 import DataTable from '../components/DataTable';
 import { CellProps, Column } from 'react-table';
 import StyledLink from '../components/StyledLink';
-import { SearchResultTableEntry, alphaNumericSortDefault } from '../types/stan';
+import { alphaNumericSortDefault, SearchResultTableEntry } from '../types/stan';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';
@@ -34,6 +34,7 @@ export type FormFindRequest = {
   tissueExternalNames?: string;
   tissueTypeName?: string;
   labwareTypeName?: string;
+  species?: string;
   maxRecords?: number;
   workNumber?: string;
   createdMin?: string;
@@ -50,7 +51,8 @@ const validationSchema = Yup.object()
     workNumber: Yup.string().ensure(),
     createdAfter: Yup.date().notRequired(),
     createdBefore: Yup.date().notRequired(),
-    labwareTypeName: Yup.string().ensure()
+    labwareTypeName: Yup.string().ensure(),
+    species: Yup.string().ensure()
   })
   .test({
     name: 'atLeastOneRequired',
@@ -80,7 +82,8 @@ const emptyFindRequest: FormFindRequest = {
   tissueExternalNames: '',
   tissueTypeName: '',
   labwareTypeName: '',
-  workNumber: ''
+  workNumber: '',
+  species: ''
 };
 
 const emptyFindRequestKeys: Array<keyof FindRequest> = objectKeys(emptyFindRequest);
@@ -285,6 +288,16 @@ function Search() {
                         emptyOption={true}
                         value={values.labwareTypeName}
                         options={selectOptionValues(searchInfo.labwareTypes, 'name', 'name')}
+                      />
+                    </div>
+                    <div>
+                      <CustomReactSelect
+                        dataTestId={'species'}
+                        label="Species"
+                        name="species"
+                        emptyOption={true}
+                        value={values.species}
+                        options={selectOptionValues(searchInfo.species, 'name', 'name')}
                       />
                     </div>
                   </div>
