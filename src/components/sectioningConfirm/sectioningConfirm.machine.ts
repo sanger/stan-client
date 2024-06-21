@@ -368,7 +368,7 @@ export function createSectioningConfirmMachine() {
           /**
            * If a layoutPlan has been removed, make sure to also remove the ConfirmSectionLabware for that layoutPlan
            */
-          const destinationBarcodes = new Set(context.plans.map((plan) => plan.planData.destination.barcode));
+          const destinationBarcodes = new Set(event.plans.map((plan) => plan.planData.destination.barcode));
 
           const confirmSectionLabware = context.confirmSectionLabware.filter((csl) =>
             destinationBarcodes.has(csl.barcode)

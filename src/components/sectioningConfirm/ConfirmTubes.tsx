@@ -106,8 +106,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
     return createConfirmLabwareMachine(comments, initialLayoutPlan.destinationLabware, initialLayoutPlan);
   }, [comments, initialLayoutPlan]);
   const [current, send, service] = useMachine(confirmLabwareMachine);
-  const { cancelled, layoutPlan, labware } = current.context;
-  const { layoutMachine } = current.context;
+  const { cancelled, layoutPlan, labware, layoutMachine } = current.context;
   const [notifyCancel, setNotifyCancel] = React.useState(false);
   const notifySectionChange = React.useRef(false);
 
@@ -121,7 +120,10 @@ const TubeRow: React.FC<TubeRowProps> = ({
 
   /** Notify section confirm machine when increasing/decreasing the number of section  */
   useEffect(() => {
-    if (layoutPlan && current.context.isLayoutUpdated && notifySectionChange.current) {
+    if (
+      (layoutPlan && current.context.isLayoutUpdated && notifySectionChange.current) ||
+      (current.context.isCancelToggled && notifySectionChange.current)
+    ) {
       notifySectionChange.current = false;
       onSectionUpdate(layoutPlan);
     }
@@ -139,8 +141,9 @@ const TubeRow: React.FC<TubeRowProps> = ({
     'cursor-pointer hover:opacity-90 text-sm tracking-wide'
   );
 
-  const handleOnClick = useCallback(() => {
+  const handleOnRemoveClick = useCallback(() => {
     if (mode === SectionNumberMode.Auto) {
+      notifySectionChange.current = true;
       setNotifyCancel(true);
     } else {
       send({ type: 'TOGGLE_CANCEL' });
@@ -260,7 +263,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
             />
           ))}
         </TableCell>
-        <TableCell onClick={handleOnClick}>
+        <TableCell onClick={handleOnRemoveClick}>
           <RemoveIcon
             data-testid={`remove-tube-${layoutPlan.destinationLabware.barcode}`}
             className="h-4 w-4 text-red-500"
