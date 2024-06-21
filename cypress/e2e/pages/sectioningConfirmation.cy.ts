@@ -11,6 +11,7 @@ import { findPlanData } from '../../../src/mocks/handlers/planHandlers';
 import { getAllSelect, selectOptionForMultiple, selectSGPNumber } from '../shared/customReactSelect.cy';
 import { HttpResponse } from 'msw';
 
+let highestSectionNumber: number = 0;
 describe('Sectioning Confirmation', () => {
   before(() => {
     cy.visit('/lab/sectioning/confirm');
@@ -178,17 +179,28 @@ describe('Sectioning Confirmation', () => {
       });
 
       it('should renumber all section numbers', () => {
-        let highestSectionNumber = 0;
-        cy.findByRole('table')
-          .find('td')
-          .eq(1)
-          .then((col) => {
-            highestSectionNumber = Number(col.text());
-          });
-
+        readHighestSectionNumber();
         cy.findAllByTestId('section-number').each((elem) => {
           highestSectionNumber++;
           cy.wrap(elem).should('have.value', highestSectionNumber + '');
+        });
+      });
+      context('after section deletion', () => {
+        before(() => {
+          cy.screenshot();
+          readHighestSectionNumber();
+          cy.screenshot();
+          cy.findByText('Edit Layout').click();
+          cy.findByRole('dialog').within(() => {
+            cy.findByText('STAN-2021').click({ ctrlKey: true });
+            cy.findByText('Done').click();
+          });
+          cy.screenshot();
+        });
+        it('renumbers all section numbers', () => {
+          cy.findAllByTestId('section-number').each((elem) => {
+            cy.wrap(elem).should('have.value', ++highestSectionNumber + '');
+          });
         });
       });
       it('should display region fields for all sections', () => {
@@ -427,3 +439,12 @@ function findPlanByBarcode(barcode: string) {
 function saveButton() {
   return cy.findByRole('button', { name: /Save/i });
 }
+
+const readHighestSectionNumber = () => {
+  cy.findByRole('table')
+    .find('td')
+    .eq(1)
+    .then((col) => {
+      highestSectionNumber = Number(col.text());
+    });
+};

@@ -128,6 +128,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     if (mode === SectionNumberMode.Auto && sectionNumberEnabled) {
       setNotifyDelete(true);
     } else {
+      notifySectionChange.current = true;
       removePlan(layoutPlan.destinationLabware.barcode!);
     }
   }, [mode, setNotifyDelete, removePlan, layoutPlan.destinationLabware.barcode, sectionNumberEnabled]);
