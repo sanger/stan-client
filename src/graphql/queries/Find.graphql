@@ -23,6 +23,9 @@ query Find($request: FindRequest!) {
         medium {
           name
         }
+        fixative {
+          name
+        }
       }
     }
     labware {

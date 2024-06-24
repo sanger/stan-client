@@ -84,7 +84,8 @@ export class SearchService implements SearchServiceInterface<FormFindRequest, Se
         sectionNumber: sample.section,
         replicate: sample.tissue.replicate ?? '',
         labwareCreated: new Date(labware.created),
-        embeddingMedium: sample.tissue.medium.name
+        embeddingMedium: sample.tissue.medium.name,
+        fixative: sample.tissue.fixative.name
       };
     });
   };

@@ -148,6 +148,7 @@ export type SearchResultTableEntry = {
   replicate?: Maybe<string>;
   labwareCreated: Date;
   embeddingMedium: string;
+  fixative: string;
 };
 
 export type SearchResultTableEntryLocation = {
