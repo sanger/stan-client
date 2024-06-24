@@ -66,7 +66,8 @@ describe('Search Service', () => {
         sectionNumber: sample10.section,
         replicate: sample10.tissue.replicate,
         labwareCreated: new Date(labware1.created),
-        embeddingMedium: sample10.tissue.medium.name
+        embeddingMedium: sample10.tissue.medium.name,
+        fixative: sample10.tissue.fixative.name
       },
       {
         barcode: labware2.barcode,
@@ -79,7 +80,8 @@ describe('Search Service', () => {
         sectionNumber: sample11.section,
         replicate: sample11.tissue.replicate,
         labwareCreated: new Date(labware2.created),
-        embeddingMedium: sample11.tissue.medium.name
+        embeddingMedium: sample11.tissue.medium.name,
+        fixative: sample11.tissue.fixative.name
       },
       {
         barcode: labware3.barcode,
@@ -96,7 +98,8 @@ describe('Search Service', () => {
         sectionNumber: sample12.section,
         replicate: sample12.tissue.replicate,
         labwareCreated: new Date(labware3.created),
-        embeddingMedium: sample12.tissue.medium.name
+        embeddingMedium: sample12.tissue.medium.name,
+        fixative: sample12.tissue.fixative.name
       },
       {
         barcode: labware2.barcode,
@@ -109,7 +112,8 @@ describe('Search Service', () => {
         sectionNumber: sample13.section,
         replicate: sample13.tissue.replicate,
         labwareCreated: new Date(labware2.created),
-        embeddingMedium: sample13.tissue.medium.name
+        embeddingMedium: sample13.tissue.medium.name,
+        fixative: sample13.tissue.fixative.name
       },
       {
         barcode: labware1.barcode,
@@ -126,7 +130,8 @@ describe('Search Service', () => {
         sectionNumber: sample14.section,
         replicate: sample14.tissue.replicate,
         labwareCreated: new Date(labware1.created),
-        embeddingMedium: sample14.tissue.medium.name
+        embeddingMedium: sample14.tissue.medium.name,
+        fixative: sample14.tissue.fixative.name
       }
     ];
 

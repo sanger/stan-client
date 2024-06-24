@@ -105,7 +105,8 @@ describe('searchService.ts', () => {
           sectionNumber: findResult.samples[0].section,
           replicate: findResult.samples[0].tissue.replicate,
           labwareCreated: new Date(findResult.labware[0].created),
-          embeddingMedium: findResult.samples[0].tissue.medium.name
+          embeddingMedium: findResult.samples[0].tissue.medium.name,
+          fixative: findResult.samples[0].tissue.fixative.name
         }
       ];
 

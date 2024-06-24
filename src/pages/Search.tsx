@@ -526,5 +526,9 @@ const columns: Column<SearchResultTableEntry>[] = [
     Header: 'Embedding Medium',
     accessor: 'embeddingMedium'
   },
+  {
+    Header: 'Fixative',
+    accessor: 'fixative'
+  },
   locationColumn
 ];
