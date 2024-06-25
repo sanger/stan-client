@@ -10,6 +10,23 @@ function App() {
      *Cypress is waiting for this event to happen in onBeforeLoad callback in cypress/support/command.ts*/
     window.dispatchEvent(new CustomEvent('reactRenderComplete'));
   }, []);
+
+  /**
+   * This disables the default scroll wheel behavior on all number input fields.
+   * This effect applies globally to all number input fields in the document.
+   */
+  React.useEffect(() => {
+    const handleWheel = (event: MouseEvent) => {
+      if (document.activeElement && document.activeElement.getAttribute('type') === 'number') {
+        event.preventDefault();
+      }
+    };
+    document.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      document.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
+
   return (
     <ConfigProvider>
       <StanCoreContext.Provider value={stanCore}>
