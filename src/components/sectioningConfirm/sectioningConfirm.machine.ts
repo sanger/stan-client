@@ -409,7 +409,10 @@ export function createSectioningConfirmMachine() {
         }),
         assignConfirmSectionResults: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.confirmSection') return context;
-          return { ...context, confirmSectionResultLabwares: event.output.confirmSection.labware };
+          return {
+            ...context,
+            confirmSectionResultLabwares: event.output.confirmSection.labware.filter((lw) => !lw.discarded)
+          };
         }),
 
         fillSectionNumbers: assign(({ context, event }) => {
