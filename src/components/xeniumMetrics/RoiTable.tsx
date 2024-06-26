@@ -2,6 +2,7 @@ import DataTable from '../DataTable';
 import { Column, Row } from 'react-table';
 import React from 'react';
 import { RoiFieldsFragment } from '../../types/sdk';
+import { alphaNumericSortDefault } from '../../types/stan';
 
 type RoiTableRow = {
   roi: string;
@@ -14,17 +15,18 @@ type RoiTableProps<T extends RoiFieldsFragment> = {
 };
 
 export const groupByRoi = (rois: RoiFieldsFragment[]): Record<string, RoiFieldsFragment[]> => {
-  const grouped = rois.reduce(
-    (acc, data) => {
-      if (!acc[data.roi]) {
-        acc[data.roi] = [];
-      }
-      acc[data.roi].push(data);
-      return acc;
-    },
-    {} as Record<string, RoiFieldsFragment[]>
-  );
-  return grouped;
+  return rois
+    .sort((a, b) => alphaNumericSortDefault(a.address, b.address))
+    .reduce(
+      (acc, data) => {
+        if (!acc[data.roi]) {
+          acc[data.roi] = [];
+        }
+        acc[data.roi].push(data);
+        return acc;
+      },
+      {} as Record<string, RoiFieldsFragment[]>
+    );
 };
 const RoiTable = ({ actionColumn, data }: RoiTableProps<any>) => {
   return (
