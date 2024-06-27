@@ -1,6 +1,12 @@
 import { graphql, HttpResponse } from 'msw';
 import commentRepository from '../repositories/commentRepository';
-import { RecordAnalyserMutation, RecordAnalyserMutationVariables } from '../../types/sdk';
+import {
+  GetAnalyserScanDataQuery,
+  GetAnalyserScanDataQueryVariables,
+  RecordAnalyserMutation,
+  RecordAnalyserMutationVariables
+} from '../../types/sdk';
+import { faker } from '@faker-js/faker';
 
 const xeniumHandlers = [
   //Get Xenium QC Info
@@ -18,6 +24,25 @@ const xeniumHandlers = [
   //Record QC Labware mutation
   graphql.mutation('RecordQCLabware', () => {
     return HttpResponse.json({ data: { recordQcLabware: { operations: [{ id: 1 }] } } });
+  }),
+
+  graphql.query<GetAnalyserScanDataQuery, GetAnalyserScanDataQueryVariables>('GetAnalyserScanData', ({ variables }) => {
+    return HttpResponse.json(
+      {
+        data: {
+          analyserScanData: {
+            barcode: variables.barcode,
+            workNumbers: ['SGP1008'],
+            probes: [
+              faker.string.alphanumeric({ length: { min: 5, max: 8 } }),
+              faker.string.alphanumeric({ length: { min: 5, max: 8 } })
+            ],
+            cellSegmentationRecorded: faker.datatype.boolean({ probability: 0.5 })
+          }
+        }
+      },
+      { status: 200 }
+    );
   })
 ];
 

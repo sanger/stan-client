@@ -1,0 +1,5 @@
+fragment AnalyserScanDataFields on AnalyserScanData {
+  workNumbers
+  probes
+  cellSegmentationRecorded
+}
