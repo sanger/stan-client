@@ -8,7 +8,7 @@ import {
 import omeroProjectFactory from '../../lib/factories/omeroProjectFactory';
 import omeroProjectRepository from '../repositories/omeroProjectRepository';
 
-const projectHandlers = [
+const omeroProjectHandlers = [
   graphql.mutation<AddOmeroProjectMutation, AddOmeroProjectMutationVariables>('AddOmeroProject', ({ variables }) => {
     const addOmeroProject = omeroProjectFactory.build({ name: variables.name });
     omeroProjectRepository.save(addOmeroProject);
@@ -33,4 +33,4 @@ const projectHandlers = [
   )
 ];
 
-export default projectHandlers;
+export default omeroProjectHandlers;

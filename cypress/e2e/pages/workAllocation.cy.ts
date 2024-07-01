@@ -367,6 +367,47 @@ describe('Work Allocation', () => {
     });
   });
 
+  context('when adding a Omero Project)', () => {
+    before(() => {
+      cy.visitAsEndUser('/sgp');
+      cy.findByTestId('addNewOmeroProject-btn').click();
+    });
+    context('when a new Omero Project is been created successfully', () => {
+      before(() => {
+        cy.findByTestId('Omero Project').type('omero_p_1');
+        cy.findByRole('button', { name: /Save/i }).click();
+      });
+      it('hides the add new config option form', () => {
+        cy.findByLabelText('Add New Omero Project').should('not.exist');
+        cy.findByRole('button', { name: /Save/i }).should('not.exist');
+      });
+      it('selects tne newly added value in the Omero Project select box', () => {
+        shouldDisplaySelectedValue('omeroProject', 'omero_p_1');
+      });
+    });
+    context('when add new Omero Project fails', () => {
+      before(() => {
+        cy.msw().then(({ graphql, worker }) => {
+          worker.use(
+            graphql.mutation('AddOmeroProject', ({ variables }) => {
+              return HttpResponse.json(
+                { errors: [{ message: `Failed to add Omero Project: "${variables.name}"` }] },
+                { status: 404 }
+              );
+            })
+          );
+        });
+        cy.findByTestId('addNewOmeroProject-btn').click();
+        cy.findByTestId('Omero Project').type('omero_p_1');
+        cy.findByRole('button', { name: /Save/i }).click();
+      });
+      it('keeps the add new config option form', () => {
+        cy.findByText('Add New Omero Project').should('be.visible');
+        cy.findByRole('button', { name: /Save/i }).should('be.visible');
+      });
+    });
+  });
+
   /*
   describe("Comments are shown or hidden dependent on chosen new status", () => {
     before(() => {

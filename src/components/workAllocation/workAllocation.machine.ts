@@ -109,6 +109,10 @@ type WorkAllocationEvent =
   | {
       type: 'ADD_NEWLY_CREATED_COST_CODE';
       costCode: CostCode;
+    }
+  | {
+      type: 'ADD_NEWLY_CREATED_OMERO_PROJECT';
+      project: OmeroProjectFieldsFragment;
     };
 
 type WorkAllocationContext = {
@@ -241,6 +245,9 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             },
             ADD_NEWLY_CREATED_COST_CODE: {
               actions: 'addNewlyCreatedCostCode'
+            },
+            ADD_NEWLY_CREATED_OMERO_PROJECT: {
+              actions: 'addNewlyCreatedOmeroProject'
             }
           }
         },
@@ -399,6 +406,12 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           if (event.type !== 'ADD_NEWLY_CREATED_COST_CODE') return context;
           return produce(context, (draft) => {
             draft.costCodes.push(event.costCode);
+          });
+        }),
+        addNewlyCreatedOmeroProject: assign(({ context, event }) => {
+          if (event.type !== 'ADD_NEWLY_CREATED_OMERO_PROJECT') return context;
+          return produce(context, (draft) => {
+            draft.omeroProjects.push(event.project);
           });
         })
       }

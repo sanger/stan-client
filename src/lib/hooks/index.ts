@@ -223,19 +223,27 @@ export function useConfirmLeave(initialShouldConfirm = false) {
 /**
  * Hook that detects clicks outside of the passed ref
  */
-export function useComponentVisible(initialIsVisible: boolean) {
+
+type UseComponentVisibleParams = {
+  initialIsVisible: boolean;
+  onHide: () => void;
+};
+
+export function useComponentVisible({ initialIsVisible, onHide }: UseComponentVisibleParams) {
   const [isComponentVisible, setIsComponentVisible] = useState(initialIsVisible);
   const ref = useRef<HTMLDivElement>(null);
 
   const handleHideDropdown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       setIsComponentVisible(false);
+      onHide();
     }
   };
 
   const handleClickOutside = (event: MouseEvent) => {
     if (ref.current && !ref.current.contains(event.target as Node)) {
       setIsComponentVisible(false);
+      onHide();
     }
   };
 
