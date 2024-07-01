@@ -1,0 +1,5 @@
+query GetAnalyserScanData($barcode: String!) {
+  analyserScanData(barcode: $barcode) {
+    ...AnalyserScanDataFields
+  }
+}

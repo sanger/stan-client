@@ -1,14 +1,16 @@
-import React, { useContext } from 'react';
+import React, { SetStateAction, useContext } from 'react';
 import { StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
 import {
   AnalyserLabware,
   AnalyserRequest,
+  AnalyserScanDataFieldsFragment,
   CassettePosition,
   EquipmentFieldsFragment,
   LabwareFlaggedFieldsFragment,
   RecordAnalyserMutation,
-  SamplePositionFieldsFragment
+  SamplePositionFieldsFragment,
+  SampleRoi
 } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import * as Yup from 'yup';
@@ -18,9 +20,7 @@ import { motion } from 'framer-motion';
 import variants from '../lib/motionVariants';
 import Heading from '../components/Heading';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
-import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
-import columns from '../components/dataTableColumns/labwareColumns';
-import { FieldArray, Form, Formik } from 'formik';
+import { Form, Formik } from 'formik';
 import FormikInput from '../components/forms/Input';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Table, { TabelSubHeader, TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
@@ -32,6 +32,9 @@ import { FormikErrorMessage, selectOptionValues } from '../components/forms';
 import { useLoaderData } from 'react-router-dom';
 import { fromPromise } from 'xstate';
 import { lotRegx } from './ProbeHybridisationXenium';
+import { joinUnique, samplesFromLabwareOrSLot } from '../components/dataTableColumns';
+import RemoveButton from '../components/buttons/RemoveButton';
+import PassIcon from '../components/icons/PassIcon';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
@@ -47,6 +50,14 @@ type LabwareSamples = {
   samples: SampleWithRegion[];
 };
 
+type AnalyserLabwareForm = {
+  labware: LabwareFlaggedFieldsFragment;
+  workNumber: string;
+  position?: CassettePosition;
+  samples: Array<SampleRoi>;
+  analyserScanData?: AnalyserScanDataFieldsFragment;
+};
+
 export type XeniumAnalyserFormValues = {
   lotNumberA: string;
   lotNumberB: string;
@@ -54,7 +65,7 @@ export type XeniumAnalyserFormValues = {
   equipmentId: number | undefined;
   runName: string;
   performed: string;
-  labware: Array<AnalyserLabware>;
+  labware: Array<AnalyserLabwareForm>;
   workNumberAll: string;
 };
 const formInitialValues: XeniumAnalyserFormValues = {
@@ -66,6 +77,58 @@ const formInitialValues: XeniumAnalyserFormValues = {
   labware: [],
   performed: '',
   workNumberAll: ''
+};
+
+const LabwareAnalyserTable = (labware: Array<AnalyserLabwareForm>, removeLabware: (barcode: string) => void) => {
+  return (
+    <Table>
+      <TableHead>
+        <tr>
+          <TableHeader>Barcode</TableHeader>
+          <TableHeader>Donor ID</TableHeader>
+          <TableHeader>Labware Type</TableHeader>
+          <TableHeader>External Name</TableHeader>
+          <TableHeader>Bio State</TableHeader>
+          <TableHeader>Work Numbers</TableHeader>
+          <TableHeader>Probes</TableHeader>
+          <TableHeader>Cell Segmentation Recorded</TableHeader>
+          <TableHeader></TableHeader>
+        </tr>
+      </TableHead>
+      <TableBody>
+        {labware.map((lw) => {
+          const samples = samplesFromLabwareOrSLot(lw.labware);
+          return (
+            <tr key={lw.labware.barcode}>
+              <TableCell>{lw.labware.barcode}</TableCell>
+              <TableCell>{joinUnique(samples.map((sample) => sample.tissue.donor.donorName))}</TableCell>
+              <TableCell>{lw.labware.labwareType.name}</TableCell>
+              <TableCell>{joinUnique(samples.map((sample) => sample.tissue.externalName ?? ''))}</TableCell>
+              <TableCell>{joinUnique(samples.map((sample) => sample.bioState.name))}</TableCell>
+              <TableCell>{lw.analyserScanData?.workNumbers.join(', ')}</TableCell>
+              <TableCell>{lw.analyserScanData?.probes.join(', ')}</TableCell>
+              <TableCell>
+                {lw.analyserScanData?.cellSegmentationRecorded ? (
+                  <PassIcon className={`inline-block h-8 w-8 text-green-500`} />
+                ) : (
+                  ' - '
+                )}
+              </TableCell>
+
+              <TableCell>
+                <RemoveButton
+                  type={'button'}
+                  onClick={() => {
+                    removeLabware(lw.labware.barcode);
+                  }}
+                />
+              </TableCell>
+            </tr>
+          );
+        })}
+      </TableBody>
+    </Table>
+  );
 };
 
 const XeniumAnalyser = () => {
@@ -135,7 +198,11 @@ const XeniumAnalyser = () => {
 
   /**This creates the slot related information for the labware */
   const createTableDataForSlots = React.useCallback(
-    (labware: LabwareFlaggedFieldsFragment) => {
+    (
+      labware: LabwareFlaggedFieldsFragment,
+      setValues: (values: SetStateAction<XeniumAnalyserFormValues>, shouldValidate?: boolean) => {},
+      values: XeniumAnalyserFormValues
+    ) => {
       const setLabwareSampleData = async (lw: LabwareFlaggedFieldsFragment) => {
         const samples: SampleWithRegion[] = [];
         /**
@@ -158,10 +225,38 @@ const XeniumAnalyser = () => {
               barcode: lw.barcode,
               performed: true
             });
+            stanCore.GetAnalyserScanData({ barcode: labware.barcode }).then((res) => {
+              setValues((prev) => {
+                const analyserLabware: AnalyserLabwareForm | undefined = prev.labware.find(
+                  (lw) => lw.labware.barcode === labware.barcode
+                );
+                if (analyserLabware) {
+                  analyserLabware.analyserScanData = res.analyserScanData;
+                } else {
+                  prev.labware.push({
+                    labware,
+                    workNumber: values.workNumberAll,
+                    position: undefined,
+                    samples: [],
+                    analyserScanData: res.analyserScanData
+                  });
+                }
+                return { ...prev };
+              });
+            });
           } else {
             setHybridisation({
               barcode: lw.barcode,
               performed: false
+            });
+            setValues((prev) => {
+              prev.labware.push({
+                labware,
+                workNumber: values.workNumberAll,
+                position: undefined,
+                samples: []
+              });
+              return { ...prev };
             });
             return;
           }
@@ -210,11 +305,11 @@ const XeniumAnalyser = () => {
               validationSchema={validationSchema}
               onSubmit={async (values) => {
                 const labwareROIData: AnalyserLabware[] = values.labware.map((lw) => {
-                  const labwareSample = labwareSamples.find((ls) => ls.barcode === lw.barcode);
+                  const labwareSample = labwareSamples.find((ls) => ls.barcode === lw.labware.barcode);
                   return {
-                    barcode: lw.barcode,
+                    barcode: lw.labware.barcode,
                     workNumber: lw.workNumber,
-                    position: lw.position.toLowerCase() === 'left' ? CassettePosition.Left : CassettePosition.Right,
+                    position: lw.position?.toLowerCase() === 'left' ? CassettePosition.Left : CassettePosition.Right,
                     samples: labwareSample
                       ? labwareSample.samples.map((sample) => {
                           return {
@@ -241,46 +336,36 @@ const XeniumAnalyser = () => {
                 });
               }}
             >
-              {({ values, setFieldValue, isValid }) => (
+              {({ values, setFieldValue, setValues, isValid }) => (
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
                     <Heading level={3}>Labware</Heading>
                     {hybridisation && !hybridisation.performed && (
                       <Warning>No probe hybridisation recorded for {hybridisation?.barcode}</Warning>
                     )}
-                    <FieldArray name={'labware'}>
-                      {(helpers) => (
-                        <LabwareScanner
-                          limit={2}
-                          onAdd={(labware) => {
-                            /**If labware scanned not already displayed, add to list**/
-                            if (!labwareSamples.some((lwSamples) => lwSamples.barcode === labware.barcode)) {
-                              createTableDataForSlots(labware);
-                            }
-                            helpers.push({ barcode: labware.barcode, workNumber: '', position: '', samples: [] });
-                          }}
-                          onRemove={(labware) => {
-                            setLabwareSamples((prev) => prev.filter((lw) => lw.barcode !== labware.barcode));
-                            values.labware.forEach((valueLw, index) => {
-                              if (valueLw.barcode === labware.barcode) {
-                                helpers.remove(index);
-                              }
-                            });
-                          }}
-                          enableFlaggedLabwareCheck
-                        >
-                          <LabwareScanPanel
-                            columns={[
-                              columns.barcode(),
-                              columns.donorId(),
-                              columns.labwareType(),
-                              columns.externalName(),
-                              columns.bioState()
-                            ]}
-                          />
-                        </LabwareScanner>
-                      )}
-                    </FieldArray>
+                    <LabwareScanner
+                      limit={2}
+                      onAdd={(labware) => {
+                        /**If labware scanned not already displayed, add to list**/
+                        if (!labwareSamples.some((lwSamples) => lwSamples.barcode === labware.barcode)) {
+                          createTableDataForSlots(labware, setValues, values);
+                        }
+                      }}
+                      onRemove={async (labware) => {
+                        setLabwareSamples((prev) => prev.filter((lw) => lw.barcode !== labware.barcode));
+                        await setValues((prev) => {
+                          return {
+                            ...prev,
+                            labware: prev.labware.filter((lw) => lw.labware.barcode !== labware.barcode)
+                          };
+                        });
+                      }}
+                      enableFlaggedLabwareCheck
+                    >
+                      {({ removeLabware }) =>
+                        values.labware.length > 0 && LabwareAnalyserTable(values.labware, removeLabware)
+                      }
+                    </LabwareScanner>
                   </motion.div>
                   {labwareSamples.length > 0 && (
                     <>
