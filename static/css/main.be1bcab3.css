@@ -2960,6 +2960,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-text-opacity: 1;
   color: rgb(233 30 99 / var(--tw-text-opacity));
 }
+.text-green-500 {
+  --tw-text-opacity: 1;
+  color: rgb(72 187 120 / var(--tw-text-opacity));
+}
 .text-sp-800 {
   --tw-text-opacity: 1;
   color: rgb(105 14 45 / var(--tw-text-opacity));
@@ -2999,10 +3003,6 @@ svg.logo.loading rect:nth-child(3n+1) {
 .text-green-800 {
   --tw-text-opacity: 1;
   color: rgb(39 103 73 / var(--tw-text-opacity));
-}
-.text-green-500 {
-  --tw-text-opacity: 1;
-  color: rgb(72 187 120 / var(--tw-text-opacity));
 }
 .text-black {
   --tw-text-opacity: 1;
@@ -4343,4 +4343,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.c9d7cc46.css.map*/
+/*# sourceMappingURL=main.be1bcab3.css.map*/
