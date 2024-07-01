@@ -60,6 +60,7 @@ import { libraryGenerationHandlers } from './handlers/libraryGenerationHandlers'
 import segmentationHandlers from './handlers/segmentationHandlers';
 import cleanOutHandlers from './handlers/cleanOutHandlers';
 import regionOfInterestHandlers from './handlers/regionOfInterestHandlers';
+import omeroProjectHandlers from './handlers/omeroProjectHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -120,5 +121,7 @@ export const handlers = [
   ...libraryGenerationHandlers,
   ...segmentationHandlers,
   ...cleanOutHandlers,
-  ...regionOfInterestHandlers
+  ...regionOfInterestHandlers,
+  ...projectHandlers,
+  ...omeroProjectHandlers
 ];
