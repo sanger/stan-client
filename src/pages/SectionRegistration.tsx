@@ -52,6 +52,7 @@ type SectionRegistrationFormSection = {
   sectionNumber: number;
   sectionThickness: number;
   region?: string;
+  dateSectioned?: Date;
 };
 
 type SectionRegistrationFormLabware = {
@@ -91,7 +92,8 @@ function buildSectionRegisterRequest(values: SectionRegistrationFormValues): Sec
             spatialLocation: sample.spatialLocation,
             species: sample.species.trim(),
             tissueType: sample.tissueType.trim(),
-            region: sample.region
+            region: sample.region,
+            dateSectioned: sample.dateSectioned?.toString()
           }));
         })
       };
@@ -132,7 +134,8 @@ function buildSample(): SectionRegistrationFormSection {
     replicateNumber: '',
     sectionNumber: 0,
     sectionThickness: 0,
-    region: ''
+    region: '',
+    dateSectioned: undefined
   };
 }
 
@@ -162,7 +165,8 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
                     replicateNumber: validation.replicateNumber,
                     sectionNumber: validation.sectionNumber,
                     sectionThickness: validation.sectionThickness,
-                    region: validation.region
+                    region: validation.region,
+                    dateSectioned: validation.dateSectioned
                   })
                 )
               )
