@@ -30,6 +30,7 @@ import AddNewConfigOption from './AddNewConfigOption';
 import projectFactory from '../../lib/factories/projectFactory';
 import costCodeFactory from '../../lib/factories/costCodeFactory';
 import { useComponentVisible } from '../../lib/hooks';
+import omeroProjectFactory from '../../lib/factories/omeroProjectFactory';
 
 const initialValues: WorkAllocationFormValues = {
   workType: '',
@@ -162,6 +163,7 @@ export default function WorkAllocation() {
   );
   const [addNewProjectCodeCode, setAddNewProjectCodeCode] = React.useState(false);
   const [addNewCostCode, setAddNewCostCode] = React.useState(false);
+  const [addNewOmeroProject, setAddNewOmeroProject] = React.useState(false);
   const addNewConfigOptionInputRef = React.useRef<HTMLInputElement>(null);
 
   /**Handler to do sorting on user action**/
@@ -227,7 +229,14 @@ export default function WorkAllocation() {
   });
 
   /** Used to close the 'add new option component' whenever the user clicks outside of it. */
-  const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(true);
+  const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible({
+    initialIsVisible: true,
+    onHide: () => {
+      setAddNewProjectCodeCode(false);
+      setAddNewCostCode(false);
+      setAddNewOmeroProject(false);
+    }
+  });
 
   return (
     <div>
@@ -294,6 +303,8 @@ export default function WorkAllocation() {
             send({ type: 'ALLOCATE_WORK', values: valuesToSubmit });
           }}
           validationSchema={validationSchema}
+          validateOnBlur={true}
+          validateOnChange={false}
         >
           {({ setFieldValue, values }) => (
             <Form>
@@ -364,15 +375,53 @@ export default function WorkAllocation() {
                     />
                   </div>
                 )}
-                <div className="md:flex-grow">
-                  <CustomReactSelect
-                    label="Omero Project"
-                    name="omeroProject"
-                    dataTestId="omeroProject"
-                    emptyOption={true}
-                    options={selectOptionValues(omeroProjects, 'name', 'name', true, { sort: true, alphaFirst: true })}
+                {addNewOmeroProject && isComponentVisible ? (
+                  <AddNewConfigOption
+                    mainDivRef={ref}
+                    inputRef={addNewConfigOptionInputRef}
+                    returnedDataObject="addOmeroProject"
+                    onSubmit={(value: string) => {
+                      return stanCore.AddOmeroProject({ name: value });
+                    }}
+                    onCancel={() => {
+                      setAddNewOmeroProject(false);
+                    }}
+                    onSuccess={async () => {
+                      send({
+                        type: 'ADD_NEWLY_CREATED_OMERO_PROJECT',
+                        project: omeroProjectFactory.build({ name: addNewConfigOptionInputRef.current!.value })
+                      });
+                      await setFieldValue('omeroProject', addNewConfigOptionInputRef.current!.value);
+                    }}
+                    onFinish={() => {
+                      setAddNewOmeroProject(false);
+                    }}
+                    configLabel="Add New Omero Project"
+                    configName="Omero Project"
                   />
-                </div>
+                ) : (
+                  <div className="md:flex-grow">
+                    <CustomReactSelect
+                      label="Omero Project"
+                      name="omeroProject"
+                      dataTestId="omeroProject"
+                      emptyOption={true}
+                      options={selectOptionValues(omeroProjects, 'name', 'name', true, {
+                        sort: true,
+                        alphaFirst: true
+                      })}
+                      value={values.omeroProject}
+                      addButton={{
+                        dataTestId: 'addNewOmeroProject-btn',
+                        onClick: () => {
+                          setAddNewOmeroProject(true);
+                          setIsComponentVisible(true);
+                        },
+                        className: 'mt-4'
+                      }}
+                    />
+                  </div>
+                )}
 
                 <div className="md:flex-grow">
                   <CustomReactSelect
