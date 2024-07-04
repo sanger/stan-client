@@ -23,6 +23,12 @@ type XeniumLabwareQCProps = {
 
 export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: XeniumLabwareQCProps) => {
   const { values, setFieldValue, setValues } = useFormikContext<XeniumQCFormData>();
+  const runNamesSelectOption: OptionType[] = values.labware[index]
+    ? values.labware[index].runNames!.map((runName) => {
+        return { value: runName, label: runName } as OptionType;
+      })
+    : ([] as OptionType[]);
+
   return (
     <div className="max-w-screen-xl mx-auto" data-testid={'xenium-labware-qc'}>
       {labware && (
@@ -47,7 +53,7 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                 </div>
               </div>
               <div className="flex flex-row items-center justify-start"></div>
-              <div className={'grid grid-cols-2 gap-4'}>
+              <div className={'grid grid-cols-3 gap-4'}>
                 <WorkNumberSelect
                   label={'SGP Number'}
                   name={`labware.${index}.workNumber`}
@@ -56,6 +62,17 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                     await setFieldValue(`labware.${index}.workNumber`, workNumber);
                   }}
                   workNumber={values.labware[index]?.workNumber}
+                />
+
+                <CustomReactSelect
+                  label={'Run Name'}
+                  dataTestId={'runName'}
+                  name={`labware.${index}.selectedRunName`}
+                  emptyOption={true}
+                  options={runNamesSelectOption}
+                  handleChange={async (val) => {
+                    await setFieldValue(`labware.${index}.selectedRunName`, val ? (val as OptionType).value : '');
+                  }}
                 />
 
                 <CustomReactSelect
