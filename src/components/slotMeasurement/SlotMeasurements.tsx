@@ -8,7 +8,9 @@ import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { Dictionary, groupBy } from 'lodash';
 
 export type MeasurementConfigProps = {
+  measurementType: string[];
   name: string;
+  unit?: string;
   stepIncrement?: string;
   validateFunction?: (value: string) => void;
   initialMeasurementVal?: string;
@@ -29,11 +31,6 @@ type MeasurementRow = {
   address: string;
   measurements: SlotMeasurementRequest[];
   samples?: SampleFieldsFragment[];
-};
-const setMeasurementNameTableTitle = (measurementName: string): string => {
-  return measurementName === 'cDNA concentration' || measurementName === 'Library concentration'
-    ? `${measurementName.toUpperCase()} (pg/\u00B5l)`
-    : measurementName.toUpperCase();
 };
 
 /**
@@ -110,7 +107,7 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
         : []),
       ...measurementConfig.map((measurementProp, measurementIndex) => {
         return {
-          Header: setMeasurementNameTableTitle(measurementProp.name),
+          Header: measurementProp.name + ` (${measurementProp.unit})`,
           id: measurementProp.name,
           allCapital: false,
           Cell: ({ row }: { row: Row<MeasurementRow> }) => {
@@ -153,12 +150,15 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
                   <CustomReactSelect
                     label={''}
                     dataTestId={`comments${row.index}`}
-                    name={`slotMeasurements.${row.index}.commentId`}
+                    name={`slotMeasurements.${row.index * measurementConfig.length}.commentId`}
                     className={'flex'}
                     emptyOption={true}
                     value={row.original.measurements[0].commentId}
                     handleChange={(val) => {
-                      onChangeField?.(`slotMeasurements.${row.index}.commentId`, (val as OptionType).value);
+                      onChangeField?.(
+                        `slotMeasurements.${row.index * measurementConfig.length}.commentId`,
+                        (val as OptionType).value
+                      );
                     }}
                     options={selectOptionValues(comments, 'text', 'id')}
                   />

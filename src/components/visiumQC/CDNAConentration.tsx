@@ -17,6 +17,68 @@ export type CDNAConcentrationProps = {
   cleanedOutAddress?: string[];
 };
 
+enum MeasurementTypes {
+  cDNAConcentration = 'cDNA concentration',
+  LibraryConcentration = 'Library concentration'
+}
+
+/***
+ *  Only acceptable 0 and decimal numbers of format ###.## Visium concentration
+ * @param value
+ */
+function validateConcentrationMeasurementValue(value: string) {
+  let error;
+  if (value === '') {
+    error = 'Required';
+  } else if (Number(value) < 0) {
+    error = 'Positive value required';
+  }
+  return error;
+}
+
+const measurements: MeasurementConfigProps[] = [
+  {
+    measurementType: [MeasurementTypes.cDNAConcentration],
+    name: 'CDNA CONCENTRATION',
+    unit: 'pg/\u00B5l',
+    stepIncrement: '.01',
+    initialMeasurementVal: '0',
+    validateFunction: validateConcentrationMeasurementValue
+  },
+  {
+    measurementType: [MeasurementTypes.LibraryConcentration],
+    name: `LIBRARY CONCENTRATION`,
+    unit: 'pg/\u00B5l',
+    stepIncrement: '.01',
+    initialMeasurementVal: '0',
+    validateFunction: validateConcentrationMeasurementValue
+  },
+  {
+    measurementType: [MeasurementTypes.cDNAConcentration, MeasurementTypes.LibraryConcentration],
+    name: 'MINIMUM SIZE',
+    unit: 'bp',
+    stepIncrement: '1',
+    initialMeasurementVal: '0',
+    validateFunction: validateConcentrationMeasurementValue
+  },
+  {
+    measurementType: [MeasurementTypes.cDNAConcentration, MeasurementTypes.LibraryConcentration],
+    name: 'MAXIMUM SIZE',
+    unit: 'bp',
+    stepIncrement: '1',
+    initialMeasurementVal: '0',
+    validateFunction: validateConcentrationMeasurementValue
+  },
+  {
+    measurementType: [MeasurementTypes.LibraryConcentration],
+    name: 'MAIN PEAK SIZE',
+    unit: 'bp',
+    stepIncrement: '1',
+    initialMeasurementVal: '0',
+    validateFunction: validateConcentrationMeasurementValue
+  }
+];
+
 const CDNAConcentration = ({
   labware,
   slotMeasurements,
@@ -26,22 +88,10 @@ const CDNAConcentration = ({
 }: CDNAConcentrationProps) => {
   const { setErrors, setTouched, setFieldValue } = useFormikContext<VisiumQCFormData>();
   const [measurementName, setMeasurementName] = useState('');
-  const measurementConfig: MeasurementConfigProps[] = React.useMemo(
-    () =>
-      ['cDNA concentration', 'Library concentration'].map((measurementName) => {
-        return {
-          name: measurementName,
-          stepIncrement: '.01',
-          initialMeasurementVal: '0',
-          validateFunction: validateConcentrationMeasurementValue
-        };
-      }),
-    []
-  );
 
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(() => {
-    return measurementConfig.filter((measurement) => measurement.name === measurementName);
-  }, [measurementConfig, measurementName]);
+    return measurements.filter((measurement) => measurement.measurementType.includes(measurementName));
+  }, [measurementName]);
 
   /***
    * When labwares changes, the slotMeasurements has to be initialized accordingly
@@ -55,17 +105,17 @@ const CDNAConcentration = ({
     }
     setFieldValue('barcode', labware.barcode);
     let slotMeasurements: SlotMeasurementRequest[] = [];
-    if (measurementName.length > 0) {
-      slotMeasurements = labware.slots.filter(isSlotFilled).map((slot) => {
-        return {
+    labware.slots.filter(isSlotFilled).forEach((slot) => {
+      memoMeasurementConfig.forEach((measurement) => {
+        slotMeasurements.push({
           address: slot.address,
-          name: measurementName,
+          name: measurement.name,
           value: '0'
-        };
+        });
       });
-      setFieldValue('slotMeasurements', slotMeasurements);
-    }
-  }, [labware, measurementName, setErrors, setTouched, setFieldValue]);
+    });
+    setFieldValue('slotMeasurements', slotMeasurements);
+  }, [labware, measurementName, setErrors, setTouched, setFieldValue, memoMeasurementConfig]);
 
   const handleChangeField = React.useCallback(
     (fieldName: string, value: string) => {
@@ -74,19 +124,6 @@ const CDNAConcentration = ({
     [setFieldValue]
   );
 
-  /***
-   *  Only acceptable 0 and decimal numbers of format ###.## Visium concentration
-   * @param value
-   */
-  function validateConcentrationMeasurementValue(value: string) {
-    let error;
-    if (value === '') {
-      error = 'Required';
-    } else if (Number(value) < 0) {
-      error = 'Positive value required';
-    }
-    return error;
-  }
   const onRemoveLabware = React.useCallback(
     (barcode: string) => {
       removeLabware(barcode);
@@ -121,12 +158,10 @@ const CDNAConcentration = ({
                     setMeasurementName((val as OptionType).label);
                     await setFieldValue('slotMeasurements', []);
                   }}
-                  options={measurementConfig.map((measurement) => {
-                    return {
-                      label: measurement.name,
-                      value: measurement.name
-                    };
-                  })}
+                  options={[
+                    { label: MeasurementTypes.cDNAConcentration, value: MeasurementTypes.cDNAConcentration },
+                    { label: MeasurementTypes.LibraryConcentration, value: MeasurementTypes.LibraryConcentration }
+                  ]}
                 />
               </div>
             }

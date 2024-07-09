@@ -298,7 +298,7 @@ describe('Visium QC Page', () => {
 
       it('shows cq value in all text fields in CQ column of table', () => {
         cy.findByTestId('all-Cycles').clear().type('3');
-        cy.findAllByTestId('Cycles-input').should('have.value', 3);
+        cy.findAllByTestId('CYCLES-input').should('have.value', 3);
       });
     });
 
@@ -599,7 +599,7 @@ describe('Visium QC Page', () => {
         cy.findByTestId('all-Cq value').type('5');
       });
       it('updates all the Cq value inputs inside the table related to the slots', () => {
-        cy.findAllByTestId('Cq value-input').should('have.value', 5);
+        cy.findAllByTestId('CQ VALUE-input').should('have.value', 5);
       });
     });
 

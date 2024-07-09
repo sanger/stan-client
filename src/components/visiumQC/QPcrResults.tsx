@@ -14,7 +14,8 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware, cleanedOutAddre
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(
     () => [
       {
-        name: 'Cq value',
+        measurementType: ['Cq value'],
+        name: 'CQ VALUE',
         stepIncrement: '.01',
         validateFunction: validateCqMeasurementValue,
         initialMeasurementVal: ''

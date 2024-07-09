@@ -7,6 +7,7 @@ import { slideFactory } from '../../../../src/lib/factories/labwareFactory';
 import { LabwareFlaggedFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
 import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
+
 afterEach(() => {
   cleanup();
 });
@@ -79,10 +80,12 @@ describe('CDNAConcentration', () => {
       fireEvent.click(option1);
     });
     expect(screen.getByRole('table')).toBeInTheDocument();
-    expect(screen.getAllByTestId('cDNA concentration-input')).toHaveLength(2);
+    expect(screen.getAllByTestId('CDNA CONCENTRATION (pg/µl)-input')).toHaveLength(2);
     expect(screen.getByTestId('comments0')).toBeInTheDocument();
     expect(screen.getByTestId('comments1')).toBeInTheDocument();
     expect(screen.getByText('CDNA CONCENTRATION (pg/\u00B5l)')).toBeInTheDocument();
+    expect(screen.getByText('MINIMUM SIZE (bp)')).toBeInTheDocument();
+    expect(screen.getByText('MAXIMUM SIZE (bp)')).toBeInTheDocument();
   });
   it('displays measurement table when a Library concentration measurement type is selected', async () => {
     renderCDNAConcentration();
@@ -95,10 +98,13 @@ describe('CDNAConcentration', () => {
       fireEvent.click(option1);
     });
     expect(screen.getByRole('table')).toBeInTheDocument();
-    expect(screen.getAllByTestId('Library concentration-input')).toHaveLength(2);
+    expect(screen.getAllByTestId('LIBRARY CONCENTRATION (pg/µl)-input')).toHaveLength(2);
     expect(screen.getByTestId('comments0')).toBeInTheDocument();
     expect(screen.getByTestId('comments1')).toBeInTheDocument();
     expect(screen.getByText('LIBRARY CONCENTRATION (pg/\u00B5l)')).toBeInTheDocument();
+    expect(screen.getByText('MINIMUM SIZE (bp)')).toBeInTheDocument();
+    expect(screen.getByText('MAXIMUM SIZE (bp)')).toBeInTheDocument();
+    expect(screen.getByText('MAIN PEAK SIZE (bp)')).toBeInTheDocument();
   });
   it('invokes remove function when labware is removed', async () => {
     const inputLabware = slideFactory.build() as NewFlaggedLabwareLayout;
