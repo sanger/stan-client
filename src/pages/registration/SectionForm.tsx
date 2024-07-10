@@ -184,6 +184,13 @@ export default function SectionForm({
         label="Section External Identifier"
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.externalIdentifier`}
       />
+      <motion.div variants={variants.fadeInWithLift}>
+        <FormikInput
+          type="date"
+          name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.dateSectioned`}
+          label={'Sectioned Date'}
+        />
+      </motion.div>
 
       <FormikInput
         label="Section Number"

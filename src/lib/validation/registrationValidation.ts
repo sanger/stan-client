@@ -202,4 +202,8 @@ export default class RegistrationValidation {
         : schema.notRequired();
     });
   }
+
+  get dateSectioned() {
+    return Yup.date().label('Sectioned Date').required('Sectioned Date is a required field');
+  }
 }
