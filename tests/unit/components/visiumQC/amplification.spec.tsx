@@ -6,6 +6,7 @@ import { enableMapSet } from 'immer';
 import Amplification, { CDNAProps } from '../../../../src/components/visiumQC/Amplification';
 import { createFlaggedLabware } from '../../../../src/mocks/handlers/flagLabwareHandlers';
 import { forEach } from 'lodash';
+
 afterEach(() => {
   cleanup();
 });
@@ -43,7 +44,7 @@ describe('Amplification', () => {
         expect(cqTable).toHaveTextContent('External ID');
         expect(cqTable).toHaveTextContent('Section Number');
         expect(cqTable).toHaveTextContent('CQ VALUE');
-        expect(screen.getAllByTestId('Cycles-input')).toHaveLength(6);
+        expect(screen.getAllByTestId('CYCLES-input')).toHaveLength(6);
         // validate labware slots have CQ value
         forEach(cqTable!.rows, (row) => {
           expect(row.cells[3]).not.toHaveTextContent('');

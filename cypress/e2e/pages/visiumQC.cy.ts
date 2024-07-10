@@ -298,7 +298,7 @@ describe('Visium QC Page', () => {
 
       it('shows cq value in all text fields in CQ column of table', () => {
         cy.findByTestId('all-Cycles').clear().type('3');
-        cy.findAllByTestId('Cycles-input').should('have.value', 3);
+        cy.findAllByTestId('CYCLES-input').should('have.value', 3);
       });
     });
 
@@ -376,7 +376,7 @@ describe('Visium QC Page', () => {
       context('When all values are valid and there is no server error', () => {
         before(() => {
           selectOption('measurementType', 'cDNA concentration');
-          cy.findAllByTestId('cDNA concentration-input').eq(0).type('.45');
+          cy.findAllByTestId('CDNA CONCENTRATION-input').eq(0).type('.45');
           selectOption('comments0', 'Potential to work');
           saveButton().click();
         });
@@ -599,7 +599,7 @@ describe('Visium QC Page', () => {
         cy.findByTestId('all-Cq value').type('5');
       });
       it('updates all the Cq value inputs inside the table related to the slots', () => {
-        cy.findAllByTestId('Cq value-input').should('have.value', 5);
+        cy.findAllByTestId('CQ VALUE-input').should('have.value', 5);
       });
     });
 

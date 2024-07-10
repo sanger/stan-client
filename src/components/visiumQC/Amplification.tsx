@@ -67,11 +67,13 @@ const Amplification = ({
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(
     () => [
       {
-        name: 'Cq value',
+        measurementType: ['Amplification'],
+        name: 'CQ VALUE',
         readOnly: true
       },
       {
-        name: 'Cycles',
+        measurementType: ['Amplification'],
+        name: 'CYCLES',
         stepIncrement: '1',
         validateFunction: validateCyclesMeasurementValue,
         initialMeasurementVal: ''
