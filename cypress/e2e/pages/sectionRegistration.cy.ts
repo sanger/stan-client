@@ -128,6 +128,11 @@ describe('Section Registration Page', () => {
         cy.findByText('Section External Identifier is a required field').should('be.visible');
       });
 
+      it('requires sectioned date', () => {
+        cy.findByLabelText('Sectioned Date').focus().blur();
+        cy.findByText('Sectioned Date is a required field').should('be.visible');
+      });
+
       it('requires Section External Identifier to only permit certain characters', () => {
         cy.findByLabelText('Section External Identifier').type('EXT&99').blur();
         cy.findByText(
@@ -338,6 +343,7 @@ function fillInForm() {
   selectOption('Spatial Location', '3 - Surface central region');
   cy.findByLabelText('Replicate Number').clear().type('2');
   cy.findByLabelText('Section External Identifier').clear().type('S_EXT_ID_1');
+  cy.findByLabelText('Sectioned Date').clear().type('2024-07-07');
   cy.findByLabelText('Section Number').clear().type('5');
   cy.findByLabelText('Section Thickness').clear().type('2');
 }
