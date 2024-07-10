@@ -80,7 +80,7 @@ describe('CDNAConcentration', () => {
       fireEvent.click(option1);
     });
     expect(screen.getByRole('table')).toBeInTheDocument();
-    expect(screen.getAllByTestId('CDNA CONCENTRATION (pg/µl)-input')).toHaveLength(2);
+    expect(screen.getAllByTestId('CDNA CONCENTRATION-input')).toHaveLength(2);
     expect(screen.getByTestId('comments0')).toBeInTheDocument();
     expect(screen.getByTestId('comments1')).toBeInTheDocument();
     expect(screen.getByText('CDNA CONCENTRATION (pg/\u00B5l)')).toBeInTheDocument();
@@ -98,7 +98,7 @@ describe('CDNAConcentration', () => {
       fireEvent.click(option1);
     });
     expect(screen.getByRole('table')).toBeInTheDocument();
-    expect(screen.getAllByTestId('LIBRARY CONCENTRATION (pg/µl)-input')).toHaveLength(2);
+    expect(screen.getAllByTestId('LIBRARY CONCENTRATION-input')).toHaveLength(2);
     expect(screen.getByTestId('comments0')).toBeInTheDocument();
     expect(screen.getByTestId('comments1')).toBeInTheDocument();
     expect(screen.getByText('LIBRARY CONCENTRATION (pg/\u00B5l)')).toBeInTheDocument();

@@ -376,7 +376,7 @@ describe('Visium QC Page', () => {
       context('When all values are valid and there is no server error', () => {
         before(() => {
           selectOption('measurementType', 'cDNA concentration');
-          cy.findAllByTestId('cDNA concentration-input').eq(0).type('.45');
+          cy.findAllByTestId('CDNA CONCENTRATION-input').eq(0).type('.45');
           selectOption('comments0', 'Potential to work');
           saveButton().click();
         });

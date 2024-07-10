@@ -184,7 +184,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             cy.findByRole('button', { name: 'Record Cycle >' }).click();
           });
           it('displays the previously entered cycle value', () => {
-            cy.findAllByTestId('Cycles-input').each((elem) => {
+            cy.findAllByTestId('CYCLES-input').each((elem) => {
               cy.wrap(elem).should('have.value', '3');
             });
           });
@@ -243,7 +243,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             cy.findByRole('button', { name: 'Record Cycle >' }).click();
           });
           it('removes the previously entered cycle values ', () => {
-            cy.findAllByTestId('Cycles-input').each((elem) => {
+            cy.findAllByTestId('CYCLES-input').each((elem) => {
               cy.wrap(elem).should('have.value', '');
             });
           });
