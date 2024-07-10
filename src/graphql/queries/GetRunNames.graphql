@@ -1,0 +1,3 @@
+query GetRunNames($barcode: String!) {
+  runNames(barcode: $barcode)
+}

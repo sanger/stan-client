@@ -4,10 +4,11 @@ import {
   LabwareFlaggedFieldsFragment,
   QcLabwareRequest,
   RecordQcLabwareMutation,
+  RoiFieldsFragment,
   SampleFieldsFragment
 } from '../types/sdk';
 import * as Yup from 'yup';
-import { StanCoreContext } from '../lib/sdk';
+import { stanCore, StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { useMachine } from '@xstate/react';
 import AppShell from '../components/AppShell';
@@ -38,12 +39,30 @@ type QcFormLabware = {
   comments: string[];
   roiComments: string[];
   sampleComments: Array<SampleComment>;
+  runNames?: string[];
+  selectedRunName?: string;
 };
 
 export type XeniumQCFormData = {
   workNumberAll: string;
   labware: Array<QcFormLabware>;
   completion: string;
+};
+
+const getRegionsOfInterestGroupedByRoi = async (barcode: string): Promise<Record<string, RoiFieldsFragment[]>> => {
+  const response = await stanCore.GetRegionsOfInterest({
+    barcodes: [barcode]
+  });
+  if (response.rois.length === 0 || response.rois[0]!.rois.length === 0) return {};
+  return groupByRoi(response.rois[0]!.rois!);
+};
+
+const getRunNames = async (barcode: string): Promise<string[]> => {
+  return await stanCore
+    .GetRunNames({
+      barcode: barcode
+    })
+    .then((response) => response.runNames);
 };
 
 const XeniumQC = () => {
@@ -79,6 +98,8 @@ const XeniumQC = () => {
           barcode: Yup.string().required(),
           workNumber: Yup.string().required().label('SGP Number'),
           comments: Yup.array().min(0).optional(),
+          runNames: Yup.array().min(0).optional(),
+          selectedRunName: Yup.string().optional(),
           roiComments: Yup.array().min(0).optional(),
           sampleComments: Yup.array()
             .of(
@@ -102,44 +123,43 @@ const XeniumQC = () => {
     completion: currentTime
   };
 
-  const getRegionsOfInterest = useCallback(
+  const getRelatedLabwareData = useCallback(
     async (
-      foundLabware: LabwareFlaggedFieldsFragment,
+      barcode: string,
       setValues: (values: SetStateAction<XeniumQCFormData>, shouldValidate?: boolean) => {}
     ): Promise<string[]> => {
       try {
-        const response = await stanCore.GetRegionsOfInterest({
-          barcodes: [foundLabware.barcode]
-        });
-        const groupedByRoi = groupByRoi(response.rois[0]!.rois!);
-        if (response.rois.length > 0) {
-          setValues((prev) => {
-            prev.labware.push({
-              barcode: foundLabware.barcode,
-              workNumber: prev.workNumberAll,
-              completion: prev.completion,
-              comments: [],
-              roiComments: [],
-              sampleComments: Object.keys(groupedByRoi).map((roi) => {
-                return {
-                  sampleAddress: groupedByRoi[roi].map((data) => {
-                    return { sample: data.sample ?? '', address: data.address };
-                  }),
-                  roi,
-                  comments: []
-                };
-              })
-            });
-            return prev;
+        const groupedByRoi = await getRegionsOfInterestGroupedByRoi(barcode);
+        if (Object.keys(groupedByRoi).length === 0)
+          return [`No region of interest is recorded against the scanned labware ${barcode}.`];
+        const runNames = await getRunNames(barcode);
+        setValues((prev) => {
+          prev.labware.push({
+            barcode: barcode,
+            workNumber: prev.workNumberAll,
+            completion: prev.completion,
+            comments: [],
+            roiComments: [],
+            runNames,
+            sampleComments: Object.keys(groupedByRoi).map((roi) => {
+              return {
+                sampleAddress: groupedByRoi[roi].map((data) => {
+                  return { sample: data.sample ?? '', address: data.address };
+                }),
+                roi,
+                comments: []
+              };
+            })
           });
-        }
+          return prev;
+        });
 
         return [];
       } catch (error) {
-        return ['Error fetching the regions of interests related to the labware ' + foundLabware.barcode];
+        return [`There was an error fetching the related data for the labware ${barcode}.`];
       }
     },
-    [stanCore]
+    []
   );
 
   return (
@@ -162,6 +182,7 @@ const XeniumQC = () => {
                     barcode: lw.barcode,
                     workNumber: lw.workNumber,
                     comments: lw.comments.map((comment) => Number(comment)),
+                    runName: lw.selectedRunName,
                     sampleComments: lw.sampleComments?.flatMap((sampleComment) => {
                       return sampleComment.sampleAddress.flatMap((sampleAdress) => {
                         return sampleComment.comments.map((commentId) => {
@@ -204,7 +225,7 @@ const XeniumQC = () => {
                           labwares: LabwareFlaggedFieldsFragment[],
                           foundLabware: LabwareFlaggedFieldsFragment
                         ) => {
-                          return getRegionsOfInterest(foundLabware, setValues);
+                          return getRelatedLabwareData(foundLabware.barcode, setValues);
                         }}
                       >
                         {({ labwares, removeLabware }) => (
