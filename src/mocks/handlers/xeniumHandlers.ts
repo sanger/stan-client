@@ -3,6 +3,7 @@ import commentRepository from '../repositories/commentRepository';
 import {
   GetAnalyserScanDataQuery,
   GetAnalyserScanDataQueryVariables,
+  GetRunNamesQuery,
   RecordAnalyserMutation,
   RecordAnalyserMutationVariables
 } from '../../types/sdk';
@@ -43,6 +44,18 @@ const xeniumHandlers = [
       },
       { status: 200 }
     );
+  }),
+
+  graphql.query<GetRunNamesQuery, GetAnalyserScanDataQueryVariables>('GetRunNames', () => {
+    return HttpResponse.json({
+      data: {
+        runNames: [
+          faker.string.alphanumeric({ length: { min: 5, max: 8 } }),
+          faker.string.alphanumeric({ length: { min: 5, max: 8 } }),
+          faker.string.alphanumeric({ length: { min: 5, max: 8 } })
+        ]
+      }
+    });
   })
 ];
 

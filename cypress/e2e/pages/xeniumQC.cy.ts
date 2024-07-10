@@ -31,6 +31,7 @@ describe('Xenium QC', () => {
       //display work number for all labware
       cy.findByTestId('workNumberAll').should('be.visible');
       cy.findByTestId('completion').should('be.visible');
+      cy.findByTestId('runName').should('be.visible');
     });
   });
   describe('When  two labware is scanned ', () => {
