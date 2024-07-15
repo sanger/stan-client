@@ -10,6 +10,7 @@ import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { selectOption } from '../shared/customReactSelect.cy';
 import { HttpResponse } from 'msw';
+
 function scanLabware(barcode: string) {
   cy.get('#labwareScanInput').should('not.be.disabled').clear().type(`${barcode}{enter}`);
 }
@@ -96,6 +97,20 @@ describe('RNA Analysis', () => {
       cy.get('[data-testid=lock]').should('exist');
     });
   });
+
+  context('When measurement type is updated after typing some value', () => {
+    before(() => {
+      selectOption('analysisType', 'DV200');
+      selectOption('measurementType', 'Range');
+      cy.findAllByTestId('measurementValue').eq(0).type('1'); //setting lower bound
+      cy.findAllByTestId('measurementValue').eq(1).type('2'); //setting upper bound
+      selectOption('measurementType', 'Single');
+    });
+    it('initiates the measurement value input', () => {
+      cy.findByTestId('measurementValue').should('have.value', '');
+    });
+  });
+
   context('when submit button is clicked and it return an error', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {

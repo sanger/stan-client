@@ -88,7 +88,7 @@ export const measurementColumn = (
           className={`rounded-md ${!measurement && 'bg-gray-200 border-gray-50'}`}
           type="number"
           data-testid={'measurementValue'}
-          defaultValue={measurement?.value}
+          value={measurement?.value}
           onFocus={(e) => {
             e.target.style.color = 'black';
             if (min && Number(e.currentTarget.value) < min) {
