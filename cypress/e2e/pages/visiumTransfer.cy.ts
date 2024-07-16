@@ -22,6 +22,19 @@ describe('Transfer Page', () => {
       });
     });
 
+    describe('when scanning the labware, before selecting the destination labware', () => {
+      before(() => {
+        cy.get('#inputLabwares').within((elem) => {
+          cy.wrap(elem).get('#labwareScanInput').wait(1000).clear().type('STAN-3111{enter}');
+        });
+      });
+      it('shows the scanned labware', () => {
+        cy.get('#inputLabwares').within((elem) => {
+          cy.wrap(elem).findByText('A1').should('be.visible');
+        });
+      });
+    });
+
     it('should display 96 Well Plate layout when user selects 96 Well Plate option', () => {
       cy.get('[type="radio"][name="96 Well Plate"]').check();
       cy.findByTestId('bioState').should('be.visible');
@@ -79,6 +92,32 @@ describe('Transfer Page', () => {
       cy.findByTestId('removeButton').click();
       cy.findByText('STAN-3112').should('not.exist');
       cy.findByTestId('removeButton').should('not.exist');
+    });
+  });
+
+  describe('Multiple destinations with different labware type', () => {
+    before(() => {
+      cy.get('[type="radio"][name="96 Well Plate"]').check();
+      cy.get('[type="radio"][name="8 Strip Tube"]').check();
+    });
+    it('updates destination pagination accordingly', () => {
+      cy.findByTestId('pager-text-div').contains('2 of 2');
+    });
+    describe('when paginating to a different destination labware type', () => {
+      before(() => {
+        cy.findByTestId('left-button').click();
+      });
+      it('updates the selection mode accordingly', () => {
+        cy.findByTestId('96 Well Plate').should('be.checked');
+      });
+    });
+    describe('when selecting scan labware option', () => {
+      before(() => {
+        cy.get('[type="radio"][name="Scan Labware"]').check();
+      });
+      it('resets the destination labware', () => {
+        cy.findByTestId('pager-text-div').contains('1 of 1');
+      });
     });
   });
 

@@ -186,9 +186,6 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
 
   const getSourceSlotColor = useCallback(
     (labware: LabwareFlaggedFieldsFragment, address: string, slot: SlotFieldsFragment) => {
-      if (!currentOutput) {
-        return 'bg-white';
-      }
       if (selectedCopyMode === SlotCopyMode.ONE_TO_MANY) {
         if (oneToManyCopyInProgress && selectedInputAddresses[0] === address) {
           return `bg-${colorByBarcode.get(labware.barcode)}-500 ring ring-pink-600 ring-offset-2`;
@@ -196,7 +193,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
       }
       //Slots copied between current selected source and destination labware
       if (
-        find(currentOutput.slotCopyContent, {
+        find(currentOutput && currentOutput.slotCopyContent, {
           sourceBarcode: labware.barcode,
           sourceAddress: address
         })
@@ -291,7 +288,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   }, [currentInputPage, inputLabware, onSelectInputLabware, setCurrentInputLabware]);
 
   /**
-   * Whenever the number of input labwares changes, set the number of pages on the pager
+   * Whenever the number of output labwares changes, set the number of pages on the pager
    */
   const numberOfOutputLabware = outputSlotCopies.length;
   useEffect(() => {
@@ -299,7 +296,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   }, [numberOfOutputLabware, setNumberOfOutputPages]);
 
   /**
-   * Whenever the number of input labwares increases, go to the last page
+   * Whenever the number of output labwares increases, go to the last page
    */
   const previousOutputLength = usePrevious(outputSlotCopies.length);
   useEffect(() => {
@@ -313,8 +310,10 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
    * and also notify parent using callback function
    */
   useEffect(() => {
-    if (outputSlotCopies.length === 0 || currentOutputPage <= 0 || outputSlotCopies.length <= currentOutputPage - 1)
+    if (outputSlotCopies.length === 0 || currentOutputPage <= 0 || outputSlotCopies.length <= currentOutputPage - 1) {
+      setCurrentOutput(null); // To Reset the output labware when selecting SCAN labware mode, before scanning a labware
       return;
+    }
     setCurrentOutput(outputSlotCopies[currentOutputPage - 1]);
     //Notify parent using callback
     onSelectOutputLabware?.(outputSlotCopies[currentOutputPage - 1].labware);

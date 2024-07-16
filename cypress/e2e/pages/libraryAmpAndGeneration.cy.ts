@@ -16,6 +16,15 @@ describe('LibraryAmpAndGeneration Page', () => {
       cy.visit('/lab/libraryGeneration');
       selectSGPNumber('SGP1008');
     });
+    describe('When updating the destination selection mode', () => {
+      before(() => {
+        cy.get('[type="radio"][name="8 Strip Tube"]').check();
+        cy.get('[type="radio"][name="96 Well Plate"]').check();
+      });
+      it('does not append destination plates', () => {
+        cy.findByTestId('pager-text-div').contains('1 of 1');
+      });
+    });
     describe('Mapping Source with 8 Strip Tube Output labware', () => {
       describe('When all required fields for mapping are fulfilled', () => {
         before(() => {
