@@ -116,7 +116,7 @@ describe('Transfer Page', () => {
         cy.get('[type="radio"][name="Scan Labware"]').check();
       });
       it('resets the destination labware', () => {
-        cy.findByTestId('pager-text-div').contains('1 of 1');
+        cy.findByTestId('pager-text-div').should('not.exist');
       });
     });
   });
