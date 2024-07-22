@@ -132,7 +132,7 @@ export const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPane
               locked={labware?.labware.barcode !== undefined}
               checkForCleanedOutAddresses
             >
-              {({ labwares, removeLabware, cleanedOutAddresses }) => {
+              {({ labwares, removeLabware }) => {
                 return (
                   <div className="flex flex-col">
                     {labwares.length > 0 && (
@@ -310,10 +310,11 @@ function SlotCopyComponent({
           hideProgressBar: true
         });
       }
-      labware =
-        !containsScannedLabware(destinations) && newLabware.length > 0
+      labware = addPlateOption
+        ? !containsScannedLabware(destinations) && newLabware.length > 0
           ? [...destinations.map((dest) => dest.labware), ...newLabware]
-          : newLabware;
+          : newLabware
+        : newLabware;
 
       send({ type: 'UPDATE_DESTINATION_LABWARE', labware });
       send({ type: 'UPDATE_DESTINATION_SELECTION_MODE', mode });
@@ -381,6 +382,22 @@ function SlotCopyComponent({
     cleanedOutInputAddresses.set(source.labware.id, source.cleanedOutAddresses ?? []);
   });
 
+  const updateDestinationModeWhenPaginating = () => {
+    //Before selecting any destination
+    if (!destinationSelectionMode.current) {
+      return undefined;
+    }
+    if (destinationSelectionMode.current === DestinationSelectionMode.SCAN) {
+      return destinationSelectionMode.current;
+    }
+    if (selectedDestination.labwareType.name === '96 well plate') {
+      destinationSelectionMode.current = DestinationSelectionMode.PLATE;
+      return DestinationSelectionMode.PLATE;
+    }
+    destinationSelectionMode.current = DestinationSelectionMode.STRIP_TUBE;
+    return DestinationSelectionMode.STRIP_TUBE;
+  };
+
   return (
     <>
       <div className="mx-auto">
@@ -412,7 +429,7 @@ function SlotCopyComponent({
               onLabwareScan={onDestinationLabwareScan}
               onDestinationSelectionModeChange={onDestinationSelectionModeChange}
               labware={destinations.find((dest) => dest.labware.id === selectedDestination.id)}
-              destinationSelectionMode={destinationSelectionMode.current}
+              destinationSelectionMode={updateDestinationModeWhenPaginating()}
             />
           }
           onSelectInputLabware={setSelectedSource}
