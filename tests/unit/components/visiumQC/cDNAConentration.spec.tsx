@@ -84,8 +84,7 @@ describe('CDNAConcentration', () => {
     expect(screen.getByTestId('comments0')).toBeInTheDocument();
     expect(screen.getByTestId('comments1')).toBeInTheDocument();
     expect(screen.getByText('CDNA CONCENTRATION (pg/\u00B5l)')).toBeInTheDocument();
-    expect(screen.getByText('MINIMUM SIZE (bp)')).toBeInTheDocument();
-    expect(screen.getByText('MAXIMUM SIZE (bp)')).toBeInTheDocument();
+    expect(screen.getByText('AVERAGE SIZE (bp)')).toBeInTheDocument();
   });
   it('displays measurement table when a Library concentration measurement type is selected', async () => {
     renderCDNAConcentration();
@@ -102,8 +101,7 @@ describe('CDNAConcentration', () => {
     expect(screen.getByTestId('comments0')).toBeInTheDocument();
     expect(screen.getByTestId('comments1')).toBeInTheDocument();
     expect(screen.getByText('LIBRARY CONCENTRATION (pg/\u00B5l)')).toBeInTheDocument();
-    expect(screen.getByText('MINIMUM SIZE (bp)')).toBeInTheDocument();
-    expect(screen.getByText('MAXIMUM SIZE (bp)')).toBeInTheDocument();
+    expect(screen.getByText('AVERAGE SIZE (bp)')).toBeInTheDocument();
     expect(screen.getByText('MAIN PEAK SIZE (bp)')).toBeInTheDocument();
   });
   it('invokes remove function when labware is removed', async () => {
