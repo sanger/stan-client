@@ -56,15 +56,11 @@ const validationSchema = Yup.object().shape({
   otherRecipients: Yup.array().optional().label('CC contacts')
 });
 
-const labwareBsContent = (labware: LabwareFlaggedFieldsFragment) => {
-  const bss = new Set(labware.slots.flatMap((slot) => slot.samples).map((sam) => sam.bioState.name.toLowerCase()));
-  if (bss.has('cdna')) {
-    return { cdna: true, other: bss.size > 1 };
-  }
-  return { cdna: false, other: bss.size > 0 };
+const labwareIsEmpty = (labware: LabwareFlaggedFieldsFragment) => {
+  return labware.slots.every((slot) => slot.samples.length === 0);
 };
 
-const labwareBioStateCheck = (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment) => {
+const labwareStateCheck = (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment) => {
   if (foundLabware.released) {
     return ['Labware ' + foundLabware.barcode + ' has already been released.'];
   }
@@ -74,29 +70,8 @@ const labwareBioStateCheck = (labwares: LabwareFlaggedFieldsFragment[], foundLab
   if (foundLabware.discarded) {
     return ['Labware ' + foundLabware.barcode + ' has been discarded.'];
   }
-  const newBsContent = labwareBsContent(foundLabware);
-  if (!newBsContent.cdna && !newBsContent.other) {
+  if (labwareIsEmpty(foundLabware)) {
     return ['Labware ' + foundLabware.barcode + ' is empty.'];
-  }
-  if (newBsContent.cdna && newBsContent.other) {
-    return ['Labware ' + foundLabware.barcode + ' contains a mix of bio states that cannot be released together.'];
-  }
-  if (labwares.length > 0) {
-    const lwBsContent = labwareBsContent(labwares[0]);
-    if (newBsContent.cdna && lwBsContent.other) {
-      return [
-        'Labware ' +
-          foundLabware.barcode +
-          ' cannot be released with the labware already scanned, because it contains cDNA.'
-      ];
-    }
-    if (newBsContent.other && lwBsContent.cdna) {
-      return [
-        'Labware ' +
-          foundLabware.barcode +
-          ' cannot be released with the labware already scanned, because it does not contain cDNA.'
-      ];
-    }
   }
   return [];
 };
@@ -335,7 +310,7 @@ function Release() {
                               onRemoveLabware(labware.barcode, values, setValues);
                             }}
                             locked={formLocked}
-                            labwareCheckFunction={labwareBioStateCheck}
+                            labwareCheckFunction={labwareStateCheck}
                             enableLocationScanner={true}
                           >
                             {values.releaseLabware.length > 0 && (
