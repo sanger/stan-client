@@ -180,11 +180,12 @@ function Search() {
     } else {
       data = uniqueTableDataRef.current ? uniqueTableDataRef.current : memoUniqueBarcodeData;
     }
+
     const fileurl = await requestDownload({
       columnData: {
-        columns: columns
+        columns: viewAllRecords ? columns : uniqueBarcodeTableColumns
       },
-      entries: data
+      entries: viewAllRecords ? data : memoUniqueBarcodeData
     });
     setFileDownloadURL(fileurl);
   }, [searchResult, requestDownload, viewAllRecords, memoUniqueBarcodeData]);
