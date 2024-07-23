@@ -55,15 +55,7 @@ const measurements: MeasurementConfigProps[] = [
   },
   {
     measurementType: [MeasurementTypes.cDNAConcentration, MeasurementTypes.LibraryConcentration],
-    name: 'MINIMUM SIZE',
-    unit: 'bp',
-    stepIncrement: '1',
-    initialMeasurementVal: '0',
-    validateFunction: validateConcentrationMeasurementValue
-  },
-  {
-    measurementType: [MeasurementTypes.cDNAConcentration, MeasurementTypes.LibraryConcentration],
-    name: 'MAXIMUM SIZE',
+    name: 'AVERAGE SIZE',
     unit: 'bp',
     stepIncrement: '1',
     initialMeasurementVal: '0',
