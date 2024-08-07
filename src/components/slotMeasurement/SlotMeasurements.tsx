@@ -133,6 +133,7 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
                   }}
                   validate={measurementProp.validateFunction}
                   min={0}
+                  style={{ minWidth: '5em' }}
                   step={measurementProp.stepIncrement}
                 />
               </>
