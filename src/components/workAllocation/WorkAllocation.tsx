@@ -342,12 +342,13 @@ export default function WorkAllocation() {
                     onCancel={() => {
                       setAddNewProjectCodeCode(false);
                     }}
-                    onSuccess={() => {
+                    onSuccess={(object) => {
+                      const name = object.name;
                       send({
                         type: 'ADD_NEWLY_CREATED_PROJECT',
-                        project: projectFactory.build({ name: addNewConfigOptionInputRef.current!.value })
+                        project: projectFactory.build({ name: name })
                       });
-                      setFieldValue('project', addNewConfigOptionInputRef.current!.value);
+                      setFieldValue('project', name);
                     }}
                     onFinish={() => {
                       setAddNewProjectCodeCode(false);
@@ -386,12 +387,13 @@ export default function WorkAllocation() {
                     onCancel={() => {
                       setAddNewOmeroProject(false);
                     }}
-                    onSuccess={async () => {
+                    onSuccess={async (object) => {
+                      const name = object.name;
                       send({
                         type: 'ADD_NEWLY_CREATED_OMERO_PROJECT',
-                        project: omeroProjectFactory.build({ name: addNewConfigOptionInputRef.current!.value })
+                        project: omeroProjectFactory.build({ name: name })
                       });
-                      await setFieldValue('omeroProject', addNewConfigOptionInputRef.current!.value);
+                      await setFieldValue('omeroProject', name);
                     }}
                     onFinish={() => {
                       setAddNewOmeroProject(false);
@@ -444,12 +446,13 @@ export default function WorkAllocation() {
                     onCancel={() => {
                       setAddNewCostCode(false);
                     }}
-                    onSuccess={() => {
+                    onSuccess={(object) => {
+                      const code = object.code;
                       send({
                         type: 'ADD_NEWLY_CREATED_COST_CODE',
-                        costCode: costCodeFactory.build({ code: addNewConfigOptionInputRef.current!.value })
+                        costCode: costCodeFactory.build({ code: code })
                       });
-                      setFieldValue('costCode', addNewConfigOptionInputRef.current!.value);
+                      setFieldValue('costCode', code);
                     }}
                     onFinish={() => {
                       setAddNewCostCode(false);

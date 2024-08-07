@@ -11,7 +11,7 @@ import { Maybe } from 'yup';
 
 export type AddNewConfigOptionProps = {
   inputRef: React.RefObject<HTMLInputElement>;
-  onSuccess: () => void;
+  onSuccess: (object: any) => void;
   onSubmit: (value: string) => Promise<any>;
   onFinish: () => void;
   onCancel: () => void;
@@ -56,7 +56,7 @@ const AddNewConfigOption = (props: AddNewConfigOptionProps) => {
         .then((data) => {
           const success = data && props.returnedDataObject in data && data[props.returnedDataObject] !== null;
           if (success) {
-            props.onSuccess();
+            props.onSuccess(data[props.returnedDataObject]);
             setServerSuccess(`Successfully added new ${props.configName}`);
           } else {
             setServerErrors(`Failed to add new ' ${props.configName}`);
