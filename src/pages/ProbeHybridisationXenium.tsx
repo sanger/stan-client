@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import {
-  GetProbePanelsQuery,
-  ProbeOperationLabware,
-  ProbeOperationRequest,
-  RecordProbeOperationMutation,
-  SlideCosting
+    GetProbePanelsQuery,
+    ProbeOperationLabware,
+    ProbeOperationRequest,
+    RecordProbeOperationMutation,
+    SlideCosting
 } from '../types/sdk';
 import AppShell from '../components/AppShell';
 import { FieldArray, Form, Formik } from 'formik';
@@ -89,7 +89,7 @@ const ProbeHybridisationXenium: React.FC = () => {
         Yup.object().shape({
           barcode: Yup.string().required().label('Barcode'),
           workNumber: Yup.string().required().label('SGP Number'),
-          kitCosting: Yup.string().oneOf(Object.values(SlideCosting)).required('Labware costing is a required field'),
+          kitCosting: Yup.string().oneOf(Object.values(SlideCosting)).required('Costing is a required field'),
           probes: Yup.array()
             .of(
               Yup.object().shape({
@@ -214,7 +214,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                                 <div className={'basis-1/4'}>
                                   <CustomReactSelect
                                     isMulti={false}
-                                    label={'Labware Cost'}
+                                    label={'Kit Costing'}
                                     name={'costingAll'}
                                     value={'costingAll'}
                                     handleChange={async (val) => {

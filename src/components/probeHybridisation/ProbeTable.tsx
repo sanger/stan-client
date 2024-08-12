@@ -24,7 +24,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
         <tr>
           <TableHeader>Barcode</TableHeader>
           <TableHeader>SGP Number</TableHeader>
-          <TableHeader>Labware Cost</TableHeader>
+          <TableHeader>Kit Costing</TableHeader>
           <TableHeader>Probe</TableHeader>
         </tr>
       </TableHead>
@@ -63,7 +63,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                     <TableHeader>Probe Panel</TableHeader>
                     <TableHeader>Lot</TableHeader>
                     <TableHeader>Plex</TableHeader>
-                    <TableHeader>Costing</TableHeader>
+                    <TableHeader>Probe Costing</TableHeader>
                     <TableHeader></TableHeader>
                   </tr>
                 </TableHead>
