@@ -127,7 +127,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
         <label>Probe Panel</label>
         <label>Lot</label>
         <label>Plex</label>
-        <label>Cost</label>
+        <label>Probe Costing</label>
         <CustomReactSelect
           dataTestId={'probe-name'}
           emptyOption={true}
