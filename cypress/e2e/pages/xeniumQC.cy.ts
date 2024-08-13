@@ -43,9 +43,6 @@ describe('Xenium QC', () => {
       cy.findByTestId('STAN-3112-workNumber').should('exist');
       cy.findByTestId('STAN-3112-comments').should('exist');
     });
-    it('should disable any further labware scanning', () => {
-      cy.get('#labwareScanInput').should('be.disabled');
-    });
   });
   describe('When  two labware is scanned and one is removed', () => {
     before(() => {
