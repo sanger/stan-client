@@ -15,6 +15,8 @@ const renderMetricReader = (sampleMetricData: SampleMetricData[]) => {
   const useFormikContextMock = jest.spyOn(Formik, 'useFormikContext');
   const getFieldMetaMock = (): XeniumMetricsForm => {
     return {
+      runName: 'Run 1',
+      runNames: ['Run 1', 'Run 2'],
       workNumber: 'SGP-1008',
       labware,
       sampleMetricData
