@@ -13,7 +13,6 @@ import { Row } from 'react-table';
 import { UploadProgress, UploadResult } from '../components/upload/useUpload';
 import MetricsReader from '../components/xeniumMetrics/MetricsReader';
 import BlueButton from '../components/buttons/BlueButton';
-import WorkNumberSelect from '../components/WorkNumberSelect';
 import * as Yup from 'yup';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { fromPromise } from 'xstate';
@@ -21,6 +20,8 @@ import { useMachine } from '@xstate/react';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
 import RoiTable, { groupByRoi } from '../components/xeniumMetrics/RoiTable';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import WorkNumberSelect from '../components/WorkNumberSelect';
 
 export type Metric = {
   name: string;
@@ -40,9 +41,17 @@ export type XeniumMetricsForm = {
   workNumber: string;
   labware: LabwareFlaggedFieldsFragment | undefined;
   sampleMetricData: Array<SampleMetricData>;
+  runName: string;
+  runNames: string[];
 };
 
-const initialValues: XeniumMetricsForm = { labware: undefined, sampleMetricData: [], workNumber: '' };
+const initialValues: XeniumMetricsForm = {
+  labware: undefined,
+  sampleMetricData: [],
+  workNumber: '',
+  runNames: [],
+  runName: ''
+};
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required(),
@@ -74,7 +83,7 @@ const validationSchema = Yup.object().shape({
 const XeniumMetrics = () => {
   const stanCore = useContext(StanCoreContext);
 
-  const getRegionsOfInterest = useCallback(
+  const getMetricOperationDetails = useCallback(
     async (
       foundLabware: LabwareFlaggedFieldsFragment,
       setValues: (values: SetStateAction<XeniumMetricsForm>, shouldValidate?: boolean) => {}
@@ -83,7 +92,7 @@ const XeniumMetrics = () => {
         const response = await stanCore.GetRegionsOfInterest({
           barcodes: [foundLabware.barcode]
         });
-        if (response.rois.length > 0 && response.rois[0].rois) {
+        if (response.rois.length > 0 && response.rois[0].rois.length > 0) {
           const groupedByRoi = groupByRoi(response.rois[0]!.rois!);
           setValues((prev) => ({
             ...prev,
@@ -98,6 +107,16 @@ const XeniumMetrics = () => {
               };
             })
           }));
+
+          const runNames = await stanCore.GetRunNames({
+            barcode: foundLabware.barcode
+          });
+          if (runNames.runNames) {
+            setValues((prev) => ({
+              ...prev,
+              runNames: runNames.runNames
+            }));
+          }
           return [];
         }
         return ['No regions of interest recorded for the labware ' + foundLabware.barcode];
@@ -123,6 +142,15 @@ const XeniumMetrics = () => {
   const [current, send] = useMachine(formMachine);
   const { serverError, submissionResult } = current.context;
 
+  const resetFormValues = (setValues: (values: SetStateAction<XeniumMetricsForm>, shouldValidate?: boolean) => {}) => {
+    setValues((prev) => ({
+      ...prev,
+      labware: undefined,
+      sampleMetricData: [],
+      workNumber: '',
+      runName: ''
+    }));
+  };
   return (
     <AppShell>
       <AppShell.Header>
@@ -138,6 +166,7 @@ const XeniumMetrics = () => {
               const request: SampleMetricsRequest = {
                 operationType: 'Xenium metrics',
                 workNumber: values.workNumber,
+                runName: values.runName,
                 barcode: values.labware!.barcode,
                 metrics: values.sampleMetricData.flatMap((data) =>
                   data.metrics.map((metric) => ({
@@ -149,34 +178,44 @@ const XeniumMetrics = () => {
               };
               send({ type: 'SUBMIT_FORM', values: request });
             }}
-            validateOnMount={true}
           >
             {({ values, setValues, setFieldValue, isValid }) => (
               <Form>
-                <div className="mt-8 space-y-2">
-                  <div>
-                    <Heading level={3}>SGP Number</Heading>
-                    <p className="mt-2">Select an SGP number to associate with this operation.</p>
-                    <div className="mt-4 md:w-1/2">
-                      <WorkNumberSelect
-                        onWorkNumberChange={(workNumber: string) => setFieldValue('workNumber', workNumber)}
-                      />
-                    </div>
-                  </div>
-                  <Heading level={2}>Labware</Heading>
-                  <p>Please scan in a labware you wish to store metrics</p>
-                  <LabwareScanner
-                    limit={1}
-                    enableFlaggedLabwareCheck
-                    labwareCheckFunction={(
-                      labwares: LabwareFlaggedFieldsFragment[],
-                      foundLabware: LabwareFlaggedFieldsFragment
-                    ) => {
-                      return getRegionsOfInterest(foundLabware, setValues);
-                    }}
-                  >
-                    {({ labwares, removeLabware }) =>
-                      labwares.map((labware, index) => (
+                <Heading level={2} className="space-y-4 mb-6">
+                  Labware
+                </Heading>
+                <LabwareScanner
+                  limit={1}
+                  enableFlaggedLabwareCheck
+                  labwareCheckFunction={(
+                    labwares: LabwareFlaggedFieldsFragment[],
+                    foundLabware: LabwareFlaggedFieldsFragment
+                  ) => {
+                    return getMetricOperationDetails(foundLabware, setValues);
+                  }}
+                >
+                  {({ labwares, removeLabware }) =>
+                    labwares.map((labware, index) => (
+                      <div className="space-y-4 py-4" key={index}>
+                        <Heading level={3}>Metric Operation Details</Heading>
+                        <div className="grid grid-cols-2 gap-x-6 mt-2 pt-4">
+                          <WorkNumberSelect
+                            label={'SGP Number'}
+                            onWorkNumberChange={(workNumber: string) => setFieldValue('workNumber', workNumber)}
+                          />
+                          <CustomReactSelect
+                            label={'Run Name'}
+                            handleChange={(val) => setFieldValue('runName', (val as OptionType).label)}
+                            emptyOption={true}
+                            dataTestId="runName"
+                            options={values.runNames.map((runName) => {
+                              return {
+                                label: runName,
+                                value: runName
+                              };
+                            })}
+                          />
+                        </div>
                         <Panel key={labware.barcode}>
                           <div className="grid grid-cols-2 mb-4">
                             {labware.flagged && FlaggedBarcodeLink(labware.barcode)}
@@ -189,6 +228,7 @@ const XeniumMetrics = () => {
                             <div className="flex flex-row items-center justify-end">
                               <RemoveButton
                                 onClick={() => {
+                                  resetFormValues(setValues);
                                   removeLabware(labware.barcode);
                                 }}
                               />
@@ -213,24 +253,26 @@ const XeniumMetrics = () => {
                             </div>
                           )}
                         </Panel>
-                      ))
-                    }
-                  </LabwareScanner>
+                      </div>
+                    ))
+                  }
+                </LabwareScanner>
+                {values.labware && values.sampleMetricData.length > 0 && (
                   <div className={'sm:flex pt-4 sm:flex-row justify-end'}>
                     <BlueButton type="submit" disabled={!isValid}>
                       Save
                     </BlueButton>
                   </div>
-                  <OperationCompleteModal
-                    show={submissionResult !== undefined}
-                    message={'Xenium Metrics recorded on labware ' + values.labware?.barcode}
-                  >
-                    <p>
-                      If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
-                      the Home screen.
-                    </p>
-                  </OperationCompleteModal>
-                </div>
+                )}
+                <OperationCompleteModal
+                  show={submissionResult !== undefined}
+                  message={'Xenium Metrics recorded on labware ' + values.labware?.barcode}
+                >
+                  <p>
+                    If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
+                    the Home screen.
+                  </p>
+                </OperationCompleteModal>
               </Form>
             )}
           </Formik>

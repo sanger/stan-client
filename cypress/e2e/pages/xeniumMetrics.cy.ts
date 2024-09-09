@@ -13,17 +13,14 @@ describe('Xenium Metrics', () => {
   });
 
   describe('On load', () => {
-    it('displays the pagw without classing', () => {
+    it('displays the page without classing', () => {
       cy.findByText('Xenium Metrics').should('be.visible');
-    });
-    it('displays the sgp number selector', () => {
-      cy.findByTestId('workNumber').should('be.visible');
     });
     it('displays the labware scanner', () => {
       cy.findByText('Labware').should('be.visible');
     });
-    it('disables save button', () => {
-      cy.findByRole('button', { name: 'Save' }).should('be.disabled');
+    it('hides the save button', () => {
+      cy.findByRole('button', { name: 'Save' }).should('not.exist');
     });
   });
 
@@ -33,6 +30,12 @@ describe('Xenium Metrics', () => {
     });
     it('displays the region of interest table', () => {
       cy.findByRole('table').should('be.visible');
+    });
+    it('displays the sgp number selector', () => {
+      cy.findByTestId('workNumber').should('be.visible');
+    });
+    it('displays the run name selector', () => {
+      cy.findByTestId('runName').should('be.visible');
     });
     it('disables the labware scanner', () => {
       cy.findByTestId('input').should('be.disabled');
@@ -57,8 +60,13 @@ describe('Xenium Metrics', () => {
     it('displays a message error', () => {
       cy.findByText('No regions of interest recorded for the labware STAN-3111').should('be.visible');
     });
-    it('kepps the labware scanner enabled', () => {
+    it('keeps the labware scanner enabled', () => {
       cy.findByTestId('input').should('be.enabled');
+    });
+    it('doe snot display the metrics details', () => {
+      cy.findByTestId('runName').should('not.exist');
+      cy.findByTestId('workNumber').should('not.exist');
+      cy.findByRole('table').should('not.exist');
     });
   });
   describe('When a metric file is uploaded and sgp number is selected', () => {
@@ -109,8 +117,8 @@ describe('Xenium Metrics', () => {
 });
 
 const fillInForm = () => {
-  selectSGPNumber('SGP1008');
   cy.get('#labwareScanInput').type('STAN-3111{enter}');
+  selectSGPNumber('SGP1008');
   cy.get('#file-0')
     .scrollIntoView()
     .selectFile(
