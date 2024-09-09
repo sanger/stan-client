@@ -50,7 +50,7 @@
     "tailwindcss": "~3.1.4",
     "typescript": "5.4.3",
     "use-immer": "^0.9.0",
-    "webpack": "5.76.0",
+    "webpack": "5.94.0",
     "xlsx": "^0.18.5",
     "xstate": "^5.3.1",
     "yup": "^1.2.0"
