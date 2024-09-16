@@ -25,6 +25,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
           <TableHeader>Barcode</TableHeader>
           <TableHeader>SGP Number</TableHeader>
           <TableHeader>Kit Costing</TableHeader>
+          <TableHeader>Sample Prep Reagent Lot</TableHeader>
           <TableHeader>Probe</TableHeader>
         </tr>
       </TableHead>
@@ -57,6 +58,13 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
               />
             </TableCell>
             <TableCell>
+              <FormikInput
+                label=""
+                data-testid={`labware.${lwIndex}.samplePrepReagentLot`}
+                name={`labware.${lwIndex}.samplePrepReagentLot`}
+              />
+            </TableCell>
+            <TableCell>
               <Table>
                 <TableHead>
                   <tr>
@@ -86,7 +94,6 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                           label={''}
                           data-testid={`${probeLw.barcode}-${probeIndex}-lot`}
                           name={`labware.${lwIndex}.probes.${probeIndex}.lot`}
-                          //width={100}
                         />
                       </TableCell>
                       <TableCell>
@@ -97,7 +104,6 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                           data-testid={`${probeLw.barcode}-${probeIndex}-plex`}
                           min={0}
                           value={probe.plex > 0 ? probe.plex : ''}
-                          //   width={50}
                         />
                       </TableCell>
                       <TableCell>

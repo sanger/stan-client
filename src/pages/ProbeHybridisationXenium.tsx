@@ -37,6 +37,7 @@ export type ProbeHybridisationXeniumFormValues = {
   performed: string;
   workNumberAll: string;
   costingAll?: string;
+  samplePrepReagentLot?: string;
 };
 export const probeLotDefault = { name: '', lot: '', plex: 0 };
 export const lotRegx = /^[A-Z0-9_]{1,25}$/;
@@ -44,7 +45,8 @@ export const lotRegx = /^[A-Z0-9_]{1,25}$/;
 const formInitialValues: ProbeHybridisationXeniumFormValues = {
   labware: [],
   performed: getCurrentDateTime(),
-  workNumberAll: ''
+  workNumberAll: '',
+  samplePrepReagentLot: ''
 };
 const ProbeHybridisationXenium: React.FC = () => {
   const probePanelInfo = useLoaderData() as GetProbePanelsQuery;
@@ -84,12 +86,17 @@ const ProbeHybridisationXenium: React.FC = () => {
       .max(currentTime, 'Please select a date and time on or before current time')
       .required('Start Time is a required field')
       .label('Start Time'),
+    samplePrepReagentLot: Yup.string().matches(/^\d{6}$/, 'Sample Prep Reagent Lot should be a string of 6 digits'),
     labware: Yup.array()
       .of(
         Yup.object().shape({
           barcode: Yup.string().required().label('Barcode'),
           workNumber: Yup.string().required().label('SGP Number'),
           kitCosting: Yup.string().oneOf(Object.values(SlideCosting)).required('Costing is a required field'),
+          samplePrepReagentLot: Yup.string().matches(
+            /^\d{6}$/,
+            'Sample Prep Reagent Lot should be a string of 6 digits'
+          ),
           probes: Yup.array()
             .of(
               Yup.object().shape({
@@ -189,7 +196,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                   </motion.div>
                   {values.labware.length > 0 && (
                     <>
-                      <div className="mx-auto max-w-screen-lg py-2 mb-6">
+                      <div className="mx-auto max-w-screen-xl py-2 mb-6">
                         <div className="flex flex-row mt-4 p-3 bg-gray-100 rounded-md">
                           <motion.div variants={variants.fadeInWithLift} className="space-y-4 p-2 pr-5">
                             <Heading level={3}>Apply to all</Heading>
@@ -202,11 +209,17 @@ const ProbeHybridisationXenium: React.FC = () => {
                                     label={'SGP Number'}
                                     name={'workNumberAll'}
                                     dataTestId={'workNumberAll'}
-                                    onWorkNumberChange={(workNumber) => {
-                                      setFieldValue('workNumberAll', workNumber);
-                                      values.labware.forEach((lw, index) =>
-                                        setFieldValue(`labware.${index}.workNumber`, workNumber)
-                                      );
+                                    onWorkNumberChange={async (workNumber) => {
+                                      await setValues((prev) => {
+                                        return {
+                                          ...prev,
+                                          workNumberAll: workNumber,
+                                          labware: prev.labware.map((lw) => ({
+                                            ...lw,
+                                            workNumber
+                                          }))
+                                        };
+                                      });
                                     }}
                                     requiredField={false}
                                   />
@@ -236,6 +249,20 @@ const ProbeHybridisationXenium: React.FC = () => {
                                     options={selectOptionValues(slideCostingOptions, 'label', 'value')}
                                   />
                                 </div>
+                                <FormikInput
+                                  label={'Sample Prep Reagent Lot'}
+                                  name={'samplePrepReagentLot'}
+                                  onChange={async (e: React.ChangeEvent<HTMLSelectElement>) => {
+                                    await setValues((prev) => ({
+                                      ...prev,
+                                      samplePrepReagentLot: e.target.value,
+                                      labware: prev.labware.map((lw) => ({
+                                        ...lw,
+                                        samplePrepReagentLot: e.target.value
+                                      }))
+                                    }));
+                                  }}
+                                />
                                 <ProbeAddPanel probePanels={probePanelInfo.probePanels} />
                               </div>
                             </div>
