@@ -6573,7 +6573,7 @@ export const AddEquipmentDocument = gql`
     ${EquipmentFieldsFragmentDoc}`;
 export const GetXeniumQcInfoDocument = gql`
     query GetXeniumQCInfo {
-  comments(includeDisabled: false, category: "Xenium QC") {
+  comments(includeDisabled: false, category: "Xenium analyser QC") {
     ...CommentFields
   }
 }
