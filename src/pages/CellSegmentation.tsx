@@ -49,14 +49,14 @@ const defaultFormValues: CellSegmentationFormProps = {
 };
 
 const validationSchema = Yup.object().shape({
-  reagentLotAll: Yup.string().matches(/^\d{6}$/, 'Reagent Lot should be a number of 6 digits'),
+  reagentLotAll: Yup.string().matches(/^\d{6}$/, 'Reagent Lot should be 6-digit number'),
   cellSegmentation: Yup.array().of(
     Yup.object().shape({
       workNumber: Yup.string().required('SGP number is required'),
       performed: Yup.string().required('Performed time is required'),
       costing: Yup.string().oneOf(Object.keys(SlideCosting)).required('Costing is required'),
       comments: Yup.array().of(Yup.string()).optional(),
-      reagentLot: Yup.string().matches(/^\d{6}$/, 'Reagent Lot should be a number of 6 digits')
+      reagentLot: Yup.string().matches(/^\d{6}$/, 'Reagent Lot should be a 6-digit number')
     })
   )
 });

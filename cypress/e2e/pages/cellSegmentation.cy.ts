@@ -85,7 +85,7 @@ describe('Cell Segmentation Page', () => {
         cy.findByTestId('cellSegmentation.0.reagentLot').clear().type('1234567').blur();
       });
       it('validates the reagent lot', () => {
-        cy.findByText('Reagent Lot should be a number of 6 digits').should('be.visible');
+        cy.findByText('Reagent Lot should be a 6-digit number').should('be.visible');
       });
     });
     describe('when all values are entered', () => {
