@@ -1,6 +1,7 @@
 import { assign, createMachine, fromPromise } from 'xstate';
 import { NewFlaggedLabwareLayout, OperationTypeName } from '../../../types/stan';
 import {
+  ExecutionType,
   FindPermDataQuery,
   LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
@@ -70,6 +71,11 @@ export interface SlotCopyContext {
   serverErrors?: Maybe<ClientError>;
 
   destinationSelectionMode?: DestinationSelectionMode;
+
+  /**
+   * Specifies if the transfer is performed manually or automatically
+   */
+  executionType?: ExecutionType;
 }
 
 type UpdateSlotCopyContentType = {
@@ -159,6 +165,11 @@ type UpdateDestinationSelectionModeEvent = {
   mode: DestinationSelectionMode;
 };
 
+type UpdateTransferTypeEvent = {
+  type: 'UPDATE_TRANSFER_TYPE_MODE';
+  mode: ExecutionType;
+};
+
 export type SlotCopyEvent =
   | { type: 'UPDATE_WORK_NUMBER'; workNumber: string }
   | UpdateSourceLabware
@@ -175,7 +186,8 @@ export type SlotCopyEvent =
   | SaveEvent
   | FindPermDataEvent
   | SlotCopyDoneEvent
-  | SlotCopyErrorEvent;
+  | SlotCopyErrorEvent
+  | UpdateTransferTypeEvent;
 
 /**
  * SlotCopy Machine Config
@@ -204,6 +216,9 @@ export const slotCopyMachine = createMachine(
           },
           UPDATE_WORK_NUMBER: {
             actions: 'assignWorkNumber'
+          },
+          UPDATE_TRANSFER_TYPE_MODE: {
+            actions: 'assignTransferType'
           },
           UPDATE_SLOT_COPY_CONTENT: [
             {
@@ -252,6 +267,9 @@ export const slotCopyMachine = createMachine(
           UPDATE_WORK_NUMBER: {
             actions: 'assignWorkNumber'
           },
+          UPDATE_TRANSFER_TYPE_MODE: {
+            actions: 'assignTransferType'
+          },
           UPDATE_SLOT_COPY_CONTENT: [
             {
               target: 'mapping',
@@ -297,6 +315,7 @@ export const slotCopyMachine = createMachine(
             stanCore.SlotCopy({
               request: {
                 workNumber: input.workNumber,
+                executionType: input.executionType,
                 operationType: input.operationType,
                 destinations: input.destinations.map((dest: Destination) => dest.slotCopyDetails),
                 sources: input.sources.reduce((arr: SlotCopySource[], curr: Source) => {
@@ -312,7 +331,8 @@ export const slotCopyMachine = createMachine(
             workNumber: context.workNumber,
             operationType: context.operationType,
             destinations: context.destinations,
-            sources: context.sources
+            sources: context.sources,
+            executionType: context.executionType
           }),
           onDone: {
             target: 'copied',
@@ -551,6 +571,10 @@ export const slotCopyMachine = createMachine(
       assignDestinationSelectionMode: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_DESTINATION_SELECTION_MODE') return context;
         return { ...context, destinationSelectionMode: event.mode };
+      }),
+      assignTransferType: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_TRANSFER_TYPE_MODE') return context;
+        return { ...context, executionType: event.mode };
       })
     }
   }
