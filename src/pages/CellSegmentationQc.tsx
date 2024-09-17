@@ -101,14 +101,16 @@ export const CellSegmentationQc = ({ initialFormValues = defaultFormValues }) =>
               validationSchema={validationSchema}
               validateOnMount={true}
             >
-              {({ isValid }) => (
+              {({ isValid, values }) => (
                 <Form>
                   <Segmentation comments={comments} isQc={true} />
-                  <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
-                    <BlueButton type="submit" disabled={!isValid}>
-                      Save
-                    </BlueButton>
-                  </div>
+                  {values.cellSegmentation.length > 0 && (
+                    <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
+                      <BlueButton type="submit" disabled={!isValid}>
+                        Save
+                      </BlueButton>
+                    </div>
+                  )}
                 </Form>
               )}
             </Formik>

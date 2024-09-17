@@ -80,6 +80,14 @@ describe('Cell Segmentation Page', () => {
         cy.findByText('Performed time is required').should('be.visible');
       });
     });
+    describe('when reagent lot is incorrectly specified', () => {
+      beforeEach(() => {
+        cy.findByTestId('cellSegmentation.0.reagentLot').clear().type('1234567').blur();
+      });
+      it('validates the reagent lot', () => {
+        cy.findByText('Reagent Lot should be a number of 6 digits').should('be.visible');
+      });
+    });
     describe('when all values are entered', () => {
       beforeEach(() => {
         fillInRequest();

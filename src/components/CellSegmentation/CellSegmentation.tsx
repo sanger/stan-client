@@ -16,6 +16,8 @@ import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import WorkNumberSelect from '../WorkNumberSelect';
 import LabwareSamplesTable from './LabwareSamplesTable';
 import { capitalize } from 'lodash';
+import StyledLink from '../StyledLink';
+import FlagIcon from '../icons/FlagIcon';
 
 type CellSegmentationPageProps = {
   comments: CommentFieldsFragment[];
@@ -41,6 +43,21 @@ type CellSegmentationFormProps = {
 export const slideCostingOptions: OptionType[] = Object.values(SlideCosting).map((val) => {
   return { value: capitalize(val), label: val };
 });
+
+const labwareLink = (labware: LabwareFlaggedFieldsFragment) => {
+  return (
+    <div className="whitespace-nowrap">
+      <StyledLink
+        className="text-sp bg-transparent hover:text-sp-700 active:text-sp-800"
+        to={`/labware/${labware.barcode}`}
+        target="_blank"
+      >
+        {labware.flagged && <FlagIcon className="inline-block h-5 w-5 -ml-1 mr-1 mb-2" />}
+        {labware.barcode}
+      </StyledLink>
+    </div>
+  );
+};
 export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
   const { values, setFieldValue, setValues } = useFormikContext<CellSegmentationFormProps>();
   return (
@@ -84,16 +101,17 @@ export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
                       }}
                     />
                   </div>
-                  <LabwareSamplesTable labware={labware} />
+                  {labwareLink(labware)}
+                  <LabwareSamplesTable labware={labware} showBarcode={false} />
                 </Panel>
               ))}
               {labwares.length > 0 && (
                 <div>
-                  <div className="mx-auto max-w-screen-lg py-2 mb-6">
+                  <div className="mx-auto max-w-screen-lx py-2 mb-6">
                     <div className="mt-4 p-3 bg-gray-100 rounded-md" data-testid="apply-to-all-div">
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4 p-2 pr-5">
                         <Heading level={3}>Apply to all</Heading>
-                        <div className="grid grid-cols-2 gap-4 mt-2 pt-4">
+                        <div className="grid grid-cols-3 gap-4 mt-2 pt-4">
                           <div className={'flex flex-col'}>
                             <WorkNumberSelect
                               label={'SGP Number'}
@@ -129,29 +147,6 @@ export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
                               }}
                             />
                           </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 mt-2 pt-4">
-                          {!isQc && (
-                            <div className={'flex flex-col'}>
-                              <CustomReactSelect
-                                label={'Costing'}
-                                options={selectOptionValues(slideCostingOptions, 'label', 'value')}
-                                name="costingAll"
-                                dataTestId="costingAll"
-                                emptyOption={true}
-                                onChange={async (val) => {
-                                  const costingAll = (val as OptionType).value;
-                                  await setValues((prev) => {
-                                    let cellSegmentation = [...prev.cellSegmentation];
-                                    cellSegmentation.forEach((cellSeg) => {
-                                      cellSeg.costing = costingAll;
-                                    });
-                                    return { ...prev, cellSegmentation, costingAll };
-                                  });
-                                }}
-                              />
-                            </div>
-                          )}
                           <div className={'flex flex-col'}>
                             <CustomReactSelect
                               label={'Comment'}
@@ -176,6 +171,45 @@ export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
                             />
                           </div>
                         </div>
+                        <div className="grid grid-cols-3 gap-4 mt-2 pt-4">
+                          {!isQc && (
+                            <>
+                              <div className={'flex flex-col'}>
+                                <CustomReactSelect
+                                  label={'Costing'}
+                                  options={selectOptionValues(slideCostingOptions, 'label', 'value')}
+                                  name="costingAll"
+                                  dataTestId="costingAll"
+                                  emptyOption={true}
+                                  onChange={async (val) => {
+                                    const costingAll = (val as OptionType).value;
+                                    await setValues((prev) => {
+                                      let cellSegmentation = [...prev.cellSegmentation];
+                                      cellSegmentation.forEach((cellSeg) => {
+                                        cellSeg.costing = costingAll;
+                                      });
+                                      return { ...prev, cellSegmentation, costingAll };
+                                    });
+                                  }}
+                                />
+                              </div>
+                              <div className={'flex flex-col'}>
+                                <FormikInput
+                                  label={'Reagent Lot'}
+                                  name={'reagentLotAll'}
+                                  onChange={async (e: React.ChangeEvent<HTMLSelectElement>) => {
+                                    await setValues((prev) => {
+                                      const cellSegmentation = prev.cellSegmentation.map((cellSeg) => {
+                                        return { ...cellSeg, reagentLot: e.target.value };
+                                      });
+                                      return { ...prev, cellSegmentation, reagentLotAll: e.target.value };
+                                    });
+                                  }}
+                                />
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </motion.div>
                     </div>
                   </div>
@@ -187,6 +221,7 @@ export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
                           <TableHeader>SGP Number</TableHeader>
                           <TableHeader>Performed</TableHeader>
                           {!isQc && <TableHeader>Costing</TableHeader>}
+                          {!isQc && <TableHeader>Reagent Lot</TableHeader>}
                           <TableHeader>Comment</TableHeader>
                         </tr>
                       </TableHead>
@@ -214,21 +249,31 @@ export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
                                 />
                               </TableCell>
                               {!isQc && (
-                                <TableCell>
-                                  <CustomReactSelect
-                                    options={selectOptionValues(slideCostingOptions, 'label', 'value')}
-                                    name={`cellSegmentation.${index}.costing`}
-                                    dataTestId={`cellSegmentation.${index}.costing`}
-                                    emptyOption={true}
-                                    value={cellSeg.costing}
-                                    onChange={async (val) => {
-                                      await setFieldValue(
-                                        `cellSegmentation.${index}.costing`,
-                                        (val as OptionType).value
-                                      );
-                                    }}
-                                  />
-                                </TableCell>
+                                <>
+                                  <TableCell>
+                                    <CustomReactSelect
+                                      options={selectOptionValues(slideCostingOptions, 'label', 'value')}
+                                      name={`cellSegmentation.${index}.costing`}
+                                      dataTestId={`cellSegmentation.${index}.costing`}
+                                      emptyOption={true}
+                                      value={cellSeg.costing}
+                                      onChange={async (val) => {
+                                        await setFieldValue(
+                                          `cellSegmentation.${index}.costing`,
+                                          (val as OptionType).value
+                                        );
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell>
+                                    <FormikInput
+                                      label={''}
+                                      name={`cellSegmentation.${index}.reagentLot`}
+                                      data-testid={`cellSegmentation.${index}.reagentLot`}
+                                      className={'w-2/5'}
+                                    />
+                                  </TableCell>
+                                </>
                               )}
                               <TableCell>
                                 <CustomReactSelect
