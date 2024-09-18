@@ -8,7 +8,7 @@ import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
 import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
-import { LabwareFlaggedFieldsFragment } from '../types/sdk';
+import { ExecutionType, LabwareFlaggedFieldsFragment } from '../types/sdk';
 import slotCopyMachine from '../lib/machines/slotCopy/slotCopyMachine';
 import { Link, useNavigate } from 'react-router-dom';
 import { reload } from '../lib/sdk';
@@ -19,6 +19,7 @@ import { DestinationSelectionMode, SlotCopyMode } from '../components/slotMapper
 import { objectKeys } from '../lib/helpers';
 import SlotCopyComponent from '../components/libraryGeneration/SlotCopyComponent';
 import { LabwareWithoutPermConfirmationModal } from '../components/libraryGeneration/LabwareWithoutPermConfirmationModal';
+import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
 
 type PageParams = {
   title: string;
@@ -60,8 +61,15 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
 
-  const { serverErrors, sourceLabwarePermData, sources, destinations, slotCopyResults, destinationSelectionMode } =
-    current.context;
+  const {
+    serverErrors,
+    sourceLabwarePermData,
+    sources,
+    destinations,
+    slotCopyResults,
+    destinationSelectionMode,
+    executionType
+  } = current.context;
 
   const navigate = useNavigate();
 
@@ -150,6 +158,27 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             <p className="mt-2">Select an SGP number to associate with this operation.</p>
             <div className="my-4 md:w-1/2">
               <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
+            </div>
+          </div>
+          <div className="mb-8">
+            <Heading level={4}>Transfer Type</Heading>
+            <div className="grid grid-cols-2 w-1/2" data-testid="transfer-type">
+              <div className="flex items-center">Select a transfer type</div>
+              <RadioGroup label="" name={'transfer-type'} withFormik={false}>
+                {Object.values(ExecutionType).map((type) => (
+                  <RadioButtonInput
+                    key={type}
+                    data-testid={`${type}-transfer`}
+                    name={type}
+                    value={type}
+                    checked={type === executionType}
+                    onChange={() => {
+                      send({ type: 'UPDATE_TRANSFER_TYPE_MODE', mode: type });
+                    }}
+                    label={type}
+                  />
+                ))}
+              </RadioGroup>
             </div>
           </div>
           <SlotCopyComponent
