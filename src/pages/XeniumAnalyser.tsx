@@ -182,7 +182,7 @@ const XeniumAnalyser = () => {
           position: Yup.string().required(),
           decodingConsumablesLot: Yup.string()
             .optional()
-            .matches(/^\d{6}$/, 'Consumables lot number should be a 6 digit number'),
+            .matches(/^\d{6}$/, 'Consumables lot number should be a 6-digit number'),
           samples: Yup.array()
             .of(
               Yup.object().shape({
