@@ -53,6 +53,7 @@ type LabwareSamples = {
 type AnalyserLabwareForm = {
   labware: LabwareFlaggedFieldsFragment;
   workNumber: string;
+  decodingConsumablesLot?: string;
   position?: CassettePosition;
   samples: Array<SampleRoi>;
   analyserScanData?: AnalyserScanDataFieldsFragment;
@@ -178,7 +179,10 @@ const XeniumAnalyser = () => {
       .of(
         Yup.object().shape({
           workNumber: Yup.string().required().label('SGP Number'),
-          position: Yup.string().required().label('Cassette Position'),
+          position: Yup.string().required(),
+          decodingConsumablesLot: Yup.string()
+            .optional()
+            .matches(/^\d{6}$/, 'Consumables lot number should be a 6-digit number'),
           samples: Yup.array()
             .of(
               Yup.object().shape({
@@ -237,6 +241,7 @@ const XeniumAnalyser = () => {
                     labware,
                     workNumber: values.workNumberAll,
                     position: undefined,
+                    decodingConsumablesLot: undefined,
                     samples: [],
                     analyserScanData: res.analyserScanData
                   });
@@ -254,6 +259,7 @@ const XeniumAnalyser = () => {
                 labware,
                 workNumber: values.workNumberAll,
                 position: undefined,
+                decodingConsumablesLot: undefined,
                 samples: []
               });
               return { ...prev };
@@ -309,6 +315,7 @@ const XeniumAnalyser = () => {
                   return {
                     barcode: lw.labware.barcode,
                     workNumber: lw.workNumber,
+                    decodingConsumablesLot: lw.decodingConsumablesLot,
                     position: lw.position?.toLowerCase() === 'left' ? CassettePosition.Left : CassettePosition.Right,
                     samples: labwareSample
                       ? labwareSample.samples.map((sample) => {
@@ -434,11 +441,17 @@ const XeniumAnalyser = () => {
                           label={'SGP Number'}
                           name={'workNumberAll'}
                           dataTestId={'workNumberAll'}
-                          onWorkNumberChange={(workNumber) => {
-                            setFieldValue('workNumberAll', workNumber);
-                            values.labware.forEach((lw, index) =>
-                              setFieldValue(`labware.${index}.workNumber`, workNumber)
-                            );
+                          onWorkNumberChange={async (workNumber) => {
+                            await setValues((prev) => {
+                              return {
+                                ...prev,
+                                workNumberAll: workNumber,
+                                labware: prev.labware.map((lw) => ({
+                                  ...lw,
+                                  workNumber
+                                }))
+                              };
+                            });
                           }}
                           requiredField={false}
                         />
@@ -449,6 +462,7 @@ const XeniumAnalyser = () => {
                             <tr>
                               <TableHeader>Barcode</TableHeader>
                               <TableHeader>SGP Number</TableHeader>
+                              <TableHeader>Decoding consumables lot number</TableHeader>
                               <TableHeader>Cassette Position</TableHeader>
                               <TableHeader>Samples</TableHeader>
                             </tr>
@@ -468,6 +482,15 @@ const XeniumAnalyser = () => {
                                     requiredField={true}
                                   />
                                   <FormikErrorMessage name={`labware.${lwIndex}.workNumber`} />
+                                </TableCell>
+                                <TableCell className={'w-20'}>
+                                  <div className={'flex flex-col'}>
+                                    <FormikInput
+                                      label={''}
+                                      name={`labware.${lwIndex}.decodingConsumablesLot`}
+                                      data-testid={`labware.${lwIndex}.decodingConsumablesLot`}
+                                    />
+                                  </div>
                                 </TableCell>
                                 <TableCell>
                                   <CustomReactSelect
