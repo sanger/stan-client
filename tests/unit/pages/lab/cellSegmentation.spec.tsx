@@ -51,13 +51,15 @@ describe('Cell Segmentation', () => {
                   performed: getCurrentDateTime(),
                   costing: '',
                   comments: [],
-                  workNumber: ''
+                  workNumber: '',
+                  reagentLot: ''
                 }
               ],
               workNumberAll: '',
               performedAll: getCurrentDateTime(),
               costingAll: '',
-              commentsAll: []
+              commentsAll: [],
+              reagentLotAll: ''
             }}
           />
         </BrowserRouter>

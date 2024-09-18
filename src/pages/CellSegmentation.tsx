@@ -27,6 +27,7 @@ type CellSegmentationProps = {
   performed: string;
   costing: string;
   comments?: string[];
+  reagentLot?: string;
 };
 
 export type CellSegmentationFormProps = {
@@ -35,10 +36,12 @@ export type CellSegmentationFormProps = {
   performedAll: string;
   costingAll: string;
   commentsAll: string[];
+  reagentLotAll: string;
 };
 
 const defaultFormValues: CellSegmentationFormProps = {
   cellSegmentation: [],
+  reagentLotAll: '',
   workNumberAll: '',
   performedAll: getCurrentDateTime(),
   costingAll: '',
@@ -46,12 +49,14 @@ const defaultFormValues: CellSegmentationFormProps = {
 };
 
 const validationSchema = Yup.object().shape({
+  reagentLotAll: Yup.string().matches(/^\d{6}$/, 'Reagent Lot should be 6-digit number'),
   cellSegmentation: Yup.array().of(
     Yup.object().shape({
       workNumber: Yup.string().required('SGP number is required'),
       performed: Yup.string().required('Performed time is required'),
       costing: Yup.string().oneOf(Object.keys(SlideCosting)).required('Costing is required'),
-      comments: Yup.array().of(Yup.string()).optional()
+      comments: Yup.array().of(Yup.string()).optional(),
+      reagentLot: Yup.string().matches(/^\d{6}$/, 'Reagent Lot should be a 6-digit number')
     })
   )
 });
@@ -63,7 +68,8 @@ const toSegmentationRequest = (values: CellSegmentationFormProps): SegmentationR
       workNumber: cellSeg.workNumber,
       performed: formatDateTimeForCore(cellSeg.performed),
       costing: SlideCosting[cellSeg.costing as keyof typeof SlideCosting],
-      commentIds: cellSeg.comments ? cellSeg.comments.map((comment) => parseInt(comment)) : []
+      commentIds: cellSeg.comments ? cellSeg.comments.map((comment) => parseInt(comment)) : [],
+      reagentLot: cellSeg.reagentLot
     };
   });
   return {
@@ -107,14 +113,16 @@ export const CellSegmentation = ({ initialFormValues = defaultFormValues }) => {
               validationSchema={validationSchema}
               validateOnMount={true}
             >
-              {({ isValid }) => (
+              {({ isValid, values }) => (
                 <Form>
                   <Segmentation comments={comments} isQc={false} />
-                  <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
-                    <BlueButton type="submit" disabled={!isValid}>
-                      Save
-                    </BlueButton>
-                  </div>
+                  {values.cellSegmentation.length > 0 && (
+                    <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
+                      <BlueButton type="submit" disabled={!isValid}>
+                        Save
+                      </BlueButton>
+                    </div>
+                  )}
                 </Form>
               )}
             </Formik>
