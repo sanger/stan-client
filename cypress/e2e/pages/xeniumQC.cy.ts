@@ -3,8 +3,10 @@ import { RecordQcLabwareMutation, RecordQcLabwareMutationVariables } from '../..
 import commentRepository from '../../../src/mocks/repositories/commentRepository';
 import { HttpResponse } from 'msw';
 
-describe('Xenium QC', () => {
-  const comments = commentRepository.findAll().filter((comment) => comment.category === 'Xenium QC' && comment.enabled);
+describe('Xenium Analyser QC', () => {
+  const comments = commentRepository
+    .findAll()
+    .filter((comment) => comment.category === 'Xenium analyser QC' && comment.enabled);
 
   before(() => {
     cy.visit('/lab/xenium_qc');
@@ -12,7 +14,7 @@ describe('Xenium QC', () => {
 
   describe('On load', () => {
     it('displays the correct title', () => {
-      cy.findByText('Xenium QC').should('be.visible');
+      cy.findByText('Xenium Analyser QC').should('be.visible');
     });
     it('displays the labware scanner', () => {
       cy.findByText('Labware').should('be.visible');
@@ -181,7 +183,7 @@ describe('Xenium QC', () => {
       });
 
       it('shows a success message', () => {
-        cy.findByText('Xenium QC recorded on all labware').should('be.visible');
+        cy.findByText('Xenium Analyser QC recorded on all labware').should('be.visible');
       });
     });
   });
