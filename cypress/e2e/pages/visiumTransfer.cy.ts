@@ -13,6 +13,11 @@ describe('Transfer Page', () => {
     before(() => {
       cy.visit('/lab/transfer');
     });
+
+    it('loads with no transfer type checked', () => {
+      cy.findByTestId('automated-transfer').should('not.be.checked');
+      cy.findByTestId('manual-transfer').should('not.be.checked');
+    });
     it('loads with no output labware type is checked', () => {
       cy.findByTestId('96 Well Plate').should('not.be.checked');
       cy.findByTestId('8 Strip Tube').should('not.be.checked');

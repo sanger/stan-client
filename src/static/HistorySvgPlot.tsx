@@ -1104,7 +1104,7 @@ export const HistorySvgPlot = `
   <text x="1080" y="8349" font-size="16" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip74); ">User: cj7</text>
   <text x="1080" y="8365" font-size="16" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip74); ">STAN-165F9</text>
   <rect x="1075" y="8425" width="160" height="90" style="stroke: rgb(0,0,0); fill: rgb(255,255,255); " />
-  <text x="1080" y="8441" font-size="16" font-weight="bold" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip75); ">Xenium QC</text>
+  <text x="1080" y="8441" font-size="16" font-weight="bold" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip75); ">Xenium Analyser QC</text>
   <text x="1080" y="8457" font-size="16" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip75); ">CTRL_007</text>
   <text x="1080" y="8473" font-size="16" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip75); ">Tissue; s8-15</text>
   <text x="1080" y="8489" font-size="16" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip75); ">User: cj7</text>
@@ -1296,7 +1296,7 @@ export const HistorySvgPlot = `
   <text x="870" y="12829" font-size="16" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip106); ">User: cj7</text>
   <text x="870" y="12845" font-size="16" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip106); ">STAN-17710</text>
   <rect x="1075" y="12905" width="160" height="90" style="stroke: rgb(0,0,0); fill: rgb(255,255,255); " />
-  <text x="1080" y="12921" font-size="16" font-weight="bold" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip107); ">Xenium QC</text>
+  <text x="1080" y="12921" font-size="16" font-weight="bold" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip107); ">Xenium Analyser QC</text>
   <text x="1080" y="12937" font-size="16" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip107); ">CTRL_007</text>
   <text x="1080" y="12953" font-size="16" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip107); ">Library; s8-15</text>
   <text x="1080" y="12969" font-size="16" style="stroke: none; fill: rgb(0,0,0); clip-path: url(#clip107); ">User: cj7</text>

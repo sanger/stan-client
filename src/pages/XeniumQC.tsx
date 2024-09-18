@@ -165,7 +165,7 @@ const XeniumQC = () => {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Xenium QC</AppShell.Title>
+        <AppShell.Title>Xenium Analyser QC</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
@@ -175,7 +175,7 @@ const XeniumQC = () => {
             validationSchema={validationSchema}
             onSubmit={async (values) => {
               const request: QcLabwareRequest = {
-                operationType: 'XENIUM QC',
+                operationType: 'XENIUM ANALYSER QC',
                 labware: values.labware.map((lw) => {
                   return {
                     completion: lw.completion!.replace('T', ' ') + ':00',
@@ -288,7 +288,7 @@ const XeniumQC = () => {
                 </div>
                 <OperationCompleteModal
                   show={submissionResult !== undefined}
-                  message={'Xenium QC recorded on all labware'}
+                  message={'Xenium Analyser QC recorded on all labware'}
                 >
                   <p>
                     If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
