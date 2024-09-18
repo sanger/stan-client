@@ -157,6 +157,15 @@ describe('Xenium analyser', () => {
           });
         });
       });
+      describe('Decoding Consumables Lot Number', () => {
+        it('validates the number if specified', () => {
+          waitFor(async () => {
+            await userEvent.type(screen.getByTestId('labware.0.decodingConsumablesLot'), '12234567');
+            await userEvent.tab();
+            expect(screen.getByText('Consumables lot number should be a 6 digit number')).toBeVisible();
+          });
+        });
+      });
       describe('Save button enabling', () => {
         it('should enable Save button when all fields are filled in ', () => {
           waitFor(async () => {
