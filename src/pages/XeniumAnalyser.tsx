@@ -53,16 +53,16 @@ type LabwareSamples = {
 type AnalyserLabwareForm = {
   labware: LabwareFlaggedFieldsFragment;
   workNumber: string;
-  decodingConsumablesLot?: string;
   position?: CassettePosition;
   samples: Array<SampleRoi>;
   analyserScanData?: AnalyserScanDataFieldsFragment;
 };
 
-export type XeniumAnalyserFormValues = {
+type XeniumAnalyserFormValues = {
   lotNumberA: string;
   lotNumberB: string;
   cellSegmentationLot: string;
+  decodingConsumablesLot?: string;
   equipmentId: number | undefined;
   runName: string;
   performed: string;
@@ -175,14 +175,14 @@ const XeniumAnalyser = () => {
     runName: Yup.string().required().label('Run Name').max(255, 'Run name should be a string of maximum length 255'),
     performed: Yup.date().required('Time is a required field').label('Time'),
     equipmentId: Yup.number().required().label('Equipment').required('Equipment is a required field'),
+    decodingConsumablesLot: Yup.string()
+      .optional()
+      .matches(/^\d{6}$/, 'Consumables lot number should be a 6-digit number'),
     labware: Yup.array()
       .of(
         Yup.object().shape({
           workNumber: Yup.string().required().label('SGP Number'),
           position: Yup.string().required(),
-          decodingConsumablesLot: Yup.string()
-            .optional()
-            .matches(/^\d{6}$/, 'Consumables lot number should be a 6-digit number'),
           samples: Yup.array()
             .of(
               Yup.object().shape({
@@ -241,7 +241,6 @@ const XeniumAnalyser = () => {
                     labware,
                     workNumber: values.workNumberAll,
                     position: undefined,
-                    decodingConsumablesLot: undefined,
                     samples: [],
                     analyserScanData: res.analyserScanData
                   });
@@ -259,7 +258,6 @@ const XeniumAnalyser = () => {
                 labware,
                 workNumber: values.workNumberAll,
                 position: undefined,
-                decodingConsumablesLot: undefined,
                 samples: []
               });
               return { ...prev };
@@ -315,7 +313,7 @@ const XeniumAnalyser = () => {
                   return {
                     barcode: lw.labware.barcode,
                     workNumber: lw.workNumber,
-                    decodingConsumablesLot: lw.decodingConsumablesLot,
+                    decodingConsumablesLot: values.decodingConsumablesLot,
                     position: lw.position?.toLowerCase() === 'left' ? CassettePosition.Left : CassettePosition.Right,
                     samples: labwareSample
                       ? labwareSample.samples.map((sample) => {
@@ -435,26 +433,35 @@ const XeniumAnalyser = () => {
                             />
                           </div>
                         </div>
-                      </motion.div>
-                      <motion.div variants={variants.fadeInWithLift} className="mt-4 py-4 pr-6 w-1/3">
-                        <WorkNumberSelect
-                          label={'SGP Number'}
-                          name={'workNumberAll'}
-                          dataTestId={'workNumberAll'}
-                          onWorkNumberChange={async (workNumber) => {
-                            await setValues((prev) => {
-                              return {
-                                ...prev,
-                                workNumberAll: workNumber,
-                                labware: prev.labware.map((lw) => ({
-                                  ...lw,
-                                  workNumber
-                                }))
-                              };
-                            });
-                          }}
-                          requiredField={false}
-                        />
+                        <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
+                          <div className={'flex flex-col'}>
+                            <FormikInput
+                              label={'Decoding consumables lot number'}
+                              name="decodingConsumablesLot"
+                              data-testid="decodingConsumablesLot"
+                            />
+                          </div>
+                          <div className={'flex flex-col'}>
+                            <WorkNumberSelect
+                              label={'SGP Number'}
+                              name={'workNumberAll'}
+                              dataTestId={'workNumberAll'}
+                              onWorkNumberChange={async (workNumber) => {
+                                await setValues((prev) => {
+                                  return {
+                                    ...prev,
+                                    workNumberAll: workNumber,
+                                    labware: prev.labware.map((lw) => ({
+                                      ...lw,
+                                      workNumber
+                                    }))
+                                  };
+                                });
+                              }}
+                              requiredField={false}
+                            />
+                          </div>
+                        </div>
                       </motion.div>
                       <motion.div variants={variants.fadeInWithLift} className="mt-4 py-4">
                         <Table>
@@ -462,7 +469,6 @@ const XeniumAnalyser = () => {
                             <tr>
                               <TableHeader>Barcode</TableHeader>
                               <TableHeader>SGP Number</TableHeader>
-                              <TableHeader>Decoding consumables lot number</TableHeader>
                               <TableHeader>Cassette Position</TableHeader>
                               <TableHeader>Samples</TableHeader>
                             </tr>
@@ -482,15 +488,6 @@ const XeniumAnalyser = () => {
                                     requiredField={true}
                                   />
                                   <FormikErrorMessage name={`labware.${lwIndex}.workNumber`} />
-                                </TableCell>
-                                <TableCell className={'w-20'}>
-                                  <div className={'flex flex-col'}>
-                                    <FormikInput
-                                      label={''}
-                                      name={`labware.${lwIndex}.decodingConsumablesLot`}
-                                      data-testid={`labware.${lwIndex}.decodingConsumablesLot`}
-                                    />
-                                  </div>
                                 </TableCell>
                                 <TableCell>
                                   <CustomReactSelect
