@@ -1834,14 +1834,11 @@ svg.logo.loading rect:nth-child(3n+1) {
 .w-12 {
   width: 3rem;
 }
-.w-1\/3 {
-  width: 33.333333%;
+.w-2\/5 {
+  width: 40%;
 }
 .w-20 {
   width: 5rem;
-}
-.w-2\/5 {
-  width: 40%;
 }
 .w-16 {
   width: 4rem;
@@ -2788,9 +2785,6 @@ svg.logo.loading rect:nth-child(3n+1) {
 }
 .pb-6 {
   padding-bottom: 1.5rem;
-}
-.pr-6 {
-  padding-right: 1.5rem;
 }
 .pl-3 {
   padding-left: 0.75rem;
@@ -4346,4 +4340,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.29a22e34.css.map*/
+/*# sourceMappingURL=main.c33653e9.css.map*/
