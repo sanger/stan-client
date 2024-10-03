@@ -246,17 +246,17 @@ describe('Fields validations', () => {
   });
 });
 const expectDisplayNumberOfLabwareAndSectionThicknessInputs = () => {
-  expect(screen.getByTestId('Number of Labware')).toBeVisible();
-  expect(screen.getByTestId('Section Thickness')).toBeVisible();
+  expect(screen.getByTestId('Number of Labware')).toHaveValue(2);
+  expect(screen.getByTestId('Section Thickness')).toHaveValue(3);
   expect(screen.queryByTestId('formInput')).toBeNull();
   expect(screen.queryByTestId('slide-costing')).toBeNull();
 };
 
 const expectDisplayNumberOfLabwareSectionThicknessLotNumberAndSlideCosting = () => {
   expect(screen.getByTestId('formInput')).toBeVisible();
-  expect(screen.getByTestId('Number of Labware')).toBeVisible();
+  expect(screen.getByTestId('Number of Labware')).toHaveValue(2);
   expect(screen.getByTestId('Barcode')).toBeVisible();
-  expect(screen.getByTestId('Section Thickness')).toBeVisible();
+  expect(screen.getByTestId('Section Thickness')).toHaveValue(3);
 };
 
 const renderLabwarePlan = (outputLabwareType: string) => {
@@ -271,6 +271,8 @@ const renderLabwarePlan = (outputLabwareType: string) => {
         sourceLabware={[buildFlaggedLabware(LabwareTypeName.TUBE)]}
         onDeleteButtonClick={jest.fn()}
         onComplete={jest.fn()}
+        numLabware={2}
+        sectionThickness={3}
       />
     </div>
   );
