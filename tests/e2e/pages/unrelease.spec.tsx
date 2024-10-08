@@ -73,8 +73,7 @@ describe('Unrelease', () => {
         const highSectionInput = screen.getAllByRole('spinbutton')[0] as HTMLInputElement;
         fireEvent.change(highSectionInput, { target: { value: -1 } });
         expect(highSectionInput).toHaveValue(-1);
-        await userEvent.click(screen.getByRole('button', { name: /submit/i }));
-        expect(screen.getByText('Section number must be greater than or equal to 0')).toBeVisible();
+        expect(screen.getByRole('button', { name: /submit/i })).toBeDisabled();
       });
     });
     it('when SGP Number not given, it shows an error', async () => {
