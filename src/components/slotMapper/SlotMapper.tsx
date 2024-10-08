@@ -708,7 +708,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
           {}
         </div>
         <div id="outputLabwares" data-testid="outputLabwares" className="p-4 flex flex-col  bg-gray-100 border-l-2">
-          <div className="flex mb-8">{outputLabwareConfigPanel}</div>
+          <div>{outputLabwareConfigPanel}</div>
           {initialOutputLabware?.length > 1 && (
             <div className="flex flex-row justify-end">
               <RemoveButton

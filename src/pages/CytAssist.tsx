@@ -44,6 +44,7 @@ interface OutputLabwareScanPanelProps {
   onChangeLabwareType: (labwareType: string) => void;
   onChangeCosting: (costing: string) => void;
   onChangeLOTNumber: (lotNumber: string, isProbe: boolean) => void;
+  onChangeLpNumber: (lpNumber: string) => void;
 }
 
 type CytAssistOutputLabwareForm = {
@@ -85,8 +86,10 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   onChangeLabwareType,
   onChangeCosting,
   onChangeLOTNumber,
+  onChangeLpNumber,
   labwareType
 }) => {
+  const LP_NUMBERS = Array.from({ length: 20 }, (_, i) => `LP${i + 1}`);
   const initialValues: CytAssistOutputLabwareForm = {
     preBarcode: '',
     labwareType: labwareType,
@@ -104,7 +107,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
     >
       {({ setFieldValue, errors, setTouched, values }) => (
         <Form>
-          <div className={'w-full grid lg:grid-cols-3 grid-cols-2 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
+          <div className={'grid grid-cols-2 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
             <div data-testid="external-barcode">
               <Label name={'External barcode'} />
               <ScanInput
@@ -176,7 +179,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
               {errors.slideLotNumber && <MutedText className={'text-red-400'}>{errors.slideLotNumber}</MutedText>}
             </div>
             <div data-testid={'probe-lot-number'}>
-              <Label name={'Transcriptome Probe LOT number'} className={'whitespace-nowrap'} />
+              <Label name="Transcriptome Probe LOT number" />
               <ScanInput
                 name="probeLotNumber"
                 onScan={(val) => onChangeLOTNumber(val, true)}
@@ -185,6 +188,21 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
                 }}
               />
               {errors.probeLotNumber && <MutedText className={'text-red-400'}>{errors.probeLotNumber}</MutedText>}
+            </div>
+            <div>
+              <Label name="LP number" />
+              <CustomReactSelect
+                handleChange={(val) => {
+                  onChangeLpNumber((val as OptionType).label);
+                }}
+                name="lpNumber"
+                emptyOption={true}
+                dataTestId="lpNumber"
+                options={LP_NUMBERS.map((lp) => ({
+                  label: lp,
+                  value: lp
+                }))}
+              />
             </div>
           </div>
         </Form>
@@ -301,6 +319,18 @@ const CytAssist = () => {
     [send, selectedDestination]
   );
 
+  const handleChangeLpNumber = React.useCallback(
+    (lpNumber: string) => {
+      if (!selectedDestination) return;
+      send({
+        type: 'UPDATE_DESTINATION_LP_NUMBER',
+        labware: selectedDestination.labware,
+        lpNumber
+      });
+    },
+    [send, selectedDestination]
+  );
+
   const handleChangeOutputLabwareType = React.useCallback(
     (labwareType: string) => {
       const labwareFactories: Record<string, NewLabwareLayout> = {
@@ -403,6 +433,7 @@ const CytAssist = () => {
                 onChangeLabwareType={handleChangeOutputLabwareType}
                 onChangeCosting={handleChangeCosting}
                 onChangeLOTNumber={handleChangeLOTNumber}
+                onChangeLpNumber={handleChangeLpNumber}
               />
             }
             labwareType={selectedDestination ? selectedDestination.slotCopyDetails.labwareType ?? '' : ''}
