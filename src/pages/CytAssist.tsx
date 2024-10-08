@@ -89,7 +89,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   onChangeLpNumber,
   labwareType
 }) => {
-  const LP_NUMBERS = ['LP1', 'LP20'];
+  const LP_NUMBERS = Array.from({ length: 20 }, (_, i) => `LP${i + 1}`);
   const initialValues: CytAssistOutputLabwareForm = {
     preBarcode: '',
     labwareType: labwareType,
