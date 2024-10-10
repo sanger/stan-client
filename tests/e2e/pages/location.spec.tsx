@@ -204,6 +204,12 @@ describe('Load location with children ', () => {
       });
       expect(screen.queryByText('Stored Items')).not.toBeInTheDocument();
     });
+    it('display number of stored items', () => {
+      act(() => {
+        renderLocation('STO-005');
+      });
+      expect(screen.findAllByTestId('storedItemsCount')).toBeVisible();
+    });
   });
 });
 

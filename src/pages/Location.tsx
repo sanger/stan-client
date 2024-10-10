@@ -413,6 +413,31 @@ const Location = () => {
     performTransferAction(transferSourceLocation, location);
   }, [transferSourceLocation, location, send]);
 
+  /** State to keep track of whether each child location is a parent of a leaf node (has no children) */
+  const [leafParentMap, setLeafParentMap] = React.useState(new Map<string, boolean>());
+
+  /**
+   * Updates the leafParentMap state whenever the location changes.
+   *
+   * This is used to determine when the `numStored` property should be displayed,
+   * which is only shown for the parent of leaf nodes.
+   */
+  React.useEffect(() => {
+    location.children.forEach((child) => {
+      stanCore
+        .FindLocationByBarcode({
+          barcode: child.barcode
+        })
+        .then((res) => {
+          setLeafParentMap((prev) => {
+            const newSate = new Map(prev);
+            newSate.set(child.barcode, res.location.children.length === 0);
+            return newSate;
+          });
+        });
+    });
+  }, [location]);
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -504,6 +529,11 @@ const Location = () => {
                             >
                               {child.customName ?? child.fixedName ?? child.barcode}
                             </StyledLink>
+                            {leafParentMap.get(child.barcode) === true && (
+                              <span className="font-semibold" data-testid={'storedItemsCount'}>
+                                {` - Number of Stored items : ${child.numStored}`}
+                              </span>
+                            )}
                           </li>
                         );
                       })}

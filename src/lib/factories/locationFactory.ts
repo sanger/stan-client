@@ -17,7 +17,8 @@ const locationFactory = Factory.define<Location>(({ sequence, params, afterBuild
     size: null,
     direction: params.direction ?? null,
     parent: params.parent == null ? null : (params.parent as LinkedLocation),
-    qualifiedNameWithFirstBarcode: params.qualifiedNameWithFirstBarcode ?? `FakeParent / ${barcode}`
+    qualifiedNameWithFirstBarcode: params.qualifiedNameWithFirstBarcode ?? `FakeParent / ${barcode}`,
+    numStored: params.numStored ?? 0
   };
 
   if (params.size) {
@@ -55,6 +56,7 @@ export function buildLinkedLocation(location: Location): LinkedLocation {
     barcode: location.barcode,
     fixedName: location.fixedName,
     customName: location.customName,
-    address: location.address
+    address: location.address,
+    numStored: location.numStored
   };
 }
