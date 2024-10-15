@@ -4,6 +4,7 @@ fragment LocationFields on Location {
   customName
   address
   direction
+  numStored
   parent {
     barcode
     fixedName
@@ -18,9 +19,6 @@ fragment LocationFields on Location {
     address
   }
   children {
-    barcode
-    fixedName
-    customName
-    address
+    ...LinkedLocationFields
   }
 }
