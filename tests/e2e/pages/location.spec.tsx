@@ -4,10 +4,12 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import Location from '../../../src/pages/Location';
 import userEvent from '@testing-library/user-event';
 import { locationRepository } from '../../../src/mocks/repositories/locationRepository';
-import { locationResponse } from '../../../src/mocks/handlers/locationHandlers';
 import { enableMapSet } from 'immer';
 import React from 'react';
 import '@testing-library/jest-dom';
+import { LocationFieldsFragment } from '../../../src/types/sdk';
+import { LocationFamily } from '../../../src/lib/machines/locations/locationMachineTypes';
+
 jest.mock('../../../src/pages/location/ItemsGrid', () => {
   return {
     __esModule: true,
@@ -31,7 +33,16 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom')
 }));
 
-require('react-router-dom').useLoaderData = () => locationResponse(locationRepository.findByBarcode('STO-024')!);
+const locationFamily = (barcode: string, withChildren: boolean = false): LocationFamily => {
+  return {
+    parent: locationRepository.findByBarcode(barcode) as LocationFieldsFragment,
+    children: withChildren
+      ? ([locationRepository.findByBarcode('STO-014')] as Array<LocationFieldsFragment>)
+      : ([] as Array<LocationFieldsFragment>)
+  };
+};
+
+require('react-router-dom').useLoaderData = () => locationFamily('STO-024');
 
 describe('Load location with no child ', () => {
   beforeAll(() => {
@@ -193,9 +204,7 @@ describe('Load location with a awaiting labware set in the session storage ', ()
 describe('Load location with children ', () => {
   describe('Stored Items', () => {
     beforeEach(() => {
-      require('react-router-dom').useLoaderData = jest
-        .fn()
-        .mockReturnValue(locationResponse(locationRepository.findByBarcode('STO-005')!));
+      require('react-router-dom').useLoaderData = jest.fn().mockReturnValue(locationFamily('STO-005', true));
       enableMapSet();
     });
     it("doesn't display a section for Stored Items", () => {
@@ -203,6 +212,12 @@ describe('Load location with children ', () => {
         renderLocation('STO-005');
       });
       expect(screen.queryByText('Stored Items')).not.toBeInTheDocument();
+    });
+    it('display number of stored items', () => {
+      act(() => {
+        renderLocation('STO-005');
+      });
+      expect(screen.queryAllByTestId('storedItemsCount').length).toBeGreaterThan(0);
     });
   });
 });

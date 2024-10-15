@@ -2,6 +2,11 @@ import { LocationFieldsFragment, Maybe, StoreInput } from '../../../types/sdk';
 import { ClientError } from 'graphql-request';
 import { LocationSearchParams } from '../../../types/stan';
 
+export type LocationFamily = {
+  parent: LocationFieldsFragment;
+  children: LocationFieldsFragment[];
+};
+
 /**
  * Context for a Location Machine
  */
@@ -46,6 +51,11 @@ export interface LocationContext {
    * Error that's come back from a request to core
    */
   serverError: Maybe<ClientError>;
+
+  /** State to keep track of whether each child location is a parent of a leaf node (has no children) */
+  parentLeafMap: Map<string, boolean>;
+
+  locationFamily: LocationFamily;
 }
 
 /**
@@ -166,6 +176,11 @@ type StoreErrorEvent = {
   error: ClientError;
 };
 
+type UpdateParentLeafMapEvent = {
+  type: 'UPDATE_PARENT_LEAF_MAP';
+  locationFamily: LocationFamily;
+};
+
 export type LocationEvent =
   | FetchLocationEvent
   | FetchLocationResolveEvent
@@ -185,7 +200,8 @@ export type LocationEvent =
   | SetErrorMessageEvent
   | StoreEvent
   | StoreResolveEvent
-  | StoreErrorEvent;
+  | StoreErrorEvent
+  | UpdateParentLeafMapEvent;
 
 /**
  * The type of an interpreted Location Machine

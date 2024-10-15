@@ -23,6 +23,7 @@ const mocklocationParentContextValue: LocationParentContextType = {
       numRows: 2,
       numColumns: 2
     },
+    numStored: 0,
     children: []
   },
   addressToItemMap: new Map([
@@ -84,7 +85,7 @@ jest.mock('.../../../../src/context/AuthContext', () => ({
     };
   })
 }));
-describe('ItemsGrid', () => {
+describe('ItemList', () => {
   beforeEach(() => {
     React.useMemo = jest.fn().mockReturnValue(createLabware('STAN-3111'));
     React.useState = jest.fn().mockReturnValue([[{ barcode: 'STAN-3111', workNumber: 'SGP8' }], jest.fn()]);
