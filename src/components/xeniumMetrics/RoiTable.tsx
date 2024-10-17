@@ -19,10 +19,10 @@ export const groupByRoi = (rois: RoiFieldsFragment[]): Record<string, RoiFieldsF
     .sort((a, b) => alphaNumericSortDefault(a.address, b.address))
     .reduce(
       (acc, data) => {
-        if (!acc[data.roi]) {
-          acc[data.roi] = [];
+        const roiGroup = acc[data.roi] || (acc[data.roi] = []);
+        if (!roiGroup.some((item) => item.address === data.address && item.sample.id === data.sample.id)) {
+          roiGroup.push(data);
         }
-        acc[data.roi].push(data);
         return acc;
       },
       {} as Record<string, RoiFieldsFragment[]>
