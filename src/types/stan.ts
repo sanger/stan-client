@@ -242,9 +242,9 @@ export type StanConfig = {
   footerColor: string;
 
   /**
-   * Email address for users to get support
+   * URL for users to get support
    */
-  supportEmail: string;
+  supportUrl: string;
 
   /**
    * When was this release deployed
