@@ -4,14 +4,13 @@ import {
   LocationEvent,
   setErrorMessage,
   setSuccessMessage,
-  StoreBarcodeEvent,
-  StoredItemFragment
+  StoreBarcodeEvent
 } from './locationMachineTypes';
 import * as locationService from '../../services/locationService';
 import { castDraft, produce } from '../../../dependencies/immer';
 import { stanCore } from '../../sdk';
-import { GridDirection, LocationFieldsFragment } from '../../../types/sdk';
 import { buildOrderedAddresses, findNextAvailableAddress } from '../../helpers/locationHelper';
+import { GridDirection } from '../../../types/sdk';
 
 enum Action {
   ASSIGN_LOCATION = 'assignLocation',
@@ -20,8 +19,7 @@ enum Action {
   UNSET_SUCCESS_MESSAGE = 'unsetSuccessMessage',
   ASSIGN_SUCCESS_MESSAGE = 'assignSuccessMessage',
   ASSIGN_ERROR_MESSAGE = 'assignErrorMessage',
-  ASSIGN_SERVER_ERRORS = 'assignServerErrors',
-  UPDATE_PARENT_LEAF_MAP = 'updateParentLeafMap'
+  ASSIGN_SERVER_ERRORS = 'assignServerErrors'
 }
 
 enum Service {
@@ -59,26 +57,29 @@ export const machineOptions: MachineImplementations<LocationContext, LocationEve
       if (event.type !== 'UPDATE_LOCATION' && event.output == null) {
         return context;
       }
+      return produce(context, (draft) => {
+        // Set the location
+        draft.location = event.type === 'UPDATE_LOCATION' ? event.location : event.output;
 
-      const location = event.type === 'UPDATE_LOCATION' ? event.location : event.output;
-      const addressToItemMap = new Map<string, StoredItemFragment>();
-      //  Create all the possible addresses for this location if it has a size.
-      const locationAddresses = location.size
-        ? buildOrderedAddresses(location.size, location.direction ?? GridDirection.DownRight)
-        : new Map<string, number>();
+        draft.addressToItemMap.clear();
+        // Create all the possible addresses for this location if it has a size.
+        draft.locationAddresses = draft.location.size
+          ? buildOrderedAddresses(draft.location.size, draft.location.direction ?? GridDirection.DownRight)
+          : new Map<string, number>();
 
-      location.stored.forEach((storedItem) => {
-        if (storedItem.address) {
-          addressToItemMap.set(storedItem.address, storedItem);
-        }
+        draft.location.stored.forEach((storedItem) => {
+          if (storedItem.address) {
+            draft.addressToItemMap.set(storedItem.address, storedItem);
+          }
+        });
+
+        const addresses = findNextAvailableAddress({
+          locationAddresses: draft.locationAddresses,
+          addressToItemMap: draft.addressToItemMap,
+          minimumAddress: draft.selectedAddress
+        });
+        draft.selectedAddress = addresses.length > 0 ? addresses[0] : null;
       });
-      const addresses = findNextAvailableAddress({
-        locationAddresses,
-        addressToItemMap,
-        minimumAddress: context.selectedAddress
-      });
-      const selectedAddress = addresses.length > 0 ? addresses[0] : null;
-      return { ...context, location, addressToItemMap, locationAddresses, selectedAddress };
     }),
 
     [Action.ASSIGN_SELECTED_ADDRESS]: assign(({ context, event }) => {
@@ -117,17 +118,6 @@ export const machineOptions: MachineImplementations<LocationContext, LocationEve
         return context;
       }
       return { ...context, serverError: castDraft(event.error) };
-    }),
-    [Action.UPDATE_PARENT_LEAF_MAP]: assign(({ context, event }) => {
-      if (event.type !== 'UPDATE_PARENT_LEAF_MAP') {
-        return context;
-      }
-      return produce(context, (draft) => {
-        draft.parentLeafMap.set(event.locationFamily.parent.barcode, event.locationFamily.children.length === 0);
-        event.locationFamily.children.forEach((location: LocationFieldsFragment) => {
-          draft.parentLeafMap.set(location.barcode, location.children.length === 0);
-        });
-      });
     })
   }
 };
@@ -135,16 +125,9 @@ export const machineOptions: MachineImplementations<LocationContext, LocationEve
 export const machineConfig: MachineConfig<LocationContext, LocationEvent> = {
   id: 'locations',
   initial: 'ready',
-  context: ({ input }) => {
-    const parentLeafMap = new Map(
-      input.locationFamily.children.map((child: LocationFieldsFragment) => [child.barcode, child.children.length === 0])
-    );
-    parentLeafMap.set(input.locationFamily.parent.barcode, input.locationFamily.children.length === 0);
-    return {
-      ...input,
-      parentLeafMap
-    };
-  },
+  context: ({ input }) => ({
+    ...input
+  }),
   states: {
     fetching: {
       invoke: {
@@ -167,7 +150,6 @@ export const machineConfig: MachineConfig<LocationContext, LocationEvent> = {
     },
     ready: {
       on: {
-        UPDATE_PARENT_LEAF_MAP: { actions: Action.UPDATE_PARENT_LEAF_MAP },
         FETCH_LOCATION: 'fetching',
         UPDATE_LOCATION: { actions: Action.ASSIGN_LOCATION },
         STORE_BARCODE: 'updating.storingBarcode',

@@ -24,7 +24,7 @@ import { Authenticated, Unauthenticated } from '../components/Authenticated';
 import { extractServerErrors } from '../types/stan';
 import { GridDirection, LocationFieldsFragment, Maybe, StoreInput, UserRole } from '../types/sdk';
 import { useMachine } from '@xstate/react';
-import { LocationFamily, StoredItemFragment } from '../lib/machines/locations/locationMachineTypes';
+import { StoredItemFragment } from '../lib/machines/locations/locationMachineTypes';
 import { locationMachine } from '../lib/machines/locations/locationMachine';
 import { awaitingStorageCheckOnExit, getAwaitingLabwaresFromSession, LabwareAwaitingStorageInfo } from './Store';
 import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
@@ -63,8 +63,7 @@ export type LocationParentContextType = {
 export const LocationParentContext = React.createContext<Maybe<LocationParentContextType>>(null);
 
 const Location = () => {
-  const locationFamily = useLoaderData() as LocationFamily;
-  const storageLocation = locationFamily.parent;
+  const storageLocation = useLoaderData() as LocationFieldsFragment;
   const [searchParams] = useSearchParams();
   const memoLabwareBarcode = React.useMemo(() => searchParams.get('labwareBarcode') ?? '', [searchParams]);
   const memoLocationMachineParams = React.useMemo(() => {
@@ -103,20 +102,11 @@ const Location = () => {
       ...memoLocationMachineParams,
       successMessage: '',
       errorMessage: '',
-      serverError: null,
-      locationFamily
+      serverError: null
     }
   });
-  const {
-    location,
-    locationAddresses,
-    successMessage,
-    errorMessage,
-    serverError,
-    addressToItemMap,
-    selectedAddress,
-    parentLeafMap
-  } = current.context;
+  const { location, locationAddresses, successMessage, errorMessage, serverError, addressToItemMap, selectedAddress } =
+    current.context;
 
   const locationHasGrid = !!location.size;
 
@@ -125,14 +115,6 @@ const Location = () => {
     send({ type: 'UPDATE_LOCATION', location: storageLocation });
   }, [send, storageLocation, location.barcode]);
 
-  React.useEffect(() => {
-    if (
-      locationFamily.parent.barcode === current.context.locationFamily.parent.barcode &&
-      locationFamily.children.length === current.context.locationFamily.children.length
-    )
-      return;
-    send({ type: 'UPDATE_PARENT_LEAF_MAP', locationFamily: locationFamily });
-  }, [send, locationFamily, current.context.locationFamily]);
   /**
    * Should the page be displaying the grid or list view of the items
    */
@@ -513,21 +495,23 @@ const Location = () => {
                 {location.children.length > 0 && (
                   <StripyCardDetail term={'Children'} dataTestId={'location-children'}>
                     <ul className="list-disc list-inside">
-                      {location.children.map((child) => (
-                        <li key={child.barcode}>
-                          <StyledLink
-                            to={`/locations/${child.barcode}`}
-                            state={awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}}
-                          >
-                            {child.customName ?? child.fixedName ?? child.barcode}
-                          </StyledLink>
-                          {parentLeafMap.get(child.barcode) === true && (
-                            <span className="font-semibold" data-testid={'storedItemsCount'}>
-                              {` - Number of Stored items : ${child.numStored}`}
-                            </span>
-                          )}
-                        </li>
-                      ))}
+                      {location.children.map((child) => {
+                        return (
+                          <li key={child.barcode}>
+                            <StyledLink
+                              to={`/locations/${child.barcode}`}
+                              state={awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}}
+                            >
+                              {child.customName ?? child.fixedName ?? child.barcode}
+                            </StyledLink>
+                            {child.leaf && (
+                              <span className="font-semibold" data-testid={'storedItemsCount'}>
+                                {` - Number of Stored items : ${child.numStored}`}
+                              </span>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </StripyCardDetail>
                 )}

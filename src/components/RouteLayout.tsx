@@ -62,7 +62,6 @@ import { CellSegmentationQc } from '../pages/CellSegmentationQc';
 import { CellSegmentation } from '../pages/CellSegmentation';
 import CleanOut from '../pages/CleanOut';
 import XeniumMetrics from '../pages/XeniumMetrics';
-import { LocationFamily } from '../lib/machines/locations/locationMachineTypes';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -488,22 +487,12 @@ const RouteLayout = () => {
         <Route
           path="/locations/:locationBarcode"
           loader={async ({ params }) => {
-            const locationFamily = {} as LocationFamily;
+            // the matching param will be available to the loader
             if (params.locationBarcode) {
-              await stanCore
-                .FindLocationByBarcode({
-                  barcode: params.locationBarcode
-                })
-                .then(async (parent) => {
-                  locationFamily.parent = parent.location;
-                  locationFamily.children = [];
-                  for (const child of parent.location.children) {
-                    await stanCore.FindLocationByBarcode({ barcode: child.barcode }).then((res) => {
-                      locationFamily.children.push(res.location);
-                    });
-                  }
-                });
-              return locationFamily;
+              const res = await stanCore.FindLocationByBarcode({
+                barcode: params.locationBarcode
+              });
+              return res.location;
             }
           }}
           element={<Location />}

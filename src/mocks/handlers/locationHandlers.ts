@@ -171,7 +171,8 @@ function addLocationHierarchy(barcode: string, linkedLocation: LinkedLocationFie
     address: location.address,
     customName: location.customName,
     fixedName: location.fixedName,
-    numStored: location.numStored
+    numStored: location.numStored,
+    leaf: location.leaf
   });
   if (location.parent) {
     addLocationHierarchy(location.parent.barcode, linkedLocation);
@@ -214,7 +215,8 @@ export function locationResponse(location: Location): LocationFieldsFragment {
         fixedName: child.fixedName,
         customName: child.customName,
         address: child.address,
-        numStored: child.numStored
+        numStored: child.numStored,
+        leaf: child.leaf
       };
     })
   };
