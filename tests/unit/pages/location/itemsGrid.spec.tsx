@@ -25,7 +25,8 @@ const mocklocationParentContextValue: LocationParentContextType = {
       numColumns: 2
     },
     children: [],
-    numStored: 0
+    numStored: 0,
+    leaf: false
   },
   addressToItemMap: new Map([
     ['A1', { barcode: 'STAN-3111' }],

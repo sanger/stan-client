@@ -23,6 +23,8 @@ const mocklocationParentContextValue: LocationParentContextType = {
       numRows: 2,
       numColumns: 2
     },
+    numStored: 0,
+    leaf: false,
     children: []
   },
   addressToItemMap: new Map([

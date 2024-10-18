@@ -188,6 +188,7 @@ export function locationResponse(location: Location): LocationFieldsFragment {
     address: location.address,
     direction: location.direction,
     numStored: location.numStored,
+    leaf: location.leaf,
     parent: location.parent
       ? {
           __typename: 'LinkedLocation',

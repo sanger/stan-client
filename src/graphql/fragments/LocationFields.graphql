@@ -5,6 +5,7 @@ fragment LocationFields on Location {
   address
   direction
   numStored
+  leaf
   parent {
     barcode
     fixedName
