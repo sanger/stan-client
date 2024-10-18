@@ -3,6 +3,6 @@ window.STAN_CONFIG = {
   headerColor: "bg-gradient-to-tr from-sdb to-sdb-400",
   footerColor: "border-sdb-100 bg-sdb-400",
   deploymentDate: "TBD",
-  supportEmail: "beaglebugs@sanger.ac.uk",
+  supportUrl: "https://sanger.freshservice.com/support/catalog/items/281",
   maxSearchRecords: 150,
 };
