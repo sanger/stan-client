@@ -1,6 +1,6 @@
 {
   "name": "client",
-  "version": "2.47.2",
+  "version": "2.47.3",
   "private": true,
   "proxy": "http://localhost:8080",
   "dependencies": {
