@@ -504,6 +504,11 @@ const Location = () => {
                             >
                               {child.customName ?? child.fixedName ?? child.barcode}
                             </StyledLink>
+                            {child.leaf && (
+                              <span className="font-semibold" data-testid={'storedItemsCount'}>
+                                {` - Number of Stored items : ${child.numStored}`}
+                              </span>
+                            )}
                           </li>
                         );
                       })}

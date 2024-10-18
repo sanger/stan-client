@@ -8,6 +8,7 @@ import { locationResponse } from '../../../src/mocks/handlers/locationHandlers';
 import { enableMapSet } from 'immer';
 import React from 'react';
 import '@testing-library/jest-dom';
+
 jest.mock('../../../src/pages/location/ItemsGrid', () => {
   return {
     __esModule: true,
@@ -203,6 +204,12 @@ describe('Load location with children ', () => {
         renderLocation('STO-005');
       });
       expect(screen.queryByText('Stored Items')).not.toBeInTheDocument();
+    });
+    it('display number of stored items', () => {
+      act(() => {
+        renderLocation('STO-005');
+      });
+      expect(screen.queryAllByTestId('storedItemsCount').length).toBeGreaterThan(0);
     });
   });
 });

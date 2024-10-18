@@ -16,12 +16,12 @@ describe('Store', () => {
     context('when the location is found', () => {
       before(() => {
         cy.visit('/store');
-        cy.findByLabelText('Find Location:').should('be.visible').type('STO-001F{enter}');
+        cy.findByLabelText('Find Location:').should('be.visible').type('STO-001{enter}');
       });
 
       it("takes you to that location's page", () => {
-        cy.location('pathname').should('eq', '/locations/STO-001F');
-        cy.findByText('Location STO-001F could not be found').should('not.exist');
+        cy.location('pathname').should('eq', '/locations/STO-001');
+        cy.findByText('Location STO-001 could not be found').should('not.exist');
       });
     });
 
