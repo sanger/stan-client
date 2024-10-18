@@ -170,6 +170,12 @@ type UpdateTransferTypeEvent = {
   mode: ExecutionType;
 };
 
+type UpdateDestinationLpNumber = {
+  type: 'UPDATE_DESTINATION_LP_NUMBER';
+  labware: NewFlaggedLabwareLayout;
+  lpNumber: string;
+};
+
 export type SlotCopyEvent =
   | { type: 'UPDATE_WORK_NUMBER'; workNumber: string }
   | UpdateSourceLabware
@@ -187,7 +193,8 @@ export type SlotCopyEvent =
   | FindPermDataEvent
   | SlotCopyDoneEvent
   | SlotCopyErrorEvent
-  | UpdateTransferTypeEvent;
+  | UpdateTransferTypeEvent
+  | UpdateDestinationLpNumber;
 
 /**
  * SlotCopy Machine Config
@@ -253,6 +260,9 @@ export const slotCopyMachine = createMachine(
           },
           UPDATE_DESTINATION_SELECTION_MODE: {
             actions: 'assignDestinationSelectionMode'
+          },
+          UPDATE_DESTINATION_LP_NUMBER: {
+            actions: 'assignDestinationLpNumber'
           }
         }
       },
@@ -303,6 +313,9 @@ export const slotCopyMachine = createMachine(
           },
           UPDATE_DESTINATION_SELECTION_MODE: {
             actions: 'assignDestinationSelectionMode'
+          },
+          UPDATE_DESTINATION_LP_NUMBER: {
+            actions: 'assignDestinationLpNumber'
           },
           SAVE: 'copying'
         }
@@ -575,6 +588,17 @@ export const slotCopyMachine = createMachine(
       assignTransferType: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_TRANSFER_TYPE_MODE') return context;
         return { ...context, executionType: event.mode };
+      }),
+      assignDestinationLpNumber: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_DESTINATION_LP_NUMBER') return context;
+        return produce(context, (draft): Draft<SlotCopyContext> => {
+          const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
+          if (!destination) {
+            return draft;
+          }
+          destination.slotCopyDetails.lpNumber = event.lpNumber;
+          return draft;
+        });
       })
     }
   }
