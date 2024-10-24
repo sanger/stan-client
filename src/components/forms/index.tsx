@@ -165,3 +165,7 @@ export function formikName(prefix: string, name: string): string {
   if (prefix === '') return name;
   return [prefix, name].join('.');
 }
+
+export const preventEnterKeyDefault = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  e.key === 'Enter' && e.preventDefault();
+};

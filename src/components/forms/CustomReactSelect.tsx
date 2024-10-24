@@ -1,7 +1,7 @@
 import React from 'react';
 import Label from './Label';
 import { useFormikContext } from 'formik';
-import { FormikErrorMessage } from './index';
+import { FormikErrorMessage, preventEnterKeyDefault } from './index';
 import ReactSelect, { components, Props } from 'react-select';
 import AddButton from '../buttons/AddButton';
 const defaultClassNames =
@@ -113,6 +113,7 @@ export const NormalReactSelect = ({
           onChange={(val) => onChangeValue(val)}
           onBlur={(val) => onBlur(val)}
           options={memoOptions}
+          onKeyDown={preventEnterKeyDefault}
           value={defaultValue(memoOptions, value, isMulti)}
           isMulti={isMulti}
           placeholder={placeholder ?? ''}

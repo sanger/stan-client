@@ -1,7 +1,7 @@
 import React from 'react';
 import Label from './Label';
 import { Field } from 'formik';
-import { FormikErrorMessage } from './index';
+import { FormikErrorMessage, preventEnterKeyDefault } from './index';
 import classNames from 'classnames';
 
 const defaultInputClassNames =
@@ -27,7 +27,14 @@ const FormikInput = ({ label, name, type = 'text', displayTag, info, ...rest }: 
     <>
       <div>
         <Label name={label} displayTag={displayTag} info={info} className={'whitespace-nowrap'}>
-          <Field type={type} data-testid={label} className={inputClassNames} name={name} {...rest} />
+          <Field
+            type={type}
+            data-testid={label}
+            className={inputClassNames}
+            name={name}
+            onKeyDown={preventEnterKeyDefault}
+            {...rest}
+          />
         </Label>
       </div>
 
