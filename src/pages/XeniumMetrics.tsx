@@ -83,20 +83,39 @@ const validationSchema = Yup.object().shape({
 const XeniumMetrics = () => {
   const stanCore = useContext(StanCoreContext);
 
-  const getMetricOperationDetails = useCallback(
+  const getRunNames = useCallback(
     async (
-      foundLabware: LabwareFlaggedFieldsFragment,
+      barcode: string,
       setValues: (values: SetStateAction<XeniumMetricsForm>, shouldValidate?: boolean) => {}
     ): Promise<string[]> => {
-      try {
-        const response = await stanCore.GetRegionsOfInterest({
-          barcodes: [foundLabware.barcode]
-        });
-        if (response.rois.length > 0 && response.rois[0].rois.length > 0) {
-          const groupedByRoi = groupByRoi(response.rois[0]!.rois!);
+      const response = await stanCore.GetRunNames({
+        barcode: barcode
+      });
+      if (response.runNames) {
+        setValues((prev) => ({
+          ...prev,
+          runNames: response.runNames
+        }));
+        return [];
+      } else {
+        return ['No run names found for the labware ' + barcode];
+      }
+    },
+    [stanCore]
+  );
+
+  const getRois = useCallback(
+    async (
+      labware: LabwareFlaggedFieldsFragment,
+      runName: string,
+      setValues: (values: SetStateAction<XeniumMetricsForm>, shouldValidate?: boolean) => {}
+    ) => {
+      stanCore.GetRunRois({ barcode: labware.barcode, run: runName }).then((response) => {
+        if (response.runRois) {
+          const groupedByRoi = groupByRoi(response.runRois);
           setValues((prev) => ({
             ...prev,
-            labware: foundLabware,
+            labware: labware,
             sampleMetricData: Object.keys(groupedByRoi).map((roi) => {
               return {
                 externalIdAddress: groupedByRoi[roi].map((data) => {
@@ -107,22 +126,8 @@ const XeniumMetrics = () => {
               };
             })
           }));
-
-          const runNames = await stanCore.GetRunNames({
-            barcode: foundLabware.barcode
-          });
-          if (runNames.runNames) {
-            setValues((prev) => ({
-              ...prev,
-              runNames: runNames.runNames
-            }));
-          }
-          return [];
         }
-        return ['No regions of interest recorded for the labware ' + foundLabware.barcode];
-      } catch (error) {
-        return ['Error fetching the regions of interests related to the labware ' + foundLabware.barcode];
-      }
+      });
     },
     [stanCore]
   );
@@ -151,6 +156,7 @@ const XeniumMetrics = () => {
       runName: ''
     }));
   };
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -191,7 +197,7 @@ const XeniumMetrics = () => {
                     labwares: LabwareFlaggedFieldsFragment[],
                     foundLabware: LabwareFlaggedFieldsFragment
                   ) => {
-                    return getMetricOperationDetails(foundLabware, setValues);
+                    return getRunNames(foundLabware.barcode, setValues);
                   }}
                 >
                   {({ labwares, removeLabware }) =>
@@ -214,6 +220,11 @@ const XeniumMetrics = () => {
                                 value: runName
                               };
                             })}
+                            onChange={async (val) => {
+                              const runName = (val as OptionType).label;
+                              await setFieldValue('runName', runName);
+                              await getRois(labware, runName, setValues);
+                            }}
                           />
                         </div>
                         <Panel key={labware.barcode}>
@@ -250,6 +261,11 @@ const XeniumMetrics = () => {
                                   }
                                 }}
                               />
+                            </div>
+                          )}
+                          {values.runName && values.sampleMetricData.length === 0 && (
+                            <div>
+                              <Warning message="No regions of interest are recorded for the scanned labware and the selected run name."></Warning>
                             </div>
                           )}
                         </Panel>

@@ -1,0 +1,5 @@
+query GetRunRois($barcode: String!, $run: String!) {
+  runRois(barcode: $barcode, run: $run) {
+    ...RoiFields
+  }
+}

@@ -1,11 +1,13 @@
 import {
-  GetRegionsOfInterestQuery,
-  GetRegionsOfInterestQueryVariables,
+  GetRunNamesQuery,
+  GetRunNamesQueryVariables,
+  GetRunRoisQuery,
+  GetRunRoisQueryVariables,
   RecordMetricsMutation,
   RecordMetricsMutationVariables
 } from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
-import { selectSGPNumber } from '../shared/customReactSelect.cy';
+import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Xenium Metrics', () => {
   before(() => {
@@ -24,13 +26,13 @@ describe('Xenium Metrics', () => {
     });
   });
 
-  describe('When a labware with registered regions of interest is scanned', () => {
+  describe('When a labware with registered run names is scanned', () => {
     before(() => {
       cy.get('#labwareScanInput').type('STAN-3111{enter}');
     });
-    it('displays the region of interest table', () => {
-      cy.findByRole('table').should('be.visible');
-    });
+    // it('displays the region of interest table', () => {
+    //   cy.findByRole('table').should('be.visible');
+    // });
     it('displays the sgp number selector', () => {
       cy.findByTestId('workNumber').should('be.visible');
     });
@@ -41,14 +43,14 @@ describe('Xenium Metrics', () => {
       cy.findByTestId('input').should('be.disabled');
     });
   });
-  describe('When a labware with no regions of interest is scanned', () => {
+  describe('When a labware with no run names is scanned', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.query<GetRegionsOfInterestQuery, GetRegionsOfInterestQueryVariables>('GetRegionsOfInterest', () => {
+          graphql.query<GetRunNamesQuery, GetRunNamesQueryVariables>('GetRunNames', () => {
             return HttpResponse.json({
               data: {
-                rois: []
+                runRois: []
               }
             });
           })
@@ -58,17 +60,52 @@ describe('Xenium Metrics', () => {
       cy.get('#labwareScanInput').type('STAN-3111{enter}');
     });
     it('displays a message error', () => {
-      cy.findByText('No regions of interest recorded for the labware STAN-3111').should('be.visible');
+      cy.findByText('No run names found for the labware STAN-3111').should('be.visible');
     });
     it('keeps the labware scanner enabled', () => {
       cy.findByTestId('input').should('be.enabled');
     });
-    it('doe snot display the metrics details', () => {
-      cy.findByTestId('runName').should('not.exist');
-      cy.findByTestId('workNumber').should('not.exist');
+    it('does not display the metrics details', () => {
       cy.findByRole('table').should('not.exist');
     });
   });
+
+  describe('On run name selection update', () => {
+    describe('When a run name is selected with roi registered', () => {
+      before(() => {
+        cy.get('#labwareScanInput').type('STAN-3111{enter}');
+        selectOption('runName', 'Run Name 1');
+      });
+      it('displays the region of interest table', () => {
+        cy.findByRole('table').should('be.visible');
+      });
+    });
+    describe('When a run name is selected with no roi registered', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<GetRunRoisQuery, GetRunRoisQueryVariables>('GetRunRois', () => {
+              return HttpResponse.json({
+                data: {
+                  runRois: []
+                }
+              });
+            })
+          );
+        });
+        cy.reload();
+        cy.get('#labwareScanInput').type('STAN-3111{enter}');
+        selectOption('runName', 'Run Name 1');
+      });
+
+      it('displays an error message', () => {
+        cy.findByText('No regions of interest are recorded for the scanned labware and the selected run name.').should(
+          'be.visible'
+        );
+      });
+    });
+  });
+
   describe('When a metric file is uploaded and sgp number is selected', () => {
     before(() => {
       cy.reload();
@@ -118,6 +155,7 @@ describe('Xenium Metrics', () => {
 
 const fillInForm = () => {
   cy.get('#labwareScanInput').type('STAN-3111{enter}');
+  selectOption('runName', 'Run Name 1');
   selectSGPNumber('SGP1008');
   cy.get('#file-0')
     .scrollIntoView()
