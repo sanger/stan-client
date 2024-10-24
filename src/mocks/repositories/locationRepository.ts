@@ -106,7 +106,7 @@ class LocationRepository implements Repository<Location> {
 
 const locationRepository = new LocationRepository();
 
-const room: Location = locationFactory.build({ customName: 'Room 1234' });
+const room: Location = locationFactory.build({ customName: 'Room 1234', leaf: true });
 
 const freezers: Location[] = [];
 
@@ -143,7 +143,8 @@ racks.forEach((rack, index) => {
     locationFactory.build({
       customName: `Box 1 in ${rack.customName}`,
       direction: GridDirection.RightDown,
-      parent: buildLinkedLocation(rack)
+      parent: buildLinkedLocation(rack),
+      leaf: true
     })
   );
   /***

@@ -3,4 +3,6 @@ fragment LinkedLocationFields on LinkedLocation {
   fixedName
   customName
   address
+  numStored
+  leaf
 }
