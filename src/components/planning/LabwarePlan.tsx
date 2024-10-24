@@ -51,6 +51,12 @@ type LabwarePlanProps = {
   operationType: string;
 
   sampleColors: Map<number, string>;
+
+  /** Specified number of labware when setting the plan */
+  numLabware: number;
+
+  /** Specified section thickness when setting the plan */
+  sectionThickness: number;
   /**
    * Callback triggered when the delete button is clicked
    * @param cid the client ID of the {@link LabwarePlan}
@@ -66,7 +72,20 @@ type LabwarePlanProps = {
 };
 
 const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
-  ({ cid, outputLabware, onDeleteButtonClick, onComplete, sampleColors, operationType, sourceLabware }, ref) => {
+  (
+    {
+      cid,
+      outputLabware,
+      onDeleteButtonClick,
+      onComplete,
+      sampleColors,
+      operationType,
+      sourceLabware,
+      numLabware,
+      sectionThickness
+    },
+    ref
+  ) => {
     const labwarePlanMachine = React.useMemo(() => {
       return createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware));
     }, [sourceLabware, sampleColors, outputLabware]);
@@ -120,7 +139,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
         className="relative p-3 shadow"
       >
         <Formik<FormValues>
-          initialValues={buildInitialValues(operationType, outputLabware.labwareType)}
+          initialValues={buildInitialValues(operationType, outputLabware.labwareType, numLabware, sectionThickness)}
           validationSchema={buildValidationSchema(outputLabware.labwareType)}
           onSubmit={async (values) => {
             const newValues = {
@@ -336,17 +355,20 @@ type FormValues = {
 /**
  * The initial values for the labware plan form
  */
-function buildInitialValues(operationType: string, labwareType: LabwareTypeFieldsFragment): FormValues {
+function buildInitialValues(
+  operationType: string,
+  labwareType: LabwareTypeFieldsFragment,
+  quantity: number,
+  sectionThickness: number
+): FormValues {
   let formValues: FormValues = {
     operationType,
-    quantity: 1
+    quantity,
+    sectionThickness
   };
 
   if (labwareType.name === LabwareTypeName.VISIUM_LP) {
     formValues.barcode = '';
-  }
-  if (labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER) {
-    formValues.sectionThickness = 0;
   }
   if (
     labwareType.name === LabwareTypeName.VISIUM_LP ||
