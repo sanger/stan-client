@@ -187,7 +187,8 @@ describe('RegistrationForm', () => {
       });
       it('enables HumFre field on entering Species', async () => {
         const speciesCombo = getSelect('Species');
-        await waitFor(() => userEvent.type(speciesCombo, 'Human{enter}'));
+        await waitFor(() => userEvent.type(speciesCombo, 'Human'));
+        await userEvent.tab();
         await waitFor(() => getSelect('HuMFre'));
         expect(getSelect('HuMFre')).toBeEnabled();
       });

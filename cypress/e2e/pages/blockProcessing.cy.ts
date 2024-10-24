@@ -122,7 +122,7 @@ describe('Block Processing', () => {
     });
     context('when entering an invalid value in Barcode field', () => {
       before(() => {
-        cy.findAllByLabelText('Barcode').last().type('Barcode1{enter}');
+        cy.findAllByLabelText('Barcode').last().type('Barcode1').blur();
       });
       it('should display an error message', () => {
         cy.findByText('Barcode should be in the format with two letters followed by 8 numbers').should('be.visible');
