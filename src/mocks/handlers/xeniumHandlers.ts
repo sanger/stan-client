@@ -51,11 +51,7 @@ const xeniumHandlers = [
   graphql.query<GetRunNamesQuery, GetAnalyserScanDataQueryVariables>('GetRunNames', () => {
     return HttpResponse.json({
       data: {
-        runNames: [
-          faker.string.alphanumeric({ length: { min: 5, max: 8 } }),
-          faker.string.alphanumeric({ length: { min: 5, max: 8 } }),
-          faker.string.alphanumeric({ length: { min: 5, max: 8 } })
-        ]
+        runNames: ['Run Name 1', 'Run Name 2', 'Run Name 3']
       }
     });
   })

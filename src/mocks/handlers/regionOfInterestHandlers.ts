@@ -2,6 +2,8 @@ import { graphql, HttpResponse } from 'msw';
 import {
   GetRegionsOfInterestQuery,
   GetRegionsOfInterestQueryVariables,
+  GetRunRoisQuery,
+  GetRunRoisQueryVariables,
   LabwareRoi,
   RecordMetricsMutation,
   RecordMetricsMutationVariables
@@ -34,6 +36,18 @@ const regionOfInterestHandlers = [
       return HttpResponse.json({ data: { rois: regionsOfInterests } }, { status: 200 });
     }
   ),
+
+  graphql.query<GetRunRoisQuery, GetRunRoisQueryVariables>('GetRunRois', ({ variables }) => {
+    const labware = createLabware(variables.barcode);
+    const rois = labware.slots.flatMap((slot) =>
+      slot.samples.map((sample) => ({
+        sample,
+        address: slot.address,
+        roi: faker.helpers.arrayElement(['top left', 'top right', 'bottom left', 'bottom right', 'center'])
+      }))
+    );
+    return HttpResponse.json({ data: { runRois: rois } }, { status: 200 });
+  }),
 
   graphql.mutation<RecordMetricsMutation, RecordMetricsMutationVariables>('RecordMetrics', () => {
     return HttpResponse.json({ data: { recordSampleMetrics: { operations: [{ id: 1 }] } } }, { status: 200 });
