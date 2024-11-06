@@ -44,6 +44,7 @@ export interface RegistrationFormTissue {
   sampleCollectionDate?: Date | string;
   blocks: RegistrationFormBlock[];
   workNumber: string;
+  bioRiskCode: string;
 }
 
 export interface RegistrationFormValues {
@@ -80,7 +81,8 @@ export function getRegistrationFormTissue(): RegistrationFormTissue {
     tissueType: '',
     blocks: [getRegistrationFormBlock()],
     sampleCollectionDate: '',
-    workNumber: ''
+    workNumber: '',
+    bioRiskCode: ''
   };
 }
 
@@ -149,7 +151,8 @@ export function buildRegisterTissuesMutationVariables(
               ? tissue.sampleCollectionDate instanceof Date
                 ? tissue.sampleCollectionDate.toLocaleDateString()
                 : tissue.sampleCollectionDate
-              : undefined
+              : undefined,
+            bioRiskCode: tissue.bioRiskCode
           };
 
           if (!ignoreExistingTissues && existingTissues.includes(blockRegisterRequest.externalIdentifier)) {

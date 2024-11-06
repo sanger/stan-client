@@ -17,6 +17,7 @@ import speciesRepository from '../repositories/speciesRepository';
 import hmdmcRepository from '../repositories/hmdmcRepository';
 import solutionRepository from '../repositories/solutionRepository';
 import slotRegionRepository from '../repositories/slotRegionRepository';
+import bioRiskRepository from '../repositories/bioRiskRepository';
 
 const registrationHandlers = [
   graphql.query<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>('GetRegistrationInfo', ({ variables }) => {
@@ -108,7 +109,8 @@ const registrationHandlers = [
           fixatives: [{ name: 'None' }, { name: 'Formalin' }],
           mediums: [{ name: 'OCT' }, { name: 'Paraffin' }, { name: 'None' }],
           solutions: solutionRepository.findAll().filter((sample) => sample.enabled),
-          slotRegions: slotRegionRepository.findAll().filter((region) => region.enabled)
+          slotRegions: slotRegionRepository.findAll().filter((region) => region.enabled),
+          bioRisks: bioRiskRepository.findAll().filter((bioRisk) => bioRisk.enabled)
         }
       },
       { status: 200 }

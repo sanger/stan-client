@@ -252,7 +252,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                                 <FormikInput
                                   label={'Sample Prep Reagent Lot'}
                                   name={'samplePrepReagentLot'}
-                                  onChange={async (e: React.ChangeEvent<HTMLSelectElement>) => {
+                                  onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
                                     await setValues((prev) => ({
                                       ...prev,
                                       samplePrepReagentLot: e.target.value,

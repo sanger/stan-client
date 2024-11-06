@@ -152,6 +152,15 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 options={selectOptionValues(registrationInfo.tissueTypes, 'name', 'name')}
                 value={values.tissues[currentIndex].tissueType}
               />
+              <CustomReactSelect
+                label="Biological Risk Assessment Numbers"
+                emptyOption
+                name={`tissues.${currentIndex}.bioRiskCode`}
+                className="mt-2"
+                dataTestId="bioRisks"
+                options={selectOptionValues(registrationInfo.bioRisks, 'code', 'code')}
+                value={values.tissues[currentIndex].bioRiskCode}
+              />
             </motion.div>
 
             <motion.div variants={variants.fadeInWithLift} className="space-y-4">

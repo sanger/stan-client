@@ -1,0 +1,4 @@
+fragment BioRiskFields on BioRisk {
+    code
+    enabled
+}
