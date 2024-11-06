@@ -99,6 +99,7 @@ function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
           species: validation.species,
           hmdmc: validation.hmdmc,
           tissueType: validation.tissueType,
+          bioRiskCode: validation.bioRiskCode,
           sampleCollectionDate: validation.sampleCollectionDate,
           blocks: Yup.array()
             .min(1)
@@ -244,6 +245,7 @@ function BlockRegistration() {
       successDisplayTableColumns={resultColumns}
       formatSuccessData={(registrationResult) => registrationResult.labware}
       isBlock={true}
+      withBioRisOption={true}
     />
   );
 
