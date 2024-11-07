@@ -1,5 +1,5 @@
 mutation SetBioRiskEnabled($code: String!, $enabled: Boolean!) {
-    setBioRiskEnabled(code: $code, enabled: $enabled) {
-        ...BioRiskFields
-    }
+  setBioRiskEnabled(code: $code, enabled: $enabled) {
+    ...BioRiskFields
+  }
 }

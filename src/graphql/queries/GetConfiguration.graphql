@@ -50,7 +50,7 @@ query GetConfiguration {
   dnapStudies(includeDisabled: true) {
     ...DnapStudyFields
   }
-  bioRisks(includeDisabled: true){
+  bioRisks(includeDisabled: true) {
     ...BioRiskFields
   }
 }

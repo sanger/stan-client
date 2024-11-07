@@ -1,5 +1,5 @@
 query GetBioRisks($includeDisabled: Boolean) {
-    bioRisks(includeDisabled: $includeDisabled) {
-        ...BioRiskFields
-    }
+  bioRisks(includeDisabled: $includeDisabled) {
+    ...BioRiskFields
+  }
 }

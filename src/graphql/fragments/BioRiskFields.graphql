@@ -1,4 +1,4 @@
 fragment BioRiskFields on BioRisk {
-    code
-    enabled
+  code
+  enabled
 }

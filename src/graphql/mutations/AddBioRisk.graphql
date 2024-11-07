@@ -1,5 +1,5 @@
 mutation AddBioRisk($code: String!) {
-    addBioRisk(code: $code) {
-        ...BioRiskFields
-    }
+  addBioRisk(code: $code) {
+    ...BioRiskFields
+  }
 }
