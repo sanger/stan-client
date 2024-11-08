@@ -506,7 +506,7 @@ const Location = () => {
                             </StyledLink>
                             {child.leaf && (
                               <span className="font-semibold" data-testid={'storedItemsCount'}>
-                                {` - Stored items : ${child.numStored}`}
+                                {` - Stored Items : ${child.numStored}`}
                               </span>
                             )}
                           </li>

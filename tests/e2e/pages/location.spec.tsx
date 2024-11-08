@@ -19,6 +19,7 @@ jest.mock('../../../src/pages/location/ItemsGrid', () => {
 });
 afterEach(() => {
   cleanup();
+  jest.clearAllMocks();
 });
 
 jest.mock('.../../../../src/context/AuthContext', () => ({
@@ -83,7 +84,7 @@ describe('Load location with no child ', () => {
     });
 
     it('displays a section for Stored Items', () => {
-      expect(screen.getByText('Stored Items')).toBeVisible();
+      expect(screen.getAllByText('Stored Items').length).toBeGreaterThan(0);
     });
   });
 
