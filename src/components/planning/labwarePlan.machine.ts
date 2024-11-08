@@ -10,7 +10,6 @@ type CreateLabwareEvent = {
   type: 'CREATE_LABWARE';
   sectionThickness?: number;
   barcode?: string;
-  quantity: number;
   lotNumber?: string;
   costing?: SlideCosting;
   operationType: string;
@@ -169,9 +168,8 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
                 destinationLabwareTypeName: context.layoutPlan.destinationLabware.labwareType.name,
                 barcode: event.barcode
               });
-              const labware: PlanRequestLabware[] = new Array(event.quantity).fill(planRequestLabware);
               return {
-                labware,
+                labware: [planRequestLabware],
                 operationType: event.operationType
               };
             },
