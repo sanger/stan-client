@@ -139,6 +139,11 @@ describe('Section Registration Page', () => {
           'Section External Identifier contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted'
         ).should('be.visible');
       });
+
+      it('requires Biological Risk Assessment Numbers ', () => {
+        cy.findByLabelText('Biological Risk Assessment Numbers').focus().blur();
+        cy.findByText('Biological Risk Assessment Numbers is a required field').should('be.visible');
+      });
     });
 
     describe('Initialisation', () => {
@@ -342,6 +347,7 @@ function fillInForm() {
   selectOption('Tissue Type', 'Liver');
   selectOption('Spatial Location', '3 - Surface central region');
   cy.findByLabelText('Replicate Number').clear().type('2');
+  selectOption('bioRiskCode', 'bioRisk1');
   cy.findByLabelText('Section External Identifier').clear().type('S_EXT_ID_1');
   cy.findByLabelText('Sectioned Date').clear().type('2024-07-07');
   cy.findByLabelText('Section Number').clear().type('5');

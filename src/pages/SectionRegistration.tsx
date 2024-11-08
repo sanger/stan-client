@@ -53,6 +53,7 @@ type SectionRegistrationFormSection = {
   sectionThickness: number;
   region?: string;
   dateSectioned?: Date;
+  bioRiskCode: string;
 };
 
 type SectionRegistrationFormLabware = {
@@ -93,7 +94,8 @@ function buildSectionRegisterRequest(values: SectionRegistrationFormValues): Sec
             species: sample.species.trim(),
             tissueType: sample.tissueType.trim(),
             region: sample.region,
-            dateSectioned: sample.dateSectioned?.toString()
+            dateSectioned: sample.dateSectioned?.toString(),
+            bioRiskCode: sample.bioRiskCode
           }));
         })
       };
@@ -135,7 +137,8 @@ function buildSample(): SectionRegistrationFormSection {
     sectionNumber: 0,
     sectionThickness: 0,
     region: '',
-    dateSectioned: undefined
+    dateSectioned: undefined,
+    bioRiskCode: ''
   };
 }
 
@@ -166,7 +169,8 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
                     sectionNumber: validation.sectionNumber,
                     sectionThickness: validation.sectionThickness,
                     region: validation.region,
-                    dateSectioned: validation.dateSectioned
+                    dateSectioned: validation.dateSectioned,
+                    bioRiskCode: validation.bioRiskCode
                   })
                 )
               )
