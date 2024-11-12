@@ -52,9 +52,6 @@ type LabwarePlanProps = {
 
   sampleColors: Map<number, string>;
 
-  /** Specified number of labware when setting the plan */
-  numLabware: number;
-
   /** Specified section thickness when setting the plan */
   sectionThickness: number;
   /**
@@ -81,7 +78,6 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
       sampleColors,
       operationType,
       sourceLabware,
-      numLabware,
       sectionThickness
     },
     ref
@@ -139,7 +135,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
         className="relative p-3 shadow"
       >
         <Formik<FormValues>
-          initialValues={buildInitialValues(operationType, outputLabware.labwareType, numLabware, sectionThickness)}
+          initialValues={buildInitialValues(operationType, outputLabware.labwareType, sectionThickness)}
           validationSchema={buildValidationSchema(outputLabware.labwareType)}
           onSubmit={async (values) => {
             const newValues = {
@@ -194,18 +190,6 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                         disabled={current.matches('printing') || current.matches('done')}
                       />
                     )}
-
-                    {outputLabware.labwareType.name !== LabwareTypeName.VISIUM_LP &&
-                      outputLabware.labwareType.name !== LabwareTypeName.XENIUM && (
-                        <FormikInput
-                          label={'Number of Labware'}
-                          name={'quantity'}
-                          type={'number'}
-                          min={1}
-                          step={1}
-                          disabled={current.matches('printing') || current.matches('done')}
-                        />
-                      )}
 
                     {outputLabware.labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER && (
                       <FormikInput
@@ -333,11 +317,6 @@ type FormValues = {
   barcode?: string;
 
   /**
-   * The number of this labware type that will be created
-   */
-  quantity: number;
-
-  /**
    * The thickness of the sections being taken, in micrometres
    */
   sectionThickness?: number;
@@ -358,12 +337,10 @@ type FormValues = {
 function buildInitialValues(
   operationType: string,
   labwareType: LabwareTypeFieldsFragment,
-  quantity: number,
   sectionThickness: number
 ): FormValues {
   let formValues: FormValues = {
     operationType,
-    quantity,
     sectionThickness
   };
 
@@ -388,17 +365,13 @@ function buildInitialValues(
  */
 function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
   type FormShape = {
-    quantity: Yup.NumberSchema;
     sectionThickness?: Yup.NumberSchema;
     barcode?: Yup.StringSchema;
     lotNumber?: Yup.StringSchema;
     costing?: Yup.StringSchema;
   };
 
-  let formShape: FormShape = {
-    quantity: Yup.number().required().integer().min(1).max(99)
-  };
-
+  let formShape: FormShape = {};
   if (labwareType.name === LabwareTypeName.VISIUM_LP) {
     formShape.barcode = Yup.string().required().min(14);
   } else if (labwareType.name === LabwareTypeName.XENIUM) {

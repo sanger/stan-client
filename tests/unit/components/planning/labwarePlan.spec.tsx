@@ -272,7 +272,6 @@ const renderLabwarePlan = (outputLabwareType: string) => {
         sourceLabware={[buildFlaggedLabware(LabwareTypeName.TUBE)]}
         onDeleteButtonClick={jest.fn()}
         onComplete={jest.fn()}
-        numLabware={2}
         sectionThickness={3}
       />
     </div>
