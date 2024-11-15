@@ -506,7 +506,7 @@ const Location = () => {
                             </StyledLink>
                             {child.leaf && (
                               <span className="font-semibold" data-testid={'storedItemsCount'}>
-                                {` - Number of Stored items : ${child.numStored}`}
+                                {` - Stored Items : ${child.numStored}`}
                               </span>
                             )}
                           </li>
@@ -517,7 +517,7 @@ const Location = () => {
                 )}
 
                 {location.children.length === 0 && (
-                  <StripyCardDetail term={'Number of Stored Items'}>
+                  <StripyCardDetail term={'Stored Items'}>
                     <span data-testid={'storedItemsCount'} className="font-semibold">
                       {location.stored.length}
                     </span>

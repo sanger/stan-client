@@ -93,14 +93,13 @@ function Plan() {
               sourceLabware={sourceLabware}
               onDeleteButtonClick={deleteAction}
               onComplete={confirmAction!}
-              numLabware={numLabware}
               sectionThickness={sectionThickness}
             />
           ))}
         </>
       );
     },
-    [sectionThickness, numLabware]
+    [sectionThickness]
   );
   const buildPlanCreationSettings = React.useCallback(() => {
     return (
@@ -143,6 +142,7 @@ function Plan() {
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
           <Planner<PlanMutation>
             operationType={'Section'}
+            numPlansToCreate={numLabware}
             selectedLabwareType={allowedLabwareTypes.find((lt) => lt.name === selectedLabwareType)}
             onPlanChanged={handlePlanChange}
             buildPlanCreationSettings={buildPlanCreationSettings}
