@@ -68,7 +68,7 @@ const renderOriginalRegistrationForm = (tissues?: RegistrationFormOriginalSample
     </div>
   );
 };
-const renderBlockRegistrationForm = (withBioRisOption: boolean, tissues?: RegistrationFormTissue) => {
+const renderBlockRegistrationForm = (withBioRiskOption: boolean, tissues?: RegistrationFormTissue) => {
   return render(
     <div>
       <Formik
@@ -82,7 +82,7 @@ const renderBlockRegistrationForm = (withBioRisOption: boolean, tissues?: Regist
           registrationInfo={registrationInfo}
           availableLabwareTypes={availableLabwareTypes}
           defaultFormTissueValues={tissues ?? getRegistrationFormTissue()}
-          withBioRisOption={withBioRisOption}
+          withBioRiskOption={withBioRiskOption}
         />
       </Formik>
     </div>

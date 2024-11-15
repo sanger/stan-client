@@ -24,14 +24,14 @@ const bioRiskHandler = [
   graphql.mutation<SetBioRiskEnabledMutation, SetBioRiskEnabledMutationVariables>(
     'SetBioRiskEnabled',
     ({ variables }) => {
-      const comment = bioRiskRepository.find('code', variables.code);
-      if (comment) {
-        comment.enabled = variables.enabled;
-        bioRiskRepository.save(comment);
-        return HttpResponse.json({ data: { setBioRiskEnabled: comment } }, { status: 200 });
+      const bioRisk = bioRiskRepository.find('code', variables.code);
+      if (bioRisk) {
+        bioRisk.enabled = variables.enabled;
+        bioRiskRepository.save(bioRisk);
+        return HttpResponse.json({ data: { setBioRiskEnabled: bioRisk } }, { status: 200 });
       } else {
         return HttpResponse.json(
-          { errors: [{ message: `Could not find comment: "${variables.code}"` }] },
+          { errors: [{ message: `Could not find the biological risk: "${variables.code}"` }] },
           { status: 404 }
         );
       }

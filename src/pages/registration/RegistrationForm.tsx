@@ -42,7 +42,7 @@ interface RegistrationFormParams<T> {
   /**
    * boolean bio Risk Code option until we add the feature for rhe Original Sample Registration
    * **/
-  withBioRisOption?: boolean;
+  withBioRiskOption?: boolean;
 }
 
 const RegistrationForm = <T extends TissueValues<B>, B>({
@@ -50,7 +50,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
   availableLabwareTypes,
   defaultFormTissueValues,
   keywordsMap,
-  withBioRisOption = false
+  withBioRiskOption = false
 }: RegistrationFormParams<T>) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { setFieldValue, values, errors, touched, isSubmitting } = useFormikContext<RegistrationFormValues>();
@@ -156,7 +156,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 options={selectOptionValues(registrationInfo.tissueTypes, 'name', 'name')}
                 value={values.tissues[currentIndex].tissueType}
               />
-              {withBioRisOption && (
+              {withBioRiskOption && (
                 <CustomReactSelect
                   label="Biological Risk Assessment Numbers"
                   emptyOption
