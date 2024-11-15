@@ -82,7 +82,8 @@ export function getRegistrationFormTissueSample(): RegistrationFormOriginalSampl
     tissueType: '',
     blocks: [getRegistrationFormSample()],
     sampleCollectionDate: '',
-    workNumber: ''
+    workNumber: '',
+    bioRiskCode: ''
   };
 }
 

@@ -85,6 +85,8 @@ interface RegistrationParams<M, T, R extends Object> {
    */
   keywordsMap?: Map<TextType, string>;
   isBlock?: boolean;
+
+  withBioRiskOption?: boolean;
 }
 
 /**
@@ -105,7 +107,8 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
   formatSuccessData,
   defaultFormTissueValues,
   keywordsMap,
-  isBlock = false
+  isBlock = false,
+  withBioRiskOption = false
 }: RegistrationParams<M, T, R>) {
   const registrationMachine = React.useMemo(() => {
     return createRegistrationMachine<FormInput<T>, M>(buildRegistrationInput, registrationService);
@@ -201,6 +204,7 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
                     availableLabwareTypes={availableLabwareTypes}
                     defaultFormTissueValues={defaultFormTissueValues}
                     keywordsMap={keywordsMap}
+                    withBioRiskOption={withBioRiskOption}
                   />
 
                   {current.matches('clashed') && registrationResult && (

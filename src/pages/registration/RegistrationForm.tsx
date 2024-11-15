@@ -38,13 +38,19 @@ interface RegistrationFormParams<T> {
    * Change in default keywords to display
    */
   keywordsMap?: Map<TextType, string>;
+
+  /**
+   * boolean bio Risk Code option until we add the feature for rhe Original Sample Registration
+   * **/
+  withBioRiskOption?: boolean;
 }
 
 const RegistrationForm = <T extends TissueValues<B>, B>({
   registrationInfo,
   availableLabwareTypes,
   defaultFormTissueValues,
-  keywordsMap
+  keywordsMap,
+  withBioRiskOption = false
 }: RegistrationFormParams<T>) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { setFieldValue, values, errors, touched, isSubmitting } = useFormikContext<RegistrationFormValues>();
@@ -131,7 +137,6 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
 
             <motion.div variants={variants.fadeInWithLift} className="space-y-4">
               <Heading level={3}>Tissue Information</Heading>
-
               <CustomReactSelect
                 label="HuMFre"
                 name={`tissues.${currentIndex}.hmdmc`}
@@ -142,7 +147,6 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 options={selectOptionValues(registrationInfo.hmdmcs, 'hmdmc', 'hmdmc')}
                 value={values.tissues[currentIndex].hmdmc}
               />
-
               <CustomReactSelect
                 label="Tissue Type"
                 emptyOption
@@ -152,6 +156,17 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 options={selectOptionValues(registrationInfo.tissueTypes, 'name', 'name')}
                 value={values.tissues[currentIndex].tissueType}
               />
+              {withBioRiskOption && (
+                <CustomReactSelect
+                  label="Biological Risk Assessment Numbers"
+                  emptyOption
+                  name={`tissues.${currentIndex}.bioRiskCode`}
+                  className="mt-2"
+                  dataTestId="bioRiskCode"
+                  options={selectOptionValues(registrationInfo.bioRisks, 'code', 'code')}
+                  value={values.tissues[currentIndex].bioRiskCode}
+                />
+              )}
             </motion.div>
 
             <motion.div variants={variants.fadeInWithLift} className="space-y-4">

@@ -206,4 +206,11 @@ export default class RegistrationValidation {
   get dateSectioned() {
     return Yup.date().label('Sectioned Date').required('Sectioned Date is a required field');
   }
+
+  get bioRiskCode() {
+    return validation.requiredString({
+      label: 'Biological Risk Assessment Numbers',
+      oneOf: this.registrationInfo.bioRisks.map((m) => m.code)
+    });
+  }
 }

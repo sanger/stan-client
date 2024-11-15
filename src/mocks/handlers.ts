@@ -61,6 +61,7 @@ import segmentationHandlers from './handlers/segmentationHandlers';
 import cleanOutHandlers from './handlers/cleanOutHandlers';
 import regionOfInterestHandlers from './handlers/regionOfInterestHandlers';
 import omeroProjectHandlers from './handlers/omeroProjectHandlers';
+import bioRiskHandler from './handlers/bioRiskHandler';
 
 export const handlers = [
   ...labwareHandlers,
@@ -123,5 +124,6 @@ export const handlers = [
   ...cleanOutHandlers,
   ...regionOfInterestHandlers,
   ...projectHandlers,
-  ...omeroProjectHandlers
+  ...omeroProjectHandlers,
+  ...bioRiskHandler
 ];

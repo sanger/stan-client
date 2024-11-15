@@ -27,4 +27,7 @@ query GetRegistrationInfo {
   slotRegions {
     name
   }
+  bioRisks {
+    code
+  }
 }

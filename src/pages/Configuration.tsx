@@ -23,6 +23,7 @@ export default function Configuration() {
 
   //Listed in alphabetical order
   const configElements = [
+    'Biological Risk Assessment Numbers',
     'Comments',
     'Cost Codes',
     'Destruction Reasons',
@@ -58,6 +59,29 @@ export default function Configuration() {
   //Fill in the Config panels in same order as config Elements
   const configPanels = React.useMemo(() => {
     return [
+      /**BioRisk Codes**/
+      <div data-testid="config">
+        <Heading level={2}>Biological Risk Assessment Numbers</Heading>
+        <p className="mt-3 mb-6 text-lg" />
+        <EntityManager
+          initialEntities={configuration.bioRisks}
+          displayKeyColumnName={'code'}
+          valueColumnName={'enabled'}
+          onChangeValue={(entity, value) => {
+            const enabled = typeof value === 'boolean' ? value : false;
+            return stanCore
+              .SetBioRiskEnabled({
+                enabled,
+                code: entity.code
+              })
+              .then((res) => res.setBioRiskEnabled);
+          }}
+          valueFieldComponentInfo={{
+            type: 'CHECKBOX'
+          }}
+          onCreate={(code) => stanCore.AddBioRisk({ code }).then((res) => res.addBioRisk)}
+        />
+      </div>,
       /**Comments**/
       <div className="space-y-8">
         {Object.keys(groupedComments)

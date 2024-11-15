@@ -44,6 +44,7 @@ export interface RegistrationFormTissue {
   sampleCollectionDate?: Date | string;
   blocks: RegistrationFormBlock[];
   workNumber: string;
+  bioRiskCode: string;
 }
 
 export interface RegistrationFormValues {
@@ -80,7 +81,8 @@ export function getRegistrationFormTissue(): RegistrationFormTissue {
     tissueType: '',
     blocks: [getRegistrationFormBlock()],
     sampleCollectionDate: '',
-    workNumber: ''
+    workNumber: '',
+    bioRiskCode: ''
   };
 }
 
@@ -97,6 +99,7 @@ function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
           species: validation.species,
           hmdmc: validation.hmdmc,
           tissueType: validation.tissueType,
+          bioRiskCode: validation.bioRiskCode,
           sampleCollectionDate: validation.sampleCollectionDate,
           blocks: Yup.array()
             .min(1)
@@ -149,7 +152,8 @@ export function buildRegisterTissuesMutationVariables(
               ? tissue.sampleCollectionDate instanceof Date
                 ? tissue.sampleCollectionDate.toLocaleDateString()
                 : tissue.sampleCollectionDate
-              : undefined
+              : undefined,
+            bioRiskCode: tissue.bioRiskCode
           };
 
           if (!ignoreExistingTissues && existingTissues.includes(blockRegisterRequest.externalIdentifier)) {
@@ -241,6 +245,7 @@ function BlockRegistration() {
       successDisplayTableColumns={resultColumns}
       formatSuccessData={(registrationResult) => registrationResult.labware}
       isBlock={true}
+      withBioRiskOption={true}
     />
   );
 

@@ -17,6 +17,7 @@ import userEvent from '@testing-library/user-event';
 import { getRegistrationFormTissue, RegistrationFormTissue } from '../../../../src/pages/BlockRegistration';
 import slotRegionRepository from '../../../../src/mocks/repositories/slotRegionRepository';
 import '@testing-library/jest-dom';
+import bioRiskRepository from '../../../../src/mocks/repositories/bioRiskRepository';
 
 const registrationInfo: GetRegistrationInfoQuery = {
   solutions: solutionRepository.findAll(),
@@ -34,7 +35,8 @@ const registrationInfo: GetRegistrationInfoQuery = {
     }
   ],
   labwareTypes: [labwareTypes[LabwareTypeName.CASSETTE].build(), labwareTypes[LabwareTypeName.PROVIASETTE].build()],
-  slotRegions: slotRegionRepository.findAll()
+  slotRegions: slotRegionRepository.findAll(),
+  bioRisks: bioRiskRepository.findAll().filter((bioRisk) => bioRisk.enabled)
 };
 const availableLabwareTypes: LabwareType[] = registrationInfo.labwareTypes;
 
@@ -66,7 +68,7 @@ const renderOriginalRegistrationForm = (tissues?: RegistrationFormOriginalSample
     </div>
   );
 };
-const renderBlockRegistrationForm = (tissues?: RegistrationFormTissue) => {
+const renderBlockRegistrationForm = (withBioRiskOption: boolean, tissues?: RegistrationFormTissue) => {
   return render(
     <div>
       <Formik
@@ -80,6 +82,7 @@ const renderBlockRegistrationForm = (tissues?: RegistrationFormTissue) => {
           registrationInfo={registrationInfo}
           availableLabwareTypes={availableLabwareTypes}
           defaultFormTissueValues={tissues ?? getRegistrationFormTissue()}
+          withBioRiskOption={withBioRiskOption}
         />
       </Formik>
     </div>
@@ -234,7 +237,8 @@ describe('RegistrationForm', () => {
               }
             ],
             sampleCollectionDate: '',
-            workNumber: ''
+            workNumber: '',
+            bioRiskCode: ''
           };
           renderOriginalRegistrationForm(tissues);
         });
@@ -288,7 +292,7 @@ describe('RegistrationForm', () => {
               };
             })
           }));
-          renderBlockRegistrationForm();
+          renderBlockRegistrationForm(true);
         });
         //Donor Information
         expect(screen.getByText('Donor Information')).toBeInTheDocument();
@@ -301,6 +305,7 @@ describe('RegistrationForm', () => {
         //Tissue Information
         expect(screen.getByText('Tissue Information')).toBeInTheDocument();
         expect(screen.getByText('HuMFre')).toBeInTheDocument();
+        expect(screen.getByRole('combobox', { name: 'Biological Risk Assessment Numbers' })).toBeInTheDocument();
 
         //humfre
         expect(screen.getByTestId('HuMFre')).toBeInTheDocument();
@@ -349,7 +354,7 @@ describe('RegistrationForm', () => {
                 };
               })
             }));
-            renderBlockRegistrationForm();
+            renderBlockRegistrationForm(false);
           });
         });
         it('removes sample collection date field on adult life stage', async () => {
@@ -404,10 +409,11 @@ describe('RegistrationForm', () => {
                 }
               ],
               sampleCollectionDate: '',
-              workNumber: ''
+              workNumber: '',
+              bioRiskCode: ''
             };
 
-            renderBlockRegistrationForm(tissues);
+            renderBlockRegistrationForm(false, tissues);
           });
 
           await waitFor(() => screen.getByRole('button', { name: '+ Add Another Tissue Block' }).click());

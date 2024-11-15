@@ -17,6 +17,7 @@ import programRepository from '../repositories/programRepository';
 import omeroProjectRepository from '../repositories/omeroProjectRepository';
 import dnapStudyRepository from '../repositories/dnapStudyRepository';
 import probePanelRepository from '../repositories/probePanelRepository';
+import bioRiskRepository from '../repositories/bioRiskRepository';
 
 const configurationHandlers = [
   graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>('GetConfiguration', () => {
@@ -38,7 +39,8 @@ const configurationHandlers = [
         programs: programRepository.findAll(),
         omeroProjects: omeroProjectRepository.findAll(),
         dnapStudies: dnapStudyRepository.findAll(),
-        probePanels: probePanelRepository.findAll()
+        probePanels: probePanelRepository.findAll(),
+        bioRisks: bioRiskRepository.findAll()
       }
     });
   })

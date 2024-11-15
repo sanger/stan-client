@@ -157,6 +157,10 @@ describe('Block Registration Page', () => {
         cy.findByLabelText('Labware Type').focus().blur();
         cy.findByText('Labware Type is a required field').should('be.visible');
       });
+      it('requires Biological Risk Assessment Numbers ', () => {
+        cy.findByLabelText('Biological Risk Assessment Numbers').focus().blur();
+        cy.findByText('Biological Risk Assessment Numbers is a required field').should('be.visible');
+      });
     });
 
     describe('submission', () => {
@@ -331,6 +335,7 @@ function fillInRegistrationForm() {
   cy.findByLabelText('External Identifier').type('EXT_ID_1');
   selectOption('HuMFre', 'HuMFre1');
   selectOption('Tissue Type', 'Liver');
+  selectOption('bioRiskCode', 'bioRisk1');
   selectOption('Spatial Location', '3 - Surface central region');
   cy.findByLabelText('Replicate Number').type('2');
   cy.findByLabelText('Last Known Section Number').type('5');
