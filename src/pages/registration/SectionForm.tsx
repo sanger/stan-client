@@ -178,6 +178,19 @@ export default function SectionForm({
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.replicateNumber`}
       />
 
+      <CustomReactSelect
+        label="Biological Risk Assessment Numbers"
+        dataTestId="bioRiskCode"
+        name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.bioRiskCode`}
+        value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].bioRiskCode}
+        options={registrationInfo.bioRisks.map((bioRisk) => {
+          return {
+            label: bioRisk.code,
+            value: bioRisk.code
+          };
+        })}
+      />
+
       <Heading level={4}>Section Information</Heading>
 
       <FormikInput
