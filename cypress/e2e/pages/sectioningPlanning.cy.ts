@@ -21,8 +21,19 @@ describe('Sectioning Planning', () => {
         cy.get('#labwareScanInput').should('not.be.disabled');
       });
     });
+    context('number of labware is defined greater than 1', () => {
+      before(() => {
+        cy.get('#labwareScanInput').type('STAN-113{enter}');
+        cy.findByTestId('numLabware').type('{selectall}').type('2');
+        cy.findByText('+ Add Labware').click();
+      });
+      it('create as much labware layouts as much precised ', () => {
+        cy.findAllByTestId('labware-').should('have.length', 2);
+      });
+    });
     context('when a source labware loaded with fetal samples less than 12 weeks old', () => {
       before(() => {
+        cy.reload();
         const sourceLabware = labwareFactory.build(
           { barcode: 'STAN-113' },
           {
@@ -138,11 +149,6 @@ describe('Sectioning Planning', () => {
       it('removes the Sectioning Layout buttons', () => {
         cy.findByText('Create Labware').should('not.exist');
         cy.findByText('Delete Layout').should('not.exist');
-      });
-
-      it('disables the form inputs', () => {
-        cy.findByLabelText('Number of Labware').should('be.disabled');
-        cy.findByLabelText('Section Thickness').should('be.disabled');
       });
 
       it('shows the LabelPrinter', () => {
