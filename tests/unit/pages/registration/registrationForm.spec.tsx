@@ -68,7 +68,7 @@ const renderOriginalRegistrationForm = (tissues?: RegistrationFormOriginalSample
     </div>
   );
 };
-const renderBlockRegistrationForm = (withBioRiskOption: boolean, tissues?: RegistrationFormTissue) => {
+const renderBlockRegistrationForm = (tissues?: RegistrationFormTissue) => {
   return render(
     <div>
       <Formik
@@ -82,7 +82,6 @@ const renderBlockRegistrationForm = (withBioRiskOption: boolean, tissues?: Regis
           registrationInfo={registrationInfo}
           availableLabwareTypes={availableLabwareTypes}
           defaultFormTissueValues={tissues ?? getRegistrationFormTissue()}
-          withBioRiskOption={withBioRiskOption}
         />
       </Formik>
     </div>
@@ -122,6 +121,7 @@ describe('RegistrationForm', () => {
 
         //Tissue Information
         expect(screen.getByText('Tissue Information')).toBeInTheDocument();
+        expect(screen.getByRole('combobox', { name: 'Biological Risk Assessment Numbers' })).toBeInTheDocument();
 
         await waitFor(() => screen.getByText('HuMFre'));
         expect(screen.getByText('HuMFre')).toBeInTheDocument();
@@ -292,7 +292,7 @@ describe('RegistrationForm', () => {
               };
             })
           }));
-          renderBlockRegistrationForm(true);
+          renderBlockRegistrationForm();
         });
         //Donor Information
         expect(screen.getByText('Donor Information')).toBeInTheDocument();
@@ -354,7 +354,7 @@ describe('RegistrationForm', () => {
                 };
               })
             }));
-            renderBlockRegistrationForm(false);
+            renderBlockRegistrationForm();
           });
         });
         it('removes sample collection date field on adult life stage', async () => {
@@ -413,7 +413,7 @@ describe('RegistrationForm', () => {
               bioRiskCode: ''
             };
 
-            renderBlockRegistrationForm(false, tissues);
+            renderBlockRegistrationForm(tissues);
           });
 
           await waitFor(() => screen.getByRole('button', { name: '+ Add Another Tissue Block' }).click());

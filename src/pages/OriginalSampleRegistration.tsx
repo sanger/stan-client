@@ -99,6 +99,7 @@ function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
           species: validation.species,
           hmdmc: validation.hmdmc,
           tissueType: validation.tissueType,
+          bioRiskCode: validation.bioRiskCode,
           sampleCollectionDate: validation.sampleCollectionDate,
           blocks: Yup.array()
             .min(1)
@@ -164,6 +165,7 @@ function OriginalSampleRegistration() {
               labwareType: block.labwareType.trim(),
               lifeStage: Object.values(LifeStage).includes(tissue.lifeStage) ? tissue.lifeStage : undefined,
               tissueType: tissue.tissueType.trim(),
+              bioRiskCode: tissue.bioRiskCode,
               spatialLocation: block.spatialLocation,
               replicateNumber: block.replicateNumber ?? undefined,
               fixative: block.fixative.trim(),

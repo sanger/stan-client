@@ -274,6 +274,7 @@ function fillInForm() {
   cy.findByTestId('External Identifier').type('EXT_ID_1');
   selectOption('HuMFre', 'HuMFre1');
   selectOption('Tissue Type', 'Liver');
+  selectOption('bioRiskCode', 'bioRisk1');
   selectOption('Spatial Location', '3 - Surface central region');
   cy.findByTestId('Replicate Number').type('2');
   selectOption('Labware Type', 'Pot');

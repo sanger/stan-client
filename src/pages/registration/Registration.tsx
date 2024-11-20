@@ -20,8 +20,8 @@ import { motion } from 'framer-motion';
 import variants from '../../lib/motionVariants';
 import Heading from '../../components/Heading';
 import WorkNumberSelect from '../../components/WorkNumberSelect';
-import { FormikErrorMessage } from '../../components/forms';
 import PromptOnLeave from '../../components/notifications/PromptOnLeave';
+import { FormikErrorMessage } from '../../components/forms';
 
 /**
  * Expect form input interface
@@ -85,8 +85,6 @@ interface RegistrationParams<M, T, R extends Object> {
    */
   keywordsMap?: Map<TextType, string>;
   isBlock?: boolean;
-
-  withBioRiskOption?: boolean;
 }
 
 /**
@@ -107,8 +105,7 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
   formatSuccessData,
   defaultFormTissueValues,
   keywordsMap,
-  isBlock = false,
-  withBioRiskOption = false
+  isBlock = false
 }: RegistrationParams<M, T, R>) {
   const registrationMachine = React.useMemo(() => {
     return createRegistrationMachine<FormInput<T>, M>(buildRegistrationInput, registrationService);
@@ -190,12 +187,15 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
                             'tissues',
                             values.tissues.map((tissue) => ({ ...tissue, workNumber }))
                           );
+                          if ('workNumber' in defaultFormTissueValues) {
+                            defaultFormTissueValues.workNumber = workNumber;
+                          }
                         }}
                         workNumber={values.workNumbers}
                         multiple={isBlock}
                         emptyOption={false}
                       />
-                      {values.workNumbers.length <= 0 && <FormikErrorMessage name={'workNumbers'} />}
+                      {isBlock && values.workNumbers.length <= 0 && <FormikErrorMessage name={'workNumbers'} />}
                     </motion.div>
                   </motion.div>
 
@@ -204,7 +204,6 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
                     availableLabwareTypes={availableLabwareTypes}
                     defaultFormTissueValues={defaultFormTissueValues}
                     keywordsMap={keywordsMap}
-                    withBioRiskOption={withBioRiskOption}
                   />
 
                   {current.matches('clashed') && registrationResult && (
