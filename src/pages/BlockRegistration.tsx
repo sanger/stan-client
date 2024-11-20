@@ -245,7 +245,6 @@ function BlockRegistration() {
       successDisplayTableColumns={resultColumns}
       formatSuccessData={(registrationResult) => registrationResult.labware}
       isBlock={true}
-      withBioRiskOption={true}
     />
   );
 

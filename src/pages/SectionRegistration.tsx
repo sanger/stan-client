@@ -53,6 +53,7 @@ type SectionRegistrationFormSection = {
   sectionThickness: number;
   region?: string;
   dateSectioned?: Date;
+  bioRiskCode: string;
 };
 
 type SectionRegistrationFormLabware = {
@@ -84,6 +85,7 @@ function buildSectionRegisterRequest(values: SectionRegistrationFormValues): Sec
             externalIdentifier: sample.externalIdentifier.trim(),
             fixative: labware.fixative.trim(),
             hmdmc: sample.hmdmc.trim(),
+            bioRiskCode: sample.bioRiskCode,
             lifeStage: Object.values(LifeStage).includes(sample.lifeStage) ? sample.lifeStage : undefined,
             medium: labware.medium.trim(),
             replicateNumber: sample.replicateNumber,
@@ -135,7 +137,8 @@ function buildSample(): SectionRegistrationFormSection {
     sectionNumber: 0,
     sectionThickness: 0,
     region: '',
-    dateSectioned: undefined
+    dateSectioned: undefined,
+    bioRiskCode: ''
   };
 }
 
@@ -160,6 +163,7 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
                     species: validation.species,
                     hmdmc: validation.hmdmc,
                     tissueType: validation.tissueType,
+                    bioRiskCode: validation.bioRiskCode,
                     externalIdentifier: validation.sectionExternalIdentifier,
                     spatialLocation: validation.spatialLocation,
                     replicateNumber: validation.replicateNumber,
