@@ -1,5 +1,16 @@
 {
   "locationType": {
+    "In Use": [
+      {
+        "barcode": "STO-1EAB"
+      },
+      {
+        "barcode": "STO-1EBA"
+      },
+      {
+        "barcode": "STO-1EC9"
+      }
+    ],
     "Room Temperature": [
       {
         "barcode": "STO-003D"
