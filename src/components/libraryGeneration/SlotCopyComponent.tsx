@@ -15,6 +15,7 @@ import { Destination, SlotCopyContext, SlotCopyEvent, Source } from '../../lib/m
 import { plateFactory, stripTubeFactory } from '../../lib/factories/labwareFactory';
 import Success from '../notifications/Success';
 import { toast } from 'react-toastify';
+import { Position } from '../../lib/helpers';
 
 type SlotCopyParams = {
   title: string;
@@ -26,6 +27,7 @@ type SlotCopyParams = {
   addPlateOption?: boolean;
   labwareDestinationSelectionMode?: DestinationSelectionMode;
   onDestinationSelectionMode?: (mode: DestinationSelectionMode) => void;
+  barcodeInfoPosition?: Position;
 };
 
 interface DestinationLabwareScanPanelProps {
@@ -241,7 +243,8 @@ function SlotCopyComponent({
   initialOutputSlotCopy,
   slotCopyModes,
   addPlateOption = true,
-  labwareDestinationSelectionMode
+  labwareDestinationSelectionMode,
+  barcodeInfoPosition
 }: SlotCopyParams) {
   const { sources, destinations } = current.context;
 
@@ -436,6 +439,7 @@ function SlotCopyComponent({
           onSelectOutputLabware={setSelectedDestination}
           slotCopyModes={slotCopyModes}
           cleanedOutInputAddresses={cleanedOutInputAddresses}
+          barcodeInfoPosition={barcodeInfoPosition}
         />
       </div>
     </>

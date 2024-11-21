@@ -32,7 +32,7 @@ import { createLabwarePlanMachine } from './labwarePlan.machine';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../pages/sectioning';
 import ScanInput from '../scanInput/ScanInput';
 import FormikSelect from '../forms/Select';
-import { objectKeys } from '../../lib/helpers';
+import { objectKeys, Position } from '../../lib/helpers';
 import { FormikErrorMessage } from '../forms';
 
 type LabwarePlanProps = {
@@ -160,6 +160,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                     slotText={(address) => buildSlotText(layoutPlan, address)}
                     slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
                     slotColor={(address) => buildSlotColor(layoutPlan, address)}
+                    barcodeInfoPosition={Position.TopRight}
                   />
 
                   {current.matches('prep') && (

@@ -30,6 +30,7 @@ import PermPositiveControl from '../components/forms/PermPositiveControl';
 import { ConfirmationModal } from '../components/modal/ConfirmationModal';
 import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 import { fromPromise } from 'xstate';
+import { Position } from '../lib/helpers';
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
@@ -302,6 +303,7 @@ function VisiumPermForm() {
             }
           }}
           cleanedOutAddresses={cleanedOutAddresses?.get(labwares[0].id)}
+          barcodeInfoPosition={Position.TopRight}
         />
       </div>
     </div>

@@ -16,7 +16,7 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import Heading from '../components/Heading';
 import LabelCopyButton from '../components/LabelCopyButton';
 import { DestinationSelectionMode, SlotCopyMode } from '../components/slotMapper/slotMapper.types';
-import { objectKeys } from '../lib/helpers';
+import { objectKeys, Position } from '../lib/helpers';
 import SlotCopyComponent from '../components/libraryGeneration/SlotCopyComponent';
 import { LabwareWithoutPermConfirmationModal } from '../components/libraryGeneration/LabwareWithoutPermConfirmationModal';
 import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
@@ -188,6 +188,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             send={send}
             initialOutputSlotCopy={initialOutputSlotCopy}
             slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
+            barcodeInfoPosition={Position.TopRight}
           />
 
           {slotCopyResults.length > 0 && (
