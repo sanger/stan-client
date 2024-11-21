@@ -1,13 +1,12 @@
 import { OutputSlotCopyData, SlotMapperContext, SlotMapperEvent, SlotMapperSchema } from './slotMapper.types';
 import {
-  GridDirection,
   LabwareFlaggedFieldsFragment,
   PassFail,
   SlotCopyContent,
   SlotPassFail,
   SlotPassFailFieldsFragment
 } from '../../types/sdk';
-import { buildAddresses, cycleColors } from '../../lib/helpers';
+import { buildAddresses, cycleColors, GridDirection } from '../../lib/helpers';
 import { sortWithDirection } from '../../lib/helpers/addressHelper';
 import { find, indexOf, intersection, map } from 'lodash';
 import { stanCore } from '../../lib/sdk';

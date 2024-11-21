@@ -1,9 +1,9 @@
 import { Factory } from 'fishery';
-import { GridDirection, Labware, LabwareState } from '../../types/sdk';
+import { Labware, LabwareState } from '../../types/sdk';
 import { labwareTypes } from './labwareTypeFactory';
 import { LabwareTypeName, NewLabwareLayout } from '../../types/stan';
 import { uniqueId } from 'lodash';
-import { buildAddresses } from '../helpers';
+import { buildAddresses, GridDirection } from '../helpers';
 import { slotFactory } from './slotFactory';
 
 export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(

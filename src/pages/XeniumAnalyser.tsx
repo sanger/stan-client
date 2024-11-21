@@ -7,7 +7,6 @@ import {
   AnalyserScanDataFieldsFragment,
   CassettePosition,
   EquipmentFieldsFragment,
-  GridDirection,
   LabwareFlaggedFieldsFragment,
   RecordAnalyserMutation,
   SamplePositionFieldsFragment,
@@ -26,7 +25,7 @@ import FormikInput from '../components/forms/Input';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Table, { TabelSubHeader, TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
-import { objectKeys } from '../lib/helpers';
+import { GridDirection, objectKeys } from '../lib/helpers';
 import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { FormikErrorMessage, selectOptionValues } from '../components/forms';
@@ -371,7 +370,7 @@ const XeniumAnalyser = () => {
                             <div className="flex flex-row mt-3">
                               <div className="grid grid-cols-3 gap-x-1">
                                 <div className="col-span-1">
-                                  <Labware labware={labwareForm.labware} gridDirection={GridDirection.DownLeft} />
+                                  <Labware labware={labwareForm.labware} gridDirection={GridDirection.LeftUp} />
                                 </div>
                                 <div className="col-span-2">{LabwareAnalyserTable(labwareForm)}</div>
                               </div>
