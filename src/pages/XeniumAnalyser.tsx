@@ -7,6 +7,7 @@ import {
   AnalyserScanDataFieldsFragment,
   CassettePosition,
   EquipmentFieldsFragment,
+  GridDirection,
   LabwareFlaggedFieldsFragment,
   RecordAnalyserMutation,
   SamplePositionFieldsFragment,
@@ -35,6 +36,8 @@ import { lotRegx } from './ProbeHybridisationXenium';
 import { joinUnique, samplesFromLabwareOrSLot } from '../components/dataTableColumns';
 import RemoveButton from '../components/buttons/RemoveButton';
 import PassIcon from '../components/icons/PassIcon';
+import Labware from '../components/labware/Labware';
+import Panel from '../components/Panel';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
@@ -80,12 +83,12 @@ const formInitialValues: XeniumAnalyserFormValues = {
   workNumberAll: ''
 };
 
-const LabwareAnalyserTable = (labware: Array<AnalyserLabwareForm>, removeLabware: (barcode: string) => void) => {
+const LabwareAnalyserTable = (labwareForm: AnalyserLabwareForm) => {
+  const samples = samplesFromLabwareOrSLot(labwareForm.labware);
   return (
-    <Table>
+    <Table className="text-sm">
       <TableHead>
         <tr>
-          <TableHeader>Barcode</TableHeader>
           <TableHeader>Donor ID</TableHeader>
           <TableHeader>Labware Type</TableHeader>
           <TableHeader>External Name</TableHeader>
@@ -93,40 +96,32 @@ const LabwareAnalyserTable = (labware: Array<AnalyserLabwareForm>, removeLabware
           <TableHeader>Work Numbers</TableHeader>
           <TableHeader>Probes</TableHeader>
           <TableHeader>Cell Segmentation Recorded</TableHeader>
-          <TableHeader></TableHeader>
         </tr>
       </TableHead>
       <TableBody>
-        {labware.map((lw) => {
-          const samples = samplesFromLabwareOrSLot(lw.labware);
-          return (
-            <tr key={lw.labware.barcode}>
-              <TableCell>{lw.labware.barcode}</TableCell>
-              <TableCell>{joinUnique(samples.map((sample) => sample.tissue.donor.donorName))}</TableCell>
-              <TableCell>{lw.labware.labwareType.name}</TableCell>
-              <TableCell>{joinUnique(samples.map((sample) => sample.tissue.externalName ?? ''))}</TableCell>
-              <TableCell>{joinUnique(samples.map((sample) => sample.bioState.name))}</TableCell>
-              <TableCell>{lw.analyserScanData?.workNumbers.join(', ')}</TableCell>
-              <TableCell>{lw.analyserScanData?.probes.join(', ')}</TableCell>
-              <TableCell>
-                {lw.analyserScanData?.cellSegmentationRecorded ? (
-                  <PassIcon className={`inline-block h-8 w-8 text-green-500`} />
-                ) : (
-                  ' - '
-                )}
-              </TableCell>
-
-              <TableCell>
-                <RemoveButton
-                  type={'button'}
-                  onClick={() => {
-                    removeLabware(lw.labware.barcode);
-                  }}
-                />
-              </TableCell>
-            </tr>
-          );
-        })}
+        <tr>
+          <TableCell className="break-words align-top">
+            {joinUnique(samples.map((sample) => sample.tissue.donor.donorName))}
+          </TableCell>
+          <TableCell className="break-words align-top">{labwareForm.labware.labwareType.name}</TableCell>
+          <TableCell className="break-words align-top">
+            {joinUnique(samples.map((sample) => sample.tissue.externalName ?? ''))}
+          </TableCell>
+          <TableCell className="break-words align-top">
+            {joinUnique(samples.map((sample) => sample.bioState.name))}
+          </TableCell>
+          <TableCell className="break-words align-top">
+            {labwareForm.analyserScanData?.workNumbers.join(', ')}
+          </TableCell>
+          <TableCell className="break-words align-top">{labwareForm.analyserScanData?.probes.join(', ')}</TableCell>
+          <TableCell className="break-words align-top">
+            {labwareForm.analyserScanData?.cellSegmentationRecorded ? (
+              <PassIcon className={`inline-block h-8 w-8 text-green-500`} />
+            ) : (
+              ' - '
+            )}
+          </TableCell>
+        </tr>
       </TableBody>
     </Table>
   );
@@ -368,7 +363,21 @@ const XeniumAnalyser = () => {
                       enableFlaggedLabwareCheck
                     >
                       {({ removeLabware }) =>
-                        values.labware.length > 0 && LabwareAnalyserTable(values.labware, removeLabware)
+                        values.labware.map((labwareForm) => (
+                          <Panel key={labwareForm.labware.barcode}>
+                            <div className="flex flex-row items-center justify-end">
+                              <RemoveButton onClick={() => removeLabware(labwareForm.labware.barcode)} />
+                            </div>
+                            <div className="flex flex-row mt-3">
+                              <div className="grid grid-cols-3 gap-x-1">
+                                <div className="col-span-1">
+                                  <Labware labware={labwareForm.labware} gridDirection={GridDirection.DownLeft} />
+                                </div>
+                                <div className="col-span-2">{LabwareAnalyserTable(labwareForm)}</div>
+                              </div>
+                            </div>
+                          </Panel>
+                        ))
                       }
                     </LabwareScanner>
                   </motion.div>

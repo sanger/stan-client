@@ -157,6 +157,10 @@ describe('Block Registration Page', () => {
         cy.findByLabelText('Labware Type').focus().blur();
         cy.findByText('Labware Type is a required field').should('be.visible');
       });
+      it('requires Biological Risk Assessment Numbers ', () => {
+        cy.findByLabelText('Biological Risk Assessment Numbers').focus().blur();
+        cy.findByText('Biological Risk Assessment Numbers is a required field').should('be.visible');
+      });
     });
 
     describe('submission', () => {

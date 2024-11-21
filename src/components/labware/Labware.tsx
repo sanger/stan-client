@@ -4,7 +4,7 @@ import BarcodeIcon from '../icons/BarcodeIcon';
 import { Slot } from './Slot';
 import { buildAddresses, isSameArray } from '../../lib/helpers';
 import _ from 'lodash';
-import { LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
+import { GridDirection, LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
 import createLabwareMachine from './labware.machine';
 import { Selectable, SelectionMode } from './labware.types';
 import { NewFlaggedLabwareLayout, NewLabwareLayout } from '../../types/stan';
@@ -120,6 +120,10 @@ export interface LabwareProps {
    * Cleaned out addresses are displayed crossed over in the UI.
    */
   cleanedOutAddresses?: string[];
+
+  barcodeInfoPosition?: 'top right' | 'bottom right' | 'top left' | 'bottom left';
+
+  gridDirection?: GridDirection;
 }
 
 export type LabwareImperativeRef = {
@@ -150,7 +154,9 @@ const Labware = ({
   slotColor,
   labwareRef,
   slotBuilder,
-  cleanedOutAddresses
+  cleanedOutAddresses,
+  barcodeInfoPosition,
+  gridDirection
 }: React.PropsWithChildren<LabwareProps>) => {
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine();
@@ -268,14 +274,53 @@ const Labware = ({
     return slotColumns;
   }, [numColumns, slots]);
 
+  const barcodePositionX = (): string => {
+    if (!barcodeInfoPosition) return 'items-start';
+    return barcodeInfoPosition.includes('right') ? 'items-start' : 'items-end';
+  };
+
+  const BarcodeInformation = () => {
+    return (
+      <div
+        className={
+          'flex flex-col py-2 px-3 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider ' +
+          barcodePositionX()
+        }
+      >
+        {name && <span>{name}</span>}
+        {barcode && !isFlagged && (
+          <span className="inline-flex">
+            <BarcodeIcon className="mr-1 h-4 w-4 text-gray-500" />
+            {barcode}
+          </span>
+        )}
+        {barcode && isFlagged ? (
+          <span>
+            <Link
+              className="flex flex-row text-sp-700 hover:text-sp-800 font-semibold hover:underline"
+              to={`/labware/${barcode}`}
+              target="_blank"
+            >
+              <FlagIcon className="h-4 w-4 inline-block mb-2 mr-1 -ml-1" />
+              {barcode}
+            </Link>
+          </span>
+        ) : (
+          ''
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={'flex flex-row'} data-testid={`labware-${labware.barcode ?? ''}`}>
       {slotColumns.length > 0 && slotBuilder && (
         <SlotColumnInfo slotColumn={slotColumns[0]} slotBuilder={slotBuilder} numRows={numRows} />
       )}
       <div onClick={() => onClick?.()} className={labwareClasses}>
+        {barcodeInfoPosition && barcodeInfoPosition.includes('top') && BarcodeInformation()}
         <div className={gridClasses}>
-          {buildAddresses({ numColumns, numRows }).map((address, i) => (
+          {buildAddresses({ numColumns, numRows }, gridDirection).map((address, i) => (
             <Slot
               key={i}
               address={address}
@@ -294,30 +339,8 @@ const Labware = ({
             />
           ))}
         </div>
-
-        <div className="flex flex-col items-start justify-between py-1 px-2 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-          {name && <span>{name}</span>}
-          {barcode && !isFlagged && (
-            <span className="inline-flex">
-              <BarcodeIcon className="mr-1 h-4 w-4 text-gray-500" />
-              {barcode}
-            </span>
-          )}
-          {barcode && isFlagged ? (
-            <span>
-              <Link
-                className="flex flex-row text-sp-700 hover:text-sp-800 font-semibold hover:underline"
-                to={`/labware/${barcode}`}
-                target="_blank"
-              >
-                <FlagIcon className="h-4 w-4 inline-block mb-2 mr-1 -ml-1" />
-                {barcode}
-              </Link>
-            </span>
-          ) : (
-            ''
-          )}
-        </div>
+        {(!barcodeInfoPosition || (barcodeInfoPosition && barcodeInfoPosition.includes('bottom'))) &&
+          BarcodeInformation()}
       </div>
       {slotColumns.length > 1 && slotBuilder && (
         <SlotColumnInfo slotColumn={slotColumns[1]} slotBuilder={slotBuilder} numRows={numRows} alignRight={true} />

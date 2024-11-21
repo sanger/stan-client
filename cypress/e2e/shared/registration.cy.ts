@@ -68,11 +68,6 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
       }
     );
 
-    it('requires Biological Risk Assessment Numbers ', () => {
-      cy.findByLabelText('Biological Risk Assessment Numbers').focus().blur();
-      cy.findByText('Biological Risk Assessment Numbers is a required field').should('be.visible');
-    });
-
     it('requires Replicate Number to be suitable', () => {
       cy.findByTestId('Replicate Number').type('1+1').blur();
       checkReplicateWarningIsVisible();
