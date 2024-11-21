@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { GridDirection, Maybe } from '../types/sdk';
+import { Maybe } from '../types/sdk';
 import { HasEnabled, SizeInput } from '../types/stan';
 import _, { isNaN } from 'lodash';
 import { Key } from 'react';
@@ -70,6 +70,19 @@ type SchemaParams = {
   schema: Yup.AnyObjectSchema;
 };
 type SafeParseQueryStringParams<T> = GuardAndTransformParams<T> | SchemaParams;
+
+export enum GridDirection {
+  /** Right across the top row, then down to the next row, etc. */
+  RightDown = 'RightDown',
+  /** Down the leftmost column, then right to the next column, etc. */
+  DownRight = 'DownRight',
+  /** Right across the bottom row, then up to the next row, etc. */
+  RightUp = 'RightUp',
+  /** Up the leftmost column, then right to the next column, etc. */
+  UpRight = 'UpRight',
+  /** Down the rightmost column, then left to the next column, etc. - Rotate 180  */
+  LeftUp = 'LeftUp'
+}
 
 /**
  * Will attempt to deserialize a URL query string into a given type <T>
@@ -211,7 +224,7 @@ export function buildAddresses(size: SizeInput, direction: GridDirection = GridD
       }
       break;
 
-    case GridDirection.DownLeft:
+    case GridDirection.LeftUp:
       // Reverse row-major order (bottom to top, right to left) // Rotate 180 degrees
       for (let row = numRows; row >= 1; row--) {
         for (let col = numColumns; col >= 1; col--) {

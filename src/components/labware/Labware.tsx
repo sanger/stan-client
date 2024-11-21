@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useImperativeHandle, useMemo } from 'rea
 import classNames from 'classnames';
 import BarcodeIcon from '../icons/BarcodeIcon';
 import { Slot } from './Slot';
-import { buildAddresses, isSameArray } from '../../lib/helpers';
+import { buildAddresses, GridDirection, isSameArray } from '../../lib/helpers';
 import _ from 'lodash';
-import { GridDirection, LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
 import createLabwareMachine from './labware.machine';
 import { Selectable, SelectionMode } from './labware.types';
 import { NewFlaggedLabwareLayout, NewLabwareLayout } from '../../types/stan';
