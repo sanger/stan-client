@@ -84,7 +84,7 @@ export enum GridDirection {
   LeftUp = 'LeftUp'
 }
 export enum Position {
-  TopRight = 'top right',
+  TopRight = 'TopRight',
   BottomRight = 'BottomRight',
   TopLeft = 'TopLeft',
   BottomLeft = 'BottomLeft'
