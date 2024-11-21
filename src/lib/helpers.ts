@@ -83,6 +83,12 @@ export enum GridDirection {
   /** Down the rightmost column, then left to the next column, etc. - Rotate 180  */
   LeftUp = 'LeftUp'
 }
+export enum Position {
+  TopRight = 'top right',
+  BottomRight = 'BottomRight',
+  TopLeft = 'TopLeft',
+  BottomLeft = 'BottomLeft'
+}
 
 /**
  * Will attempt to deserialize a URL query string into a given type <T>
