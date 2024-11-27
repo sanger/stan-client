@@ -80,7 +80,7 @@ export enum GridDirection {
   RightUp = 'RightUp',
   /** Up the leftmost column, then right to the next column, etc. */
   UpRight = 'UpRight',
-  /** Down the rightmost column, then left to the next column, etc. - Rotate 180  */
+  /** Left across the bottom row, then up to the next row, etc. */
   LeftUp = 'LeftUp'
 }
 
