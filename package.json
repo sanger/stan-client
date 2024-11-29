@@ -4,7 +4,7 @@
   "private": true,
   "proxy": "http://localhost:8080",
   "dependencies": {
-    "@react-aria/tabs": "^3.8.2",
+    "@react-aria/tabs": "^3.9.7",
     "@sanger/ui-styling": "^4.1.0",
     "@storybook/react-webpack5": "^7.6.3",
     "@tailwindcss/aspect-ratio": "^0.4.2",
