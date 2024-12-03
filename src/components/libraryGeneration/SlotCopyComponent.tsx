@@ -21,7 +21,7 @@ type SlotCopyParams = {
   initialOutputLabware: NewFlaggedLabwareLayout[];
   initialOutputSlotCopy: Array<Destination>;
   send: (event: SlotCopyEvent) => void;
-  current: MachineSnapshot<SlotCopyContext, SlotCopyEvent, any, any, any, any>;
+  current: MachineSnapshot<SlotCopyContext, SlotCopyEvent, any, any, any, any, any, any>;
   slotCopyModes: Array<SlotCopyMode>;
   addPlateOption?: boolean;
   labwareDestinationSelectionMode?: DestinationSelectionMode;
@@ -329,7 +329,7 @@ function SlotCopyComponent({
         ? (plateFactory.build() as NewFlaggedLabwareLayout)
         : (stripTubeFactory.build() as NewFlaggedLabwareLayout);
 
-    const labwareArray = destinations.map((dest) => dest.labware);
+    const labwareArray = destinations.map((dest: Destination) => dest.labware);
     labwareArray.push(labware);
     toast(addDestinationPlateNotification(labware.labwareType.name), {
       position: toast.POSITION.TOP_RIGHT,
@@ -378,7 +378,7 @@ function SlotCopyComponent({
   );
 
   const cleanedOutInputAddresses: Map<number, string[]> = new Map();
-  sources.forEach((source) => {
+  sources.forEach((source: Source) => {
     cleanedOutInputAddresses.set(source.labware.id, source.cleanedOutAddresses ?? []);
   });
 
@@ -410,7 +410,7 @@ function SlotCopyComponent({
               cleanedOutAddresses: output.cleanedOutAddresses
             };
           })}
-          initialInputLabware={sources.map((source) => source.labware)}
+          initialInputLabware={sources.map((source: Source) => source.labware)}
           onInputLabwareChange={handleInputLabwareChange}
           onChange={handleOnSlotMapperChange}
           onOutputLabwareChange={handleOutputLabwareChange}
@@ -418,7 +418,7 @@ function SlotCopyComponent({
             sources.length > 0 && (
               <SlotCopySourceConfigPanel
                 onChangeState={onSourceLabwareStateChange}
-                selectedSource={sources.find((src) => src.labware.barcode === selectedSource?.barcode)}
+                selectedSource={sources.find((src: Source) => src.labware.barcode === selectedSource?.barcode)}
               />
             )
           }
@@ -428,7 +428,7 @@ function SlotCopyComponent({
               onChangeBioState={onChangeBioState}
               onLabwareScan={onDestinationLabwareScan}
               onDestinationSelectionModeChange={onDestinationSelectionModeChange}
-              labware={destinations.find((dest) => dest.labware.id === selectedDestination.id)}
+              labware={destinations.find((dest: Destination) => dest.labware.id === selectedDestination.id)}
               destinationSelectionMode={updateDestinationModeWhenPaginating()}
             />
           }
