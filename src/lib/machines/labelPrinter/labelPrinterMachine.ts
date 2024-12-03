@@ -1,4 +1,4 @@
-import { assign, createMachine, fromPromise, MachineConfig, MachineImplementations } from 'xstate';
+import { assign, createMachine, fromPromise, InternalMachineImplementations, MachineConfig } from 'xstate';
 import { LabelPrinterContext, LabelPrinterEvent } from './labelPrinterMachineTypes';
 import { find } from 'lodash';
 import { castDraft, produce } from '../../../dependencies/immer';
@@ -8,7 +8,19 @@ import { LabelType, LabwareFieldsFragment, PrinterFieldsFragment } from '../../.
 /**
  * LabelPrinter Machine Options
  */
-const machineOptions: MachineImplementations<LabelPrinterContext, LabelPrinterEvent> = {
+
+type LabelPrinterMachineImplementation = {
+  context: LabelPrinterContext;
+  events: LabelPrinterEvent;
+  actors: any;
+  actions: any;
+  guards: any;
+  delays: any;
+  tags: any;
+  emitted: any;
+};
+
+const machineOptions: InternalMachineImplementations<LabelPrinterMachineImplementation> = {
   actions: {
     assignPrinters: assign(({ context, event }) => {
       if (event.type !== 'xstate.done.actor.fetchPrinters') {

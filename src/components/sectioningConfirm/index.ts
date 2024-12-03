@@ -2,5 +2,5 @@ import { ConfirmLabwareContext, ConfirmLabwareEvent } from './confirmLabware.mac
 import { MachineSnapshot } from 'xstate';
 
 export const selectConfirmOperationLabware = (
-  state: MachineSnapshot<ConfirmLabwareContext, ConfirmLabwareEvent, any, any, any, any, any>
+  state: MachineSnapshot<ConfirmLabwareContext, ConfirmLabwareEvent, any, any, any, any, any, any>
 ) => state.context.confirmSectionLabware;

@@ -11,12 +11,23 @@ import { buildAddresses, cycleColors } from '../../lib/helpers';
 import { sortWithDirection } from '../../lib/helpers/addressHelper';
 import { find, indexOf, intersection, map } from 'lodash';
 import { stanCore } from '../../lib/sdk';
-import { assign, createMachine, fromPromise, MachineImplementations } from 'xstate';
-import { produce } from '../../dependencies/immer';
+import { assign, createMachine, fromPromise, InternalMachineImplementations } from 'xstate';
+import { produce } from 'immer';
 
 const colors = cycleColors();
 
-const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapperEvent> = {
+type SlotMapperMachineImplementation = {
+  context: SlotMapperContext;
+  events: SlotMapperEvent;
+  actors: any;
+  actions: any;
+  guards: any;
+  delays: any;
+  tags: any;
+  emitted: any;
+};
+
+const machineImplementations: InternalMachineImplementations<SlotMapperMachineImplementation> = {
   actions: {
     assignInputLabware: assign(({ context, event }) => {
       if (event.type === 'UPDATE_INPUT_LABWARE') {
@@ -26,20 +37,22 @@ const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapp
 
           // Update the failedSlots array if it has entries for any removed labware
           let keys = Array.from(draft.failedSlots.keys()).filter(
-            (key) => draft.inputLabware.findIndex((labware) => labware.barcode === key) === -1
+            (key) =>
+              draft.inputLabware.findIndex((labware: LabwareFlaggedFieldsFragment) => labware.barcode === key) === -1
           );
           keys.forEach((key) => draft.failedSlots.delete(key));
 
           // Update the errors array if it has entries for any removed labware
           keys = Array.from(draft.errors.keys()).filter(
-            (key) => draft.inputLabware.findIndex((labware) => labware.barcode === key) === -1
+            (key) =>
+              draft.inputLabware.findIndex((labware: LabwareFlaggedFieldsFragment) => labware.barcode === key) === -1
           );
           keys.forEach((key) => draft.errors.delete(key));
 
           // Update destination slotCopyContent if it has entries for any removed labware
-          draft.outputSlotCopies.forEach((outputScc) => {
-            outputScc.slotCopyContent = outputScc.slotCopyContent.filter((scc) =>
-              draft.inputLabware.some((lw) => lw.barcode === scc.sourceBarcode)
+          draft.outputSlotCopies.forEach((outputScc: OutputSlotCopyData) => {
+            outputScc.slotCopyContent = outputScc.slotCopyContent.filter((scc: SlotCopyContent) =>
+              draft.inputLabware.some((lw: LabwareFlaggedFieldsFragment) => lw.barcode === scc.sourceBarcode)
             );
           });
         });

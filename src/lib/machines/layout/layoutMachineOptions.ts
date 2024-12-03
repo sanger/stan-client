@@ -1,10 +1,11 @@
 import { LayoutContext, Source } from './layoutContext';
 import { isEqual } from 'lodash';
 import { tissue } from '../../helpers/labwareHelper';
-import { LabwareFieldsFragment } from '../../../types/sdk';
-import { assign, MachineImplementations, sendParent } from 'xstate';
+import { LabwareFieldsFragment, Slot } from '../../../types/sdk';
+import { assign, InternalMachineImplementations, sendParent } from 'xstate';
 import { LayoutEvents } from './layoutEvents';
-import { produce } from '../../../dependencies/immer';
+import { LayoutSchema } from './layoutStates';
+import { produce } from 'immer';
 
 export const layoutMachineKey = 'layoutMachine';
 
@@ -21,7 +22,19 @@ export enum Actions {
   CANCEL_EDIT_LAYOUT = 'layoutMachine.cancelEditLayout'
 }
 
-export const machineOptions: MachineImplementations<LayoutContext, LayoutEvents> = {
+type LayoutMachineImplementation = {
+  context: LayoutContext;
+  events: LayoutEvents;
+  schema: LayoutSchema;
+  actors: any;
+  actions: any;
+  guards: any;
+  delays: any;
+  tags: any;
+  emitted: any;
+};
+
+export const machineOptions: InternalMachineImplementations<LayoutMachineImplementation> = {
   actions: {
     [Actions.ASSIGN_SELECTED]: assign(({ context, event }) => {
       if (event.type !== 'SELECT_SOURCE') {
@@ -72,7 +85,8 @@ export const machineOptions: MachineImplementations<LayoutContext, LayoutEvents>
         return context;
       }
       return produce(context, (draft) => {
-        draft.layoutPlan.destinationLabware.slots.forEach((slot) => {
+        // @ts-ignore
+        draft.layoutPlan.destinationLabware.slots.forEach((slot: Slot) => {
           draft.layoutPlan.plannedActions.set(slot.address, [event.source]);
         });
       });

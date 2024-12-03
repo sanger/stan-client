@@ -1,4 +1,4 @@
-import { assign, createMachine, fromPromise, MachineConfig, MachineImplementations, raise } from 'xstate';
+import { assign, createMachine, fromPromise, InternalMachineImplementations, MachineConfig, raise } from 'xstate';
 import {
   LocationContext,
   LocationEvent,
@@ -33,7 +33,18 @@ enum Service {
 /**
  * Location Machine Options
  */
-export const machineOptions: MachineImplementations<LocationContext, LocationEvent> = {
+type LocationMachineImplementation = {
+  context: LocationContext;
+  events: LocationEvent;
+  actors: any;
+  actions: any;
+  guards: any;
+  delays: any;
+  tags: any;
+  emitted: any;
+};
+
+export const machineOptions: InternalMachineImplementations<LocationMachineImplementation> = {
   actions: {
     [Action.ASSIGN_LOCATION_SEARCH_PARAMS]: assign(({ context, event }) => {
       if (event.type !== 'FETCH_LOCATION') {
