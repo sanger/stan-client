@@ -260,7 +260,7 @@ function buildPlanRequestLabware({
       const sources = layoutPlan.plannedActions.get(address)!;
       return sources.map((source) => ({
         address,
-        sampleThickness,
+        sampleThickness: sampleThickness?.toString(),
         sampleId: source.sampleId,
         source: {
           barcode: source.labware.barcode,

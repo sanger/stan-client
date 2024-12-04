@@ -89,7 +89,7 @@ function buildSectionRegisterRequest(values: SectionRegistrationFormValues): Sec
             medium: labware.medium.trim(),
             replicateNumber: sample.replicateNumber,
             sectionNumber: sample.sectionNumber,
-            sectionThickness: sample.sectionThickness,
+            sectionThickness: sample.sectionThickness.toString(),
             spatialLocation: sample.spatialLocation,
             species: sample.species.trim(),
             tissueType: sample.tissueType.trim(),

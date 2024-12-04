@@ -229,6 +229,7 @@ export default function SectionForm({
         label="Section Thickness"
         type="number"
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.sectionThickness`}
+        step="0.5"
       />
 
       <div className="flex flex-row justify-between">
