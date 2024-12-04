@@ -2320,6 +2320,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 .text-wrap {
   text-wrap: wrap;
 }
+.break-words {
+  overflow-wrap: break-word;
+}
 .rounded {
   border-radius: 0.25rem;
 }
@@ -2899,6 +2902,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 }
 .text-right {
   text-align: right;
+}
+.align-top {
+  vertical-align: top;
 }
 .align-middle {
   vertical-align: middle;
@@ -4542,4 +4548,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.d4f1c9be.css.map*/
+/*# sourceMappingURL=main.b48dcd17.css.map*/
