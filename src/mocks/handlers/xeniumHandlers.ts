@@ -34,7 +34,6 @@ const xeniumHandlers = [
       {
         data: {
           analyserScanData: {
-            barcode: variables.barcode,
             workNumbers: ['SGP1008'],
             probes: [
               faker.string.alphanumeric({ length: { min: 5, max: 8 } }),
