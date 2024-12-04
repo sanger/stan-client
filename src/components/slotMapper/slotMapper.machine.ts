@@ -11,12 +11,23 @@ import { buildAddresses, cycleColors } from '../../lib/helpers';
 import { sortWithDirection } from '../../lib/helpers/addressHelper';
 import { find, indexOf, intersection, map } from 'lodash';
 import { stanCore } from '../../lib/sdk';
-import { assign, createMachine, fromPromise, MachineImplementations } from 'xstate';
-import { produce } from '../../dependencies/immer';
+import { assign, createMachine, fromPromise, InternalMachineImplementations } from 'xstate';
+import { produce } from 'immer';
 
 const colors = cycleColors();
 
-const machineImplementations: MachineImplementations<SlotMapperContext, SlotMapperEvent> = {
+type SlotMapperMachineImplementation = {
+  context: SlotMapperContext;
+  events: SlotMapperEvent;
+  actors: any;
+  actions: any;
+  guards: any;
+  delays: any;
+  tags: any;
+  emitted: any;
+};
+
+const machineImplementations: InternalMachineImplementations<SlotMapperMachineImplementation> = {
   actions: {
     assignInputLabware: assign(({ context, event }) => {
       if (event.type === 'UPDATE_INPUT_LABWARE') {

@@ -12,7 +12,7 @@ import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../pages/
 import { ActorRef, MachineSnapshot } from 'xstate';
 
 interface LayoutPlannerProps {
-  actor: ActorRef<MachineSnapshot<LayoutContext, LayoutEvents, any, any, any, any>, any>;
+  actor: ActorRef<MachineSnapshot<LayoutContext, LayoutEvents, any, any, any, any, any, any>, any>;
   children: React.ReactNode;
 }
 

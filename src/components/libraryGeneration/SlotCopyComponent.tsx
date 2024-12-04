@@ -21,7 +21,7 @@ type SlotCopyParams = {
   initialOutputLabware: NewFlaggedLabwareLayout[];
   initialOutputSlotCopy: Array<Destination>;
   send: (event: SlotCopyEvent) => void;
-  current: MachineSnapshot<SlotCopyContext, SlotCopyEvent, any, any, any, any>;
+  current: MachineSnapshot<SlotCopyContext, SlotCopyEvent, any, any, any, any, any, any>;
   slotCopyModes: Array<SlotCopyMode>;
   addPlateOption?: boolean;
   labwareDestinationSelectionMode?: DestinationSelectionMode;
