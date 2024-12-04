@@ -1,6 +1,6 @@
-import { GridDirection } from '../../types/sdk';
 import { orderBy } from 'lodash';
 import { getColumnIndex, getRowIndex } from './labwareHelper';
+import { GridDirection } from '../helpers';
 
 /**
  * Sort a list of addresses by the direction given

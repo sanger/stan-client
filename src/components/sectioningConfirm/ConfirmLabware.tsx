@@ -23,6 +23,7 @@ import { ConfirmationModal } from '../modal/ConfirmationModal';
 import { SectionNumberMode } from './SectioningConfirm';
 import { LabwareTypeName } from '../../types/stan';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { Position } from '../../lib/helpers';
 
 interface ConfirmLabwareProps {
   /**
@@ -152,6 +153,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             slotText={(address) => buildSlotText(layoutPlan, address)}
             slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
             slotColor={(address) => buildSlotColor(layoutPlan, address)}
+            barcodeInfoPosition={Position.TopRight}
           />
           {sectionNumberEnabled && (
             <PinkButton disabled={current.matches('done')} onClick={() => send({ type: 'EDIT_LAYOUT' })}>
