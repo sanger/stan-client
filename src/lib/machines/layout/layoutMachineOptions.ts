@@ -2,9 +2,10 @@ import { LayoutContext, Source } from './layoutContext';
 import { isEqual } from 'lodash';
 import { tissue } from '../../helpers/labwareHelper';
 import { LabwareFieldsFragment } from '../../../types/sdk';
-import { assign, MachineImplementations, sendParent } from 'xstate';
+import { assign, InternalMachineImplementations, sendParent } from 'xstate';
 import { LayoutEvents } from './layoutEvents';
-import { produce } from '../../../dependencies/immer';
+import { produce } from 'immer';
+import { LayoutSchema } from './layoutStates';
 
 export const layoutMachineKey = 'layoutMachine';
 
@@ -21,7 +22,19 @@ export enum Actions {
   CANCEL_EDIT_LAYOUT = 'layoutMachine.cancelEditLayout'
 }
 
-export const machineOptions: MachineImplementations<LayoutContext, LayoutEvents> = {
+type LayoutMachineImplementation = {
+  context: LayoutContext;
+  events: LayoutEvents;
+  schema: LayoutSchema;
+  actors: any;
+  actions: any;
+  guards: any;
+  delays: any;
+  tags: any;
+  emitted: any;
+};
+
+export const machineOptions: InternalMachineImplementations<LayoutMachineImplementation> = {
   actions: {
     [Actions.ASSIGN_SELECTED]: assign(({ context, event }) => {
       if (event.type !== 'SELECT_SOURCE') {
