@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useImperativeHandle, useMemo } from 'rea
 import classNames from 'classnames';
 import BarcodeIcon from '../icons/BarcodeIcon';
 import { Slot } from './Slot';
-import { buildAddresses, isSameArray } from '../../lib/helpers';
+import { buildAddresses, GridDirection, isSameArray } from '../../lib/helpers';
 import _ from 'lodash';
 import { LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
 import createLabwareMachine from './labware.machine';
@@ -120,6 +120,8 @@ export interface LabwareProps {
    * Cleaned out addresses are displayed crossed over in the UI.
    */
   cleanedOutAddresses?: string[];
+
+  gridDirection?: GridDirection;
 }
 
 export type LabwareImperativeRef = {
@@ -150,7 +152,8 @@ const Labware = ({
   slotColor,
   labwareRef,
   slotBuilder,
-  cleanedOutAddresses
+  cleanedOutAddresses,
+  gridDirection
 }: React.PropsWithChildren<LabwareProps>) => {
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine();
@@ -275,7 +278,7 @@ const Labware = ({
       )}
       <div onClick={() => onClick?.()} className={labwareClasses}>
         <div className={gridClasses}>
-          {buildAddresses({ numColumns, numRows }).map((address, i) => (
+          {buildAddresses({ numColumns, numRows }, gridDirection).map((address, i) => (
             <Slot
               key={i}
               address={address}

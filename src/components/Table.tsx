@@ -3,7 +3,9 @@ import IconButton from './buttons/IconButton';
 import DownArrowIcon from './icons/DownArrowIcon';
 import UpArrowIcon from './icons/UpArrowIcon';
 
-interface TableProps extends React.DetailedHTMLProps<React.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement> {}
+interface TableProps extends React.DetailedHTMLProps<React.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement> {
+  tableClassName?: string;
+}
 
 export type SortProps = {
   sortFieldName: string;
@@ -33,11 +35,12 @@ interface TableHeaderProps {
  * </Table>
  *
  * @param children
+ * @param tableClassName
  * @param rest props passed into the HTML table
  */
-const Table: React.FC<TableProps> = ({ children, ...rest }) => {
+const Table: React.FC<TableProps> = ({ children, tableClassName, ...rest }) => {
   return (
-    <div className="flex flex-col overflow-auto max-h-screen" datatype="table-wrapper">
+    <div className={'flex flex-col overflow-auto max-h-screen ' + tableClassName} datatype="table-wrapper">
       <div className="py-2 align-middle inline-block min-w-full">
         <div className="shadow border-b border-gray-200 sm:rounded-lg">
           <table className="min-w-full divide-y divide-gray-200" {...rest}>

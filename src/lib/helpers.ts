@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { GridDirection, Maybe } from '../types/sdk';
+import { Maybe } from '../types/sdk';
 import { HasEnabled, SizeInput } from '../types/stan';
 import _, { isNaN } from 'lodash';
 import { Key } from 'react';
@@ -70,6 +70,19 @@ type SchemaParams = {
   schema: Yup.AnyObjectSchema;
 };
 type SafeParseQueryStringParams<T> = GuardAndTransformParams<T> | SchemaParams;
+
+export enum GridDirection {
+  /** Right across the top row, then down to the next row, etc. */
+  RightDown = 'RightDown',
+  /** Down the leftmost column, then right to the next column, etc. */
+  DownRight = 'DownRight',
+  /** Right across the bottom row, then up to the next row, etc. */
+  RightUp = 'RightUp',
+  /** Up the leftmost column, then right to the next column, etc. */
+  UpRight = 'UpRight',
+  /** Left across the bottom row, then up to the next row, etc. */
+  LeftUp = 'LeftUp'
+}
 
 /**
  * Will attempt to deserialize a URL query string into a given type <T>
@@ -180,19 +193,48 @@ export function createAddress(rowNumber: number, columnNumber: number): string {
  * @param direction the grid direction
  */
 export function buildAddresses(size: SizeInput, direction: GridDirection = GridDirection.RightDown): Array<string> {
-  let directionSize = direction === GridDirection.RightDown ? size.numRows : size.numColumns;
-  let orthogonalDirectionSize = direction === GridDirection.RightDown ? size.numColumns : size.numRows;
-
+  const { numRows, numColumns } = size;
   const addresses = new Array<string>();
 
-  for (let i = 1, j = directionSize; i <= j; i++) {
-    for (let m = 1, n = orthogonalDirectionSize; m <= n; m++) {
-      if (direction === GridDirection.RightDown) {
-        addresses.push(createAddress(i, m));
-      } else {
-        addresses.push(createAddress(m, i));
+  switch (direction) {
+    case GridDirection.RightDown:
+      // Right across the top row, then down to the next row, etc. //standard row-major order
+      for (let row = 1; row <= numRows; row++) {
+        for (let col = 1; col <= numColumns; col++) {
+          addresses.push(createAddress(row, col));
+        }
       }
-    }
+      break;
+
+    case GridDirection.DownRight:
+      // Down the leftmost column, then right to the next column, etc.
+      for (let col = 1; col <= numColumns; col++) {
+        for (let row = 1; row <= numRows; row++) {
+          addresses.push(createAddress(row, col));
+        }
+      }
+      break;
+
+    case GridDirection.RightUp:
+      // Right across the bottom row, then up to the next row, etc. // A1, ..An row is at the bottom
+      for (let row = numRows; row >= 1; row--) {
+        for (let col = 1; col <= numColumns; col++) {
+          addresses.push(createAddress(row, col));
+        }
+      }
+      break;
+
+    case GridDirection.LeftUp:
+      // Reverse row-major order (bottom to top, right to left) // Rotate 180 degrees
+      for (let row = numRows; row >= 1; row--) {
+        for (let col = numColumns; col >= 1; col--) {
+          addresses.push(createAddress(row, col));
+        }
+      }
+      break;
+
+    default:
+      throw new Error(`Unsupported direction: ${direction}`);
   }
 
   return addresses;
