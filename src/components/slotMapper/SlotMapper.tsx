@@ -20,12 +20,17 @@ import createSlotMapperMachine from './slotMapper.machine';
 import PinkButton from '../buttons/PinkButton';
 import RadioGroup, { RadioButtonInput } from '../forms/RadioGroup';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
+import { Position } from '../../lib/helpers';
 
 type LabwareType = {
   labwareType?: string;
 };
 
-type ExtendedSlotMapperProps = SlotMapperProps & LabwareType;
+type BarcodeInfoPosition = {
+  barcodeInfoPosition?: Position;
+};
+
+type ExtendedSlotMapperProps = SlotMapperProps & LabwareType & BarcodeInfoPosition;
 
 const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   onChange,
@@ -44,7 +49,8 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   onSelectOutputLabware,
   displayMappedTable = true,
   labwareType = undefined,
-  cleanedOutInputAddresses
+  cleanedOutInputAddresses,
+  barcodeInfoPosition
 }) => {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine;
@@ -698,6 +704,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
                           current.context.cleanedOutInputAddresses?.get(currentInputLabware.id) ??
                           cleanedOutAddresses?.get(currentInputLabware.id)
                         }
+                        barcodeInfoPosition={barcodeInfoPosition}
                       />
                     </div>
                   )}
@@ -742,6 +749,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
                     onSelect={setSelectedOutputAddresses}
                     slotColor={(address) => getDestinationSlotColor(currentOutput, address)}
                     cleanedOutAddresses={currentOutput.cleanedOutAddresses}
+                    barcodeInfoPosition={barcodeInfoPosition}
                   />
                 )}
               </div>

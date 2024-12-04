@@ -18,6 +18,7 @@ import { CommentFieldsFragment, ConfirmSectionLabware } from '../../types/sdk';
 import { selectConfirmOperationLabware } from './index';
 import { ConfirmationModal } from '../modal/ConfirmationModal';
 import { SectionNumberMode } from './SectioningConfirm';
+import { Position } from '../../lib/helpers';
 
 interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
@@ -202,6 +203,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
               slotText={(address) => buildSlotText(layoutPlan, address)}
               slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
               slotColor={(address) => buildSlotColor(layoutPlan, address)}
+              barcodeInfoPosition={Position.TopRight}
             />
 
             <PinkButton disabled={current.matches('.done')} onClick={() => !cancelled && send({ type: 'EDIT_LAYOUT' })}>

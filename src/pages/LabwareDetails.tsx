@@ -20,6 +20,7 @@ import { LabwareStatePill } from '../components/LabwareStatePill';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
 import { useLoaderData } from 'react-router-dom';
 import { LabwareFlagDetails } from '../components/LabwareFlagDetails';
+import { Position } from '../lib/helpers';
 
 /**
  * Props passed in to the {@link LabwareDetails} page
@@ -79,6 +80,7 @@ export default function LabwareDetails() {
                   name={labware.labwareType.name}
                   selectable={'none'}
                   slotBuilder={permData && permData.length > 0 ? slotBuilder : undefined}
+                  barcodeInfoPosition={Position.TopRight}
                 />
               </div>
 
