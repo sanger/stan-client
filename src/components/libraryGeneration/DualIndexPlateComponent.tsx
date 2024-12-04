@@ -23,7 +23,7 @@ import { OutputSlotCopyData } from '../slotMapper/slotMapper.types';
 type DualIndexPlateParams = {
   destinationLabware?: LabwareFlaggedFieldsFragment;
   send: (event: ReagentTransferEvent) => void;
-  current: MachineSnapshot<ReagentTransferContext, any, any, any, any, any>;
+  current: MachineSnapshot<ReagentTransferContext, any, any, any, any, any, any, any>;
   outputSlotCopies?: Array<OutputSlotCopyData>;
   destinationCleanedOutAddresses?: string[];
 };
