@@ -31,7 +31,7 @@
     "classnames": "^2.2.6",
     "formik": "^2.2.1",
     "framer-motion": "^6.5.1",
-    "graphql": "^16.8.1",
+    "graphql": "^16.9.0",
     "graphql-request": "6.1.0",
     "immer": "^10.0.3",
     "js-cookie": "^3.0.5",
