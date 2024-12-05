@@ -50,7 +50,7 @@ function Plan() {
 
   const [numLabware, setNumLabware] = React.useState<number>(1);
 
-  const [sectionThickness, setSectionThickness] = React.useState<number>(1);
+  const [sectionThickness, setSectionThickness] = React.useState<number>(0.5);
 
   const sectioningInfo = useLoaderData() as GetSectioningInfoQuery;
   /**
@@ -127,7 +127,8 @@ function Plan() {
           onChange={(e) => setSectionThickness(Number(e.currentTarget.value))}
           value={sectionThickness}
           data-testid={'sectionThickness'}
-          min={1}
+          min={0.5}
+          step={0.5}
         />
       </div>
     );
