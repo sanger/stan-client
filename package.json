@@ -6,7 +6,7 @@
   "dependencies": {
     "@react-aria/tabs": "^3.9.7",
     "@sanger/ui-styling": "^4.1.0",
-    "@storybook/react-webpack5": "^7.6.3",
+    "@storybook/react-webpack5": "^8.4.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/typography": "^0.5.15",
     "@testing-library/jest-dom": "^6.6.3",
@@ -43,7 +43,7 @@
     "react-router-dom": "^6.28.0",
     "react-router-prompt": "^0.7.1",
     "react-scripts": "^5.0.1",
-    "react-select": "^5.8.3",
+    "react-select": "^5.7.3",
     "react-syntax-highlighter": "^15.5.0",
     "react-table": "^7.8.0",
     "react-toastify": "^9.0.5",
