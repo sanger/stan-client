@@ -179,7 +179,7 @@ export default class RegistrationValidation {
       });
   }
   get sectionThickness() {
-    return Yup.number().integer().min(0).label('Section Thickness');
+    return Yup.number().min(0).label('Section Thickness');
   }
 
   get labwareType() {

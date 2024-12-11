@@ -198,8 +198,8 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                         label={'Section Thickness'}
                         name={'sectionThickness'}
                         type={'number'}
-                        min={1}
-                        step={1}
+                        min={0.5}
+                        step={0.5}
                       />
                     )}
                     {(outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP ||
