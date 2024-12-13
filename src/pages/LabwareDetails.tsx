@@ -5,6 +5,7 @@ import {
   AddressPermDataFieldsFragment,
   FlagDetail,
   LabwareFieldsFragment,
+  SampleBioRisk,
   SamplePositionFieldsFragment,
   SlotFieldsFragment,
   UserRole
@@ -30,10 +31,12 @@ type LabwareDetailsProps = {
   permData?: AddressPermDataFieldsFragment[];
   samplePositionResults: SamplePositionFieldsFragment[];
   labwareFlagDetails: FlagDetail[];
+  labwareBioRiskCodes: Array<SampleBioRisk>;
 };
 
 export default function LabwareDetails() {
-  const { labware, permData, samplePositionResults, labwareFlagDetails } = useLoaderData() as LabwareDetailsProps;
+  const { labware, permData, samplePositionResults, labwareFlagDetails, labwareBioRiskCodes } =
+    useLoaderData() as LabwareDetailsProps;
   const getPermDataForSlot = (
     slot: SlotFieldsFragment,
     permData: AddressPermDataFieldsFragment[]
@@ -123,9 +126,10 @@ export default function LabwareDetails() {
                   sampleColumns.donorName(),
                   sampleColumns.medium(),
                   sampleColumns.fixative(),
-                  sampleColumns.huMFre()
+                  sampleColumns.huMFre(),
+                  sampleColumns.bioRiskCode()
                 ]}
-                data={sampleColumns.buildSampleDataTableRows(labware, samplePositionResults)}
+                data={sampleColumns.buildSampleDataTableRows(labware, samplePositionResults, labwareBioRiskCodes)}
               />
             </div>
           </div>

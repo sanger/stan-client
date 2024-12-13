@@ -501,20 +501,19 @@ const RouteLayout = () => {
         <Route
           path="/labware/:barcode"
           loader={async ({ params }) => {
-            // the matching param will be available to the loader
             if (params.barcode) {
-              const res = await stanCore.FindPermData({
-                barcode: params.barcode
-              });
-              const flagDetails = await stanCore.GetLabwareFlagDetails({
-                barcodes: [params.barcode]
-              });
+              const [perData, flagDetails, labwareBioRiskCodes] = await Promise.all([
+                stanCore.FindPermData({ barcode: params.barcode }),
+                stanCore.GetLabwareFlagDetails({ barcodes: [params.barcode] }),
+                stanCore.GetLabwareBioRiskCodes({ barcode: params.barcode })
+              ]);
               return {
-                ...res.visiumPermData,
-                labwareFlagDetails: flagDetails.labwareFlagDetails
+                ...perData.visiumPermData,
+                labwareFlagDetails: flagDetails.labwareFlagDetails,
+                labwareBioRiskCodes: labwareBioRiskCodes.labwareBioRiskCodes
               };
             }
-          }} // the loader will be called with the params object
+          }}
           element={<LabwareDetails />}
         />
         <Route element={<AuthLayout role={UserRole.Enduser} />}>
