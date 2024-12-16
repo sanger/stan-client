@@ -1,0 +1,5 @@
+query GetLabwareBioRiskCodes($barcode: String!) {
+  labwareBioRiskCodes(barcode: $barcode) {
+    ...SampleBioRiskFields
+  }
+}

@@ -1,0 +1,4 @@
+fragment SampleBioRiskFields on SampleBioRisk {
+  sampleId
+  bioRiskCode
+}

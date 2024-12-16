@@ -4,13 +4,16 @@ import {
   AddBioRiskMutationVariables,
   GetBioRisksQuery,
   GetBioRisksQueryVariables,
+  GetLabwareBioRiskCodesQuery,
+  GetLabwareBioRiskCodesQueryVariables,
+  Labware,
   SetBioRiskEnabledMutation,
   SetBioRiskEnabledMutationVariables
 } from '../../types/sdk';
 import { isEnabled } from '../../lib/helpers';
-import BioRiskRepository from '../repositories/bioRiskRepository';
 import bioRiskRepository from '../repositories/bioRiskRepository';
 import bioRiskFactory from '../../lib/factories/bioRiskFactory';
+import labwareFactory from '../../lib/factories/labwareFactory';
 
 const bioRiskHandler = [
   graphql.mutation<AddBioRiskMutation, AddBioRiskMutationVariables>('AddBioRisk', ({ variables }) => {
@@ -42,12 +45,32 @@ const bioRiskHandler = [
     return HttpResponse.json(
       {
         data: {
-          bioRisks: BioRiskRepository.findAll().filter((bioRisk) => variables.includeDisabled || isEnabled(bioRisk))
+          bioRisks: bioRiskRepository.findAll().filter((bioRisk) => variables.includeDisabled || isEnabled(bioRisk))
         }
       },
       { status: 200 }
     );
-  })
+  }),
+
+  graphql.query<GetLabwareBioRiskCodesQuery, GetLabwareBioRiskCodesQueryVariables>(
+    'GetLabwareBioRiskCodes',
+    ({ variables }) => {
+      const labware: Labware = labwareFactory.build({ barcode: variables.barcode });
+      return HttpResponse.json(
+        {
+          data: {
+            labwareBioRiskCodes: labware.slots.map((slot) => {
+              return {
+                sampleId: slot.samples[0].id,
+                bioRiskCode: bioRiskFactory.build().code
+              };
+            })
+          }
+        },
+        { status: 200 }
+      );
+    }
+  )
 ];
 
 export default bioRiskHandler;

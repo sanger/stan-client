@@ -2,6 +2,7 @@ import { Column } from 'react-table';
 import {
   LabwareFieldsFragment,
   LabwareType,
+  SampleBioRisk,
   SampleFieldsFragment,
   SamplePositionFieldsFragment
 } from '../../types/sdk';
@@ -13,7 +14,7 @@ import MutedText from '../MutedText';
  */
 export type SampleDataTableRow = SampleFieldsFragment & { slotAddress: string } & {
   sectionPosition?: string;
-} & { barcode?: string } & { labwareType?: LabwareType };
+} & { barcode?: string } & { labwareType?: LabwareType } & { bioRiskCode?: string };
 
 type ColumnFactory<E = any> = (meta?: E) => Column<SampleDataTableRow>;
 
@@ -34,7 +35,8 @@ const samplePositionMapBySampleIdSlotId = (
 
 export function buildSampleDataTableRows(
   labware: LabwareFieldsFragment,
-  samplePositionResults: SamplePositionFieldsFragment[]
+  samplePositionResults: SamplePositionFieldsFragment[],
+  labwareBioRiskCodes: Array<SampleBioRisk>
 ): SampleDataTableRow[] {
   const samplePositionResultsMap = samplePositionMapBySampleIdSlotId(samplePositionResults);
 
@@ -43,7 +45,8 @@ export function buildSampleDataTableRows(
       return {
         ...sample,
         slotAddress: slot.address,
-        sectionPosition: samplePositionResultsMap[`${sample.id}-${slot.id}`]?.region
+        sectionPosition: samplePositionResultsMap[`${sample.id}-${slot.id}`]?.region,
+        bioRiskCode: labwareBioRiskCodes.find((sbr) => sbr.sampleId === sample.id)?.bioRiskCode
       };
     });
   });
@@ -131,5 +134,12 @@ export const labwareType: ColumnFactory = () => {
   return {
     Header: 'Labware Type',
     accessor: (sample) => sample.labwareType?.name
+  };
+};
+
+export const bioRiskCode: ColumnFactory = () => {
+  return {
+    Header: 'Biological Risk Number',
+    accessor: (sample) => sample.bioRiskCode
   };
 };
