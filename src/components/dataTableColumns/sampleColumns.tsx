@@ -139,7 +139,7 @@ export const labwareType: ColumnFactory = () => {
 
 export const bioRiskCode: ColumnFactory = () => {
   return {
-    Header: 'Bio Risk Code',
+    Header: 'Biological Risk Number',
     accessor: (sample) => sample.bioRiskCode
   };
 };
