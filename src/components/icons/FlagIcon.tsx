@@ -8,7 +8,7 @@ const FlagIcon: React.FC<FlagIconProps> = (props) => {
       height={`${props.height ?? '24px'}`}
       viewBox="0 0 20 20"
       fill="currentColor"
-      className={`w-5 h-5 ` + props.className ?? ''}
+      className={`w-5 h-5 ${props.className}`}
       {...props}
     >
       <path d="M0 0h24v24H0V0z" fill="none" clipRule="evenodd" />
