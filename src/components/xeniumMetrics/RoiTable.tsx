@@ -68,7 +68,7 @@ const RoiTable = ({ actionColumn, data }: RoiTableProps<any>) => {
             );
           }
         },
-        actionColumn
+        actionColumn as Column<RoiTableRow>
       ]}
       data={data}
     />
