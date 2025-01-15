@@ -8,7 +8,7 @@ import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 //region Events
 type CreateLabwareEvent = {
   type: 'CREATE_LABWARE';
-  sectionThickness?: number;
+  sectionThickness?: { [slotAddress: string]: number };
   barcode?: string;
   lotNumber?: string;
   costing?: SlideCosting;
@@ -238,7 +238,7 @@ type BuildPlanRequestLabwareParams = {
   destinationLabwareTypeName: string;
   layoutPlan: LayoutPlan;
   barcode?: string;
-  sampleThickness?: number;
+  sampleThickness?: { [slotAddress: string]: number };
   lotNumber?: string;
   costing?: SlideCosting;
 };
@@ -260,7 +260,7 @@ function buildPlanRequestLabware({
       const sources = layoutPlan.plannedActions.get(address)!;
       return sources.map((source) => ({
         address,
-        sampleThickness: sampleThickness?.toString(),
+        sampleThickness: sampleThickness ? sampleThickness[address].toString() : '',
         sampleId: source.sampleId,
         source: {
           barcode: source.labware.barcode,

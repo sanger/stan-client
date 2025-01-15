@@ -97,7 +97,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
    */
   const buildPlanLayouts = React.useCallback(
     (
-      plans: Map<string, NewFlaggedLabwareLayout>,
+      plans: Map<string, { labware: NewFlaggedLabwareLayout }>,
       sourceLabware: LabwareFlaggedFieldsFragment[],
       sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,
@@ -112,7 +112,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
       const planWithKeys: PlanWithId[] = Array.from(plans.keys()).map((k) => {
         return {
           cid: k,
-          plan: plans.get(k)
+          plan: plans.get(k)?.labware
         };
       });
       const layoutPlanGroupedByType: Dictionary<PlanWithId[]> = groupBy(
