@@ -7,10 +7,8 @@ const AddButton = (
   return (
     <button
       {...props}
-      className={
-        `p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:bg-gray-100 text-gray-400
-      hover:text-gray-600 disabled:text-gray-200 ` + props.className ?? ''
-      }
+      className={`p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:bg-gray-100 text-gray-400
+      hover:text-gray-600 disabled:text-gray-200 ${props.className}`}
     >
       <AddIcon className="inline-block h-5 w-5" />
     </button>
