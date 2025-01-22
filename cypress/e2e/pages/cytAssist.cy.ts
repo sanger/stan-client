@@ -24,27 +24,27 @@ describe('CytAssist Page', () => {
     });
   });
 
-  context('When user selects Visium LP CytAssist labwareType', () => {
+  context('When user selects Visium LP CytAssist 6.5 labwareType', () => {
     before(() => {
       selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST);
     });
-    it('should set output labware type value to Visium LP CytAssist', () => {
-      shouldDisplaySelectedValue('output-labware-type', 'Visium LP CytAssist');
+    it('should set output labware type value to Visium LP CytAssist 6.5', () => {
+      shouldDisplaySelectedValue('output-labware-type', 'Visium LP CytAssist 6.5');
     });
-    it('shows a Visium LP CytAssist slide for the output', () => {
-      cy.findAllByText(/Visium LP CytAssist/i).should('have.length.above', 0);
+    it('shows a Visium LP CytAssist 6.5 slide for the output', () => {
+      cy.findAllByText(/Visium LP CytAssist 6.5/i).should('have.length.above', 0);
     });
   });
 
-  context('When user selects Visium LP CytAssist XL labwareType', () => {
+  context('When user selects Visium LP CytAssist 11 labwareType', () => {
     before(() => {
       selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_XL);
     });
-    it('should set output labware type value to Visium LP CytAssist XL', () => {
-      shouldDisplaySelectedValue('output-labware-type', 'Visium LP CytAssist XL');
+    it('should set output labware type value to Visium LP CytAssist 11', () => {
+      shouldDisplaySelectedValue('output-labware-type', 'Visium LP CytAssist 11');
     });
-    it('shows a Visium LP CytAssist XL slide for the output', () => {
-      cy.findAllByText(/Visium LP CytAssist XL/i).should('have.length.above', 0);
+    it('shows a Visium LP CytAssist 11 slide for the output', () => {
+      cy.findAllByText(/Visium LP CytAssist 11/i).should('have.length.above', 0);
     });
   });
 
