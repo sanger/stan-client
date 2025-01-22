@@ -83,6 +83,12 @@ export enum GridDirection {
   /** Left across the bottom row, then up to the next row, etc. */
   LeftUp = 'LeftUp'
 }
+
+export enum LabwareDirection {
+  Horizontal = 'Horizontal',
+  Vertical = 'Vertical'
+}
+
 export enum Position {
   TopRight = 'TopRight',
   BottomRight = 'BottomRight',

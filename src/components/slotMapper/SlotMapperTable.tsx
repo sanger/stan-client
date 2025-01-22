@@ -3,7 +3,7 @@ import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import { LabwareFlaggedFieldsFragment, SlotCopyContent, SlotFieldsFragment } from '../../types/sdk';
 import { FlaggedBarcodeLink } from '../dataTableColumns/labwareColumns';
 
-type SlotMapperTableProps = {
+export type SlotMapperTableProps = {
   labware: LabwareFlaggedFieldsFragment;
   slots: SlotFieldsFragment[];
   slotCopyContent: Array<SlotCopyContent>;

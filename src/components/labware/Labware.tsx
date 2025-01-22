@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useImperativeHandle, useMemo } from 'rea
 import classNames from 'classnames';
 import BarcodeIcon from '../icons/BarcodeIcon';
 import { Slot } from './Slot';
-import { buildAddresses, GridDirection, isSameArray, Position } from '../../lib/helpers';
+import { buildAddresses, GridDirection, isSameArray, LabwareDirection, Position } from '../../lib/helpers';
 import _ from 'lodash';
 import { LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
 import createLabwareMachine from './labware.machine';
@@ -109,6 +109,12 @@ export interface LabwareProps {
   labwareRef?: React.RefObject<LabwareImperativeRef>;
 
   /**
+   * A callback used to manage references to individual labware elements.
+   * This is useful for dynamically tracking labware elements in a collection.
+   */
+  labwareRefCallback?: (el: LabwareImperativeRef) => void;
+
+  /**
    * A callback that will be called for each slot in the labware. Must return a react component that will be placed
    * in the labelled slot beside the component
    * @param slot a slot on the given labware
@@ -123,7 +129,15 @@ export interface LabwareProps {
 
   barcodeInfoPosition?: Position;
 
+  /**
+   * Specifies the grid direction used to determine the positioning of wells inside the labware.
+   */
   gridDirection?: GridDirection;
+
+  /**
+   * Specifies the orientation of the labware layout. Defaults to vertical.
+   */
+  labwareDirection?: LabwareDirection;
 }
 
 export type LabwareImperativeRef = {
@@ -156,7 +170,9 @@ const Labware = ({
   slotBuilder,
   cleanedOutAddresses,
   barcodeInfoPosition,
-  gridDirection
+  gridDirection,
+  labwareDirection,
+  labwareRefCallback
 }: React.PropsWithChildren<LabwareProps>) => {
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine();
@@ -184,6 +200,9 @@ const Labware = ({
   }, [labware]);
 
   useImperativeHandle(labwareRef, () => ({
+    deselectAll: () => send({ type: 'RESET_SELECTED' })
+  }));
+  useImperativeHandle(labwareRefCallback, () => ({
     deselectAll: () => send({ type: 'RESET_SELECTED' })
   }));
 
@@ -215,13 +234,19 @@ const Labware = ({
   const labwareClasses =
     'inline-block border border-sdb py-2 bg-blue-100 rounded-lg transition duration-300 ease-in-out';
 
+  const grid =
+    labwareDirection && labwareDirection === LabwareDirection.Horizontal
+      ? `grid grid-cols-${numRows} grid-rows-${numColumns}`
+      : `grid grid-rows-${numRows} grid-cols-${numColumns}`;
+
   const gridClasses = classNames(
     {
       'px-12 gap-4': numColumns <= 3,
       'px-10 gap-3': numColumns <= 5,
       'px-6 gap-2': numColumns > 6
     },
-    `grid grid-rows-${numRows} grid-cols-${numColumns} py-4 select-none`
+
+    `${grid} py-4 select-none`
   );
 
   // Give slots some default styles if some haven't been passed in
