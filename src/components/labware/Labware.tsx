@@ -135,6 +135,15 @@ export interface LabwareProps {
   gridDirection?: GridDirection;
 
   /**
+   * Callback to highlight slots due to an external action
+   * without requiring direct selection or clicking on the slot.
+   * This is useful when existing actions are already hooked to
+   * the `onSelect` and `onClick` events.
+   * @param addresses The addresses of the slots to highlight.
+   */
+  highlightedSlots?: Set<string>;
+
+  /**
    * Specifies the orientation of the labware layout. Defaults to vertical.
    */
   labwareDirection?: LabwareDirection;
@@ -171,6 +180,7 @@ const Labware = ({
   cleanedOutAddresses,
   barcodeInfoPosition,
   gridDirection,
+  highlightedSlots,
   labwareDirection,
   labwareRefCallback
 }: React.PropsWithChildren<LabwareProps>) => {
@@ -367,7 +377,7 @@ const Labware = ({
               text={slotText}
               secondaryText={slotSecondaryText}
               color={_slotColor}
-              selected={selectedAddresses?.has(address)}
+              selected={selectedAddresses?.has(address) || (highlightedSlots?.has(address) ?? false)}
               isCleanedOut={cleanedOutAddresses?.includes(address)}
             />
           ))}
