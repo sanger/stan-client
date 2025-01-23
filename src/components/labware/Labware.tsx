@@ -124,6 +124,15 @@ export interface LabwareProps {
   barcodeInfoPosition?: Position;
 
   gridDirection?: GridDirection;
+
+  /**
+   * Callback to highlight slots due to an external action
+   * without requiring direct selection or clicking on the slot.
+   * This is useful when existing actions are already hooked to
+   * the `onSelect` and `onClick` events.
+   * @param addresses The addresses of the slots to highlight.
+   */
+  highlightedSlots?: Set<string>;
 }
 
 export type LabwareImperativeRef = {
@@ -156,7 +165,8 @@ const Labware = ({
   slotBuilder,
   cleanedOutAddresses,
   barcodeInfoPosition,
-  gridDirection
+  gridDirection,
+  highlightedSlots
 }: React.PropsWithChildren<LabwareProps>) => {
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine();
@@ -342,7 +352,7 @@ const Labware = ({
               text={slotText}
               secondaryText={slotSecondaryText}
               color={_slotColor}
-              selected={selectedAddresses?.has(address)}
+              selected={selectedAddresses?.has(address) || (highlightedSlots?.has(address) ?? false)}
               isCleanedOut={cleanedOutAddresses?.includes(address)}
             />
           ))}

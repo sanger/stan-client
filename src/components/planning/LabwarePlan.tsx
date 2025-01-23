@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import labwareScanTableColumns from '../dataTableColumns/labwareColumns';
 import PinkButton from '../buttons/PinkButton';
 import { useMachine } from '@xstate/react';
@@ -19,7 +19,6 @@ import {
   LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   LabwareType,
-  LabwareTypeFieldsFragment,
   PlanMutation,
   SlideCosting
 } from '../../types/sdk';
@@ -34,6 +33,7 @@ import ScanInput from '../scanInput/ScanInput';
 import FormikSelect from '../forms/Select';
 import { objectKeys, Position } from '../../lib/helpers';
 import { FormikErrorMessage } from '../forms';
+import Table, { TableBody, TableHead, TableHeader } from '../Table';
 
 type LabwarePlanProps = {
   /**
@@ -121,6 +121,8 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
     const columns = [labwareScanTableColumns.barcode(), printColumn];
 
+    const [highlightedSlots, setHighlightedSlots] = useState(new Set<string>());
+
     const isLabwareWithCosting =
       outputLabware.labwareType.name === LabwareTypeName.VISIUM_TO ||
       outputLabware.labwareType.name === LabwareTypeName.VISIUM_ADH ||
@@ -135,7 +137,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
         className="relative p-3 shadow"
       >
         <Formik<FormValues>
-          initialValues={buildInitialValues(operationType, outputLabware.labwareType, sectionThickness)}
+          initialValues={buildInitialValues(operationType, outputLabware, sectionThickness)}
           validationSchema={buildValidationSchema(outputLabware.labwareType)}
           onSubmit={async (values) => {
             const newValues = {
@@ -161,6 +163,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                     slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
                     slotColor={(address) => buildSlotColor(layoutPlan, address)}
                     barcodeInfoPosition={Position.TopRight}
+                    highlightedSlots={highlightedSlots}
                   />
 
                   {current.matches('prep') && (
@@ -192,16 +195,6 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                       />
                     )}
 
-                    {outputLabware.labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER && (
-                      <FormikInput
-                        disabled={current.matches('printing') || current.matches('done')}
-                        label={'Section Thickness'}
-                        name={'sectionThickness'}
-                        type={'number'}
-                        min={0.5}
-                        step={0.5}
-                      />
-                    )}
                     {(outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP ||
                       outputLabware.labwareType.name === LabwareTypeName.VISIUM_TO ||
                       outputLabware.labwareType.name === LabwareTypeName.VISIUM_ADH ||
@@ -227,6 +220,42 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                           ))}
                         </FormikSelect>
                       </>
+                    )}
+
+                    {outputLabware.labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER && (
+                      <Table>
+                        <TableHead>
+                          <tr>
+                            <TableHeader>Slot</TableHeader>
+                            <TableHeader>Section Thickness</TableHeader>
+                          </tr>
+                        </TableHead>
+                        <TableBody>
+                          {outputLabware.slots.map((slot, index) => (
+                            <tr key={index}>
+                              <td className="text-center">{slot.address}</td>
+                              <td>
+                                <FormikInput
+                                  className="text-center focus:ring-sdb-100 focus:border-sdb-100 block border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed"
+                                  label={''}
+                                  disabled={current.matches('printing') || current.matches('done')}
+                                  name={`sectionThickness[${slot.address}]`}
+                                  data-testid={`section-thickness-${slot.address}`}
+                                  type="number"
+                                  min={0.5}
+                                  step={0.5}
+                                  onFocus={() => {
+                                    setHighlightedSlots(new Set([slot.address]));
+                                  }}
+                                  onBlur={() => {
+                                    setHighlightedSlots(new Set());
+                                  }}
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </TableBody>
+                      </Table>
                     )}
                   </div>
 
@@ -320,7 +349,7 @@ type FormValues = {
   /**
    * The thickness of the sections being taken, in micrometres
    */
-  sectionThickness?: number;
+  sectionThickness?: { [slotAddress: string]: number };
 
   /**
    * The Slide lot number (only for Visium slides)
@@ -337,14 +366,13 @@ type FormValues = {
  */
 function buildInitialValues(
   operationType: string,
-  labwareType: LabwareTypeFieldsFragment,
+  labwareLayout: NewFlaggedLabwareLayout,
   sectionThickness: number
 ): FormValues {
   let formValues: FormValues = {
-    operationType,
-    sectionThickness
+    operationType
   };
-
+  const labwareType = labwareLayout.labwareType;
   if (labwareType.name === LabwareTypeName.VISIUM_LP) {
     formValues.barcode = '';
   }
@@ -356,7 +384,10 @@ function buildInitialValues(
     formValues.costing = undefined;
     formValues.lotNumber = '';
   }
-
+  formValues.sectionThickness = {};
+  labwareLayout.slots.forEach((slot) => {
+    formValues.sectionThickness![slot.address] = sectionThickness;
+  });
   return formValues;
 }
 
@@ -366,7 +397,7 @@ function buildInitialValues(
  */
 function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
   type FormShape = {
-    sectionThickness?: Yup.NumberSchema;
+    sectionThickness?: Yup.ObjectSchema<any>;
     barcode?: Yup.StringSchema;
     lotNumber?: Yup.StringSchema;
     costing?: Yup.StringSchema;
@@ -381,7 +412,11 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
       .matches(/^\d{7}$/, 'Xenium barcode should be a 7-digit number');
   }
   if (labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER) {
-    formShape.sectionThickness = Yup.number().required().min(0.5);
+    formShape.sectionThickness = Yup.object().test(
+      'has-at-least-one-key',
+      'Section thickness must have at least one entry',
+      (value) => value && Object.keys(value).length > 0
+    );
   }
   if (
     labwareType.name === LabwareTypeName.VISIUM_LP ||
