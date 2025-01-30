@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import AppShell from '../components/AppShell';
-import SlotMapper from '../components/slotMapper/SlotMapper';
 import BlueButton from '../components/buttons/BlueButton';
-import { LabwareTypeName, NewFlaggedLabwareLayout, NewLabwareLayout } from '../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../types/stan';
 import Warning from '../components/notifications/Warning';
 import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
@@ -14,23 +13,18 @@ import { Link, useNavigate } from 'react-router-dom';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Heading from '../components/Heading';
-import {
-  stripTubeFactory,
-  visiumLPCytAssistFactory,
-  visiumLPCytAssistHDFactory,
-  visiumLPCytAssistXLFactory
-} from '../lib/factories/labwareFactory';
+import { visiumLPCytAssistFactory } from '../lib/factories/labwareFactory';
 import MutedText from '../components/MutedText';
 import ScanInput from '../components/scanInput/ScanInput';
 import { objectKeys } from '../lib/helpers';
 import Label from '../components/forms/Label';
-import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { SlotCopyMode } from '../components/slotMapper/slotMapper.types';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import LabelPrinter from '../components/LabelPrinter';
 import ButtonBar from '../components/ButtonBar';
+import MultipleLabwareSlotMapper from '../components/slotMapper/MultipleLabwareSlotMapper';
 
 /**
  * Success notification when slots have been copied
@@ -41,13 +35,14 @@ interface OutputLabwareScanPanelProps {
   preBarcode: Maybe<string> | undefined;
   labwareType: string;
   onChangeBarcode: (barcode: string) => void;
-  onChangeLabwareType: (labwareType: string) => void;
   onChangeCosting: (costing: string) => void;
   onChangeLOTNumber: (lotNumber: string, isProbe: boolean) => void;
   onChangeLpNumber: (lpNumber: string) => void;
+
+  children?: React.ReactNode;
 }
 
-type CytAssistOutputLabwareForm = {
+export type CytAssistOutputLabwareForm = {
   preBarcode: string;
   labwareType: string;
   costing: string;
@@ -83,11 +78,11 @@ const validationSchema = () => {
 /**Component to configure the output CytAssist labware**/
 const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = ({
   onChangeBarcode,
-  onChangeLabwareType,
   onChangeCosting,
   onChangeLOTNumber,
   onChangeLpNumber,
-  labwareType
+  labwareType,
+  children
 }) => {
   const LP_NUMBERS = Array.from({ length: 20 }, (_, i) => `LP${i + 1}`);
   const initialValues: CytAssistOutputLabwareForm = {
@@ -105,46 +100,25 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
       validationSchema={validationSchema}
       validateOnChange={true}
     >
-      {({ setFieldValue, errors, setTouched, values }) => (
+      {({ errors, values }) => (
         <Form>
-          <div className={'grid grid-cols-2 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
-            <div data-testid="external-barcode">
-              <Label name={'External barcode'} />
-              <ScanInput
-                onScan={(barcode) => onChangeBarcode(barcode)}
-                onBlur={(e) => onChangeBarcode(e.currentTarget.value)}
-                allowEmptyValue={true}
-                placeholder={
-                  values.labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD ? 'H1-9D8VN2V' : 'V42A20-3752023-10-20'
-                }
-                name={'preBarcode'}
-              />
-              {errors.preBarcode && <MutedText className={'text-red-400'}>{errors.preBarcode}</MutedText>}
-            </div>
+          <div className={'grid grid-cols-3 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
             <div>
-              <Label name={'Labware Type'} />
+              <Label name="LP number" />
               <CustomReactSelect
-                handleChange={async (val) => {
-                  await setTouched({ preBarcode: true });
-                  onChangeLabwareType((val as OptionType).label);
+                handleChange={(val) => {
+                  onChangeLpNumber((val as OptionType).label);
                 }}
-                name={'labwareType'}
-                value={values.labwareType}
+                name="lpNumber"
                 emptyOption={true}
-                dataTestId="output-labware-type"
-                options={[
-                  LabwareTypeName.VISIUM_LP_CYTASSIST,
-                  LabwareTypeName.VISIUM_LP_CYTASSIST_XL,
-                  LabwareTypeName.VISIUM_LP_CYTASSIST_HD,
-                  LabwareTypeName.STRIP_TUBE
-                ].map((key) => {
-                  return {
-                    label: key,
-                    value: key
-                  };
-                })}
+                dataTestId="lpNumber"
+                options={LP_NUMBERS.map((lp) => ({
+                  label: lp,
+                  value: lp
+                }))}
               />
             </div>
+
             <div>
               <Label name={'Slide costings'} />
               <CustomReactSelect
@@ -168,9 +142,8 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
             <div data-testid={'lot-number'}>
               <Label name={'Slide LOT number'} />
               <ScanInput
-                onScan={(val) => setFieldValue('slideLotNumber', val)}
+                onScan={(val) => onChangeLOTNumber(val, false)}
                 onBlur={(e) => {
-                  setFieldValue('slideLotNumber', e.currentTarget.value);
                   onChangeLOTNumber(e.currentTarget.value, false);
                 }}
                 allowEmptyValue={true}
@@ -189,50 +162,25 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
               />
               {errors.probeLotNumber && <MutedText className={'text-red-400'}>{errors.probeLotNumber}</MutedText>}
             </div>
-            <div>
-              <Label name="LP number" />
-              <CustomReactSelect
-                handleChange={(val) => {
-                  onChangeLpNumber((val as OptionType).label);
-                }}
-                name="lpNumber"
-                emptyOption={true}
-                dataTestId="lpNumber"
-                options={LP_NUMBERS.map((lp) => ({
-                  label: lp,
-                  value: lp
-                }))}
+            <div data-testid="external-barcode">
+              <Label name={'External barcode'} />
+              <ScanInput
+                onScan={(barcode) => onChangeBarcode(barcode)}
+                onBlur={(e) => onChangeBarcode(e.currentTarget.value)}
+                allowEmptyValue={true}
+                placeholder={
+                  values.labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD ? 'H1-9D8VN2V' : 'V42A20-3752023-10-20'
+                }
+                name={'preBarcode'}
               />
+              {errors.preBarcode && <MutedText className={'text-red-400'}>{errors.preBarcode}</MutedText>}
             </div>
           </div>
+
+          {children}
         </Form>
       )}
     </Formik>
-  );
-};
-
-/**Table component to display all mappings made between slots in input and output labware**/
-const SlotMappingContentTable = ({ slotCopyContent }: { slotCopyContent: SlotCopyContent[] }) => {
-  return (
-    <Table data-testid="mapped_table">
-      <TableHead>
-        <tr>
-          <TableHeader>Source Barcode</TableHeader>
-          <TableHeader>Source Address</TableHeader>
-          <TableHeader>Destination Address</TableHeader>
-        </tr>
-      </TableHead>
-
-      <TableBody>
-        {slotCopyContent.map((slot) => (
-          <tr key={`${slot.destinationAddress}-${slot.sourceBarcode}`}>
-            <TableCell>{slot.sourceBarcode}</TableCell>
-            <TableCell>{slot.sourceAddress}</TableCell>
-            <TableCell>{slot.destinationAddress}</TableCell>
-          </tr>
-        ))}
-      </TableBody>
-    </Table>
   );
 };
 
@@ -331,20 +279,14 @@ const CytAssist = () => {
     [send, selectedDestination]
   );
 
-  const handleChangeOutputLabwareType = React.useCallback(
-    (labwareType: string) => {
-      const labwareFactories: Record<string, NewLabwareLayout> = {
-        [LabwareTypeName.VISIUM_LP_CYTASSIST]: visiumLPCytAssistFactory.build(),
-        [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory.build(),
-        [LabwareTypeName.VISIUM_LP_CYTASSIST_HD]: visiumLPCytAssistHDFactory.build(),
-        [LabwareTypeName.STRIP_TUBE]: stripTubeFactory.build()
-      };
+  const handleChangeLabwareType = React.useCallback(
+    (destLabware: NewFlaggedLabwareLayout[]) => {
       if (!selectedDestination) return;
-      const destLabware = (labwareFactories[labwareType] as NewFlaggedLabwareLayout) || initialOutputLabwarePlaceHolder;
+      const newDestLabware = destLabware && destLabware[0] ? destLabware[0] : initialOutputLabwarePlaceHolder;
       send({
         type: 'UPDATE_DESTINATION_LABWARE_TYPE',
         labwareToReplace: selectedDestination.labware!,
-        labware: destLabware
+        labware: newDestLabware
       });
     },
     [send, selectedDestination, initialOutputLabwarePlaceHolder]
@@ -379,7 +321,6 @@ const CytAssist = () => {
       scrollToRef();
     }
   }, [serverErrors, scrollToRef]);
-
   return (
     <AppShell>
       <AppShell.Header>
@@ -401,50 +342,25 @@ const CytAssist = () => {
             </div>
           </div>
 
-          <SlotMapper
-            locked={current.matches('copied')}
-            initialOutputLabware={
-              selectedDestination
-                ? [
-                    {
-                      labware: selectedDestination.labware,
-                      slotCopyContent: selectedDestination.slotCopyDetails.contents,
-                      cleanedOutAddresses: selectedDestination.cleanedOutAddresses
-                    }
-                  ]
-                : []
-            }
-            slotCopyModes={[SlotCopyMode.ONE_TO_ONE, SlotCopyMode.MANY_TO_ONE]}
-            onChange={handleOnSlotMapperChange}
-            inputLabwareLimit={2}
-            displayMappedTable={false}
-            failedSlotsCheck={false}
-            disabledOutputSlotAddresses={
-              destinations.length > 0 &&
-              destinations[0].labware.labwareType.name === LabwareTypeName.VISIUM_LP_CYTASSIST
-                ? ['B1', 'C1']
-                : []
-            }
-            outputLabwareConfigPanel={
-              <CytAssistOutputlabwareScanPanel
-                preBarcode={selectedDestination && selectedDestination.slotCopyDetails.preBarcode}
-                labwareType={selectedDestination ? selectedDestination.slotCopyDetails.labwareType ?? '' : ''}
-                onChangeBarcode={handleChangeOutputLabwareBarcode}
-                onChangeLabwareType={handleChangeOutputLabwareType}
-                onChangeCosting={handleChangeCosting}
-                onChangeLOTNumber={handleChangeLOTNumber}
-                onChangeLpNumber={handleChangeLpNumber}
+          <div className="mb-8">
+            <Heading level={4}>CytAssist Slide</Heading>
+            <CytAssistOutputlabwareScanPanel
+              preBarcode={selectedDestination && selectedDestination.slotCopyDetails.preBarcode}
+              labwareType={selectedDestination ? selectedDestination.slotCopyDetails.labwareType ?? '' : ''}
+              onChangeBarcode={handleChangeOutputLabwareBarcode}
+              onChangeCosting={handleChangeCosting}
+              onChangeLOTNumber={handleChangeLOTNumber}
+              onChangeLpNumber={handleChangeLpNumber}
+            >
+              <MultipleLabwareSlotMapper
+                locked={current.matches('copied')}
+                slotCopyModes={[SlotCopyMode.ONE_TO_ONE, SlotCopyMode.MANY_TO_ONE]}
+                onChange={handleOnSlotMapperChange}
+                inputLabwareLimit={2}
+                onOutputLabwareChange={handleChangeLabwareType}
               />
-            }
-            labwareType={selectedDestination ? selectedDestination.slotCopyDetails.labwareType ?? '' : ''}
-          />
-
-          {selectedDestination && selectedDestination.slotCopyDetails.contents.length > 0 && (
-            <div className="space-y-4">
-              <Heading level={4}>Mapped slots</Heading>
-              <SlotMappingContentTable slotCopyContent={selectedDestination.slotCopyDetails.contents} />
-            </div>
-          )}
+            </CytAssistOutputlabwareScanPanel>
+          </div>
         </div>
       </AppShell.Main>
 
