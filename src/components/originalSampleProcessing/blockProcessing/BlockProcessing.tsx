@@ -120,7 +120,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   /** Display created Labware plans**/
   const buildPlanLayouts = React.useCallback(
     (
-      plans: Map<string, NewFlaggedLabwareLayout>,
+      plans: Map<string, { labware: NewFlaggedLabwareLayout; sectionThickness?: number }>,
       sourceLabware: LabwareFlaggedFieldsFragment[],
       sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,
@@ -135,7 +135,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
       const planWithKeys: PlanWithId[] = Array.from(plans.keys()).map((k) => {
         return {
           cid: k,
-          plan: plans.get(k)
+          plan: plans.get(k)?.labware
         };
       });
       const layoutPlanGroupedByType: Dictionary<PlanWithId[]> = groupBy(

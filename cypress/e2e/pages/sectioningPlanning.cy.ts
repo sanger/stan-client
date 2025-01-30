@@ -126,7 +126,7 @@ describe('Sectioning Planning', () => {
           cy.findByText('A1').click();
           cy.findByText('Done').click();
         });
-        cy.findByLabelText('Section Thickness').type('5');
+        cy.findByTestId('section-thickness-A1').type('5');
       });
 
       after(() => {
@@ -266,7 +266,7 @@ function createLabware() {
     cy.findByText('A1').click();
     cy.findByText('Done').click();
   });
-  cy.findByLabelText('Section Thickness').clear().type('5');
+  cy.findByTestId('section-thickness-A1').clear().type('5');
   cy.findByText('Create Labware').click();
 }
 

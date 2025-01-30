@@ -30,6 +30,8 @@ type PlannerProps<M> = {
    */
   numPlansToCreate?: number;
 
+  sectionThickness?: number;
+
   /***
    * Is only a single source labware allowed?
    */
@@ -38,7 +40,7 @@ type PlannerProps<M> = {
    *Callback to render the plan layouts created. This allows to customise the plan layout depending on the context it is called.
    */
   buildPlanLayouts: (
-    layout: Map<string, NewFlaggedLabwareLayout>, //All layouts created
+    layout: Map<string, { labware: NewFlaggedLabwareLayout; sectionThickness?: number }>, //All layouts created
     sourceLabware: LabwareFlaggedFieldsFragment[],
     sampleColors: Map<number, string>,
     deleteAction: (cid: string) => void,
@@ -71,7 +73,7 @@ export type PlanChangedProps<M> = {
   numberOfPlans: number;
   completedPlans: Array<M>;
   sourceLabware: Array<LabwareFlaggedFieldsFragment>;
-  layoutPlans: Map<string, NewFlaggedLabwareLayout>;
+  layoutPlans: Map<string, { labware: NewFlaggedLabwareLayout; sectionThickness: number }>;
 };
 
 /**
@@ -87,7 +89,7 @@ type PlannerState<M> = {
   /**
    * Map of client ID to labware
    */
-  labwarePlans: Map<string, NewFlaggedLabwareLayout>;
+  labwarePlans: Map<string, { labware: NewFlaggedLabwareLayout; sectionThickness: number }>;
 
   /**
    * Map of client ID to completed plans
@@ -119,6 +121,7 @@ type Action<M> =
       type: 'ADD_LABWARE_PLAN';
       labwareType: LabwareTypeFieldsFragment;
       numLabwareAdd: number;
+      sectionThickness: number;
     }
   | { type: 'REMOVE_LABWARE_PLAN'; cid: string }
   | { type: 'PLAN_COMPLETE'; cid: string; plan: M };
@@ -135,17 +138,17 @@ function reducer<M>(state: PlannerState<M>, action: Action<M>): PlannerState<M> 
 
       case 'ADD_LABWARE_PLAN': {
         for (let indx = 0; indx < action.numLabwareAdd; indx++) {
-          draft.labwarePlans.set(
-            uniqueId('labware_plan_'),
-            unregisteredLabwareFactory.build(
+          draft.labwarePlans.set(uniqueId('labware_plan_'), {
+            labware: unregisteredLabwareFactory.build(
               {},
               {
                 associations: {
                   labwareType: action.labwareType
                 }
               }
-            ) as NewFlaggedLabwareLayout
-          );
+            ) as NewFlaggedLabwareLayout,
+            sectionThickness: action.sectionThickness
+          });
         }
         // As soon as there are any plans present, stop the user from adding
         // any more source labware
@@ -178,7 +181,8 @@ export default function Planner<M>({
   columns,
   singleSourceAllowed,
   buildPlanLayouts,
-  buildPlanCreationSettings
+  buildPlanCreationSettings,
+  sectionThickness
 }: PlannerProps<M>) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -220,10 +224,11 @@ export default function Planner<M>({
     dispatch({
       type: 'ADD_LABWARE_PLAN',
       labwareType: selectedLabwareType,
-      numLabwareAdd: numPlansToCreate ?? 1
+      numLabwareAdd: numPlansToCreate ?? 1,
+      sectionThickness: sectionThickness ?? 0.5
     });
     scrollToRef();
-  }, [selectedLabwareType, numPlansToCreate, dispatch, scrollToRef]);
+  }, [selectedLabwareType, numPlansToCreate, dispatch, scrollToRef, sectionThickness]);
 
   /**
    * Handler for the onDeleteButtonClick event of a LabwarePlan

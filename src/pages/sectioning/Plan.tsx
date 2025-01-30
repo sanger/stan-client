@@ -73,34 +73,32 @@ function Plan() {
     [setShouldConfirm, setPlanProps]
   );
 
-  const buildPlanLayouts = React.useCallback(
-    (
-      plans: Map<string, NewFlaggedLabwareLayout>,
-      sourceLabware: LabwareFlaggedFieldsFragment[],
-      sampleColors: Map<number, string>,
-      deleteAction: (cid: string) => void,
-      confirmAction?: (cid: string, plan: PlanMutation) => void
-    ) => {
-      return (
-        <>
-          {Array.from(plans.entries()).map(([cid, newLabwareLayout]) => (
-            <LabwarePlan
-              key={cid}
-              cid={cid}
-              outputLabware={newLabwareLayout}
-              sampleColors={sampleColors}
-              operationType={'Section'}
-              sourceLabware={sourceLabware}
-              onDeleteButtonClick={deleteAction}
-              onComplete={confirmAction!}
-              sectionThickness={sectionThickness}
-            />
-          ))}
-        </>
-      );
-    },
-    [sectionThickness]
-  );
+  const buildPlanLayouts = (
+    plans: Map<string, { labware: NewFlaggedLabwareLayout; sectionThickness?: number }>,
+    sourceLabware: LabwareFlaggedFieldsFragment[],
+    sampleColors: Map<number, string>,
+    deleteAction: (cid: string) => void,
+    confirmAction?: (cid: string, plan: PlanMutation) => void
+  ) => {
+    return (
+      <>
+        {Array.from(plans.entries()).map(([cid, newLabwareParams]) => (
+          <LabwarePlan
+            key={cid}
+            cid={cid}
+            outputLabware={newLabwareParams.labware}
+            sampleColors={sampleColors}
+            operationType={'Section'}
+            sourceLabware={sourceLabware}
+            onDeleteButtonClick={deleteAction}
+            onComplete={confirmAction!}
+            sectionThickness={newLabwareParams.sectionThickness ?? 0.5}
+          />
+        ))}
+      </>
+    );
+  };
+
   const buildPlanCreationSettings = React.useCallback(() => {
     return (
       <div className="mt-4 grid grid-cols-3 gap-x-2 gap-y-1 text-center">
@@ -144,6 +142,7 @@ function Plan() {
           <Planner<PlanMutation>
             operationType={'Section'}
             numPlansToCreate={numLabware}
+            sectionThickness={sectionThickness}
             selectedLabwareType={allowedLabwareTypes.find((lt) => lt.name === selectedLabwareType)}
             onPlanChanged={handlePlanChange}
             buildPlanCreationSettings={buildPlanCreationSettings}
