@@ -33,7 +33,6 @@ import ScanInput from '../scanInput/ScanInput';
 import FormikSelect from '../forms/Select';
 import { objectKeys, Position } from '../../lib/helpers';
 import { FormikErrorMessage } from '../forms';
-import Table, { TableBody, TableHead, TableHeader } from '../Table';
 
 type LabwarePlanProps = {
   /**
@@ -223,39 +222,42 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                     )}
 
                     {outputLabware.labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER && (
-                      <Table>
-                        <TableHead>
-                          <tr>
-                            <TableHeader>Slot</TableHeader>
-                            <TableHeader>Section Thickness</TableHeader>
-                          </tr>
-                        </TableHead>
-                        <TableBody>
-                          {outputLabware.slots.map((slot, index) => (
-                            <tr key={index}>
-                              <td className="text-center">{slot.address}</td>
-                              <td>
-                                <FormikInput
-                                  className="text-center focus:ring-sdb-100 focus:border-sdb-100 block border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed"
-                                  label={''}
-                                  disabled={current.matches('printing') || current.matches('done')}
-                                  name={`sectionThickness[${slot.address}]`}
-                                  data-testid={`section-thickness-${slot.address}`}
-                                  type="number"
-                                  min={0.5}
-                                  step={0.5}
-                                  onFocus={() => {
-                                    setHighlightedSlots(new Set([slot.address]));
-                                  }}
-                                  onBlur={() => {
-                                    setHighlightedSlots(new Set());
-                                  }}
-                                />
-                              </td>
-                            </tr>
+                      <div className="p-4 space-y-2 space-x-2 bg-gray-100">
+                        <div className={'grid grid-cols-2 py-2 text-gray-500 text-center'}>
+                          <div>Section Thickness</div>
+                        </div>
+                        <div className={'flex flex-col space-y-4'}>
+                          {outputLabware.slots.map((slot) => (
+                            <div key={slot.address} className="flex flex-row items-start justify-start gap-x-2">
+                              <span className="font-medium text-gray-800 tracking-wide py-2">{slot.address}</span>
+                              <FormikInput
+                                className="text-center focus:ring-sdb-100 focus:border-sdb-100 block border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-300"
+                                label={''}
+                                disabled={
+                                  current.matches('printing') ||
+                                  current.matches('done') ||
+                                  !current.context.layoutPlan.plannedActions.has(slot.address)
+                                }
+                                name={
+                                  current.context.layoutPlan.plannedActions.has(slot.address)
+                                    ? `sectionThickness[${slot.address}]`
+                                    : 'sectionThickness'
+                                }
+                                data-testid={`section-thickness`}
+                                type="number"
+                                min={0.5}
+                                step={0.5}
+                                onFocus={() => {
+                                  setHighlightedSlots(new Set([slot.address]));
+                                }}
+                                onBlur={() => {
+                                  setHighlightedSlots(new Set());
+                                }}
+                              />
+                            </div>
                           ))}
-                        </TableBody>
-                      </Table>
+                        </div>
+                      </div>
                     )}
                   </div>
 

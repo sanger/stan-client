@@ -103,6 +103,13 @@ describe('Sectioning Planning', () => {
         cy.findByRole('button', { name: /Next/i }).should('be.disabled');
       });
 
+      it('section thickness inputs initially are empty and disabled', () => {
+        cy.findAllByTestId('section-thickness').each((input) => {
+          cy.wrap(input).should('have.value', '');
+          cy.wrap(input).should('be.disabled');
+        });
+      });
+
       context('when I try and leave the page', () => {
         it('shows a confirm box', () => {
           cy.on('window:confirm', (str) => {
@@ -126,7 +133,6 @@ describe('Sectioning Planning', () => {
           cy.findByText('A1').click();
           cy.findByText('Done').click();
         });
-        cy.findByTestId('section-thickness-A1').type('5');
       });
 
       after(() => {
@@ -135,6 +141,11 @@ describe('Sectioning Planning', () => {
 
       it('enables the Create Labware button', () => {
         cy.findByText('Create Labware').should('not.be.disabled');
+      });
+
+      it('enables and set section thickness input to the predefined value', () => {
+        cy.findAllByTestId('section-thickness').eq(0).should('have.value', '0.5');
+        cy.findAllByTestId('section-thickness').eq(0).should('be.enabled');
       });
     });
   });
@@ -266,7 +277,7 @@ function createLabware() {
     cy.findByText('A1').click();
     cy.findByText('Done').click();
   });
-  cy.findByTestId('section-thickness-A1').clear().type('5');
+  cy.findByTestId('section-thickness').eq(0).clear().type('5');
   cy.findByText('Create Labware').click();
 }
 
