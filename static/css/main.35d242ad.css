@@ -4162,6 +4162,11 @@ svg.logo.loading rect:nth-child(3n+1) {
   background-color: rgb(237 242 247 / 1);
   background-color: rgb(237 242 247 / var(--tw-bg-opacity, 1));
 }
+.disabled\:bg-gray-300:disabled {
+  --tw-bg-opacity: 1;
+  background-color: rgb(226 232 240 / 1);
+  background-color: rgb(226 232 240 / var(--tw-bg-opacity, 1));
+}
 .disabled\:text-gray-200:disabled {
   --tw-text-opacity: 1;
   color: rgb(237 242 247 / 1);
@@ -4548,4 +4553,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.b48dcd17.css.map*/
+/*# sourceMappingURL=main.35d242ad.css.map*/
