@@ -67,8 +67,8 @@ const machineImplementations: InternalMachineImplementations<SlotMapperMachineIm
 
     assignLabwareColors: assign(({ context }) =>
       produce(context, (draft) => {
-        if (!draft.inputLabware.length) {
-          draft.colorByBarcode.clear();
+        if (!draft.inputLabware || draft.inputLabware.length === 0) {
+          draft.colorByBarcode = new Map();
           return;
         }
         for (const lw of draft.inputLabware) {
