@@ -190,10 +190,18 @@ type SlotPassFailErrorEvent = {
   error: Draft<ClientError>;
 };
 
+type SetFromDraftEvent = {
+  type: 'SET_FROM_DRAFT';
+  labware: Array<LabwareFlaggedFieldsFragment>;
+  cleanedOutInputAddresses: Map<number, string[]>;
+  outputSlotCopyContent: Array<OutputSlotCopyData>;
+};
+
 type LockEvent = { type: 'LOCK' };
 type UnlockEvent = { type: 'UNLOCK' };
 
 export type SlotMapperEvent =
+  | SetFromDraftEvent
   | UpdateInputLabwareEvent
   | UpdateOutputLabwareEvent
   | CopyOneToOneSlotsEvent

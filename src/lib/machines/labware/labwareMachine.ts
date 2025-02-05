@@ -10,9 +10,9 @@ import {
 import { extractServerErrors } from '../../../types/stan';
 import { stanCore } from '../../sdk';
 import { ClientError } from 'graphql-request';
-import { findIndex } from 'lodash';
 import { convertLabwareToFlaggedLabware } from '../../helpers/labwareHelper';
 import { produce } from '../../../dependencies/immer';
+import { findIndex } from 'lodash';
 
 const resolveStringArrayPromise = (data: string[] | Promise<string[]>): string[] => {
   let resolvedData: string[] = [];
@@ -113,7 +113,7 @@ type UpdateCurrentBarcodeEvent = {
 /**
  * Event to be called when current barcode is to be submitted
  */
-type SubmitBarcodeEvent = { type: 'SUBMIT_BARCODE' };
+type SubmitBarcodeEvent = { type: 'SUBMIT_BARCODE'; barcode?: string };
 
 /**
  * Event to be called to remove a piece of labware from context
@@ -444,20 +444,16 @@ export const createLabwareMachine = () => {
         removeLabware: assign(({ context, event }) => {
           if (event.type !== 'REMOVE_LABWARE') return context;
 
-          const removeLabwareIndex = findIndex(context.labwares, {
-            barcode: event.value
-          });
-
-          if (removeLabwareIndex < 0) return context;
+          const labwareToRemove = context.labwares.find((lw) => lw.barcode === event.value);
+          if (!labwareToRemove) return context;
 
           context.removedLabware = {
-            labware: context.labwares[removeLabwareIndex],
-            index: removeLabwareIndex
+            labware: labwareToRemove,
+            index: findIndex(context.labwares, (lw) => lw.barcode === event.value)
           };
           return produce(context, (draft) => {
-            if (draft.checkForCleanedOutAddresses)
-              draft.cleanedOutAddresses.delete(context.labwares[removeLabwareIndex].id);
-            draft.labwares = draft.labwares.filter((_, index) => index !== removeLabwareIndex);
+            if (draft.checkForCleanedOutAddresses) draft.cleanedOutAddresses.delete(labwareToRemove.id);
+            draft.labwares = draft.labwares.filter((lw) => lw.barcode !== event.value);
             draft.successMessage = `"${event.value}" removed`;
           });
         }),

@@ -1,0 +1,5 @@
+query ReloadSlotCopy($operationType: String!, $workNumber: String!, $lpNumber: String!) {
+  reloadSlotCopy(operationType: $operationType, workNumber: $workNumber, lpNumber: $lpNumber) {
+    ...SlotCopyLoadFields
+  }
+}

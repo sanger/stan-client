@@ -7,6 +7,8 @@ import {
   LabwareFlaggedFieldsFragment,
   LabwareState,
   Maybe,
+  ReloadSlotCopyQuery,
+  SaveSlotCopyMutation,
   SlideCosting,
   SlotCopyContent,
   SlotCopyDestination,
@@ -18,6 +20,9 @@ import { castDraft, produce } from '../../../dependencies/immer';
 import { ClientError } from 'graphql-request';
 import { DestinationSelectionMode } from '../../../components/slotMapper/slotMapper.types';
 import { Draft } from 'immer';
+import { flaggedLabwareLayout } from '../../factories/labwareFactory';
+import { initialOutputLabware } from '../../../pages/CytAssist';
+import { eventBus } from '../../../eventBus';
 
 /**
  * Context for SlotCopy Machine
@@ -76,7 +81,14 @@ export interface SlotCopyContext {
    * Specifies if the transfer is performed manually or automatically
    */
   executionType?: ExecutionType;
+
+  successMessage?: string;
 }
+
+export type SavedDraft = {
+  sources: Array<Source>;
+  destination: Destination;
+};
 
 type UpdateSlotCopyContentType = {
   type: 'UPDATE_SLOT_COPY_CONTENT';
@@ -176,6 +188,38 @@ type UpdateDestinationLpNumber = {
   lpNumber: string;
 };
 
+type SaveDraft = {
+  type: 'SAVE_DRAFT';
+};
+
+type SlotDraftSaveEvent = {
+  type: 'xstate.done.actor.saveDraft';
+  output: SaveSlotCopyMutation;
+};
+
+type SlotDraftErrorEvent = {
+  type: 'xstate.error.actor.saveDraft';
+  error: Maybe<ClientError>;
+};
+
+type ReloadDraftedCytAssist = {
+  type: 'RELOAD_DRAFTED_CYTASSIST';
+  workNumber: string;
+  lpNumber: string;
+};
+
+type ReloadDraftedCytAssistDoneEvent = {
+  type: 'xstate.done.actor.reloadDraftedCytAssist';
+  output: ReloadSlotCopyQuery & {
+    inputLabware: LabwareFlaggedFieldsFragment[];
+    cleanedOutInputAddresses: Map<number, string[]>;
+  };
+};
+type ReloadDraftedCytAssistErrorEvent = {
+  type: 'xstate.error.actor.reloadDraftedCytAssist';
+  error: Maybe<ClientError>;
+};
+
 export type SlotCopyEvent =
   | { type: 'UPDATE_WORK_NUMBER'; workNumber: string }
   | UpdateSourceLabware
@@ -194,7 +238,13 @@ export type SlotCopyEvent =
   | SlotCopyDoneEvent
   | SlotCopyErrorEvent
   | UpdateTransferTypeEvent
-  | UpdateDestinationLpNumber;
+  | UpdateDestinationLpNumber
+  | SaveDraft
+  | SlotDraftErrorEvent
+  | SlotDraftSaveEvent
+  | ReloadDraftedCytAssist
+  | ReloadDraftedCytAssistDoneEvent
+  | ReloadDraftedCytAssistErrorEvent;
 
 /**
  * SlotCopy Machine Config
@@ -213,7 +263,6 @@ export const slotCopyMachine = createMachine(
     initial: 'mapping',
     states: {
       mapping: {
-        entry: ['emptyServerError'],
         on: {
           UPDATE_SOURCE_LABWARE: {
             actions: 'assignSourceLabware'
@@ -263,6 +312,16 @@ export const slotCopyMachine = createMachine(
           },
           UPDATE_DESTINATION_LP_NUMBER: {
             actions: 'assignDestinationLpNumber'
+          },
+          RELOAD_DRAFTED_CYTASSIST: {
+            target: 'reloadDraftedCytAssist'
+          },
+          SAVE_DRAFT: {
+            guard: ({ context }) =>
+              context.workNumber.length > 0 &&
+              context.destinations.length > 0 &&
+              context.destinations[0].slotCopyDetails.lpNumber !== undefined,
+            target: 'saveDraft'
           }
         }
       },
@@ -317,7 +376,17 @@ export const slotCopyMachine = createMachine(
           UPDATE_DESTINATION_LP_NUMBER: {
             actions: 'assignDestinationLpNumber'
           },
-          SAVE: 'copying'
+          SAVE: 'copying',
+          RELOAD_DRAFTED_CYTASSIST: {
+            target: 'reloadDraftedCytAssist'
+          },
+          SAVE_DRAFT: {
+            guard: ({ context }) =>
+              context.workNumber.length > 0 &&
+              context.destinations.length > 0 &&
+              context.destinations[0].slotCopyDetails.lpNumber !== undefined,
+            target: 'saveDraft'
+          }
         }
       },
       copying: {
@@ -330,7 +399,7 @@ export const slotCopyMachine = createMachine(
                 workNumber: input.workNumber,
                 executionType: input.executionType,
                 operationType: input.operationType,
-                destinations: input.destinations.map((dest: Destination) => dest.slotCopyDetails),
+                destinations: input.destinations,
                 sources: input.sources.reduce((arr: SlotCopySource[], curr: Source) => {
                   if (curr.labwareState) {
                     arr.push({ barcode: curr.labware.barcode, labwareState: curr.labwareState });
@@ -343,7 +412,7 @@ export const slotCopyMachine = createMachine(
           input: ({ context }) => ({
             workNumber: context.workNumber,
             operationType: context.operationType,
-            destinations: context.destinations,
+            destinations: context.destinations.map((dest: Destination) => dest.slotCopyDetails),
             sources: context.sources,
             executionType: context.executionType
           }),
@@ -407,6 +476,88 @@ export const slotCopyMachine = createMachine(
       },
       copied: {
         type: 'final'
+      },
+      saveDraft: {
+        entry: ['emptyServerError'],
+        invoke: {
+          id: 'saveDraft',
+          src: fromPromise(({ input }) =>
+            stanCore.SaveSlotCopy({
+              request: {
+                ...input
+              }
+            })
+          ),
+          input: ({ context }) => {
+            const cytAssistLabware = context.destinations[0];
+            return {
+              workNumber: context.workNumber,
+              operationType: context.operationType,
+              labwareType: cytAssistLabware.labware.labwareType.name,
+              preBarcode: cytAssistLabware.slotCopyDetails.preBarcode,
+              costing: cytAssistLabware.slotCopyDetails.costing,
+              lpNumber: cytAssistLabware.slotCopyDetails.lpNumber,
+              probeLotNumber: cytAssistLabware.slotCopyDetails.probeLotNumber,
+              lotNumber: cytAssistLabware.slotCopyDetails.lotNumber,
+              contents: cytAssistLabware.slotCopyDetails.contents.map((scc) => scc),
+              sources: []
+            };
+          },
+          onDone: {
+            target: 'mapping',
+            actions: ['assignSaveDraftResult']
+          },
+          onError: {
+            target: 'mapping',
+            actions: ['assignServerError']
+          }
+        }
+      },
+      reloadDraftedCytAssist: {
+        entry: ['emptyServerError'],
+        invoke: {
+          id: 'reloadDraftedCytAssist',
+          src: fromPromise(async ({ input }) => {
+            const res = await stanCore.ReloadSlotCopy({
+              operationType: 'CytAssist',
+              ...input
+            });
+            const barcodes = res.reloadSlotCopy?.contents.map((content) => content.sourceBarcode);
+            if (!barcodes || barcodes.length === 0) return res;
+
+            // Fetch flagged labware for all unique barcodes
+            const inputLabware = await Promise.all(
+              Array.from(new Set(barcodes)).map(async (barcode) => {
+                const labware = await stanCore.FindFlaggedLabware({ barcode });
+                return labware.labwareFlagged;
+              })
+            );
+
+            // Fetch cleaned-out addresses for all unique barcodes
+            const cleanedOutResults = await Promise.all(
+              inputLabware.map(async (lw) => {
+                const cleanedOut = await stanCore.GetCleanedOutAddresses({ barcode: lw.barcode });
+                return { id: lw.id, addresses: cleanedOut.cleanedOutAddresses };
+              })
+            );
+            const cleanedOutInputAddresses: Map<number, string[]> = new Map(
+              cleanedOutResults.map(({ id, addresses }) => [id, addresses])
+            );
+            return { ...res, inputLabware, cleanedOutInputAddresses };
+          }),
+          input: ({ event }) => ({
+            workNumber: (event as ReloadDraftedCytAssist).workNumber,
+            lpNumber: (event as ReloadDraftedCytAssist).lpNumber
+          }),
+          onDone: {
+            target: 'mapping',
+            actions: ['assignDraftedCytAssist', 'triggerUiUpdate']
+          },
+          onError: {
+            target: 'mapping',
+            actions: ['assignServerError', 'triggerUiUpdate']
+          }
+        }
       }
     }
   },
@@ -468,14 +619,27 @@ export const slotCopyMachine = createMachine(
         if (event.type !== 'xstate.done.actor.copySlots') {
           return context;
         }
-        return { ...context, slotCopyResults: event.output.slotCopy.labware };
+        return { ...context, slotCopyResults: event.output.slotCopy.labware, successMessage: 'Slots copied' };
       }),
 
       assignServerError: assign(({ context, event }) => {
-        if (event.type !== 'xstate.error.actor.copySlots') {
-          return context;
+        if (event.type === 'xstate.error.actor.copySlots' || event.type === 'xstate.error.actor.saveDraft') {
+          return { ...context, serverErrors: castDraft(event.error) };
         }
-        return { ...context, serverErrors: castDraft(event.error) };
+        /**
+         * No need to display an error message, but we need to reset the context.
+         * This covers the case where the user loads a saved draft and then updates the inputs (LB number or work number)
+         * to values that do not have a saved draft.
+         */
+        if (event.type === 'xstate.error.actor.reloadDraftedCytAssist') {
+          return {
+            ...context,
+            serverErrors: null,
+            sources: [],
+            destinations: [initialOutputLabware]
+          };
+        }
+        return context;
       }),
 
       assignWorkNumber: assign(({ context, event }) => {
@@ -599,6 +763,40 @@ export const slotCopyMachine = createMachine(
           destination.slotCopyDetails.lpNumber = event.lpNumber;
           return draft;
         });
+      }),
+      assignDraftedCytAssist: assign(({ context, event }) => {
+        if (event.type !== 'xstate.done.actor.reloadDraftedCytAssist') return context;
+        return produce(context, (draft) => {
+          const layout = flaggedLabwareLayout(event.output.reloadSlotCopy!.labwareType!);
+          if (!layout) return draft;
+          if (event.output.reloadSlotCopy) {
+            const { sources, operationType, workNumber, executionType, lpNumber, ...copyDetails } =
+              event.output.reloadSlotCopy;
+            draft.destinations[0] = {
+              labware: layout,
+              slotCopyDetails: {
+                ...draft.destinations[0].slotCopyDetails,
+                ...copyDetails
+              }
+            };
+            draft.sources = event.output.inputLabware?.map((labware) => {
+              return { labware, cleanedOutAddresses: event.output.cleanedOutInputAddresses.get(labware.id) ?? [] };
+            });
+          }
+        });
+      }),
+      triggerUiUpdate: ({ context }) => {
+        const savedDraft: SavedDraft = {
+          sources: context.sources,
+          destination: context.destinations[0]
+        };
+        eventBus.emit('updateUiFromDraft', savedDraft);
+      },
+      assignSaveDraftResult: assign(({ context, event }) => {
+        if (event.type !== 'xstate.done.actor.saveDraft') {
+          return context;
+        }
+        return { ...context, successMessage: 'Draft saved' };
       })
     }
   }

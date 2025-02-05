@@ -32,7 +32,8 @@ const machineImplementations: InternalMachineImplementations<SlotMapperMachineIm
       if (event.type === 'UPDATE_INPUT_LABWARE') {
         return produce(context, (draft) => {
           draft.inputLabware = event.labware;
-          draft.cleanedOutInputAddresses = event.cleanedOutAddresses;
+          if (event.cleanedOutAddresses && event.cleanedOutAddresses?.size > 0)
+            draft.cleanedOutInputAddresses = event.cleanedOutAddresses;
 
           // Update the failedSlots array if it has entries for any removed labware
           let keys = Array.from(draft.failedSlots.keys()).filter(
@@ -64,15 +65,17 @@ const machineImplementations: InternalMachineImplementations<SlotMapperMachineIm
       return context;
     }),
 
-    assignLabwareColors: assign(({ context }) => {
-      return produce(context, (draft) => {
-        draft.inputLabware.forEach((lw: LabwareFlaggedFieldsFragment) => {
-          if (!draft.colorByBarcode.has(lw.barcode)) {
-            draft.colorByBarcode.set(lw.barcode, colors.next().value);
-          }
-        });
-      });
-    }),
+    assignLabwareColors: assign(({ context }) =>
+      produce(context, (draft) => {
+        if (!draft.inputLabware.length) {
+          draft.colorByBarcode.clear();
+          return;
+        }
+        for (const lw of draft.inputLabware) {
+          draft.colorByBarcode.has(lw.barcode) || draft.colorByBarcode.set(lw.barcode, colors.next().value);
+        }
+      })
+    ),
 
     checkSlots: assign(({ context }) => {
       const inputLabwareBarcodes = map(context.inputLabware, 'barcode');
@@ -284,6 +287,14 @@ const machineImplementations: InternalMachineImplementations<SlotMapperMachineIm
         });
       }
       return context;
+    }),
+    assignFromDraft: assign(({ context, event }) => {
+      if (event.type !== 'SET_FROM_DRAFT') return context;
+      return produce(context, (draft) => {
+        draft.inputLabware = event.labware;
+        draft.cleanedOutInputAddresses = event.cleanedOutInputAddresses;
+        draft.outputSlotCopies = event.outputSlotCopyContent;
+      });
     })
   }
 };
@@ -342,6 +353,9 @@ const createSlotMapperMachine = createMachine(
           ],
           UPDATE_OUTPUT_LABWARE: {
             actions: 'assignOutputLabware'
+          },
+          SET_FROM_DRAFT: {
+            actions: ['assignFromDraft', 'assignLabwareColors']
           },
           LOCK: 'locked'
         }
