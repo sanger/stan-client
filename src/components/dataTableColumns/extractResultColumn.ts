@@ -15,7 +15,7 @@ const barcode: ColumnFactory = () => {
     Header: 'Barcode',
     accessor: (result) =>
       result.extractResult.labware.flagged
-        ? FlaggedBarcodeLink(result.extractResult.labware.barcode)
+        ? FlaggedBarcodeLink(result.extractResult.labware.barcode, result.extractResult.labware.flagPriority)
         : result.extractResult.labware.barcode
   };
 };

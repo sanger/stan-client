@@ -52,7 +52,7 @@ export function buildHistory(workNumber?: string, flagged?: boolean): HistoryFie
     __typename: 'History',
     samples: [sample],
     labware: [sourceLabware, destinationLabware].map(buildLabwareFragment),
-    flaggedBarcodes: [],
+    flagBarcodes: [],
     entries
   };
 }

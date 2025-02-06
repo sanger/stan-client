@@ -23,6 +23,7 @@ import { FontSizeIcon } from '../icons/FontSizeIcon';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { omit } from 'lodash';
 import BlueButton from '../buttons/BlueButton';
+import { FlaggedBarcodeLink } from '../dataTableColumns/labwareColumns';
 
 /**
  * Component for looking up and displaying the history of labware and samples
@@ -212,10 +213,6 @@ export default function History(props: HistoryProps) {
    * File upload option is only for authenticated users, so
    * only allow permission to view or download uploaded files if not authenticated
    */
-  const labwareUrlPath = (barcode: string) => {
-    return `/labware/${barcode}`;
-  };
-
   const fileUploadUrlPath = (workNumber: string) => {
     const queryParamsStr = stringify({
       workNumber: workNumber
@@ -287,15 +284,12 @@ export default function History(props: HistoryProps) {
                 <div className={'flex flex-col mt-4 justify-center'} data-testid="flagged-labware">
                   <Table>
                     <TableBody>
-                      <TableCell className={'flex flex-col justify-center  p-2'}>
-                        {history.flaggedBarcodes.map((barcode, indx) => (
-                          <StyledLink
-                            data-testid={`styled-link-${barcode}`}
-                            key={barcode}
-                            to={labwareUrlPath(barcode)}
-                            className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
-                          >{`${barcode}`}</StyledLink>
-                        ))}
+                      <TableCell className={'flex flex-col items-center p-2'}>
+                        {history.flaggedBarcodes.map((flagBarcode, index1) => {
+                          return flagBarcode.barcodes.map((barcode, index2) => {
+                            return FlaggedBarcodeLink(barcode, flagBarcode.priority, `${index1}-${index2}`);
+                          });
+                        })}
                       </TableCell>
                     </TableBody>
                   </Table>

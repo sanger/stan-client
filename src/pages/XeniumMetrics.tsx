@@ -7,8 +7,6 @@ import { LabwareFlaggedFieldsFragment, RecordMetricsMutation, SampleMetricsReque
 import { StanCoreContext } from '../lib/sdk';
 import Panel from '../components/Panel';
 import RemoveButton from '../components/buttons/RemoveButton';
-import { FlaggedBarcodeLink } from '../components/dataTableColumns/labwareColumns';
-import StyledLink from '../components/StyledLink';
 import { Row } from 'react-table';
 import { UploadProgress, UploadResult } from '../components/upload/useUpload';
 import MetricsReader from '../components/xeniumMetrics/MetricsReader';
@@ -22,6 +20,7 @@ import Warning from '../components/notifications/Warning';
 import RoiTable, { groupByRoi } from '../components/xeniumMetrics/RoiTable';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import WorkNumberSelect from '../components/WorkNumberSelect';
+import { FlaggedBarcodeLink } from '../components/dataTableColumns/labwareColumns';
 
 export type Metric = {
   name: string;
@@ -229,13 +228,7 @@ const XeniumMetrics = () => {
                         </div>
                         <Panel key={labware.barcode}>
                           <div className="grid grid-cols-2 mb-4">
-                            {labware.flagged && FlaggedBarcodeLink(labware.barcode)}
-                            {!labware.flagged && (
-                              <StyledLink to={`/labware/${labware.barcode}`} target="_blank">
-                                {labware.barcode}
-                              </StyledLink>
-                            )}
-
+                            {FlaggedBarcodeLink(labware.barcode, labware.flagPriority)}
                             <div className="flex flex-row items-center justify-end">
                               <RemoveButton
                                 onClick={() => {

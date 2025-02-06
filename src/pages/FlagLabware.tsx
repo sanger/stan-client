@@ -15,7 +15,7 @@ import {
   FlagDetail,
   FlagLabwareMutation,
   FlagLabwareRequest,
-  LabwareFieldsFragment,
+  FlagPriority,
   LabwareFlaggedFieldsFragment
 } from '../types/sdk';
 import { useMachine } from '@xstate/react';
@@ -28,18 +28,23 @@ import { LabwareFlagDetails } from '../components/LabwareFlagDetails';
 import { Column } from 'react-table';
 import { fromPromise } from 'xstate';
 import WorkNumberSelect from '../components/WorkNumberSelect';
+import CustomReactSelect from '../components/forms/CustomReactSelect';
+import StyledLink from '../components/StyledLink';
 
 type FormFlagLabware = {
-  labware: LabwareFieldsFragment | undefined;
+  labware: Array<LabwareFlaggedFieldsFragment>;
   description: string;
   workNumber: string;
+  priority?: FlagPriority;
 };
 
-const initialValues: FormFlagLabware = { labware: undefined, description: '', workNumber: '' };
+const initialValues: FormFlagLabware = { labware: [], description: '', workNumber: '' };
+
 function buildValidationSchema() {
   return Yup.object().shape({
     workNumber: Yup.string().label('Work Number').optional(),
-    labware: Yup.object().label('Labware').required('Labware is required'),
+    labware: Yup.array().of(Yup.object()).label('Labware').min(1, 'Labware is required'),
+    priority: Yup.string().required('Flag Priority is required').oneOf([FlagPriority.Note, FlagPriority.Flag]),
     description: Yup.string()
       .label('Description')
       .required('Description is required')
@@ -66,9 +71,9 @@ const FlagLabware = () => {
   const convertValuesAndSubmit = async (values: FormFlagLabware) => {
     if (!values.labware) return;
     const requestValues: FlagLabwareRequest = {
-      barcode: values.labware!.barcode,
-      description: values.description,
-      workNumber: values.workNumber
+      ...values,
+      priority: values.priority!,
+      barcodes: values.labware!.map((lw) => lw?.barcode)
     };
     send({ type: 'SUBMIT_FORM', values: requestValues });
   };
@@ -76,16 +81,12 @@ const FlagLabware = () => {
   const serverError = current.context.serverError;
 
   const labwareColumns = useMemo(() => {
-    return [
-      columns.barcode(),
-      columns.externalName(),
-      columns.donorId(),
-      columns.tissueType(),
-      columns.labwareType()
-    ] as Array<Column<LabwareFlaggedFieldsFragment>>;
+    return [columns.externalName(), columns.donorId(), columns.tissueType(), columns.labwareType()] as Array<
+      Column<LabwareFlaggedFieldsFragment>
+    >;
   }, []);
 
-  const [relatedFlags, setRelatedFlags] = React.useState<FlagDetail[]>([]);
+  const [relatedFlags, setRelatedFlags] = React.useState<Map<string, Array<FlagDetail>>>(new Map()); //labware barcode for a key
 
   const checkRelatedFlags = useCallback(
     async (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): Promise<string[]> => {
@@ -93,7 +94,11 @@ const FlagLabware = () => {
         const response = await stanCore.GetLabwareFlagDetails({
           barcodes: [foundLabware.barcode]
         });
-        setRelatedFlags(response.labwareFlagDetails);
+        if (response.labwareFlagDetails && response.labwareFlagDetails.length > 0) {
+          setRelatedFlags((relatedFlags) => {
+            return new Map(relatedFlags.set(foundLabware.barcode, response.labwareFlagDetails as Array<FlagDetail>));
+          });
+        }
         return [];
       } catch (error) {
         return ['Error fetching labware flag details.'];
@@ -110,84 +115,116 @@ const FlagLabware = () => {
       <AppShell.Main>
         {serverError && <Warning error={serverError} />}
         <div className="max-w-screen-xl mx-auto">
-          <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={convertValuesAndSubmit}>
-            {({ values, setFieldValue }) => (
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={convertValuesAndSubmit}
+            validateOnMount={true}
+          >
+            {({ values, setFieldValue, setValues, errors }) => (
               <Form>
                 <GrayBox>
                   <div className="md:w-3/4">
                     <div className="space-y-4">
                       {serverError && <Warning error={serverError} />}
                       <Heading level={3}>SGP Number</Heading>
-                      <p className="mt-2">SGP number is optional for this operation</p>
+                      <MutedText>SGP number is optional for this operation.</MutedText>
                       <div className="mt-4 md:w-1/2">
                         <WorkNumberSelect
                           name="workNumber"
-                          onWorkNumberChange={(workNumber) => {
-                            setFieldValue('workNumber', workNumber);
+                          onWorkNumberChange={async (workNumber) => {
+                            await setFieldValue('workNumber', workNumber);
                           }}
                         />
                       </div>
+                      <Heading level={3}>Flag Priority</Heading>
+                      <MutedText>Please select the flag priority to apply to the scanned labware.</MutedText>
+                      <CustomReactSelect
+                        dataTestId="priority"
+                        className="mt-4 md:w-1/2"
+                        name="priority"
+                        emptyOption={true}
+                        options={[
+                          { value: FlagPriority.Note, label: 'Note' },
+                          { value: FlagPriority.Flag, label: 'Flag' }
+                        ]}
+                      />
                       <Heading level={3}>Labware</Heading>
                       <MutedText>Please scan in the labware you wish to flag.</MutedText>
                       <LabwareScanner
-                        limit={1}
-                        onAdd={(lw) => setFieldValue('labware', lw)}
+                        onAdd={async (lw) =>
+                          await setValues({
+                            ...values,
+                            labware: values.labware.concat(lw)
+                          })
+                        }
                         enableFlaggedLabwareCheck
                         labwareCheckFunction={checkRelatedFlags}
                       >
                         {({ labwares, removeLabware }) =>
-                          labwares.map((labware, index) => (
+                          labwares.map((labware) => (
                             <Panel key={labware.barcode}>
                               <div className="flex flex-row items-center justify-end">
-                                {
-                                  <RemoveButton
-                                    data-testid={'remove'}
-                                    onClick={() => {
-                                      removeLabware(labware.barcode);
-                                      return setFieldValue('labware', undefined);
-                                    }}
-                                  />
-                                }
-                              </div>
-
-                              <DataTable columns={labwareColumns} data={[labware]} />
-
-                              {relatedFlags.length > 0 && <LabwareFlagDetails flagDetails={relatedFlags} />}
-
-                              <div className="mt-6">
-                                <Heading level={3}>Description</Heading>
-                                <MutedText>Please enter a reason for flagging the labware.</MutedText>
-
-                                <Field
-                                  as={'textarea'}
-                                  rows={5}
-                                  cols={77}
-                                  maxLength={500}
-                                  name="description"
-                                  data-testid="description"
+                                <RemoveButton
+                                  data-testid={'remove'}
+                                  onClick={async () => {
+                                    removeLabware(labware.barcode);
+                                    await setValues({
+                                      ...values,
+                                      labware: values.labware.filter((lw) => lw.barcode !== labware.barcode)
+                                    });
+                                  }}
                                 />
-                                <FormikErrorMessage name="description" />
                               </div>
+                              <div className="whitespace-nowrap">
+                                <StyledLink
+                                  className="text-sp bg-transparent hover:text-sp-700 active:text-sp-800"
+                                  to={`/labware/${labware.barcode}`}
+                                  target="_blank"
+                                >
+                                  {labware.barcode}
+                                </StyledLink>
+                              </div>
+                              <DataTable columns={labwareColumns} data={[labware]} />
+                              {relatedFlags.size > 0 && relatedFlags.get(labware.barcode) && (
+                                <LabwareFlagDetails flagDetails={relatedFlags.get(labware.barcode)!} />
+                              )}
                             </Panel>
                           ))
                         }
                       </LabwareScanner>
+                      <div className="mt-6">
+                        <Heading level={3}>Description</Heading>
+                        <MutedText>Please enter a reason for flagging the labware.</MutedText>
+                        <Field
+                          as={'textarea'}
+                          rows={5}
+                          cols={77}
+                          maxLength={500}
+                          name="description"
+                          data-testid="description"
+                        />
+                        <FormikErrorMessage name="description" />
+                      </div>
                     </div>
                   </div>
                   <Sidebar>
                     <Heading level={3} showBorder={false}>
                       Summary
                     </Heading>
-
-                    {values.labware ? (
+                    {values.labware.length === 0 && <p className="italic text-sm">No labware scanned.</p>}
+                    {values.labware.length > 0 && (
                       <p>
-                        <span className="font-semibold">{values.labware.barcode}</span> will be flagged.
+                        <span className="font-semibold">{values.labware.map((lw) => lw.barcode).join(', ')}</span> will
+                        be flagged
+                        {values.priority && (
+                          <p>
+                            with priority <span className="font-semibold capitalize"> {values.priority}</span>.
+                          </p>
+                        )}
                       </p>
-                    ) : (
-                      <p className="italic text-sm">No labware scanned.</p>
                     )}
-
-                    <PinkButton type="submit" className="sm:w-full" disabled={!values.labware}>
+                    <PinkButton type="submit" className="sm:w-full" disabled={Object.keys(errors).length > 0}>
                       Flag Labware
                     </PinkButton>
                   </Sidebar>

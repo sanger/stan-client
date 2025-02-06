@@ -4,6 +4,7 @@ import {
   FindFlaggedLabwareQueryVariables,
   FlagLabwareMutation,
   FlagLabwareMutationVariables,
+  FlagPriority,
   GetLabwareFlagDetailsQuery,
   GetLabwareFlagDetailsQueryVariables,
   Labware,
@@ -44,15 +45,16 @@ export const flagLabwareHandlers = [
                 {
                   barcode: barcode,
                   flags: [
-                    { barcode: barcode, description: 'Flagged for testing' },
-                    { barcode: 'STAN-1234', description: 'ancestor 1 flagged' },
-                    { barcode: 'STAN-1235', description: 'ancestor 2 flagged' },
+                    { barcode: barcode, description: 'Flagged for testing', priority: FlagPriority.Note },
+                    { barcode: 'STAN-1234', description: 'ancestor 1 flagged', priority: FlagPriority.Flag },
+                    { barcode: 'STAN-1235', description: 'ancestor 2 flagged', priority: FlagPriority.Flag },
                     {
                       barcode: 'STAN-1235',
                       description:
                         'And don’t forget to try our lorem ipsum generator, find placeholder images for your next design, or add a lorem ipsum plugin to the CMS or text editor of your choice.\n' +
                         '\n' +
-                        'Need more fonts? Cool symbols? Check out Glyphy for the ultimate copy and paste experience.'
+                        'Need more fonts? Cool symbols? Check out Glyphy for the ultimate copy and paste experience.',
+                      priority: FlagPriority.Note
                     }
                   ]
                 }

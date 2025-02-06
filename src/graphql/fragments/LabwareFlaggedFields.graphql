@@ -6,6 +6,7 @@ fragment LabwareFlaggedFields on LabwareFlagged {
   discarded
   released
   flagged
+  flagPriority
   state
   created
   labwareType {

@@ -1,12 +1,18 @@
 import React from 'react';
 import { CellProps, Column } from 'react-table';
-import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, SampleFieldsFragment } from '../../types/sdk';
+import {
+  FlagPriority,
+  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
+  SampleFieldsFragment
+} from '../../types/sdk';
 import Circle from '../Circle';
 import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
 import { joinUnique, samplesFromLabwareOrSLot, valueFromSamples } from './index';
 import StyledLink from '../StyledLink';
 import FlagIcon from '../icons/FlagIcon';
 import MutedText from '../MutedText';
+import BubleChatIcon from '../icons/BubleChatIcon';
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
@@ -39,20 +45,21 @@ const flaggedBarcode: FlaggedColumnFactory = () => {
   return {
     Header: 'Barcode',
     accessor: (lw: LabwareFlaggedFieldsFragment) => {
-      return lw.flagged ? FlaggedBarcodeLink(lw.barcode) : lw.barcode;
+      return lw.flagged ? FlaggedBarcodeLink(lw.barcode, lw.flagPriority) : lw.barcode;
     }
   };
 };
 
-export const FlaggedBarcodeLink = (barcode: string) => {
+export const FlaggedBarcodeLink = (barcode: string, priority?: FlagPriority | null, index?: string) => {
   return (
-    <div className="whitespace-nowrap">
+    <div className="whitespace-nowrap" key={index}>
       <StyledLink
         className="text-sp bg-transparent hover:text-sp-700 active:text-sp-800"
         to={`/labware/${barcode}`}
         target="_blank"
       >
-        <FlagIcon className="inline-block h-5 w-5 -ml-1 mr-1 mb-2" />
+        {priority && priority === FlagPriority.Flag && <FlagIcon className="inline-block h-5 w-5 -ml-1 mr-1 mb-2" />}
+        {priority && priority === FlagPriority.Note && <BubleChatIcon className="inline-block h-5 w-5 -ml-1 mr-1" />}
         {barcode}
       </StyledLink>
     </div>

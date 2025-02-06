@@ -1,4 +1,5 @@
 import {
+  FlagBarcodes,
   LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   LabwareState,
@@ -282,7 +283,7 @@ export type HistoryTableEntry = {
 
 export type HistoryData = {
   entries: Array<HistoryTableEntry>;
-  flaggedBarcodes: Array<string>;
+  flaggedBarcodes: Array<FlagBarcodes>;
 }
 
 /**
