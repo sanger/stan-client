@@ -286,9 +286,9 @@ export default function History(props: HistoryProps) {
                     <TableBody>
                       <TableCell className={'flex flex-col items-center p-2'}>
                         {history.flaggedBarcodes.map((flagBarcode, index1) => {
-                          return flagBarcode.barcodes.map((barcode, index2) => {
-                            return FlaggedBarcodeLink(barcode, flagBarcode.priority, `${index1}-${index2}`);
-                          });
+                          return flagBarcode.barcodes.map((barcode, index2) =>
+                            FlaggedBarcodeLink(barcode, flagBarcode.priority, `${index1}-${index2}`)
+                          );
                         })}
                       </TableCell>
                     </TableBody>

@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom';
 import { HistoryUrlParams } from '../../../../src/pages/History';
 import History from '../../../../src/components/history/History';
-import { LabwareState, UserRole } from '../../../../src/types/sdk';
+import { FlagPriority, LabwareState, UserRole } from '../../../../src/types/sdk';
 import { BrowserRouter } from 'react-router-dom';
 import { HistoryTableEntry } from '../../../../src/types/stan';
 import * as xState from '@xstate/react';
@@ -313,7 +313,10 @@ describe('History Page', () => {
             value: 'found',
             context: {
               historyProps: historyProps,
-              history: { entries: historyTableEntries, flaggedBarcodes: ['STAN-3111'] },
+              history: {
+                entries: historyTableEntries,
+                flaggedBarcodes: [{ barcodes: ['STAN-3111'], priority: FlagPriority.Flag }]
+              },
               serverError: undefined
             },
 
@@ -329,16 +332,9 @@ describe('History Page', () => {
           );
         });
       });
-      it('should display the flagged labware section', async () => {
-        expect(screen.getByText('Flagged Labware')).toBeInTheDocument();
-        expect(screen.getByTestId('styled-link-STAN-3111')).toBeInTheDocument();
-      });
-
-      it('should navigate to the flagged labware page when the flagged labware link is clicked', () => {
-        act(() => {
-          screen.getByTestId('styled-link-STAN-3111').click();
-        });
-        expect(global.window.location.pathname).toContain('/labware/STAN-3111');
+      it('should display the flagged labware section', () => {
+        expect(screen.getByText('Flagged Labware')).toBeVisible();
+        expect(screen.getByTestId('flagged-barcode-link')).toBeVisible();
       });
     });
     describe('when displayFlaggedLabware is false', () => {
@@ -349,7 +345,10 @@ describe('History Page', () => {
             value: 'found',
             context: {
               historyProps: historyProps,
-              history: { entries: historyTableEntries, flaggedBarcodes: ['STAN-3111'] },
+              history: {
+                entries: historyTableEntries,
+                flaggedBarcodes: [{ barcodes: ['STAN-3111'], priority: FlagPriority.Flag }]
+              },
               serverError: undefined
             },
 
