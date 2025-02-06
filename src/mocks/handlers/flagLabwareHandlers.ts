@@ -83,7 +83,14 @@ export const createFlaggedLabware = (barcode: string): LabwareFlaggedFieldsFragm
   const labwareJson = sessionStorage.getItem(`labware-${barcode}`);
   const labware: Labware = labwareJson ? JSON.parse(labwareJson) : createLabware(barcode);
   const flaggedLabware = convertLabwareToFlaggedLabware([buildLabwareFragment(labware)])[0];
-  flaggedLabware.flagged = barcode.endsWith('00');
+  if (barcode.endsWith('00')) {
+    flaggedLabware.flagged = true;
+    flaggedLabware.flagPriority = FlagPriority.Flag;
+  }
+  if (barcode.endsWith('99')) {
+    flaggedLabware.flagged = true;
+    flaggedLabware.flagPriority = FlagPriority.Note;
+  }
   flaggedLabware.__typename = 'LabwareFlagged';
   return flaggedLabware;
 };
