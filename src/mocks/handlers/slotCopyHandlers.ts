@@ -1,9 +1,48 @@
-import { SlotCopyMutation, SlotCopyMutationVariables } from '../../types/sdk';
+import {
+  ReloadSlotCopyQuery,
+  ReloadSlotCopyQueryVariables,
+  SaveSlotCopyMutation,
+  SaveSlotCopyMutationVariables,
+  SlideCosting,
+  SlotCopyLoad,
+  SlotCopyMutation,
+  SlotCopyMutationVariables
+} from '../../types/sdk';
 import { graphql, HttpResponse } from 'msw';
 import labwareFactory from '../../lib/factories/labwareFactory';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
 import { find } from 'lodash';
+import { LabwareTypeName } from '../../types/stan';
+
+const savedSlotCopy: SlotCopyLoad = {
+  operationType: 'CyAssist',
+  workNumber: 'SGP1',
+  lpNumber: 'LP1',
+  labwareType: LabwareTypeName.STRIP_TUBE,
+  preBarcode: 'H1-9D8VN2V',
+  probeLotNumber: '123456',
+  lotNumber: '7712543',
+  costing: SlideCosting.Sgp,
+  sources: [],
+  contents: [
+    {
+      sourceBarcode: 'STAN-3100',
+      sourceAddress: 'A1',
+      destinationAddress: 'A1'
+    },
+    {
+      sourceBarcode: 'STAN-3100',
+      sourceAddress: 'B1',
+      destinationAddress: 'A1'
+    },
+    {
+      sourceBarcode: 'STAN-3200',
+      sourceAddress: 'A2',
+      destinationAddress: 'C1'
+    }
+  ]
+};
 
 const slotCopyHandlers = [
   graphql.mutation<SlotCopyMutation, SlotCopyMutationVariables>('SlotCopy', ({ variables }) => {
@@ -25,6 +64,26 @@ const slotCopyHandlers = [
       }
     };
     return HttpResponse.json({ data: payload }, { status: 200 });
+  }),
+
+  graphql.mutation<SaveSlotCopyMutation, SaveSlotCopyMutationVariables>('SaveSlotCopy', ({ variables }) => {
+    const payload: SaveSlotCopyMutation = {
+      __typename: 'Mutation',
+      saveSlotCopy: savedSlotCopy
+    };
+    return HttpResponse.json({ data: payload }, { status: 200 });
+  }),
+
+  graphql.query<ReloadSlotCopyQuery, ReloadSlotCopyQueryVariables>('ReloadSlotCopy', ({ variables }) => {
+    return HttpResponse.json({
+      data: {
+        reloadSlotCopy: {
+          ...savedSlotCopy,
+          workNumber: variables.workNumber,
+          lpNumber: variables.lpNumber
+        }
+      }
+    });
   })
 ];
 

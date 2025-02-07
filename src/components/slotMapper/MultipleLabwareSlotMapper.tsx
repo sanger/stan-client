@@ -15,19 +15,16 @@ import { GridDirection, LabwareDirection } from '../../lib/helpers';
 import RemoveButton from '../buttons/RemoveButton';
 import Label from '../forms/Label';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
-import { LabwareTypeName, NewFlaggedLabwareLayout, NewLabwareLayout } from '../../types/stan';
-import {
-  stripTubeFactory,
-  visiumLPCytAssistFactory,
-  visiumLPCytAssistHDFactory,
-  visiumLPCytAssistXLFactory
-} from '../../lib/factories/labwareFactory';
+import { LabwareTypeName } from '../../types/stan';
 import { find } from 'lodash';
 import WhiteButton from '../buttons/WhiteButton';
 import SlotMapperTable, { SlotMapperTableProps } from './SlotMapperTable';
 import Warning from '../notifications/Warning';
 import { useFormikContext } from 'formik';
 import { CytAssistOutputLabwareForm } from '../../pages/CytAssist';
+import { flaggedLabwareLayout } from '../../lib/factories/labwareFactory';
+import { eventBus } from '../../eventBus';
+import { SavedDraft } from '../../lib/machines/slotCopy/slotCopyMachine';
 
 type SelectedSlots = {
   labware: LabwareFlaggedFieldsFragment;
@@ -66,29 +63,75 @@ const validatePreBarcode = (preBarcode: string, labwareType: string) => {
 
 const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
   onChange,
-  locked = false,
+  locked,
   inputLabwareLimit,
   slotCopyModes,
   onOutputLabwareChange
 }) => {
-  const memoSlotMapperMachine = React.useMemo(() => {
-    return createSlotMapperMachine;
-  }, []);
-
-  const [current, send] = useMachine(memoSlotMapperMachine, {
+  const slotMapperMachine = createSlotMapperMachine;
+  const [current, send] = useMachine(slotMapperMachine, {
     input: {
       inputLabware: [],
       outputSlotCopies: [],
-      failedSlotsCheck: true
+      failedSlotsCheck: true,
+      cleanedOutInputAddresses: new Map()
     }
   });
 
-  const { inputLabware, outputSlotCopies, colorByBarcode, failedSlots, errors } = current.context;
+  const { inputLabware, outputSlotCopies, colorByBarcode, failedSlots, errors, cleanedOutInputAddresses } =
+    current.context;
 
   const currentOutput = outputSlotCopies[0];
   const slotCopyContent = React.useMemo(() => {
     return outputSlotCopies[0] ? outputSlotCopies[0].slotCopyContent : [];
   }, [outputSlotCopies]);
+
+  /**Memoise whether any source is mapped**/
+  const anySourceMapped = useMemo(() => {
+    if (inputLabware.length === 0) {
+      return false;
+    }
+    if (!currentOutput) {
+      return false;
+    }
+    return currentOutput.slotCopyContent.length > 0;
+  }, [currentOutput, inputLabware]);
+
+  useEffect(() => {
+    const handler = (savedDraft: SavedDraft) => {
+      send({
+        type: 'SET_FROM_DRAFT',
+        labware: savedDraft.sources.map((source) => source.labware),
+        cleanedOutInputAddresses: new Map(
+          savedDraft.sources.map((source) => {
+            return [source.labware.id, source.cleanedOutAddresses ?? []];
+          })
+        ),
+        outputSlotCopyContent: [
+          {
+            labware: savedDraft.destination.labware,
+            slotCopyContent: savedDraft.destination.slotCopyDetails.contents,
+            cleanedOutAddresses: []
+          }
+        ]
+      });
+    };
+
+    eventBus.on('updateUiFromDraft', handler);
+
+    // Cleanup function to remove the listener when component unmounts or updates
+    return () => {
+      eventBus.off('updateUiFromDraft', handler);
+    };
+  }, [send]);
+
+  useEffect(() => {
+    if (!currentOutput?.slotCopyContent) return;
+    console.log(' === ON CHANGE  ');
+    onChange?.(currentOutput.labware, currentOutput?.slotCopyContent, anySourceMapped);
+  }, [onChange, currentOutput, anySourceMapped]);
+
+  const { setFieldValue, values, setFieldError } = useFormikContext<CytAssistOutputLabwareForm>();
 
   const disabledOutputSlotAddresses = React.useMemo(() => {
     return currentOutput?.labware && currentOutput?.labware.labwareType.name === LabwareTypeName.VISIUM_LP_CYTASSIST
@@ -194,34 +237,10 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
     setSelectedInputAddresses(undefined);
   }, [deselectInputLabware, inputLabware]);
 
-  /**Memoise whether any source is mapped**/
-  const anySourceMapped = useMemo(() => {
-    if (inputLabware.length === 0) {
-      return false;
-    }
-    if (!currentOutput) {
-      return false;
-    }
-    return currentOutput.slotCopyContent.length > 0;
-  }, [currentOutput, inputLabware]);
-
-  /**
-   * Whenever the SlotCopyContent map changes, call the onChange handler
-   */
-  useEffect(() => {
-    if (!currentOutput?.slotCopyContent || !currentOutput.labware) return;
-    onChange?.(currentOutput.labware, currentOutput?.slotCopyContent, anySourceMapped);
-  }, [onChange, currentOutput, anySourceMapped]);
-
   const handleChangeOutputLabwareType = React.useCallback(
     (labwareType: string) => {
-      const labwareFactories: Record<string, NewLabwareLayout> = {
-        [LabwareTypeName.VISIUM_LP_CYTASSIST]: visiumLPCytAssistFactory.build(),
-        [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory.build(),
-        [LabwareTypeName.VISIUM_LP_CYTASSIST_HD]: visiumLPCytAssistHDFactory.build(),
-        [LabwareTypeName.STRIP_TUBE]: stripTubeFactory.build()
-      };
-      const newLabwareLayout = labwareFactories[labwareType] as NewFlaggedLabwareLayout;
+      const newLabwareLayout = flaggedLabwareLayout(labwareType);
+      if (!newLabwareLayout) return;
       send({
         type: 'UPDATE_OUTPUT_LABWARE',
         outputSlotCopyContent: [
@@ -318,9 +337,6 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
       setFailedSelectSlots(new Map());
       const address = givenDestinationAddress ?? (currentOutput && selectedOutputAddresses?.address);
       if (address && selectedInputAddresses) {
-        setSelectedInputAddresses(undefined);
-        setSelectedOutputAddresses(undefined);
-        deselectAll();
         send({
           type: 'COPY_ONE_TO_ONE_SLOTS',
           inputLabwareId: selectedInputAddresses.labware.id,
@@ -328,12 +344,14 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
           outputLabwareId: currentOutput.labware?.id,
           outputAddress: address
         });
+        setSelectedInputAddresses(undefined);
+        setSelectedOutputAddresses(undefined);
+        deselectAll();
       }
     },
     [currentOutput, send, selectedInputAddresses, selectedOutputAddresses, deselectAll]
   );
 
-  // const mappedOutputAddess
   /**
    * Handle one to one copy action
    */
@@ -476,7 +494,6 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
     [setSelectedCopyMode]
   );
 
-  const { setFieldValue, values, setFieldError } = useFormikContext<CytAssistOutputLabwareForm>();
   return (
     <div className="space-y-8 mt-10">
       <div className="grid grid-cols-2 auto-rows-auto">
@@ -511,57 +528,59 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
 
         <div id="inputLabwares" className="bg-gray-100 p-4">
           <LabwareScanner
-            initialLabwares={inputLabware.filter((labware) => labware.barcode.length > 0)}
             onChange={onLabwareScannerChange}
             limit={inputLabwareLimit}
             enableFlaggedLabwareCheck
             checkForCleanedOutAddresses
-            initCleanedOutAddresses={current.context.cleanedOutInputAddresses}
+            initialLabwares={inputLabware}
           >
-            {({ removeLabware, cleanedOutAddresses, labwares }) => {
-              if (!labwares) {
+            {({ removeLabware, cleanedOutAddresses }) => {
+              if (inputLabware.length === 0) {
                 return <MutedText>Add labware using the scan input above</MutedText>;
               }
-              if (labwares.length > 0) {
-                return (
-                  <div className={`grid grid-cols-${inputLabware.length}`} data-testid="input-labware-div">
-                    {inputLabware.map((labware, index) => {
-                      return (
-                        <div key={labware.barcode} className="flex flex-row" data-testid={labware.barcode}>
-                          <Labware
-                            labware={labware}
-                            selectable={'non_empty'}
-                            selectionMode={selectedCopyMode !== SlotCopyMode.ONE_TO_MANY ? 'multi' : 'single'}
-                            labwareRefCallback={(el: LabwareImperativeRef) => {
-                              if (el) {
-                                inputLabwareRefs.current.set(index, el);
-                              } else {
-                                inputLabwareRefs.current.delete(index);
-                              }
-                            }}
-                            slotColor={(address, slot) => {
-                              return getSourceSlotColor(labware, address, slot);
-                            }}
-                            name={labware.labwareType.name}
-                            onSelect={(selected) => handleOnInputLabwareSlotClick(index, labware, selected)}
-                            cleanedOutAddresses={
-                              current.context.cleanedOutInputAddresses?.get(labware.id) ??
-                              cleanedOutAddresses?.get(labware.id)
-                            }
-                          />
-                          <div>
-                            <RemoveButton
-                              onClick={() => {
-                                removeLabware(labware.barcode);
-                              }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              }
+              return (
+                <div className={`grid grid-cols-${inputLabware.length}`} data-testid="input-labware-div">
+                  {inputLabware.map((labware, index) => (
+                    <div key={labware.barcode} className="flex flex-row" data-testid={labware.barcode}>
+                      <Labware
+                        labware={labware}
+                        selectable={'non_empty'}
+                        selectionMode={selectedCopyMode !== SlotCopyMode.ONE_TO_MANY ? 'multi' : 'single'}
+                        labwareRefCallback={(el: LabwareImperativeRef) => {
+                          if (el) {
+                            inputLabwareRefs.current.set(index, el);
+                          } else {
+                            inputLabwareRefs.current.delete(index);
+                          }
+                        }}
+                        slotColor={(address, slot) => {
+                          return getSourceSlotColor(labware, address, slot);
+                        }}
+                        name={labware.labwareType.name}
+                        onSelect={(selected) => handleOnInputLabwareSlotClick(index, labware, selected)}
+                        cleanedOutAddresses={
+                          current.context.cleanedOutInputAddresses?.get(labware.id) ??
+                          cleanedOutAddresses?.get(labware.id)
+                        }
+                      />
+                      <div>
+                        <RemoveButton
+                          onClick={() => {
+                            removeLabware(labware.barcode);
+                            send({
+                              type: 'UPDATE_INPUT_LABWARE',
+                              labware: inputLabware.filter((lw) => lw.barcode !== labware.barcode),
+                              cleanedOutAddresses: new Map(
+                                Array.from(cleanedOutInputAddresses || []).filter(([key]) => key !== labware.id)
+                              )
+                            });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
             }}
           </LabwareScanner>
         </div>
@@ -570,6 +589,7 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
             <div className="grid grid-cols-3 mb-10 m-4">
               <Label name={'Labware Type'} />
               <CustomReactSelect
+                name="labwareType"
                 handleChange={async (val) => {
                   const selectedType = (val as OptionType).value;
                   handleChangeOutputLabwareType(selectedType);
@@ -579,6 +599,7 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
                     if (!isValid.valid) setFieldError('preBarcode', isValid.errorMessage);
                   }
                 }}
+                value={values.labwareType}
                 className="col-span-2"
                 emptyOption={true}
                 dataTestId="output-labware-type"
@@ -596,11 +617,11 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
               />
             </div>
           </div>
-          <div className={'flex items-center justify-center'}>
+          <div className={'flex items-center justify-center'} data-testid="cytassist-labware">
             {outputSlotCopies.length > 0 &&
               outputSlotCopies.map((output, index) => (
                 <div className="flex flex-2  space-y-2" key={index}>
-                  {output.labware && (
+                  {output.labware && output.labware.labwareType.name && (
                     <Labware
                       labware={output.labware}
                       selectable="any"

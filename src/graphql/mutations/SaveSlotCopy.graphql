@@ -1,0 +1,5 @@
+mutation SaveSlotCopy($request: SlotCopySave!) {
+  saveSlotCopy(request: $request) {
+    ...SlotCopyLoadFields
+  }
+}

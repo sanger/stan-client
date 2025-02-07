@@ -1,0 +1,22 @@
+fragment SlotCopyLoadFields on SlotCopyLoad {
+  sources {
+    barcode
+    labwareState
+  }
+  operationType
+  workNumber
+  lpNumber
+  executionType
+  labwareType
+  barcode
+  bioState
+  costing
+  lotNumber
+  probeLotNumber
+  preBarcode
+  contents {
+    sourceBarcode
+    sourceAddress
+    destinationAddress
+  }
+}
