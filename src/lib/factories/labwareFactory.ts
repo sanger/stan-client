@@ -1,7 +1,7 @@
 import { Factory } from 'fishery';
 import { Labware, LabwareState } from '../../types/sdk';
 import { labwareTypes } from './labwareTypeFactory';
-import { LabwareTypeName, NewLabwareLayout } from '../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout, NewLabwareLayout } from '../../types/stan';
 import { uniqueId } from 'lodash';
 import { buildAddresses, GridDirection } from '../helpers';
 import { slotFactory } from './slotFactory';
@@ -161,4 +161,11 @@ export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>
   [LabwareTypeName.VISIUM_LP_CYTASSIST_HD]: visiumLPCytAssistHDFactory,
   [LabwareTypeName.XENIUM]: xeniumFactory,
   [LabwareTypeName.STRIP_TUBE]: stripTubeFactory
+};
+
+export const flaggedLabwareLayout = (labwareType: string) => {
+  if (Object.values(LabwareTypeName).includes(labwareType as LabwareTypeName)) {
+    return labwareFactories[labwareType as LabwareTypeName].build() as NewFlaggedLabwareLayout;
+  }
+  return undefined;
 };

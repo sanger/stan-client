@@ -26,19 +26,13 @@ import LabelPrinter from '../components/LabelPrinter';
 import ButtonBar from '../components/ButtonBar';
 import MultipleLabwareSlotMapper from '../components/slotMapper/MultipleLabwareSlotMapper';
 
-/**
- * Success notification when slots have been copied
- */
-const ToastSuccess = () => <Success message={'Slots copied'} />;
-
 interface OutputLabwareScanPanelProps {
   preBarcode: Maybe<string> | undefined;
-  labwareType: string;
   onChangeBarcode: (barcode: string) => void;
   onChangeCosting: (costing: string) => void;
   onChangeLOTNumber: (lotNumber: string, isProbe: boolean) => void;
   onChangeLpNumber: (lpNumber: string) => void;
-
+  draftedValues: CytAssistOutputLabwareForm;
   children?: React.ReactNode;
 }
 
@@ -48,9 +42,12 @@ export type CytAssistOutputLabwareForm = {
   costing: string;
   slideLotNumber: string;
   probeLotNumber: string;
+  lpNumber: string;
 };
 
 const lotNumberRegex = /^\d{6,7}$/;
+
+const LP_NUMBERS = Array.from({ length: 20 }, (_, i) => `LP${i + 1}`);
 
 const validationSchema = () => {
   return Yup.object().shape({
@@ -63,8 +60,9 @@ const validationSchema = () => {
             .matches(/[A-Z0-9]{2}-[A-Z0-9]{7}/, 'Invalid format for a labware type of VISIUM_LP_CYTASSIST_HD')
         : Yup.string()
             .required('Required field')
-            .matches(/[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}/, 'Invalid format');
+            .matches(/[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}/, 'Invalid format for this labware type');
     }),
+    lpNumber: Yup.string().oneOf(LP_NUMBERS).required('Required field'),
     costing: Yup.string().required('Required field'),
     probeLotNumber: Yup.string()
       .required('Required field')
@@ -81,24 +79,17 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   onChangeCosting,
   onChangeLOTNumber,
   onChangeLpNumber,
-  labwareType,
+  draftedValues,
   children
 }) => {
-  const LP_NUMBERS = Array.from({ length: 20 }, (_, i) => `LP${i + 1}`);
-  const initialValues: CytAssistOutputLabwareForm = {
-    preBarcode: '',
-    labwareType: labwareType,
-    costing: '',
-    slideLotNumber: '',
-    probeLotNumber: ''
-  };
-
   return (
     <Formik<CytAssistOutputLabwareForm>
-      initialValues={initialValues}
+      initialValues={draftedValues}
       onSubmit={() => {}}
       validationSchema={validationSchema}
       validateOnChange={true}
+      validateOnMount={true}
+      enableReinitialize={true}
     >
       {({ errors, values }) => (
         <Form>
@@ -128,6 +119,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
                 handleBlur={(val) => {
                   val && onChangeCosting((val as OptionType).label);
                 }}
+                value={draftedValues.costing}
                 name={'costing'}
                 emptyOption={true}
                 dataTestId="output-labware-costing"
@@ -184,18 +176,18 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   );
 };
 
+const initialOutputLabwarePlaceHolder = visiumLPCytAssistFactory.build() as NewFlaggedLabwareLayout;
+initialOutputLabwarePlaceHolder.labwareType.name = '';
+
+export const initialOutputLabware: Destination = {
+  labware: initialOutputLabwarePlaceHolder,
+  slotCopyDetails: {
+    labwareType: '',
+    contents: []
+  }
+};
+
 const CytAssist = () => {
-  const initialOutputLabwarePlaceHolder = visiumLPCytAssistFactory.build() as NewFlaggedLabwareLayout;
-  initialOutputLabwarePlaceHolder.labwareType.name = '';
-
-  const initialOutputLabware: Destination = {
-    labware: initialOutputLabwarePlaceHolder,
-    slotCopyDetails: {
-      labwareType: '',
-      contents: []
-    }
-  };
-
   const [current, send] = useMachine(slotCopyMachine, {
     input: {
       workNumber: '',
@@ -230,9 +222,17 @@ const CytAssist = () => {
 
   const handleWorkNumberChange = useCallback(
     (workNumber: string) => {
+      if (current.context.workNumber === workNumber) return;
       send({ type: 'UPDATE_WORK_NUMBER', workNumber });
+      if (workNumber && current.context.destinations[0].slotCopyDetails.lpNumber) {
+        send({
+          type: 'RELOAD_DRAFTED_CYTASSIST',
+          workNumber: workNumber,
+          lpNumber: current.context.destinations[0].slotCopyDetails.lpNumber
+        });
+      }
     },
-    [send]
+    [send, current.context.workNumber, current.context.destinations]
   );
 
   const handleChangeOutputLabwareBarcode = React.useCallback(
@@ -273,10 +273,17 @@ const CytAssist = () => {
       send({
         type: 'UPDATE_DESTINATION_LP_NUMBER',
         labware: selectedDestination.labware,
-        lpNumber
+        lpNumber: lpNumber
       });
+      if (lpNumber !== selectedDestination?.slotCopyDetails.lpNumber && current.context.workNumber.length > 0) {
+        send({
+          type: 'RELOAD_DRAFTED_CYTASSIST',
+          workNumber: current.context.workNumber,
+          lpNumber: lpNumber
+        });
+      }
     },
-    [send, selectedDestination]
+    [send, selectedDestination, current.context.workNumber]
   );
 
   const handleChangeLabwareType = React.useCallback(
@@ -289,7 +296,7 @@ const CytAssist = () => {
         labware: newDestLabware
       });
     },
-    [send, selectedDestination, initialOutputLabwarePlaceHolder]
+    [send, selectedDestination]
   );
 
   /**
@@ -299,18 +306,24 @@ const CytAssist = () => {
     send({ type: 'SAVE' });
   }, [send]);
 
+  const onSaveDraftAction = React.useCallback(() => {
+    send({ type: 'SAVE_DRAFT' });
+  }, [send]);
+
   /**
-   * When we get into the "copied" state, show a success message
+   * On "copied" or "drafted" state, show a success message
    */
+
   useEffect(() => {
-    if (current.value === 'copied') {
+    const ToastSuccess = () => <Success message={current.context.successMessage} />;
+    if (current.context.successMessage && current.context.successMessage.length > 0) {
       toast(ToastSuccess, {
         position: toast.POSITION.TOP_RIGHT,
         autoClose: 4000,
         hideProgressBar: true
       });
     }
-  }, [current.value]);
+  }, [current.value, current.context.successMessage]);
 
   /**
    * When there's an error returned from the server, scroll to it
@@ -346,11 +359,18 @@ const CytAssist = () => {
             <Heading level={4}>CytAssist Slide</Heading>
             <CytAssistOutputlabwareScanPanel
               preBarcode={selectedDestination && selectedDestination.slotCopyDetails.preBarcode}
-              labwareType={selectedDestination ? selectedDestination.slotCopyDetails.labwareType ?? '' : ''}
               onChangeBarcode={handleChangeOutputLabwareBarcode}
               onChangeCosting={handleChangeCosting}
               onChangeLOTNumber={handleChangeLOTNumber}
               onChangeLpNumber={handleChangeLpNumber}
+              draftedValues={{
+                preBarcode: selectedDestination ? selectedDestination.slotCopyDetails.preBarcode ?? '' : '',
+                labwareType: selectedDestination ? selectedDestination.slotCopyDetails.labwareType ?? '' : '',
+                costing: selectedDestination ? selectedDestination.slotCopyDetails.costing ?? '' : '',
+                slideLotNumber: selectedDestination ? selectedDestination.slotCopyDetails.lotNumber ?? '' : '',
+                probeLotNumber: selectedDestination ? selectedDestination.slotCopyDetails.probeLotNumber ?? '' : '',
+                lpNumber: selectedDestination ? selectedDestination.slotCopyDetails.lpNumber ?? '' : ''
+              }}
             >
               <MultipleLabwareSlotMapper
                 locked={current.matches('copied')}
@@ -367,20 +387,28 @@ const CytAssist = () => {
       <div className="border border-t-2 border-gray-200 w-full py-4 px-4 sm:px-6 lg:px-8 bg-gray-100 flex-shrink-0">
         <div className="flex flex-row items-center justify-end space-x-2">
           {!current.matches('copied') && (
-            <BlueButton
-              disabled={
-                !current.matches('readyToCopy') ||
-                current.context.workNumber === '' ||
-                !selectedDestination ||
-                !selectedDestination.slotCopyDetails.preBarcode ||
-                !selectedDestination.slotCopyDetails.costing ||
-                !selectedDestination.slotCopyDetails.lotNumber ||
-                !selectedDestination.slotCopyDetails.probeLotNumber
-              }
-              onClick={onSaveAction}
-            >
-              Save
-            </BlueButton>
+            <>
+              <BlueButton
+                disabled={
+                  !current.matches('readyToCopy') ||
+                  current.context.workNumber === '' ||
+                  !selectedDestination ||
+                  !selectedDestination.slotCopyDetails.preBarcode ||
+                  !selectedDestination.slotCopyDetails.costing ||
+                  !selectedDestination.slotCopyDetails.lotNumber ||
+                  !selectedDestination.slotCopyDetails.probeLotNumber
+                }
+                onClick={onSaveAction}
+              >
+                Save
+              </BlueButton>
+              <BlueButton
+                disabled={!current.context.workNumber || !selectedDestination?.slotCopyDetails.lpNumber}
+                onClick={onSaveDraftAction}
+              >
+                Save Draft
+              </BlueButton>
+            </>
           )}
         </div>
         {current.matches('copied') && (

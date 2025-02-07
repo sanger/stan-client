@@ -1,7 +1,7 @@
-import { SlotCopyMutation, SlotCopyMutationVariables } from '../../../src/types/sdk';
-import { LabwareTypeName } from '../../../src/types/stan';
 import { selectOption, selectSGPNumber, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
+import { ReloadSlotCopyQuery, ReloadSlotCopyQueryVariables, SlideCosting } from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
+import { LabwareTypeName } from '../../../src/types/stan';
 
 describe('CytAssist Page', () => {
   before(() => {
@@ -15,6 +15,9 @@ describe('CytAssist Page', () => {
 
     it('disables the Save button', () => {
       saveButton().should('be.disabled');
+    });
+    it('disables the Draft Save button', () => {
+      saveDraftButton().should('be.disabled');
     });
     it('displays the mode selection', () => {
       cy.findByText(/Select transfer mode/i).should('be.visible');
@@ -100,7 +103,7 @@ describe('CytAssist Page', () => {
       });
     });
     it('should display Invalid format error message', () => {
-      cy.findByText('Invalid format').should('be.visible');
+      cy.findByText('Invalid format for this labware type').should('be.visible');
     });
   });
   context('When external id is entered in correct format', () => {
@@ -167,6 +170,7 @@ describe('CytAssist Page', () => {
         enterOutputLabwareExternalID();
         enterLOTNumber();
         enterProbeLOTNumber();
+        enterLpNumber();
         selectSlideCostings('SGP');
       });
       context('When mapping is done  and all field selected except SGP number', () => {
@@ -185,12 +189,14 @@ describe('CytAssist Page', () => {
     });
     describe('Check for External barcode', () => {
       before(() => {
-        cy.findByTestId('external-barcode').within(() => {
-          cy.findByRole('textbox').clear().blur();
-        });
+        cy.findByTestId('external-barcode')
+          .scrollIntoView()
+          .within(() => {
+            cy.findByRole('textbox').clear().blur();
+          });
       });
       context('When mapping is done  and all field selected except External barcode', () => {
-        it('should display Required field error for external id', () => {
+        it('should display Required field error for external barcode', () => {
           cy.findByText('Required field').should('be.visible');
         });
         it('keeps the Save button disabled', () => {
@@ -330,10 +336,197 @@ describe('CytAssist Page', () => {
       });
     });
   });
+  describe('On save draft', () => {
+    before(() => {
+      cy.reload();
+      selectSGPNumber('SGP1008');
+      enterLpNumber();
+    });
+    context('draft saving', () => {
+      it('enables save draft button when sgp and lp numbers are selected', () => {
+        saveDraftButton().should('be.enabled');
+      });
+    });
+    context('load saved draft', () => {
+      it('populates the slide costings properly', () => {
+        shouldDisplaySelectedValue('output-labware-costing', 'SGP');
+      });
+      it('populates the slide LOT number properly', () => {
+        cy.findByTestId('lot-number').within(() => {
+          cy.findByRole('textbox').should('have.value', '7712543');
+        });
+      });
+      it('populates the probe LOT number properly', () => {
+        cy.findByTestId('probe-lot-number').within(() => {
+          cy.findByRole('textbox').should('have.value', '123456');
+        });
+      });
+      it('populates the external barcode properly', () => {
+        cy.findByTestId('external-barcode').within(() => {
+          cy.findByRole('textbox').should('have.value', 'H1-9D8VN2V');
+        });
+      });
+      it('selects the correct output labware type', () => {
+        shouldDisplaySelectedValue('output-labware-type', '8 Strip Tube');
+      });
+      it('displays the source labware properly', () => {
+        cy.findByText('STAN-3100').should('be.visible');
+        cy.findByText('STAN-3200').should('be.visible');
+      });
+      it('displays the output labware properly', () => {
+        cy.findByTestId('cytassist-labware').within(() => {
+          cy.findByText('8 Strip Tube').should('be.visible');
+        });
+      });
+      it('shows the mapped slots correctly', () => {
+        cy.findByTestId('cytassist-labware').within(() => {
+          cy.findByText('A1').click();
+        });
+        cy.findByTestId('mapping_table').get('tbody tr').should('have.length', 2);
+      });
+      it('shows the mapped slots correctly', () => {
+        cy.findByTestId('cytassist-labware').within(() => {
+          cy.findByText('C1').click();
+        });
+        cy.findByTestId('mapping_table').get('tbody tr').should('have.length', 1);
+      });
+    });
+
+    context('re-load with different drafted values', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<ReloadSlotCopyQuery, ReloadSlotCopyQueryVariables>('ReloadSlotCopy', () => {
+              return HttpResponse.json({
+                data: {
+                  reloadSlotCopy: {
+                    operationType: 'CyAssist',
+                    workNumber: 'SGP1',
+                    lpNumber: 'LP1',
+                    labwareType: LabwareTypeName.VISIUM_LP_CYTASSIST_HD,
+                    preBarcode: 'V42A20-3752023-10-20',
+                    probeLotNumber: '999456',
+                    lotNumber: '1112543',
+                    costing: SlideCosting.Faculty,
+                    sources: [],
+                    contents: [
+                      {
+                        sourceBarcode: 'STAN-3300',
+                        sourceAddress: 'B1',
+                        destinationAddress: 'A1'
+                      },
+                      {
+                        sourceBarcode: 'STAN-3300',
+                        sourceAddress: 'A1',
+                        destinationAddress: 'A1'
+                      },
+                      {
+                        sourceBarcode: 'STAN-3300',
+                        sourceAddress: 'C1',
+                        destinationAddress: 'A1'
+                      }
+                    ]
+                  }
+                }
+              });
+            })
+          );
+        });
+        enterLpNumber('LP5');
+      });
+      it('updates the slide costings properly', () => {
+        shouldDisplaySelectedValue('output-labware-costing', 'Faculty');
+      });
+      it('updates the slide LOT number properly', () => {
+        cy.findByTestId('lot-number').within(() => {
+          cy.findByRole('textbox').should('have.value', '1112543');
+        });
+      });
+      it('updates the probe LOT number properly', () => {
+        cy.findByTestId('probe-lot-number').within(() => {
+          cy.findByRole('textbox').should('have.value', '999456');
+        });
+      });
+      it('updates the external barcode properly', () => {
+        cy.findByTestId('external-barcode').within(() => {
+          cy.findByRole('textbox').should('have.value', 'V42A20-3752023-10-20');
+        });
+      });
+      it('re-selects the correct output labware type', () => {
+        shouldDisplaySelectedValue('output-labware-type', 'Visium LP CytAssist HD');
+      });
+      it('updates the source labware properly', () => {
+        cy.findByText('STAN-3300').should('be.visible');
+      });
+      it('updates the output labware properly', () => {
+        cy.findByTestId('cytassist-labware').within(() => {
+          cy.findByText('Visium LP CytAssist HD').should('be.visible');
+        });
+      });
+      it('shows the mapped slots correctly', () => {
+        cy.findByTestId('cytassist-labware').within(() => {
+          cy.findByText('A1').click();
+        });
+        cy.findByTestId('mapping_table').get('tbody tr').should('have.length', 3);
+      });
+    });
+
+    context('re-load with no drafted values', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<ReloadSlotCopyQuery, ReloadSlotCopyQueryVariables>('ReloadSlotCopy', () => {
+              return HttpResponse.json({
+                errors: [
+                  {
+                    message: 'No Record is been stored.'
+                  }
+                ]
+              });
+            })
+          );
+        });
+        enterLpNumber('LP7');
+      });
+      it('empty the slide costings input field', () => {
+        shouldDisplaySelectedValue('output-labware-costing', '');
+      });
+      it('empty the slide LOT number input field', () => {
+        cy.findByTestId('lot-number').within(() => {
+          cy.findByRole('textbox').should('have.value', '');
+        });
+      });
+      it('empty the probe LOT number input field', () => {
+        cy.findByTestId('probe-lot-number').within(() => {
+          cy.findByRole('textbox').should('have.value', '');
+        });
+      });
+      it('empty the external barcode input field', () => {
+        cy.findByTestId('external-barcode').within(() => {
+          cy.findByRole('textbox').should('have.value', '');
+        });
+      });
+      it('defaults the output labware type select box to null', () => {
+        shouldDisplaySelectedValue('output-labware-type', '');
+      });
+      it('removes the source labware', () => {
+        cy.findByTestId('input-labware-div').should('not.exist');
+      });
+      it('removes the output labware', () => {
+        cy.findByTestId('cytassist-labware').within(() => {
+          cy.findAllByTestId('slot').should('have.length', 0);
+        });
+      });
+    });
+  });
 });
 
 function saveButton() {
-  return cy.findByRole('button', { name: /Save/i }).scrollIntoView();
+  return cy.findByRole('button', { name: 'Save' }).scrollIntoView();
+}
+
+function saveDraftButton() {
+  return cy.findByRole('button', { name: 'Save Draft' }).scrollIntoView();
 }
 
 function mapSlots() {
@@ -369,6 +562,10 @@ function enterProbeLOTNumber() {
   cy.findByTestId('probe-lot-number').within(() => {
     cy.findByRole('textbox').clear().type('1234567{enter}').blur();
   });
+}
+
+function enterLpNumber(lpNumber: string = 'LP1') {
+  selectOption('lpNumber', lpNumber);
 }
 function selectLabwareType(type: string) {
   selectOption('output-labware-type', type);
