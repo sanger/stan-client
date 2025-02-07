@@ -102,7 +102,7 @@ function ExtractResultLabwareRow({ labware, index, availableComments }: ExtractR
   );
 
   const barcodeCell = useMemo(() => {
-    return labware.lw.flagged ? FlaggedBarcodeLink(labware.lw.barcode) : labware.lw.barcode;
+    return labware.lw.flagged ? FlaggedBarcodeLink(labware.lw.barcode, labware.lw.flagPriority) : labware.lw.barcode;
   }, [labware]);
 
   return (

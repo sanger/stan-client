@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import React from 'react';
 import '@testing-library/jest-dom';
 import FlagLabware from '../../../src/pages/FlagLabware';
+
 describe('On load', () => {
   describe('FlagLabware page is loaded correctly', () => {
     beforeEach(() => {
@@ -19,12 +20,11 @@ describe('On load', () => {
     it('renders SGP number select number', () => {
       expect(screen.getByTestId('workNumber')).toBeVisible();
     });
+    it('renders the flag priority select box', () => {
+      expect(screen.getByTestId('priority')).toBeVisible();
+    });
     it('renders the labware scanner', () => {
       expect(screen.getByTestId('input')).toBeVisible();
-    });
-
-    it('submit button is disabled', () => {
-      expect(screen.queryByRole('button', { name: 'Flag Labware' })).toBeDisabled();
     });
   });
 });

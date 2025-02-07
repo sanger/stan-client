@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useImperativeHandle, useMemo } from 'react';
 import classNames from 'classnames';
-import BarcodeIcon from '../icons/BarcodeIcon';
 import { Slot } from './Slot';
 import { buildAddresses, GridDirection, isSameArray, LabwareDirection, Position } from '../../lib/helpers';
 import _ from 'lodash';
-import { LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
+import { FlagPriority, LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
 import createLabwareMachine from './labware.machine';
 import { Selectable, SelectionMode } from './labware.types';
 import { NewFlaggedLabwareLayout, NewLabwareLayout } from '../../types/stan';
@@ -13,6 +12,8 @@ import * as slotHelper from '../../lib/helpers/slotHelper';
 import SlotColumnInfo from './SlotColumnInfo';
 import { Link } from 'react-router-dom';
 import FlagIcon from '../icons/FlagIcon';
+import BarcodeIcon from '../icons/BarcodeIcon';
+import BubleChatIcon from '../icons/BubleChatIcon';
 
 export interface LabwareProps {
   /**
@@ -322,38 +323,42 @@ const Labware = ({
     return 'items-start';
   };
 
-  const BarcodeInformation = () => {
-    return (
-      <div
-        className={
-          'flex flex-col py-2 px-3 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider ' +
-          barcodePositionClassName()
-        }
-      >
-        {name && <span>{name}</span>}
-        {barcode && !isFlagged && (
-          <span className="inline-flex">
-            <BarcodeIcon className="mr-1 h-4 w-4 text-gray-500" />
-            {barcode}
-          </span>
-        )}
-        {barcode && isFlagged ? (
-          <span>
-            <Link
-              className="flex flex-row text-sp-700 hover:text-sp-800 font-semibold hover:underline"
-              to={`/labware/${barcode}`}
-              target="_blank"
-            >
+  const BarcodeInformation = () => (
+    <div
+      className={
+        'flex flex-col py-2 px-3 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider ' +
+        barcodePositionClassName()
+      }
+    >
+      {name && <span>{name}</span>}
+      {barcode && !isFlagged && (
+        <span className="inline-flex">
+          <BarcodeIcon className="mr-1 h-4 w-4 text-gray-500" />
+          {barcode}
+        </span>
+      )}
+      {barcode && 'flagPriority' in labware ? (
+        <span>
+          <Link
+            className="flex flex-row text-sp-700 hover:text-sp-800 font-semibold hover:underline"
+            to={`/labware/${barcode}`}
+            target="_blank"
+          >
+            {labware.flagPriority === FlagPriority.Flag && (
               <FlagIcon className="h-4 w-4 inline-block mb-2 mr-1 -ml-1" />
-              {barcode}
-            </Link>
-          </span>
-        ) : (
-          ''
-        )}
-      </div>
-    );
-  };
+            )}
+            {labware.flagPriority === FlagPriority.Note && (
+              <BubleChatIcon className="h-4 w-4 inline-block mb-2 mr-1 -ml-1" />
+            )}
+
+            {barcode}
+          </Link>
+        </span>
+      ) : (
+        ''
+      )}
+    </div>
+  );
 
   return (
     <div className={'flex flex-row'} data-testid={`labware-${labware.barcode ?? ''}`}>

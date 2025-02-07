@@ -8,7 +8,6 @@ import { selectOptionValues } from '../forms';
 import { FieldArray, useFormikContext } from 'formik';
 import { SampleComment, XeniumQCFormData } from '../../pages/XeniumQC';
 import { CellProps } from 'react-table';
-import StyledLink from '../StyledLink';
 import Warning from '../notifications/Warning';
 import { FlaggedBarcodeLink } from '../dataTableColumns/labwareColumns';
 import RoiTable from '../xeniumMetrics/RoiTable';
@@ -36,13 +35,7 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
           {({ remove }) => (
             <Panel>
               <div className="grid grid-cols-2 mb-4">
-                {labware.flagged && FlaggedBarcodeLink(labware.barcode)}
-                {!labware.flagged && (
-                  <StyledLink to={`/labware/${labware.barcode}`} target="_blank">
-                    {labware.barcode}
-                  </StyledLink>
-                )}
-
+                {FlaggedBarcodeLink(labware.barcode, labware.flagPriority)}
                 <div className="flex flex-row items-center justify-end">
                   <RemoveButton
                     onClick={() => {

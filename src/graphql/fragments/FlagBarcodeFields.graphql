@@ -1,0 +1,4 @@
+fragment FlagBarcodesFields on FlagBarcodes {
+  barcodes
+  priority
+}

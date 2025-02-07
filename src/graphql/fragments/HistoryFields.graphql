@@ -8,5 +8,7 @@ fragment HistoryFields on History {
   entries {
     ...HistoryEntryFields
   }
-  flaggedBarcodes
+  flagBarcodes {
+    ...FlagBarcodesFields
+  }
 }

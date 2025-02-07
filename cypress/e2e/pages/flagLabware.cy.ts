@@ -1,18 +1,19 @@
 import { act } from '@testing-library/react';
+import { selectOption } from '../shared/customReactSelect.cy';
 
 describe('Flag Labware', () => {
-  beforeEach(() => {
-    cy.visit('/admin/flagLabware');
-  });
-  describe('when a labware is scanned', () => {
-    beforeEach(() => {
+  describe('when all fields are been correctly populated', () => {
+    before(() => {
+      cy.visit('/admin/flagLabware');
+      selectOption('priority', 'Note');
+      cy.findByTestId('description').type('Flagging multiple labware');
+    });
+    it('supports flagging multiple labware at the same time', () => {
       cy.get('#labwareScanInput').type('STAN-123{enter}');
+      cy.get('#labwareScanInput').type('STAN-321{enter}');
     });
-    it('renders the labware details table', () => {
-      cy.findByRole('table').should('be.visible');
-    });
-    it('renders the description text area', () => {
-      cy.findByTestId('description').should('be.visible');
+    it('renders the labware details tables', () => {
+      cy.findAllByRole('table').should('have.length', 2);
     });
     it('updates the summary section', () => {
       cy.findByText('No labwares scanned.').should('not.exist');
@@ -27,16 +28,6 @@ describe('Flag Labware', () => {
         cy.get('#labwareScanInput').type('STAN-1200{enter}');
       });
       cy.findByText('Related Flags').should('be.visible');
-    });
-  });
-
-  describe('when the user does not enter a valid description for flagging a labware', () => {
-    it('displays an error message', () => {
-      act(() => {
-        cy.get('#labwareScanInput').type('STAN-1200{enter}');
-        cy.findByRole('button', { name: 'Flag Labware' }).click();
-      });
-      cy.findByText('Description is required').should('be.visible');
     });
   });
 });

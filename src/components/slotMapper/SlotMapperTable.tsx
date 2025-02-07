@@ -58,7 +58,9 @@ export default function SlotMapperTable({ labware, slots, slotCopyContent }: Slo
       <TableBody>
         {mappingForSlots.map(({ slot, destinationAddress }) => (
           <tr key={`${slot.address}-${slot.labwareId}-${destinationAddress}`}>
-            <TableCell>{labware.flagged ? FlaggedBarcodeLink(labware.barcode) : labware.barcode}</TableCell>
+            <TableCell>
+              {labware.flagged ? FlaggedBarcodeLink(labware.barcode, labware.flagPriority) : labware.barcode}
+            </TableCell>
             <TableCell>{slot.address}</TableCell>
             <TableCell>{slot.samples.length > 0 ? slot.samples[0].tissue.externalName : ''}</TableCell>
             <TableCell>{slot.samples.length > 0 ? slot.samples[0].tissue.spatialLocation.code : ''}</TableCell>

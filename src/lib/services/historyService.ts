@@ -1,6 +1,6 @@
 import { stanCore } from '../sdk';
 import { HistoryTableEntry } from '../../types/stan';
-import { HistoryFieldsFragment, LabwareFieldsFragment, SampleFieldsFragment } from '../../types/sdk';
+import { FlagBarcodes, HistoryFieldsFragment, LabwareFieldsFragment, SampleFieldsFragment } from '../../types/sdk';
 import { HistoryUrlParams } from '../../pages/History';
 import { omit } from 'lodash';
 
@@ -12,14 +12,14 @@ const initHistory: HistoryFieldsFragment = {
   entries: [],
   labware: [],
   samples: [],
-  flaggedBarcodes: [],
+  flagBarcodes: [],
   __typename: 'History'
 };
 
 export type HistoryService = {
   history: {
     entries: Array<HistoryTableEntry>;
-    flaggedBarcodes: Array<string>;
+    flaggedBarcodes: Array<FlagBarcodes>;
   };
   historyGraph?: string;
   zoom?: number;
@@ -109,7 +109,7 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Histo
   return {
     history: {
       entries: buildHistoryEntries(history),
-      flaggedBarcodes: history.flaggedBarcodes
+      flaggedBarcodes: history.flagBarcodes
     },
     historyGraph,
     fontSize,
