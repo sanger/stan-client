@@ -71,9 +71,10 @@ const FlagLabware = () => {
   const convertValuesAndSubmit = async (values: FormFlagLabware) => {
     if (!values.labware) return;
     const requestValues: FlagLabwareRequest = {
-      ...values,
       priority: values.priority!,
-      barcodes: values.labware!.map((lw) => lw?.barcode)
+      barcodes: values.labware!.map((lw) => lw?.barcode),
+      workNumber: values.workNumber,
+      description: values.description
     };
     send({ type: 'SUBMIT_FORM', values: requestValues });
   };
