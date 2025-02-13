@@ -21,8 +21,8 @@ import { ClientError } from 'graphql-request';
 import { DestinationSelectionMode } from '../../../components/slotMapper/slotMapper.types';
 import { Draft } from 'immer';
 import { flaggedLabwareLayout } from '../../factories/labwareFactory';
-import { initialOutputLabware } from '../../../pages/CytAssist';
 import { eventBus } from '../../../eventBus';
+import { initialOutputLabware } from '../../../pages/CytAssist';
 
 /**
  * Context for SlotCopy Machine
@@ -636,7 +636,12 @@ export const slotCopyMachine = createMachine(
             ...context,
             serverErrors: null,
             sources: [],
-            destinations: [initialOutputLabware]
+            destinations: [
+              {
+                labware: initialOutputLabware.labware,
+                slotCopyDetails: { lpNumber: context.destinations[0].slotCopyDetails.lpNumber, contents: [] }
+              }
+            ]
           };
         }
         return context;
@@ -767,21 +772,24 @@ export const slotCopyMachine = createMachine(
       assignDraftedCytAssist: assign(({ context, event }) => {
         if (event.type !== 'xstate.done.actor.reloadDraftedCytAssist') return context;
         return produce(context, (draft) => {
-          const layout = flaggedLabwareLayout(event.output.reloadSlotCopy!.labwareType!);
-          if (!layout) return draft;
           if (event.output.reloadSlotCopy) {
+            const draftedLayout = flaggedLabwareLayout(event.output.reloadSlotCopy!.labwareType!);
             const { sources, operationType, workNumber, executionType, lpNumber, ...copyDetails } =
               event.output.reloadSlotCopy;
             draft.destinations[0] = {
-              labware: layout,
+              labware: draftedLayout || initialOutputLabware.labware,
               slotCopyDetails: {
                 ...draft.destinations[0].slotCopyDetails,
                 ...copyDetails
               }
             };
-            draft.sources = event.output.inputLabware?.map((labware) => {
-              return { labware, cleanedOutAddresses: event.output.cleanedOutInputAddresses.get(labware.id) ?? [] };
-            });
+            if (event.output.inputLabware) {
+              draft.sources = event.output.inputLabware.map((labware) => {
+                return { labware, cleanedOutAddresses: event.output.cleanedOutInputAddresses.get(labware.id) ?? [] };
+              });
+            } else {
+              draft.sources = [];
+            }
           }
         });
       }),

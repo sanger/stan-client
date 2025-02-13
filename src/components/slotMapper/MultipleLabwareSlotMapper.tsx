@@ -127,7 +127,6 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
 
   useEffect(() => {
     if (!currentOutput?.slotCopyContent) return;
-    console.log(' === ON CHANGE  ');
     onChange?.(currentOutput.labware, currentOutput?.slotCopyContent, anySourceMapped);
   }, [onChange, currentOutput, anySourceMapped]);
 
