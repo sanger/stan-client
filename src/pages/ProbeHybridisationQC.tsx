@@ -139,7 +139,7 @@ export default function ProbeHybridisationQC() {
         };
       });
     },
-    [globalWorkNumber, updateWorkNumbersFromGlobal, resetSubmissionResult]
+    [globalWorkNumber, resetSubmissionResult, globalCompletionTime]
   );
 
   const validateProbeHybridisationQcLabware = useCallback(
