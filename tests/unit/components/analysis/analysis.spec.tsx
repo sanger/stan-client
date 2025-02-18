@@ -1,6 +1,7 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { createMemoryRouter } from 'react-router-dom';
+import { RouterProvider } from 'react-router';
 import React from 'react';
 import Analysis from '../../../../src/pages/Analysis';
 import { describe } from '@jest/globals';

@@ -1,6 +1,7 @@
 import { describe } from '@jest/globals';
 import { act, cleanup, render, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
-import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { createMemoryRouter } from 'react-router-dom';
+import { RouterProvider } from 'react-router';
 import Location from '../../../src/pages/Location';
 import userEvent from '@testing-library/user-event';
 import { locationRepository } from '../../../src/mocks/repositories/locationRepository';

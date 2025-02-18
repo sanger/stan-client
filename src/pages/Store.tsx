@@ -9,7 +9,7 @@ import LocationIcon from '../components/icons/LocationIcon';
 import Heading from '../components/Heading';
 
 import storeConfig from '../static/store.json';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Location, NavigationType, useLocation, useNavigate } from 'react-router-dom';
 import BarcodeIcon from '../components/icons/BarcodeIcon';
 import { FindLocationByBarcodeQuery, Maybe } from '../types/sdk';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
@@ -18,7 +18,6 @@ import { StanCoreContext } from '../lib/sdk';
 import { ClientError } from 'graphql-request';
 import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
 import PromptOnLeave from '../components/notifications/PromptOnLeave';
-import { Action as HistoryAction, Location } from '@remix-run/router/dist/history';
 
 export type LabwareAwaitingStorageInfo = {
   barcode: string;
@@ -33,7 +32,7 @@ export type LabwareAwaitingStorageInfo = {
 export type BlockerFunctionParams = {
   currentLocation: Location;
   nextLocation: Location;
-  historyAction: HistoryAction;
+  historyAction: NavigationType;
 };
 
 /**

@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { createMemoryRouter } from 'react-router-dom';
+import { RouterProvider } from 'react-router';
 import ReleaseOptions from '../../../../src/components/release/ReleaseOptions';
 
 afterEach(() => {
