@@ -28,6 +28,7 @@ import { toast } from 'react-toastify';
 import { omit } from 'lodash';
 import { ClientError } from 'graphql-request';
 import Success from '../components/notifications/Success';
+import MutedText from '../components/MutedText';
 
 type CompletionRequestForm = {
   operationType: string;
@@ -74,6 +75,7 @@ export default function ProbeHybridisationQC() {
   });
 
   const [globalWorkNumber, setGlobalWorkNumber] = React.useState('');
+  const [globalCompletionTime, setGlobalCompletionTime] = React.useState(getCurrentDateTime());
   const [formValues, setFormValues] = React.useState<ProbeHybridisationQCFormValues>({ request: [] });
   const [submissionError, setSubmissionError] = React.useState<Array<ClientError>>([]);
   const [submissionSuccess, setSubmissionSuccess] = React.useState<Array<String>>([]);
@@ -101,6 +103,23 @@ export default function ProbeHybridisationQC() {
     [resetSubmissionResult]
   );
 
+  const updateCompletionTimesFromGlobal = useCallback((completionTime: string) => {
+    setFormValues((prev) => {
+      return {
+        ...prev,
+        request: prev.request.map((rq) => {
+          return {
+            ...rq,
+            labware: {
+              ...rq.labware,
+              completion: formatDateTimeForCore(completionTime)
+            }
+          };
+        })
+      };
+    });
+  }, []);
+
   const onAddLabware = useCallback(
     (labware: LabwareFlaggedFieldsFragment) => {
       resetSubmissionResult();
@@ -110,20 +129,17 @@ export default function ProbeHybridisationQC() {
           request: prev.request.concat({
             labware: {
               barcode: labware.barcode,
-              completion: formatDateTimeForCore(getCurrentDateTime()),
+              completion: globalCompletionTime,
               comments: []
             },
             globalComments: [],
-            workNumber: '',
+            workNumber: globalWorkNumber,
             operationType: 'Probe hybridisation QC'
           })
         };
       });
-      if (globalWorkNumber) {
-        updateWorkNumbersFromGlobal(globalWorkNumber);
-      }
     },
-    [globalWorkNumber, updateWorkNumbersFromGlobal, resetSubmissionResult]
+    [globalWorkNumber, resetSubmissionResult, globalCompletionTime]
   );
 
   const validateProbeHybridisationQcLabware = useCallback(
@@ -262,19 +278,40 @@ export default function ProbeHybridisationQC() {
                 )}
               </div>
             )}
-            <Heading level={2}>SGP Number</Heading>
-            <p>Select an SGP number to associate all the scanned labware.</p>
-            <div className="mt-4 md:w-1/2">
-              <WorkNumberSelect
-                dataTestId="globalWorkNumber"
-                onWorkNumberChange={(workNumber) => {
-                  setGlobalWorkNumber(workNumber);
-                  updateWorkNumbersFromGlobal(workNumber);
-                }}
-              />
-            </div>
           </div>
           <div className="mt-8 space-y-2">
+            <div className="grid grid-cols-2 gap-x-1">
+              <div>
+                <Heading level={4}>SGP Number</Heading>
+                <MutedText>Select an SGP number to apply to all the scanned labware.</MutedText>
+                <div className="mt-4 md:w-1/2">
+                  <WorkNumberSelect
+                    dataTestId="globalWorkNumber"
+                    onWorkNumberChange={(workNumber) => {
+                      setGlobalWorkNumber(workNumber);
+                      updateWorkNumbersFromGlobal(workNumber);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="">
+                <Heading level={4}>Completion Time</Heading>
+                <MutedText>Select a completion to apply to all the scanned labware.</MutedText>
+                <input
+                  className="rounded-md border-gray-300 w-1/2 p-2 mt-1"
+                  data-testid={'globalCompletionDateTime'}
+                  type="datetime-local"
+                  max={getCurrentDateTime()}
+                  value={globalCompletionTime}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    if (validateCompletionDateTime(e.target.value)) {
+                      setGlobalCompletionTime(e.target.value);
+                      updateCompletionTimesFromGlobal(e.target.value);
+                    }
+                  }}
+                />
+              </div>
+            </div>
             <Heading level={2}>Slides</Heading>
             <p>Please scan a slide</p>
             <LabwareScanner
@@ -339,6 +376,7 @@ export default function ProbeHybridisationQC() {
                                 Completion Time
                               </label>
                               <input
+                                className="rounded-md border-gray-300 p-2"
                                 data-testid={'completionDateTime'}
                                 type="datetime-local"
                                 max={getCurrentDateTime()}
@@ -367,7 +405,7 @@ export default function ProbeHybridisationQC() {
                                 }}
                                 value={
                                   formValues.request.find((rq) => rq.labware.barcode === labware.barcode)?.labware
-                                    .completion || formatDateTimeForCore(getCurrentDateTime())
+                                    .completion || globalCompletionTime
                                 }
                               />
                             </div>
