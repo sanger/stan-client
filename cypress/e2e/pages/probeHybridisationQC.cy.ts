@@ -18,6 +18,9 @@ describe('Probe Hybridisation QC', () => {
     it('displays the SGP number select box', () => {
       cy.findByText('SGP Number').should('be.visible');
     });
+    it('should init completed time to the current time', () => {
+      cy.findByTestId('globalCompletionDateTime').should('contain.value', new Date().toISOString().split('T')[0]);
+    });
     it('displays the labware scanner', () => {
       cy.findByTestId('input').should('be.visible');
     });
@@ -75,16 +78,28 @@ describe('Probe Hybridisation QC', () => {
         cy.findByTestId('labware').should('be.visible');
       });
       it('shows the completion Date time select box', () => {
-        cy.findByText('Completion Time').should('be.visible');
+        cy.findByTestId('completionDateTime').should('be.visible');
       });
-      it('should init completed time to the current time', () => {
-        cy.findByTestId('completionDateTime').should('contain.value', new Date().toISOString().split('T')[0]);
+      it('should init labware complete time with the general complete time', () => {
+        cy.findByTestId('globalCompletionDateTime').then(($input) => {
+          const generalCompleteTime = $input.val();
+          cy.findByTestId('completionDateTime').should('contain.value', generalCompleteTime);
+        });
       });
       it('shows the global comments select box', () => {
         cy.findByTestId('globalComment').should('be.visible');
       });
       it('shows the labware sgp number', () => {
         cy.findByTestId('workNumber').should('be.visible');
+      });
+
+      describe('when updating the general completion time', () => {
+        before(() => {
+          cy.findByTestId('globalCompletionDateTime').clear().type('2021-01-01T10:00');
+        });
+        it('updates the labware completion time', () => {
+          cy.findByTestId('completionDateTime').should('contain.value', '2021-01-01T10:00');
+        });
       });
 
       describe('When a selecting a comment from the global comment select box', () => {
@@ -126,7 +141,7 @@ describe('Probe Hybridisation QC', () => {
         cy.findByText('Please select a time on or before current time').should('be.visible');
       });
       it('keeps the current date', () => {
-        cy.findByTestId('completionDateTime').should('contain.value', new Date().toISOString().split('T')[0]);
+        cy.findByTestId('completionDateTime').should('not.have.value', '2075-01-01T10:00');
       });
     });
   });
