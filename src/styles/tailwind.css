@@ -1,167 +1,31 @@
-@import 'tailwindcss';
+@tailwind base;
 
-@config './tailwind.config.js';
-
-/* Defining Oklab colorspace in Tailwind 4.0 */
-@theme {
-  --color-purple-100: oklch(97.68% 0.0142 308.3);
-  --color-purple-200: oklch(90.73% 0.053 306.09);
-  --color-purple-300: oklch(83.8% 0.0893 303.68);
-  --color-purple-400: oklch(73.58% 0.1394 299.78);
-  --color-purple-500: oklch(66.37% 0.1634 296.96);
-  --color-purple-600: oklch(56.89% 0.1812 294.13);
-  --color-purple-700: oklch(59.85% 0.2294 296.96);
-  --color-purple-800: oklch(56.91% 0.2541 296.96);
-  --color-purple-900: oklch(54.56% 0.2787 296.96);
-  --color-gray-50: oklch(98.46% 0.0017 247.84);
-  --color-gray-100: oklch(98.34% 0.0042 236.5);
-  --color-gray-200: oklch(95.88% 0.0086 247.92);
-  --color-gray-300: oklch(92.88% 0.0126 255.51);
-  --color-gray-400: oklch(86.87% 0.0187 250.61);
-  --color-gray-500: oklch(74.57% 0.0304 254.72);
-  --color-gray-600: oklch(59.56% 0.0381 257.87);
-  --color-gray-700: oklch(44.74% 0.0343 261.32);
-  --color-gray-800: oklch(33.51% 0.0331 260.91);
-  --color-gray-900: oklch(24.33% 0.0247 263.95);
-  --color-sp: oklch(60.62% 0.2298 9.63);
-  --color-sp-100: oklch(95.17% 0.0231 357.35);
-  --color-sp-200: oklch(87.92% 0.0617 356.53);
-  --color-sp-300: oklch(80.86% 0.1013 357.25);
-  --color-sp-400: oklch(68.78% 0.1797 1.96);
-  --color-sp-500: oklch(60.62% 0.2298 9.63);
-  --color-sp-600: oklch(56.12% 0.212 9.52);
-  --color-sp-700: oklch(41.85% 0.155 8.77);
-  --color-sp-800: oklch(34.34% 0.1241 7.48);
-  --color-sp-900: oklch(26.34% 0.0913 5.95);
-  /* Sanger dark blue */
-  --color-sdb: oklch(28.09% 0.0533 277.89);
-  --color-sdb-100: oklch(61.69% 0.0865 278.16);
-  --color-sdb-200: oklch(51.58% 0.1119 276.86);
-  --color-sdb-300: oklch(44.18% 0.0936 276.57);
-  --color-sdb-400: oklch(36.48% 0.0724 277.03);
-  --color-sdb-500: oklch(28.09% 0.0533 277.89);
-  --color-sdb-600: oklch(19.32% 0.0283 280.26);
-
-  --color-red-100: oklch(97.79% 0.0107 17.34);
-  --color-red-200: oklch(91.2% 0.0437 17.98);
-  --color-red-300: oklch(83.54% 0.0892 19.12);
-  --color-red-400: oklch(74.21% 0.1503 21.35);
-  --color-red-500: oklch(68.82% 0.1776 22.95);
-  --color-red-600: oklch(61.37% 0.2039 25.56);
-  --color-red-700: oklch(54.41% 0.1859 25.95);
-  --color-red-800: oklch(46.5% 0.147 24.94);
-  --color-red-900: oklch(39.37% 0.1047 23.19);
-  --color-orange-100: oklch(98.62% 0.0142 84.58);
-  --color-orange-200: oklch(94.65% 0.0501 82.8);
-  --color-orange-300: oklch(88.57% 0.0986 80.9);
-  --color-orange-400: oklch(80.12% 0.1343 68.79);
-  --color-orange-500: oklch(72.44% 0.1534 56.07);
-  --color-orange-600: oklch(65.33% 0.1638 48.41);
-  --color-orange-700: oklch(57.92% 0.1504 43.81);
-  --color-orange-800: oklch(49.37% 0.1289 39.62);
-  --color-orange-900: oklch(41.85% 0.105 37.68);
-  --color-yellow-100: oklch(99.6% 0.0196 106.75);
-  --color-yellow-200: oklch(97.81% 0.0777 106.18);
-  --color-yellow-300: oklch(94.16% 0.1253 103.63);
-  --color-yellow-400: oklch(90.08% 0.1496 99.71);
-  --color-yellow-500: oklch(84.37% 0.1458 93.31);
-  --color-yellow-600: oklch(73.43% 0.1377 80.01);
-  --color-yellow-700: oklch(62.64% 0.1248 70.45);
-  --color-yellow-800: oklch(52.6% 0.1111 62.59);
-  --color-yellow-900: oklch(43.1% 0.092 59.95);
-  --color-green-100: oklch(98.59% 0.0213 154.14);
-  --color-green-200: oklch(93.08% 0.0664 154.9);
-  --color-green-300: oklch(86.19% 0.1028 154.84);
-  --color-green-400: oklch(78.6% 0.1379 154.52);
-  --color-green-500: oklch(70.96% 0.1434 154.53);
-  --color-green-600: oklch(63.42% 0.1283 156.2);
-  --color-green-700: oklch(55.32% 0.1067 157.99);
-  --color-green-800: oklch(46.35% 0.0823 160.17);
-  --color-green-900: oklch(40.43% 0.0671 161.21);
-  --color-teal-100: oklch(98.05% 0.0268 182.42);
-  --color-teal-200: oklch(92.25% 0.0685 183.53);
-  --color-teal-300: oklch(85.98% 0.0972 184.89);
-  --color-teal-400: oklch(78.64% 0.1143 186.56);
-  --color-teal-500: oklch(69.64% 0.1053 190.24);
-  --color-teal-600: oklch(61.88% 0.0914 193.16);
-  --color-teal-700: oklch(53.29% 0.0748 196.34);
-  --color-teal-800: oklch(44.7% 0.057 200.25);
-  --color-teal-900: oklch(39.51% 0.048 203.48);
-  --color-blue-100: oklch(97.15% 0.0167 230.9);
-  --color-blue-200: oklch(89.6% 0.0484 232.92);
-  --color-blue-300: oklch(82.08% 0.0833 237.18);
-  --color-blue-400: oklch(73.92% 0.1154 242.05);
-  --color-blue-500: oklch(66.26% 0.1358 246.81);
-  --color-blue-600: oklch(59.46% 0.1398 250.3);
-  --color-blue-700: oklch(52.41% 0.1259 252.32);
-  --color-blue-800: oklch(43.46% 0.091 255.18);
-  --color-blue-900: oklch(37.93% 0.0663 256.38);
-  --color-indigo-100: oklch(96.36% 0.0176 253.34);
-  --color-indigo-200: oklch(88.3% 0.0557 259.3);
-  --color-indigo-300: oklch(80.52% 0.0895 264.78);
-  --color-indigo-400: oklch(70.87% 0.1346 269.11);
-  --color-indigo-500: oklch(62.71% 0.1638 271.53);
-  --color-indigo-600: oklch(56.31% 0.1717 274.55);
-  --color-indigo-700: oklch(49.42% 0.1693 276.3);
-  --color-indigo-800: oklch(42.15% 0.1269 280.6);
-  --color-indigo-900: oklch(36.68% 0.0889 286.32);
-  --color-pink-100: oklch(97.85% 0.011 3.49);
-  --color-pink-200: oklch(91.51% 0.0456 359.18);
-  --color-pink-300: oklch(84.69% 0.0852 356.45);
-  --color-pink-400: oklch(75.65% 0.143 355.9);
-  --color-pink-500: oklch(69.23% 0.1817 352.86);
-  --color-pink-600: oklch(60.7% 0.1984 353.2);
-  --color-pink-700: oklch(54.42% 0.1853 349.34);
-  --color-pink-800: oklch(47.11% 0.1644 346.74);
-  --color-pink-900: oklch(39.5% 0.1244 341.71);
-}
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: #e2e8f0;
-  }
-}
-
-@layer base {
-  svg.logo {
+svg.logo {
     width: 300px;
     height: 300px;
-  }
-
-  /* Animations */
-  svg.logo.loading rect {
+}
+/* Animations */
+svg.logo.loading rect {
     animation: sm-pulse;
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
     animation-direction: alternate;
     animation-duration: 0.6s;
-  }
-
-  svg.logo.loading rect:nth-child(odd) {
+}
+svg.logo.loading rect:nth-child(odd) {
     animation-delay: 0.6s;
-  }
-
-  svg.logo.loading rect:nth-child(3n + 1) {
+}
+svg.logo.loading rect:nth-child(3n+1) {
     animation-delay: 0.3s;
-  }
-
-  @keyframes sm-pulse {
+}
+@keyframes sm-pulse {
     from {
-      opacity: 1;
+        opacity: 1
     }
     to {
-      opacity: 0.5;
+        opacity: 0.5;
     }
-  }
 }
+
+@tailwind components;
+@tailwind utilities;
