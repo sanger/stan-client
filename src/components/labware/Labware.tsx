@@ -242,8 +242,22 @@ const Labware = ({
     onSelect?.(Array.from(selectedAddresses));
   }, [onSelect, selectedAddresses]);
 
-  const labwareClasses =
-    'inline-block border border-sdb py-2 bg-blue-100 rounded-lg transition duration-300 ease-in-out';
+  const isBarcodeInfoAtTheTop = barcodeInfoPosition === Position.TopLeft || barcodeInfoPosition === Position.TopRight;
+
+  const isBarcodeInfoAtTheBottom =
+    barcodeInfoPosition === Position.BottomRight || barcodeInfoPosition === Position.BottomLeft;
+
+  const isBarcodeInfoAtTheLeft =
+    barcodeInfoPosition === Position.TopLeft || barcodeInfoPosition === Position.BottomLeft;
+
+  const isBarcodeInfoAtTheLeftSide = barcodeInfoPosition === Position.Left;
+
+  const isBarcodeInfoAtTheRightSide = barcodeInfoPosition === Position.Right;
+
+  const labwareDisplayClass =
+    isBarcodeInfoAtTheLeftSide || isBarcodeInfoAtTheRightSide ? 'flex flex row' : 'inline-block';
+
+  const labwareClasses = `${labwareDisplayClass} border border-sdb py-2 bg-blue-100 rounded-lg transition duration-300 ease-in-out items-center`;
 
   const grid =
     labwareDirection && labwareDirection === LabwareDirection.Horizontal
@@ -310,14 +324,6 @@ const Labware = ({
     return slotColumns;
   }, [numColumns, slots]);
 
-  const isBarcodeInfoAtTheTop = barcodeInfoPosition === Position.TopLeft || barcodeInfoPosition === Position.TopRight;
-
-  const isBarcodeInfoAtTheBottom =
-    barcodeInfoPosition === Position.BottomRight || barcodeInfoPosition === Position.BottomLeft;
-
-  const isBarcodeInfoAtTheLeft =
-    barcodeInfoPosition === Position.TopLeft || barcodeInfoPosition === Position.BottomLeft;
-
   const barcodePositionClassName = (): string => {
     if (barcodeInfoPosition && isBarcodeInfoAtTheLeft) return 'items-end';
     return 'items-start';
@@ -326,9 +332,16 @@ const Labware = ({
   const BarcodeInformation = () => (
     <div
       className={
-        'flex flex-col py-2 px-3 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider ' +
+        'flex flex-col py-2 px-3 text-xs font-medium text-gray-500 uppercase tracking-wider ' +
         barcodePositionClassName()
       }
+      style={{
+        writingMode: isBarcodeInfoAtTheRightSide
+          ? 'vertical-rl'
+          : isBarcodeInfoAtTheLeftSide
+            ? 'vertical-lr'
+            : 'initial'
+      }}
     >
       {name && <span>{name}</span>}
       {barcode && !isFlagged && (
@@ -366,7 +379,7 @@ const Labware = ({
         <SlotColumnInfo slotColumn={slotColumns[0]} slotBuilder={slotBuilder} numRows={numRows} />
       )}
       <div onClick={() => onClick?.()} className={labwareClasses}>
-        {barcodeInfoPosition && isBarcodeInfoAtTheTop && BarcodeInformation()}
+        {(isBarcodeInfoAtTheLeftSide || isBarcodeInfoAtTheTop) && BarcodeInformation()}
         <div className={gridClasses}>
           {buildAddresses({ numColumns, numRows }, gridDirection).map((address, i) => (
             <Slot
@@ -387,7 +400,7 @@ const Labware = ({
             />
           ))}
         </div>
-        {(!barcodeInfoPosition || isBarcodeInfoAtTheBottom) && BarcodeInformation()}
+        {(!barcodeInfoPosition || isBarcodeInfoAtTheBottom || isBarcodeInfoAtTheRightSide) && BarcodeInformation()}
       </div>
       {slotColumns.length > 1 && slotBuilder && (
         <SlotColumnInfo slotColumn={slotColumns[1]} slotBuilder={slotBuilder} numRows={numRows} alignRight={true} />

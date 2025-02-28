@@ -93,7 +93,9 @@ export enum Position {
   TopRight = 'TopRight',
   BottomRight = 'BottomRight',
   TopLeft = 'TopLeft',
-  BottomLeft = 'BottomLeft'
+  BottomLeft = 'BottomLeft',
+  Right = 'Right',
+  Left = 'Left'
 }
 
 /**
