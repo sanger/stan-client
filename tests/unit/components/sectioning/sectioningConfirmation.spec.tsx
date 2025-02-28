@@ -6,8 +6,9 @@ import Confirm from '../../../../src/pages/sectioning/Confirm';
 import { uniqueId } from 'lodash';
 import { enableMapSet } from 'immer';
 import labwareFactory from '../../../../src/lib/factories/labwareFactory';
-import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import * as reactDom from 'react-router-dom';
+import { createMemoryRouter } from 'react-router-dom';
+import { RouterProvider } from 'react-router';
 import userEvent from '@testing-library/user-event';
 
 afterEach(() => {

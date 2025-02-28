@@ -1,9 +1,9 @@
 import React from 'react';
-import { render, screen, act, waitFor, cleanup } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe } from '@jest/globals';
 import FileManager from '../../../src/pages/FileManager';
-import { BrowserRouter } from 'react-router-dom';
+import { createMemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import { WorkStatus } from '../../../src/types/sdk';
 import { findUploadedFiles } from '../../../src/lib/services/fileService';
@@ -15,6 +15,7 @@ import {
   workNumberNumOptionsShouldBeMoreThan
 } from '../../generic/utilities';
 import workRepository from '../../../src/mocks/repositories/workRepository';
+import { RouterProvider } from 'react-router';
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -83,11 +84,9 @@ describe('On load', () => {
           search: ''
         };
       });
+      renderFileManagerComponent();
     });
     it('loads all the page fields correctly', async () => {
-      act(() => {
-        renderFileManagerComponent();
-      });
       await expectFileManagerPageDefaultState();
     });
   });
@@ -99,23 +98,15 @@ describe('On load', () => {
           search: 'workNumber=SGP1008'
         };
       });
+      renderFileManagerComponent(true, 'workNumber=SGP1008');
     });
     it('loads all the page fields correctly', async () => {
-      act(() => {
-        renderFileManagerComponent();
-      });
       await expectFileManagerPageWithUploadState();
     });
     it('should select SGP1008 in select box', async () => {
-      act(() => {
-        renderFileManagerComponent();
-      });
       expect(await screen.findByTestId('workNumber')).toHaveTextContent('SGP1008');
     });
     it('should check active checkBox', async () => {
-      act(() => {
-        renderFileManagerComponent();
-      });
       expect(await screen.findByTestId('active')).toBeChecked();
     });
   });
@@ -131,7 +122,7 @@ describe('On load', () => {
           }
         }
       ]);
-      renderFileManagerComponent();
+      renderFileManagerComponent(true, 'workNumber=SGP1008');
     });
     await waitFor(() => {
       const filesTable = screen.getByRole('table');
@@ -142,7 +133,7 @@ describe('On load', () => {
 
   it('enables upload button after selecting a file', async () => {
     act(() => {
-      renderFileManagerComponent();
+      renderFileManagerComponent(true, 'workNumber=SGP1008');
     });
     await screen.findByTestId('file-input').then(async (fileInput) => {
       expect(fileInput).toBeEnabled();
@@ -168,96 +159,74 @@ describe('On load', () => {
           status: WorkStatus.Paused
         }
       ]);
+      renderFileManagerComponent(true, 'workNumber=SGP1001');
     });
 
     it('loads all the page fields correctly', async () => {
-      act(() => {
-        renderFileManagerComponent();
-      });
       await expectFileManagerPageWithUploadState();
     });
     it('should uncheck active checkBox', async () => {
-      act(() => {
-        renderFileManagerComponent();
-      });
       expect(await screen.findByTestId('active')).not.toBeChecked();
     });
     it('should select SGP1001 in select box', async () => {
-      act(() => {
-        renderFileManagerComponent();
-      });
       expect(await screen.findByTestId('workNumber')).toHaveTextContent('SGP1001');
     });
+  });
 
-    describe('on visiting page with multiple work numbers as a query parameter', () => {
-      beforeEach(() => {
-        require('react-router-dom').useLocation.mockImplementation(() => {
-          return {
-            pathname: () => './file_manager',
-            search: 'workNumber=SGP1001&workNumber=SGP1008'
-          };
-        });
-        require('react-router-dom').useLoaderData = jest.fn().mockReturnValue([
-          {
-            workNumber: 'SGP1001',
-            workRequester: 'user1',
-            project: 'Project 1',
-            status: WorkStatus.Paused
-          },
-          {
-            workNumber: 'SGP1008',
-            workRequester: 'user1',
-            project: 'Project 1',
-            status: WorkStatus.Active
-          }
-        ]);
-        //renderFileManagerComponent();
+  describe('on visiting page with multiple work numbers as a query parameter', () => {
+    beforeEach(() => {
+      require('react-router-dom').useLocation.mockImplementation(() => {
+        return {
+          pathname: () => './file_manager',
+          search: 'workNumber=SGP1001&workNumber=SGP1008'
+        };
       });
-
-      it('loads all the page fields correctly', async () => {
-        act(() => {
-          renderFileManagerComponent();
-        });
-        await expectFileManagerPageWithUploadState();
-      });
-      it('should uncheck active checkBox', async () => {
-        act(() => {
-          renderFileManagerComponent();
-        });
-        expect(await screen.findByTestId('active')).not.toBeChecked();
-      });
-      it('should select SGP1001 and SGP1008 in work number select box', async () => {
-        act(() => {
-          renderFileManagerComponent();
-        });
-        await screen.findByTestId('workNumber').then((workNumber) => {
-          expect(workNumber).toHaveTextContent('SGP1001');
-          expect(workNumber).toHaveTextContent('SGP1008');
-        });
-      });
+      require('react-router-dom').useLoaderData = jest.fn().mockReturnValue([
+        {
+          workNumber: 'SGP1001',
+          workRequester: 'user1',
+          project: 'Project 1',
+          status: WorkStatus.Paused
+        },
+        {
+          workNumber: 'SGP1008',
+          workRequester: 'user1',
+          project: 'Project 1',
+          status: WorkStatus.Active
+        }
+      ]);
+      renderFileManagerComponent(true, 'workNumber=SGP1001&workNumber=SGP1008');
     });
 
-    describe('on visiting page with invalid work number as a query parameter', () => {
-      beforeEach(() => {
-        require('react-router-dom').useLocation.mockImplementation(() => {
-          return {
-            pathname: () => './file_manager',
-            search: 'workNumber=Blah'
-          };
-        });
+    it('loads all the page fields correctly', async () => {
+      await expectFileManagerPageWithUploadState();
+    });
+    it('should uncheck active checkBox', async () => {
+      expect(await screen.findByTestId('active')).not.toBeChecked();
+    });
+    it('should select SGP1001 and SGP1008 in work number select box', async () => {
+      await screen.findByTestId('workNumber').then((workNumber) => {
+        expect(workNumber).toHaveTextContent('SGP1001');
+        expect(workNumber).toHaveTextContent('SGP1008');
       });
-      it('loads the page as no query param is specified', async () => {
-        act(() => {
-          renderFileManagerComponent();
-        });
-        await expectFileManagerPageDefaultState();
+    });
+  });
+
+  describe('on visiting page with invalid work number as a query parameter', () => {
+    beforeEach(() => {
+      require('react-router-dom').useLocation.mockImplementation(() => {
+        return {
+          pathname: () => './file_manager',
+          search: 'workNumber=Blah'
+        };
       });
-      it('loads the work number select box with no option selected', async () => {
-        act(() => {
-          renderFileManagerComponent();
-        });
-        expect(await screen.findByTestId('workNumber')).toHaveTextContent('');
-      });
+      renderFileManagerComponent(true, 'workNumber=Blah');
+    });
+    it('loads the page as no query param is specified', async () => {
+      await expectFileManagerPageDefaultState();
+    });
+    it('loads the work number select box with no option selected', async () => {
+      expect(await screen.findByTestId('workNumber')).toHaveTextContent('');
     });
   });
 
@@ -285,11 +254,9 @@ describe('On load', () => {
           }
         ]);
         require('react-router-dom').useNavigate.mockImplementation(() => navigateMock);
+        renderFileManagerComponent(true);
       });
       it('should display the url with selected work number', async () => {
-        act(() => {
-          renderFileManagerComponent();
-        });
         await waitFor(async () => {
           await selectSGPNumber('SGP1008');
           expect(navigateMock).toHaveBeenCalledWith('/file_manager?workNumber=SGP1008');
@@ -322,11 +289,9 @@ describe('On load', () => {
               json: () => Promise.resolve({ message: '' })
             })
           );
+          renderFileManagerComponent(true, 'workNumber=SGP1008');
         });
         it('should not display upload failure message', async () => {
-          act(() => {
-            renderFileManagerComponent();
-          });
           await screen.findByTestId('file-input').then(async (fileInput) => {
             expect(fileInput).toBeEnabled();
             await userEvent.upload(fileInput, new File(['sample content1'], 'sample1.txt', { type: 'text/plain' }));
@@ -351,11 +316,9 @@ describe('On load', () => {
               json: () => Promise.resolve({ message: 'java.io.IOException: Error message here.' })
             })
           );
+          renderFileManagerComponent(true, 'workNumber=SGP1008');
         });
         it('should display upload failure message', async () => {
-          act(() => {
-            renderFileManagerComponent();
-          });
           await screen.findByTestId('file-input').then(async (fileInput) => {
             expect(fileInput).toBeEnabled();
             await userEvent
@@ -392,11 +355,9 @@ describe('On load', () => {
               }
             }
           ]);
+          renderFileManagerComponent(true, 'workNumber=SGP1008');
         });
         it('should display a warning message', async () => {
-          act(() => {
-            renderFileManagerComponent();
-          });
           await screen.findByTestId('file-input').then(async (fileInput) => {
             expect(fileInput).toBeEnabled();
             await userEvent
@@ -415,9 +376,6 @@ describe('On load', () => {
         });
         describe('Pressing Cancel button', () => {
           it('should not display success message', async () => {
-            act(() => {
-              renderFileManagerComponent();
-            });
             await screen.findByTestId('file-input').then(async (fileInput) => {
               expect(fileInput).toBeEnabled();
               await userEvent
@@ -439,9 +397,6 @@ describe('On load', () => {
         });
         describe('Pressing Continue button', () => {
           it('should  display success message', async () => {
-            act(() => {
-              renderFileManagerComponent();
-            });
             await screen.findByTestId('file-input').then(async (fileInput) => {
               expect(fileInput).toBeEnabled();
               await userEvent
@@ -471,7 +426,7 @@ describe('On load', () => {
               search: 'workNumber=SGP1008'
             };
           });
-          renderFileManagerComponent(false);
+          renderFileManagerComponent(false, 'workNumber=SGP1008');
         });
         expect(screen.queryByText('Upload file')).not.toBeInTheDocument();
         expect(screen.queryByText('Files')).toBeVisible();
@@ -551,10 +506,10 @@ describe('On load', () => {
     });
   });
 });
-const renderFileManagerComponent = (showUpload = true) => {
-  return render(
-    <BrowserRouter>
-      <FileManager showUpload={showUpload} />
-    </BrowserRouter>
-  );
+const renderFileManagerComponent = (showUpload = true, searchField?: string) => {
+  const initialEntry = searchField ? `/file_manager?${searchField}` : '/file_manager';
+  const router = createMemoryRouter([{ path: '/file_manager', element: <FileManager showUpload={showUpload} /> }], {
+    initialEntries: [initialEntry]
+  });
+  render(<RouterProvider router={router} />);
 };

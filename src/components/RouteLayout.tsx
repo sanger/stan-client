@@ -1,4 +1,5 @@
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom';
+import { RouterProvider } from 'react-router';
 import Store from '../pages/Store';
 import DataFetcher from './DataFetcher';
 import { StanCoreContext } from '../lib/sdk';
