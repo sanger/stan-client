@@ -5,5 +5,5 @@ module.exports = {
   content: [...defaultOptions.content, './src/**/*.{html,tsx}'],
   corePlugins: {},
   plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography'), require('@tailwindcss/aspect-ratio')],
-  important: false
+  important: true
 };

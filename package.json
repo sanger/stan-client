@@ -5,7 +5,7 @@
   "proxy": "http://localhost:8080",
   "dependencies": {
     "@react-aria/tabs": "^3.9.7",
-    "@sanger/ui-styling": "^4.1.0",
+    "@sanger/ui-styling": "^4.3.0",
     "@storybook/react-webpack5": "^7.6.3",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/postcss": "^4.0.0",
@@ -47,7 +47,7 @@
     "react-syntax-highlighter": "^15.6.1",
     "react-table": "^7.8.0",
     "react-toastify": "^9.0.5",
-    "tailwindcss": "^3.0.0",
+    "tailwindcss": "^4.0.9",
     "typescript": "5.7.2",
     "use-immer": "^0.9.0",
     "webpack": "5.96.1",
@@ -59,9 +59,9 @@
     "start": "npm-run-all -p start:css start:js",
     "start:msw": "REACT_APP_MOCK_API=msw npm run start",
     "build": "npm-run-all build:css build:js",
-    "start:js": "react-scripts --openssl-legacy-provider start",
-    "build:js": "react-scripts --openssl-legacy-provider build",
-    "start:css": "postcss src/styles/tailwind.css -o src/styles/index.css -w",
+    "start:js": "craco --openssl-legacy-provider start",
+    "build:js": "craco --openssl-legacy-provider build",
+    "start:css": "postcss node_modules/@sanger/ui-styling/tailwind.css -o src/styles/index.css -w",
     "build:css": "postcss src/styles//tailwind.css -o src/styles/index.css --env production",
     "cypress:open": "cypress open --config-file=cypress.config.ts",
     "cypress:run": "cypress run",
@@ -96,6 +96,7 @@
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.7",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@craco/craco": "^7.1.0",
     "@faker-js/faker": "^8.3.1",
     "@graphql-codegen/cli": "^5.0.2",
     "@graphql-codegen/typescript": "^4.0.2",
@@ -123,6 +124,7 @@
     "msw": "^2.0.11",
     "npm-run-all": "^4.1.5",
     "postcss-cli": "^10.0.0",
+    "postcss-loader": "^8.1.1",
     "precise-commits": "^1.0.2",
     "prettier": "3.1.0",
     "start-server-and-test": "^2.0.3",
@@ -131,7 +133,11 @@
   "resolutions": {
     "babel-loader": "8.1.0",
     "yaml": "2.2.2",
-    "string-width": "4.2.3"
+    "string-width": "4.2.3",
+    "tailwindcss": "^4.0.9",
+    "react-scripts/tailwindcss": "^4.0.9",
+    "postcss": "^8.4.32",
+    "postcss-loader": "^8.1.1"
   },
   "msw": {
     "workerDirectory": "public"
