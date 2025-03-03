@@ -1,7 +1,15 @@
 import { selectOption, selectSGPNumber, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
-import { ReloadSlotCopyQuery, ReloadSlotCopyQueryVariables, SlideCosting } from '../../../src/types/sdk';
+import {
+  FindFlaggedLabwareQuery,
+  FindFlaggedLabwareQueryVariables,
+  LabwareState,
+  ReloadSlotCopyQuery,
+  ReloadSlotCopyQueryVariables,
+  SlideCosting
+} from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
 import { LabwareTypeName } from '../../../src/types/stan';
+import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHandlers';
 
 describe('CytAssist Page', () => {
   before(() => {
@@ -24,6 +32,28 @@ describe('CytAssist Page', () => {
     });
     it('should select the first option by default', () => {
       cy.findByTestId('copyMode-One to one').should('be.checked');
+    });
+  });
+
+  context('when scanning a non active labware', () => {
+    before(() => {
+      const discardedLabware = createFlaggedLabware('STAN-4100');
+      discardedLabware.state = LabwareState.Discarded;
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.query<FindFlaggedLabwareQuery, FindFlaggedLabwareQueryVariables>('FindFlaggedLabware', () => {
+            return HttpResponse.json({
+              data: {
+                labwareFlagged: discardedLabware
+              }
+            });
+          })
+        );
+      });
+      cy.get('#labwareScanInput').type('STAN-4100{enter}');
+    });
+    it('should display an error message', () => {
+      cy.findByText('Labware is not active: [ STAN-4100]').should('be.visible');
     });
   });
 
@@ -367,7 +397,7 @@ describe('CytAssist Page', () => {
         });
       });
       it('selects the correct output labware type', () => {
-        shouldDisplaySelectedValue('output-labware-type', '8 Strip Tube');
+        shouldDisplaySelectedValue('output-labware-type', 'Visium LP CytAssist 6.5');
       });
       it('displays the source labware properly', () => {
         cy.findByText('STAN-3100').should('be.visible');
@@ -375,7 +405,7 @@ describe('CytAssist Page', () => {
       });
       it('displays the output labware properly', () => {
         cy.findByTestId('cytassist-labware').within(() => {
-          cy.findByText('8 Strip Tube').should('be.visible');
+          cy.findByText('Visium LP CytAssist 6.5').should('be.visible');
         });
       });
       it('shows the mapped slots correctly', () => {
@@ -386,7 +416,7 @@ describe('CytAssist Page', () => {
       });
       it('shows the mapped slots correctly', () => {
         cy.findByTestId('cytassist-labware').within(() => {
-          cy.findByText('C1').click();
+          cy.findByText('D1').click();
         });
         cy.findByTestId('mapping_table').get('tbody tr').should('have.length', 1);
       });

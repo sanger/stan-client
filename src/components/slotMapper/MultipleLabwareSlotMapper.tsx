@@ -2,7 +2,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Labware, { LabwareImperativeRef } from '../labware/Labware';
 import { OutputSlotCopyData, SlotCopyMode, SlotMapperProps } from './slotMapper.types';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
-import { LabwareFlaggedFieldsFragment, SlotFieldsFragment, SlotPassFailFieldsFragment } from '../../types/sdk';
+import {
+  LabwareFlaggedFieldsFragment,
+  LabwareState,
+  SlotFieldsFragment,
+  SlotPassFailFieldsFragment
+} from '../../types/sdk';
 import Heading from '../Heading';
 import MutedText from '../MutedText';
 import { useMachine } from '@xstate/react';
@@ -11,7 +16,7 @@ import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import createSlotMapperMachine from './slotMapper.machine';
 import RadioGroup, { RadioButtonInput } from '../forms/RadioGroup';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
-import { GridDirection, LabwareDirection } from '../../lib/helpers';
+import { GridDirection, LabwareDirection, Position } from '../../lib/helpers';
 import RemoveButton from '../buttons/RemoveButton';
 import Label from '../forms/Label';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
@@ -483,6 +488,13 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
     [send]
   );
 
+  const isLabwareActive = useCallback(
+    (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): string[] => {
+      return foundLabware.state !== LabwareState.Active ? [`Labware is not active: [ ${foundLabware.barcode}]`] : [];
+    },
+    []
+  );
+
   /**
    * Callback when the copy mode changes
    */
@@ -532,6 +544,7 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
             enableFlaggedLabwareCheck
             checkForCleanedOutAddresses
             initialLabwares={inputLabware}
+            labwareCheckFunction={isLabwareActive}
           >
             {({ removeLabware, cleanedOutAddresses }) => {
               if (inputLabware.length === 0) {
@@ -561,6 +574,7 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
                           current.context.cleanedOutInputAddresses?.get(labware.id) ??
                           cleanedOutAddresses?.get(labware.id)
                         }
+                        barcodeInfoPosition={Position.TopRight}
                       />
                       <div>
                         <RemoveButton
@@ -605,8 +619,7 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
                 options={[
                   LabwareTypeName.VISIUM_LP_CYTASSIST,
                   LabwareTypeName.VISIUM_LP_CYTASSIST_XL,
-                  LabwareTypeName.VISIUM_LP_CYTASSIST_HD,
-                  LabwareTypeName.STRIP_TUBE
+                  LabwareTypeName.VISIUM_LP_CYTASSIST_HD
                 ].map((key) => {
                   return {
                     label: key,
@@ -644,6 +657,7 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
                       cleanedOutAddresses={output.cleanedOutAddresses}
                       gridDirection={GridDirection.LeftUp}
                       labwareDirection={LabwareDirection.Horizontal}
+                      barcodeInfoPosition={Position.Right}
                     />
                   )}
                 </div>
