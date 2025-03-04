@@ -19,7 +19,7 @@ const savedSlotCopy: SlotCopyLoad = {
   operationType: 'CyAssist',
   workNumber: 'SGP1',
   lpNumber: 'LP1',
-  labwareType: LabwareTypeName.STRIP_TUBE,
+  labwareType: LabwareTypeName.VISIUM_LP_CYTASSIST,
   preBarcode: 'H1-9D8VN2V',
   probeLotNumber: '123456',
   lotNumber: '7712543',
@@ -39,7 +39,7 @@ const savedSlotCopy: SlotCopyLoad = {
     {
       sourceBarcode: 'STAN-3200',
       sourceAddress: 'A2',
-      destinationAddress: 'C1'
+      destinationAddress: 'D1'
     }
   ]
 };
