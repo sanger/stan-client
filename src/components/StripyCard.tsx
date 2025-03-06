@@ -8,7 +8,7 @@ interface StripyCardProps extends React.PropsWithChildren {
 
 const StripyCard: React.FC<StripyCardProps> = ({ heading, description, children }) => {
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div className="bg-white shadow-md overflow-hidden sm:rounded-lg">
       <div className="px-4 py-5 sm:px-6">
         {typeof heading === 'string' ? (
           <Heading level={3} showBorder={false}>

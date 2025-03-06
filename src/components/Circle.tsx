@@ -5,7 +5,7 @@ interface CircleProps {
 }
 
 const Circle: React.FC<CircleProps> = ({ backgroundColor }) => {
-  return <span className={`inline-block h-8 w-8 rounded-full bg-${backgroundColor}-600`} />;
+  return <span className={`inline-block h-8 w-8 rounded-full ${backgroundColor}`} />;
 };
 
 export default Circle;

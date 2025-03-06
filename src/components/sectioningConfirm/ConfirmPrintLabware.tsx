@@ -38,7 +38,7 @@ export const ConfirmPrintLabware = ({ labwareType, labwares }: ConfirmPrintLabwa
         variants={variants.fadeInWithLift}
         initial={'hidden'}
         animate={'visible'}
-        className="relative p-3 shadow space-y-4 px-4"
+        className="relative p-3 shadow-md space-y-4 px-4"
       >
         <DataTable columns={columns} data={labwares} />
 

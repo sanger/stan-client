@@ -193,10 +193,10 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
           {slotCopyResults.length > 0 && (
             <div className="mt-8 flex flex-col items-end sm:justify-end space-y-2">
-              <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
+              <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow-md space-y-2">
                 <LabelPrinter labwares={slotCopyResults} />
               </div>
-              <div className="sm:max-w-xl w-full  border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2 ">
+              <div className="sm:max-w-xl w-full  border-gray-200 p-4 rounded-md bg-gray-100 shadow-md space-y-2 ">
                 <div className={'flex items-center space-x-2'}>
                   <div className={'font-bold'}>Labels:</div>
                   <div>{slotCopyResults.map((res) => res.barcode).join(',')}</div>
@@ -206,7 +206,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
                     labels={slotCopyResults.map((scr) => scr.barcode)}
                     copyButtonText={'Copy Labels'}
                     buttonClass={
-                      'text-white bg-sdb-400 shadow-sm hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600'
+                      'text-white bg-sdb-400 shadow-xs hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600'
                     }
                   />
                 </div>
@@ -216,7 +216,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
         </div>
       </AppShell.Main>
 
-      <div className="border border-t-2 border-gray-200 w-full py-4 px-4 sm:px-6 lg:px-8 bg-gray-100 flex-shrink-0">
+      <div className="border border-t-2 border-gray-200 w-full py-4 px-4 sm:px-6 lg:px-8 bg-gray-100 shrink-0">
         <div className="flex flex-row items-center justify-end space-x-2">
           {!current.matches('copied') && (
             <BlueButton

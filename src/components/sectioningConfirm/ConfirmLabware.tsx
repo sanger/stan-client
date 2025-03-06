@@ -139,7 +139,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       variants={variants.fadeInWithLift}
       initial={'hidden'}
       animate={'visible'}
-      className={`relative p-3 shadow ${!sectionNumberEnabled && 'lg:w-2/3 lg:mx-auto rounded-lg'}`}
+      className={`relative p-3 shadow-md ${!sectionNumberEnabled && 'lg:w-2/3 lg:mx-auto rounded-lg'}`}
     >
       <RemoveButton data-testid={`remove-slide-${labware.barcode}`} onClick={handleRemovePlan} />
       <div
@@ -250,10 +250,8 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
           <Heading level={3}>Set Layout</Heading>
           {layoutMachine && (
             <LayoutPlanner actor={layoutMachine}>
-              <div className="my-2">
-                <p className="text-gray-900 text-sm leading-normal">
-                  Click a slot to increase the number of sections in that slot.
-                </p>
+              <div className="my-2 text-gray-900 text-sm leading-normal">
+                <p>Click a slot to increase the number of sections in that slot.</p>
                 <p>To reduce the number of sections in a slot, use Ctrl-Click.</p>
               </div>
             </LayoutPlanner>
@@ -270,7 +268,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             >
               Done
             </BlueButton>
-            <WhiteButton onClick={() => layoutMachine.send({ type: 'CANCEL' })} className="mt-3 w-full sm:mt-0 sm:ml-3">
+            <WhiteButton onClick={() => layoutMachine.send({ type: 'CANCEL' })} className="mt-3 sm:mt-0 sm:ml-3">
               Cancel
             </WhiteButton>
           </ModalFooter>

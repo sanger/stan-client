@@ -42,7 +42,7 @@ const Table: React.FC<TableProps> = ({ children, tableClassName, ...rest }) => {
   return (
     <div className={'flex flex-col overflow-auto max-h-screen ' + tableClassName} datatype="table-wrapper">
       <div className="py-2 align-middle inline-block min-w-full">
-        <div className="shadow border-b border-gray-200 sm:rounded-lg">
+        <div className="shadow-md border-b border-gray-200 sm:rounded-lg">
           <table className="min-w-full divide-y divide-gray-200" {...rest}>
             {children}
           </table>

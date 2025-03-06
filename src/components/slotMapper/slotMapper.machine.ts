@@ -6,14 +6,20 @@ import {
   SlotPassFail,
   SlotPassFailFieldsFragment
 } from '../../types/sdk';
-import { buildAddresses, cycleColors, GridDirection } from '../../lib/helpers';
+import {
+  backgroundColorClassNames,
+  buildAddresses,
+  disabledBackgroundColorClassNames,
+  GridDirection
+} from '../../lib/helpers';
 import { sortWithDirection } from '../../lib/helpers/addressHelper';
 import { find, indexOf, intersection, map } from 'lodash';
 import { stanCore } from '../../lib/sdk';
 import { assign, createMachine, fromPromise, InternalMachineImplementations } from 'xstate';
 import { produce } from 'immer';
 
-const colors = cycleColors();
+const colors = backgroundColorClassNames();
+const disabledColors = disabledBackgroundColorClassNames();
 
 type SlotMapperMachineImplementation = {
   context: SlotMapperContext;
@@ -69,10 +75,15 @@ const machineImplementations: InternalMachineImplementations<SlotMapperMachineIm
       produce(context, (draft) => {
         if (!draft.inputLabware || draft.inputLabware.length === 0) {
           draft.colorByBarcode = new Map();
+          draft.disabledColorByBarcode = new Map();
           return;
         }
         for (const lw of draft.inputLabware) {
-          draft.colorByBarcode.has(lw.barcode) || draft.colorByBarcode.set(lw.barcode, colors.next().value);
+          draft.colorByBarcode.set(lw.barcode, draft.colorByBarcode.get(lw.barcode) ?? colors.next().value);
+          draft.disabledColorByBarcode.set(
+            lw.barcode,
+            draft.disabledColorByBarcode.get(lw.barcode) ?? disabledColors.next().value
+          );
         }
       })
     ),
@@ -320,6 +331,7 @@ const createSlotMapperMachine = createMachine(
         ...input,
         failedSlotsCheck: input.failedSlotsCheck || true,
         colorByBarcode: new Map(),
+        disabledColorByBarcode: new Map(),
         failedSlots: new Map(),
         errors: new Map()
       };

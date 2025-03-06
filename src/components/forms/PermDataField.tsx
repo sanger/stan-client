@@ -44,7 +44,7 @@ export default function PermDataField<T>({ name }: PermDataFieldProps) {
         <Label htmlFor={`${name}checkbox`} name={'Control?'} />
         <Input
           type="checkbox"
-          className={'w-5 rounded'}
+          className={'w-5 rounded-sm'}
           id={`${name}checkbox`}
           checked={isControl}
           onChange={onIsControlChange}

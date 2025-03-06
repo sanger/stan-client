@@ -122,7 +122,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
   };
 
   return (
-    <div className={'border-1 border-gray-300 shadow justify-end p-2 basis-3/4'}>
+    <div className={'border-1 border-gray-300 shadow-md justify-end p-2 basis-3/4'}>
       <div className={'grid grid-cols-4 gap-x-3 p-4'} data-testid={'probe-all-table'}>
         <label>Probe Panel</label>
         <label>Lot</label>

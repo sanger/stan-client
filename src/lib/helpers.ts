@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 import { Maybe } from '../types/sdk';
 import { HasEnabled, SizeInput } from '../types/stan';
-import _, { isNaN } from 'lodash';
+import { isNaN } from 'lodash';
 import { Key } from 'react';
 import { Column } from 'react-table';
 
@@ -255,23 +255,17 @@ export function buildAddresses(size: SizeInput, direction: GridDirection = GridD
 }
 
 /**
- * Loop through URL params, filtering out unwanted keys,
- * removing nil (null or undefined), empty values, and values that are arrays
- *
- * @param params the URL params
- * @param allowedKeys list of keys to pick from params
- */
-export function cleanParams(params: URLSearchParams, allowedKeys: Array<string>) {
-  return _(params).pick(allowedKeys).omitBy(_.isNil).omitBy(_.isEmpty).omitBy(_.isArray).value();
-}
-
-/**
  * Create a generator for cycling through a list of colors
  */
-export function cycleColors() {
-  return cycle(['red', 'green', 'indigo', 'pink', 'blue', 'purple']);
+const COLORS = ['red', 'green', 'indigo', 'pink', 'blue', 'purple'];
+
+export function backgroundColorClassNames() {
+  return cycle(COLORS.map((color) => `bg-${color}-500`));
 }
 
+export function disabledBackgroundColorClassNames() {
+  return cycle(COLORS.map((color) => `bg-${color}-200`));
+}
 /**
  * Get a timestamp as a string
  * @return timestamp in the format yyyyMMddHHmmss

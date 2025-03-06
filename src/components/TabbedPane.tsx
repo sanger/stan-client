@@ -1,6 +1,6 @@
 import React from 'react';
 import { AriaTabListProps } from '@react-types/tabs';
-import { useTabListState, TabListState } from '@react-stately/tabs';
+import { TabListState, useTabListState } from '@react-stately/tabs';
 import { useTab, useTabList, useTabPanel } from '@react-aria/tabs';
 import { Node } from '@react-types/shared';
 
@@ -45,7 +45,7 @@ function TabItem<T extends object>({ state, item }: TabItemProps<T>) {
       key={key}
       {...tabProps}
       ref={ref}
-      className={`rounded-tl-lg rounded-tr-lg whitespace-nowrap transition focus:outline-none py-2 cursor-pointer px-8 h-full ${
+      className={`rounded-tl-lg rounded-tr-lg whitespace-nowrap transition focus:outline-hidden py-2 cursor-pointer px-8 h-full ${
         isSelected ? 'bg-sdb-400 text-white' : 'bg-gray-200'
       } ${isDisabled && 'text-gray-300 cursor-not-allowed'}`}
     >
@@ -61,7 +61,7 @@ const TabContentPanel = ({ state, ...props }: { state: TabListState<object> }) =
 
   return (
     <div
-      className={'p-4  h-full border-primary-200 -mt-px rounded rounded-tl-none overflow-y-auto overflow-x-hidden'}
+      className={'p-4  h-full border-primary-200 -mt-px rounded-sm rounded-tl-none overflow-y-auto overflow-x-hidden'}
       {...tabPanelProps}
       ref={ref}
     >

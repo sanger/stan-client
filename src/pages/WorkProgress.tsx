@@ -196,7 +196,7 @@ const WorkProgress = () => {
               <Heading level={3} showBorder={false}>
                 Summary Dashboard
               </Heading>
-              <div className={'mx-auto flex w-full p-4 rounded-md justify-center bg-gray-400 shadow-sm'}>
+              <div className={'mx-auto flex w-full p-4 rounded-md justify-center bg-gray-400 shadow-xs'}>
                 <StyledLink to={`work_progress_summary`} className={'text-md'}>
                   Spatial Genomics Platform Status
                 </StyledLink>

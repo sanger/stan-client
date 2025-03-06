@@ -17,7 +17,7 @@ export function buildSlotSecondaryText(layoutPlan: LayoutPlan, address: string) 
 export function buildSlotColor(layoutPlan: LayoutPlan, address: string) {
   const action = layoutPlan.plannedActions.get(address);
   if (action && action.length > 0) {
-    return `bg-${layoutPlan.sampleColors.get(action[0].sampleId)}-600`;
+    return layoutPlan.sampleColors.get(action[0].sampleId);
   }
   return undefined;
 }

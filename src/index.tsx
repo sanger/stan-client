@@ -1,9 +1,8 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import {createRoot} from 'react-dom/client';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { enableAllPlugins } from './dependencies/immer';
-import "./styles/index.css";
-import App from "./App";
+import './styles/index.css';
+import App from './App';
 
 // To use the XState Inspector, uncomment the following lines
 // import { inspect } from "@xstate/inspect";

@@ -53,7 +53,7 @@ describe('Slot', () => {
       //Displays a large shape
       expect(screen.getByTestId('slot')).toHaveClass('h-20 w-20');
       //Displays slot as selected with a pink border
-      expect(screen.getByTestId('slot')).toHaveClass('ring ring-pink-600 ring-offset-2');
+      expect(screen.getByTestId('slot')).toHaveClass('ring-3 ring-pink-600 ring-offset-2');
       //Fills slot as selected with a given color
       expect(screen.getByTestId('slot')).toHaveClass('bg-sdb-300');
     });

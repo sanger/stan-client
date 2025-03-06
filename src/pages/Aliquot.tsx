@@ -178,7 +178,7 @@ function Aliquot() {
               </Table>
 
               <div className="flex flex-row items-center sm:justify-end" data-testid={'printDiv'}>
-                <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
+                <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow-md space-y-2">
                   {printResult && <PrintResult result={printResult} />}
                   <LabelPrinter
                     labelsPerBarcode={1}
@@ -199,7 +199,7 @@ function Aliquot() {
       </AppShell.Main>
 
       {showGrayPanel && (
-        <div className="flex-shrink-0 max-w-screen-xl mx-auto">
+        <div className="shrink-0 max-w-screen-xl mx-auto">
           {serverErrors && <Warning error={serverErrors} />}
 
           <div className="my-4 mx-4 sm:mx-auto p-4 rounded-md bg-gray-100">

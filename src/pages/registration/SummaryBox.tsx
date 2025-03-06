@@ -98,7 +98,7 @@ const SummaryBox = ({
                 setCurrentFormIndex(tissueIndex);
               }}
               key={tissueIndex}
-              className={`group block px-2 py-1 outline-none rounded-r hover:bg-sdb-300 ${
+              className={`group block px-2 py-1 outline-hidden rounded-r hover:bg-sdb-300 ${
                 tissueIndex === currentFormIndex && 'border-l-4 border-sp pl-1 bg-sdb-500'
               }`}
             >

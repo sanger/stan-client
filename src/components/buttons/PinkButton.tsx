@@ -7,9 +7,9 @@ interface PinkButtonProps extends ButtonProps {}
 const PinkButton = ({ children, className, action = 'primary', ...rest }: PinkButtonProps) => {
   const buttonClasses = classNames(
     {
-      'text-white bg-sp hover:bg-sp-600 shadow-sm focus:border-sp-700 focus:shadow-outline-sp active:bg-sp-700':
+      'text-white bg-sp hover:bg-sp-600 shadow-xs focus:border-sp-700 focus:shadow-outline-sp active:bg-sp-700':
         action === 'primary',
-      'text-sp bg-transparent border border-sp shadow-sm hover:bg-sp-100 focus:border-sp-400 focus:shadow-outline-sp active:bg-sp-200':
+      'text-sp bg-transparent border border-sp shadow-xs hover:bg-sp-100 focus:border-sp-400 focus:shadow-outline-sp active:bg-sp-200':
         action === 'secondary',
       'text-sp bg-transparent hover:text-sp-700 active:text-sp-800': action === 'tertiary'
     },

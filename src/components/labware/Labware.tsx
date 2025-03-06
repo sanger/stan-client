@@ -279,7 +279,7 @@ const Labware = ({
     slotColor ??
     ((address, slot) => {
       if (slotHelper.hasMultipleSamples(slot)) {
-        return 'bg-gradient-to-r from-purple-400 via-pink-500 to-red-500';
+        return 'bg-linear-to-r from-purple-400 via-pink-500 to-red-500';
       } else if (slotHelper.isSlotFilled(slot)) {
         return 'bg-sdb-300';
       }

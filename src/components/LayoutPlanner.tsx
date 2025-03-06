@@ -57,9 +57,9 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
                   }}
                   className={`${
                     isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'
-                  } bg-${layoutPlan.sampleColors.get(
+                  } ${layoutPlan.sampleColors.get(
                     source.sampleId
-                  )}-600 inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
+                  )} inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
                 >
                   {source.labware.barcode}
                 </span>

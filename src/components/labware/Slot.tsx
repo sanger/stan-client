@@ -47,7 +47,7 @@ export function Slot({
       [`hover:${brightenColor(bgColor)}`]: onClick && bgColor && !isCleanedOut,
       [`${bgColor} text-gray-100`]: bgColor,
       'bg-gray-100 text-gray-800': !bgColor,
-      'ring ring-pink-600 ring-offset-2': selected,
+      'ring-3 ring-pink-600 ring-offset-2': selected,
       'border border-gray-800': !selected,
       'h-20 w-20': size === 'large',
       'h-16 w-16': size === 'medium',

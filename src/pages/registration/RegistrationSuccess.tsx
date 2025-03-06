@@ -55,7 +55,7 @@ const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFie
           <div className="flex flex-row items-center sm:justify-end">
             <motion.div
               variants={variants.fadeInWithLift}
-              className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow"
+              className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow-md"
             >
               {<LabelPrinter labwares={labware} />}
             </motion.div>

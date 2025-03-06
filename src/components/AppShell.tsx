@@ -60,7 +60,7 @@ function AppShell({ children }: AppShellParams) {
             <div className="-mr-2 -my-2 md:hidden">
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-100 hover:text-white hover:bg-gray-700 focus:outline-none focus:bg-gray-700 focus:text-white"
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-100 hover:text-white hover:bg-gray-700 focus:outline-hidden focus:bg-gray-700 focus:text-white"
               >
                 <svg className="block h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -86,25 +86,25 @@ function AppShell({ children }: AppShellParams) {
                 <Menu caption={'Lab Work'} topMostMenu={true}>
                   <Menu
                     caption={'Sectioning'}
-                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Recording sectioning planning and confirmation.'}
                   >
                     <NavLinkMenuItem
                       caption={'Orientation QC'}
                       path={'/lab/sectioning/orientation_qc'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording the embedding orientation.'}
                     />
                     <NavLinkMenuItem
                       caption={'Planning'}
                       path={'/lab/sectioning'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Slice up some tissue and place sections into pre-labelled pieces of labware.'}
                     />
                     <NavLinkMenuItem
                       caption={'Confirmation'}
                       path={'/lab/sectioning/confirm'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={
                         'Confirm the number of sections taken, along with section numbers and comments, post-sectioning.'
                       }
@@ -112,13 +112,13 @@ function AppShell({ children }: AppShellParams) {
                   </Menu>
                   <Menu
                     caption={'Original Sample'}
-                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Original sample operations'}
                   >
                     <NavLinkMenuItem
                       caption={'Labware generation'}
                       path="/lab/original_sample_processing"
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={
                         'Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative.'
                       }
@@ -126,27 +126,27 @@ function AppShell({ children }: AppShellParams) {
                     <NavLinkMenuItem
                       caption={'Paraffin Processing'}
                       path="/lab/paraffin_processing"
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Records the type of processing cycle run on the sample.'}
                     />
 
                     <NavLinkMenuItem
                       caption={'Solution Transfer'}
                       path="/lab/solution_transfer"
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Records solution transfer operation of samples.'}
                     />
                     <NavLinkMenuItem
                       caption={'Add External ID'}
                       path="/lab/add_external_id"
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Add an External ID to an original sample.'}
                     />
 
                     <NavLinkMenuItem
                       caption={'Sample Processing Comments'}
                       path="/lab/sample_processing_comments"
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Records extra labware generation comments.'}
                     />
                   </Menu>
@@ -154,103 +154,103 @@ function AppShell({ children }: AppShellParams) {
                   <NavLinkMenuItem
                     caption={'Fetal Waste'}
                     path="/lab/fetal_waste"
-                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Convert bio state to Fetal Waste.'}
                   />
                   <Menu
                     caption={'RNA'}
-                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Recording RNA extraction and analysis'}
                   >
                     <NavLinkMenuItem
                       caption={'Extraction'}
                       path="/lab/extraction"
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Extract RNA from scraps obtained from Sectioning.'}
                     />
                     <NavLinkMenuItem
                       caption={'Extraction Result'}
                       path={'/lab/extraction_result'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Record pass/fail results and concentration for RNA extractions.'}
                     />
                     <NavLinkMenuItem
                       caption={'Analysis'}
                       path={'/lab/rna_analysis'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Record RNA Analysis on tubes from RNA Extraction'}
                     />
                     <NavLinkMenuItem
                       caption={'Aliquoting'}
                       path="/lab/aliquoting"
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Aliquot a tube of solution out into multiple new tubes.'}
                     />
                   </Menu>
                   <Menu
                     caption={'Staining'}
                     description={'Recording staining slides and QC'}
-                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                   >
                     <NavLinkMenuItem
                       caption={'Stain slides'}
                       path={'/lab/staining'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Stain slides and record incubation details.'}
                     />
                     <NavLinkMenuItem
                       caption={'Staining QC'}
                       path={'/lab/staining_qc'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Pass or fail samples on a stained slide.'}
                     />
                   </Menu>
                   <Menu
                     caption={'Visium'}
-                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Recording Visium process'}
                   >
                     <NavLinkMenuItem
                       caption={'Transfer'}
                       path={'/lab/transfer'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Transfer to new 96 well plate.'}
                     />
                     <NavLinkMenuItem
                       caption={'Visium QC'}
                       path={'/lab/visium_qc'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Pass or fail samples on a visium slide.'}
                     />
 
                     <NavLinkMenuItem
                       caption={'Visium Permeabilisation'}
                       path={'/lab/visium_perm'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Record permeabilisation times for each slot of a stained slide.'}
                     />
                     <NavLinkMenuItem
                       caption={'Visium Analysis'}
                       path={'/lab/visium_analysis'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Select the best permeabilisation time for a slide.'}
                     />
                     <NavLinkMenuItem
                       caption={'Dual Index Plate'}
                       path={'/lab/dual_index_plate'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Record the transfer of dual-index reagent to 96 well plate.'}
                     />
                     <NavLinkMenuItem
                       caption={'CytAssist'}
                       path={'/lab/cytassist'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Record the transfer of sections to a CytAssist slide.'}
                     />
                     <NavLinkMenuItem
                       caption={'Library Amplification and Generation'}
                       path={'/lab/libraryGeneration'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={
                         'Record the library amplification, dual index plate, and the cycle number for the Visium CytAssist.'
                       }
@@ -258,61 +258,61 @@ function AppShell({ children }: AppShellParams) {
                   </Menu>
                   <Menu
                     caption={'Probe Hybridisation'}
-                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Recording Probe hybridisation'}
                   >
                     <NavLinkMenuItem
                       caption={'Xenium'}
                       path={'/lab/probe_hybridisation_xenium'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording Probe hybridisation for Xenium slides.'}
                     />
                     <NavLinkMenuItem
                       caption={'Probe hybridisation QC'}
                       path={'/lab/probe_hybridisation_qc'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording Probe hybridisation QC completion date and set sample sections comments.'}
                     />
                   </Menu>
                   <Menu
                     caption={'Xenium'}
-                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Recording Xenium run information'}
                   >
                     <NavLinkMenuItem
                       caption={'Cell Segmentation'}
                       path={'/lab/cell_segmentation'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     />
                     <NavLinkMenuItem
                       caption={'Cell Segmentation QC'}
                       path={'/lab/cell_segmentation_qc'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording Cell Segmentation QC'}
                     />
                     <NavLinkMenuItem
                       caption={'Xenium Analyser'}
                       path={'/lab/xenium_analyser'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording Xenium analyser information'}
                     />
                     <NavLinkMenuItem
                       caption={'Xenium Analyser QC'}
                       path={'/lab/xenium_qc'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording Xenium Analyser QC'}
                     />
                     <NavLinkMenuItem
                       caption={'Xenium Metrics'}
                       path={'/lab/xenium_metrics'}
-                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording region of interest metrics for Xenium slides'}
                     />
                   </Menu>
                   <NavLinkMenuItem
                     caption={'Imaging'}
                     path={'/lab/imaging'}
-                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Record that images have been taken for a batch of labware.'}
                   />
                 </Menu>
@@ -325,55 +325,55 @@ function AppShell({ children }: AppShellParams) {
                   <NavLinkMenuItem
                     caption={'Block Registration'}
                     path={'/admin/registration'}
-                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Register blocks of tissue into STAN and obtain new barcodes for its labware.'}
                   />
                   <NavLinkMenuItem
                     caption={'Section Registration'}
                     path={'/admin/section_registration'}
-                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Register sections of tissue on pre-barcoded labware into STAN.'}
                   />
                   <NavLinkMenuItem
                     caption={'Original Sample Registration'}
                     path={'/admin/tissue_registration'}
-                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Register tissue samples which can be either fixed or fresh into STAN.'}
                   />
                   <NavLinkMenuItem
                     caption={'Clean Out'}
                     path={'/admin/cleanout'}
-                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Clean the wells/slots of a labware.'}
                   />
                   <NavLinkMenuItem
                     caption={'Destroy'}
                     path={'/admin/destroy'}
-                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Destroy multiple pieces of labware and have STAN remove them from storage.'}
                   />
                   <NavLinkMenuItem
                     caption={'Flag Labware'}
                     path={'/admin/flagLabware'}
-                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Flag a labware and record a reason.'}
                   />
                   <NavLinkMenuItem
                     caption={'Reactivate'}
                     path={'/admin/reactivate'}
-                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Reactivate destroyed and discarded labware.'}
                   />
                   <NavLinkMenuItem
                     caption={'Release'}
                     path={'/admin/release'}
-                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Release samples in STAN to teams within the Institute.'}
                   />
                   <NavLinkMenuItem
                     caption={'Unrelease'}
                     path={'/admin/unrelease'}
-                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={' Re-use STAN labware that has previously been released.'}
                   />
                 </Menu>
@@ -384,7 +384,7 @@ function AppShell({ children }: AppShellParams) {
                 <button
                   ref={profileButtonRef}
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="max-w-xs flex items-center text-sm rounded-full text-white focus:outline-none focus:shadow-solid"
+                  className="max-w-xs flex items-center text-sm rounded-full text-white focus:outline-hidden focus:shadow-sm-solid"
                   id="user-menu"
                   aria-label="User menu"
                   aria-haspopup="true"
@@ -555,7 +555,7 @@ function AppShell({ children }: AppShellParams) {
               <motion.div variants={variants.menuItemVariants} className="pt-4 pb-3 border-t border-gray-700">
                 <Authenticated role={UserRole.Enduser}>
                   <div className="flex items-center px-5 space-x-3 mb-3">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <span className="inline-flex items-center justify-center h-10 w-10 p-1 rounded-full text-white bg-sp text-xs">
                         {auth.authState?.user.username}
                       </span>
@@ -575,7 +575,7 @@ function AppShell({ children }: AppShellParams) {
                   <Authenticated role={UserRole.Admin}>
                     <Link
                       to="/config"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-hidden focus:text-white focus:bg-gray-700"
                     >
                       STAN Configuration
                     </Link>
@@ -584,7 +584,7 @@ function AppShell({ children }: AppShellParams) {
                   <Authenticated role={UserRole.Enduser}>
                     <Link
                       to="/logout"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-hidden focus:text-white focus:bg-gray-700"
                     >
                       Sign out
                     </Link>
@@ -593,7 +593,7 @@ function AppShell({ children }: AppShellParams) {
                   <Unauthenticated>
                     <Link
                       to="/login"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-hidden focus:text-white focus:bg-gray-700"
                     >
                       Login
                     </Link>
@@ -607,7 +607,7 @@ function AppShell({ children }: AppShellParams) {
       {locationState?.warning && <Warning message={locationState.warning} />}
       {locationState?.success && <Success message={locationState.success} />}
       {children}
-      <footer className={`border border-t-2 pt-5 pb-3 flex-shrink-0 ${config?.footerColor}`}>
+      <footer className={`border border-t-2 pt-5 pb-3 shrink-0 ${config?.footerColor}`}>
         <div className="max-w-sm mx-auto px-4 sm:px-6">
           <ul className="flex flex-row items-center justify-between my-2 text-xs text-gray-500">
             <li>
@@ -661,7 +661,7 @@ function AppShell({ children }: AppShellParams) {
 
 AppShell.Header = function ({ children }: { children: JSX.Element | JSX.Element[] }) {
   return (
-    <header className="bg-white shadow">
+    <header className="bg-white shadow-md">
       <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8">{children}</div>
     </header>
   );

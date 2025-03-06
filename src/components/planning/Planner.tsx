@@ -313,7 +313,7 @@ export default function Planner<M>({
             /**Render plan creation settings panel using the callback method (passed as props) so that it will be done by the parent component **/
             buildPlanCreationSettings()
           }
-          <div className={'flex w-full justify-end flex-shrink-0 border-t-2 border-gray-200 py-2'}>
+          <div className={'flex w-full justify-end shrink-0 border-t-2 border-gray-200 py-2'}>
             <BlueButton
               id="#addLabware"
               onClick={onAddLabwareClick}

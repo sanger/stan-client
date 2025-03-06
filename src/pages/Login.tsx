@@ -95,7 +95,7 @@ const Login = (): JSX.Element => {
     <>
       {auth.isAuthenticated() && <Navigate to={location.state?.referrer ?? '/'} />}
 
-      <div className="bg-gradient-to-bl from-sdb to-sdb-400">
+      <div className="bg-linear-to-bl from-sdb via-sdb-400 to-sdb-400">
         <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0.1 }}
@@ -105,7 +105,7 @@ const Login = (): JSX.Element => {
           >
             <div>
               <Link to="/">
-                <Logo className="mx-auto h-20 w-auto" />
+                <Logo className="mx-auto h-20" />
               </Link>
             </div>
             <div>
@@ -141,14 +141,15 @@ const Login = (): JSX.Element => {
                     name="password"
                     className="items-start justify-between border-l-4 border-orange-600 p-2 bg-orange-200 text-orange-800"
                   />
-                  <div className="rounded-md shadow-sm">
+                  <div className="rounded-md shadow-xs">
                     <div>
                       <Field
                         data-testid="username"
                         aria-label="Sanger username"
                         name="username"
                         type="text"
-                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
+                        className="appearance-none rounded-none relative block w-full px-3 py-2 bg-white border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md
+                        focus:outline-hidden focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
                         placeholder="Sanger username"
                       />
                     </div>
@@ -160,7 +161,7 @@ const Login = (): JSX.Element => {
                       aria-label="Password"
                       name="password"
                       type="password"
-                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 bg-white border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-hidden focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
                       placeholder="Password"
                     />
                   </div>

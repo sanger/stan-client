@@ -12,7 +12,7 @@ export default function Panel({ children }: PanelProps) {
       variants={variants.fadeInWithLift}
       initial={'hidden'}
       animate={'visible'}
-      className="relative p-3 shadow"
+      className="relative p-3 shadow-md"
     >
       {children}
     </motion.div>

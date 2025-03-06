@@ -133,7 +133,7 @@ export const ItemsGrid: React.FC = () => {
       <div className="flex flex-col">
         <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-            <div className="p-2 shadow overflow-hidden border-b border-gray-200">
+            <div className="p-2 shadow-md overflow-hidden border-b border-gray-200">
               <div
                 className={`min-w-full grid justify-center grid-flow-row gap-2 grid-cols-location-${location.size?.numColumns}`}
               >

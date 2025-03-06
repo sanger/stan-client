@@ -1,9 +1,48 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Import Tailwind's base styles from ui-styling package. Optional if you don't want to use them.**/
+@import '../../node_modules/@sanger/ui-styling/tailwind.css';
 
-@layer base {
-  h1 {
-    @apply text-2xl;
-  }
+@theme {
+    --default-ring-width: 3px;
+    --default-ring-color: var(--color-blue-500);
+}
+
+.grid-cols-12 {
+    @apply grid-cols-12;
+}
+
+.bg-red-500 {
+    background-color: oklch(68.82% 0.1776 22.95);
+}
+.bg-red-200 {
+    background-color:oklch(91.2% 0.0437 17.98);
+}
+.bg-pink-500 {
+    background-color:oklch(69.23% 0.1817 352.86);
+}
+.bg-pink-200 {
+    background-color:oklch(91.51% 0.0456 359.18);
+}
+.bg-indigo-500 {
+    background-color:oklch(62.71% 0.1638 271.53);
+}
+.bg-indigo-200 {
+    background-color:oklch(88.3% 0.0557 259.3);
+}
+.bg-green-500 {
+    background-color:oklch(70.96% 0.1434 154.53);
+}
+.bg-green-200 {
+    background-color:oklch(93.08% 0.0664 154.9);
+}
+.bg-purple-500 {
+    background-color:oklch(66.37% 0.1634 296.96);
+}
+.bg-purple-200 {
+    background-color:oklch(90.73% 0.053 306.09);
+}
+.bg-blue-500 {
+    background-color:oklch(66.26% 0.1358 246.81);
+}
+.bg-purple-200 {
+    background-color:oklch(89.6% 0.0484 232.92);
 }

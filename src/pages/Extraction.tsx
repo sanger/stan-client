@@ -16,7 +16,7 @@ import { usePrinters } from '../lib/hooks';
 import MutedText from '../components/MutedText';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import { useMachine } from '@xstate/react';
-import { buildSampleColors, extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
+import { buildSampleColors, extractLabwareFromFlagged, hasSamples } from '../lib/helpers/labwareHelper';
 import { EquipmentFieldsFragment, LabwareFlaggedFieldsFragment } from '../types/sdk';
 import extractionMachine, { ExtractionContext } from '../lib/machines/extraction/extractionMachine';
 import { Link, useLoaderData, useNavigate } from 'react-router-dom';
@@ -26,7 +26,6 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import LabelCopyButton from '../components/LabelCopyButton';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { selectOptionValues } from '../components/forms';
-import { hasSamples } from '../lib/helpers/labwareHelper';
 
 function buildExtractionTableData(ctx: ExtractionContext) {
   if (!ctx.extraction) return [];
@@ -202,7 +201,7 @@ function Extraction() {
               </Table>
 
               <div className="flex flex-col items-end sm:justify-end space-y-2">
-                <div className="sm:max-w-xl w-full p-4 rounded-md border-gray-200 bg-gray-100 shadow space-y-2">
+                <div className="sm:max-w-xl w-full p-4 rounded-md border-gray-200 bg-gray-100 shadow-md space-y-2">
                   {printResult && <PrintResult result={printResult} />}
                   <LabelPrinter
                     labelsPerBarcode={2}
@@ -218,7 +217,7 @@ function Extraction() {
                 </div>
                 <div
                   className={
-                    'flex flex-col sm:max-w-xl w-full p-4 rounded-md border-gray-200 bg-gray-100 shadow items-end sm:justify-end '
+                    'flex flex-col sm:max-w-xl w-full p-4 rounded-md border-gray-200 bg-gray-100 shadow-md items-end sm:justify-end '
                   }
                 >
                   <div className={'flex items-center space-x-2'}>
@@ -229,7 +228,7 @@ function Extraction() {
                     labels={extraction?.extract?.labware.map((lw) => lw.barcode) ?? []}
                     copyButtonText={'Copy Labels'}
                     buttonClass={
-                      'text-white bg-sdb-400 shadow-sm hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600'
+                      'text-white bg-sdb-500 shadow-xs hover:bg-sdb focus:border-sdb focus:shadow-md-outline-sdb active:bg-sdb-600'
                     }
                   />
                 </div>
@@ -240,7 +239,7 @@ function Extraction() {
       </AppShell.Main>
 
       {showGrayPanel && (
-        <div className="flex-shrink-0 max-w-screen-xl mx-auto">
+        <div className="shrink-0 max-w-screen-xl mx-auto">
           {serverErrors && <Warning error={serverErrors} />}
 
           <div className="my-4 mx-4 sm:mx-auto p-4 rounded-md bg-gray-100">

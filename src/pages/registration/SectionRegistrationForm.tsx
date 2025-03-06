@@ -224,7 +224,7 @@ function SectionRegistrationForm({ registrationInfo }: SectionRegistrationFormPa
                     setCurrentIndex(labwareIndex);
                   }}
                   key={labware.clientId}
-                  className={`group block px-2 py-1 outline-none rounded-r hover:bg-sdb-300 ${
+                  className={`group block px-2 py-1 outline-hidden rounded-r hover:bg-sdb-300 ${
                     labwareIndex === currentIndex && 'border-l-4 border-sp pl-1 bg-sdb-500'
                   }`}
                 >
