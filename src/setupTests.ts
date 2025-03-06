@@ -4,7 +4,7 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 
-import { server } from '../src/mocks/server';
+import { server } from './mocks/server';
 
 global.fetch = require('node-fetch');
 beforeAll(() => server.listen()); // Start the server when test starts

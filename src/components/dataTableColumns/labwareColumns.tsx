@@ -26,7 +26,8 @@ const color: ColumnFactory<Map<number, any>> = (meta) => {
   return {
     id: 'color',
     Header: '',
-    accessor: (originalRow: LabwareFieldsFragment) => meta?.get(originalRow.slots[0]?.samples[0]?.id) ?? backgroundColorClassNames().next().value,
+    accessor: (originalRow: LabwareFieldsFragment) =>
+      meta?.get(originalRow.slots[0]?.samples[0]?.id) ?? backgroundColorClassNames().next().value,
     Cell: (props: CellProps<LabwareFieldsFragment>) => <Circle backgroundColor={props.value} />
   };
 };
