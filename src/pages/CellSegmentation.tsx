@@ -2,16 +2,17 @@ import AppShell from '../components/AppShell';
 import { Form, Formik } from 'formik';
 import {
   CommentFieldsFragment,
+  LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   SegmentationLabware,
   SegmentationMutation,
   SegmentationRequest,
   SlideCosting
 } from '../types/sdk';
-import { formatDateTimeForCore, getCurrentDateTime } from '../types/stan';
+import { createSessionStorageForLabwareAwaiting, formatDateTimeForCore, getCurrentDateTime } from '../types/stan';
 import React, { useContext } from 'react';
 import BlueButton from '../components/buttons/BlueButton';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { StanCoreContext } from '../lib/sdk';
@@ -20,6 +21,7 @@ import { fromPromise } from 'xstate';
 import { useMachine } from '@xstate/react';
 import Warning from '../components/notifications/Warning';
 import { Segmentation } from '../components/CellSegmentation/CellSegmentation';
+import WhiteButton from '../components/buttons/WhiteButton';
 
 type CellSegmentationProps = {
   labware: LabwareFlaggedFieldsFragment;
@@ -80,6 +82,7 @@ const toSegmentationRequest = (values: CellSegmentationFormProps): SegmentationR
 
 export const CellSegmentation = ({ initialFormValues = defaultFormValues }) => {
   const comments = useLoaderData() as CommentFieldsFragment[];
+  const navigate = useNavigate();
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
     return createFormMachine<SegmentationRequest, SegmentationMutation>().provide({
@@ -114,28 +117,46 @@ export const CellSegmentation = ({ initialFormValues = defaultFormValues }) => {
               validateOnMount={true}
             >
               {({ isValid, values }) => (
-                <Form>
-                  <Segmentation comments={comments} isQc={false} />
-                  {values.cellSegmentation.length > 0 && (
-                    <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
-                      <BlueButton type="submit" disabled={!isValid}>
-                        Save
-                      </BlueButton>
-                    </div>
-                  )}
-                </Form>
+                <>
+                  <Form>
+                    <Segmentation comments={comments} isQc={false} />
+                    {values.cellSegmentation.length > 0 && (
+                      <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
+                        <BlueButton type="submit" disabled={!isValid}>
+                          Save
+                        </BlueButton>
+                      </div>
+                    )}
+                  </Form>
+
+                  <OperationCompleteModal
+                    show={submissionResult !== undefined}
+                    message={'Cell Segmentation recorded on all labware'}
+                    additionalButtons={
+                      <WhiteButton
+                        type="button"
+                        style={{ marginLeft: 'auto' }}
+                        className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                        onClick={() => {
+                          createSessionStorageForLabwareAwaiting(
+                            values.cellSegmentation.map((cellSeg) => cellSeg.labware as LabwareFieldsFragment)
+                          );
+                          navigate('/store');
+                        }}
+                      >
+                        Store
+                      </WhiteButton>
+                    }
+                  >
+                    <p>
+                      If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
+                      the Home screen.
+                    </p>
+                  </OperationCompleteModal>
+                </>
               )}
             </Formik>
           </div>
-          <OperationCompleteModal
-            show={submissionResult !== undefined}
-            message={'Cell Segmentation recorded on all labware'}
-          >
-            <p>
-              If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the
-              Home screen.
-            </p>
-          </OperationCompleteModal>
         </div>
       </AppShell.Main>
     </AppShell>
