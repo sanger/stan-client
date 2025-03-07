@@ -137,7 +137,7 @@ const ReleaseOptions = () => {
                 className="sm:w-full"
               >
                 <a
-                  className="w-full text-gray-800 focus:outline-none"
+                  className="w-full text-gray-800 focus:outline-hidden"
                   download={`release.${memoReleaseParams.type}`}
                   href={`/release?id=${memoReleaseParams.id.join(',')}&groups=${memoReleaseParams.groups.join(
                     ','

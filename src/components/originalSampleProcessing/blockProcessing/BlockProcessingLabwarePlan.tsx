@@ -133,7 +133,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
         ref={ref}
         initial={'hidden'}
         animate={'visible'}
-        className="relative p-3 shadow"
+        className="relative p-3 shadow-md"
         data-testid={'plan'}
       >
         <>
@@ -154,7 +154,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                 </PinkButton>
               )}
             </div>
-            <div className="border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow">
+            <div className="border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow-md">
               <div className="py-4 px-8 w-full space-y-4">
                 {current.matches('prep.errored') && (
                   <Warning message={'There was an error creating the Labware'} error={requestError} />

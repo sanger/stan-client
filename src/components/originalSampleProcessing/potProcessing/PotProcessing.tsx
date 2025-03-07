@@ -207,7 +207,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
         )}
         <input
           type="number"
-          className="mt-3 h-10 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
+          className="mt-3 h-10 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
           onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
           value={numLabware}
           data-testid={'numLabware'}

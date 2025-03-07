@@ -28,7 +28,7 @@ const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({ when, message, onPromptLe
           </ModalBody>
           <ModalFooter>
             <WhiteButton
-              className="mt-3 w-full sm:mt-0 sm:ml-3"
+              className="mt-3 sm:mt-0 sm:ml-3"
               onClick={() => {
                 onConfirm();
                 onPromptLeave?.();
@@ -37,7 +37,7 @@ const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({ when, message, onPromptLe
               Ok
             </WhiteButton>
             <BlueButton
-              className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+              className="text-base sm:ml-3 sm:w-auto sm:text-sm"
               onClick={() => {
                 onCancel();
                 onPromptCancel?.();

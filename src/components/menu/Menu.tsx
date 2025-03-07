@@ -52,10 +52,10 @@ const Menu: React.FC<MenuProps> = ({ caption, description, topMostMenu = false, 
             ref={menuButtonRef}
             onClick={() => setMenuDropdownOpen(!menuDropdownOpen)}
             type="button"
-            className={`rounded-md inline-flex focus:outline-none ${
+            className={`rounded-md inline-flex focus:outline-hidden ${
               topMostMenu
                 ? 'group items-center px-3 py-2 rounded-md text-sm font-medium focus:text-white focus:bg-gray-700 text-gray-100 hover:text-white hover:bg-gray-700'
-                : 'w-full ml-4 justify-between outline-none hover:bg-gray-50'
+                : 'w-full ml-4 justify-between outline-hidden hover:bg-gray-50'
             }`}
           >
             <div className={'flex flex-col'}>
@@ -78,7 +78,7 @@ const Menu: React.FC<MenuProps> = ({ caption, description, topMostMenu = false, 
             >
               <div
                 className={`rounded-lg  border-2 border-white
-                  ${topMostMenu ? 'shadow-lg ring-black ring-1 ring-opacity-5' : 'shadow-xl'}`}
+                  ${topMostMenu ? 'shadow-lg ring-black ring-1 ring-black-5' : 'shadow-xl'}`}
               >
                 <div className={`bg-white grid gap-6 px-5 py-6 sm:gap-8 sm:p-8`}>{children}</div>
               </div>

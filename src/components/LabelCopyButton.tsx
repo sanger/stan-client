@@ -54,7 +54,7 @@ const LabelCopyButton: React.FC<LabelCopyButtonProps> = ({
   };
 
   const buttonClassName = classNames(
-    'w-full inline-flex items-center justify-center space-x-1 justify-center rounded-md border border-gray-300 shadow-sm gap-x-1 px-4 py-2 bg-white text-base font-medium hover:bg-gray-100 active:opacity-75 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm',
+    'w-full inline-flex items-center justify-center space-x-1 justify-center rounded-md border border-gray-300 shadow-xs gap-x-1 px-4 py-2 bg-white text-base font-medium hover:bg-gray-100 active:opacity-75 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm',
     buttonClass
   );
   return (

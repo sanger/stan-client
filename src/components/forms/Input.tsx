@@ -5,7 +5,7 @@ import { FormikErrorMessage, preventEnterKeyDefault } from './index';
 import classNames from 'classnames';
 
 const defaultInputClassNames =
-  'focus:ring-sdb-100 focus:border-sdb-100 block border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed';
+  'ring-sdb-100 focus:border-sdb-100 block border border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed';
 
 interface FormikInputProps {
   label: string;
@@ -19,7 +19,7 @@ interface FormikInputProps {
 const FormikInput = ({ label, name, type = 'text', displayTag, info, ...rest }: FormikInputProps) => {
   const inputClassNames = classNames(
     {
-      'w-full disabled:bg-gray-200': type !== 'checkbox'
+      'bg-white border h-10 w-full disabled:bg-gray-200': type !== 'checkbox'
     },
     defaultInputClassNames
   );
@@ -49,7 +49,7 @@ interface InputProps extends React.DetailedHTMLProps<React.InputHTMLAttributes<H
 export const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   const inputClassNames = classNames(
     {
-      'w-full disabled:bg-gray-200': props.type !== 'checkbox' || props.type !== 'radio'
+      'w-full h-10 disabled:bg-gray-200': props.type !== 'checkbox' || props.type !== 'radio'
     },
     defaultInputClassNames
   );

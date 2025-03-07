@@ -6,7 +6,7 @@ import {
   LabwareType,
   SlotFieldsFragment
 } from '../../types/sdk';
-import { cycleColors } from '../helpers';
+import { backgroundColorClassNames } from '../helpers';
 import { orderBy } from 'lodash';
 import { Addressable, LabwareTypeName } from '../../types/stan';
 import * as slotHelper from './slotHelper';
@@ -42,7 +42,7 @@ export function labwareSamples(labware: LabwareFieldsFragment | LabwareFlaggedFi
 export function buildSampleColors(
   labwares: LabwareFieldsFragment[] | LabwareFlaggedFieldsFragment[]
 ): Map<number, string> {
-  const colors = cycleColors();
+  const colors = backgroundColorClassNames();
   const sampleColors = new Map();
   labwares.forEach((labware) => {
     labwareSamples(labware).forEach((value) => {

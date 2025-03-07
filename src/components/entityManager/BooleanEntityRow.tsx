@@ -27,7 +27,7 @@ export function BooleanEntityRow({ value, disable, onChange }: BooleanEntityRowP
   };
 
   return (
-    <TableCell colSpan={2}>
+    <TableCell colSpan={2} className="relative inline-block w-11 h-5">
       <Input type="checkbox" disabled={disable} defaultChecked={value} onChange={handleOnChange} />
     </TableCell>
   );

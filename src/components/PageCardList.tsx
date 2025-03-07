@@ -20,7 +20,7 @@ interface PageCardProps extends React.PropsWithChildren {
 
 export const PageCard: React.FC<PageCardProps> = ({ page, title, children }) => (
   <Link to={page} className="w-full md:w-96 lg:w-84">
-    <div className="flex flex-col items-center justify-center mb-3 px-20 py-12 hover:bg-gray-100 hover:shadow transition duration-300">
+    <div className="flex flex-col items-center justify-center mb-3 px-20 py-12 hover:bg-gray-100 hover:shadow-md transition duration-300">
       <Heading level={3} className="text-centre">
         {title}
       </Heading>

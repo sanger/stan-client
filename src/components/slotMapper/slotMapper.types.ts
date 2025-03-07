@@ -104,8 +104,14 @@ export interface SlotMapperContext {
   inputLabware: Array<LabwareFlaggedFieldsFragment>;
   /**Mapped slots data**/
   outputSlotCopies: Array<OutputSlotCopyData>;
-  /**Map between color to display in slots and labware**/
+  /**
+   * Map between labware and the background color class name for active slots.
+   */
   colorByBarcode: Map<string, string>;
+  /**
+   * Map between labware and the background color class name for disabled (already mapped) slots.
+   */
+  disabledColorByBarcode: Map<string, string>;
   /**Failed slots, if any**/
   failedSlots: Map<string, SlotPassFailFieldsFragment[]>;
   /**Any mapping errors*/

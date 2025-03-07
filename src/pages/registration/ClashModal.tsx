@@ -68,19 +68,19 @@ export default function ClashModal({
         </div>
       </ModalBody>
       <ModalFooter>
-        <BlueButton onClick={onConfirm} className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm">
+        <BlueButton onClick={onConfirm} className="text-base sm:ml-3 sm:w-auto sm:text-sm">
           Confirm
         </BlueButton>
         <Link
           to={`/admin/unrelease?${linkToUnrelease}`}
           target="_blank"
-          className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+          className="mt-3 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
         >
           <BlueButton action="tertiary" onClick={onConfirmAndUnrelease}>
             Confirm and Unrelease
           </BlueButton>
         </Link>
-        <BlueButton action="secondary" onClick={onCancel} className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+        <BlueButton action="secondary" onClick={onCancel} className="mt-3 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
           Cancel
         </BlueButton>
       </ModalFooter>

@@ -280,7 +280,7 @@ export default function LabwareResult({
           {displayPassFail && (
             <>
               <BlueButton
-                className="flex-shrink-0"
+                className="shrink-0"
                 data-testid={'passAll'}
                 type="button"
                 onClick={() => send({ type: 'PASS_ALL' })}
@@ -288,7 +288,7 @@ export default function LabwareResult({
                 Pass All
               </BlueButton>
               <PinkButton
-                className="flex-shrink-0"
+                className="shrink-0"
                 data-testid={'failAll'}
                 type="button"
                 onClick={() => send({ type: 'FAIL_ALL' })}

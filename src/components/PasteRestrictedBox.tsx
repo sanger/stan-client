@@ -66,7 +66,7 @@ export default function PasteRestrictedBox({ onChange }: PasteRestrictedBoxProps
         )}
         <button
           id="pasteButton"
-          className="px-5 py-3 flex items-center rounded-r-md border-l-0 border text-white bg-sdb-400 focus:outline-none"
+          className="px-5 py-3 flex items-center rounded-r-md border-l-0 border text-white bg-sdb-400 focus:outline-hidden"
           onClick={() => {
             handlePaste();
           }}

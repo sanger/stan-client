@@ -40,7 +40,7 @@ const ScanInput = React.forwardRef<HTMLInputElement, ScanInputProps>(
         'rounded-r-md': !inputProps?.disabled,
         'border-r-0 disabled:bg-gray-100': inputProps?.disabled
       },
-      'flex-grow-0 focus:ring-sdb-100 focus:border-sdb-100 h-10 block w-full border-gray-300 rounded-none transition duration-150 ease-in-out'
+      'grow-0 focus:ring-sdb-100 focus:border-sdb-100 h-10 block w-full border-gray-300 rounded-none transition duration-150 ease-in-out'
     );
 
     const onKeyDownHandler = React.useCallback(
@@ -59,7 +59,7 @@ const ScanInput = React.forwardRef<HTMLInputElement, ScanInputProps>(
     return (
       <div className="flex flex-col">
         {label && <Label name={label} />}
-        <div className="flex rounded-md shadow-sm">
+        <div className="flex rounded-md shadow-xs">
           <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
             <BarcodeIcon className="block h-5 w-5" />
           </span>

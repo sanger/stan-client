@@ -72,7 +72,7 @@ function Confirm() {
                     />
                   ))}
                 </div>
-                <div className="flex-shrink-0 max-w-screen-xl mx-auto mt-12">
+                <div className="shrink-0 max-w-screen-xl mx-auto mt-12">
                   <div className="my-4 mx-4 sm:mx-auto p-4 rounded-md bg-gray-100">
                     <p className="my-3 text-gray-800 text-center text-sm  leading-normal">
                       If you wish to store all sectioned slides click

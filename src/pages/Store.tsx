@@ -227,7 +227,7 @@ const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
       }}
     >
       <div className="border border-gray-200 p-4 flex bg-gray-50 hover:bg-gray-200 rounded">
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <div className="flex items-center justify-center h-12 w-12 rounded-md bg-sdb-400 text-white">
             <LocationIcon iconStyle="stroke" className="h-6 w-6" />
           </div>

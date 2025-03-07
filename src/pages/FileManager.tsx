@@ -181,7 +181,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true }: FileMana
         return (
           <WhiteButton className="sm:w-full">
             <a
-              className="w-full text-gray-800 focus:outline-none  text-left"
+              className="w-full text-gray-800 focus:outline-hidden  text-left"
               download={props.row.original.name}
               href={props.row.original.url}
             >
@@ -222,7 +222,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true }: FileMana
                         multiple
                       />
                     </motion.div>
-                    <Label name={'Active'} className={'w-5 mt-2'}>
+                    <Label name={'Active'} className={'w-5'}>
                       <Input
                         type="checkbox"
                         data-testid="active"

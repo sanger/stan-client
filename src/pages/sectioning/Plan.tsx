@@ -113,7 +113,7 @@ function Plan() {
         />
         <input
           type="number"
-          className="block h-10 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
+          className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
           onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
           value={numLabware}
           data-testid={'numLabware'}
@@ -121,7 +121,7 @@ function Plan() {
         />
         <input
           type="number"
-          className="block h-10 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
+          className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
           onChange={(e) => setSectionThickness(Number(e.currentTarget.value))}
           value={sectionThickness}
           data-testid={'sectionThickness'}

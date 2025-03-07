@@ -13,6 +13,7 @@ import StyledLink from '../StyledLink';
 import FlagIcon from '../icons/FlagIcon';
 import MutedText from '../MutedText';
 import BubleChatIcon from '../icons/BubleChatIcon';
+import { backgroundColorClassNames } from '../../lib/helpers';
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
@@ -25,7 +26,8 @@ const color: ColumnFactory<Map<number, any>> = (meta) => {
   return {
     id: 'color',
     Header: '',
-    accessor: (originalRow: LabwareFieldsFragment) => meta?.get(originalRow.slots[0]?.samples[0]?.id) ?? '#FFF',
+    accessor: (originalRow: LabwareFieldsFragment) =>
+      meta?.get(originalRow.slots[0]?.samples[0]?.id) ?? backgroundColorClassNames().next().value,
     Cell: (props: CellProps<LabwareFieldsFragment>) => <Circle backgroundColor={props.value} />
   };
 };

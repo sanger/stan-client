@@ -228,7 +228,6 @@ function Search() {
                         name="tissueExternalNames"
                         label="External Identifier"
                         info={<ExternalIDFieldSearchInfo />}
-                        className={'w-full'}
                       />
                     </div>
                     <div>

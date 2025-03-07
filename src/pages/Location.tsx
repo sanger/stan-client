@@ -555,7 +555,7 @@ const Location = () => {
                             />
                             <button
                               id="pasteButton"
-                              className="px-2 py-2 flex items-center rounded-r-md border-l-0 border text-white bg-sdb-400 focus:outline-none"
+                              className="px-2 py-2 flex items-center rounded-r-md border-l-0 border text-white bg-sdb-400 focus:outline-hidden"
                               onClick={() => {
                                 handlePaste();
                               }}

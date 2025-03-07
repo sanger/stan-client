@@ -107,7 +107,7 @@ function Analysis() {
       </AppShell.Main>
 
       {!analysisMode ? (
-        <div className="flex-shrink-0 max-w-screen-xl mx-auto">
+        <div className="shrink-0 max-w-screen-xl mx-auto">
           <div className="my-4 mx-4 sm:mx-auto p-4 rounded-md bg-gray-100">
             <p className="my-3 text-gray-800 text-sm leading-normal">
               Once <span className="font-bold text-gray-900">all tubes</span> have been scanned, click Analysis to

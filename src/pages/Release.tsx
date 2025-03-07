@@ -436,7 +436,7 @@ function Release() {
                                 <Input
                                   type="checkbox"
                                   data-testid={`${releaseOption.displayName}-checkbox`}
-                                  className={'w-5 rounded'}
+                                  className={'w-5 rounded-md'}
                                   checked={selectedReleaseColumns.some(
                                     (column) =>
                                       column.displayName === releaseOption.displayName &&
@@ -546,7 +546,7 @@ function Release() {
                     {submissionResult && (
                       <PinkButton className="sm:w-full">
                         <a
-                          className="w-full text-gray-800 focus:outline-none"
+                          className="w-full text-gray-800 focus:outline-hidden"
                           download={`release.${selectedFileType}`}
                           href={`/release?id=${submissionResult.release.releases.map(
                             (r) => r.id

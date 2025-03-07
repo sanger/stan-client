@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 const Splash = () => {
   return (
-    <div className="bg-gradient-to-bl from-sdb to-sdb-400">
+    <div className="bg-linear-to-bl from-sdb via-sdb-400 to-sdb-400">
       <motion.div
         initial={{ opacity: 0.1 }}
         animate={{ opacity: 1 }}

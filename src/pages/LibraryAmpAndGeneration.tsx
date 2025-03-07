@@ -381,10 +381,10 @@ export const LibraryAmpAndGeneration = () => {
             )}
             {serverSuccess && (
               <div className="mt-8 flex flex-col items-end sm:justify-end space-y-2">
-                <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
+                <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow-md space-y-2">
                   <LabelPrinter labwares={serverSuccess.libraryPrep.labware} />
                 </div>
-                <div className="sm:max-w-xl w-full  border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2 ">
+                <div className="sm:max-w-xl w-full  border-gray-200 p-4 rounded-md bg-gray-100 shadow-md space-y-2 ">
                   <div className={'flex items-center space-x-2'}>
                     <div className={'font-bold'}>Labels:</div>
                     <div>{serverSuccess.libraryPrep.labware.map((lw) => lw.barcode).join(',')}</div>
@@ -394,7 +394,7 @@ export const LibraryAmpAndGeneration = () => {
                       labels={serverSuccess.libraryPrep.labware.map((lw) => lw.barcode)}
                       copyButtonText={'Copy Labels'}
                       buttonClass={
-                        'text-white bg-sdb-400 shadow-sm hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600'
+                        'text-white bg-sdb-400 shadow-xs hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600'
                       }
                     />
                   </div>

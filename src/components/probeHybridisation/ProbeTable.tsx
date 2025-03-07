@@ -149,7 +149,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                                   onClick={() => {
                                     helpers.push(probeLotDefault);
                                   }}
-                                  className={'focus:outline-none'}
+                                  className={'focus:outline-hidden'}
                                 >
                                   <AddIcon className="inline-block text-green-500 h-5 w-5 -ml-1 mr-2" />
                                 </IconButton>

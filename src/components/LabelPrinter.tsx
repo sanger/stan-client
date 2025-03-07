@@ -87,7 +87,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
           aria-label="printers"
           disabled={current.matches('printing')}
           value={context.selectedPrinter?.name}
-          className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 sm:w-1/2"
+          className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100 sm:w-1/2"
           onChange={updateSelectedLabelPrinter}
         >
           {context.printers?.length > 0 && optionValues(context.printers, 'name', 'name')}

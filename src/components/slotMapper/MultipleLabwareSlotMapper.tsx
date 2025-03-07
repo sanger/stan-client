@@ -83,8 +83,15 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
     }
   });
 
-  const { inputLabware, outputSlotCopies, colorByBarcode, failedSlots, errors, cleanedOutInputAddresses } =
-    current.context;
+  const {
+    inputLabware,
+    outputSlotCopies,
+    colorByBarcode,
+    disabledColorByBarcode,
+    failedSlots,
+    errors,
+    cleanedOutInputAddresses
+  } = current.context;
 
   const currentOutput = outputSlotCopies[0];
   const slotCopyContent = React.useMemo(() => {
@@ -284,10 +291,10 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
         sourceAddress: address
       });
       if (slotCopy) {
-        return `bg-${colorByBarcode.get(labware.barcode)}-200  ${
+        return `${disabledColorByBarcode.get(labware.barcode)}  ${
           selectedInputAddresses?.labware.barcode === slotCopy.sourceBarcode &&
           selectedInputAddresses?.addresses.includes(address)
-            ? 'ring ring-blue ring-offset-2'
+            ? 'ring-3 ring-blue ring-offset-2'
             : ''
         }`;
       }
@@ -296,10 +303,10 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
         return `bg-gray-300 ring-0 ring-offset-0 text-white border-0 border-gray-300`;
       }
       if (slot?.samples?.length) {
-        return `bg-${colorByBarcode.get(labware.barcode)}-500`;
+        return colorByBarcode.get(labware.barcode);
       }
     },
-    [colorByBarcode, memoInputAddressesDisabled, selectedInputAddresses, slotCopyContent]
+    [colorByBarcode, disabledColorByBarcode, memoInputAddressesDisabled, selectedInputAddresses, slotCopyContent]
   );
 
   const getDestinationSlotColor = useCallback(
@@ -325,9 +332,9 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
           selectedInputAddresses.labware.barcode === scc.sourceBarcode &&
           selectedInputAddresses.addresses.includes(scc.sourceAddress)
         ) {
-          return `bg-${colorByBarcode.get(scc.sourceBarcode)}-500 ring ring-blue-600 ring-offset-2`;
+          return `${colorByBarcode.get(scc.sourceBarcode)} ring-3 ring-blue-600 ring-offset-2`;
         }
-        return `bg-${colorByBarcode.get(scc.sourceBarcode)}-500`;
+        return `${colorByBarcode.get(scc.sourceBarcode)}`;
       }
     },
     [colorByBarcode, disabledOutputSlotAddresses, selectedInputAddresses, currentOutput]
@@ -632,7 +639,7 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
           <div className={'flex items-center justify-center'} data-testid="cytassist-labware">
             {outputSlotCopies.length > 0 &&
               outputSlotCopies.map((output, index) => (
-                <div className="flex flex-2  space-y-2" key={index}>
+                <div className="flex space-y-2" key={index}>
                   {output.labware && output.labware.labwareType.name && (
                     <Labware
                       labware={output.labware}

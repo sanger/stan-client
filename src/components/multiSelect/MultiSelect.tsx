@@ -37,7 +37,7 @@ interface SelectProps
   selectedOptionDisplayPosition?: Position;
 }
 const defaultClassNames =
-  'block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 disabled:opacity-75 disabled:bg-gray-200 disabled:cursor-not-allowed';
+  'block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100 disabled:opacity-75 disabled:bg-gray-200 disabled:cursor-not-allowed';
 
 export const MultiSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
   (
@@ -122,7 +122,7 @@ export const MultiSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
 
     const renderSelectedOptions = () => {
       return (
-        <div className={'flex flex-row flex-wrap mb-2 border-gray-100 border-2 py-2 shadow-sm'}>
+        <div className={'flex flex-row flex-wrap mb-2 border-gray-100 border-2 py-2 shadow-xs'}>
           {selectedWithoutEmptyString.map((selectedStr, index) => {
             return (
               <div className={'flex flex-row whitespace-nowrap mr-2 mb-1'} key={index}>
@@ -136,7 +136,7 @@ export const MultiSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
                     </div>
                     <button
                       data-testid="removeButton"
-                      className=" hover:bg-red-100 rounded-md focus:outline-none bg-white focus:bg-red-100 text-sdb-400 hover:text-red-600 disabled:text-gray-200"
+                      className=" hover:bg-red-100 rounded-md focus:outline-hidden bg-white focus:bg-red-100 text-sdb-400 hover:text-red-600 disabled:text-gray-200"
                       onClick={() => {
                         handleRemove(selectedStr);
                       }}
