@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 
 const Splash = () => {
   return (

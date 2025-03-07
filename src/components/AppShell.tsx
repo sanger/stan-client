@@ -6,7 +6,7 @@ import { useOnClickOutside } from '../lib/hooks';
 import Logo from './Logo';
 import GuestIcon from './icons/GuestIcon';
 import { useAuth } from '../context/AuthContext';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from '../dependencies/motion';
 import Heading from './Heading';
 import variants from '../lib/motionVariants';
 import { Slide, ToastContainer } from 'react-toastify';

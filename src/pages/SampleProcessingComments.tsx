@@ -5,7 +5,7 @@ import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { stanCore } from '../lib/sdk';
 import variants from '../lib/motionVariants';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import Warning from '../components/notifications/Warning';

@@ -1,6 +1,6 @@
 import React from 'react';
 import AppShell from '../components/AppShell';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import variants from '../lib/motionVariants';
 import Heading from '../components/Heading';
 import WorkNumberSelect, { WorkInfo } from '../components/WorkNumberSelect';

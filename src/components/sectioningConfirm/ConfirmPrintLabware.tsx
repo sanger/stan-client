@@ -1,6 +1,6 @@
 import React from 'react';
 import Heading from '../Heading';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import variants from '../../lib/motionVariants';
 import DataTable from '../DataTable';
 import LabelPrinter, { PrintResult } from '../LabelPrinter';
@@ -9,6 +9,7 @@ import { usePrinters } from '../../lib/hooks';
 import { CellProps } from 'react-table';
 import LabelPrinterButton from '../LabelPrinterButton';
 import labwareScanTableColumns from '../dataTableColumns/labwareColumns';
+
 type ConfirmPrintLabwareProps = {
   labwareType: string;
   labwares: LabwareFieldsFragment[];

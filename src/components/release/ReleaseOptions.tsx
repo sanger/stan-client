@@ -6,7 +6,7 @@ import Heading from '../Heading';
 import { Input } from '../forms/Input';
 import GrayBox, { Sidebar } from '../layouts/GrayBox';
 import PinkButton from '../buttons/PinkButton';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import DownloadIcon from '../icons/DownloadIcon';
 import Warning from '../notifications/Warning';
 import { ReleaseFileOptionFieldsFragment } from '../../types/sdk';

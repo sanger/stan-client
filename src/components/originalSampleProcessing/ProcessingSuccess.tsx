@@ -1,7 +1,7 @@
 import React from 'react';
 import Success from '../notifications/Success';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import { LabwareFieldsFragment } from '../../types/sdk';
 import variants from '../../lib/motionVariants';
 import DataTable from '../DataTable';
@@ -14,6 +14,7 @@ import BlueButton from '../buttons/BlueButton';
 import { reload } from '../../lib/sdk';
 import WhiteButton from '../buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
+
 interface ProcessingSuccessProps {
   labware: LabwareFieldsFragment[];
   columns: Column<LabwareFieldsFragment>[];

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { GetRegistrationInfoQuery, LabwareType, LifeStage } from '../../types/sdk';
 import { FieldArray, Form, useFormikContext } from 'formik';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from '../../dependencies/motion';
 import Heading from '../../components/Heading';
 import FormikInput from '../../components/forms/Input';
 import RadioGroup, { RadioButton } from '../../components/forms/RadioGroup';
@@ -80,9 +80,9 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
     <Form>
       <GrayBox>
         <AnimatePresence
-          exitBeforeEnter
-          onExitComplete={() => {
-            setFieldValue(
+          mode="wait"
+          onExitComplete={async () => {
+            await setFieldValue(
               'tissues',
               values.tissues.filter((t) => !!t.clientId)
             );

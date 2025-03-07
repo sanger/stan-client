@@ -1,6 +1,6 @@
 import React from 'react';
 import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment } from '../../types/sdk';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import { Column, Row } from 'react-table';
 import MutedText from '../MutedText';
 import LockIcon from '../icons/LockIcon';

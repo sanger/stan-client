@@ -1,7 +1,7 @@
 import { GetPotProcessingInfoQuery, LabwareFlaggedFieldsFragment } from '../../../types/sdk';
 import React from 'react';
 import { useMachine } from '@xstate/react';
-import { motion } from 'framer-motion';
+import { motion } from '../../../dependencies/motion';
 import variants from '../../../lib/motionVariants';
 import Labware from '../../labware/Labware';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../../pages/sectioning';

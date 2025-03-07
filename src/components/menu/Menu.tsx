@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useOnClickOutside } from '../../lib/hooks';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from '../../dependencies/motion';
 
 interface MenuProps {
   caption: string;

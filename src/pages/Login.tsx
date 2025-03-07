@@ -7,7 +7,7 @@ import LoginButton from '../components/buttons/LoginButton';
 import Warning from '../components/notifications/Warning';
 import Success from '../components/notifications/Success';
 import Logo from '../components/Logo';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import { extractServerErrors } from '../types/stan';
 import { StanCoreContext } from '../lib/sdk';
 import { ClientError } from 'graphql-request';

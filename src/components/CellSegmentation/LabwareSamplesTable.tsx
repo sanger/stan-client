@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import { LabwareFlaggedFieldsFragment } from '../../types/sdk';
 

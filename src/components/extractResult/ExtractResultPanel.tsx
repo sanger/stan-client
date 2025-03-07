@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { ExtractResultQuery } from '../../types/sdk';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import MutedText from '../MutedText';
 import LockIcon from '../icons/LockIcon';
 import DataTable from '../DataTable';

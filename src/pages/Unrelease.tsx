@@ -7,7 +7,7 @@ import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import columns from '../components/dataTableColumns/labwareColumns';
 import { FormikErrorMessage } from '../components/forms';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import variants from '../lib/motionVariants';
 import Heading from '../components/Heading';
 import MutedText from '../components/MutedText';

@@ -2,7 +2,7 @@ import React from 'react';
 import AppShell from '../components/AppShell';
 import { Form, Formik } from 'formik';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import variants from '../lib/motionVariants';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import LockIcon from '../icons/LockIcon';
 import RemoveButton from '../buttons/RemoveButton';
 import { useLabwareContext } from './LabwareScanner';

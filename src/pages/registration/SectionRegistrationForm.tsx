@@ -7,7 +7,7 @@ import FormikInput from '../../components/forms/Input';
 import Heading from '../../components/Heading';
 import { selectOptionValues } from '../../components/forms';
 import Pill from '../../components/Pill';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import BarcodeIcon from '../../components/icons/BarcodeIcon';
 import EditIcon from '../../components/icons/EditIcon';
 import LabwareIcon from '../../components/icons/LabwareIcon';

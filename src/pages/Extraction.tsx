@@ -5,7 +5,7 @@ import Heading from '../components/Heading';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import labwareScanTableColumns from '../components/dataTableColumns/labwareColumns';
 import Warning from '../components/notifications/Warning';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
 import LabelPrinterButton from '../components/LabelPrinterButton';
 import Circle from '../components/Circle';

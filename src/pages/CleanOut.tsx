@@ -3,7 +3,7 @@ import AppShell from '../components/AppShell';
 import { CleanOutMutation, CleanOutRequest } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import variants from '../lib/motionVariants';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';

@@ -12,7 +12,7 @@ import {
 import ExtractResultPanel from '../components/extractResult/ExtractResultPanel';
 import BlueButton from '../components/buttons/BlueButton';
 import variants from '../lib/motionVariants';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import AnalysisLabware from '../components/analysisLabware/analysisLabware';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { useMachine } from '@xstate/react';

@@ -22,7 +22,7 @@ import { stanCore } from '../../../lib/sdk';
 import WorkNumberSelect from '../../WorkNumberSelect';
 import Warning from '../../notifications/Warning';
 import variants from '../../../lib/motionVariants';
-import { motion } from 'framer-motion';
+import { motion } from '../../../dependencies/motion';
 import { selectOptionValues } from '../../forms';
 import ProcessingSuccess from '../ProcessingSuccess';
 import { useConfirmLeave } from '../../../lib/hooks';
