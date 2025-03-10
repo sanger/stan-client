@@ -221,12 +221,13 @@ function Search() {
                   )}
                   <div className="md:grid md:grid-cols-3 md:space-y-0 md:gap-4 space-y-2">
                     <div>
-                      <FormikInput name="labwareBarcode" label="STAN Barcode" />
+                      <FormikInput name="labwareBarcode" label="STAN Barcode" preventEnterKeyDefault={false} />
                     </div>
                     <div className="inline-block">
                       <FormikInput
                         name="tissueExternalNames"
                         label="External Identifier"
+                        preventEnterKeyDefault={false}
                         info={<ExternalIDFieldSearchInfo />}
                       />
                     </div>
@@ -235,6 +236,7 @@ function Search() {
                         name="donorNames"
                         label="Donor ID"
                         data-testid={'donor-names'}
+                        preventEnterKeyDefault={false}
                         info={
                           <div className={'flex flex-col whitespace-pre-wrap space-x-2 space-y-2'}>
                             <p className={'font-medium'}>
@@ -262,13 +264,19 @@ function Search() {
                         value={values.workNumber}
                         emptyOption={true}
                         options={selectOptionValues(sortedWorks(), 'workNumber', 'workNumber', true)}
+                        preventEnterKeyDefault={false}
                       />
                     </div>
                     <div>
-                      <FormikInput type="date" name="createdMin" label="Created After" />
+                      <FormikInput type="date" name="createdMin" label="Created After" preventEnterKeyDefault={false} />
                     </div>
                     <div>
-                      <FormikInput type="date" name="createdMax" label="Created Before" />
+                      <FormikInput
+                        type="date"
+                        name="createdMax"
+                        label="Created Before"
+                        preventEnterKeyDefault={false}
+                      />
                     </div>
                     <div>
                       <CustomReactSelect
@@ -278,6 +286,7 @@ function Search() {
                         emptyOption={true}
                         value={values.tissueTypeName}
                         options={selectOptionValues(searchInfo.tissueTypes, 'name', 'name')}
+                        preventEnterKeyDefault={false}
                       />
                     </div>
                     <div>
@@ -288,6 +297,7 @@ function Search() {
                         emptyOption={true}
                         value={values.labwareTypeName}
                         options={selectOptionValues(searchInfo.labwareTypes, 'name', 'name')}
+                        preventEnterKeyDefault={false}
                       />
                     </div>
                     <div>
@@ -298,6 +308,7 @@ function Search() {
                         emptyOption={true}
                         value={values.species}
                         options={selectOptionValues(searchInfo.species, 'name', 'name')}
+                        preventEnterKeyDefault={false}
                       />
                     </div>
                   </div>
