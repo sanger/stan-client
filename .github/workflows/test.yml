@@ -24,10 +24,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          cache: 'yarn'
-      - name: Install dependencides
-        run: >-
-          yarn install
+      - name: Install dependencies
+        run:  yarn install
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
@@ -80,13 +78,10 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
-        cache: 'yarn'
-    - name: Install dependencides
-      run: >-
-        yarn install
+    - name: Install dependencies
+      run: yarn install
     - name: Run jest tests
-      run: >-
-        yarn test:unit
+      run: yarn test:unit
 
   prettier:
     name: Check format with prettier
@@ -97,13 +92,10 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
-        cache: 'yarn'
-    - name: Install dependencides
-      run: >-
-        yarn install
+    - name: Install dependencies
+      run: yarn install
     - name: Run prettier
-      run: >-
-        yarn prettier --check .
+      run: yarn prettier --check .
     
   eslint:
     name: Lint with ESLint
@@ -114,10 +106,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
-        cache: 'yarn'
-    - name: Install dependencides
-      run: >-
-        yarn install
+    - name: Install dependencies
+      run:  yarn install
     - name: Lint using ESLint
-      run: >-
-        yarn lint
+      run: yarn lint
