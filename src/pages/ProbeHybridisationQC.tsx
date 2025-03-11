@@ -298,7 +298,7 @@ export default function ProbeHybridisationQC() {
                 <Heading level={4}>Completion Time</Heading>
                 <MutedText>Select a completion to apply to all the scanned labware.</MutedText>
                 <input
-                  className="rounded-md border-gray-300 w-1/2 p-2 mt-1"
+                  className="rounded-md border border-gray-300 w-1/2 p-2 mt-1"
                   data-testid={'globalCompletionDateTime'}
                   type="datetime-local"
                   max={getCurrentDateTime()}
@@ -376,7 +376,7 @@ export default function ProbeHybridisationQC() {
                                 Completion Time
                               </label>
                               <input
-                                className="rounded-md border-gray-300 p-2"
+                                className="rounded-md border border-gray-300 p-2 bg-white"
                                 data-testid={'completionDateTime'}
                                 type="datetime-local"
                                 max={getCurrentDateTime()}

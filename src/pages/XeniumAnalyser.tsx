@@ -7,6 +7,7 @@ import {
   AnalyserScanDataFieldsFragment,
   CassettePosition,
   EquipmentFieldsFragment,
+  LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   RecordAnalyserMutation,
   SamplePositionFieldsFragment,
@@ -29,7 +30,7 @@ import { GridDirection, objectKeys } from '../lib/helpers';
 import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { FormikErrorMessage, selectOptionValues } from '../components/forms';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { fromPromise } from 'xstate';
 import { lotRegx } from './ProbeHybridisationXenium';
 import { joinUnique, samplesFromLabwareOrSLot } from '../components/dataTableColumns';
@@ -37,6 +38,8 @@ import RemoveButton from '../components/buttons/RemoveButton';
 import PassIcon from '../components/icons/PassIcon';
 import Labware from '../components/labware/Labware';
 import Panel from '../components/Panel';
+import WhiteButton from '../components/buttons/WhiteButton';
+import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
@@ -130,6 +133,7 @@ const LabwareAnalyserTable = (labwareForm: AnalyserLabwareForm) => {
 
 const XeniumAnalyser = () => {
   const equipments = useLoaderData() as EquipmentFieldsFragment[];
+  const navigate = useNavigate();
   const [labwareSamples, setLabwareSamples] = React.useState<LabwareSamples[]>([]);
   const [hybridisation, setHybridisation] = React.useState<{ barcode: string; performed: boolean } | undefined>(
     undefined
@@ -398,13 +402,7 @@ const XeniumAnalyser = () => {
                             />
                           </div>
                           <div className={'flex flex-col'}>
-                            <FormikInput
-                              label={'Run Name'}
-                              type="text"
-                              name="runName"
-                              data-testid="runName"
-                              className="shadow-xs focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                            />
+                            <FormikInput label={'Run Name'} type="text" name="runName" data-testid="runName" />
                           </div>
                         </div>
                         <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
@@ -414,7 +412,6 @@ const XeniumAnalyser = () => {
                               type="text"
                               name="lotNumberA"
                               data-testid="lotNumberA"
-                              className="shadow-xs focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                             />
                           </div>
                           <div className={'flex flex-col'}>
@@ -423,7 +420,6 @@ const XeniumAnalyser = () => {
                               type="text"
                               name="lotNumberB"
                               data-testid="lotNumberB"
-                              className="shadow-xs focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                             />
                           </div>
                           <div className={'flex flex-col'}>
@@ -432,7 +428,6 @@ const XeniumAnalyser = () => {
                               type="text"
                               name="cellSegmentationLot"
                               data-testid="cellSegmentationLot"
-                              className="shadow-xs focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                             />
                           </div>
                         </div>
@@ -571,6 +566,21 @@ const XeniumAnalyser = () => {
                   <OperationCompleteModal
                     show={submissionResult !== undefined}
                     message={'Xenium analyser recorded on all labware'}
+                    additionalButtons={
+                      <WhiteButton
+                        type="button"
+                        style={{ marginLeft: 'auto' }}
+                        className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                        onClick={() => {
+                          createSessionStorageForLabwareAwaiting(
+                            values.labware.map((analyserLabware) => analyserLabware.labware as LabwareFieldsFragment)
+                          );
+                          navigate('/store');
+                        }}
+                      >
+                        Store
+                      </WhiteButton>
+                    }
                   >
                     <p>
                       If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
