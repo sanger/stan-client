@@ -24,10 +24,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
+          cache: 'yarn'
       - name: Install dependencies
         run:  yarn install
       - name: Cypress run
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v6
         with:
           install-command: yarn --frozen-lockfile --silent
           build: yarn build
@@ -40,6 +41,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
+          overwrite: true
           name: cypress-screenshots
           path: cypress/screenshots
 
@@ -78,6 +80,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
+        cache: 'yarn'
     - name: Install dependencies
       run: yarn install
     - name: Run jest tests
@@ -92,6 +95,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
+        cache: 'yarn'
     - name: Install dependencies
       run: yarn install
     - name: Run prettier
@@ -106,6 +110,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
+        cache: 'yarn'
     - name: Install dependencies
       run:  yarn install
     - name: Lint using ESLint
