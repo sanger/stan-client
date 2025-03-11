@@ -4,7 +4,7 @@ import React from 'react';
 import { getSdk } from '../types/sdk';
 import { NavigateFunction } from 'react-router-dom';
 
-const endpoint = process.env.NODE_ENV === 'test' ? 'http://127.0.0.1:3000/graphql' : '/graphql';
+const endpoint = process.env.NODE_ENV === 'test' ? 'http://localhost:3000/graphql' : '/graphql';
 export const graphQLClient = new GraphQLClient(endpoint);
 
 const xsrf = Cookies.get('XSRF-TOKEN');
