@@ -34,7 +34,7 @@ jobs:
           build: yarn build
           start: npx serve -s build -p 3000
           wait-on: "http://localhost:3000"
-          config: baseUrl=http:/localhost:3000
+          config: baseUrl=http://localhost:3000
           timeout-minutes: 5
           browser: chrome
       # store any screenshots of the failing tests as artifacts
