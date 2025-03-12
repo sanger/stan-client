@@ -1,7 +1,7 @@
 import React from 'react';
 import Label from './Label';
 import { Field } from 'formik';
-import { FormikErrorMessage, onPreventEnterKeyDefault } from './index';
+import { FormikErrorMessage, preventEnterKeyDefault } from './index';
 import classNames from 'classnames';
 
 const defaultInputClassNames =
@@ -14,18 +14,9 @@ interface FormikInputProps {
   [key: string]: any;
   displayTag?: string;
   info?: React.ReactNode;
-  preventEnterKeyDefault?: boolean;
 }
 
-const FormikInput = ({
-  label,
-  name,
-  type = 'text',
-  displayTag,
-  info,
-  preventEnterKeyDefault = true,
-  ...rest
-}: FormikInputProps) => {
+const FormikInput = ({ label, name, type = 'text', displayTag, info, ...rest }: FormikInputProps) => {
   const inputClassNames = classNames(
     {
       'bg-white border h-10 w-full disabled:bg-gray-200': type !== 'checkbox'
@@ -41,7 +32,7 @@ const FormikInput = ({
             data-testid={label}
             className={inputClassNames}
             name={name}
-            onKeyDown={preventEnterKeyDefault ? onPreventEnterKeyDefault : undefined}
+            onKeyDown={preventEnterKeyDefault}
             {...rest}
           />
         </Label>
