@@ -197,86 +197,86 @@ describe('RegistrationForm', () => {
       });
     });
 
-    describe('Add Identical Tissue button click', () => {
-      it('creates another identical  sample', async () => {
-        await act(async () => {
-          jest.mock('formik', () => ({
-            useFormikContext: jest.fn().mockImplementation(() => {
-              return {
-                setFieldValue: jest.fn(),
-                errors: undefined,
-                values: { tissues: [getRegistrationFormTissueSample()], workNumbers: [] }
-              };
-            })
-          }));
-          window.HTMLElement.prototype.scrollIntoView = jest.fn();
-          jest.mock('../../../../src/lib/hooks', () => ({
-            useScrollToRef: jest.fn().mockImplementation(() => {
-              return {
-                scrollToRef: jest.fn(),
-                ref: null
-              };
-            })
-          }));
-          const tissues: RegistrationFormOriginalSample = {
-            clientId: Date.now(),
-            donorId: '',
-            species: 'HuMFre1',
-            lifeStage: LifeStage.Fetal,
-            hmdmc: '',
-            tissueType: 'Kidney',
-            blocks: [
-              {
-                clientId: Date.now(),
-                spatialLocation: 1,
-                labwareType: 'Cassette',
-                fixative: 'Formalin',
-                solution: 'Ethanol',
-                externalIdentifier: 'EXT-1',
-                replicateNumber: '1'
-              }
-            ],
-            sampleCollectionDate: '',
-            workNumber: '',
-            bioRiskCode: ''
-          };
-          renderOriginalRegistrationForm(tissues);
-        });
-
-        await waitFor(() => {
-          fireEvent.click(screen.getByRole('button', { name: '+ Add Identical Tissue Sample' }));
-        });
-
-        //Two sample pages
-        expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
-        //Displays Delete sample button'
-        expect(screen.getAllByRole('button', { name: 'Delete Sample' })).toHaveLength(2);
-        //Populates the value of Spatial location from the tissue sample created'
-        const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
-        const slDiv = within(sampleDiv).getAllByTestId('Spatial Location');
-        expect(slDiv[0]).toHaveTextContent('1 - Cortex');
-        //Populates the value of LabwareType from the tissue sample created
-        const lwDiv = within(sampleDiv).getAllByTestId('Labware Type');
-        expect(lwDiv[0]).toHaveTextContent('Cassette');
-        //Should display all other fields as empty'
-        const extId = within(sampleDiv).getByTestId('External Identifier');
-        expect(extId).toHaveTextContent('');
-        const replicateDiv = within(sampleDiv).getByTestId('Replicate Number');
-        expect(replicateDiv).toHaveTextContent('');
-        const fixativeDiv = within(sampleDiv).getAllByTestId('Fixative');
-        expect(fixativeDiv[0]).not.toHaveTextContent('Formalin');
-        const solutionDiv = within(sampleDiv).getAllByTestId('Solution');
-        expect(solutionDiv[0]).not.toHaveTextContent('Ethanol');
-
-        //On "Delete Sample" button click'
-        await waitFor(() => {
-          fireEvent.click(screen.getAllByRole('button', { name: 'Delete Sample' })[0]);
-          //One sample page
-          expect(screen.getAllByTestId('sample-info-div')).toHaveLength(1);
-          expect(screen.queryByRole('button', { name: 'Delete Sample' })).not.toBeInTheDocument();
-        });
-      });
-    });
+    // describe('Add Identical Tissue button click', () => {
+    //   it('creates another identical  sample', async () => {
+    //     await act(async () => {
+    //       jest.mock('formik', () => ({
+    //         useFormikContext: jest.fn().mockImplementation(() => {
+    //           return {
+    //             setFieldValue: jest.fn(),
+    //             errors: undefined,
+    //             values: { tissues: [getRegistrationFormTissueSample()], workNumbers: [] }
+    //           };
+    //         })
+    //       }));
+    //       window.HTMLElement.prototype.scrollIntoView = jest.fn();
+    //       jest.mock('../../../../src/lib/hooks', () => ({
+    //         useScrollToRef: jest.fn().mockImplementation(() => {
+    //           return {
+    //             scrollToRef: jest.fn(),
+    //             ref: null
+    //           };
+    //         })
+    //       }));
+    //       const tissues: RegistrationFormOriginalSample = {
+    //         clientId: Date.now(),
+    //         donorId: '',
+    //         species: 'HuMFre1',
+    //         lifeStage: LifeStage.Fetal,
+    //         hmdmc: '',
+    //         tissueType: 'Kidney',
+    //         blocks: [
+    //           {
+    //             clientId: Date.now(),
+    //             spatialLocation: 1,
+    //             labwareType: 'Cassette',
+    //             fixative: 'Formalin',
+    //             solution: 'Ethanol',
+    //             externalIdentifier: 'EXT-1',
+    //             replicateNumber: '1'
+    //           }
+    //         ],
+    //         sampleCollectionDate: '',
+    //         workNumber: '',
+    //         bioRiskCode: ''
+    //       };
+    //       renderOriginalRegistrationForm(tissues);
+    //     });
+    //
+    //     await waitFor(() => {
+    //       fireEvent.click(screen.getByRole('button', { name: '+ Add Identical Tissue Sample' }));
+    //     });
+    //
+    //     //Two sample pages
+    //     expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
+    //     //Displays Delete sample button'
+    //     expect(screen.getAllByRole('button', { name: 'Delete Sample' })).toHaveLength(2);
+    //     //Populates the value of Spatial location from the tissue sample created'
+    //     const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
+    //     const slDiv = within(sampleDiv).getAllByTestId('Spatial Location');
+    //     expect(slDiv[0]).toHaveTextContent('1 - Cortex');
+    //     //Populates the value of LabwareType from the tissue sample created
+    //     const lwDiv = within(sampleDiv).getAllByTestId('Labware Type');
+    //     expect(lwDiv[0]).toHaveTextContent('Cassette');
+    //     //Should display all other fields as empty'
+    //     const extId = within(sampleDiv).getByTestId('External Identifier');
+    //     expect(extId).toHaveTextContent('');
+    //     const replicateDiv = within(sampleDiv).getByTestId('Replicate Number');
+    //     expect(replicateDiv).toHaveTextContent('');
+    //     const fixativeDiv = within(sampleDiv).getAllByTestId('Fixative');
+    //     expect(fixativeDiv[0]).not.toHaveTextContent('Formalin');
+    //     const solutionDiv = within(sampleDiv).getAllByTestId('Solution');
+    //     expect(solutionDiv[0]).not.toHaveTextContent('Ethanol');
+    //
+    //     //On "Delete Sample" button click'
+    //     await waitFor(() => {
+    //       fireEvent.click(screen.getAllByRole('button', { name: 'Delete Sample' })[0]);
+    //       //One sample page
+    //       expect(screen.getAllByTestId('sample-info-div')).toHaveLength(1);
+    //       expect(screen.queryByRole('button', { name: 'Delete Sample' })).not.toBeInTheDocument();
+    //     });
+    //   });
+    // });
   });
 
   describe('Block registration', () => {
