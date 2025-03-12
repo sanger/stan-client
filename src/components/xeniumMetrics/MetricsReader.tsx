@@ -137,7 +137,7 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
   }, [setValues, rowIndex]);
 
   return (
-    <div className={'max-w-32 bg-gray-100 border border-gray-200 bg-gray-100 rounded-md'}>
+    <div className={'max-w-80 border border-gray-200 bg-gray-100 rounded-md pr-4 pl-4'}>
       <div className="flex flex-col border-b-2 border-gray-200 space-x-6 py-2" data-testid={'upload'}>
         <div className="grid grid-cols-3">
           <div className="flex flex-row space-x-4 col-span-2">
@@ -150,7 +150,9 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
             />
             <label
               htmlFor={`file-${rowIndex}`}
-              className={'bg-white text-gray-400 disabled:cursor-not-allowed whitespace-nowrap  py-2 px-4 rounded'}
+              className={
+                'bg-white text-gray-400 disabled:cursor-not-allowed whitespace-nowrap  py-2 px-4 rounded w-32 text-center'
+              }
             >
               Select file...
             </label>
