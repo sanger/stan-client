@@ -1,7 +1,7 @@
 import React from 'react';
 import Label from './Label';
 import { useFormikContext } from 'formik';
-import { FormikErrorMessage, preventEnterKeyDefault } from './index';
+import { FormikErrorMessage, onPreventEnterKeyDefault } from './index';
 import ReactSelect, { components, Props } from 'react-select';
 import AddButton from '../buttons/AddButton';
 const defaultClassNames =
@@ -34,6 +34,7 @@ interface CustomReactSelectProps extends Props {
   valueAsNumber?: boolean;
   fixedWidth?: number;
   addButton?: AddButtonProps;
+  preventEnterKeyDefault?: boolean;
 }
 
 const defaultValue = (options: OptionType[], value: any, isMulti: boolean) => {
@@ -65,6 +66,7 @@ export const NormalReactSelect = ({
   isMulti = false,
   fixedWidth,
   addButton,
+  preventEnterKeyDefault = true,
   ...props
 }: CustomReactSelectProps) => {
   const onChangeValue = React.useCallback(
@@ -113,7 +115,7 @@ export const NormalReactSelect = ({
           onChange={(val) => onChangeValue(val)}
           onBlur={(val) => onBlur(val)}
           options={memoOptions}
-          onKeyDown={preventEnterKeyDefault}
+          onKeyDown={preventEnterKeyDefault ? onPreventEnterKeyDefault : undefined}
           value={defaultValue(memoOptions, value, isMulti)}
           isMulti={isMulti}
           placeholder={placeholder ?? ''}
@@ -176,6 +178,7 @@ const FormikReactSelect = ({
   handleBlur,
   valueAsNumber,
   fixedWidth,
+  preventEnterKeyDefault,
   ...props
 }: CustomReactSelectProps) => {
   const { setFieldValue, setFieldTouched } = useFormikContext() ?? {};
@@ -227,6 +230,7 @@ const FormikReactSelect = ({
         isMulti={isMulti}
         value={memoNewValue}
         fixedWidth={fixedWidth}
+        preventEnterKeyDefault={preventEnterKeyDefault}
         {...props}
       />
 
