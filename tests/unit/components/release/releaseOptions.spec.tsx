@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { createMemoryRouter } from 'react-router-dom';
 import { RouterProvider } from 'react-router';
 import ReleaseOptions from '../../../../src/components/release/ReleaseOptions';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();
@@ -38,8 +39,8 @@ describe('ReleaseOptions', () => {
       initialEntries: ['/releaseOptions?id=123&groups=option_1,option_2&type=xlsx']
     });
     render(<RouterProvider router={router} />);
-    ['Option 1', 'Option 2'].forEach((option, indx) => {
-      const optionCheckBox = screen.getAllByRole('checkbox')[indx];
+    ['Option 1', 'Option 2'].forEach((_option, index) => {
+      const optionCheckBox = screen.getAllByRole('checkbox')[index];
       expect(optionCheckBox).toBeChecked();
     });
     const option3 = screen.getAllByRole('checkbox')[2];
