@@ -10,7 +10,7 @@ import AppShell from '../components/AppShell';
 import { FieldArray, Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import variants from '../lib/motionVariants';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import Heading from '../components/Heading';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';

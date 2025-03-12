@@ -6,7 +6,7 @@ import PinkButton from '../buttons/PinkButton';
 import Modal, { ModalBody, ModalFooter } from '../Modal';
 import Heading from '../Heading';
 import BlueButton from '../buttons/BlueButton';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import { selectOptionValues } from '../forms';
 import LayoutPlanner from '../LayoutPlanner';
 import Label from '../forms/Label';

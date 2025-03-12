@@ -1,7 +1,7 @@
 import React from 'react';
 import InfoIcon from '../icons/InfoIcon';
 import variants from '../../lib/motionVariants';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import classNames from 'classnames';
 import FailIcon from '../icons/FailIcon';
 import Modal, { ModalBody, ModalHeader } from '../Modal';

@@ -12,7 +12,7 @@ import {
 } from '../types/sdk';
 import * as Yup from 'yup';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import variants from '../lib/motionVariants';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';

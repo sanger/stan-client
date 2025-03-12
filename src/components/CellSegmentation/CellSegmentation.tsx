@@ -4,7 +4,7 @@ import { CommentFieldsFragment, LabwareFlaggedFieldsFragment, SlideCosting } fro
 import LabwareScanner from '../labwareScanner/LabwareScanner';
 import MutedText from '../MutedText';
 import Heading from '../Heading';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import variants from '../../lib/motionVariants';
 import Panel from '../Panel';
 import RemoveButton from '../buttons/RemoveButton';

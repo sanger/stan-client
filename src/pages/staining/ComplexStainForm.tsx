@@ -8,7 +8,7 @@ import {
 } from '../../types/sdk';
 import { Form, Formik } from 'formik';
 import GrayBox, { Sidebar } from '../../components/layouts/GrayBox';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import variants from '../../lib/motionVariants';
 import Heading from '../../components/Heading';
 import MutedText from '../../components/MutedText';

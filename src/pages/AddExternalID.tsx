@@ -10,7 +10,7 @@ import { FormikErrorMessage } from '../components/forms';
 import PinkButton from '../components/buttons/PinkButton';
 import Warning from '../components/notifications/Warning';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import variants from '../lib/motionVariants';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';

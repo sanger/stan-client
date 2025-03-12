@@ -5,7 +5,7 @@ import { DestroyMutation, DestroyRequest, GetDestroyInfoQuery } from '../types/s
 import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import variants from '../lib/motionVariants';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';

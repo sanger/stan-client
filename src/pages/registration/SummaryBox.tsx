@@ -1,5 +1,5 @@
 import Heading from '../../components/Heading';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import GuestIcon from '../../components/icons/GuestIcon';
 import EditIcon from '../../components/icons/EditIcon';
 import BlockIcon from '../../components/icons/BlockIcon';

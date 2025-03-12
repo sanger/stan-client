@@ -3,7 +3,7 @@ import AppShell from '../components/AppShell';
 import { objectKeys, parseQueryString } from '../lib/helpers';
 import BlockProcessing from '../components/originalSampleProcessing/blockProcessing/BlockProcessing';
 import variants from '../lib/motionVariants';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 import { stanCore } from '../lib/sdk';
 import PotProcessing from '../components/originalSampleProcessing/potProcessing/PotProcessing';
 import { GetBlockProcessingInfoQuery, GetPotProcessingInfoQuery } from '../types/sdk';

@@ -7,7 +7,7 @@ import BlueButton from '../buttons/BlueButton';
 import Heading from '../Heading';
 import LayoutPlanner from '../LayoutPlanner';
 import Labware from '../labware/Labware';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import variants from '../../lib/motionVariants';
 import Warning from '../notifications/Warning';
 import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';

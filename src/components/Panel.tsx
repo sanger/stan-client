@@ -1,6 +1,6 @@
 import React from 'react';
 import variants from '../lib/motionVariants';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 
 type PanelProps = {
   children: React.ReactNode;

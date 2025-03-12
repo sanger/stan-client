@@ -7,7 +7,7 @@ import { Link, useLoaderData, useLocation, useNavigate } from 'react-router-dom'
 import { useConfirmLeave } from '../../lib/hooks';
 import Heading from '../../components/Heading';
 import BlueButton from '../../components/buttons/BlueButton';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import { ModalBody } from '../../components/Modal';
 import Success from '../../components/notifications/Success';
 import variants from '../../lib/motionVariants';

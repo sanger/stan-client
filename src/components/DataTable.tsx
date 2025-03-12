@@ -1,7 +1,7 @@
 import React, { ReactNode, useImperativeHandle } from 'react';
 import { Column, PluginHook, SortingRule, TableState, useSortBy, useTable } from 'react-table';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from './Table';
-import { motion } from 'framer-motion';
+import { motion } from '../dependencies/motion';
 
 type ColumnWithAllCapitalProp<T extends object = {}> = Column<T> & {
   allCapital?: boolean;

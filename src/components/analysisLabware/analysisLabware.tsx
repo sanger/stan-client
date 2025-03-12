@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 import Heading from '../Heading';
 import { CommentFieldsFragment, EquipmentFieldsFragment, RnaAnalysisLabware } from '../../types/sdk';
 import { Row } from 'react-table';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import DataTable from '../DataTable';
 import { useMachine } from '@xstate/react';
 import { analysisLabwareMachine } from './analysisLabware.machine';

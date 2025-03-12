@@ -2,7 +2,7 @@ import React from 'react';
 import Success from '../../components/notifications/Success';
 import BlueButton from '../../components/buttons/BlueButton';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from '../../dependencies/motion';
 import { LabwareFieldsFragment } from '../../types/sdk';
 import variants from '../../lib/motionVariants';
 import DataTable from '../../components/DataTable';
