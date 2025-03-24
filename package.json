@@ -62,7 +62,7 @@
     "start:js": "craco --openssl-legacy-provider start",
     "build:js": "craco --openssl-legacy-provider build",
     "start:css": "postcss src/styles/tailwind.css -o src/styles/index.css -w",
-    "build:css": "postcss src/styles/tailwind.css -o src/styles/index.css",
+    "build:css": "postcss src/styles/tailwind.css -o src/styles/index.css --env production",
     "cypress:open": "cypress open --config-file=cypress.config.ts",
     "cypress:run": "cypress run",
     "test": "start-server-and-test start 3000 cypress:run",
