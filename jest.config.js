@@ -16,5 +16,6 @@ module.exports = {
   },
   testMatch: ['<rootDir>/tests/unit/**/*.spec.{js,jsx,ts,tsx}', '<rootDir>/tests/e2e/**/*.spec.{js,jsx,ts,tsx}'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  setupFiles: ['./jest.polyfills.js'],
   transformIgnorePatterns: ['node_modules/(?!(msw)/)']
 };
