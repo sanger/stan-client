@@ -112,7 +112,7 @@ export default function ProbeHybridisationQC() {
             ...rq,
             labware: {
               ...rq.labware,
-              completion: formatDateTimeForCore(completionTime)
+              completion: completionTime
             }
           };
         })
@@ -184,7 +184,8 @@ export default function ProbeHybridisationQC() {
             ...omit(data, 'globalComments'),
             labware: [
               {
-                ...data.labware
+                ...data.labware,
+                completion: data.labware.completion ? formatDateTimeForCore(data.labware.completion) : undefined
               }
             ]
           }
@@ -392,7 +393,7 @@ export default function ProbeHybridisationQC() {
                                               ...rq,
                                               labware: {
                                                 ...rq.labware,
-                                                completion: formatDateTimeForCore(e.target.value)
+                                                completion: e.target.value
                                               }
                                             };
                                           } else {
