@@ -28,6 +28,7 @@ export default function HistoryInput({ eventTypes }: HistoryInputProps) {
               { label: 'Graph', value: 'graph' }
             ]}
             value={values.resultFormat}
+            preventEnterKeyDefault={false}
           />
         </div>
         <div className={'flex flex-col '}>
@@ -40,10 +41,11 @@ export default function HistoryInput({ eventTypes }: HistoryInputProps) {
             multiple={false}
             dataTestId={'workNumber'}
             workNumberType={'ALL'}
+            preventEnterKeyDefault={false}
           />
         </div>
         <div className={'flex flex-col '}>
-          <FormikInput name="barcode" label="Barcode" data-testid={'barcode'} />
+          <FormikInput name="barcode" label="Barcode" data-testid={'barcode'} preventEnterKeyDefault={false} />
         </div>
         <div className={'flex flex-col '}>
           <FormikInput
@@ -51,6 +53,7 @@ export default function HistoryInput({ eventTypes }: HistoryInputProps) {
             label="External Name"
             data-testid={'external-name'}
             info={<ExternalIDFieldSearchInfo />}
+            preventEnterKeyDefault={false}
           />
         </div>
         <div className={'flex flex-col '}>
@@ -75,6 +78,7 @@ export default function HistoryInput({ eventTypes }: HistoryInputProps) {
                 </p>
               </div>
             }
+            preventEnterKeyDefault={false}
           />
         </div>
         {values.resultFormat === 'table' && (
@@ -86,6 +90,7 @@ export default function HistoryInput({ eventTypes }: HistoryInputProps) {
               dataTestId={'event-type'}
               options={eventTypes.sort().map((evtType) => ({ label: evtType, value: evtType }))}
               value={values.eventType}
+              preventEnterKeyDefault={false}
             />
           </div>
         )}

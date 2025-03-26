@@ -84,6 +84,7 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, requ
                   emptyOption={true}
                   onWorkNumberChange={(workNumber) => setFieldValue('workNumber', workNumber)}
                   workNumber={values.workNumber}
+                  preventEnterKeyDefault={false}
                 />
               </div>
               {programs && (
@@ -99,6 +100,7 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, requ
                   value={values.programs}
                   isMulti={true}
                   dataTestId={'select_program'}
+                  preventEnterKeyDefault={false}
                 />
               )}
               {workTypes && (
@@ -114,6 +116,7 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, requ
                   value={values.workTypes}
                   dataTestId={'select_workType'}
                   isMulti={true}
+                  preventEnterKeyDefault={false}
                 />
               )}
               {sortedStatues && (
@@ -130,6 +133,7 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, requ
                   name={'statuses'}
                   value={values.statuses}
                   dataTestId={'select_status'}
+                  preventEnterKeyDefault={false}
                 />
               )}
               {requesters && (
@@ -145,6 +149,7 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, requ
                   value={values.requesters}
                   dataTestId={'select_workRequester'}
                   isMulti={true}
+                  preventEnterKeyDefault={false}
                 />
               )}
             </div>
