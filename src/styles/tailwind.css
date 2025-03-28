@@ -10,6 +10,54 @@
   @apply grid-cols-12;
 }
 
+.grid-cols-location-2 {
+  @apply grid-cols-location-2;
+}
+
+.grid-cols-location-3 {
+  @apply grid-cols-location-3;
+}
+
+.grid-cols-location-4 {
+  @apply grid-cols-location-4;
+}
+
+.grid-cols-location-5 {
+  @apply grid-cols-location-5;
+}
+
+.grid-cols-location-5 {
+  @apply grid-cols-location-5;
+}
+
+.grid-cols-location-6 {
+  @apply grid-cols-location-6;
+}
+
+.grid-cols-location-7 {
+  @apply grid-cols-location-7;
+}
+
+.grid-cols-location-8 {
+  @apply grid-cols-location-8;
+}
+
+.grid-cols-location-9 {
+  @apply grid-cols-location-9;
+}
+
+.grid-cols-location-10 {
+  @apply grid-cols-location-10;
+}
+
+.grid-cols-location-11 {
+  @apply grid-cols-location-11;
+}
+
+.grid-cols-location-12 {
+  @apply grid-cols-location-12;
+}
+
 .bg-red-500 {
   background-color: oklch(68.82% 0.1776 22.95);
 }
@@ -45,4 +93,38 @@
 }
 .bg-purple-200 {
   background-color: oklch(89.6% 0.0484 232.92);
+}
+
+/* prod theme colors */
+.border-sdb-100 {
+  @apply border-sdb-100;
+}
+
+.bg-sdb-400 {
+  @apply bg-sdb-400;
+}
+
+.from-sdb{
+  @apply from-sdb;
+}
+
+.to-sdb-400{
+  @apply to-sdb-400;
+}
+
+/* uat theme colors */
+.border-green-600 {
+  @apply border-green-600;
+}
+
+.bg-green-800 {
+  @apply bg-green-800;
+}
+
+.from-green-800{
+  @apply from-green-800;
+}
+
+.to-green-700{
+  @apply to-green-700;
 }
