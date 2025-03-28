@@ -104,11 +104,11 @@
   @apply bg-sdb-400;
 }
 
-.from-sdb{
+.from-sdb {
   @apply from-sdb;
 }
 
-.to-sdb-400{
+.to-sdb-400 {
   @apply to-sdb-400;
 }
 
@@ -121,10 +121,10 @@
   @apply bg-green-800;
 }
 
-.from-green-800{
+.from-green-800 {
   @apply from-green-800;
 }
 
-.to-green-700{
+.to-green-700 {
   @apply to-green-700;
 }
