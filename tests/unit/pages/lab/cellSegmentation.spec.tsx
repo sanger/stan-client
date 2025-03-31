@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { CellSegmentation } from '../../../../src/pages/CellSegmentation';
 import { getCurrentDateTime } from '../../../../src/types/stan';
 import { createFlaggedLabware } from '../../../../src/mocks/handlers/flagLabwareHandlers';
+import { SlideCosting } from '../../../../src/types/sdk';
 
 jest.mock('react-router-dom', () => ({
   ...(jest.requireActual('react-router-dom') as any),
@@ -49,7 +50,7 @@ describe('Cell Segmentation', () => {
                 {
                   labware: mockedScannedLabware,
                   performed: getCurrentDateTime(),
-                  costing: '',
+                  costing: SlideCosting.WarrantyReplacement,
                   comments: [],
                   workNumber: '',
                   reagentLot: ''
@@ -57,7 +58,7 @@ describe('Cell Segmentation', () => {
               ],
               workNumberAll: '',
               performedAll: getCurrentDateTime(),
-              costingAll: '',
+              costingAll: undefined,
               commentsAll: [],
               reagentLotAll: ''
             }}
