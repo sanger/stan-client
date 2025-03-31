@@ -27,7 +27,7 @@ type CellSegmentationProps = {
   labware: LabwareFlaggedFieldsFragment;
   workNumber: string;
   performed: string;
-  costing: string;
+  costing: SlideCosting;
   comments?: string[];
   reagentLot?: string;
 };
@@ -36,7 +36,7 @@ export type CellSegmentationFormProps = {
   cellSegmentation: CellSegmentationProps[];
   workNumberAll: string;
   performedAll: string;
-  costingAll: string;
+  costingAll?: SlideCosting;
   commentsAll: string[];
   reagentLotAll: string;
 };
@@ -46,7 +46,7 @@ const defaultFormValues: CellSegmentationFormProps = {
   reagentLotAll: '',
   workNumberAll: '',
   performedAll: getCurrentDateTime(),
-  costingAll: '',
+  costingAll: undefined,
   commentsAll: []
 };
 
@@ -56,7 +56,7 @@ const validationSchema = Yup.object().shape({
     Yup.object().shape({
       workNumber: Yup.string().required('SGP number is required'),
       performed: Yup.string().required('Performed time is required'),
-      costing: Yup.string().oneOf(Object.keys(SlideCosting)).required('Costing is required'),
+      costing: Yup.string().oneOf(Object.values(SlideCosting)).required('Costing is required'),
       comments: Yup.array().of(Yup.string()).optional(),
       reagentLot: Yup.string().matches(/^\d{6}$/, 'Reagent Lot should be a 6-digit number')
     })
@@ -69,7 +69,7 @@ const toSegmentationRequest = (values: CellSegmentationFormProps): SegmentationR
       barcode: cellSeg.labware.barcode,
       workNumber: cellSeg.workNumber,
       performed: formatDateTimeForCore(cellSeg.performed),
-      costing: SlideCosting[cellSeg.costing as keyof typeof SlideCosting],
+      costing: cellSeg.costing,
       commentIds: cellSeg.comments ? cellSeg.comments.map((comment) => parseInt(comment)) : [],
       reagentLot: cellSeg.reagentLot
     };

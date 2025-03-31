@@ -16,7 +16,7 @@ import Heading from '../components/Heading';
 import { visiumLPCytAssistFactory } from '../lib/factories/labwareFactory';
 import MutedText from '../components/MutedText';
 import ScanInput from '../components/scanInput/ScanInput';
-import { objectKeys } from '../lib/helpers';
+import { slideCostingOptions } from '../lib/helpers';
 import Label from '../components/forms/Label';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { SlotCopyMode } from '../components/slotMapper/slotMapper.types';
@@ -25,6 +25,7 @@ import * as Yup from 'yup';
 import LabelPrinter from '../components/LabelPrinter';
 import ButtonBar from '../components/ButtonBar';
 import MultipleLabwareSlotMapper from '../components/slotMapper/MultipleLabwareSlotMapper';
+import { selectOptionValues } from '../components/forms';
 
 interface OutputLabwareScanPanelProps {
   preBarcode: Maybe<string> | undefined;
@@ -123,12 +124,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
                 name={'costing'}
                 emptyOption={true}
                 dataTestId="output-labware-costing"
-                options={objectKeys(SlideCosting).map((key) => {
-                  return {
-                    label: SlideCosting[key],
-                    value: SlideCosting[key]
-                  };
-                })}
+                options={selectOptionValues(slideCostingOptions, 'label', 'value')}
               />
             </div>
             <div data-testid={'lot-number'}>

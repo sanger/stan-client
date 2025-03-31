@@ -31,8 +31,8 @@ import { createLabwarePlanMachine } from './labwarePlan.machine';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../pages/sectioning';
 import ScanInput from '../scanInput/ScanInput';
 import FormikSelect from '../forms/Select';
-import { objectKeys, Position } from '../../lib/helpers';
-import { FormikErrorMessage } from '../forms';
+import { Position, slideCostingOptions } from '../../lib/helpers';
+import { FormikErrorMessage, selectOptionValues } from '../forms';
 
 type LabwarePlanProps = {
   /**
@@ -141,11 +141,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
           onSubmit={async (values) => {
             const newValues = {
               ...values,
-              costing: isLabwareWithCosting
-                ? values.costing === 'SGP'
-                  ? SlideCosting.Sgp
-                  : SlideCosting.Faculty
-                : undefined
+              costing: isLabwareWithCosting ? values.costing : undefined
             };
             send({ type: 'CREATE_LABWARE', ...newValues });
           }}
@@ -212,9 +208,9 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                           emptyOption={true}
                           disabled={current.matches('printing') || current.matches('done')}
                         >
-                          {objectKeys(SlideCosting).map((key) => (
-                            <option key={key} value={SlideCosting[key]}>
-                              {SlideCosting[key]}
+                          {selectOptionValues(slideCostingOptions, 'label', 'value').map((cost) => (
+                            <option key={cost.value} value={cost.value}>
+                              {cost.value}
                             </option>
                           ))}
                         </FormikSelect>
@@ -360,7 +356,7 @@ type FormValues = {
   /**
    * The Slide costing (only for Visium slides)
    */
-  costing?: string;
+  costing?: SlideCosting;
 };
 
 /**

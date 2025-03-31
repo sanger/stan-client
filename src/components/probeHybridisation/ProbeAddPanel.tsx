@@ -8,7 +8,7 @@ import React from 'react';
 import { lotRegx, ProbeHybridisationXeniumFormValues } from '../../pages/ProbeHybridisationXenium';
 import MutedText from '../MutedText';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
-import { objectKeys } from '../../lib/helpers';
+import { slideCostingOptions } from '../../lib/helpers';
 
 type ProbeLotAddPanelProps = {
   probePanels: ProbePanelFieldsFragment[];
@@ -17,13 +17,7 @@ type ProbeLotAddPanelProps = {
 const isAnEmptyProbeRow = (probeRow: Array<ProbeLot>) => {
   return (
     probeRow.length === 1 &&
-    probeRow.every(
-      (probe) =>
-        probe.name === '' &&
-        probe.lot === '' &&
-        probe.plex === 0 &&
-        ![SlideCosting.Sgp, SlideCosting.Faculty].includes(probe.costing)
-    )
+    probeRow.every((probe) => probe.name === '' && probe.lot === '' && probe.plex === 0 && probe.costing === undefined)
   );
 };
 
@@ -31,7 +25,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
   const [probeName, setProbeName] = React.useState('');
   const [probeLot, setProbeLot] = React.useState('');
   const [probePlex, setProbePlex] = React.useState('');
-  const [probeCosting, setProbeCosting] = React.useState('');
+  const [probeCosting, setProbeCosting] = React.useState<SlideCosting>();
   const [probeLotError, setProbeLotError] = React.useState({ name: '', lot: '', plex: '', costing: '' });
   const isTouched = React.useRef(false);
 
@@ -79,7 +73,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
   );
 
   const validateProbeCosting = React.useCallback(
-    (probeCosting: string) => {
+    (probeCosting: SlideCosting | undefined) => {
       isTouched.current = true;
       if (!probeCosting) {
         setProbeLotError((prev) => ({ ...prev, costing: 'Probe costing is required.' }));
@@ -117,7 +111,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
       probeLotError.name.length > 0 ||
       probeLotError.plex.length > 0 ||
       probeLotError.costing.length > 0 ||
-      !(Number(probePlex) > 0 && probeName.length > 0 && probeLot.length > 0 && probeCosting.length > 0)
+      !(Number(probePlex) > 0 && probeName.length > 0 && probeLot.length > 0 && probeCosting !== undefined)
     );
   };
 
@@ -172,17 +166,12 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
           value={probeCosting}
           handleChange={(val) => {
             isTouched.current = true;
-            setProbeCosting((val as OptionType).value);
+            setProbeCosting((val as OptionType).label as SlideCosting);
           }}
           onBlur={() => validateProbeCosting(probeCosting)}
           emptyOption={true}
           dataTestId="probe-costing"
-          options={objectKeys(SlideCosting).map((key) => {
-            return {
-              label: SlideCosting[key],
-              value: SlideCosting[key]
-            };
-          })}
+          options={selectOptionValues(slideCostingOptions, 'label', 'value')}
         />
         {probeLotError.name ? <MutedText className={'text-blue-400'}>{probeLotError.name}</MutedText> : <div />}
         {probeLotError.lot ? <MutedText className={'text-blue-400'}>{probeLotError.lot}</MutedText> : <div />}
@@ -202,7 +191,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
                       name: probeName,
                       lot: probeLot,
                       plex: Number(probePlex),
-                      costing: probeCosting === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty
+                      costing: probeCosting!
                     }))
                   : [
                       ...lw.probes,
@@ -210,7 +199,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
                         name: probeName,
                         lot: probeLot,
                         plex: Number(probePlex),
-                        costing: probeCosting === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty
+                        costing: probeCosting!
                       }
                     ];
                 return {
