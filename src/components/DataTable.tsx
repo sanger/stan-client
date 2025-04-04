@@ -30,6 +30,8 @@ interface DataTableProps<T extends object> {
    * class name list to assign to each cell, defaults to whitespace-nowrap, if none is provided
    */
   cellClassName?: string;
+
+  noHeader?: boolean;
 }
 
 const DataTableComponent = <T extends Object>(
@@ -39,7 +41,8 @@ const DataTableComponent = <T extends Object>(
     defaultSort,
     sortable = false,
     fixedHeader = false,
-    cellClassName
+    cellClassName,
+    noHeader = false
   }: React.PropsWithChildren<DataTableProps<T>>,
   ref?: React.Ref<T[]>
 ): React.ReactElement<DataTableProps<T>> => {
@@ -98,51 +101,53 @@ const DataTableComponent = <T extends Object>(
 
   return (
     <Table {...getTableProps()}>
-      <TableHead fixed={fixedHeader}>
-        {headerGroups.map((headerGroup, indx) => (
-          <tr {...headerGroup.getHeaderGroupProps()} key={indx}>
-            {headerGroup.headers.map((column) => (
-              <TableHeader
-                allCapital={(column as ColumnWithAllCapitalProp).allCapital}
-                {...column.getHeaderProps(sortable ? column.getSortByToggleProps() : undefined)}
-              >
-                {column.render('Header') as ReactNode}
-                {column.isSorted ? (
-                  column.isSortedDesc ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="inline-block h-4 w-4"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+      {!noHeader && (
+        <TableHead fixed={fixedHeader}>
+          {headerGroups.map((headerGroup, indx) => (
+            <tr {...headerGroup.getHeaderGroupProps()} key={indx}>
+              {headerGroup.headers.map((column) => (
+                <TableHeader
+                  allCapital={(column as ColumnWithAllCapitalProp).allCapital}
+                  {...column.getHeaderProps(sortable ? column.getSortByToggleProps() : undefined)}
+                >
+                  {column.render('Header') as ReactNode}
+                  {column.isSorted ? (
+                    column.isSortedDesc ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="inline-block h-4 w-4"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="inline-block h-4 w-4"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )
                   ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="inline-block h-4 w-4"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )
-                ) : (
-                  ''
-                )}
-              </TableHeader>
-            ))}
-          </tr>
-        ))}
-      </TableHead>
+                    ''
+                  )}
+                </TableHeader>
+              ))}
+            </tr>
+          ))}
+        </TableHead>
+      )}
       <TableBody {...getTableBodyProps()}>
         {rows.map((row) => {
           prepareRow(row);

@@ -18,6 +18,7 @@ interface TableHeaderProps {
   children?: ReactNode | ReactNode[];
   allCapital?: boolean;
   colSpan?: number;
+  className?: string;
 }
 /**
  * @example
@@ -62,7 +63,14 @@ export const TableHead = ({ children, fixed = false }: TableHeadProps) => {
   return <thead className={`${fixed ? 'sticky top-0' : ''}`}>{children}</thead>;
 };
 
-export const TableHeader = ({ children, sortProps, allCapital = true, colSpan, ...rest }: TableHeaderProps) => {
+export const TableHeader = ({
+  children,
+  sortProps,
+  allCapital = true,
+  colSpan,
+  className,
+  ...rest
+}: TableHeaderProps) => {
   return (
     <th className="px-6 py-3 bg-gray-50 text-left select-none" colSpan={colSpan} {...rest}>
       <>
@@ -78,7 +86,7 @@ export const TableHeader = ({ children, sortProps, allCapital = true, colSpan, .
               <span
                 className={`bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 tracking-wide ${
                   allCapital ? 'uppercase' : ''
-                }`}
+                } ${className}`}
               >
                 {children}
               </span>
