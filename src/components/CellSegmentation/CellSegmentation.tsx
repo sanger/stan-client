@@ -1,6 +1,6 @@
 import { useFormikContext } from 'formik';
 import React from 'react';
-import { CommentFieldsFragment, LabwareFlaggedFieldsFragment, SlideCosting } from '../../types/sdk';
+import { CommentFieldsFragment, LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
 import MutedText from '../MutedText';
 import Heading from '../Heading';
@@ -15,9 +15,9 @@ import { selectOptionValues } from '../forms';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import WorkNumberSelect from '../WorkNumberSelect';
 import LabwareSamplesTable from './LabwareSamplesTable';
-import { capitalize } from 'lodash';
 import StyledLink from '../StyledLink';
 import FlagIcon from '../icons/FlagIcon';
+import { slideCostingOptions } from '../../lib/helpers';
 
 type CellSegmentationPageProps = {
   comments: CommentFieldsFragment[];
@@ -39,10 +39,6 @@ type CellSegmentationFormProps = {
   costingAll?: string;
   commentsAll?: string[];
 };
-
-export const slideCostingOptions: OptionType[] = Object.values(SlideCosting).map((val) => {
-  return { value: capitalize(val), label: val };
-});
 
 const labwareLink = (labware: LabwareFlaggedFieldsFragment) => {
   return (
@@ -226,74 +222,71 @@ export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
                         </tr>
                       </TableHead>
                       <TableBody>
-                        {values.cellSegmentation.map((cellSeg, index) => {
-                          return (
-                            <tr key={index}>
-                              <TableCell>{cellSeg.labware.barcode}</TableCell>
-                              <TableCell>
-                                <WorkNumberSelect
-                                  dataTestId={`cellSegmentation.${index}.workNumber`}
-                                  workNumber={cellSeg.workNumber}
-                                  onWorkNumberChange={async (workNumber) => {
-                                    await setFieldValue(`cellSegmentation.${index}.workNumber`, workNumber);
-                                  }}
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <FormikInput
-                                  label={''}
-                                  max={getCurrentDateTime()}
-                                  type="datetime-local"
-                                  name={`cellSegmentation.${index}.performed`}
-                                  data-testid={`cellSegmentation.${index}.performed`}
-                                />
-                              </TableCell>
-                              {!isQc && (
-                                <>
-                                  <TableCell>
-                                    <CustomReactSelect
-                                      options={selectOptionValues(slideCostingOptions, 'label', 'value')}
-                                      name={`cellSegmentation.${index}.costing`}
-                                      dataTestId={`cellSegmentation.${index}.costing`}
-                                      emptyOption={true}
-                                      value={cellSeg.costing}
-                                      onChange={async (val) => {
-                                        await setFieldValue(
-                                          `cellSegmentation.${index}.costing`,
-                                          (val as OptionType).value
-                                        );
-                                      }}
-                                    />
-                                  </TableCell>
-                                  <TableCell>
-                                    <FormikInput
-                                      label={''}
-                                      name={`cellSegmentation.${index}.reagentLot`}
-                                      data-testid={`cellSegmentation.${index}.reagentLot`}
-                                      className={'w-2/5'}
-                                    />
-                                  </TableCell>
-                                </>
-                              )}
-                              <TableCell>
-                                <CustomReactSelect
-                                  name={`cellSegmentation.${index}.comments`}
-                                  options={selectOptionValues(comments, 'text', 'id')}
-                                  dataTestId={`cellSegmentation.${index}.comments`}
-                                  emptyOption={true}
-                                  isMulti={true}
-                                  value={cellSeg.comments ?? []}
-                                  onChange={async (val) => {
-                                    const selected = (val as OptionType[])
-                                      .filter((v) => v.label.length > 0)
-                                      .map((v) => v.value);
-                                    await setFieldValue(`cellSegmentation.${index}.comments`, selected);
-                                  }}
-                                />
-                              </TableCell>
-                            </tr>
-                          );
-                        })}
+                        {values.cellSegmentation.map((cellSeg, index) => (
+                          <tr key={index}>
+                            <TableCell>{cellSeg.labware.barcode}</TableCell>
+                            <TableCell>
+                              <WorkNumberSelect
+                                dataTestId={`cellSegmentation.${index}.workNumber`}
+                                workNumber={cellSeg.workNumber}
+                                onWorkNumberChange={async (workNumber) => {
+                                  await setFieldValue(`cellSegmentation.${index}.workNumber`, workNumber);
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <FormikInput
+                                label={''}
+                                max={getCurrentDateTime()}
+                                type="datetime-local"
+                                name={`cellSegmentation.${index}.performed`}
+                                data-testid={`cellSegmentation.${index}.performed`}
+                              />
+                            </TableCell>
+                            {!isQc && (
+                              <>
+                                <TableCell>
+                                  <CustomReactSelect
+                                    options={selectOptionValues(slideCostingOptions, 'label', 'value')}
+                                    name={`cellSegmentation.${index}.costing`}
+                                    dataTestId={`cellSegmentation.${index}.costing`}
+                                    emptyOption={true}
+                                    value={cellSeg.costing}
+                                    onChange={async (val) => {
+                                      await setFieldValue(
+                                        `cellSegmentation.${index}.costing`,
+                                        (val as OptionType).value
+                                      );
+                                    }}
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <FormikInput
+                                    label={''}
+                                    name={`cellSegmentation.${index}.reagentLot`}
+                                    data-testid={`cellSegmentation.${index}.reagentLot`}
+                                  />
+                                </TableCell>
+                              </>
+                            )}
+                            <TableCell>
+                              <CustomReactSelect
+                                name={`cellSegmentation.${index}.comments`}
+                                options={selectOptionValues(comments, 'text', 'id')}
+                                dataTestId={`cellSegmentation.${index}.comments`}
+                                emptyOption={true}
+                                isMulti={true}
+                                value={cellSeg.comments ?? []}
+                                onChange={async (val) => {
+                                  const selected = (val as OptionType[])
+                                    .filter((v) => v.label.length > 0)
+                                    .map((v) => v.value);
+                                  await setFieldValue(`cellSegmentation.${index}.comments`, selected);
+                                }}
+                              />
+                            </TableCell>
+                          </tr>
+                        ))}
                       </TableBody>
                     </Table>
                   </div>

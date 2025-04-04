@@ -1,9 +1,10 @@
 import * as Yup from 'yup';
-import { Maybe } from '../types/sdk';
+import { Maybe, SlideCosting } from '../types/sdk';
 import { HasEnabled, SizeInput } from '../types/stan';
 import { isNaN } from 'lodash';
 import { Key } from 'react';
 import { Column } from 'react-table';
+import { OptionType } from '../components/forms/CustomReactSelect';
 
 /**
  * Utility for retrieving a list of correctly typed object keys.
@@ -488,3 +489,7 @@ export function friendlyName(array: string[]) {
     .filter((str) => str.length > 0)
     .join(', ');
 }
+
+export const slideCostingOptions: OptionType[] = Object.values(SlideCosting).map((val) => {
+  return { value: val, label: val };
+});

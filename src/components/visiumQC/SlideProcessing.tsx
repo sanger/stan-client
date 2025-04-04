@@ -11,9 +11,9 @@ import Panel from '../Panel';
 import LabwareResult from '../labwareResult/LabwareResult';
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
-import { objectKeys } from '../../lib/helpers';
+import { slideCostingOptions } from '../../lib/helpers';
 import ScanInput from '../scanInput/ScanInput';
-import { FormikErrorMessage } from '../forms';
+import { FormikErrorMessage, selectOptionValues } from '../forms';
 import { stanCore } from '../../lib/sdk';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
@@ -100,12 +100,7 @@ const SlideProcessing = ({
                   emptyOption={true}
                   isDisabled={initialCosting !== undefined}
                   dataTestId="slide-costing"
-                  options={objectKeys(SlideCosting).map((key) => {
-                    return {
-                      label: SlideCosting[key],
-                      value: SlideCosting[key]
-                    };
-                  })}
+                  options={selectOptionValues(slideCostingOptions, 'label', 'value')}
                 />
               </div>
               <div className={'flex flex-col'}>

@@ -5,12 +5,12 @@ import FormikInput from '../forms/Input';
 import React from 'react';
 import { FieldArray, useFormikContext } from 'formik';
 import { ProbeHybridisationXeniumFormValues, probeLotDefault } from '../../pages/ProbeHybridisationXenium';
-import { ProbePanelFieldsFragment, SlideCosting } from '../../types/sdk';
+import { ProbePanelFieldsFragment } from '../../types/sdk';
 import RemoveButton from '../buttons/RemoveButton';
 import IconButton from '../buttons/IconButton';
 import AddIcon from '../icons/AddIcon';
 import CustomReactSelect from '../forms/CustomReactSelect';
-import { objectKeys } from '../../lib/helpers';
+import { slideCostingOptions } from '../../lib/helpers';
 
 type ProbeTableProps = {
   probePanels: ProbePanelFieldsFragment[];
@@ -47,12 +47,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
               <CustomReactSelect
                 dataTestId={`${probeLw.labware.barcode}-kitCosting`}
                 name={`labware.${lwIndex}.kitCosting`}
-                options={objectKeys(SlideCosting).map((key) => {
-                  return {
-                    label: SlideCosting[key],
-                    value: SlideCosting[key]
-                  };
-                })}
+                options={selectOptionValues(slideCostingOptions, 'label', 'value')}
                 value={probeLw.kitCosting}
                 emptyOption={true}
               />
@@ -111,12 +106,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                           label={''}
                           dataTestId={`${probeLw.labware.barcode}-${probeIndex}-costing`}
                           name={`labware.${lwIndex}.probes.${probeIndex}.costing`}
-                          options={objectKeys(SlideCosting).map((key) => {
-                            return {
-                              label: SlideCosting[key],
-                              value: SlideCosting[key]
-                            };
-                          })}
+                          options={selectOptionValues(slideCostingOptions, 'label', 'value')}
                           isMulti={false}
                           value={probe.costing}
                           emptyOption={true}

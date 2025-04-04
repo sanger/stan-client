@@ -32,8 +32,8 @@ import { useLoaderData, useNavigate } from 'react-router-dom';
 import { fromPromise } from 'xstate';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { selectOptionValues } from '../components/forms';
-import { slideCostingOptions } from '../components/CellSegmentation/CellSegmentation';
 import WhiteButton from '../components/buttons/WhiteButton';
+import { slideCostingOptions } from '../lib/helpers';
 
 type ProbeOperationLabwareForm = {
   labware: LabwareFieldsFragment;
@@ -47,7 +47,7 @@ export type ProbeHybridisationXeniumFormValues = {
   labware: ProbeOperationLabwareForm[];
   performed: string;
   workNumberAll: string;
-  costingAll?: string;
+  costingAll?: SlideCosting;
   samplePrepReagentLot?: string;
 };
 export const probeLotDefault = { name: '', lot: '', plex: 0 };
@@ -249,8 +249,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                                     name={'costingAll'}
                                     value={'costingAll'}
                                     handleChange={async (val) => {
-                                      const kitCosting =
-                                        (val as OptionType).label === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty;
+                                      const kitCosting = (val as OptionType).label as SlideCosting;
                                       await setValues((prev) => {
                                         return {
                                           ...prev,
