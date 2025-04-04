@@ -31,12 +31,12 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
       </TableHead>
       <TableBody>
         {values.labware.map((probeLw, lwIndex) => (
-          <tr key={probeLw.barcode}>
-            <TableCell>{probeLw.barcode}</TableCell>
+          <tr key={probeLw.labware.barcode}>
+            <TableCell>{probeLw.labware.barcode}</TableCell>
             <TableCell>
               <WorkNumberSelect
                 name={`labware.${lwIndex}.workNumber`}
-                dataTestId={`${probeLw.barcode}-workNumber`}
+                dataTestId={`${probeLw.labware.barcode}-workNumber`}
                 onWorkNumberChange={(workNumber) => {
                   setFieldValue(`labware.${lwIndex}.workNumber`, workNumber);
                 }}
@@ -45,7 +45,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
             </TableCell>
             <TableCell>
               <CustomReactSelect
-                dataTestId={`${probeLw.barcode}-kitCosting`}
+                dataTestId={`${probeLw.labware.barcode}-kitCosting`}
                 name={`labware.${lwIndex}.kitCosting`}
                 options={objectKeys(SlideCosting).map((key) => {
                   return {
@@ -81,7 +81,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                       <TableCell>
                         <CustomReactSelect
                           label={''}
-                          dataTestId={`${probeLw.barcode}-${probeIndex}-name`}
+                          dataTestId={`${probeLw.labware.barcode}-${probeIndex}-name`}
                           name={`labware.${lwIndex}.probes.${probeIndex}.name`}
                           options={selectOptionValues(probePanels, 'name', 'name')}
                           isMulti={false}
@@ -92,7 +92,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                       <TableCell>
                         <FormikInput
                           label={''}
-                          data-testid={`${probeLw.barcode}-${probeIndex}-lot`}
+                          data-testid={`${probeLw.labware.barcode}-${probeIndex}-lot`}
                           name={`labware.${lwIndex}.probes.${probeIndex}.lot`}
                         />
                       </TableCell>
@@ -101,7 +101,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                           label={''}
                           name={`labware.${lwIndex}.probes.${probeIndex}.plex`}
                           type={'number'}
-                          data-testid={`${probeLw.barcode}-${probeIndex}-plex`}
+                          data-testid={`${probeLw.labware.barcode}-${probeIndex}-plex`}
                           min={0}
                           value={probe.plex > 0 ? probe.plex : ''}
                         />
@@ -109,7 +109,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                       <TableCell>
                         <CustomReactSelect
                           label={''}
-                          dataTestId={`${probeLw.barcode}-${probeIndex}-costing`}
+                          dataTestId={`${probeLw.labware.barcode}-${probeIndex}-costing`}
                           name={`labware.${lwIndex}.probes.${probeIndex}.costing`}
                           options={objectKeys(SlideCosting).map((key) => {
                             return {
@@ -125,7 +125,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                       <TableCell>
                         <div
                           className={'flex flex-row space-x-2'}
-                          data-testid={`${probeLw.barcode}-${probeIndex}-action`}
+                          data-testid={`${probeLw.labware.barcode}-${probeIndex}-action`}
                         >
                           {probeIndex === 0 && probeLw.probes.length === 1 ? (
                             <></>
