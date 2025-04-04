@@ -1,6 +1,8 @@
 import React, { useContext } from 'react';
 import {
   GetProbePanelsQuery,
+  LabwareFieldsFragment,
+  ProbeLot,
   ProbeOperationLabware,
   ProbeOperationRequest,
   RecordProbeOperationMutation,
@@ -24,16 +26,25 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import Warning from '../components/notifications/Warning';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import ProbeTable from '../components/probeHybridisation/ProbeTable';
-import { getCurrentDateTime } from '../types/stan';
+import { createSessionStorageForLabwareAwaiting, formatDateTimeForCore, getCurrentDateTime } from '../types/stan';
 import ProbeAddPanel from '../components/probeHybridisation/ProbeAddPanel';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { fromPromise } from 'xstate';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { selectOptionValues } from '../components/forms';
+import WhiteButton from '../components/buttons/WhiteButton';
 import { slideCostingOptions } from '../lib/helpers';
 
+type ProbeOperationLabwareForm = {
+  labware: LabwareFieldsFragment;
+  workNumber: string;
+  kitCosting: SlideCosting;
+  samplePrepReagentLot?: string;
+  probes: Array<ProbeLot>;
+};
+
 export type ProbeHybridisationXeniumFormValues = {
-  labware: ProbeOperationLabware[];
+  labware: ProbeOperationLabwareForm[];
   performed: string;
   workNumberAll: string;
   costingAll?: SlideCosting;
@@ -56,7 +67,7 @@ const ProbeHybridisationXenium: React.FC = () => {
       actors: {
         submitForm: fromPromise(({ input }) => {
           if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
-          const performedValue = input.event.values.performed!.replace('T', ' ') + ':00';
+          const performedValue = formatDateTimeForCore(input.event.values.performed);
           return stanCore.RecordProbeOperation({
             // Stan-core's graphql schema describes the format of a timestamp as yyyy-mm-dd HH:MM:SS
             request: { ...input.event.values, performed: performedValue }
@@ -90,7 +101,7 @@ const ProbeHybridisationXenium: React.FC = () => {
     labware: Yup.array()
       .of(
         Yup.object().shape({
-          barcode: Yup.string().required().label('Barcode'),
+          labware: Yup.object().required(),
           workNumber: Yup.string().required().label('SGP Number'),
           kitCosting: Yup.string().oneOf(Object.values(SlideCosting)).required('Costing is a required field'),
           samplePrepReagentLot: Yup.string().matches(
@@ -130,6 +141,7 @@ const ProbeHybridisationXenium: React.FC = () => {
       .required()
   });
 
+  const navigate = useNavigate();
   return (
     <AppShell>
       <AppShell.Header>
@@ -148,7 +160,13 @@ const ProbeHybridisationXenium: React.FC = () => {
                   values: {
                     operationType: 'Probe hybridisation Xenium',
                     performed: values.performed,
-                    labware: values.labware
+                    labware: values.labware.map((probeLw) => ({
+                      barcode: probeLw.labware.barcode,
+                      workNumber: probeLw.workNumber,
+                      kitCosting: probeLw.kitCosting,
+                      samplePrepReagentLot: probeLw.samplePrepReagentLot,
+                      probes: probeLw.probes
+                    }))
                   }
                 });
               }}
@@ -163,9 +181,9 @@ const ProbeHybridisationXenium: React.FC = () => {
                           onChange={(labware) => {
                             labware.forEach((lw) => {
                               /**If Labware scanned not already displayed, add to probe list**/
-                              if (!values.labware.some((valueLw) => valueLw.barcode === lw.barcode)) {
+                              if (!values.labware.some((valueLw) => valueLw.labware.barcode === lw.barcode)) {
                                 helpers.push({
-                                  barcode: lw.barcode,
+                                  labware: lw,
                                   workNumber: '',
                                   probes: [probeLotDefault]
                                 });
@@ -173,7 +191,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                             });
                             /**If Labware not scanned is displayed, remove from probe list**/
                             values.labware.forEach((valueLw, index) => {
-                              if (!labware.some((lw) => lw.barcode === valueLw.barcode)) {
+                              if (!labware.some((lw) => lw.barcode === valueLw.labware.barcode)) {
                                 helpers.remove(index);
                               }
                             });
@@ -293,6 +311,21 @@ const ProbeHybridisationXenium: React.FC = () => {
                   <OperationCompleteModal
                     show={submissionResult !== undefined}
                     message={'Xenium probe hybridisation recorded on all labware'}
+                    additionalButtons={
+                      <div className={'flex flex-row gap-x-3'}>
+                        <WhiteButton
+                          type="button"
+                          style={{ marginLeft: 'auto' }}
+                          className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                          onClick={() => {
+                            createSessionStorageForLabwareAwaiting(values.labware.map((probeLw) => probeLw.labware));
+                            navigate('/store');
+                          }}
+                        >
+                          Store
+                        </WhiteButton>
+                      </div>
+                    }
                   >
                     <p>
                       If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
