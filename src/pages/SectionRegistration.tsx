@@ -288,7 +288,14 @@ export const SectionRegistration: React.FC = () => {
         });
       });
     });
-    return <RegistrationSuccess successData={samples} columns={columnsToDisplay} labware={result} />;
+    return (
+      <RegistrationSuccess
+        successData={samples}
+        columns={columnsToDisplay}
+        labware={result}
+        isSectionRegistration={true}
+      />
+    );
   }
 
   return (
