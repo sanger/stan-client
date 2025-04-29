@@ -161,7 +161,7 @@ export default function LabwareResult({
                     min={0}
                     max={100}
                     value={slotMeasurements.get(slot.address)?.value}
-                    className={'rounded rounded-md w-20'}
+                    className={'rounded-md w-20 bg-white border border-gray-300'}
                     onChange={(e) => {
                       if (validateMeasurementField(e.currentTarget.value)) {
                         send({
