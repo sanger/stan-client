@@ -5,14 +5,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from '../../dependencies/motion';
 import { LabwareFieldsFragment } from '../../types/sdk';
 import variants from '../../lib/motionVariants';
-import DataTable from '../../components/DataTable';
-import LabelPrinter from '../../components/LabelPrinter';
 import PinkButton from '../../components/buttons/PinkButton';
 import ButtonBar from '../../components/ButtonBar';
 import AppShell from '../../components/AppShell';
 import { Column } from 'react-table';
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 import { SampleDataTableRow } from '../../components/dataTableColumns/sampleColumns';
+import { PrintLabwareWithSampleDetails } from './PrintLabwareWithSampleDetails';
+import DataTable from '../../components/DataTable';
+import LabelPrinter from '../../components/LabelPrinter';
 
 /**Represent an object containing LabwareFieldsFragment member**/
 export interface LabwareContainType extends Object {
@@ -23,12 +24,14 @@ type RegistrationSuccessProps<T extends Required<LabwareContainType> | LabwareFi
   successData: T[];
   columns: Column<T>[];
   labware: LabwareFieldsFragment[];
+  isSectionRegistration?: boolean;
 };
 
 const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFieldsFragment | SampleDataTableRow>({
   successData,
   columns,
-  labware
+  labware,
+  isSectionRegistration = false
 }: RegistrationSuccessProps<T>) => {
   const navigate = useNavigate();
 
@@ -48,18 +51,23 @@ const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFie
             <Success message={'Registration complete'} />
           </motion.div>
 
-          <motion.div variants={variants.fadeInWithLift} className="flex flex-col">
-            <DataTable columns={columns} data={successData} />
-          </motion.div>
+          {isSectionRegistration && <PrintLabwareWithSampleDetails labware={labware} />}
+          {!isSectionRegistration && (
+            <>
+              <motion.div variants={variants.fadeInWithLift} className="flex flex-col">
+                <DataTable columns={columns} data={successData} />
+              </motion.div>
 
-          <div className="flex flex-row items-center sm:justify-end">
-            <motion.div
-              variants={variants.fadeInWithLift}
-              className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow-md"
-            >
-              {<LabelPrinter labwares={labware} />}
-            </motion.div>
-          </div>
+              <div className="flex flex-row items-center sm:justify-end">
+                <motion.div
+                  variants={variants.fadeInWithLift}
+                  className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow-md"
+                >
+                  {<LabelPrinter labwares={labware} />}
+                </motion.div>
+              </div>
+            </>
+          )}
         </motion.div>
       </AppShell.Main>
 
