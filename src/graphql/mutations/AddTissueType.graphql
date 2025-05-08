@@ -1,10 +1,10 @@
 mutation AddTissueType($request: AddTissueTypeRequest!) {
-    addTissueType(request: $request) {
-        name
-        code
-        spatialLocations {
-            code
-            name
-        }
+  addTissueType(request: $request) {
+    name
+    code
+    spatialLocations {
+      code
+      name
     }
+  }
 }

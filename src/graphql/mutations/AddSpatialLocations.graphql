@@ -1,9 +1,9 @@
 mutation AddSpatialLocations($request: AddSpatialLocationsRequest!) {
-    addSpatialLocations(request: $request) {
-        name
-        spatialLocations {
-            code
-            name
-        }
+  addSpatialLocations(request: $request) {
+    name
+    spatialLocations {
+      code
+      name
     }
+  }
 }

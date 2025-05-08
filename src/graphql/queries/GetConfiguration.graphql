@@ -56,5 +56,4 @@ query GetConfiguration {
   tissueTypes {
     ...TissueTypeFields
   }
-
 }
