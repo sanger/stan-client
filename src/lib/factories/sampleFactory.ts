@@ -71,7 +71,7 @@ export const speciesFactory: Factory<Species> = Factory.define<Species>(({ param
 
 export const spatialLocationFactory = Factory.define<SpatialLocation>(({ params, associations }) => ({
   __typename: 'SpatialLocation',
-  name: params.name ?? 'MONKEY',
+  name: params.name ?? faker.lorem.words(),
   code: params.code ?? _.random(33),
   tissueType: associations.tissueType ?? tissueTypeFactory.build()
 }));
@@ -79,5 +79,6 @@ export const spatialLocationFactory = Factory.define<SpatialLocation>(({ params,
 export const tissueTypeFactory = Factory.define<TissueType>(({ sequence, params }) => ({
   __typename: 'TissueType',
   name: params.name ?? `Tissue Type ${sequence}`,
+  code: params.code ?? faker.string.alpha({ length: 3, casing: 'upper' }),
   spatialLocations: []
 }));

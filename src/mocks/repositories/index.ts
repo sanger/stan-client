@@ -4,6 +4,7 @@ type Repository<T> = {
   save: (entity: T) => T;
   findAll: () => T[];
   find: (key: keyof T, value: string | number) => Maybe<T>;
+  saveAll: (entities: Array<T>) => void;
 };
 
 export function createSessionStorageRepository<T>(storageKey: string, primaryKey: keyof T, seeds: T[]): Repository<T> {
@@ -33,9 +34,21 @@ export function createSessionStorageRepository<T>(storageKey: string, primaryKey
     return entity;
   }
 
+  function saveAll(entities: Array<T>) {
+    const keys = entities.map((entity) => entity[primaryKey]);
+    const merged = [
+      all().filter((entity) => {
+        return !keys.includes(entity[primaryKey]);
+      }),
+      ...entities
+    ];
+    sessionStorage.setItem(storageKey, JSON.stringify(merged));
+  }
+
   return {
     find,
     findAll,
-    save
+    save,
+    saveAll
   };
 }

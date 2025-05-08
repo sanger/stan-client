@@ -1,0 +1,8 @@
+fragment TissueTypeFields on TissueType {
+  name
+  spatialLocations {
+    code
+    name
+  }
+
+}

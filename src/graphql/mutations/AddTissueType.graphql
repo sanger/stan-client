@@ -1,0 +1,9 @@
+mutation AddTissueType($request: AddTissueTypeRequest!) {
+    addTissueType(request: $request) {
+        name
+        spatialLocations {
+            code
+            name
+        }
+    }
+}

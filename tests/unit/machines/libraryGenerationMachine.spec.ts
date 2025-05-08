@@ -12,6 +12,7 @@ import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHan
 import { SlotMeasurement } from '../../../src/components/slotMeasurement/SlotMeasurements';
 import * as sdk from '../../../src/lib/sdk';
 import { plateOutputSlotCopy } from '../../../src/components/libraryGeneration/SlotCopyComponent';
+import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
 
 const mockedMachineInput = {
   workNumber: '',
@@ -352,6 +353,9 @@ describe('libraryGenerationMachine', () => {
       describe('On Save', () => {
         describe('When request succeed', () => {
           it('assign server success message', (done) => {
+            jest.spyOn(sdk.stanCore, 'RecordLibraryPrep').mockResolvedValueOnce({
+              libraryPrep: { operations: [{ id: 1 }], labware: [createLabware('STAN-5123')] }
+            });
             const actor = createActor(libraryGenerationMachine, {
               input: mockedMachineInput,
               snapshot: libraryGenerationMachine.resolveState({

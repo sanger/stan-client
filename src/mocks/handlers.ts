@@ -62,6 +62,8 @@ import cleanOutHandlers from './handlers/cleanOutHandlers';
 import regionOfInterestHandlers from './handlers/regionOfInterestHandlers';
 import omeroProjectHandlers from './handlers/omeroProjectHandlers';
 import bioRiskHandler from './handlers/bioRiskHandler';
+import spatialLocationHandlers from './handlers/spatialLocationHandlers';
+import tissueTypeHandlers from './handlers/tissueTypeHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -125,5 +127,7 @@ export const handlers = [
   ...regionOfInterestHandlers,
   ...projectHandlers,
   ...omeroProjectHandlers,
-  ...bioRiskHandler
+  ...bioRiskHandler,
+  ...spatialLocationHandlers,
+  ...tissueTypeHandlers
 ];
