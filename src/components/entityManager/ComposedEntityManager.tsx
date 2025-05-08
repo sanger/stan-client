@@ -24,34 +24,40 @@ export type EntityDefinition<A, B, C> = {
   type: string;
   properties: Array<EntityProperty>;
   orderBy: string;
-  onCreate: (entity: B, parentEntity?: A) => Promise<C>;
+  onCreate: (entity: A, parentEntity?: C) => Promise<B>;
   toString?: (entity: A) => string;
+  initialValue?: A;
 };
 
-type ComposedEntityManagerProps<E, F, G, H, I> = {
+type ComposedEntityManagerProps<E, F, G, H> = {
   composedEntities: Array<E>;
-  entitiesDef: EntityDefinition<E, H, I>;
-  nestedEntitiesDef: EntityDefinition<E, F, G>;
+  entitiesDef: EntityDefinition<E, F, E>;
+  nestedEntitiesDef: EntityDefinition<G, H, E>;
 };
 
-export default function ComposedEntityManager<E extends ComposedEntities, F, G, H, I>({
+export default function ComposedEntityManager<E extends ComposedEntities, F, G, H>({
   composedEntities,
   entitiesDef,
   nestedEntitiesDef
-}: ComposedEntityManagerProps<E, F, G, H, I>) {
-  const [serverErrors, setServerErrors] = React.useState<Maybe<ClientError> | string>(null);
+}: ComposedEntityManagerProps<E, F, G, H>) {
+  const composeErrorMessage = React.useCallback((serverErrors: ClientError) => {
+    const extracted = extractServerErrors(serverErrors);
+    return extracted.message + ':\n' + extracted.problems.join('\n');
+  }, []);
+
+  const [serverErrors, setServerErrors] = React.useState<Maybe<ClientError>>(null);
   const [serverSuccess, setServerSuccess] = React.useState<Maybe<string>>(null);
 
   useEffect(() => {
     if (serverErrors) {
       warningToast({
-        message: serverErrors instanceof ClientError ? extractServerErrors(serverErrors).message! : serverErrors,
+        message: composeErrorMessage(serverErrors),
         position: toast.POSITION.TOP_RIGHT,
         autoClose: 5000
       });
       setServerErrors(null);
     }
-  }, [serverErrors]);
+  }, [serverErrors, composeErrorMessage]);
 
   useEffect(() => {
     if (serverSuccess) {
@@ -74,7 +80,7 @@ export default function ComposedEntityManager<E extends ComposedEntities, F, G, 
 
         return {
           ...entity,
-          [nestedEntitiesDef.name]: nestedEntities
+          [nestedEntitiesDef.type]: nestedEntities
         };
       });
   }, [composedEntities, entitiesDef.orderBy, nestedEntitiesDef]);
@@ -118,12 +124,12 @@ export default function ComposedEntityManager<E extends ComposedEntities, F, G, 
                     {entity[entityProp.propertyName] as string}
                   </TableCell>
                 ))}
-                {isExpanded && (entity[nestedEntitiesDef.name] as Record<string, EntityValueType>[]).length === 0 && (
+                {isExpanded && (entity[nestedEntitiesDef.type] as Record<string, EntityValueType>[]).length === 0 && (
                   <TableCell>
                     <MutedText>{`No ${nestedEntitiesDef.name} is associated with this ${entitiesDef.name}`}</MutedText>
                   </TableCell>
                 )}
-                {isExpanded && (entity[nestedEntitiesDef.name] as Record<string, EntityValueType>[]).length > 0 && (
+                {isExpanded && (entity[nestedEntitiesDef.type] as Record<string, EntityValueType>[]).length > 0 && (
                   <TableCell
                     className={`grid grid-cols-${nestedEntitiesDef.properties.length}`}
                     onClick={() => {
@@ -141,7 +147,7 @@ export default function ComposedEntityManager<E extends ComposedEntities, F, G, 
                         {`${nestedEntitiesDef.name}  ${prop.propertyName}`}
                       </div>
                     ))}
-                    {(entity[nestedEntitiesDef.name] as Record<string, EntityValueType>[]).map(
+                    {(entity[nestedEntitiesDef.type] as Record<string, EntityValueType>[]).map(
                       (nestedEntity: Record<string, EntityValueType>, index: number) =>
                         nestedEntitiesDef.properties.map((prop) => (
                           <div key={`nes-${nestedEntity[prop.propertyName]}-${index}`}>
@@ -153,11 +159,11 @@ export default function ComposedEntityManager<E extends ComposedEntities, F, G, 
                 )}
                 <TableCell>
                   {isAddingNewEntity && (
-                    <AddNewEntity<F, E>
+                    <AddNewEntity<G, E>
                       parentEntity={entity}
                       entityPros={nestedEntitiesDef.properties}
                       entityName={nestedEntitiesDef.name}
-                      onSave={async (_entity: F, _parentEntity?: E) => {
+                      onSave={async (_entity: G, _parentEntity?: E) => {
                         nestedEntitiesDef
                           .onCreate(_entity, _parentEntity)
                           .then(() => {
@@ -165,8 +171,8 @@ export default function ComposedEntityManager<E extends ComposedEntities, F, G, 
                               const newEntities = [...prev];
                               newEntities[index] = {
                                 ...newEntities[index],
-                                [nestedEntitiesDef.name]: [
-                                  ...(newEntities[index][nestedEntitiesDef.name] as F[]),
+                                [nestedEntitiesDef.type]: [
+                                  ...(newEntities[index][nestedEntitiesDef.type] as F[]),
                                   _entity
                                 ]
                               };
@@ -180,7 +186,7 @@ export default function ComposedEntityManager<E extends ComposedEntities, F, G, 
                             setAddNewEntityRowIndex(null);
                           })
                           .catch((error) => {
-                            setServerErrors(error.message);
+                            setServerErrors(error);
                           });
                       }}
                       onCancel={() => {
@@ -212,13 +218,13 @@ export default function ComposedEntityManager<E extends ComposedEntities, F, G, 
         </BlueButton>
       </div>
       {displayNewEntityForm && (
-        <AddNewEntity<E, H>
+        <AddNewEntity<E, F>
           entityPros={entitiesDef.properties}
           entityName={entitiesDef.name}
           onSave={async (entity: E) => {
-            const newEntity = { ...entity, [nestedEntitiesDef.name]: [] } as E;
+            const newEntity = { ...entity, [nestedEntitiesDef.type]: [nestedEntitiesDef.initialValue ?? {}] } as E;
             entitiesDef
-              .onCreate({ ...entity, spatialLocations: [] } as H)
+              .onCreate({ ...newEntity })
               .then(() => {
                 setEntities((prev) => {
                   const newEntities = [...prev];
@@ -231,7 +237,7 @@ export default function ComposedEntityManager<E extends ComposedEntities, F, G, 
                 setDisplayNewEntityForm(false);
               })
               .catch((error) => {
-                setServerErrors(error.message);
+                setServerErrors(error);
               });
             return Promise<void>;
           }}

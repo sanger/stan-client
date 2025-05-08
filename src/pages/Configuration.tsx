@@ -4,7 +4,6 @@ import {
   AddSpatialLocationsMutation,
   AddSpatialLocationsRequest,
   AddTissueTypeMutation,
-  AddTissueTypeRequest,
   AddTissueTypeSpatialLocation,
   GetConfigurationQuery,
   TissueTypeFieldsFragment,
@@ -495,10 +494,9 @@ export default function Configuration() {
         <Heading level={2}>Tissue Types</Heading>
         <ComposedEntityManager<
           TissueTypeFieldsFragment,
+          AddTissueTypeMutation,
           AddTissueTypeSpatialLocation,
-          AddSpatialLocationsMutation,
-          AddTissueTypeRequest,
-          AddTissueTypeMutation
+          AddSpatialLocationsMutation
         >
           composedEntities={configuration.tissueTypes}
           entitiesDef={{
@@ -515,7 +513,7 @@ export default function Configuration() {
               }
             ],
             orderBy: 'name',
-            onCreate: (entity: AddTissueTypeRequest) => {
+            onCreate: (entity: TissueTypeFieldsFragment) => {
               return stanCore.AddTissueType({ request: entity });
             },
             toString: (entity: TissueTypeFieldsFragment) => {
@@ -542,6 +540,10 @@ export default function Configuration() {
                 spatialLocations: [entity]
               };
               return stanCore.AddSpatialLocations({ request });
+            },
+            initialValue: {
+              name: 'No spatial information',
+              code: 0
             }
           }}
         />

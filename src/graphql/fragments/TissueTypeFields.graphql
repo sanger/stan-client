@@ -1,5 +1,6 @@
 fragment TissueTypeFields on TissueType {
   name
+  code
   spatialLocations {
     code
     name
