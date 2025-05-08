@@ -35,6 +35,21 @@ const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFie
 }: RegistrationSuccessProps<T>) => {
   const navigate = useNavigate();
 
+  const labwareGroupedByType = React.useMemo(() => {
+    const confirmedLabwareTypes = labware.reduce((prev: string[], lw) => {
+      if (!prev.includes(lw.labwareType.name)) {
+        prev.push(lw.labwareType.name);
+      }
+      return prev;
+    }, []);
+
+    const labwareGroups: LabwareFieldsFragment[][] = [];
+    confirmedLabwareTypes.forEach((labwareType) => {
+      labwareGroups.push(labware.filter((labware) => labware.labwareType.name === labwareType));
+    });
+    return labwareGroups;
+  }, [labware]);
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -51,7 +66,11 @@ const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFie
             <Success message={'Registration complete'} />
           </motion.div>
 
-          {isSectionRegistration && <PrintLabwareWithSampleDetails labware={labware} />}
+          {isSectionRegistration &&
+            labwareGroupedByType.map((labwareByType: LabwareFieldsFragment[]) => (
+              <PrintLabwareWithSampleDetails labware={labwareByType} />
+            ))}
+
           {!isSectionRegistration && (
             <>
               <motion.div variants={variants.fadeInWithLift} className="flex flex-col">

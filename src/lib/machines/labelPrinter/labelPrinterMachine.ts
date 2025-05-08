@@ -127,12 +127,11 @@ const machineConfig: MachineConfig<LabelPrinterContext, LabelPrinterEvent> = {
           if (!context.selectedPrinter) {
             return undefined;
           }
-          let labelsPerBarcode = 1;
-          if (event.type === 'PRINT' && event.labelsPerBarcode) {
-            labelsPerBarcode = event.labelsPerBarcode;
-          }
+          const labelsPerBarcode = event.type === 'PRINT' && event.labelsPerBarcode ? event.labelsPerBarcode : 1;
+          const printerName = event.type === 'PRINT' && event.printer ? event.printer : context.selectedPrinter.name;
+
           return {
-            printerName: context.selectedPrinter.name,
+            printerName: printerName,
             barcodes: context.labwares.map((lw) => new Array(labelsPerBarcode).fill(lw.barcode)).flat()
           };
         },
