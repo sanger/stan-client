@@ -53,4 +53,7 @@ query GetConfiguration {
   bioRisks(includeDisabled: true) {
     ...BioRiskFields
   }
+  tissueTypes {
+    ...TissueTypeFields
+  }
 }

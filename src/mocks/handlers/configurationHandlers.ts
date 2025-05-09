@@ -18,6 +18,7 @@ import omeroProjectRepository from '../repositories/omeroProjectRepository';
 import dnapStudyRepository from '../repositories/dnapStudyRepository';
 import probePanelRepository from '../repositories/probePanelRepository';
 import bioRiskRepository from '../repositories/bioRiskRepository';
+import tissueTypeRepository from '../repositories/tissueTypeRepository';
 
 const configurationHandlers = [
   graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>('GetConfiguration', () => {
@@ -40,7 +41,8 @@ const configurationHandlers = [
         omeroProjects: omeroProjectRepository.findAll(),
         dnapStudies: dnapStudyRepository.findAll(),
         probePanels: probePanelRepository.findAll(),
-        bioRisks: bioRiskRepository.findAll()
+        bioRisks: bioRiskRepository.findAll(),
+        tissueTypes: tissueTypeRepository.findAll()
       }
     });
   })

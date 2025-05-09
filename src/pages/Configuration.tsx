@@ -1,6 +1,14 @@
 import React, { useCallback, useContext, useState } from 'react';
 import AppShell from '../components/AppShell';
-import { GetConfigurationQuery, UserRole } from '../types/sdk';
+import {
+  AddSpatialLocationsMutation,
+  AddSpatialLocationsRequest,
+  AddTissueTypeMutation,
+  AddTissueTypeSpatialLocation,
+  GetConfigurationQuery,
+  TissueTypeFieldsFragment,
+  UserRole
+} from '../types/sdk';
 import EntityManager from '../components/entityManager/EntityManager';
 import Heading from '../components/Heading';
 import { groupBy } from 'lodash';
@@ -14,6 +22,7 @@ import BlueButton from '../components/buttons/BlueButton';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
 import Success from '../components/notifications/Success';
 import { useLoaderData } from 'react-router-dom';
+import ComposedEntityManager from '../components/entityManager/ComposedEntityManager';
 
 export default function Configuration() {
   const configuration = useLoaderData() as GetConfigurationQuery;
@@ -39,6 +48,7 @@ export default function Configuration() {
     'Release Recipients',
     'Species',
     'Solutions',
+    'Tissue Types',
     'Users',
     'Work Types'
   ];
@@ -275,7 +285,6 @@ export default function Configuration() {
           valueFieldComponentInfo={{
             type: 'CHECKBOX'
           }}
-          displayKeyFieldAsDropDown={false}
         />
       </div>,
 
@@ -477,6 +486,65 @@ export default function Configuration() {
           onCreate={(name) => stanCore.AddSolution({ name }).then((res) => res.addSolution)}
           valueFieldComponentInfo={{
             type: 'CHECKBOX'
+          }}
+        />
+      </div>,
+      /**Tissue Types**/
+      <div data-testid="config">
+        <Heading level={2}>Tissue Types</Heading>
+        <ComposedEntityManager<
+          TissueTypeFieldsFragment,
+          AddTissueTypeMutation,
+          AddTissueTypeSpatialLocation,
+          AddSpatialLocationsMutation
+        >
+          composedEntities={configuration.tissueTypes}
+          entitiesDef={{
+            name: 'Tissue Type',
+            type: 'TissueType',
+            properties: [
+              {
+                propertyName: 'name',
+                propertyType: 'string'
+              },
+              {
+                propertyName: 'code',
+                propertyType: 'string'
+              }
+            ],
+            orderBy: 'name',
+            onCreate: (entity: TissueTypeFieldsFragment) => {
+              return stanCore.AddTissueType({ request: entity });
+            },
+            toString: (entity: TissueTypeFieldsFragment) => {
+              return entity.name;
+            }
+          }}
+          nestedEntitiesDef={{
+            name: 'Spatial Location',
+            type: 'spatialLocations',
+            properties: [
+              {
+                propertyName: 'name',
+                propertyType: 'string'
+              },
+              {
+                propertyName: 'code',
+                propertyType: 'number'
+              }
+            ],
+            orderBy: 'code',
+            onCreate: (entity: AddTissueTypeSpatialLocation, parentEntity?: TissueTypeFieldsFragment) => {
+              const request: AddSpatialLocationsRequest = {
+                name: parentEntity ? parentEntity.name : '',
+                spatialLocations: [entity]
+              };
+              return stanCore.AddSpatialLocations({ request });
+            },
+            initialValue: {
+              name: 'No spatial information',
+              code: 0
+            }
           }}
         />
       </div>,
