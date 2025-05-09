@@ -30,7 +30,7 @@ const spatialLocationHandlers = [
         const existingCode = tissueType.spatialLocations.find((existing) => existing.code === spatialLocation.code);
         if (existingCode) {
           return HttpResponse.json(
-            { errors: [{ message: `Spatial location ${spatialLocation.name} already exists` }] },
+            { errors: [{ message: `Spatial location ${spatialLocation.code} already exists` }] },
             { status: 400 }
           );
         }
