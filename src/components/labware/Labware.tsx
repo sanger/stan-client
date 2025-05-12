@@ -266,12 +266,12 @@ const Labware = ({
 
   const gridClasses = classNames(
     {
-      'px-12 gap-4': numColumns <= 3,
-      'px-10 gap-3': numColumns <= 5,
-      'px-6 gap-2': numColumns > 6
+      'px-12 gap-4 md:px-3 md:gap-1': numColumns <= 3,
+      'px-10 gap-3 md:px-2 md:gap-1': numColumns > 3 && numColumns <= 5,
+      'px-6 gap-2 md:px-1 md:gap-1': numColumns > 6
     },
 
-    `${grid} py-4 select-none`
+    `${grid} py-4 select-none md:py-1`
   );
 
   // Give slots some default styles if some haven't been passed in

@@ -48,8 +48,8 @@ function AppShell({ children }: AppShellParams) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className={`relative ${config?.headerColor}`}>
+    <div className="flex flex-col min-h-screen sm:min-w-fit">
+      <div className={config?.headerColor}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center py-4 md:justify-start md:space-x-10 ">
             <div className="flex justify-start">
