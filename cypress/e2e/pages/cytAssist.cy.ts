@@ -397,7 +397,7 @@ describe('CytAssist Page', () => {
         });
       });
       it('selects the correct output labware type', () => {
-        shouldDisplaySelectedValue('output-labware-type', 'Visium LP CytAssist 6.5');
+        shouldDisplaySelectedValue('output-labware-type', 'CytAssist 6.5 Visium LP');
       });
       it('displays the source labware properly', () => {
         cy.findByText('STAN-3100').should('be.visible');
@@ -405,7 +405,7 @@ describe('CytAssist Page', () => {
       });
       it('displays the output labware properly', () => {
         cy.findByTestId('cytassist-labware').within(() => {
-          cy.findByText('Visium LP CytAssist 6.5').should('be.visible');
+          cy.findByText('CytAssist 6.5 Visium LP').should('be.visible');
         });
       });
       it('shows the mapped slots correctly', () => {

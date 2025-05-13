@@ -36,8 +36,8 @@ export enum LabwareTypeName {
   DUAL_INDEX_PLATE = "Dual index plate",
   POT = "Pot",
   PRE_BARCODED_TUBE = "Prebarcoded tube",
-  VISIUM_LP_CYTASSIST= "Visium LP CytAssist 6.5",
-  VISIUM_LP_CYTASSIST_XL= "Visium LP CytAssist 11",
+  VISIUM_LP_CYTASSIST= "CytAssist 6.5 Visium LP",
+  VISIUM_LP_CYTASSIST_XL= "CytAssist 11 Visium LP",
   VISIUM_LP_CYTASSIST_HD= "Visium LP CytAssist HD",
   XENIUM = "Xenium",
   STRIP_TUBE = "8 Strip Tube"
