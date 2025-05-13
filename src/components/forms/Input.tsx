@@ -59,7 +59,7 @@ interface InputProps extends React.DetailedHTMLProps<React.InputHTMLAttributes<H
 export const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   const inputClassNames = classNames(
     {
-      'w-full h-10 disabled:bg-gray-200': props.type !== 'checkbox' || props.type !== 'radio'
+      'w-full bg-white h-10 disabled:bg-gray-200 text-center': props.type !== 'checkbox' || props.type !== 'radio'
     },
     defaultInputClassNames
   );

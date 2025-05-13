@@ -68,8 +68,14 @@ export default function SectioningConfirm({
   }, []);
   const [current, send, service] = useMachine(sectioningMachine);
 
-  const { sourceLabware, layoutPlansByLabwareType, requestError, confirmSectionResultLabwares, sectionNumberMode } =
-    current.context;
+  const {
+    sourceLabware,
+    layoutPlansByLabwareType,
+    requestError,
+    confirmSectionResultLabwares,
+    sectionNumberMode,
+    workNumber
+  } = current.context;
 
   /**
    * Call the {@code onConfirmed} callback when machine reaches the {@code confirmed} state
@@ -162,7 +168,7 @@ export default function SectioningConfirm({
     <div className="my-4 mx-auto max-w-screen-xl space-y-12">
       <div>
         <Heading level={3}>SGP Number</Heading>
-        <p className="mt-2">Select an SGP number to associate with this confirmation.</p>
+        <p className="mt-2">Select an SGP number to apply to all sectioning plans.</p>
         <div className="mt-4 md:w-1/2">
           <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
         </div>
@@ -225,6 +231,7 @@ export default function SectioningConfirm({
                           slotRegions={slotRegions}
                           mode={sectionNumberMode}
                           sectionNumberEnabled={false}
+                          workNumber={workNumber}
                         />
                       ))}
                     </div>
@@ -241,6 +248,7 @@ export default function SectioningConfirm({
                         layoutPlans={layoutPlansByLabwareType[LabwareTypeName.TUBE]}
                         comments={comments}
                         mode={sectionNumberMode}
+                        workNumber={workNumber}
                       />
                     </div>
                   )}
@@ -268,6 +276,7 @@ export default function SectioningConfirm({
                               slotRegions={slotRegions}
                               mode={sectionNumberMode}
                               onSectionNumberChange={handleSectionNumberChange}
+                              workNumber={workNumber}
                             />
                           ))}
                         </div>

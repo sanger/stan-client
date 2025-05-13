@@ -108,47 +108,42 @@ type SectioningConfirmEvent =
   | { type: 'xstate.error.actor.confirmSection'; error: ClientError };
 
 const isValidSectionLabware = (ctx: SectioningConfirmContext): boolean => {
-  return (
-    ctx.confirmSectionLabware.every((csl) => {
-      /**Check if plan has any Fetal waste labware and it has barcode information**/
-      if (
-        csl.cancelled ||
-        (ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER] &&
-          ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER].some(
-            (plan) => plan.destinationLabware.barcode === csl.barcode
-          ))
-      ) {
-        return true;
-      }
-      /** Has every section got a section number? **/
-      const validSectionNumber =
-        csl.confirmSections?.every((cs) => (cs.newSection ? cs.newSection > 0 : false)) ?? false;
-      if (!validSectionNumber) return false;
-
-      /**Create a dictionary of slot addresses
-       * key is the address
-       * value is array of all sections in thet address
-       * **/
-      let slotDictionary: Dictionary<Array<ConfirmSection>> = groupBy(
-        csl.confirmSections,
-        (cs) => cs.destinationAddress
-      );
-      let slotAddresses = Object.keys(slotDictionary);
-      for (let indx = 0; indx < slotAddresses.length; indx++) {
-        const sections = slotDictionary[slotAddresses[indx]];
-        /**If there are multiple sections in this slot address, it should have distinct regions assigned for each section**/
-        if (sections.length > 1) {
-          /** Every section in slot has a region?**/
-          let isValidRegion = sections.every((cs) => (cs.region ? cs.region.length > 0 : false)) ?? false;
-          if (!isValidRegion) return false;
-          /** Are regions defined in a slot unique? **/
-          const regionsInSection = sections.map((section) => section.region);
-          if (regionsInSection.length !== new Set(regionsInSection).size) return false;
-        }
-      }
+  return ctx.confirmSectionLabware.every((csl) => {
+    if (!csl.workNumber) return false;
+    /**Check if plan has any Fetal waste labware and it has barcode information**/
+    if (
+      csl.cancelled ||
+      (ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER] &&
+        ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER].some(
+          (plan) => plan.destinationLabware.barcode === csl.barcode
+        ))
+    ) {
       return true;
-    }) && ctx.workNumber !== ''
-  );
+    }
+    /** Has every section got a section number? **/
+    const validSectionNumber = csl.confirmSections?.every((cs) => (cs.newSection ? cs.newSection > 0 : false)) ?? false;
+    if (!validSectionNumber) return false;
+
+    /**Create a dictionary of slot addresses
+     * key is the address
+     * value is array of all sections in thet address
+     * **/
+    let slotDictionary: Dictionary<Array<ConfirmSection>> = groupBy(csl.confirmSections, (cs) => cs.destinationAddress);
+    let slotAddresses = Object.keys(slotDictionary);
+    for (let indx = 0; indx < slotAddresses.length; indx++) {
+      const sections = slotDictionary[slotAddresses[indx]];
+      /**If there are multiple sections in this slot address, it should have distinct regions assigned for each section**/
+      if (sections.length > 1) {
+        /** Every section in slot has a region?**/
+        let isValidRegion = sections.every((cs) => (cs.region ? cs.region.length > 0 : false)) ?? false;
+        if (!isValidRegion) return false;
+        /** Are regions defined in a slot unique? **/
+        const regionsInSection = sections.map((section) => section.region);
+        if (regionsInSection.length !== new Set(regionsInSection).size) return false;
+      }
+    }
+    return true;
+  });
 };
 
 export function createSectioningConfirmMachine() {
@@ -234,8 +229,7 @@ export function createSectioningConfirmMachine() {
               })
             ),
             input: ({ context }) => ({
-              labware: context.confirmSectionLabware,
-              workNumber: context.workNumber
+              labware: context.confirmSectionLabware
             }),
             id: 'confirmSection',
             onDone: {
@@ -405,7 +399,13 @@ export function createSectioningConfirmMachine() {
 
         assignWorkNumber: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_WORK_NUMBER') return context;
-          return { ...context, workNumber: event.workNumber };
+          return produce(context, (draft) => {
+            draft.workNumber = event.workNumber;
+            draft.confirmSectionLabware = draft.confirmSectionLabware.map((csl) => ({
+              ...csl,
+              workNumber: event.workNumber
+            }));
+          });
         }),
         assignConfirmSectionResults: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.confirmSection') return context;

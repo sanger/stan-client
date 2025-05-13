@@ -19,6 +19,7 @@ import { selectConfirmOperationLabware } from './index';
 import { ConfirmationModal } from '../modal/ConfirmationModal';
 import { SectionNumberMode } from './SectioningConfirm';
 import { Position } from '../../lib/helpers';
+import WorkNumberSelect from '../WorkNumberSelect';
 
 interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
@@ -32,6 +33,7 @@ interface ConfirmTubesProps {
     sectionNumber: number
   ) => void;
   mode: SectionNumberMode;
+  workNumber: string;
 }
 
 const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
@@ -40,10 +42,11 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
   onChange,
   onSectionNumberChange,
   onSectionUpdate,
-  mode
+  mode,
+  workNumber
 }) => {
   return (
-    <div className="p-4 lg:w-2/3 lg:mx-auto rounded-lg bg-gray-100 space-y-4">
+    <div className="p-4 rounded-lg bg-gray-100 space-y-4">
       <div>
         <p className="text-gray-800 text-sm leading-normal">
           For any tubes that were created but did not receive any sections, you can mark them as{' '}
@@ -56,6 +59,7 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
             <tr>
               <TableHeader />
               <TableHeader>Tube Barcode</TableHeader>
+              <TableHeader>SGP Number</TableHeader>
               <TableHeader>Section Number</TableHeader>
               <TableHeader />
             </tr>
@@ -70,6 +74,7 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
                 onSectionUpdate={onSectionUpdate}
                 onSectionNumberChange={onSectionNumberChange}
                 mode={mode}
+                workNumber={workNumber}
               />
             ))}
           </TableBody>
@@ -93,6 +98,7 @@ interface TubeRowProps {
     sectionNumber: number
   ) => void;
   mode: SectionNumberMode;
+  workNumber: string;
 }
 
 const TubeRow: React.FC<TubeRowProps> = ({
@@ -101,11 +107,12 @@ const TubeRow: React.FC<TubeRowProps> = ({
   onChange,
   onSectionNumberChange,
   onSectionUpdate,
-  mode
+  mode,
+  workNumber
 }) => {
   const confirmLabwareMachine = React.useMemo(() => {
-    return createConfirmLabwareMachine(comments, initialLayoutPlan.destinationLabware, initialLayoutPlan);
-  }, [comments, initialLayoutPlan]);
+    return createConfirmLabwareMachine(comments, initialLayoutPlan.destinationLabware, initialLayoutPlan, workNumber);
+  }, [comments, initialLayoutPlan, workNumber]);
   const [current, send, service] = useMachine(confirmLabwareMachine);
   const { cancelled, layoutPlan, labware, layoutMachine } = current.context;
   const [notifyCancel, setNotifyCancel] = React.useState(false);
@@ -214,55 +221,35 @@ const TubeRow: React.FC<TubeRowProps> = ({
 
         <TableCell>
           <span className={`${cancelled ? 'line-through' : ''}`}>{layoutPlan.destinationLabware.barcode}</span>
-
-          {layoutMachine && (
-            <Modal show={current.matches('editingLayout')}>
-              <ModalBody>
-                <Heading level={3}>Set Layout</Heading>
-                {layoutMachine && (
-                  <LayoutPlanner actor={layoutMachine}>
-                    <div className="my-2">
-                      <p className="text-gray-900 text-sm leading-normal">
-                        Click a slot to increase the number of sections in that slot.
-                      </p>
-                      <p>To reduce the number of sections in a slot, use Ctrl-Click.</p>
-                    </div>
-                  </LayoutPlanner>
-                )}
-              </ModalBody>
-              <ModalFooter>
-                <BlueButton
-                  onClick={() => {
-                    notifySectionChange.current = true;
-                    layoutMachine.send({ type: 'DONE' });
-                  }}
-                  className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-                >
-                  Done
-                </BlueButton>
-                <WhiteButton
-                  onClick={() => layoutMachine.send({ type: 'CANCEL' })}
-                  className="mt-3 w-full sm:mt-0 sm:ml-3"
-                >
-                  Cancel
-                </WhiteButton>
-              </ModalFooter>
-            </Modal>
-          )}
+        </TableCell>
+        <TableCell>
+          <WorkNumberSelect
+            dataTestId={`sectionnumber-worknumber-${layoutPlan.destinationLabware.barcode}`}
+            onWorkNumberChange={(_workNumber) => {
+              send({
+                type: 'UPDATE_SECTION_WORK_NUMBER',
+                labware: confirmOperationLabware!,
+                workNumber: _workNumber
+              });
+            }}
+            workNumber={confirmOperationLabware?.workNumber ?? ''}
+          />
         </TableCell>
         <TableCell>
           {layoutPlan.plannedActions.get('A1')?.map((source, index) => (
-            <Input
-              key={source.address + String(index)}
-              data-testid={`sectionnumber-tube-${layoutPlan.destinationLabware.barcode}`}
-              type="number"
-              value={source.newSection === 0 ? '' : String(source.newSection)}
-              min={1}
-              disabled={cancelled || mode === SectionNumberMode.Auto}
-              // So the row click handler doesn't get triggered
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) => handleOnChange('A1', Number(e.target.value), index)}
-            />
+            <div className="mb-1">
+              <Input
+                key={source.address + String(index)}
+                data-testid={`sectionnumber-tube-${layoutPlan.destinationLabware.barcode}`}
+                type="number"
+                value={source.newSection === 0 ? '' : String(source.newSection)}
+                min={1}
+                disabled={cancelled || mode === SectionNumberMode.Auto}
+                // So the row click handler doesn't get triggered
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => handleOnChange('A1', Number(e.target.value), index)}
+              />
+            </div>
           ))}
         </TableCell>
         <TableCell onClick={handleOnRemoveClick}>
@@ -272,6 +259,37 @@ const TubeRow: React.FC<TubeRowProps> = ({
           />
         </TableCell>
       </tr>
+      {layoutMachine && (
+        <Modal show={current.matches('editingLayout')}>
+          <ModalBody>
+            <Heading level={3}>Set Layout</Heading>
+            {layoutMachine && (
+              <LayoutPlanner actor={layoutMachine}>
+                <div className="my-2">
+                  <p className="text-gray-900 text-sm leading-normal">
+                    Click a slot to increase the number of sections in that slot.
+                  </p>
+                  <p>To reduce the number of sections in a slot, use Ctrl-Click.</p>
+                </div>
+              </LayoutPlanner>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <BlueButton
+              onClick={() => {
+                notifySectionChange.current = true;
+                layoutMachine.send({ type: 'DONE' });
+              }}
+              className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              Done
+            </BlueButton>
+            <WhiteButton onClick={() => layoutMachine.send({ type: 'CANCEL' })} className="mt-3 sm:mt-0 sm:ml-3">
+              Cancel
+            </WhiteButton>
+          </ModalFooter>
+        </Modal>
+      )}
     </>
   );
 };

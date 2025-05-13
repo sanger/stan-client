@@ -24,8 +24,13 @@ import { SectionNumberMode } from './SectioningConfirm';
 import { LabwareTypeName } from '../../types/stan';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { Position } from '../../lib/helpers';
+import WorkNumberSelect from '../WorkNumberSelect';
 
 interface ConfirmLabwareProps {
+  /**
+   * The work number associated with the sectioning plan.
+   */
+  workNumber: string;
   /**
    * The layout plan created originally
    */
@@ -83,6 +88,7 @@ interface ConfirmLabwareProps {
 }
 
 const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
+  workNumber,
   originalLayoutPlan,
   comments,
   slotRegions,
@@ -94,8 +100,8 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   mode
 }) => {
   const confirmLabwareMachine = React.useMemo(() => {
-    return createConfirmLabwareMachine(comments, originalLayoutPlan.destinationLabware, originalLayoutPlan);
-  }, [comments, originalLayoutPlan]);
+    return createConfirmLabwareMachine(comments, originalLayoutPlan.destinationLabware, originalLayoutPlan, workNumber);
+  }, [comments, originalLayoutPlan, workNumber]);
   const [current, send, service] = useMachine(confirmLabwareMachine);
   const confirmOperationLabware = useSelector(service, selectConfirmOperationLabware);
 
@@ -141,7 +147,26 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       animate={'visible'}
       className={`relative p-3 shadow-md ${!sectionNumberEnabled && 'lg:w-2/3 lg:mx-auto rounded-lg'}`}
     >
-      <RemoveButton data-testid={`remove-slide-${labware.barcode}`} onClick={handleRemovePlan} />
+      <div className="flex flex-row items-center justify-end">
+        <RemoveButton data-testid={`remove-slide-${labware.barcode}`} onClick={handleRemovePlan} />
+      </div>
+
+      <div>
+        <p className="ml-1">SGP number to associate with this sectioning plan</p>
+        <div className="mt-4 mb-4 md:w-1/3">
+          <WorkNumberSelect
+            dataTestId={`sectionnumber-worknumber-${layoutPlan.destinationLabware.barcode}`}
+            onWorkNumberChange={(_workNumber) => {
+              send({
+                type: 'UPDATE_SECTION_WORK_NUMBER',
+                labware: confirmOperationLabware!,
+                workNumber: _workNumber
+              });
+            }}
+            workNumber={confirmOperationLabware?.workNumber ?? ''}
+          />
+        </div>
+      </div>
       <div
         data-testid={`div-slide-${labware.barcode}`}
         className={`${sectionNumberEnabled && 'md:grid md:grid-cols-2'}`}

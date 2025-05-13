@@ -56,6 +56,12 @@ export interface ConfirmLabwareContext {
    */
   isCancelToggled?: boolean;
   isLayoutUpdated?: boolean;
+
+  /**
+   * The work number associated with the labware confirmation process.
+   * This is an optional field that can be used to apply the same work number to all sectioning plans.
+   */
+  workNumber?: string;
 }
 
 type SetCommentForAddressEvent = {
@@ -118,6 +124,12 @@ type CancelEditLayoutEvent = {
   type: 'CANCEL_EDIT_LAYOUT';
 };
 
+type AssignSectionWorkNumber = {
+  type: 'UPDATE_SECTION_WORK_NUMBER';
+  labware: ConfirmSectionLabware;
+  workNumber: string;
+};
+
 export type ConfirmLabwareEvent =
   | SetCommentForAddressEvent
   | SetCommentsForSectionEvent
@@ -131,7 +143,8 @@ export type ConfirmLabwareEvent =
   | CommitConfirmationEvent
   | SectioningConfirmationCompleteEvent
   | AssignLayoutPlanEvent
-  | CancelEditLayoutEvent;
+  | CancelEditLayoutEvent
+  | AssignSectionWorkNumber;
 
 function buildConfirmSection(destinationAddress: string, plannedAction: Source): ConfirmSection {
   return {
@@ -153,7 +166,8 @@ function buildConfirmSections(destinationAddress: string, plannedActions: Array<
 export const createConfirmLabwareMachine = (
   comments: Array<Comment>,
   labware: NewFlaggedLabwareLayout,
-  layoutPlan: LayoutPlan
+  layoutPlan: LayoutPlan,
+  workNumber: string
 ) =>
   createMachine(
     {
@@ -166,6 +180,7 @@ export const createConfirmLabwareMachine = (
       context: {
         comments,
         labware,
+        workNumber,
         originalLayoutPlan: cloneDeep(layoutPlan),
         layoutPlan: cloneDeep(layoutPlan),
         addressToCommentMap: new Map(),
@@ -203,6 +218,9 @@ export const createConfirmLabwareMachine = (
             },
             SET_REGION_FOR_SECTION: {
               actions: ['assignRegionInSection', 'commitConfirmation']
+            },
+            UPDATE_SECTION_WORK_NUMBER: {
+              actions: 'assignSectionWorkNumber'
             }
           }
         },
@@ -222,6 +240,9 @@ export const createConfirmLabwareMachine = (
             CANCEL_EDIT_LAYOUT: {
               actions: 'cancelEditLayout',
               target: 'editableMode'
+            },
+            UPDATE_SECTION_WORK_NUMBER: {
+              actions: 'assignSectionWorkNumber'
             }
           }
         },
@@ -365,6 +386,7 @@ export const createConfirmLabwareMachine = (
             confirmSections.push(...buildConfirmSections(destinationAddress, originalPlannedActions));
           }
           const confirmSectionLabware = {
+            workNumber: workNumber,
             barcode: context.labware.barcode!,
             cancelled: context.cancelled,
             confirmSections: context.cancelled ? undefined : confirmSections,
@@ -373,10 +395,17 @@ export const createConfirmLabwareMachine = (
               commentId
             }))
           };
-          return { ...context, confirmSectionLabware };
+          return { ...context, workNumber, confirmSectionLabware };
         }),
         cancelEditLayout: assign(({ context, event }) => {
           return context;
+        }),
+        assignSectionWorkNumber: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_SECTION_WORK_NUMBER') return context;
+          return {
+            ...context,
+            confirmSectionLabware: { ...context.confirmSectionLabware!, workNumber: event.workNumber }
+          };
         })
       }
     }

@@ -8,7 +8,12 @@ import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { labwareTypes } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { findPlanData } from '../../../src/mocks/handlers/planHandlers';
-import { getAllSelect, selectOptionForMultiple, selectSGPNumber } from '../shared/customReactSelect.cy';
+import {
+  getAllSelect,
+  selectOptionForMultiple,
+  selectSGPNumber,
+  shouldDisplaySelectedValue
+} from '../shared/customReactSelect.cy';
 import { HttpResponse } from 'msw';
 
 let highestSectionNumber: number = 0;
@@ -72,6 +77,10 @@ describe('Sectioning Confirmation', () => {
 
     it('disables all section number fields', () => {
       cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).should('be.disabled'));
+    });
+
+    it('sets the section plan’s SGP number to match the global SGP number', () => {
+      shouldDisplaySelectedValue('sectionnumber-worknumber-STAN-0001F', 'SGP1008');
     });
     // Section numbers already filled in
     it('enables the Save button', () => {

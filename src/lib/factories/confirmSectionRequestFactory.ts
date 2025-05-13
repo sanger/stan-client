@@ -5,8 +5,7 @@ import { ConfirmSectionLabware, ConfirmSectionRequest, Labware } from '../../typ
  */
 export function buildConfirmSectionRequest(): ConfirmSectionRequest {
   return {
-    labware: [],
-    workNumber: ''
+    labware: []
   };
 }
 
