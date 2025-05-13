@@ -371,9 +371,11 @@ export default function History(props: HistoryProps) {
               </div>
             )}
             {history.entries.length > 0 && (
-              <TopScrollingBar>
-                <DataTable columns={historyColumns} data={history.entries} fixedHeader={true} />
-              </TopScrollingBar>
+              <div className="mx-auto max-w-screen-xl">
+                <TopScrollingBar>
+                  <DataTable columns={historyColumns} data={history.entries} fixedHeader={true} />
+                </TopScrollingBar>
+              </div>
             )}
           </>
         ) : isValidInput ? (

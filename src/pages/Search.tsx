@@ -334,7 +334,7 @@ function Search() {
             </Formik>
           </div>
 
-          <div className="my-10">
+          <div className="my-10 mx-auto max-w-screen-xl">
             {current.matches('searching') && (
               <div className="flex flex-row justify-center">
                 <LoadingSpinner />

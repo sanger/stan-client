@@ -120,10 +120,13 @@ export const TableCell: React.FC<
 
 type Props = {
   children: string | ReactNode | ReactNode[];
+  className?: string;
 };
-export const TabelSubHeader: React.FC<Props> = ({ children, ...rest }) => {
+export const TabelSubHeader: React.FC<Props> = ({ children, className, ...rest }) => {
+  const baseClasses = 'flex text-xs font-medium text-gray-500 uppercase';
+  const classNames = `${baseClasses} ${className ?? ''}`.trim();
   return (
-    <div className="flex text-xs font-medium text-gray-500 uppercase" {...rest}>
+    <div className={classNames} {...rest}>
       {children}
     </div>
   );

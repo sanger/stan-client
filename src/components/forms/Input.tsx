@@ -24,6 +24,7 @@ const FormikInput = ({
   displayTag,
   info,
   preventEnterKeyDefault = true,
+  className,
   ...rest
 }: FormikInputProps) => {
   const inputClassNames = classNames(
@@ -34,7 +35,7 @@ const FormikInput = ({
   );
   return (
     <>
-      <div>
+      <div className={className}>
         <Label name={label} displayTag={displayTag} info={info} className={'whitespace-nowrap'}>
           <Field
             type={type}

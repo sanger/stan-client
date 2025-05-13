@@ -10,8 +10,7 @@ import {
   LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   RecordAnalyserMutation,
-  SamplePositionFieldsFragment,
-  SampleRoi
+  SamplePositionFieldsFragment
 } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import * as Yup from 'yup';
@@ -50,16 +49,13 @@ type SampleWithRegion = {
   externalName?: string;
   roi: string;
 };
-type LabwareSamples = {
-  samples: SampleWithRegion[];
-  labware: LabwareFlaggedFieldsFragment;
-};
 
 type AnalyserLabwareForm = {
   labware: LabwareFlaggedFieldsFragment;
+  hybridisation: boolean;
   workNumber: string;
   position?: CassettePosition;
-  samples: Array<SampleRoi>;
+  samples: Array<SampleWithRegion>;
   analyserScanData?: AnalyserScanDataFieldsFragment;
 };
 
@@ -134,10 +130,6 @@ const LabwareAnalyserTable = (labwareForm: AnalyserLabwareForm) => {
 const XeniumAnalyser = () => {
   const equipments = useLoaderData() as EquipmentFieldsFragment[];
   const navigate = useNavigate();
-  const [labwareSamples, setLabwareSamples] = React.useState<LabwareSamples[]>([]);
-  const [hybridisation, setHybridisation] = React.useState<{ barcode: string; performed: boolean } | undefined>(
-    undefined
-  );
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
     return createFormMachine<AnalyserRequest, RecordAnalyserMutation>().provide({
@@ -181,6 +173,7 @@ const XeniumAnalyser = () => {
     labware: Yup.array()
       .of(
         Yup.object().shape({
+          hybridisation: Yup.boolean(),
           workNumber: Yup.string().required().label('SGP Number'),
           position: Yup.string().required(),
           samples: Yup.array()
@@ -200,6 +193,28 @@ const XeniumAnalyser = () => {
       .min(1)
   });
 
+  /**Create samples with region information */
+  const labwareSamplesWithRegions = React.useCallback(
+    (lw: LabwareFlaggedFieldsFragment, samplePositions: SamplePositionFieldsFragment[]) => {
+      const samples: SampleWithRegion[] = [];
+      lw.slots.forEach((slot) => {
+        slot.samples.forEach((sample) => {
+          const samplePosition = samplePositions.find((sp) => sp.address === slot.address && sp.sampleId === sample.id);
+          samples.push({
+            address: slot.address,
+            sampleId: sample.id,
+            region: samplePosition?.region ?? '',
+            externalName: sample.tissue.externalName ?? '',
+            sectionNumber: String(sample.section) ?? '',
+            roi: ''
+          });
+        });
+      });
+      return samples;
+    },
+    []
+  );
+
   /**This creates the slot related information for the labware */
   const createTableDataForSlots = React.useCallback(
     (
@@ -208,12 +223,6 @@ const XeniumAnalyser = () => {
       values: XeniumAnalyserFormValues
     ) => {
       const setLabwareSampleData = async (lw: LabwareFlaggedFieldsFragment) => {
-        const samples: SampleWithRegion[] = [];
-        /**
-         * FindSamplePositions - if no samples in the labware have a region, the array would be empty.
-         * Fetch sample positions first and then add the region to the sample information got from the labware
-         * to create samples
-         */
         let samplePositions: SamplePositionFieldsFragment[] = [];
         try {
           /**Validate whether probe hybridisation has been recorded on this labware**/
@@ -221,14 +230,16 @@ const XeniumAnalyser = () => {
             .FindLatestOperation({ barcode: lw.barcode, operationType: 'Probe hybridisation Xenium' })
             .then((res) => res.findLatestOp);
           /**If probe hybridisation has been recorded, get the sample positions,otherwise return**/
+
           if (latestOp) {
+            /**
+             * FindSamplePositions - if no samples in the labware have a region, the array would be empty.
+             * Fetch sample positions first and then add the region to the sample information got from the labware
+             * to create samples
+             */
             samplePositions = await stanCore
               .FindSamplePositions({ labwareBarcode: lw.barcode })
               .then((res) => res.samplePositions);
-            setHybridisation({
-              barcode: lw.barcode,
-              performed: true
-            });
             stanCore.GetAnalyserScanData({ barcode: labware.barcode }).then((res) => {
               setValues((prev) => {
                 const analyserLabware: AnalyserLabwareForm | undefined = prev.labware.find(
@@ -239,9 +250,10 @@ const XeniumAnalyser = () => {
                 } else {
                   prev.labware.push({
                     labware,
+                    hybridisation: true,
                     workNumber: values.workNumberAll,
                     position: undefined,
-                    samples: [],
+                    samples: labwareSamplesWithRegions(labware, samplePositions),
                     analyserScanData: res.analyserScanData
                   });
                 }
@@ -249,51 +261,26 @@ const XeniumAnalyser = () => {
               });
             });
           } else {
-            setHybridisation({
-              barcode: lw.barcode,
-              performed: false
-            });
             setValues((prev) => {
               prev.labware.push({
                 labware,
+                hybridisation: false,
                 workNumber: values.workNumberAll,
                 position: undefined,
-                samples: []
+                samples: labwareSamplesWithRegions(labware, samplePositions)
               });
               return { ...prev };
             });
             return;
           }
         } catch (e) {
-          samplePositions = [];
           return;
         }
-        /**Create samples with region information */
-        lw.slots.forEach((slot) => {
-          slot.samples.forEach((sample) => {
-            const samplePosition = samplePositions.find(
-              (sp) => sp.address === slot.address && sp.sampleId === sample.id
-            );
-            samples.push({
-              address: slot.address,
-              sampleId: sample.id,
-              region: samplePosition?.region ?? '',
-              externalName: sample.tissue.externalName ?? '',
-              sectionNumber: String(sample.section) ?? '',
-              roi: ''
-            });
-          });
-        });
-        setLabwareSamples((prev) => [...prev, { labware: lw, barcode: lw.barcode, workNumber: '', samples }]);
       };
       setLabwareSampleData(labware);
     },
-    [setLabwareSamples, stanCore, setHybridisation]
+    [labwareSamplesWithRegions, stanCore]
   );
-
-  const isEmptyROI = (labware: LabwareSamples[]) => {
-    return labware.filter((lw) => lw.samples.some((sample) => sample.roi === '')).length > 0;
-  };
 
   return (
     <AppShell>
@@ -309,7 +296,7 @@ const XeniumAnalyser = () => {
               validationSchema={validationSchema}
               onSubmit={async (values) => {
                 const labwareROIData: AnalyserLabware[] = values.labware.map((lw) => {
-                  const labwareSample = labwareSamples.find((ls) => ls.labware.barcode === lw.labware.barcode);
+                  const labwareSample = values.labware.find((ls) => ls.labware.barcode === lw.labware.barcode);
                   return {
                     barcode: lw.labware.barcode,
                     workNumber: lw.workNumber,
@@ -345,19 +332,20 @@ const XeniumAnalyser = () => {
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
                     <Heading level={3}>Labware</Heading>
-                    {hybridisation && !hybridisation.performed && (
-                      <Warning>No probe hybridisation recorded for {hybridisation?.barcode}</Warning>
-                    )}
+                    {values.labware
+                      .filter((lw) => !lw.hybridisation)
+                      .map((lw) => (
+                        <Warning key={`war-${lw.labware.barcode}`}>
+                          No probe hybridisation recorded for {lw.labware.barcode}
+                        </Warning>
+                      ))}
                     <LabwareScanner
                       limit={2}
                       onAdd={(labware) => {
                         /**If labware scanned not already displayed, add to list**/
-                        if (!labwareSamples.some((lwSamples) => lwSamples.labware.barcode === labware.barcode)) {
-                          createTableDataForSlots(labware, setValues, values);
-                        }
+                        createTableDataForSlots(labware, setValues, values);
                       }}
                       onRemove={async (labware) => {
-                        setLabwareSamples((prev) => prev.filter((lw) => lw.labware.barcode !== labware.barcode));
                         await setValues((prev) => {
                           return {
                             ...prev,
@@ -379,7 +367,7 @@ const XeniumAnalyser = () => {
                       }
                     </LabwareScanner>
                   </motion.div>
-                  {labwareSamples.length > 0 && (
+                  {values.labware.length > 0 && values.labware.some((lw) => lw.hybridisation) && (
                     <>
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4 py-4">
                         <Heading level={3}>Analyser Details</Heading>
@@ -461,103 +449,104 @@ const XeniumAnalyser = () => {
                           </div>
                         </div>
                       </motion.div>
-                      {labwareSamples.map((lw, lwIndex) => (
-                        <motion.div variants={variants.fadeInWithLift} className="flex flex-row mt-4 py-4">
-                          <div className="grid grid-cols-7 gap-x-1">
-                            <div className="col-span-2">
-                              <Labware labware={lw.labware} gridDirection={GridDirection.LeftUp} />
-                            </div>
-                            <div className="col-span-5">
-                              <Table className="text-sm">
-                                <TableHead>
-                                  <tr>
-                                    <TableHeader>SGP Number</TableHeader>
-                                    <TableHeader>Cassette Position</TableHeader>
-                                    <TableHeader>Samples</TableHeader>
-                                  </tr>
-                                </TableHead>
-                                <TableBody>
-                                  <tr key={lw.labware.barcode}>
-                                    <TableCell className="align-top">
-                                      <WorkNumberSelect
-                                        name={`labware.${lwIndex}.workNumber`}
-                                        dataTestId={`${lw.labware.barcode}-workNumber`}
-                                        onWorkNumberChange={(workNumber) => {
-                                          setFieldValue(`labware.${lwIndex}.workNumber`, workNumber);
-                                        }}
-                                        workNumber={values.labware[lwIndex]?.workNumber}
-                                        requiredField={true}
-                                      />
-                                      <FormikErrorMessage name={`labware.${lwIndex}.workNumber`} />
-                                    </TableCell>
-                                    <TableCell className="align-top">
-                                      <CustomReactSelect
-                                        options={objectKeys(CassettePosition).map((val) => {
-                                          return { value: val, label: val };
-                                        })}
-                                        name={`labware.${lwIndex}.position`}
-                                        dataTestId={`${lw.labware.barcode}-position`}
-                                        emptyOption={true}
-                                      />
-                                    </TableCell>
+                      {values.labware
+                        .filter((lw) => lw.hybridisation)
+                        .map((lw, lwIndex) => (
+                          <motion.div
+                            variants={variants.fadeInWithLift}
+                            className="flex flex-row mt-4 py-4"
+                            key={lw.labware.barcode}
+                          >
+                            <div className="flex flex-row gap-x-6">
+                              <div>
+                                <Labware labware={lw.labware} gridDirection={GridDirection.LeftUp} />
+                              </div>
+                              <div>
+                                <Table className="text-sm min-w-fit">
+                                  <TableHead>
+                                    <tr>
+                                      <TableHeader>SGP Number</TableHeader>
+                                      <TableHeader>Cassette Position</TableHeader>
+                                      <TableHeader>Samples</TableHeader>
+                                    </tr>
+                                  </TableHead>
+                                  <TableBody>
+                                    <tr key={lw.labware.barcode}>
+                                      <TableCell className="align-top">
+                                        <WorkNumberSelect
+                                          name={`labware.${lwIndex}.workNumber`}
+                                          dataTestId={`${lw.labware.barcode}-workNumber`}
+                                          onWorkNumberChange={(workNumber) => {
+                                            setFieldValue(`labware.${lwIndex}.workNumber`, workNumber);
+                                          }}
+                                          workNumber={values.labware[lwIndex]?.workNumber}
+                                          requiredField={true}
+                                        />
+                                        <FormikErrorMessage name={`labware.${lwIndex}.workNumber`} />
+                                      </TableCell>
+                                      <TableCell className="align-top">
+                                        <CustomReactSelect
+                                          options={objectKeys(CassettePosition).map((val) => {
+                                            return { value: val, label: val };
+                                          })}
+                                          name={`labware.${lwIndex}.position`}
+                                          dataTestId={`${lw.labware.barcode}-position`}
+                                          emptyOption={true}
+                                        />
+                                      </TableCell>
 
-                                    <TableCell>
-                                      <div
-                                        className={'flex flex-col space-y-2'}
-                                        data-testid={`${lw.labware.barcode}-samples`}
-                                      >
-                                        <div className={'grid grid-cols-5 gap-2'}>
-                                          <TabelSubHeader>Region of interest</TabelSubHeader>
-                                          <TabelSubHeader>Slot address</TabelSubHeader>
-                                          <TabelSubHeader>Section number</TabelSubHeader>
-                                          <TabelSubHeader>Section position</TabelSubHeader>
-                                          <TabelSubHeader>External Id</TabelSubHeader>
-                                        </div>
-                                        {lw.samples.map((sample, sampleIndex) => {
-                                          return (
-                                            <div
-                                              className={'grid grid-cols-5 gap2'}
-                                              key={`${lw.labware.barcode}-${sample.sampleId}`}
-                                            >
-                                              <div className={'flex flex-col'}>
+                                      <TableCell>
+                                        <div
+                                          className={'flex flex-col space-y-2'}
+                                          data-testid={`${lw.labware.barcode}-samples`}
+                                        >
+                                          <div className={'flex flex-row gap-x-10'}>
+                                            <TabelSubHeader className="whitespace-normal break-words w-[50px]">
+                                              Slot address
+                                            </TabelSubHeader>
+                                            <TabelSubHeader className="whitespace-normal break-words w-[80px]">
+                                              External Id
+                                            </TabelSubHeader>
+                                            <TabelSubHeader className="whitespace-normal break-words w-[50px]">
+                                              Section number
+                                            </TabelSubHeader>
+                                            <TabelSubHeader className="whitespace-normal break-words w-[210px]">
+                                              Region
+                                            </TabelSubHeader>
+                                          </div>
+                                          {lw.samples.map((sample, sampleIndex) => {
+                                            return (
+                                              <div
+                                                className={'flex flex-row gap-x-10'}
+                                                key={`${lw.labware.barcode}-${sample.sampleId}`}
+                                              >
+                                                <label className="flex items-center w-[50px]">{sample.address}</label>
+                                                <label className="flex items-center w-[80px]">
+                                                  {sample.externalName}
+                                                </label>
+                                                <label className="flex items-center w-[50px]">
+                                                  {sample.sectionNumber}
+                                                </label>
                                                 <FormikInput
                                                   label={''}
+                                                  className="w-[210px]"
                                                   name={`labware.${lwIndex}.samples.${sampleIndex}.roi`}
                                                   data-testid={`${lw.labware.barcode}-${sampleIndex}-roi`}
-                                                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                                                    setFieldValue(
-                                                      `labware.${lwIndex}.samples.${sampleIndex}.roi`,
-                                                      e.currentTarget.value
-                                                    );
-                                                    setLabwareSamples((prev) => {
-                                                      const updated = [...prev];
-                                                      updated[lwIndex].samples[sampleIndex].roi = e.currentTarget.value;
-                                                      return updated;
-                                                    });
-                                                  }}
-                                                  value={labwareSamples[lwIndex].samples[sampleIndex].roi}
                                                 />
                                               </div>
-                                              <div className={'flex items-center px-6'}>
-                                                <label>{sample.address}</label>
-                                              </div>
-                                              <label className={'flex items-center px-6'}>{sample.sectionNumber}</label>
-                                              <label className={'flex items-center'}>{sample.region}</label>
-                                              <label className={'flex items-center'}>{sample.externalName}</label>
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    </TableCell>
-                                  </tr>
-                                </TableBody>
-                              </Table>
+                                            );
+                                          })}
+                                        </div>
+                                      </TableCell>
+                                    </tr>
+                                  </TableBody>
+                                </Table>
+                              </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      ))}
+                          </motion.div>
+                        ))}
                       <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
-                        <BlueButton type="submit" disabled={!isValid || isEmptyROI(labwareSamples)}>
+                        <BlueButton type="submit" disabled={!isValid}>
                           Save
                         </BlueButton>
                       </div>
