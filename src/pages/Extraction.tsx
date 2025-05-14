@@ -27,7 +27,16 @@ import LabelCopyButton from '../components/LabelCopyButton';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { selectOptionValues } from '../components/forms';
 
-function buildExtractionResultData(ctx: ExtractionContext) {
+type ExtractionResultData = {
+  extractionResult: {
+    sampleColor: string | undefined;
+    sourceLabware: LabwareFieldsFragment;
+    destinationLabware: LabwareFieldsFragment | undefined;
+  }[];
+  destinationLabware: LabwareFieldsFragment[];
+};
+
+function buildExtractionResultData(ctx: ExtractionContext): ExtractionResultData {
   if (!ctx.extraction) {
     return {
       extractionResult: [],
