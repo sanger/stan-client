@@ -10,7 +10,6 @@ import { motion } from '../../dependencies/motion';
 import { selectOptionValues } from '../forms';
 import LayoutPlanner from '../LayoutPlanner';
 import Label from '../forms/Label';
-import WhiteButton from '../buttons/WhiteButton';
 import { sortRightDown } from '../../lib/helpers/labwareHelper';
 import LabwareComments, { SectionNumberSetting } from './LabwareComments';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../pages/sectioning';
@@ -293,9 +292,6 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             >
               Done
             </BlueButton>
-            <WhiteButton onClick={() => layoutMachine.send({ type: 'CANCEL' })} className="mt-3 sm:mt-0 sm:ml-3">
-              Cancel
-            </WhiteButton>
           </ModalFooter>
         )}
       </Modal>
