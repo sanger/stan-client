@@ -227,7 +227,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                             <div key={slot.address} className="flex flex-row items-start justify-start gap-x-2">
                               <span className="font-medium text-gray-800 tracking-wide py-2">{slot.address}</span>
                               <FormikInput
-                                className="text-center focus:ring-sdb-100 focus:border-sdb-100 block border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-300"
+                                className="text-center focus:ring-sdb-100 focus:border-sdb-100 block h-8 bg-white border border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-300"
                                 label={''}
                                 disabled={
                                   current.matches('printing') ||

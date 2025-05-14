@@ -8,6 +8,9 @@ const workSeeds: Array<WorkFieldsFragment> = [
   workFactory.build({ status: WorkStatus.Paused }),
   workFactory.build({ status: WorkStatus.Failed }),
   workFactory.build({ status: WorkStatus.Active }),
+  workFactory.build({ status: WorkStatus.Active }),
+  workFactory.build({ status: WorkStatus.Active }),
+  workFactory.build({ status: WorkStatus.Active }),
   workFactory.build({ workType: { name: 'Work Type 1', enabled: true } })
 ];
 
