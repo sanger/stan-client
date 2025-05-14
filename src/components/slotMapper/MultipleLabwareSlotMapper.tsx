@@ -145,7 +145,9 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
   const { setFieldValue, values, setFieldError } = useFormikContext<CytAssistOutputLabwareForm>();
 
   const disabledOutputSlotAddresses = React.useMemo(() => {
-    return currentOutput?.labware && currentOutput?.labware.labwareType.name === LabwareTypeName.VISIUM_LP_CYTASSIST
+    return currentOutput?.labware &&
+      (currentOutput?.labware.labwareType.name === LabwareTypeName.VISIUM_LP_CYTASSIST ||
+        currentOutput?.labware.labwareType.name === LabwareTypeName.VISIUM_LP_CYTASSIST_HD)
       ? ['B1', 'C1']
       : [];
   }, [currentOutput]);

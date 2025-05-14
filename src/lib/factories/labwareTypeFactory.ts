@@ -124,7 +124,7 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
   [LabwareTypeName.VISIUM_LP_CYTASSIST_HD]: labwareTypeFactory.params({
     __typename: 'LabwareType',
     name: LabwareTypeName.VISIUM_LP_CYTASSIST_HD,
-    numRows: 2,
+    numRows: 4,
     numColumns: 1,
     labelType: labelTypeFactory.build({ name: `${LabwareTypeName.VISIUM_LP_CYTASSIST_HD} Label` })
   }),

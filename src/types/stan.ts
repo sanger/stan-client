@@ -38,7 +38,7 @@ export enum LabwareTypeName {
   PRE_BARCODED_TUBE = "Prebarcoded tube",
   VISIUM_LP_CYTASSIST= "CytAssist 6.5 Visium LP",
   VISIUM_LP_CYTASSIST_XL= "CytAssist 11 Visium LP",
-  VISIUM_LP_CYTASSIST_HD= "Visium LP CytAssist HD",
+  VISIUM_LP_CYTASSIST_HD= "CytAssist HD 6.5 Visium LP",
   XENIUM = "Xenium",
   STRIP_TUBE = "8 Strip Tube"
 
