@@ -142,6 +142,17 @@ export const stripTubeFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.STRIP_TUBE].build()
 });
 
+export const visiumLPCytAssistHD11Factory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.VISIUM_LP_CYTASSIST_HD_11].build()
+});
+
+export const visiumLPCytAssistHD365Factory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5].build()
+});
+
+export const visiumLPCytAssistHD311Factory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11].build()
+});
 export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>> = {
   [LabwareTypeName.TUBE]: tubeFactory,
   [LabwareTypeName.PROVIASETTE]: proviasetteFactory,
@@ -160,7 +171,10 @@ export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>
   [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory,
   [LabwareTypeName.VISIUM_LP_CYTASSIST_HD]: visiumLPCytAssistHDFactory,
   [LabwareTypeName.XENIUM]: xeniumFactory,
-  [LabwareTypeName.STRIP_TUBE]: stripTubeFactory
+  [LabwareTypeName.STRIP_TUBE]: stripTubeFactory,
+  [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_11]: visiumLPCytAssistHD11Factory,
+  [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5]: visiumLPCytAssistHD365Factory,
+  [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11]: visiumLPCytAssistHD311Factory
 };
 
 export const flaggedLabwareLayout = (labwareType: string) => {
