@@ -452,17 +452,13 @@ const XeniumAnalyser = () => {
                       {values.labware
                         .filter((lw) => lw.hybridisation)
                         .map((lw, lwIndex) => (
-                          <motion.div
-                            variants={variants.fadeInWithLift}
-                            className="flex flex-row mt-4 py-4"
-                            key={lw.labware.barcode}
-                          >
+                          <motion.div variants={variants.fadeInWithLift} className="mt-4" key={lw.labware.barcode}>
                             <div className="flex flex-row gap-x-6">
                               <div>
                                 <Labware labware={lw.labware} gridDirection={GridDirection.LeftUp} />
                               </div>
-                              <div>
-                                <Table className="text-sm min-w-fit">
+                              <div className="w-full">
+                                <Table className="text-sm">
                                   <TableHead>
                                     <tr>
                                       <TableHeader>SGP Number</TableHeader>
@@ -472,7 +468,7 @@ const XeniumAnalyser = () => {
                                   </TableHead>
                                   <TableBody>
                                     <tr key={lw.labware.barcode}>
-                                      <TableCell className="align-top">
+                                      <TableCell className="align-top w-1/10">
                                         <WorkNumberSelect
                                           name={`labware.${lwIndex}.workNumber`}
                                           dataTestId={`${lw.labware.barcode}-workNumber`}
@@ -484,7 +480,7 @@ const XeniumAnalyser = () => {
                                         />
                                         <FormikErrorMessage name={`labware.${lwIndex}.workNumber`} />
                                       </TableCell>
-                                      <TableCell className="align-top">
+                                      <TableCell className="align-top w-1/10">
                                         <CustomReactSelect
                                           options={objectKeys(CassettePosition).map((val) => {
                                             return { value: val, label: val };
@@ -495,41 +491,39 @@ const XeniumAnalyser = () => {
                                         />
                                       </TableCell>
 
-                                      <TableCell>
+                                      <TableCell className="align-top w-8/10">
                                         <div
-                                          className={'flex flex-col space-y-2'}
+                                          className={'flex flex-col space-y-2 w-full'}
                                           data-testid={`${lw.labware.barcode}-samples`}
                                         >
-                                          <div className={'flex flex-row gap-x-10'}>
-                                            <TabelSubHeader className="whitespace-normal break-words w-[50px]">
+                                          <div className={'flex gap-x-10'}>
+                                            <TabelSubHeader className="whitespace-normal break-words w-2/10">
                                               Slot address
                                             </TabelSubHeader>
-                                            <TabelSubHeader className="whitespace-normal break-words w-[80px]">
+                                            <TabelSubHeader className="whitespace-normal break-words w-3/10">
                                               External Id
                                             </TabelSubHeader>
-                                            <TabelSubHeader className="whitespace-normal break-words w-[50px]">
+                                            <TabelSubHeader className="whitespace-normal break-words w-2/10">
                                               Section number
                                             </TabelSubHeader>
-                                            <TabelSubHeader className="whitespace-normal break-words w-[210px]">
+                                            <TabelSubHeader className="whitespace-normal break-words w-3/10">
                                               Region
                                             </TabelSubHeader>
                                           </div>
                                           {lw.samples.map((sample, sampleIndex) => {
                                             return (
                                               <div
-                                                className={'flex flex-row gap-x-10'}
+                                                className={'flex gap-x-10'}
                                                 key={`${lw.labware.barcode}-${sample.sampleId}`}
                                               >
-                                                <label className="flex items-center w-[50px]">{sample.address}</label>
-                                                <label className="flex items-center w-[80px]">
+                                                <label className="items-center w-2/10">{sample.address}</label>
+                                                <label className="items-center whitespace-normal break-words w-3/10">
                                                   {sample.externalName}
                                                 </label>
-                                                <label className="flex items-center w-[50px]">
-                                                  {sample.sectionNumber}
-                                                </label>
+                                                <label className="items-center w-2/10">{sample.sectionNumber}</label>
                                                 <FormikInput
                                                   label={''}
-                                                  className="w-[210px]"
+                                                  className="w-3/10"
                                                   name={`labware.${lwIndex}.samples.${sampleIndex}.roi`}
                                                   data-testid={`${lw.labware.barcode}-${sampleIndex}-roi`}
                                                 />

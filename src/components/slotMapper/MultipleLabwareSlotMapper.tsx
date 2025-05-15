@@ -147,7 +147,8 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
   const disabledOutputSlotAddresses = React.useMemo(() => {
     return currentOutput?.labware &&
       (currentOutput?.labware.labwareType.name === LabwareTypeName.VISIUM_LP_CYTASSIST ||
-        currentOutput?.labware.labwareType.name === LabwareTypeName.VISIUM_LP_CYTASSIST_HD)
+        currentOutput?.labware.labwareType.name === LabwareTypeName.VISIUM_LP_CYTASSIST_HD ||
+        currentOutput?.labware.labwareType.name === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5)
       ? ['B1', 'C1']
       : [];
   }, [currentOutput]);
@@ -628,7 +629,10 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
                 options={[
                   LabwareTypeName.VISIUM_LP_CYTASSIST,
                   LabwareTypeName.VISIUM_LP_CYTASSIST_XL,
-                  LabwareTypeName.VISIUM_LP_CYTASSIST_HD
+                  LabwareTypeName.VISIUM_LP_CYTASSIST_HD,
+                  LabwareTypeName.VISIUM_LP_CYTASSIST_HD_11,
+                  LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5,
+                  LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11
                 ].map((key) => {
                   return {
                     label: key,
