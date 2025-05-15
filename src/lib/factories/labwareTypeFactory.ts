@@ -128,6 +128,27 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     numColumns: 1,
     labelType: labelTypeFactory.build({ name: `${LabwareTypeName.VISIUM_LP_CYTASSIST_HD} Label` })
   }),
+  [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_11]: labwareTypeFactory.params({
+    __typename: 'LabwareType',
+    name: LabwareTypeName.VISIUM_LP_CYTASSIST_HD_11,
+    numRows: 2,
+    numColumns: 1,
+    labelType: labelTypeFactory.build({ name: `${LabwareTypeName.VISIUM_LP_CYTASSIST_HD_11} Label` })
+  }),
+  [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5]: labwareTypeFactory.params({
+    __typename: 'LabwareType',
+    name: LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5,
+    numRows: 4,
+    numColumns: 1,
+    labelType: labelTypeFactory.build({ name: `${LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5} Label` })
+  }),
+  [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11]: labwareTypeFactory.params({
+    __typename: 'LabwareType',
+    name: LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11,
+    numRows: 2,
+    numColumns: 1,
+    labelType: labelTypeFactory.build({ name: `${LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11} Label` })
+  }),
   [LabwareTypeName.STRIP_TUBE]: labwareTypeFactory.params({
     __typename: 'LabwareType',
     name: LabwareTypeName.STRIP_TUBE,
