@@ -17,7 +17,7 @@ import MutedText from '../components/MutedText';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import { useMachine } from '@xstate/react';
 import { buildSampleColors, extractLabwareFromFlagged, hasSamples } from '../lib/helpers/labwareHelper';
-import { EquipmentFieldsFragment, LabwareFlaggedFieldsFragment } from '../types/sdk';
+import { EquipmentFieldsFragment, LabwareFieldsFragment, LabwareFlaggedFieldsFragment } from '../types/sdk';
 import extractionMachine, { ExtractionContext } from '../lib/machines/extraction/extractionMachine';
 import { Link, useLoaderData, useNavigate } from 'react-router-dom';
 import ButtonBar from '../components/ButtonBar';
@@ -27,26 +27,58 @@ import LabelCopyButton from '../components/LabelCopyButton';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { selectOptionValues } from '../components/forms';
 
-function buildExtractionTableData(ctx: ExtractionContext) {
-  if (!ctx.extraction) return [];
-  const sourceLabwares = ctx.labwares;
-  const destinationLabwares = ctx.extraction.extract.labware;
-  const sampleColors = buildSampleColors(destinationLabwares);
-  /**
-   * The result will contain one operation per labware, and each operation will contain one action per sample in the labware.
-   * Here it is refined to show  one result per operation.
-   */
+type ExtractionResultData = {
+  extractionResult: {
+    sampleColor: string | undefined;
+    sourceLabware: LabwareFieldsFragment;
+    destinationLabware: LabwareFieldsFragment | undefined;
+  }[];
+  destinationLabware: LabwareFieldsFragment[];
+};
 
-  return ctx.extraction.extract.operations
-    .map((operation) => {
-      return {
+function buildExtractionResultData(ctx: ExtractionContext): ExtractionResultData {
+  if (!ctx.extraction) {
+    return {
+      extractionResult: [],
+      destinationLabware: []
+    };
+  }
+
+  const { labwares: sourceLabwares } = ctx;
+  const { labware: destinationLabwares, operations } = ctx.extraction.extract;
+  const sampleColors = buildSampleColors(sourceLabwares);
+
+  return sourceLabwares.reduce(
+    (acc, sourceLw) => {
+      const operation = operations.find((op) => op.actions[0].source.labwareId === sourceLw.id);
+
+      if (!operation) return acc;
+
+      const destinationLw = destinationLabwares.find((lw) => lw.id === operation.actions[0].destination.labwareId);
+
+      acc.extractionResult.push({
         sampleColor: sampleColors.get(operation.actions[0].sample.id),
-        sourceLabware: sourceLabwares.find((lw) => lw.id === operation.actions[0].source.labwareId),
-        destinationLabware: destinationLabwares.find((lw) => lw.id === operation.actions[0].destination.labwareId)
-      };
-    })
-    .flat();
+        sourceLabware: sourceLw,
+        destinationLabware: destinationLw
+      });
+
+      if (destinationLw) {
+        acc.destinationLabware.push(destinationLw);
+      }
+
+      return acc;
+    },
+    {
+      extractionResult: [] as {
+        sampleColor: string | undefined;
+        sourceLabware: LabwareFieldsFragment;
+        destinationLabware: LabwareFieldsFragment | undefined;
+      }[],
+      destinationLabware: [] as LabwareFieldsFragment[]
+    }
+  );
 }
+
 const extractionEquipments = (equipments: EquipmentFieldsFragment[]) => {
   const methods: Array<{ value: number; label: string }> = [];
 
@@ -63,7 +95,7 @@ function Extraction() {
 
   const { handleOnPrint, handleOnPrintError, handleOnPrinterChange, printResult, currentPrinter } = usePrinters();
 
-  const { labwares, serverErrors, extraction } = current.context;
+  const { labwares, serverErrors } = current.context;
 
   const extractionMethodOptions = useMemo(() => extractionEquipments(equipments), [equipments]);
 
@@ -85,8 +117,8 @@ function Extraction() {
     [sampleColors]
   );
 
-  const extractionTableData = useMemo(() => {
-    return buildExtractionTableData(current.context);
+  const extractionResultData = useMemo(() => {
+    return buildExtractionResultData(current.context);
   }, [current]);
 
   const handleWorkNumberChange = useCallback(
@@ -176,7 +208,7 @@ function Extraction() {
                   </tr>
                 </TableHead>
                 <TableBody>
-                  {extractionTableData.map((data) => (
+                  {extractionResultData.extractionResult.map((data) => (
                     <tr key={data.destinationLabware?.barcode}>
                       <TableCell>{data.sampleColor && <Circle backgroundColor={data.sampleColor} />}</TableCell>
                       <TableCell>{data.sourceLabware?.barcode}</TableCell>
@@ -206,7 +238,7 @@ function Extraction() {
                   <LabelPrinter
                     labelsPerBarcode={2}
                     showNotifications={false}
-                    labwares={extraction?.extract?.labware ?? []}
+                    labwares={extractionResultData.destinationLabware ?? []}
                     onPrint={handleOnPrint}
                     onPrintError={handleOnPrintError}
                     onPrinterChange={handleOnPrinterChange}
@@ -222,13 +254,13 @@ function Extraction() {
                 >
                   <div className={'flex items-center space-x-2'}>
                     <div className={'font-bold'}>Labels:</div>
-                    <div>{extraction?.extract?.labware.map((lw) => lw.barcode).join(',')}</div>
+                    <div>{extractionResultData.destinationLabware.map((lw) => lw.barcode).join(', ')}</div>
                   </div>
                   <LabelCopyButton
-                    labels={extraction?.extract?.labware.map((lw) => lw.barcode) ?? []}
+                    labels={extractionResultData.destinationLabware.map((lw) => lw.barcode) ?? []}
                     copyButtonText={'Copy Labels'}
                     buttonClass={
-                      'text-white bg-sdb-500 shadow-xs hover:bg-sdb focus:border-sdb focus:shadow-md-outline-sdb active:bg-sdb-600'
+                      'shadow-xs hover:text-white hover:bg-sdb focus:border-sdb focus:shadow-md-outline-sdb active:bg-sdb-600'
                     }
                   />
                 </div>
@@ -276,7 +308,7 @@ function Extraction() {
             <BlueButton action="primary">Return Home</BlueButton>
           </Link>
           <div className={''}>
-            <Link to={'/lab/extraction_result'} state={{ labware: extraction?.extract?.labware }}>
+            <Link to={'/lab/extraction_result'} state={{ labware: extractionResultData.destinationLabware }}>
               <BlueButton action="primary">Go to Extraction Result &gt;</BlueButton>
             </Link>
           </div>
