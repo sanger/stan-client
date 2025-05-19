@@ -314,12 +314,6 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
               >
                 Done
               </BlueButton>
-              <WhiteButton
-                onClick={() => layoutMachine.send({ type: 'CANCEL' })}
-                className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Cancel
-              </WhiteButton>
             </ModalFooter>
           )}
         </Modal>

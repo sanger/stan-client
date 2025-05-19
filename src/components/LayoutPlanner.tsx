@@ -10,6 +10,7 @@ import {
 } from '../lib/machines/layout/layoutEvents';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../pages/sectioning';
 import { ActorRef, MachineSnapshot } from 'xstate';
+import { Position } from '../lib/helpers';
 
 interface LayoutPlannerProps {
   actor: ActorRef<MachineSnapshot<LayoutContext, LayoutEvents, any, any, any, any, any, any>, any>;
@@ -41,6 +42,7 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
               slotText={(address) => buildSlotText(layoutPlan, address)}
               slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
               slotColor={(address) => buildSlotColor(layoutPlan, address)}
+              barcodeInfoPosition={Position.TopRight}
             />
           )}
         </div>

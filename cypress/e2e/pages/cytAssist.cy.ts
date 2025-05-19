@@ -340,7 +340,7 @@ describe('CytAssist Page', () => {
         saveButton().should('not.be.disabled').click();
         cy.findByText('Slots copied').should('be.visible');
       });
-      describe('When user selects Visium LP CytAssist HD labwareType', () => {
+      describe('When user selects CytAssist HD 6.5 labwareType', () => {
         before(() => {
           cy.reload();
           selectSGPNumber('SGP1008');
@@ -483,14 +483,14 @@ describe('CytAssist Page', () => {
         });
       });
       it('re-selects the correct output labware type', () => {
-        shouldDisplaySelectedValue('output-labware-type', 'Visium LP CytAssist HD');
+        shouldDisplaySelectedValue('output-labware-type', 'CytAssist HD 6.5');
       });
       it('updates the source labware properly', () => {
         cy.findByText('STAN-3300').should('be.visible');
       });
       it('updates the output labware properly', () => {
         cy.findByTestId('cytassist-labware').within(() => {
-          cy.findByText('Visium LP CytAssist HD').should('be.visible');
+          cy.findByText('CytAssist HD 6.5').should('be.visible');
         });
       });
       it('shows the mapped slots correctly', () => {
