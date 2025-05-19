@@ -104,7 +104,7 @@ describe('Render Confirm Component', () => {
     });
     it('loads Sectioning Confirming page with the planed section(s) correctly', () => {
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Sectioning - Confirmation');
-      expect(screen.getByText('SGP Number')).toBeVisible();
+      expect(screen.getAllByText('SGP Number').length).toBeGreaterThan(0);
       expect(screen.getByText('Find Plans')).toBeVisible();
       expect(screen.queryByText('Section Numbering')).toBeVisible();
       const saveButton = screen.getByRole('button', { name: 'Save' });

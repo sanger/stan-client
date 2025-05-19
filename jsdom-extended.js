@@ -23,8 +23,6 @@ class JSDOMEnvironmentExtended extends JSDOMEnvironment {
     this.global.FormData = FormData;
     this.global.Request = Request;
     this.global.Response = Response;
-    this.global.Request = Request;
-    this.global.Response = Response;
     this.global.structuredClone = structuredClone;
 
     this.global.BroadcastChannel = BroadcastChannel;
