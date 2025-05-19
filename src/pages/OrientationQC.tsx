@@ -81,7 +81,7 @@ const OrientationQC = () => {
               });
             }}
           >
-            {({ values, setFieldValue }) => (
+            {({ values, setFieldValue, resetForm }) => (
               <Form>
                 <GrayBox>
                   <motion.div

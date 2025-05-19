@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { describe } from '@jest/globals';
 import { BrowserRouter } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { CellSegmentation } from '../../../../src/pages/CellSegmentation';
 import { getCurrentDateTime } from '../../../../src/types/stan';
 import { createFlaggedLabware } from '../../../../src/mocks/handlers/flagLabwareHandlers';
 import { SlideCosting } from '../../../../src/types/sdk';
+import React from 'react';
 
 jest.mock('react-router-dom', () => ({
   ...(jest.requireActual('react-router-dom') as any),
@@ -30,7 +31,7 @@ jest.mock('../../../../src/components/labwareScanner/LabwareScanner', () => ({
 
 describe('Cell Segmentation', () => {
   describe('Cell segmentation page is loaded correctly', () => {
-    it('renders page the page without clutching', () => {
+    it('renders page the page without clutching', async () => {
       render(
         <BrowserRouter>
           <CellSegmentation />
@@ -41,30 +42,32 @@ describe('Cell Segmentation', () => {
     });
   });
   describe('when a labware is scanned', () => {
-    beforeEach(() => {
-      render(
-        <BrowserRouter>
-          <CellSegmentation
-            initialFormValues={{
-              cellSegmentation: [
-                {
-                  labware: mockedScannedLabware,
-                  performed: getCurrentDateTime(),
-                  costing: SlideCosting.WarrantyReplacement,
-                  comments: [],
-                  workNumber: '',
-                  reagentLot: ''
-                }
-              ],
-              workNumberAll: '',
-              performedAll: getCurrentDateTime(),
-              costingAll: undefined,
-              commentsAll: [],
-              reagentLotAll: ''
-            }}
-          />
-        </BrowserRouter>
-      );
+    beforeEach(async () => {
+      await act(async () => {
+        render(
+          <BrowserRouter>
+            <CellSegmentation
+              initialFormValues={{
+                cellSegmentation: [
+                  {
+                    labware: mockedScannedLabware,
+                    performed: getCurrentDateTime(),
+                    costing: SlideCosting.WarrantyReplacement,
+                    comments: [],
+                    workNumber: '',
+                    reagentLot: ''
+                  }
+                ],
+                workNumberAll: '',
+                performedAll: getCurrentDateTime(),
+                costingAll: undefined,
+                commentsAll: [],
+                reagentLotAll: ''
+              }}
+            />
+          </BrowserRouter>
+        );
+      });
     });
     it('renders labware details', () => {
       expect(screen.getAllByRole('table')).toHaveLength(2);

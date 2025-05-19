@@ -33,10 +33,7 @@ import { spatialLocationColumnDiv } from '../components/dataTableColumns/labware
  - "medium" and "lastknownSectionNumber" fields are omitted
  - changed "externalIdentifier" and "replicateNumber" fields to optional
  **/
-export type RegistrationFormBlockSample = PartialBy<
-  Omit<RegistrationFormBlock, 'medium' | 'lastKnownSectionNumber'>,
-  'externalIdentifier' | 'replicateNumber'
-> & {
+export type RegistrationFormBlockSample = PartialBy<RegistrationFormBlock, 'externalIdentifier' | 'replicateNumber'> & {
   solution: string;
 };
 
@@ -68,7 +65,9 @@ export function getRegistrationFormSample(): RegistrationFormBlockSample {
     fixative: '',
     solution: '',
     externalIdentifier: '',
-    replicateNumber: ''
+    replicateNumber: '',
+    lastKnownSectionNumber: 0,
+    medium: ''
   };
 }
 
