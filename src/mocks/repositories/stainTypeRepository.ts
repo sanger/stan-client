@@ -7,6 +7,18 @@ const stainTypeSeeds: Array<StainTypeFieldsFragment> = [
     name: 'H&E',
     measurementTypes: ['Haematoxylin', 'Blueing', 'Eosin']
   }),
+  stainTypeFactory.build({
+    name: 'H&E CytAssist',
+    measurementTypes: ['Haematoxylin', 'Blueing', 'Eosin']
+  }),
+  stainTypeFactory.build({
+    name: 'H&E Post Xenium',
+    measurementTypes: ['Haematoxylin', 'Blueing', 'Eosin']
+  }),
+  stainTypeFactory.build({
+    name: 'H&E QC',
+    measurementTypes: ['Haematoxylin', 'Blueing', 'Eosin']
+  }),
   stainTypeFactory.build({ name: "Masson's Trichrome" }),
   stainTypeFactory.build({ name: 'RNAscope' }),
   stainTypeFactory.build({ name: 'IHC' })
