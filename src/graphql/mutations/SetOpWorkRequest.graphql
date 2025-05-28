@@ -1,0 +1,5 @@
+mutation SetOpWorkRequest($request: OpWorkRequest!) {
+  setOperationWork(request: $request) {
+    ...OperationFields
+  }
+}

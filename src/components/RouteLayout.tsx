@@ -63,6 +63,7 @@ import { CellSegmentationQc } from '../pages/CellSegmentationQc';
 import { CellSegmentation } from '../pages/CellSegmentation';
 import CleanOut from '../pages/CleanOut';
 import XeniumMetrics from '../pages/XeniumMetrics';
+import { ReassignWorkNumber } from '../pages/ReassignWorkNumber/ReassignWorkNumber';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -427,6 +428,15 @@ const RouteLayout = () => {
               });
               return res.comments;
             }}
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/admin/reassign_work_number"
+            loader={async () => {
+              return await stanCore.GetEventTypes();
+            }}
+            element={<ReassignWorkNumber />}
           />
         </Route>
 

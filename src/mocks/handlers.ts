@@ -64,6 +64,7 @@ import omeroProjectHandlers from './handlers/omeroProjectHandlers';
 import bioRiskHandler from './handlers/bioRiskHandler';
 import spatialLocationHandlers from './handlers/spatialLocationHandlers';
 import tissueTypeHandlers from './handlers/tissueTypeHandlers';
+import reassignWorkNumber from './handlers/WorkNumberHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -129,5 +130,6 @@ export const handlers = [
   ...omeroProjectHandlers,
   ...bioRiskHandler,
   ...spatialLocationHandlers,
-  ...tissueTypeHandlers
+  ...tissueTypeHandlers,
+  ...reassignWorkNumber
 ];

@@ -198,6 +198,7 @@ const FlagLabware = () => {
                         <Heading level={3}>Description</Heading>
                         <MutedText>Please enter a reason for flagging the labware.</MutedText>
                         <Field
+                          className="border border-gray-500 rounded-md shadow-sm focus:ring-sp-500 focus:border-sp-500 block w-full p-2"
                           as={'textarea'}
                           rows={5}
                           cols={77}
