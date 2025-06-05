@@ -2,7 +2,7 @@ import AppShell from '../../components/AppShell';
 import React from 'react';
 import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
 import { useLoaderData } from 'react-router-dom';
-import { GetEventTypesQuery } from '../../types/sdk';
+import { GetOperationTypesQuery } from '../../types/sdk';
 import BlueButton from '../../components/buttons/BlueButton';
 import WorkNumberSelect from '../../components/WorkNumberSelect';
 import GrayBox, { Sidebar } from '../../components/layouts/GrayBox';
@@ -17,7 +17,7 @@ import OperationCompleteModal from '../../components/modal/OperationCompleteModa
 import Warning from '../../components/notifications/Warning';
 
 export const ReviseWorkNumber = () => {
-  const events = useLoaderData() as GetEventTypesQuery;
+  const events = useLoaderData() as GetOperationTypesQuery;
 
   const [currentReviseMachine, sendReviseMachine] = useMachine(reviseWorkNumberMachine, {
     input: {
@@ -63,14 +63,14 @@ export const ReviseWorkNumber = () => {
                     <Input
                       data-testid={'barcode'}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        sendReviseMachine({ type: 'SET_BARCODE', barcode: e.target.value });
+                        sendReviseMachine({ type: 'SET_BARCODE', barcode: e.target.value.trim() });
                       }}
                     />
                   </Label>
                   <CustomReactSelect
-                    label="Event Type"
+                    label="Operation Name"
                     dataTestId="eventType"
-                    options={events.eventTypes.sort().map((event) => {
+                    options={events.opTypes.sort().map((event) => {
                       return { label: event, value: event };
                     })}
                     handleChange={(value) => {

@@ -434,7 +434,7 @@ const RouteLayout = () => {
           <Route
             path="/admin/revise_work_number"
             loader={async () => {
-              return await stanCore.GetEventTypes();
+              return await stanCore.GetOperationTypes();
             }}
             element={<ReviseWorkNumber />}
           />
