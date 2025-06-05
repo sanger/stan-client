@@ -10,16 +10,16 @@ import Heading from '../../components/Heading';
 import PinkButton from '../../components/buttons/PinkButton';
 import { useMachine } from '@xstate/react';
 import { Input } from '../../components/forms/Input';
-import { reassignWorkNumberMachine } from './ReassignWorkNumber.machine';
+import { reviseWorkNumberMachine } from './ReviseWorkNumber.machine';
 import Label from '../../components/forms/Label';
 import Table, { TableBody, TableCell, TableHeader } from '../../components/Table';
 import OperationCompleteModal from '../../components/modal/OperationCompleteModal';
 import Warning from '../../components/notifications/Warning';
 
-export const ReassignWorkNumber = () => {
+export const ReviseWorkNumber = () => {
   const events = useLoaderData() as GetEventTypesQuery;
 
-  const [currentReassignMachine, sendReassignMachine] = useMachine(reassignWorkNumberMachine, {
+  const [currentReviseMachine, sendReviseMachine] = useMachine(reviseWorkNumberMachine, {
     input: {
       barcode: '',
       eventType: '',
@@ -31,12 +31,12 @@ export const ReassignWorkNumber = () => {
   });
 
   const { workNumber, eventType, barcode, operations, selectedOps, submissionResult, serverError } =
-    currentReassignMachine.context;
+    currentReviseMachine.context;
 
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Reassign Work Number</AppShell.Title>
+        <AppShell.Title>Revise Work Number</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
@@ -50,7 +50,7 @@ export const ReassignWorkNumber = () => {
                   label={''}
                   dataTestId={'workNumber'}
                   onWorkNumberChange={(_workNumber) => {
-                    sendReassignMachine({ type: 'SET_WORK_NUMBER', workNumber: _workNumber });
+                    sendReviseMachine({ type: 'SET_WORK_NUMBER', workNumber: _workNumber });
                   }}
                 />
               </div>
@@ -63,7 +63,7 @@ export const ReassignWorkNumber = () => {
                     <Input
                       data-testid={'barcode'}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        sendReassignMachine({ type: 'SET_BARCODE', barcode: e.target.value });
+                        sendReviseMachine({ type: 'SET_BARCODE', barcode: e.target.value });
                       }}
                     />
                   </Label>
@@ -74,7 +74,7 @@ export const ReassignWorkNumber = () => {
                       return { label: event, value: event };
                     })}
                     handleChange={(value) => {
-                      sendReassignMachine({ type: 'SET_EVENT_TYPE', eventType: (value as OptionType).value });
+                      sendReviseMachine({ type: 'SET_EVENT_TYPE', eventType: (value as OptionType).value });
                     }}
                   />
                 </div>
@@ -82,9 +82,9 @@ export const ReassignWorkNumber = () => {
                   <BlueButton
                     data-testid={'search-operations'}
                     disabled={eventType.length === 0 || barcode.length === 0}
-                    loading={currentReassignMachine.matches('find_operations')}
+                    loading={currentReviseMachine.matches('find_operations')}
                     onClick={() => {
-                      sendReassignMachine({ type: 'FIND_OPERATIONS' });
+                      sendReviseMachine({ type: 'FIND_OPERATIONS' });
                     }}
                   >
                     Search
@@ -112,7 +112,7 @@ export const ReassignWorkNumber = () => {
                               data-testid="active"
                               checked={selectedOps.some((opId) => opId === operation.id)}
                               onChange={() => {
-                                sendReassignMachine({
+                                sendReviseMachine({
                                   type: 'TOGGLE_OPERATION',
                                   opId: operation.id
                                 });
@@ -147,11 +147,11 @@ export const ReassignWorkNumber = () => {
               <PinkButton
                 data-testid={'submit'}
                 disabled={selectedOps.length === 0 || workNumber.length === 0}
-                loading={currentReassignMachine.matches('submitting')}
+                loading={currentReviseMachine.matches('submitting')}
                 type="submit"
                 className="sm:w-full"
                 onClick={() => {
-                  sendReassignMachine({ type: 'SUBMIT' });
+                  sendReviseMachine({ type: 'SUBMIT' });
                 }}
               >
                 Submit
@@ -159,7 +159,7 @@ export const ReassignWorkNumber = () => {
             </Sidebar>
           </GrayBox>
           <OperationCompleteModal
-            show={currentReassignMachine.matches('final') && submissionResult !== undefined}
+            show={currentReviseMachine.matches('final') && submissionResult !== undefined}
             message={submissionResult}
           >
             <p>

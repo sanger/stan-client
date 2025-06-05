@@ -5,7 +5,7 @@ import { stanCore } from '../../lib/sdk';
 import { Draft } from 'immer';
 import { castDraft } from '../../dependencies/immer';
 
-export interface ReassignWorkNumberMachineContext {
+export interface ReviseWorkNumberMachineContext {
   submissionResult?: string;
   serverError?: ClientError;
   operations: Array<OperationFieldsFragment>;
@@ -52,16 +52,16 @@ type SubmitEvent = {
   type: 'SUBMIT';
 };
 
-type ReassignWorkNumberEvent = {
-  type: 'xstate.done.actor.reassignWorkNumber';
+type ReviseWorkNumberEvent = {
+  type: 'xstate.done.actor.reviseWorkNumber';
   output: SetOpWorkRequestMutation;
 };
 
-type ReassignWorkNumberErrorEvent = {
-  type: 'xstate.error.actor.reassignWorkNumber';
+type ReviseWorkNumberErrorEvent = {
+  type: 'xstate.error.actor.reviseWorkNumber';
   error: Draft<ClientError>;
 };
-type ReassignWorkNumberMachineEvents =
+type ReviseWorkNumberMachineEvents =
   | SetEventType
   | SetBarcode
   | SetWorkNumber
@@ -70,18 +70,18 @@ type ReassignWorkNumberMachineEvents =
   | FindOperationErrorEvent
   | SubmitEvent
   | ToggleOperationSelectionEvent
-  | ReassignWorkNumberEvent
-  | ReassignWorkNumberErrorEvent;
+  | ReviseWorkNumberEvent
+  | ReviseWorkNumberErrorEvent;
 
-export const reassignWorkNumberMachine = createMachine(
+export const reviseWorkNumberMachine = createMachine(
   {
-    id: 'reassignWorkNumberMachine',
+    id: 'reviseWorkNumberMachine',
     initial: 'ready',
     types: {} as {
-      context: ReassignWorkNumberMachineContext;
-      events: ReassignWorkNumberMachineEvents;
+      context: ReviseWorkNumberMachineContext;
+      events: ReviseWorkNumberMachineEvents;
     },
-    context: ({ input }: { input: ReassignWorkNumberMachineContext }): ReassignWorkNumberMachineContext => ({
+    context: ({ input }: { input: ReviseWorkNumberMachineContext }): ReviseWorkNumberMachineContext => ({
       ...input
     }),
     states: {
@@ -156,7 +156,7 @@ export const reassignWorkNumberMachine = createMachine(
       },
       submitting: {
         invoke: {
-          id: 'reassignWorkNumber',
+          id: 'reviseWorkNumber',
           src: fromPromise(async ({ input }) => {
             return await stanCore.SetOpWorkRequest({
               request: {
@@ -242,10 +242,7 @@ export const reassignWorkNumberMachine = createMachine(
         }
       }),
       assignServerError: assign(({ context, event }) => {
-        if (
-          event.type !== 'xstate.error.actor.findOperations' &&
-          event.type !== 'xstate.error.actor.reassignWorkNumber'
-        )
+        if (event.type !== 'xstate.error.actor.findOperations' && event.type !== 'xstate.error.actor.reviseWorkNumber')
           return context;
         return {
           ...context,
@@ -253,12 +250,12 @@ export const reassignWorkNumberMachine = createMachine(
         };
       }),
       assignSubmissionResult: assign(({ context, event }) => {
-        if (event.type !== 'xstate.done.actor.reassignWorkNumber') return context;
+        if (event.type !== 'xstate.done.actor.reviseWorkNumber') return context;
         const successfullyUpdatedOpIds = event.output.setOperationWork.map((op) => op.id);
         if (successfullyUpdatedOpIds.length !== context.selectedOps.length) {
           return {
             ...context,
-            submissionResult: `Some operations were not updated. Successfully reassigned operations to work number ${
+            submissionResult: `Some operations were not updated. Successfully revised operations to work number ${
               context.workNumber
             } are: ${successfullyUpdatedOpIds.join(', ')}`,
             serverError: undefined
@@ -266,7 +263,7 @@ export const reassignWorkNumberMachine = createMachine(
         } else {
           return {
             ...context,
-            submissionResult: `All selected operations have been successfully reassigned to the work number ${context.workNumber}.`,
+            submissionResult: `All selected operations have been successfully revised to the work number ${context.workNumber}.`,
             serverError: undefined
           };
         }
