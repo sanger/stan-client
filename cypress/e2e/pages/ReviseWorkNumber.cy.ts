@@ -7,9 +7,9 @@ import {
 import { HttpResponse } from 'msw';
 import { selectOption } from '../shared/customReactSelect.cy';
 
-describe('Reassign WOrk Number Page', () => {
+describe('Revise Work Number Page', () => {
   before(() => {
-    cy.visit('/admin/reassign_work_number');
+    cy.visit('/admin/revise_work_number');
   });
 
   describe('On load', () => {
@@ -96,7 +96,7 @@ describe('Reassign WOrk Number Page', () => {
       });
 
       it('displays a success message', () => {
-        cy.findByText('All selected operations have been successfully reassigned to the work number SGP1008.').should(
+        cy.findByText('All selected operations have been successfully revised to the work number SGP1008.').should(
           'be.visible'
         );
       });

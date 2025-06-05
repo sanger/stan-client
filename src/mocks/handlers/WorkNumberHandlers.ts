@@ -2,7 +2,7 @@ import { graphql, HttpResponse } from 'msw';
 import { SetOpWorkRequestMutation, SetOpWorkRequestMutationVariables } from '../../types/sdk';
 import OperationFactory from '../../lib/factories/operationFactory';
 
-const reassignWorkNumber = [
+const reviseWorkNumber = [
   graphql.mutation<SetOpWorkRequestMutation, SetOpWorkRequestMutationVariables>('SetOpWorkRequest', ({ variables }) => {
     const opIds = variables.request.opIds;
     const operations = opIds.map((opId) => OperationFactory.build({ id: opId }));
@@ -10,4 +10,4 @@ const reassignWorkNumber = [
   })
 ];
 
-export default reassignWorkNumber;
+export default reviseWorkNumber;

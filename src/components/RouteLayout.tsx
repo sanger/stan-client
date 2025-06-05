@@ -63,7 +63,7 @@ import { CellSegmentationQc } from '../pages/CellSegmentationQc';
 import { CellSegmentation } from '../pages/CellSegmentation';
 import CleanOut from '../pages/CleanOut';
 import XeniumMetrics from '../pages/XeniumMetrics';
-import { ReassignWorkNumber } from '../pages/ReassignWorkNumber/ReassignWorkNumber';
+import { ReviseWorkNumber } from '../pages/ReviseWorkNumber/ReviseWorkNumber';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -432,11 +432,11 @@ const RouteLayout = () => {
         </Route>
         <Route element={<AuthLayout />}>
           <Route
-            path="/admin/reassign_work_number"
+            path="/admin/revise_work_number"
             loader={async () => {
               return await stanCore.GetEventTypes();
             }}
-            element={<ReassignWorkNumber />}
+            element={<ReviseWorkNumber />}
           />
         </Route>
 
