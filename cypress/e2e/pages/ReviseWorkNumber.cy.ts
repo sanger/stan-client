@@ -30,7 +30,7 @@ describe('Revise Work Number Page', () => {
   describe('When searching for operations', () => {
     before(() => {
       cy.findByTestId('barcode').type('STAN-1223');
-      selectOption('eventType', 'Event 1');
+      selectOption('eventType', 'Operation Type 1');
     });
     describe('when no operations is found', () => {
       before(() => {
