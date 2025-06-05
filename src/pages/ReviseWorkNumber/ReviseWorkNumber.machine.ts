@@ -242,10 +242,7 @@ export const reviseWorkNumberMachine = createMachine(
         }
       }),
       assignServerError: assign(({ context, event }) => {
-        if (
-          event.type !== 'xstate.error.actor.findOperations' &&
-          event.type !== 'xstate.error.actor.reviseWorkNumber'
-        )
+        if (event.type !== 'xstate.error.actor.findOperations' && event.type !== 'xstate.error.actor.reviseWorkNumber')
           return context;
         return {
           ...context,
