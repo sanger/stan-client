@@ -39,6 +39,7 @@ import Labware from '../components/labware/Labware';
 import Panel from '../components/Panel';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
+import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
@@ -69,6 +70,7 @@ type XeniumAnalyserFormValues = {
   performed: string;
   labware: Array<AnalyserLabwareForm>;
   workNumberAll: string;
+  roiBarcode?: string;
 };
 const formInitialValues: XeniumAnalyserFormValues = {
   runName: '',
@@ -526,6 +528,13 @@ const XeniumAnalyser = () => {
                                                   className="w-3/10"
                                                   name={`labware.${lwIndex}.samples.${sampleIndex}.roi`}
                                                   data-testid={`${lw.labware.barcode}-${sampleIndex}-roi`}
+                                                  onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                                    const roiBarcode = e.target.value.trim();
+                                                    await setValues((prev) => ({
+                                                      ...prev,
+                                                      roiBarcode: roiBarcode.length > 0 ? roiBarcode : undefined
+                                                    }));
+                                                  }}
                                                 />
                                               </div>
                                             );
@@ -570,6 +579,19 @@ const XeniumAnalyser = () => {
                       the Home screen.
                     </p>
                   </OperationCompleteModal>
+                  {values.roiBarcode && (
+                    <BarcodeDisplayer
+                      barcode={values.roiBarcode}
+                      header={'Scan the region barcode into your machine'}
+                      show={true}
+                      onClose={async () => {
+                        await setValues((prev) => ({
+                          ...prev,
+                          roiBarcode: undefined
+                        }));
+                      }}
+                    />
+                  )}
                 </Form>
               )}
             </Formik>
