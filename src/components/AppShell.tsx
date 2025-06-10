@@ -365,6 +365,12 @@ function AppShell({ children }: AppShellParams) {
                     description={'Reactivate destroyed and discarded labware.'}
                   />
                   <NavLinkMenuItem
+                    caption={'Re-assign Request Number'}
+                    path={'/admin/reassign_request_number'}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Re-assign request numbers to labware.'}
+                  />
+                  <NavLinkMenuItem
                     caption={'Revise Work Number'}
                     path={'/admin/revise_work_number'}
                     icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
@@ -549,6 +555,8 @@ function AppShell({ children }: AppShellParams) {
                         <StanMobileNavLink to={'/admin/flagLabware'}>Flag Labware</StanMobileNavLink>
 
                         <StanMobileNavLink to="/admin/reactivate">Reactivate</StanMobileNavLink>
+
+                        <StanMobileNavLink to="/admin/revise_work_number">Re-assign Request Number</StanMobileNavLink>
 
                         <StanMobileNavLink to="/admin/revise_work_number">Revise Work Number</StanMobileNavLink>
 

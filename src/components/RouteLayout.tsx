@@ -64,6 +64,7 @@ import { CellSegmentation } from '../pages/CellSegmentation';
 import CleanOut from '../pages/CleanOut';
 import XeniumMetrics from '../pages/XeniumMetrics';
 import { ReviseWorkNumber } from '../pages/ReviseWorkNumber/ReviseWorkNumber';
+import { ReassignRequestNumber } from '../pages/ReassignRequestNumber';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -429,6 +430,9 @@ const RouteLayout = () => {
               return res.comments;
             }}
           />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/admin/reassign_request_number" element={<ReassignRequestNumber />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
