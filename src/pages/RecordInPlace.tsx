@@ -89,7 +89,11 @@ export default function RecordInPlace({
       .optional()
       .label('Equipment'),
     operationType: Yup.string().required().label('Operation Type'),
-    workNumbers: Yup.array().of(Yup.string().required()).min(1).required().label('SGP Number')
+    workNumbers: Yup.array()
+      .of(Yup.string().required())
+      .min(1, 'SGP Number is a required field')
+      .required()
+      .label('SGP Number')
   });
 
   /**
@@ -138,7 +142,7 @@ export default function RecordInPlace({
                         <WorkNumberSelect
                           onWorkNumberChange={(workNumber) => setFieldValue('workNumbers', [workNumber])}
                         />
-                        <FormikErrorMessage name={'workNumber'} />
+                        <FormikErrorMessage name={'workNumbers'} />
                       </motion.div>
 
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4">
