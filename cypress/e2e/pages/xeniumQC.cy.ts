@@ -146,14 +146,23 @@ describe('Xenium Analyser QC', () => {
         cy.findByRole('button', { name: 'Save' }).should('be.enabled');
       });
     });
+    context('when no run name is selected', () => {
+      before(() => {
+        selectOption('runName', '');
+      });
+      it('disables the Save button', () => {
+        cy.findByRole('button', { name: 'Save' }).should('be.disabled');
+      });
+      it('displays an error message', () => {
+        cy.findByText('Run name is a required field').should('be.visible');
+      });
+    });
   });
 
   describe('On save', () => {
-    before(() => {
-      cy.get('#labwareScanInput').type('STAN-3111{enter}');
-    });
     context('When there is a server error', () => {
       before(() => {
+        cy.reload();
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<RecordQcLabwareMutation, RecordQcLabwareMutationVariables>('RecordQCLabware', () => {
@@ -170,7 +179,8 @@ describe('Xenium Analyser QC', () => {
             })
           );
         });
-
+        cy.get('#labwareScanInput').type('STAN-3111{enter}');
+        fillInForm();
         cy.findByRole('button', { name: 'Save' }).click();
       });
       it('shows an error', () => {
@@ -193,5 +203,6 @@ describe('Xenium Analyser QC', () => {
     cy.findByTestId('completion').clear().type('2020-01-01T10:00').blur();
     selectOption('STAN-3111-workNumber', 'SGP1008');
     selectOption('STAN-3111-comments', comments[0].text);
+    selectOption('runName', 'Run Name 2');
   }
 });
