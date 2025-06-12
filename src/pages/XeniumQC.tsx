@@ -99,7 +99,7 @@ const XeniumQC = () => {
           workNumber: Yup.string().required().label('SGP Number'),
           comments: Yup.array().min(0).optional(),
           runNames: Yup.array().min(0).optional(),
-          selectedRunName: Yup.string().optional(),
+          selectedRunName: Yup.string().required('Run name is a required field'),
           roiComments: Yup.array().min(0).optional(),
           sampleComments: Yup.array()
             .of(
