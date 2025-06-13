@@ -44,6 +44,20 @@ describe('Xenium Analyser', () => {
       //Table should display barcode of labware scanned
       cy.findAllByRole('table').contains('td', 'STAN-3111');
     });
+    context('when a region of interest is set', () => {
+      before(() => {
+        cy.findByTestId('STAN-3111-1-roi').clear().type('123456789').blur();
+      });
+      after(() => {
+        cy.findByTestId('closeBarcodeDisplayer').click();
+      });
+      it('displays the barcodeDisplayer', () => {
+        cy.findByText('Scan the region barcode into your machine').should('be.visible');
+      });
+      it('the barcodeDisplayer contains the roi barcode', () => {
+        cy.findByTestId('2d-barcode').contains('123456789');
+      });
+    });
   });
   describe('When  two labware is scanned ', () => {
     before(() => {
@@ -126,6 +140,7 @@ describe('Xenium Analyser', () => {
     selectOption('STAN-3111-position', 'Left');
     for (let indx = 0; indx < 8; indx++) {
       cy.findByTestId(`STAN-3111-${indx}-roi`).clear().type('123456789').blur();
+      cy.findByTestId('closeBarcodeDisplayer').click();
     }
   }
 });
