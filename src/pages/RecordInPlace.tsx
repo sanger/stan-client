@@ -89,7 +89,11 @@ export default function RecordInPlace({
       .optional()
       .label('Equipment'),
     operationType: Yup.string().required().label('Operation Type'),
-    workNumber: Yup.string().required().label('SGP Number')
+    workNumbers: Yup.array()
+      .of(Yup.string().required())
+      .min(1, 'SGP Number is a required field')
+      .required()
+      .label('SGP Number')
   });
 
   /**
@@ -99,7 +103,7 @@ export default function RecordInPlace({
     operationType,
     labware: [],
     equipmentId: undefined,
-    workNumber: ''
+    workNumbers: []
   };
 
   return (
@@ -119,7 +123,7 @@ export default function RecordInPlace({
               send({ type: 'SUBMIT_FORM', values: submitValues });
             }}
           >
-            {({ values, setFieldValue, errors }) => (
+            {({ values, setFieldValue, isValid }) => (
               <>
                 <Form>
                   <GrayBox>
@@ -136,9 +140,9 @@ export default function RecordInPlace({
                         <Heading level={3}>SGP Number</Heading>
 
                         <WorkNumberSelect
-                          onWorkNumberChange={(workNumber) => setFieldValue('workNumber', workNumber)}
+                          onWorkNumberChange={(workNumber) => setFieldValue('workNumbers', [workNumber])}
                         />
-                        <FormikErrorMessage name={'workNumber'} />
+                        <FormikErrorMessage name={'workNumbers'} />
                       </motion.div>
 
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4">
@@ -181,9 +185,9 @@ export default function RecordInPlace({
                         Summary
                       </Heading>
 
-                      {values.workNumber ? (
+                      {values.workNumbers && values.workNumbers.length > 0 ? (
                         <p>
-                          The selected SGP number is <span className="font-semibold">{values.workNumber}</span>.
+                          The selected SGP number is <span className="font-semibold">{values.workNumbers[0]}</span>.
                         </p>
                       ) : (
                         <p className="text-sm italic">No SGP number selected.</p>
@@ -198,7 +202,7 @@ export default function RecordInPlace({
                         </div>
                       )}
                       <PinkButton
-                        disabled={current.matches('submitted')}
+                        disabled={current.matches('submitted') || !isValid}
                         loading={current.matches('submitting')}
                         type="submit"
                         className="sm:w-full"
