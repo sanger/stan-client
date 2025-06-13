@@ -1,12 +1,12 @@
 {
   "name": "client",
-  "version": "3.10.0",
+  "version": "3.9.2",
   "private": true,
   "proxy": "http://localhost:8080",
   "dependencies": {
     "@react-aria/tabs": "^3.9.7",
     "@sanger/ui-styling": "^4.3.0",
-    "@storybook/react-webpack5": "^7.6.3",
+    "@storybook/react-webpack5": "^8.2.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/postcss": "^4.0.0",
     "@tailwindcss/typography": "^0.5.15",
