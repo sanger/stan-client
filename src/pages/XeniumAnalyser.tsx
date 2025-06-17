@@ -39,7 +39,7 @@ import Labware from '../components/labware/Labware';
 import Panel from '../components/Panel';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
-import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
+import { QrCodeDisplayer } from '../components/modal/QrCodeDisplayer';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
@@ -580,9 +580,9 @@ const XeniumAnalyser = () => {
                     </p>
                   </OperationCompleteModal>
                   {values.roiBarcode && (
-                    <BarcodeDisplayer
-                      barcode={values.roiBarcode}
-                      header={'Scan the region barcode into your machine'}
+                    <QrCodeDisplayer
+                      value={values.roiBarcode}
+                      header={`Scan ${values.roiBarcode} into your machine`}
                       show={true}
                       onClose={async () => {
                         await setValues((prev) => ({
