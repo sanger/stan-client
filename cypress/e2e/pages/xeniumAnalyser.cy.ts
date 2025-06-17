@@ -52,10 +52,10 @@ describe('Xenium Analyser', () => {
         cy.findByTestId('closeBarcodeDisplayer').click();
       });
       it('displays the barcodeDisplayer', () => {
-        cy.findByText('Scan the region barcode into your machine').should('be.visible');
+        cy.findByText('Scan 123456789 into your machine').should('be.visible');
       });
-      it('the barcodeDisplayer contains the roi barcode', () => {
-        cy.findByTestId('2d-barcode').contains('123456789');
+      it('the qr code should be visible', () => {
+        cy.findByTestId('qr-code').should('be.visible');
       });
     });
   });

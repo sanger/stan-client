@@ -145,7 +145,7 @@ export const QrCodeDisplayer = ({ show, header, value, onClose }: QRProps) => {
       </ModalHeader>
       <ModalBody>
         <div className="my-4 flex justify-center">
-          <QRCodeCanvas value={value} />
+          <QRCodeCanvas value={value} data-testid="qr-code" />
         </div>
       </ModalBody>
     </Modal>
