@@ -295,15 +295,6 @@ const XeniumQC = () => {
                 <OperationCompleteModal
                   show={submissionResult !== undefined}
                   message={'Xenium Analyser QC recorded on all labware'}
-                >
-                  <p>
-                    If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
-                    the Home screen.
-                  </p>
-                </OperationCompleteModal>
-                <OperationCompleteModal
-                  show={submissionResult !== undefined}
-                  message={'Xenium Analyser QC recorded on all labware'}
                   additionalButtons={
                     <WhiteButton
                       type="button"
