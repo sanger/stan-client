@@ -146,13 +146,6 @@ describe('Staining Page', () => {
       shouldDisplaySuccessDialog(['Store', 'Stain Again', 'Reset Form', 'Return Home']);
       shouldNavigateToStore();
     });
-    describe('when RNAscope & IHC Stain Type is selected', () => {
-      before(() => {
-        submitStainInfo('RNAscope & IHC');
-      });
-      shouldDisplaySuccessDialog(['Store', 'Stain Again', 'Reset Form', 'Return Home']);
-      shouldNavigateToStore();
-    });
   });
 
   function submitStainInfo(stainType: string) {

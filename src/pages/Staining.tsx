@@ -38,18 +38,7 @@ export default function Staining() {
                 emptyOption
                 dataTestId={'stainType'}
                 handleChange={(e) => setStainType((e as OptionType).label)}
-                options={selectOptionValues(
-                  [
-                    ...stainingInfo.stainTypes,
-                    {
-                      __typename: 'StainType',
-                      measurementTypes: [],
-                      name: 'RNAscope & IHC'
-                    }
-                  ],
-                  'name',
-                  'name'
-                )}
+                options={selectOptionValues(stainingInfo.stainTypes, 'name', 'name')}
               />
             </Label>
           </div>

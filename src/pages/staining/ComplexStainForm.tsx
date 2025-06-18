@@ -59,7 +59,7 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
 
   const plexMin = 1;
   const plexMax = 100;
-  const stainTypes = stainType === 'RNAscope & IHC' ? stainType.split('&').map((val) => val.trim()) : [stainType];
+  const stainTypes = stainType.includes(' & ') ? stainType.split(' & ').map((val) => val.trim()) : [stainType];
 
   const labwareValidationSchema = Yup.object().shape({
     barcode: Yup.string().required().label('Barcode'),
