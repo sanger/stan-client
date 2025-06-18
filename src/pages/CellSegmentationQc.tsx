@@ -2,15 +2,16 @@ import AppShell from '../components/AppShell';
 import { Form, Formik } from 'formik';
 import {
   CommentFieldsFragment,
+  LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   SegmentationLabware,
   SegmentationMutation,
   SegmentationRequest
 } from '../types/sdk';
-import { formatDateTimeForCore, getCurrentDateTime } from '../types/stan';
+import { createSessionStorageForLabwareAwaiting, formatDateTimeForCore, getCurrentDateTime } from '../types/stan';
 import React, { useContext } from 'react';
 import BlueButton from '../components/buttons/BlueButton';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
@@ -19,6 +20,7 @@ import { useMachine } from '@xstate/react';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { Segmentation } from '../components/CellSegmentation/CellSegmentation';
 import Warning from '../components/notifications/Warning';
+import WhiteButton from '../components/buttons/WhiteButton';
 
 type CellSegmentationQcProps = {
   labware: LabwareFlaggedFieldsFragment;
@@ -84,6 +86,7 @@ export const CellSegmentationQc = ({ initialFormValues = defaultFormValues }) =>
 
   const [current, send] = useMachine(formMachine);
   const { serverError, submissionResult } = current.context;
+  const navigate = useNavigate();
   return (
     <AppShell>
       <AppShell.Header>
@@ -111,19 +114,35 @@ export const CellSegmentationQc = ({ initialFormValues = defaultFormValues }) =>
                       </BlueButton>
                     </div>
                   )}
+
+                  <OperationCompleteModal
+                    show={submissionResult !== undefined}
+                    message={'Cell Segmentation QC recorded on all labware'}
+                    additionalButtons={
+                      <WhiteButton
+                        type="button"
+                        style={{ marginLeft: 'auto' }}
+                        className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                        onClick={() => {
+                          createSessionStorageForLabwareAwaiting(
+                            values.cellSegmentation.map((cellSeg) => cellSeg.labware as LabwareFieldsFragment)
+                          );
+                          navigate('/store');
+                        }}
+                      >
+                        Store
+                      </WhiteButton>
+                    }
+                  >
+                    <p>
+                      If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
+                      the Home screen.
+                    </p>
+                  </OperationCompleteModal>
                 </Form>
               )}
             </Formik>
           </div>
-          <OperationCompleteModal
-            show={submissionResult !== undefined}
-            message={'Cell Segmentation QC recorded on all labware'}
-          >
-            <p>
-              If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the
-              Home screen.
-            </p>
-          </OperationCompleteModal>
         </div>
       </AppShell.Main>
     </AppShell>
