@@ -1,6 +1,7 @@
 import React, { SetStateAction, useCallback, useContext } from 'react';
 import {
   CommentFieldsFragment,
+  LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   QcLabwareRequest,
   RecordQcLabwareMutation,
@@ -20,11 +21,12 @@ import { XeniumLabwareQC } from '../components/xeniumQC/XeniumLabwareQC';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import BlueButton from '../components/buttons/BlueButton';
 import FormikInput from '../components/forms/Input';
-import { getCurrentDateTime } from '../types/stan';
+import { createSessionStorageForLabwareAwaiting, getCurrentDateTime } from '../types/stan';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { fromPromise } from 'xstate';
 import { groupByRoi } from '../components/xeniumMetrics/RoiTable';
+import WhiteButton from '../components/buttons/WhiteButton';
 
 export type SampleComment = {
   roi: string;
@@ -41,6 +43,7 @@ type QcFormLabware = {
   sampleComments: Array<SampleComment>;
   runNames?: string[];
   selectedRunName?: string;
+  lw: LabwareFlaggedFieldsFragment;
 };
 
 export type XeniumQCFormData = {
@@ -95,6 +98,7 @@ const XeniumQC = () => {
     labware: Yup.array()
       .of(
         Yup.object().shape({
+          lw: Yup.object(),
           barcode: Yup.string().required(),
           workNumber: Yup.string().required().label('SGP Number'),
           comments: Yup.array().min(0).optional(),
@@ -125,17 +129,18 @@ const XeniumQC = () => {
 
   const getRelatedLabwareData = useCallback(
     async (
-      barcode: string,
+      labware: LabwareFlaggedFieldsFragment,
       setValues: (values: SetStateAction<XeniumQCFormData>, shouldValidate?: boolean) => {}
     ): Promise<string[]> => {
       try {
-        const groupedByRoi = await getRegionsOfInterestGroupedByRoi(barcode);
+        const groupedByRoi = await getRegionsOfInterestGroupedByRoi(labware.barcode);
         if (Object.keys(groupedByRoi).length === 0)
-          return [`No region of interest is recorded against the scanned labware ${barcode}.`];
-        const runNames = await getRunNames(barcode);
+          return [`No region of interest is recorded against the scanned labware ${labware.barcode}.`];
+        const runNames = await getRunNames(labware.barcode);
         setValues((prev) => {
           prev.labware.push({
-            barcode: barcode,
+            lw: labware,
+            barcode: labware.barcode,
             workNumber: prev.workNumberAll,
             completion: prev.completion,
             comments: [],
@@ -156,12 +161,12 @@ const XeniumQC = () => {
 
         return [];
       } catch (error) {
-        return [`There was an error fetching the related data for the labware ${barcode}.`];
+        return [`There was an error fetching the related data for the labware ${labware.barcode}.`];
       }
     },
     []
   );
-
+  const navigate = useNavigate();
   return (
     <AppShell>
       <AppShell.Header>
@@ -215,7 +220,8 @@ const XeniumQC = () => {
                               barcode: addedLw.barcode,
                               workNumber: values.workNumberAll,
                               completion: values.completion,
-                              comments: []
+                              comments: [],
+                              lw: addedLw
                             });
                           }
                         }}
@@ -224,7 +230,7 @@ const XeniumQC = () => {
                           labwares: LabwareFlaggedFieldsFragment[],
                           foundLabware: LabwareFlaggedFieldsFragment
                         ) => {
-                          return getRelatedLabwareData(foundLabware.barcode, setValues);
+                          return getRelatedLabwareData(foundLabware, setValues);
                         }}
                       >
                         {({ labwares, removeLabware }) => (
@@ -289,6 +295,21 @@ const XeniumQC = () => {
                 <OperationCompleteModal
                   show={submissionResult !== undefined}
                   message={'Xenium Analyser QC recorded on all labware'}
+                  additionalButtons={
+                    <WhiteButton
+                      type="button"
+                      style={{ marginLeft: 'auto' }}
+                      className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                      onClick={() => {
+                        createSessionStorageForLabwareAwaiting(
+                          values.labware.map((analyserLabware) => analyserLabware.lw as LabwareFieldsFragment)
+                        );
+                        navigate('/store');
+                      }}
+                    >
+                      Store
+                    </WhiteButton>
+                  }
                 >
                   <p>
                     If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
