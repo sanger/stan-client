@@ -1,5 +1,5 @@
-mutation SetProbePanelEnabled($name: String!, $enabled: Boolean!) {
-  setProbePanelEnabled(name: $name, enabled: $enabled) {
+mutation SetProbePanelEnabled($type: ProbeType!, $name: String!, $enabled: Boolean!) {
+  setProbePanelEnabled(type: $type, name: $name, enabled: $enabled) {
     ...ProbePanelFields
   }
 }

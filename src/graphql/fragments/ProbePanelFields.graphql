@@ -1,4 +1,5 @@
 fragment ProbePanelFields on ProbePanel {
   name
   enabled
+  type
 }

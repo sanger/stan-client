@@ -161,7 +161,7 @@ export default function WorkNumberSelect({
     }
   };
   return (
-    <div className={'flex flex-col'}>
+    <div>
       <CustomReactSelect
         label={label ?? ''}
         name={name ?? undefined}
