@@ -123,7 +123,7 @@ describe('Xenium Probe Hybridisation', () => {
       before(() => {
         cy.reload();
         cy.get('#labwareScanInput').type('STAN-3111{enter}');
-        selectOption('probe-name', 'Custom breast');
+        selectOption('probe-name', 'Xenium APT gene expression panel');
         cy.findByTestId('probe-lot').type('1234');
         cy.findByTestId('probe-plex').scrollIntoView().type('2');
         selectOption('probe-costing', 'Faculty');
@@ -132,7 +132,7 @@ describe('Xenium Probe Hybridisation', () => {
       it('adds a new probe row to all the scanned labware', () => {
         //Should adds probe information to the existing rows
         cy.findByTestId('STAN-3111-0-name').should('be.visible');
-        shouldDisplaySelectedValue('STAN-3111-0-name', 'Custom breast');
+        shouldDisplaySelectedValue('STAN-3111-0-name', 'Xenium APT gene expression panel');
         cy.findByTestId('STAN-3111-0-lot').should('have.value', '1234');
         cy.findByTestId('STAN-3111-0-plex').scrollIntoView().should('have.value', '2');
         shouldDisplaySelectedValue('STAN-3111-0-costing', 'Faculty');
@@ -154,7 +154,7 @@ describe('Xenium Probe Hybridisation', () => {
       it('should remove the first row', () => {
         cy.findByTestId('STAN-3111-1-action').should('not.exist');
         //Displays only one row with value
-        shouldDisplaySelectedValue('STAN-3111-0-name', 'Custom breast');
+        shouldDisplaySelectedValue('STAN-3111-0-name', 'Xenium APT gene expression panel');
         cy.findByTestId('STAN-3111-0-lot').should('have.value', '1234');
         cy.findByTestId('STAN-3111-0-plex').scrollIntoView().should('have.value', '2');
         shouldDisplaySelectedValue('STAN-3111-0-costing', 'Faculty');
@@ -206,7 +206,7 @@ describe('Xenium Probe Hybridisation', () => {
       before(() => {
         selectOption('STAN-3112-workNumber', 'SGP1008');
         selectOption('STAN-3112-kitCosting', 'SGP');
-        selectOption('STAN-3112-0-name', 'Custom breast');
+        selectOption('STAN-3112-0-name', 'Xenium APT gene expression panel');
         cy.findByTestId('STAN-3112-0-lot').type('1234');
         cy.findByTestId('STAN-3112-0-plex').scrollIntoView().type('2');
         selectOption('STAN-3112-0-costing', 'SGP');
@@ -229,7 +229,7 @@ describe('Xenium Probe Hybridisation', () => {
       it('changes status on  panel name field', () => {
         selectOption('STAN-3112-0-name', '');
         cy.findByRole('button', { name: 'Save' }).should('be.disabled');
-        selectOption('STAN-3112-0-name', 'Custom breast');
+        selectOption('STAN-3112-0-name', 'Xenium APT gene expression panel');
         cy.findByRole('button', { name: 'Save' }).should('be.enabled');
       });
       it('changes status on  lot name field', () => {

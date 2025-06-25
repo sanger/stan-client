@@ -38,7 +38,13 @@ query GetConfiguration {
   solutions(includeDisabled: true) {
     ...SolutionFields
   }
-  probePanels(includeDisabled: true) {
+  xeniumProbePanels: probePanels(type: xenium, includeDisabled: true) {
+    ...ProbePanelFields
+  }
+  cytassistProbePanels: probePanels(type: cytassist, includeDisabled: true) {
+    ...ProbePanelFields
+  }
+  spikeProbePanels: probePanels(type: spike, includeDisabled: true) {
     ...ProbePanelFields
   }
   programs(includeDisabled: true) {

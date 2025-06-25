@@ -13,7 +13,7 @@ import Search from '../pages/Search';
 import WorkProgressSummary from '../pages/WorkProgressSummary';
 import FileManager from '../pages/FileManager';
 import AuthLayout from './AuthLayout';
-import { UserRole } from '../types/sdk';
+import { ProbeType, UserRole } from '../types/sdk';
 import SGP from '../pages/SGP';
 import Confirm from '../pages/sectioning/Confirm';
 import Plan from '../pages/sectioning/Plan';
@@ -65,6 +65,7 @@ import CleanOut from '../pages/CleanOut';
 import XeniumMetrics from '../pages/XeniumMetrics';
 import { ReviseWorkNumber } from '../pages/ReviseWorkNumber/ReviseWorkNumber';
 import { ReassignRequestNumber } from '../pages/ReassignRequestNumber';
+import ProbeHybridisationCytAssist from '../pages/ProbeHybridisationCytAssist/ProbeHybridisationCytAssist';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -267,10 +268,23 @@ const RouteLayout = () => {
           <Route
             path="/lab/probe_hybridisation_xenium"
             loader={async () => {
-              const res = await stanCore.GetProbePanels();
-              return res;
+              return await stanCore.GetProbePanels({ type: ProbeType.Xenium });
             }}
             element={<ProbeHybridisationXenium />}
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/probe_hybridisation_cytassist"
+            loader={async () => {
+              const cytAssistProbes = await stanCore.GetProbePanels({ type: ProbeType.Cytassist });
+              const spikeProbes = await stanCore.GetProbePanels({ type: ProbeType.Spike });
+              return {
+                cytAssistProbes: cytAssistProbes.probePanels,
+                spikeProbes: spikeProbes.probePanels
+              };
+            }}
+            element={<ProbeHybridisationCytAssist />}
           />
         </Route>
         <Route element={<AuthLayout />}>

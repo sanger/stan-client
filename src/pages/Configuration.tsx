@@ -6,6 +6,7 @@ import {
   AddTissueTypeMutation,
   AddTissueTypeSpatialLocation,
   GetConfigurationQuery,
+  ProbeType,
   TissueTypeFieldsFragment,
   UserRole
 } from '../types/sdk';
@@ -289,27 +290,82 @@ export default function Configuration() {
       </div>,
 
       /**Probe Panels**/
-      <div data-testid="config">
-        <Heading level={2}>Probe Panels</Heading>
-        <p className="mt-3 mb-6 text-lg" />
-        <EntityManager
-          initialEntities={configuration.probePanels}
-          displayKeyColumnName={'name'}
-          valueColumnName={'enabled'}
-          onChangeValue={(entity, value) => {
-            const enabled = typeof value === 'boolean' ? value : false;
-            return stanCore
-              .SetProbePanelEnabled({
-                enabled,
-                name: entity.name
-              })
-              .then((res) => res.setProbePanelEnabled);
-          }}
-          onCreate={(name) => stanCore.AddProbePanel({ name }).then((res) => res.addProbePanel)}
-          valueFieldComponentInfo={{
-            type: 'CHECKBOX'
-          }}
-        />
+      <div className="space-y-8">
+        <div data-testid="config">
+          <Heading level={2}>Probe Panels - CytAssist</Heading>
+          <p className="mt-3 mb-6 text-lg" />
+          <EntityManager
+            initialEntities={configuration.cytassistProbePanels}
+            displayKeyColumnName={'name'}
+            valueColumnName={'enabled'}
+            onChangeValue={(entity, value) => {
+              const enabled = typeof value === 'boolean' ? value : false;
+              return stanCore
+                .SetProbePanelEnabled({
+                  enabled,
+                  name: entity.name,
+                  type: ProbeType.Cytassist
+                })
+                .then((res) => res.setProbePanelEnabled);
+            }}
+            onCreate={(name) =>
+              stanCore.AddProbePanel({ type: ProbeType.Cytassist, name }).then((res) => res.addProbePanel)
+            }
+            valueFieldComponentInfo={{
+              type: 'CHECKBOX'
+            }}
+          />
+        </div>
+        <div data-testid="config">
+          <Heading level={2}>Probe Panels - Spike</Heading>
+          <p className="mt-3 mb-6 text-lg" />
+          <EntityManager
+            initialEntities={configuration.spikeProbePanels}
+            displayKeyColumnName={'name'}
+            valueColumnName={'enabled'}
+            onChangeValue={(entity, value) => {
+              const enabled = typeof value === 'boolean' ? value : false;
+              return stanCore
+                .SetProbePanelEnabled({
+                  enabled,
+                  name: entity.name,
+                  type: ProbeType.Spike
+                })
+                .then((res) => res.setProbePanelEnabled);
+            }}
+            onCreate={(name) =>
+              stanCore.AddProbePanel({ type: ProbeType.Spike, name }).then((res) => res.addProbePanel)
+            }
+            valueFieldComponentInfo={{
+              type: 'CHECKBOX'
+            }}
+          />
+        </div>
+        <div data-testid="config">
+          <Heading level={2}>Probe Panels - Xenium</Heading>
+          <p className="mt-3 mb-6 text-lg" />
+          <EntityManager
+            initialEntities={configuration.xeniumProbePanels}
+            displayKeyColumnName={'name'}
+            valueColumnName={'enabled'}
+            onChangeValue={(entity, value) => {
+              const enabled = typeof value === 'boolean' ? value : false;
+              return stanCore
+                .SetProbePanelEnabled({
+                  enabled,
+                  name: entity.name,
+                  type: ProbeType.Xenium
+                })
+                .then((res) => res.setProbePanelEnabled);
+            }}
+            onCreate={(name) =>
+              stanCore.AddProbePanel({ type: ProbeType.Xenium, name }).then((res) => res.addProbePanel)
+            }
+            valueFieldComponentInfo={{
+              type: 'CHECKBOX'
+            }}
+          />
+        </div>
       </div>,
 
       /**Projects**/

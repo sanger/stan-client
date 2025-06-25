@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 
 import { Formik } from 'formik';
 import ProbeAddPanel from '../../../../src/components/probeHybridisation/ProbeAddPanel';
-import { ProbePanelFieldsFragment } from '../../../../src/types/sdk';
+import { ProbePanelFieldsFragment, ProbeType } from '../../../../src/types/sdk';
 
 afterEach(() => {
   cleanup();
@@ -14,8 +14,8 @@ const FormikProps = {
 };
 
 const probePanels: ProbePanelFieldsFragment[] = [
-  { name: 'Custom breast', __typename: 'ProbePanel', enabled: true },
-  { name: 'Custom brain', __typename: 'ProbePanel', enabled: true }
+  { name: 'Custom breast', __typename: 'ProbePanel', enabled: true, type: ProbeType.Xenium },
+  { name: 'Custom brain', __typename: 'ProbePanel', enabled: true, type: ProbeType.Xenium }
 ];
 describe('ProbeAddPanel', () => {
   describe('On Mount', () => {

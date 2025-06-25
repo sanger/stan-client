@@ -1,6 +1,7 @@
-query GetProbePanels {
-  probePanels {
+query GetProbePanels($type: ProbeType!) {
+  probePanels(type: $type) {
     name
     enabled
+    type
   }
 }
