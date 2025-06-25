@@ -21,10 +21,10 @@ const ProbeTable: React.FC<ProbePanelInfo> = ({ cytAssistProbes, spikeProbes }: 
         <span>SGP Number</span>
         <span>Kit Costing</span>
         <span>Reagent LOT</span>
+        <span>Custom Probe Panel</span>
         <span>Probe Probe</span>
         <span>Probe LOT</span>
         <span>Probe Costing</span>
-        <span>Custom Probe</span>
         <span></span>
       </div>
       {values.labware.map((probeLw, lwIndex) => (
@@ -32,14 +32,14 @@ const ProbeTable: React.FC<ProbePanelInfo> = ({ cytAssistProbes, spikeProbes }: 
           <span>{probeLw.labware.barcode}</span>
           <WorkNumberSelect
             name={`labware.${lwIndex}.workNumber`}
-            dataTestId={`${probeLw.labware.barcode}-workNumber`}
+            dataTestId={`labware.${lwIndex}.workNumber`}
             onWorkNumberChange={async (workNumber) => {
               await setFieldValue(`labware.${lwIndex}.workNumber`, workNumber);
             }}
             workNumber={values.labware[lwIndex].workNumber}
           />
           <CustomReactSelect
-            dataTestId={`${probeLw.labware.barcode}-kitCosting`}
+            dataTestId={`labware.${lwIndex}.kitCosting`}
             name={`labware.${lwIndex}.kitCosting`}
             options={selectOptionValues(slideCostingOptions, 'label', 'value')}
             value={probeLw.kitCosting}
@@ -53,9 +53,18 @@ const ProbeTable: React.FC<ProbePanelInfo> = ({ cytAssistProbes, spikeProbes }: 
               className=""
             />
           </div>
-          <div className="col-span-5">
+          <CustomReactSelect
+            label=""
+            dataTestId={`labware.${lwIndex}.customPanel`}
+            name={`labware.${lwIndex}.customPanel`}
+            options={selectOptionValues(spikeProbes, 'name', 'name')}
+            isMulti={false}
+            emptyOption={true}
+            value={probeLw.customPanel}
+          />
+          <div className="col-span-4">
             {probeLw.probes.length === 0 && (
-              <div className="grid grid-cols-5 w-full border gap-x-1 border-gray-200 rounded-md p-2 mt-2">
+              <div className="grid grid-cols-4 w-full border gap-x-1 border-gray-200 rounded-md p-2 mt-2">
                 <CustomReactSelect
                   dataTestId={`labware.${lwIndex}.probes.0.panel`}
                   label=""
@@ -79,14 +88,7 @@ const ProbeTable: React.FC<ProbePanelInfo> = ({ cytAssistProbes, spikeProbes }: 
                   isMulti={false}
                   emptyOption={true}
                 />
-                <CustomReactSelect
-                  label=""
-                  dataTestId={`labware.${lwIndex}.probes.0.customPanel`}
-                  name={`labware.${lwIndex}.probes.0.customPanel`}
-                  options={selectOptionValues(spikeProbes, 'name', 'name')}
-                  isMulti={false}
-                  emptyOption={true}
-                />
+
                 <div
                   className={'flex flex-row space-x-2 justify-end items-end'}
                   data-testid={`labware.${lwIndex}.probes.0.actions`}
@@ -109,7 +111,7 @@ const ProbeTable: React.FC<ProbePanelInfo> = ({ cytAssistProbes, spikeProbes }: 
             )}
             {probeLw.probes.map((probe, probeIndex) => (
               <div
-                className="grid grid-cols-5 w-full border gap-x-1 border-gray-200 rounded-md p-2 mt-2"
+                className="grid grid-cols-4 w-full border gap-x-1 border-gray-200 rounded-md p-2 mt-2"
                 key={`probeLw.barcode-${lwIndex}-${probeIndex}`}
               >
                 <CustomReactSelect
@@ -135,15 +137,6 @@ const ProbeTable: React.FC<ProbePanelInfo> = ({ cytAssistProbes, spikeProbes }: 
                   options={selectOptionValues(slideCostingOptions, 'label', 'value')}
                   isMulti={false}
                   value={probe.costing}
-                  emptyOption={true}
-                />
-                <CustomReactSelect
-                  label={''}
-                  dataTestId={`labware.${lwIndex}.probes.${probeIndex}.customPanel`}
-                  name={`labware.${lwIndex}.probes.${probeIndex}.customPanel`}
-                  options={selectOptionValues(spikeProbes, 'name', 'name')}
-                  isMulti={false}
-                  value={probe.customPanel}
                   emptyOption={true}
                 />
                 <div

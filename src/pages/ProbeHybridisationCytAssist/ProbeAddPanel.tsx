@@ -8,11 +8,11 @@ import FormikInput from '../../components/forms/Input';
 import WhiteButton from '../../components/buttons/WhiteButton';
 import AddIcon from '../../components/icons/AddIcon';
 
-const ProbeAddPanel = ({ cytAssistProbes, spikeProbes }: ProbePanelInfo) => {
+const ProbeAddPanel = ({ cytAssistProbes }: ProbePanelInfo) => {
   const { values, setValues, setTouched, errors } = useFormikContext<ProbeHybridisationCytAssistFormValues>();
   return (
     <div className={'border-1 border-gray-300 shadow-md justify-end p-2 basis-3/4'}>
-      <div className={'grid grid-cols-4 gap-x-3 p-4 gap-y-5'} data-testid={'probe-all-table'}>
+      <div className={'grid grid-cols-3 gap-x-3 p-4 gap-y-5'} data-testid={'probe-all-table'}>
         <CustomReactSelect
           dataTestId={'probe-name'}
           emptyOption={true}
@@ -29,13 +29,6 @@ const ProbeAddPanel = ({ cytAssistProbes, spikeProbes }: ProbePanelInfo) => {
           name={'probePanelAll.costing'}
           emptyOption={true}
           options={selectOptionValues(slideCostingOptions, 'label', 'value')}
-        />
-        <CustomReactSelect
-          dataTestId={'custom-probe'}
-          emptyOption={true}
-          label="Custom Probe Panel"
-          name={'probePanelAll.customPanel'}
-          options={selectOptionValues(spikeProbes, 'name', 'name')}
         />
       </div>
 
@@ -61,7 +54,6 @@ const ProbeAddPanel = ({ cytAssistProbes, spikeProbes }: ProbePanelInfo) => {
                 probes: lw.probes.map(() => ({
                   panel: true,
                   lot: true,
-                  customPanel: true,
                   costing: true
                 }))
               }))

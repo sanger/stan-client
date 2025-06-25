@@ -39,6 +39,7 @@ export type ProbeHybridisationCytAssistFormValues = {
   workNumberAll: string;
   costingAll?: SlideCosting;
   reagentLotAll?: string;
+  customPanelAll?: string;
   probePanelAll: CytAssistProbe;
 };
 
@@ -48,16 +49,16 @@ type ProbeOperationLabwareForm = {
   kitCosting?: SlideCosting;
   reagentLot?: string;
   probes: Array<CytAssistProbe>;
+  customPanel?: string;
 };
 
 export type CytAssistProbe = {
   panel: string;
   lot: string;
   costing?: SlideCosting;
-  customPanel?: string;
 };
 
-export const probeLotDefault: CytAssistProbe = { panel: '', lot: '', customPanel: '' };
+export const probeLotDefault: CytAssistProbe = { panel: '', lot: '' };
 export const lotRegx = /^[A-Z0-9_]{1,25}$/;
 
 const formInitialValues: ProbeHybridisationCytAssistFormValues = {
@@ -117,14 +118,14 @@ const ProbeHybridisationCytAssist: React.FC = () => {
           lotRegx,
           'LOT number should be a string of maximum length 25 of capital letters, numbers and underscores.'
         ),
-      costing: Yup.string().oneOf(Object.values(SlideCosting)),
-      customPanel: Yup.string().optional()
+      costing: Yup.string().oneOf(Object.values(SlideCosting))
     }),
     labware: Yup.array()
       .of(
         Yup.object().shape({
           labware: Yup.object().required(),
           workNumber: Yup.string().required().label('SGP Number'),
+          customPanel: Yup.string().optional(),
           kitCosting: Yup.string().oneOf(Object.values(SlideCosting)).required('Costing is a required field'),
           reagentLot: Yup.string().matches(/^\d{6}$/, 'Reagent LOT should be a string of 6 digits'),
           probes: Yup.array()
@@ -147,8 +148,7 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                     lotRegx,
                     'LOT number should be a string of maximum length 25 of capital letters, numbers and underscores.'
                   ),
-                costing: Yup.string().oneOf(Object.values(SlideCosting)).required('Probe costing is a required field'),
-                customPanel: Yup.string().optional()
+                costing: Yup.string().oneOf(Object.values(SlideCosting)).required('Probe costing is a required field')
               })
             )
             .min(1)
@@ -184,11 +184,11 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                       workNumber: probeLw.workNumber,
                       kitCosting: probeLw.kitCosting!,
                       reagentLot: probeLw.reagentLot,
+                      spike: probeLw.customPanel,
                       probes: probeLw.probes.map((probe) => ({
                         name: probe.panel,
                         lot: probe.lot,
-                        costing: probe.costing!,
-                        spike: probe.customPanel
+                        costing: probe.costing!
                       }))
                     }))
                   }
@@ -209,7 +209,10 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                               ...prev.labware,
                               {
                                 labware: lw as LabwareFieldsFragment,
-                                workNumber: '',
+                                workNumber: values.workNumberAll,
+                                kitCosting: values.costingAll,
+                                reagentLot: values.reagentLotAll,
+                                customPanel: values.customPanelAll,
                                 probes: []
                               }
                             ]
@@ -243,7 +246,7 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                             <Heading level={3}>Apply to all</Heading>
                             <div className={'flex flex-col mt-4'}>
                               <div className={'w-full border-2 border-gray-100 mb-4'} />
-                              <div className={'grid grid-cols-8 gap-x-1'}>
+                              <div className={'grid grid-cols-7 gap-x-4'}>
                                 <WorkNumberSelect
                                   label={'SGP Number'}
                                   name={'workNumberAll'}
@@ -299,7 +302,27 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                                     }));
                                   }}
                                 />
-                                <div className={'col-span-5'}>
+                                <CustomReactSelect
+                                  dataTestId={'customPanelAll'}
+                                  emptyOption={true}
+                                  label="Custom Probe Panel"
+                                  name={'customPanelAll'}
+                                  options={selectOptionValues(probePanelInfo.spikeProbes, 'name', 'name')}
+                                  handleChange={async (val) => {
+                                    const customPanel = (val as OptionType).label;
+                                    await setValues((prev) => {
+                                      return {
+                                        ...prev,
+                                        customPanelAll: customPanel,
+                                        labware: prev.labware.map((lw) => ({
+                                          ...lw,
+                                          customPanel
+                                        }))
+                                      };
+                                    });
+                                  }}
+                                />
+                                <div className={'col-span-3'}>
                                   <ProbeAddPanel
                                     cytAssistProbes={probePanelInfo.cytAssistProbes}
                                     spikeProbes={probePanelInfo.spikeProbes}

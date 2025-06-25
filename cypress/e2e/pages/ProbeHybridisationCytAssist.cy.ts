@@ -35,10 +35,10 @@ describe('CytAssist Probe Hybridisation', () => {
       cy.findByRole('button', { name: 'Add to all' }).should('be.disabled');
     });
     it('displays the scanned labware in probe table', () => {
-      cy.findByTestId('STAN-3111-workNumber').should('be.visible');
+      cy.findByTestId('labware.0.workNumber').should('be.visible');
+      cy.findByTestId('labware.0.customPanel').scrollIntoView().should('be.visible');
       cy.findByTestId('labware.0.probes.0.panel').should('be.visible');
       cy.findByTestId('labware.0.probes.0.lot').should('be.visible');
-      cy.findByTestId('labware.0.probes.0.customPanel').scrollIntoView().should('be.visible');
       cy.findByTestId('labware.0.probes.0.costing').should('be.visible');
       cy.findByTestId('labware.0.probes.0.actions').should('be.visible');
       //Should not display remove button
@@ -76,7 +76,7 @@ describe('CytAssist Probe Hybridisation', () => {
         selectOption('workNumberAll', 'SGP1008');
       });
       it('should select SGP1008 for all labware', () => {
-        shouldDisplaySelectedValue('STAN-3111-workNumber', 'SGP1008');
+        shouldDisplaySelectedValue('labware.0.workNumber', 'SGP1008');
       });
     });
   });
@@ -86,12 +86,22 @@ describe('CytAssist Probe Hybridisation', () => {
         selectOption('costingAll', 'SGP');
       });
       it('should select costing for all labware', () => {
-        shouldDisplaySelectedValue('STAN-3111-kitCosting', 'SGP');
+        shouldDisplaySelectedValue('labware.0.kitCosting', 'SGP');
       });
     });
   });
   describe('Labware reagent Lot for all', () => {
     context('When Reagent Lot is set for all labware', () => {
+      before(() => {
+        selectOption('customPanelAll', 'Custom spike 1');
+      });
+      it('should set custom probe panel for the scanned labware', () => {
+        shouldDisplaySelectedValue('labware.0.customPanel', 'Custom spike 1');
+      });
+    });
+  });
+  describe('Labware custom probe panel for all', () => {
+    context('When a custom probe panel is set for all labware', () => {
       before(() => {
         cy.findByTestId('reagentLotAll').clear().type('123456').blur();
       });
@@ -106,7 +116,6 @@ describe('CytAssist Probe Hybridisation', () => {
         selectOption('probe-name', 'CytAssist APT gene expression panel');
         cy.findByTestId('probe-lot').type('1234');
         selectOption('probe-costing', 'Faculty');
-        selectOption('custom-probe', 'Custom spike 1');
       });
       it('enables Add to all button', () => {
         cy.findByRole('button', { name: 'Add to all' }).should('be.enabled');
@@ -144,13 +153,11 @@ describe('CytAssist Probe Hybridisation', () => {
         selectOption('probe-name', 'CytAssist APT gene expression panel');
         cy.findByTestId('probe-lot').clear().type('1234');
         selectOption('probe-costing', 'Faculty');
-        selectOption('custom-probe', 'Custom spike 1');
         cy.findByRole('button', { name: 'Add to all' }).click();
       });
       it('adds a new probe row to all the scanned labware', () => {
         shouldDisplaySelectedValue('labware.0.probes.0.panel', 'CytAssist APT gene expression panel');
         cy.findByTestId('labware.0.probes.0.lot').should('have.value', '1234');
-        shouldDisplaySelectedValue('labware.0.probes.0.customPanel', 'Custom spike 1');
         shouldDisplaySelectedValue('labware.0.probes.0.costing', 'Faculty');
       });
 
@@ -172,7 +179,6 @@ describe('CytAssist Probe Hybridisation', () => {
         //Displays only one row with value
         shouldDisplaySelectedValue('labware.0.probes.0.panel', 'CytAssist APT gene expression panel');
         cy.findByTestId('labware.0.probes.0.lot').should('have.value', '1234');
-        shouldDisplaySelectedValue('labware.0.probes.0.customPanel', 'Custom spike 1');
         shouldDisplaySelectedValue('labware.0.probes.0.costing', 'Faculty');
         //Action column updated
         cy.findByTestId('labware.0.probes.0.actions').within(() => {
@@ -189,12 +195,8 @@ describe('CytAssist Probe Hybridisation', () => {
       });
       it('adds a new empty row', () => {
         cy.findByTestId('labware.0.probes.1.actions').should('exist');
-        //Displays only one row with value
         shouldDisplaySelectedValue('labware.0.probes.1.name', '');
         cy.findByTestId('labware.0.probes.1.lot').should('have.value', '');
-        shouldDisplaySelectedValue('labware.0.probes.1.customPanel', '');
-        shouldDisplaySelectedValue('labware.0.probes.1.customPanel', '');
-        //Action column updated
         cy.findByTestId('labware.0.probes.1.actions').within(() => {
           cy.findByTestId('removeButton').should('exist');
           cy.findByTestId('addButton').should('exist');
@@ -246,12 +248,12 @@ describe('CytAssist Probe Hybridisation', () => {
 const fillInTheForm = () => {
   cy.reload();
   cy.get('#labwareScanInput').type('STAN-3111{enter}');
-  selectOption('STAN-3111-workNumber', 'SGP1008');
-  selectOption('STAN-3111-kitCosting', 'SGP');
+  selectOption('labware.0.workNumber', 'SGP1008');
+  selectOption('labware.0.kitCosting', 'SGP');
   cy.findByTestId('labware.0.reagentLot').type('345678');
+  selectOption('labware.0.customPanel', 'Custom spike 1');
   selectOption('labware.0.probes.0.panel', 'CytAssist APT gene expression panel');
   cy.findByTestId('labware.0.probes.0.lot').type('1234');
-  selectOption('labware.0.probes.0.customPanel', 'Custom spike 1');
   selectOption('labware.0.probes.0.costing', 'SGP');
   cy.findByRole('button', { name: 'Save' }).click();
 };
