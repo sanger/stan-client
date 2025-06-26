@@ -18,12 +18,17 @@ interface DisplayerProps {
   barcode: string;
 
   /**
+   * user warning message, if any
+   */
+  warningMessage?: string;
+
+  /**
    * Function to close the modal
    */
   onClose: () => void;
 }
 
-export const BarcodeDisplayer = ({ show, header, barcode, onClose }: DisplayerProps) => {
+export const BarcodeDisplayer = ({ show, header, barcode, warningMessage, onClose }: DisplayerProps) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
@@ -49,6 +54,7 @@ export const BarcodeDisplayer = ({ show, header, barcode, onClose }: DisplayerPr
         </div>
       </ModalHeader>
       <ModalBody>
+        {warningMessage && <div className="flex flex-row text-orange-800 font-medium text-md ">{warningMessage}</div>}
         <div className="my-4 flex justify-center">
           <svg data-testid="2d-barcode" ref={svgRef}></svg>
         </div>
