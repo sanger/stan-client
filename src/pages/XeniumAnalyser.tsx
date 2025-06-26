@@ -70,7 +70,7 @@ type XeniumAnalyserFormValues = {
   performed: string;
   labware: Array<AnalyserLabwareForm>;
   workNumberAll: string;
-  roiBarcode?: string;
+  barcodeDisplayerProps?: BarcodeDisplayerProps;
 };
 const formInitialValues: XeniumAnalyserFormValues = {
   runName: '',
@@ -81,6 +81,11 @@ const formInitialValues: XeniumAnalyserFormValues = {
   labware: [],
   performed: '',
   workNumberAll: ''
+};
+
+type BarcodeDisplayerProps = {
+  barcode: string;
+  warningMessage?: string;
 };
 
 const LabwareAnalyserTable = (labwareForm: AnalyserLabwareForm) => {
@@ -208,7 +213,7 @@ const XeniumAnalyser = () => {
             region: samplePosition?.region ?? '',
             externalName: sample.tissue.externalName ?? '',
             sectionNumber: String(sample.section) ?? '',
-            roi: ''
+            roi: sample.tissue.externalName ?? ''
           });
         });
       });
@@ -526,14 +531,24 @@ const XeniumAnalyser = () => {
                                                 <FormikInput
                                                   label={''}
                                                   className="w-3/10"
+                                                  type="text"
                                                   name={`labware.${lwIndex}.samples.${sampleIndex}.roi`}
                                                   data-testid={`${lw.labware.barcode}-${sampleIndex}-roi`}
                                                   onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                                                    const roiBarcode = e.target.value.trim();
-                                                    await setValues((prev) => ({
-                                                      ...prev,
-                                                      roiBarcode: roiBarcode.length > 0 ? roiBarcode : undefined
-                                                    }));
+                                                    const barcode = e.target.value.trim();
+                                                    if (barcode.length !== 0) {
+                                                      const barcodeDisplayerProps = {
+                                                        barcode,
+                                                        warningMessage:
+                                                          barcode !== sample.externalName
+                                                            ? 'The region does not match the sample external name'
+                                                            : undefined
+                                                      };
+                                                      await setValues((prev) => ({
+                                                        ...prev,
+                                                        barcodeDisplayerProps
+                                                      }));
+                                                    }
                                                   }}
                                                 />
                                               </div>
@@ -579,15 +594,16 @@ const XeniumAnalyser = () => {
                       the Home screen.
                     </p>
                   </OperationCompleteModal>
-                  {values.roiBarcode && (
+                  {values.barcodeDisplayerProps && (
                     <BarcodeDisplayer
-                      barcode={values.roiBarcode}
+                      barcode={values.barcodeDisplayerProps.barcode}
+                      warningMessage={values.barcodeDisplayerProps.warningMessage}
                       header={'Scan the region barcode into your machine'}
                       show={true}
                       onClose={async () => {
                         await setValues((prev) => ({
                           ...prev,
-                          roiBarcode: undefined
+                          barcodeDisplayerProps: undefined
                         }));
                       }}
                     />
