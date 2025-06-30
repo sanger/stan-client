@@ -98,7 +98,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                           type={'number'}
                           data-testid={`${probeLw.labware.barcode}-${probeIndex}-plex`}
                           min={0}
-                          value={probe.plex > 0 ? probe.plex : ''}
+                          value={probe.plex ? probe.plex : ''}
                         />
                       </TableCell>
                       <TableCell>

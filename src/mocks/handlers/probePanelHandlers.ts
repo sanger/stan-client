@@ -11,11 +11,14 @@ import probePanelRepository from '../repositories/probePanelRepository';
 import probePanelFactory from '../../lib/factories/probePanelFactory';
 
 const probePanelHandlers = [
-  graphql.query<GetProbePanelsQuery, GetProbePanelsQueryVariables>('GetProbePanels', () => {
-    return HttpResponse.json({ data: { probePanels: probePanelRepository.findAll() } }, { status: 200 });
+  graphql.query<GetProbePanelsQuery, GetProbePanelsQueryVariables>('GetProbePanels', ({ variables }) => {
+    return HttpResponse.json(
+      { data: { probePanels: probePanelRepository.findAll().filter((probe) => probe.type === variables.type) } },
+      { status: 200 }
+    );
   }),
   graphql.mutation<AddProbePanelMutation, AddProbePanelMutationVariables>('AddProbePanel', ({ variables }) => {
-    const addProbePanel = probePanelFactory.build({ name: variables.name });
+    const addProbePanel = probePanelFactory.build({ name: variables.name, type: variables.type });
     probePanelRepository.save(addProbePanel);
     return HttpResponse.json({ data: { addProbePanel } }, { status: 200 });
   }),
