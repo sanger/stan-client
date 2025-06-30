@@ -22,6 +22,15 @@ beforeEach(() => {
 const mockedLabware = buildLabwareFragment(labwareFactory.build({ barcode: 'STAN-123', id: 123 }));
 const mockedFlaggedLabware = convertLabwareToFlaggedLabware([mockedLabware]);
 
+const mockedLabware2 = buildLabwareFragment(labwareFactory.build({ barcode: 'STAN-3100', id: 3100 }));
+const mockedFlaggedLabware2 = convertLabwareToFlaggedLabware([mockedLabware2]);
+
+const mockedLabware3 = buildLabwareFragment(labwareFactory.build({ barcode: 'STAN-3200', id: 3200 }));
+const mockedFlaggedLabware3 = convertLabwareToFlaggedLabware([mockedLabware3]);
+
+const mockedLabware4 = buildLabwareFragment(labwareFactory.build({ barcode: 'STAN-3300', id: 3300 }));
+const mockedFlaggedLabware4 = convertLabwareToFlaggedLabware([mockedLabware4]);
+
 const mockedLabwareContext: LabwareContext = {
   currentBarcode: '',
   foundLabware: null,
@@ -34,6 +43,21 @@ const mockedLabwareContext: LabwareContext = {
   locationScan: false,
   limit: undefined,
   cleanedOutAddresses: new Map<number, string[]>()
+};
+
+const mockedLabwareContextWithLimit: LabwareContext = {
+  currentBarcode: '',
+  foundLabware: null,
+  labwares: [],
+  removedLabware: null,
+  foundLabwareCheck: undefined,
+  validator: Yup.string().trim().required('Barcode is required'),
+  successMessage: null,
+  errorMessage: null,
+  locationScan: false,
+  limit: 2,
+  cleanedOutAddresses: new Map<number, string[]>(),
+  areInitialsSet: false
 };
 
 describe('labwareMachine', () => {
@@ -375,6 +399,52 @@ describe('labwareMachine', () => {
           });
           stateMachine.send({ type: 'SUBMIT_BARCODE' });
           expect(stateMachine.getSnapshot().context.checkForCleanedOutAddresses).toEqual(true);
+        });
+      });
+    });
+  });
+
+  describe('SET_INITIALS', () => {
+    describe('when scanner is loaded with some initial labware', () => {
+      it('transitions to full state', (done) => {
+        const machine = createActor(createLabwareMachine(), {
+          input: mockedLabwareContextWithLimit
+        });
+        machine.subscribe((state) => {
+          if (state.matches('full')) {
+            expect(state.context.cleanedOutAddresses.size).toEqual(1);
+            expect(state.context.labwares.length).toEqual(2);
+            machine.stop();
+            done();
+          }
+        });
+        machine.start();
+        machine.send({
+          type: 'SET_INITIALS',
+          labware: [...mockedFlaggedLabware2, ...mockedFlaggedLabware3],
+          cleanedOutAddresses: new Map([[mockedLabware2.id, ['B1', 'B2']]])
+        });
+      });
+    });
+
+    describe('when init labware size is bigger that the scanner limit', () => {
+      it('does not assign the values', (done) => {
+        const machine = createActor(createLabwareMachine(), {
+          input: mockedLabwareContextWithLimit
+        });
+        machine.subscribe((state) => {
+          if (state.matches('idle.normal')) {
+            expect(state.context.cleanedOutAddresses.size).toEqual(0);
+            expect(state.context.labwares.length).toEqual(0);
+            machine.stop();
+            done();
+          }
+        });
+        machine.start();
+        machine.send({
+          type: 'SET_INITIALS',
+          labware: [...mockedFlaggedLabware2, ...mockedFlaggedLabware3, ...mockedFlaggedLabware4],
+          cleanedOutAddresses: new Map([[mockedLabware2.id, ['B1', 'B2']]])
         });
       });
     });

@@ -386,7 +386,7 @@ const CytAssist = () => {
             <>
               <BlueButton
                 disabled={
-                  !current.matches('readyToCopy') ||
+                  (!current.matches('readyToCopy') && !current.matches('mapping')) ||
                   current.context.workNumber === '' ||
                   !selectedDestination ||
                   !selectedDestination.slotCopyDetails.preBarcode ||
