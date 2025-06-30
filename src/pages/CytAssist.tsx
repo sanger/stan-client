@@ -404,6 +404,9 @@ const CytAssist = () => {
               >
                 Save Draft
               </BlueButton>
+              <BlueButton action="tertiary" onClick={() => reload(navigate)}>
+                Reset
+              </BlueButton>
             </>
           )}
         </div>
