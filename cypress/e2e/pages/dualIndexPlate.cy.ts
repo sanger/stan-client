@@ -153,7 +153,7 @@ describe('Dual Index Plate', () => {
     });
     context('When user selects a work number,plateType and have a mapping', () => {
       before(() => {
-        selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
+        selectOption('plateType', 'Dual Index TT Set A');
         selectSGPNumber('SGP1008');
       });
       it('should enable save', () => {
@@ -187,7 +187,7 @@ describe('Dual Index Plate', () => {
               return HttpResponse.json({
                 data: {
                   reagentPlate: {
-                    plateType: 'Fresh frozen - Dual Index TT Set A',
+                    plateType: 'Dual Index TT Set A',
                     barcode: '123456789123456789012345',
                     slots: []
                   }
@@ -200,7 +200,7 @@ describe('Dual Index Plate', () => {
         scanInSourceLabware('123456789123456789012345');
       });
       it('should display plate type that is alreAdy assigned to dual index plate', () => {
-        cy.contains('Fresh frozen - Dual Index TT Set A').should('be.visible');
+        cy.contains('Dual Index TT Set A').should('be.visible');
       });
       it('should disable plate type selection combo', () => {
         shouldBeDisabled('plateType');
@@ -233,7 +233,7 @@ describe('Dual Index Plate', () => {
         selectSGPNumber('SGP1008');
         scanInSourceLabware('300051128832186720221202');
         scanInDestinationLabware();
-        selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
+        selectOption('plateType', 'Dual Index TT Set A');
         cy.get('#sourceLabwares').within(() => {
           cy.findByText('A1').click();
         });

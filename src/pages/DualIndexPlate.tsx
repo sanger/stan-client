@@ -18,7 +18,7 @@ import DualIndexPlateComponent from '../components/libraryGeneration/DualIndexPl
  */
 const ToastSuccess = () => <Success message={'Reagents transferred'} />;
 
-export const PLATE_TYPES = ['Fresh frozen - Dual Index TT Set A', 'FFPE - Dual Index TS Set A'];
+export const PLATE_TYPES = ['Dual Index TT Set A', 'Dual Index TS Set A'];
 
 function DualIndexPlate() {
   const [current, send] = useMachine(reagentTransferMachine);
