@@ -14,11 +14,11 @@ import BlueButton from '../buttons/BlueButton';
 import PinkButton from '../buttons/PinkButton';
 import Labware from '../labware/Labware';
 import { CommentFieldsFragment, ConfirmSectionLabware } from '../../types/sdk';
-import { selectConfirmOperationLabware } from './index';
 import { ConfirmationModal } from '../modal/ConfirmationModal';
 import { SectionNumberMode } from './SectioningConfirm';
 import { Position } from '../../lib/helpers';
 import WorkNumberSelect from '../WorkNumberSelect';
+import { selectConfirmOperationLabware } from './index';
 
 interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
@@ -31,6 +31,12 @@ interface ConfirmTubesProps {
     sectionIndex: number,
     sectionNumber: number
   ) => void;
+  onSectionThicknessChange: (
+    layoutPlan: LayoutPlan,
+    slotAddress: string,
+    sectionIndex: number,
+    sectionThickness: string
+  ) => void;
   mode: SectionNumberMode;
   workNumber: string;
 }
@@ -40,6 +46,7 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
   comments,
   onChange,
   onSectionNumberChange,
+  onSectionThicknessChange,
   onSectionUpdate,
   mode,
   workNumber
@@ -59,6 +66,7 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
               <TableHeader />
               <TableHeader>Tube Barcode</TableHeader>
               <TableHeader>SGP Number</TableHeader>
+              <TableHeader>Section Thickness</TableHeader>
               <TableHeader>Section Number</TableHeader>
               <TableHeader />
             </tr>
@@ -72,6 +80,7 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
                 onChange={onChange}
                 onSectionUpdate={onSectionUpdate}
                 onSectionNumberChange={onSectionNumberChange}
+                onSectionThicknessChange={onSectionThicknessChange}
                 mode={mode}
                 workNumber={workNumber}
               />
@@ -96,6 +105,12 @@ interface TubeRowProps {
     sectionIndex: number,
     sectionNumber: number
   ) => void;
+  onSectionThicknessChange: (
+    layoutPlan: LayoutPlan,
+    slotAddress: string,
+    sectionIndex: number,
+    sectionThickness: string
+  ) => void;
   mode: SectionNumberMode;
   workNumber: string;
 }
@@ -106,6 +121,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
   onChange,
   onSectionNumberChange,
   onSectionUpdate,
+  onSectionThicknessChange,
   mode,
   workNumber
 }) => {
@@ -157,7 +173,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
     }
   }, [send, mode, setNotifyCancel]);
 
-  /***Update section numbers **/
+  /***Update section numbers and thickness **/
   const handleOnChange = useCallback(
     (slotAddress: string, sectionNumber: number, sectionIndex: number) => {
       /**Notify parent, so as to modify section number in original layout**/
@@ -172,32 +188,43 @@ const TubeRow: React.FC<TubeRowProps> = ({
     [send, layoutPlan, onSectionNumberChange]
   );
 
+  const handleSectionThicknessOnChange = useCallback(
+    (slotAddress: string, sectionIndex: number, sectionThickness: string) => {
+      onSectionThicknessChange(layoutPlan, slotAddress, sectionIndex, sectionThickness);
+      send({
+        type: 'UPDATE_SECTION_THICKNESS',
+        slotAddress,
+        thickness: sectionThickness,
+        sectionIndex
+      });
+    },
+    [send, layoutPlan, onSectionThicknessChange]
+  );
+
   return (
     <>
-      {
-        <ConfirmationModal
-          show={notifyCancel}
-          header={`${cancelled ? 'Enabling' : 'Cancelling'} tube`}
-          message={{ type: 'Warning', text: 'Section number update' }}
-          confirmOptions={[
-            {
-              label: 'Cancel',
-              action: () => {
-                setNotifyCancel(false);
-              }
-            },
-            {
-              label: 'Continue',
-              action: () => {
-                send({ type: 'TOGGLE_CANCEL' });
-                setNotifyCancel(false);
-              }
+      <ConfirmationModal
+        show={notifyCancel}
+        header={`${cancelled ? 'Enabling' : 'Cancelling'} tube`}
+        message={{ type: 'Warning', text: 'Section number update' }}
+        confirmOptions={[
+          {
+            label: 'Cancel',
+            action: () => {
+              setNotifyCancel(false);
             }
-          ]}
-        >
-          <p className={'font-bold mt-8'}>Planned section numbers of other labware will be updated.</p>
-        </ConfirmationModal>
-      }
+          },
+          {
+            label: 'Continue',
+            action: () => {
+              send({ type: 'TOGGLE_CANCEL' });
+              setNotifyCancel(false);
+            }
+          }
+        ]}
+      >
+        <p className={'font-bold mt-8'}>Planned section numbers of other labware will be updated.</p>
+      </ConfirmationModal>
       <tr className={rowClassnames}>
         <TableCell>
           <div className="py-4 flex flex-col items-center justify-between space-y-8">
@@ -231,8 +258,24 @@ const TubeRow: React.FC<TubeRowProps> = ({
                 workNumber: _workNumber
               });
             }}
-            workNumber={confirmOperationLabware?.workNumber ?? ''}
+            workNumber={confirmOperationLabware?.workNumber ?? workNumber}
           />
+        </TableCell>
+        <TableCell>
+          {layoutPlan.plannedActions.get('A1')?.map((source, index) => (
+            <div className="mb-1">
+              <Input
+                key={source.address + String(index)}
+                data-testid={`section-thickness-tube-${layoutPlan.destinationLabware.barcode}`}
+                type="number"
+                value={source.sampleThickness}
+                min={0.5}
+                step={0.5}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => handleSectionThicknessOnChange('A1', index, e.target.value)}
+              />
+            </div>
+          ))}
         </TableCell>
         <TableCell>
           {layoutPlan.plannedActions.get('A1')?.map((source, index) => (
