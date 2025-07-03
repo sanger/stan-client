@@ -129,12 +129,21 @@ export default function LabwareScanner({
       errorMessage: null,
       locationScan: false,
       checkForCleanedOutAddresses,
-      cleanedOutAddresses: slicedInitialCleanedOutAddresses
+      cleanedOutAddresses: slicedInitialCleanedOutAddresses,
+      areInitialsSet: false
     }
   });
 
-  const { labwares, removedLabware, successMessage, errorMessage, currentBarcode, locationScan, cleanedOutAddresses } =
-    current.context;
+  const {
+    labwares,
+    removedLabware,
+    successMessage,
+    errorMessage,
+    currentBarcode,
+    locationScan,
+    cleanedOutAddresses,
+    areInitialsSet
+  } = current.context;
   /**
    * After transition into the "idle" state, focus the scan input
    */
@@ -186,6 +195,16 @@ export default function LabwareScanner({
   useEffect(() => {
     send(locked ? { type: 'LOCK' } : { type: 'UNLOCK' });
   }, [send, locked]);
+
+  useEffect(() => {
+    if (slicedInitialLabware.length > 0 && !areInitialsSet) {
+      send({
+        type: 'SET_INITIALS',
+        labware: slicedInitialLabware,
+        cleanedOutAddresses
+      });
+    }
+  }, [send, slicedInitialLabware, cleanedOutAddresses, areInitialsSet]);
 
   const ctxValue: LabwareScannerContextType = {
     locked: current.matches('locked'),

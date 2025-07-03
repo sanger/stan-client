@@ -504,7 +504,7 @@ export const slotCopyMachine = createMachine(
             };
           },
           onDone: {
-            target: 'mapping',
+            target: 'readyToCopy',
             actions: ['assignSaveDraftResult']
           },
           onError: {

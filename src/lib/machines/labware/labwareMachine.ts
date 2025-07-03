@@ -99,6 +99,12 @@ export interface LabwareContext {
    * value: list of cleaned out addresses
    */
   cleanedOutAddresses: Map<number, string[]>;
+
+  /**
+   * Indicates whether the initial labware and cleaned out addresses have been set in the context.
+   * Used to prevent re-initialization of these values.
+   */
+  areInitialsSet?: boolean;
 }
 
 /**
@@ -179,6 +185,12 @@ type FindCleanedOutAddressesErrorEvent = {
   error: ClientError;
 };
 
+type SetInitials = {
+  type: 'SET_INITIALS';
+  labware: LabwareFlaggedFieldsFragment[];
+  cleanedOutAddresses: Map<number, string[]>;
+};
+
 export type LabwareEvents =
   | UpdateCurrentBarcodeEvent
   | SubmitBarcodeEvent
@@ -194,7 +206,8 @@ export type LabwareEvents =
   | AddFoundLabwareEvent
   | FoundLabwareCheckErrorEvent
   | FindCleanedOutAddressesEvent
-  | FindCleanedOutAddressesErrorEvent;
+  | FindCleanedOutAddressesErrorEvent
+  | SetInitials;
 
 /**
  * State machine for managing a collection of {@link Labware Labwares}
@@ -252,6 +265,11 @@ export const createLabwareMachine = () => {
             success: {}
           },
           on: {
+            SET_INITIALS: {
+              guard: ({ context }) => !context.areInitialsSet,
+              actions: 'assignInitials',
+              target: 'checking_full'
+            },
             UPDATE_CURRENT_BARCODE: {
               target: '#labwareScanner.idle.normal',
               actions: 'assignCurrentBarcode'
@@ -554,6 +572,17 @@ export const createLabwareMachine = () => {
           }
           context.errorMessage = handleFindError(event.error);
           return context;
+        }),
+        assignInitials: assign(({ context, event }) => {
+          if (event.type !== 'SET_INITIALS') {
+            return context;
+          }
+          return {
+            ...context,
+            labwares: event.labware,
+            cleanedOutAddresses: event.cleanedOutAddresses,
+            areInitialsSet: true
+          };
         })
       },
       guards: {
