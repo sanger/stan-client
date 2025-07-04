@@ -79,6 +79,14 @@ describe('Sectioning Confirmation', () => {
       cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).should('be.disabled'));
     });
 
+    it('fills section thickness', () => {
+      cy.findAllByTestId('section-thickness').each((elem) => cy.wrap(elem).should('have.value', 2.5));
+    });
+
+    it('enables the user to edit section thickness', () => {
+      cy.findAllByTestId('section-thickness').each((elem) => cy.wrap(elem).should('be.enabled'));
+    });
+
     it('sets the section plan’s SGP number to match the global SGP number', () => {
       shouldDisplaySelectedValue('sectionnumber-worknumber-STAN-0001F', 'SGP1008');
     });

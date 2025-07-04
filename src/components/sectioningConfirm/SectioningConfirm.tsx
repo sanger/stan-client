@@ -157,6 +157,19 @@ export default function SectioningConfirm({
     [send]
   );
 
+  const handleSectionThicknessChange = useCallback(
+    (layoutPlan: LayoutPlan, slotAddress: string, sectionIndex: number, sectionThickness: string) => {
+      send({
+        type: 'UPDATE_SECTION_THICKNESS',
+        layoutPlan,
+        slotAddress,
+        sectionIndex,
+        sectionThickness
+      });
+    },
+    [send]
+  );
+
   const sectionNumberEnabled = () => {
     return (
       Object.entries(layoutPlansByLabwareType).filter(
@@ -245,6 +258,7 @@ export default function SectioningConfirm({
                         onChange={handleConfirmChange}
                         onSectionUpdate={handleSectionUpdate}
                         onSectionNumberChange={handleSectionNumberChange}
+                        onSectionThicknessChange={handleSectionThicknessChange}
                         layoutPlans={layoutPlansByLabwareType[LabwareTypeName.TUBE]}
                         comments={comments}
                         mode={sectionNumberMode}
@@ -276,6 +290,7 @@ export default function SectioningConfirm({
                               slotRegions={slotRegions}
                               mode={sectionNumberMode}
                               onSectionNumberChange={handleSectionNumberChange}
+                              onSectionThicknessChange={handleSectionThicknessChange}
                               workNumber={workNumber}
                             />
                           ))}

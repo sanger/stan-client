@@ -22,6 +22,7 @@ interface LabwareCommentsProps {
   onCommentChange: (slotAddress: string, sectionIndex: number, commentIds: string[]) => void;
   onSlotRegionChange: (slotAddress: string, sectionIndex: number, slotRegion: string) => void;
   onSectionNumberChange: (slotAddress: string, sectionIndex: number, sectionNumber: number) => void;
+  onSectionThicknessChange: (slotAddress: string, sectionIndex: number, thickness: string) => void;
 }
 
 const LabwareComments: React.FC<LabwareCommentsProps> = ({
@@ -33,7 +34,8 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
   onSlotRegionChange,
   disabledComment = false,
   sectionNumberDisplay = SectionNumberSetting.NORMAL,
-  onSectionNumberChange
+  onSectionNumberChange,
+  onSectionThicknessChange
 }) => {
   const sections = layoutPlan.plannedActions.get(slot.address);
   const isRegionExists = (region: string) => {
@@ -46,10 +48,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
       <span className="font-medium text-gray-800 tracking-wide py-2">{slot.address}</span>
       <div className="flex flex-col">
         {sections?.map((source, index) => (
-          <div
-            className={'grid grid-cols-3 gap-x-3  gap-y-2 items-center content-center'}
-            key={source.address + String(index)}
-          >
+          <div className={'grid grid-cols-4 gap-x-1 gap-y-2'} key={source.address + String(index)}>
             {sectionNumberDisplay !== SectionNumberSetting.HIDE && (
               <>
                 <Input
@@ -59,6 +58,16 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
                   min={1}
                   disabled={sectionNumberDisplay === SectionNumberSetting.DISABLE}
                   onChange={(e) => onSectionNumberChange(slot.address, index, Number(e.target.value))}
+                />
+                <Input
+                  type="number"
+                  data-testid={'section-thickness'}
+                  value={source.sampleThickness}
+                  min={0.5}
+                  step={0.5}
+                  onChange={(e) => {
+                    onSectionThicknessChange(slot.address, index, e.target.value);
+                  }}
                 />
 
                 <div className={'flex flex-col'}>

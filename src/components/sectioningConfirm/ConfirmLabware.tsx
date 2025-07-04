@@ -16,7 +16,6 @@ import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../pag
 import { createConfirmLabwareMachine } from './confirmLabware.machine';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
 import { CommentFieldsFragment, ConfirmSectionLabware, SlotRegionFieldsFragment } from '../../types/sdk';
-import { selectConfirmOperationLabware } from './index';
 import RemoveButton from '../buttons/RemoveButton';
 import { ConfirmationModal } from '../modal/ConfirmationModal';
 import { SectionNumberMode } from './SectioningConfirm';
@@ -24,6 +23,7 @@ import { LabwareTypeName } from '../../types/stan';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { Position } from '../../lib/helpers';
 import WorkNumberSelect from '../WorkNumberSelect';
+import { selectConfirmOperationLabware } from './index';
 
 interface ConfirmLabwareProps {
   /**
@@ -84,6 +84,13 @@ interface ConfirmLabwareProps {
     sectionIndex: number,
     sectionNumber: number
   ) => void;
+
+  onSectionThicknessChange?: (
+    layoutPlan: LayoutPlan,
+    slotAddress: string,
+    sectionIndex: number,
+    sectionThickness: string
+  ) => void;
 }
 
 const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
@@ -96,7 +103,8 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   onSectionUpdate,
   onSectionNumberChange,
   removePlan,
-  mode
+  mode,
+  onSectionThicknessChange
 }) => {
   const confirmLabwareMachine = React.useMemo(() => {
     return createConfirmLabwareMachine(comments, originalLayoutPlan.destinationLabware, originalLayoutPlan, workNumber);
@@ -162,7 +170,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                 workNumber: _workNumber
               });
             }}
-            workNumber={confirmOperationLabware?.workNumber ?? ''}
+            workNumber={confirmOperationLabware?.workNumber ?? workNumber}
           />
         </div>
       </div>
@@ -190,8 +198,9 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             <Heading level={3} showBorder={false}>
               Comments
             </Heading>
-            <div className={'grid grid-cols-3 py-2 text-gray-500 text-center'}>
+            <div className={'grid grid-cols-4 gap-x-1 py-2 text-gray-500 text-center'}>
               <div>Section number</div>
+              <div>Section Thickness</div>
               <div>Region</div>
               <div>Comment</div>
             </div>
@@ -243,6 +252,16 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                         slotAddress,
                         sectionIndex,
                         sectionNumber
+                      });
+                    }}
+                    onSectionThicknessChange={(slotAddress, sectionIndex, thickness) => {
+                      onSectionThicknessChange &&
+                        onSectionThicknessChange(layoutPlan, slotAddress, sectionIndex, thickness);
+                      send({
+                        type: 'UPDATE_SECTION_THICKNESS',
+                        slotAddress,
+                        sectionIndex,
+                        thickness
                       });
                     }}
                   />

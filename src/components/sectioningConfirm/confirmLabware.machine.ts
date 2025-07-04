@@ -130,6 +130,13 @@ type AssignSectionWorkNumber = {
   workNumber: string;
 };
 
+type UpdateSectionThicknessEvent = {
+  type: 'UPDATE_SECTION_THICKNESS';
+  slotAddress: string;
+  thickness: string;
+  sectionIndex: number;
+};
+
 export type ConfirmLabwareEvent =
   | SetCommentForAddressEvent
   | SetCommentsForSectionEvent
@@ -144,12 +151,14 @@ export type ConfirmLabwareEvent =
   | SectioningConfirmationCompleteEvent
   | AssignLayoutPlanEvent
   | CancelEditLayoutEvent
-  | AssignSectionWorkNumber;
+  | AssignSectionWorkNumber
+  | UpdateSectionThicknessEvent;
 
 function buildConfirmSection(destinationAddress: string, plannedAction: Source): ConfirmSection {
   return {
     destinationAddress,
     newSection: plannedAction.newSection,
+    thickness: plannedAction.sampleThickness,
     sampleId: plannedAction.sampleId,
     region: plannedAction.region,
     commentIds: plannedAction.commentIds
@@ -212,6 +221,9 @@ export const createConfirmLabwareMachine = (
             },
             UPDATE_SECTION_NUMBER: {
               actions: ['updateSectionNumber', 'commitConfirmation']
+            },
+            UPDATE_SECTION_THICKNESS: {
+              actions: ['updateSectionThickness', 'commitConfirmation']
             },
             UPDATE_ALL_SOURCES: {
               actions: ['updateAllSources', 'commitConfirmation']
@@ -361,6 +373,17 @@ export const createConfirmLabwareMachine = (
             }
           });
         }),
+        updateSectionThickness: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_SECTION_THICKNESS') {
+            return context;
+          }
+          return produce(context, (draft) => {
+            const plannedAction = draft.layoutPlan.plannedActions.get(event.slotAddress);
+            if (plannedAction && plannedAction[event.sectionIndex]) {
+              plannedAction[event.sectionIndex].sampleThickness = event.thickness;
+            }
+          });
+        }),
 
         updateAllSources: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_ALL_SOURCES') {
@@ -386,7 +409,7 @@ export const createConfirmLabwareMachine = (
             confirmSections.push(...buildConfirmSections(destinationAddress, originalPlannedActions));
           }
           const confirmSectionLabware = {
-            workNumber: workNumber,
+            workNumber: context.confirmSectionLabware?.workNumber || workNumber,
             barcode: context.labware.barcode!,
             cancelled: context.cancelled,
             confirmSections: context.cancelled ? undefined : confirmSections,
