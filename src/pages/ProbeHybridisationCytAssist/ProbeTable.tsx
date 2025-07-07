@@ -8,11 +8,11 @@ import FormikInput from '../../components/forms/Input';
 import RemoveButton from '../../components/buttons/RemoveButton';
 import IconButton from '../../components/buttons/IconButton';
 import AddIcon from '../../components/icons/AddIcon';
-import { ProbeHybridisationCytAssistFormValues, ProbePanelInfo } from './ProbeHybridisationCytAssist';
+import { ProbeHybridisationCytAssistFormValues, ProbesOptions } from './ProbeHybridisationCytAssist';
 
 const probeLotDefault = { panel: '', lot: '' };
 
-const ProbeTable: React.FC<ProbePanelInfo> = ({ cytAssistProbes, spikeProbes }: ProbePanelInfo) => {
+const ProbeTable: React.FC<ProbesOptions> = ({ cytAssistProbes, spikeProbes }: ProbesOptions) => {
   const { values, setFieldValue } = useFormikContext<ProbeHybridisationCytAssistFormValues>();
   return (
     <>

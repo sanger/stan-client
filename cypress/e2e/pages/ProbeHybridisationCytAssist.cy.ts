@@ -204,7 +204,30 @@ describe('CytAssist Probe Hybridisation', () => {
       });
     });
   });
+  describe('Addresses field', () => {
+    describe('When selecting from the labware', () => {
+      before(() => {
+        cy.findByTestId('STAN-3111').within(() => {
+          cy.findByText('A1').click();
+        });
+      });
 
+      it('updates the address field automatically', () => {
+        cy.findByTestId('labware.0.addresses').should('contain.value', 'A1');
+      });
+    });
+    describe('When setting the addresses value', () => {
+      before(() => {
+        cy.findByTestId('labware.0.addresses').clear().type('A1, A2');
+      });
+
+      it('highlights the labware slots accordingly', () => {
+        cy.findByTestId('STAN-3111').within(() => {
+          cy.findAllByTestId('slot').get('.ring-pink-600').should('have.length', 2);
+        });
+      });
+    });
+  });
   describe('Save', () => {
     context('When there is a server error', () => {
       before(() => {
