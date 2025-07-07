@@ -27,6 +27,7 @@ export interface Source {
   sampleId: number;
   labware: LabwareFieldsFragment | LabwareFlaggedFieldsFragment;
   newSection: number;
+  sampleThickness?: string;
   address?: Maybe<Address>;
   region?: string;
   commentIds?: number[];

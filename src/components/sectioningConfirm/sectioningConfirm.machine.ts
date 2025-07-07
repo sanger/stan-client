@@ -105,7 +105,14 @@ type SectioningConfirmEvent =
   | { type: 'IS_INVALID' }
   | { type: 'CONFIRM' }
   | { type: 'xstate.done.actor.confirmSection'; output: ConfirmSectionMutation }
-  | { type: 'xstate.error.actor.confirmSection'; error: ClientError };
+  | { type: 'xstate.error.actor.confirmSection'; error: ClientError }
+  | {
+      type: 'UPDATE_SECTION_THICKNESS';
+      layoutPlan: LayoutPlan;
+      slotAddress: string;
+      sectionIndex: number;
+      sectionThickness: string;
+    };
 
 const isValidSectionLabware = (ctx: SectioningConfirmContext): boolean => {
   return ctx.confirmSectionLabware.every((csl) => {
@@ -193,6 +200,9 @@ export function createSectioningConfirmMachine() {
             },
             UPDATE_SECTION_NUMBER: {
               actions: 'assignSectionNumber'
+            },
+            UPDATE_SECTION_THICKNESS: {
+              actions: 'assignSectionThickness'
             }
           },
           states: {
@@ -272,7 +282,8 @@ export function createSectioningConfirmMachine() {
                 ? event.confirmSectionLabware.confirmSections.map((cs) => {
                     return {
                       sampleId: cs.sampleId,
-                      destinationAddress: cs.destinationAddress
+                      destinationAddress: cs.destinationAddress,
+                      thickness: cs.thickness
                     };
                   })
                 : []
@@ -353,6 +364,25 @@ export function createSectioningConfirmMachine() {
                 .find((source, indx) => source.address === event.slotAddress && indx === event.sectionIndex);
               if (source) {
                 source.newSection = event.sectionNumber;
+              }
+            }
+          });
+        }),
+        assignSectionThickness: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_SECTION_THICKNESS') {
+            return context;
+          }
+          return produce(context, (draft) => {
+            const planInContext = findPlan(
+              draft.layoutPlansByLabwareType,
+              event.layoutPlan.destinationLabware.barcode!
+            );
+            if (planInContext) {
+              const source = Array.from(planInContext.plannedActions.values())
+                .flatMap((sources) => sources)
+                .find((source, indx) => source.address === event.slotAddress && indx === event.sectionIndex);
+              if (source) {
+                source.sampleThickness = event.sectionThickness;
               }
             }
           });
@@ -539,7 +569,8 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
             sampleId: planAction.sample.id,
             labware: sourceLabwares.find((lw) => lw.id === planAction.source.labwareId)!,
             newSection: 0,
-            address: planAction.source.address
+            address: planAction.source.address,
+            sampleThickness: planAction.sampleThickness ?? undefined
           }
         ];
         const plannedActionsForSlot = memo.get(planAction.destination.address);
