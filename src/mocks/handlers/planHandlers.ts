@@ -147,7 +147,9 @@ export function findPlanData(sourceLabware: Labware, destinationLabware: Labware
             sample: {
               __typename: 'Sample',
               id: sourceLabware.slots[0].samples[0].id
-            }
+            },
+            newSection: 3,
+            sampleThickness: '2.5'
           }
         ]
       }
