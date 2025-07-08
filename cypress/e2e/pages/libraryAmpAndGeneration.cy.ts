@@ -74,7 +74,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             cy.get('#sourceScanInput').within(() => {
               cy.findByRole('textbox').clear().type(`${dualIndexPlateBarcode}{enter}`);
             });
-            selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
+            selectOption('plateType', 'Dual Index TT Set A');
 
             transferReagent();
           });
@@ -115,7 +115,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             cy.findByText(dualIndexPlateBarcode).should('be.visible');
           });
           it('display previously selected dual plate type', () => {
-            shouldDisplaySelectedValue('plateType', 'Fresh frozen - Dual Index TT Set A');
+            shouldDisplaySelectedValue('plateType', 'Dual Index TT Set A');
           });
           it('displays previously transferred reagent should be visible', () => {
             cy.findByRole('table').should('be.visible');
@@ -175,7 +175,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             cy.findByText(dualIndexPlateBarcode).should('be.visible');
           });
           it('displays the previously scanned dual index plate type ', () => {
-            shouldDisplaySelectedValue('plateType', 'Fresh frozen - Dual Index TT Set A');
+            shouldDisplaySelectedValue('plateType', 'Dual Index TT Set A');
           });
           it('displays the newly scanned destination plate', () => {
             cy.findByText('STAN-5345').should('be.visible');
@@ -234,7 +234,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             cy.findByText(dualIndexPlateBarcode).should('be.visible');
           });
           it('displays the previously scanned dual index plate type ', () => {
-            shouldDisplaySelectedValue('plateType', 'Fresh frozen - Dual Index TT Set A');
+            shouldDisplaySelectedValue('plateType', 'Dual Index TT Set A');
           });
           it('displays the previously scanned destination plate', () => {
             cy.findByText('STAN-5345').should('be.visible');
@@ -437,7 +437,7 @@ const fillInReagentTransferStep = () => {
   cy.get('#sourceScanInput').within(() => {
     cy.findByRole('textbox').clear().type(`${dualIndexPlateBarcode}{enter}`);
   });
-  selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
+  selectOption('plateType', 'Dual Index TT Set A');
   transferReagent();
   cy.findByRole('button', { name: 'Record Cycle >' }).click();
 };
