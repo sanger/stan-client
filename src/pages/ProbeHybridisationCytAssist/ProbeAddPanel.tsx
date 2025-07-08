@@ -1,14 +1,14 @@
 import { useFormikContext } from 'formik';
 import React from 'react';
 import { slideCostingOptions } from '../../lib/helpers';
-import { ProbeHybridisationCytAssistFormValues, ProbePanelInfo } from './ProbeHybridisationCytAssist';
+import { ProbeHybridisationCytAssistFormValues, ProbesOptions } from './ProbeHybridisationCytAssist';
 import CustomReactSelect from '../../components/forms/CustomReactSelect';
 import { selectOptionValues } from '../../components/forms';
 import FormikInput from '../../components/forms/Input';
 import WhiteButton from '../../components/buttons/WhiteButton';
 import AddIcon from '../../components/icons/AddIcon';
 
-const ProbeAddPanel = ({ cytAssistProbes }: ProbePanelInfo) => {
+const ProbeAddPanel = ({ cytAssistProbes }: ProbesOptions) => {
   const { values, setValues, setTouched, errors } = useFormikContext<ProbeHybridisationCytAssistFormValues>();
   return (
     <div className={'border-1 border-gray-300 shadow-md justify-end p-2 basis-3/4'}>

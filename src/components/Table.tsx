@@ -5,6 +5,7 @@ import UpArrowIcon from './icons/UpArrowIcon';
 
 interface TableProps extends React.DetailedHTMLProps<React.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement> {
   tableClassName?: string;
+  isFixed?: boolean;
 }
 
 export type SortProps = {
@@ -37,14 +38,17 @@ interface TableHeaderProps {
  *
  * @param children
  * @param tableClassName
+ * @param isFixed
  * @param rest props passed into the HTML table
  */
-const Table: React.FC<TableProps> = ({ children, tableClassName, ...rest }) => {
+const Table: React.FC<TableProps> = ({ children, tableClassName, isFixed, ...rest }) => {
+  const fixedClassNames = isFixed ? 'table-fixed w-full' : 'min-w-full';
+
   return (
-    <div className={'flex flex-col overflow-auto max-h-screen ' + tableClassName} datatype="table-wrapper">
+    <div className={'flex flex-col overflow-auto max-h-screen' + tableClassName} datatype="table-wrapper">
       <div className="py-2 align-middle inline-block min-w-full">
         <div className="shadow-md border-b border-gray-200 sm:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200" {...rest}>
+          <table className={`divide-y divide-gray-200 ${fixedClassNames}`} {...rest}>
             {children}
           </table>
         </div>

@@ -23,7 +23,6 @@ import { StanCoreContext } from '../../lib/sdk';
 import createFormMachine from '../../lib/machines/form/formMachine';
 import Warning from '../../components/notifications/Warning';
 import OperationCompleteModal from '../../components/modal/OperationCompleteModal';
-import ProbeTable from './ProbeTable';
 import { createSessionStorageForLabwareAwaiting, formatDateTimeForCore, getCurrentDateTime } from '../../types/stan';
 import ProbeAddPanel from './ProbeAddPanel';
 import { useLoaderData, useNavigate } from 'react-router-dom';
@@ -32,6 +31,8 @@ import CustomReactSelect, { OptionType } from '../../components/forms/CustomReac
 import { selectOptionValues } from '../../components/forms';
 import WhiteButton from '../../components/buttons/WhiteButton';
 import { slideCostingOptions } from '../../lib/helpers';
+import Panel from '../../components/Panel';
+import ProbeSettings from './ProbeSettings';
 
 export type ProbeHybridisationCytAssistFormValues = {
   labware: ProbeOperationLabwareForm[];
@@ -50,6 +51,8 @@ type ProbeOperationLabwareForm = {
   reagentLot?: string;
   probes: Array<CytAssistProbe>;
   customPanel?: string;
+  activeProbeIndex?: number;
+  addresses?: string;
 };
 
 export type CytAssistProbe = {
@@ -69,13 +72,19 @@ const formInitialValues: ProbeHybridisationCytAssistFormValues = {
   probePanelAll: probeLotDefault
 };
 
-export type ProbePanelInfo = {
+export type ProbesOptions = {
   cytAssistProbes: GetProbePanelsQuery['probePanels'];
   spikeProbes: GetProbePanelsQuery['probePanels'];
 };
 
+export type ProbePanelInfo = {
+  probesOptions: ProbesOptions;
+  probeLabware: ProbeOperationLabwareForm;
+  lwIndex: number;
+};
+
 const ProbeHybridisationCytAssist: React.FC = () => {
-  const probePanelInfo = useLoaderData() as ProbePanelInfo;
+  const probesOptions = useLoaderData() as ProbesOptions;
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
     return createFormMachine<ProbeOperationRequest, RecordProbeOperationMutation>().provide({
@@ -185,6 +194,7 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                       kitCosting: probeLw.kitCosting!,
                       reagentLot: probeLw.reagentLot,
                       spike: probeLw.customPanel,
+                      addresses: probeLw.addresses?.split(',').map((addr) => addr.trim()),
                       probes: probeLw.probes.map((probe) => ({
                         name: probe.panel,
                         lot: probe.lot,
@@ -307,7 +317,7 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                                   emptyOption={true}
                                   label="Custom Probe Panel"
                                   name={'customPanelAll'}
-                                  options={selectOptionValues(probePanelInfo.spikeProbes, 'name', 'name')}
+                                  options={selectOptionValues(probesOptions.spikeProbes, 'name', 'name')}
                                   handleChange={async (val) => {
                                     const customPanel = (val as OptionType).label;
                                     await setValues((prev) => {
@@ -324,8 +334,8 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                                 />
                                 <div className={'col-span-3'}>
                                   <ProbeAddPanel
-                                    cytAssistProbes={probePanelInfo.cytAssistProbes}
-                                    spikeProbes={probePanelInfo.spikeProbes}
+                                    cytAssistProbes={probesOptions.cytAssistProbes}
+                                    spikeProbes={probesOptions.spikeProbes}
                                   />
                                 </div>
                               </div>
@@ -345,11 +355,13 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                           max={currentTime}
                         />
                       </div>
+
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4 w-full">
-                        <ProbeTable
-                          cytAssistProbes={probePanelInfo.cytAssistProbes}
-                          spikeProbes={probePanelInfo.spikeProbes}
-                        />
+                        {values.labware.map((probeLw, lwIndex) => (
+                          <Panel>
+                            <ProbeSettings probesOptions={probesOptions} probeLabware={probeLw} lwIndex={lwIndex} />
+                          </Panel>
+                        ))}
                       </motion.div>
                       <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
                         <BlueButton
