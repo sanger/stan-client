@@ -19,6 +19,7 @@ import '@testing-library/jest-dom';
 import bioRiskRepository from '../../../../src/mocks/repositories/bioRiskRepository';
 import userEvent from '@testing-library/user-event';
 import { selectOption } from '../../../generic/utilities';
+import cellClassRepository from '../../../../src/mocks/repositories/cellClassRepository';
 
 const registrationInfo: GetRegistrationInfoQuery = {
   solutions: solutionRepository.findAll(),
@@ -37,7 +38,8 @@ const registrationInfo: GetRegistrationInfoQuery = {
   ],
   labwareTypes: [labwareTypes[LabwareTypeName.CASSETTE].build(), labwareTypes[LabwareTypeName.PROVIASETTE].build()],
   slotRegions: slotRegionRepository.findAll(),
-  bioRisks: bioRiskRepository.findAll().filter((bioRisk) => bioRisk.enabled)
+  bioRisks: bioRiskRepository.findAll().filter((bioRisk) => bioRisk.enabled),
+  cellClasses: cellClassRepository.findAll().filter((cellClass) => cellClass.enabled)
 };
 const availableLabwareTypes: LabwareType[] = registrationInfo.labwareTypes;
 
@@ -47,6 +49,7 @@ const tissues: RegistrationFormOriginalSample = {
   species: 'HuMFre1',
   lifeStage: LifeStage.Fetal,
   hmdmc: '',
+  cellClass: '',
   tissueType: 'Kidney',
   blocks: [
     {
@@ -159,6 +162,8 @@ describe('RegistrationForm', () => {
         expect(screen.getByTestId('adult')).toBeChecked();
 
         expect(screen.getByRole('combobox', { name: 'Species' })).toBeInTheDocument();
+
+        expect(screen.getByRole('combobox', { name: 'Cell Class' })).toBeInTheDocument();
 
         //Tissue Information
         expect(screen.getByText('Tissue Information')).toBeInTheDocument();

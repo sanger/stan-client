@@ -45,6 +45,7 @@ type SectionRegistrationFormSection = {
   lifeStage: LifeStage;
   species: string;
   hmdmc: string;
+  cellClass: string;
   tissueType: string;
   externalIdentifier: string;
   spatialLocation: number;
@@ -130,6 +131,7 @@ function buildSample(): SectionRegistrationFormSection {
     lifeStage: LifeStage.Adult,
     species: '',
     hmdmc: '',
+    cellClass: '',
     tissueType: '',
     externalIdentifier: '',
     spatialLocation: 0,
@@ -162,6 +164,7 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
                     lifeStage: validation.lifeStage,
                     species: validation.species,
                     hmdmc: validation.hmdmc,
+                    cellClass: validation.cellClass,
                     tissueType: validation.tissueType,
                     externalIdentifier: validation.sectionExternalIdentifier,
                     spatialLocation: validation.spatialLocation,

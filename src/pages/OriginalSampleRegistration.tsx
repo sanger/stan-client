@@ -82,7 +82,8 @@ export function getRegistrationFormTissueSample(): RegistrationFormOriginalSampl
     blocks: [getRegistrationFormSample()],
     sampleCollectionDate: '',
     workNumber: '',
-    bioRiskCode: ''
+    bioRiskCode: '',
+    cellClass: ''
   };
 }
 
@@ -96,6 +97,7 @@ function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
           donorId: validation.donorId,
           lifeStage: validation.lifeStage,
           species: validation.species,
+          cellClass: validation.cellClass,
           hmdmc: validation.hmdmc,
           tissueType: validation.tissueType,
           bioRiskCode: validation.bioRiskCode,

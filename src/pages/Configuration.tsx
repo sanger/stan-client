@@ -34,6 +34,7 @@ export default function Configuration() {
   //Listed in alphabetical order
   const configElements = [
     'Biological Risk Assessment Numbers',
+    'Cell Classes',
     'Comments',
     'Cost Codes',
     'Destruction Reasons',
@@ -91,6 +92,32 @@ export default function Configuration() {
             type: 'CHECKBOX'
           }}
           onCreate={(code) => stanCore.AddBioRisk({ code }).then((res) => res.addBioRisk)}
+        />
+      </div>,
+
+      /**Cell Class**/
+      <div data-testid="config">
+        <Heading level={2}>Cell Classes</Heading>
+        <p className="mt-3 mb-6 text-lg" />
+        <EntityManager
+          initialEntities={configuration.cellClasses}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
+          onChangeValue={(entity, value) => {
+            const enabled = typeof value === 'boolean' ? value : false;
+            return stanCore
+              .SetCellClassEnabled({
+                enabled,
+                name: entity.name
+              })
+              .then((res) => {
+                return res.setCellClassEnabled;
+              });
+          }}
+          valueFieldComponentInfo={{
+            type: 'CHECKBOX'
+          }}
+          onCreate={(name) => stanCore.AddCellClass({ name }).then((res) => res.addCellClass)}
         />
       </div>,
       /**Comments**/

@@ -1,3 +1,5 @@
+import { selectOption } from './customReactSelect.cy';
+
 export enum RegistrationType {
   BLOCK,
   SLIDE,
@@ -49,6 +51,45 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
     it('requires Species', () => {
       cy.findByLabelText('Species').focus().blur();
       cy.findByText('Species is a required field').should('be.visible');
+    });
+
+    describe('HuMFre', () => {
+      context('when species is set to human', () => {
+        before(() => {
+          selectOption('Species', 'Human');
+        });
+        it('enables HuMFre', () => {
+          cy.findByLabelText('HuMFre').should('be.enabled');
+        });
+        context('when cell class is set to tissue', () => {
+          before(() => {
+            selectOption('cellClass', 'tissue');
+            selectOption('HuMFre', '');
+            cy.findByLabelText('Tissue Type').focus();
+          });
+          it('sets Humfre fields to requited ', () => {
+            cy.findByText('HuMFre is a required field').should('be.visible');
+          });
+        });
+        context('when cell class is not set to tissue', () => {
+          before(() => {
+            selectOption('cellClass', 'TMA');
+            selectOption('HuMFre', '');
+            cy.findByLabelText('Tissue Type').focus();
+          });
+          it('sets Humfre fields to requited ', () => {
+            cy.findByText('HuMFre is a required field').should('not.exist');
+          });
+        });
+      });
+      context('when species is not set to human', () => {
+        before(() => {
+          selectOption('Species', 'Mouse');
+        });
+        it('disables HuMFre', () => {
+          cy.findByLabelText('HuMFre').should('be.disabled');
+        });
+      });
     });
 
     it('requires Tissue Type', () => {

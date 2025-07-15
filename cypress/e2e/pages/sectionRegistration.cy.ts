@@ -166,7 +166,7 @@ describe('Section Registration Page', () => {
     describe('Adding/Removing Sections', () => {
       context('when clicking on a slot', () => {
         before(() => {
-          cy.findByText('B1').click();
+          cy.findByText('B1').scrollIntoView().click();
         });
 
         it('should add a new section', () => {
@@ -343,6 +343,7 @@ function fillInForm() {
   selectOption('Medium', 'Paraffin');
   cy.findByLabelText('Donor ID').clear().type('DONOR_1');
   selectOption('Species', 'Human');
+  selectOption('cellClass', 'tissue');
   selectOption('HuMFre', 'HuMFre1');
   selectOption('Tissue Type', 'Liver');
   selectOption('Spatial Location', '3 - Surface central region');

@@ -1,0 +1,5 @@
+mutation AddCellClass($name: String!) {
+  addCellClass(name: $name) {
+    ...CellClassFields
+  }
+}

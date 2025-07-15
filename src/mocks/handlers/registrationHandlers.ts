@@ -18,6 +18,7 @@ import hmdmcRepository from '../repositories/hmdmcRepository';
 import solutionRepository from '../repositories/solutionRepository';
 import slotRegionRepository from '../repositories/slotRegionRepository';
 import bioRiskRepository from '../repositories/bioRiskRepository';
+import cellClassRepository from '../repositories/cellClassRepository';
 
 const registrationHandlers = [
   graphql.query<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>('GetRegistrationInfo', ({ variables }) => {
@@ -110,7 +111,8 @@ const registrationHandlers = [
           mediums: [{ name: 'OCT' }, { name: 'Paraffin' }, { name: 'None' }],
           solutions: solutionRepository.findAll().filter((sample) => sample.enabled),
           slotRegions: slotRegionRepository.findAll().filter((region) => region.enabled),
-          bioRisks: bioRiskRepository.findAll().filter((bioRisk) => bioRisk.enabled)
+          bioRisks: bioRiskRepository.findAll().filter((bioRisk) => bioRisk.enabled),
+          cellClasses: cellClassRepository.findAll().filter((cellClass) => cellClass.enabled)
         }
       },
       { status: 200 }

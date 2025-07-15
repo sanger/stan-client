@@ -406,8 +406,7 @@ const RouteLayout = () => {
           <Route
             path="/admin/registration"
             loader={async () => {
-              const res = await stanCore.GetRegistrationInfo();
-              return res;
+              return await stanCore.GetRegistrationInfo();
             }}
             element={<BlockRegistration />}
           />

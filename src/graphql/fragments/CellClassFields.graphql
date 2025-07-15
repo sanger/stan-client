@@ -1,0 +1,4 @@
+fragment CellClassFields on CellClass {
+  name
+  enabled
+}

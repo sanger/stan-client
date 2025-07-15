@@ -137,6 +137,16 @@ export default function SectionForm({
         value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].species}
       />
 
+      <CustomReactSelect
+        label={'Cell Class'}
+        name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.cellClass`}
+        emptyOption
+        className="mt-2"
+        dataTestId="cellClass"
+        options={selectOptionValues(registrationInfo.cellClasses, 'name', 'name')}
+        value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].cellClass}
+      />
+
       <Heading level={4}>Tissue Information</Heading>
 
       <CustomReactSelect

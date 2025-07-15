@@ -1,0 +1,5 @@
+mutation SetCellClassEnabled($name: String!, $enabled: Boolean!) {
+  setCellClassEnabled(name: $name, enabled: $enabled) {
+    ...CellClassFields
+  }
+}
