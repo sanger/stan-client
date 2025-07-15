@@ -86,6 +86,7 @@ function buildSectionRegisterRequest(values: SectionRegistrationFormValues): Sec
             externalIdentifier: sample.externalIdentifier.trim(),
             fixative: labware.fixative.trim(),
             hmdmc: sample.hmdmc.trim(),
+            cellClass: sample.cellClass.trim(),
             lifeStage: Object.values(LifeStage).includes(sample.lifeStage) ? sample.lifeStage : undefined,
             medium: labware.medium.trim(),
             replicateNumber: sample.replicateNumber,
