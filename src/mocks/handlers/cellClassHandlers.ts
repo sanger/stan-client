@@ -30,7 +30,7 @@ const cellClassHandlers = [
         return HttpResponse.json({ data: { setCellClassEnabled: cellClass } }, { status: 200 });
       } else {
         return HttpResponse.json(
-          { errors: [{ message: `Could not find the cell class with name: "${variables.name}"` }] },
+          { errors: [{ message: `Could not find the cellular classification with name: "${variables.name}"` }] },
           { status: 404 }
         );
       }

@@ -216,7 +216,7 @@ export default class RegistrationValidation {
 
   get cellClass() {
     return validation.requiredString({
-      label: 'Cell Class',
+      label: 'Cellular Classification',
       oneOf: this.registrationInfo.cellClasses.map((cc) => cc.name)
     });
   }

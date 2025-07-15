@@ -138,7 +138,7 @@ export default function SectionForm({
       />
 
       <CustomReactSelect
-        label={'Cell Class'}
+        label={'Cellular Classification'}
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.cellClass`}
         emptyOption
         className="mt-2"

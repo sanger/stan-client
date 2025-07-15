@@ -34,7 +34,7 @@ export default function Configuration() {
   //Listed in alphabetical order
   const configElements = [
     'Biological Risk Assessment Numbers',
-    'Cell Classes',
+    'Cellular Classifications',
     'Comments',
     'Cost Codes',
     'Destruction Reasons',
@@ -97,7 +97,7 @@ export default function Configuration() {
 
       /**Cell Class**/
       <div data-testid="config">
-        <Heading level={2}>Cell Classes</Heading>
+        <Heading level={2}>Cellular Classifications</Heading>
         <p className="mt-3 mb-6 text-lg" />
         <EntityManager
           initialEntities={configuration.cellClasses}

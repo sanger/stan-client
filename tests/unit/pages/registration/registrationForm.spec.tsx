@@ -163,7 +163,7 @@ describe('RegistrationForm', () => {
 
         expect(screen.getByRole('combobox', { name: 'Species' })).toBeInTheDocument();
 
-        expect(screen.getByRole('combobox', { name: 'Cell Class' })).toBeInTheDocument();
+        expect(screen.getByRole('combobox', { name: 'Cellular Classification' })).toBeInTheDocument();
 
         //Tissue Information
         expect(screen.getByText('Tissue Information')).toBeInTheDocument();

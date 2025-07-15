@@ -128,7 +128,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 value={values.tissues[currentIndex].species}
               />
               <CustomReactSelect
-                label={'Cell Class'}
+                label={'Cellular Classification'}
                 name={`tissues.${currentIndex}.cellClass`}
                 emptyOption
                 className="mt-2"
