@@ -42,7 +42,6 @@ export type CytAssistOutputLabwareForm = {
   labwareType: string;
   costing: string;
   slideLotNumber: string;
-  probeLotNumber: string;
   lpNumber: string;
 };
 
@@ -65,9 +64,6 @@ const validationSchema = () => {
     }),
     lpNumber: Yup.string().oneOf(LP_NUMBERS).required('Required field'),
     costing: Yup.string().required('Required field'),
-    probeLotNumber: Yup.string()
-      .required('Required field')
-      .matches(lotNumberRegex, 'Invalid format: Required 6-7 digit number'),
     slideLotNumber: Yup.string()
       .required('Required field')
       .matches(lotNumberRegex, 'Invalid format: Required 6-7 digit number')
@@ -138,17 +134,6 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
                 name={'slideLotNumber'}
               />
               {errors.slideLotNumber && <MutedText className={'text-red-400'}>{errors.slideLotNumber}</MutedText>}
-            </div>
-            <div data-testid={'probe-lot-number'}>
-              <Label name="Transcriptome Probe LOT number" />
-              <ScanInput
-                name="probeLotNumber"
-                onScan={(val) => onChangeLOTNumber(val, true)}
-                onBlur={(e) => {
-                  onChangeLOTNumber(e.currentTarget.value, true);
-                }}
-              />
-              {errors.probeLotNumber && <MutedText className={'text-red-400'}>{errors.probeLotNumber}</MutedText>}
             </div>
             <div data-testid="external-barcode">
               <Label name={'External barcode'} />
@@ -364,7 +349,6 @@ const CytAssist = () => {
                 labwareType: selectedDestination ? selectedDestination.slotCopyDetails.labwareType ?? '' : '',
                 costing: selectedDestination ? selectedDestination.slotCopyDetails.costing ?? '' : '',
                 slideLotNumber: selectedDestination ? selectedDestination.slotCopyDetails.lotNumber ?? '' : '',
-                probeLotNumber: selectedDestination ? selectedDestination.slotCopyDetails.probeLotNumber ?? '' : '',
                 lpNumber: selectedDestination ? selectedDestination.slotCopyDetails.lpNumber ?? '' : ''
               }}
             >
@@ -391,8 +375,7 @@ const CytAssist = () => {
                   !selectedDestination ||
                   !selectedDestination.slotCopyDetails.preBarcode ||
                   !selectedDestination.slotCopyDetails.costing ||
-                  !selectedDestination.slotCopyDetails.lotNumber ||
-                  !selectedDestination.slotCopyDetails.probeLotNumber
+                  !selectedDestination.slotCopyDetails.lotNumber
                 }
                 onClick={onSaveAction}
               >
