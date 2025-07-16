@@ -174,6 +174,19 @@ const ParaffinProcessing: React.FC = () => {
                       ) : (
                         <p className="text-sm italic">No SGP number selected.</p>
                       )}
+
+                      {values.barcodes.length > 0 && (
+                        <>
+                          <p>
+                            <span className="font-semibold">{values.barcodes.length}</span> labware scanned to record
+                            the processing cycle type for the sample.
+                          </p>
+                          <p>
+                            Samples are embedded in <span className="font-semibold">Paraffin</span> medium
+                          </p>
+                        </>
+                      )}
+
                       {values.commentId >= 0 ? (
                         <p>
                           The selected program is{' '}
@@ -181,12 +194,6 @@ const ParaffinProcessing: React.FC = () => {
                         </p>
                       ) : (
                         <p className="text-sm italic">No Program selected.</p>
-                      )}
-
-                      {values.barcodes.length > 0 && (
-                        <p>
-                          Samples are embedded in <span className="font-semibold">Paraffin</span> medium
-                        </p>
                       )}
 
                       <div className="my-4 mx-4 sm:mx-auto p-1 rounded-md bg-sdb-400 italic">
