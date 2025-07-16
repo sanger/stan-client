@@ -5,7 +5,9 @@ import {
   LabwareState,
   ReloadSlotCopyQuery,
   ReloadSlotCopyQueryVariables,
-  SlideCosting
+  SlideCosting,
+  SlotCopyMutation,
+  SlotCopyMutationVariables
 } from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
 import { LabwareTypeName } from '../../../src/types/stan';
@@ -162,24 +164,6 @@ describe('CytAssist Page', () => {
       cy.findByText('Invalid format: Required 6-7 digit number').should('not.exist');
     });
   });
-  context('When Probe LOT number is entered in wrong format', () => {
-    before(() => {
-      cy.findByTestId('probe-lot-number').within(() => {
-        cy.findByRole('textbox').type('asddg{enter}');
-      });
-    });
-    it('should display Invalid format error message', () => {
-      cy.findByText('Invalid format: Required 6-7 digit number').should('be.visible');
-    });
-  });
-  context('When Probe LOT number  is entered in correct format', () => {
-    before(() => {
-      enterProbeLOTNumber();
-    });
-    it('should not display invalid format error message for Probe LOT number', () => {
-      cy.findByText('Invalid format: Required 6-7 digit number').should('not.exist');
-    });
-  });
   context('When labware type is updated', () => {
     before(() => {
       selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD);
@@ -199,7 +183,6 @@ describe('CytAssist Page', () => {
         mapSlots();
         enterOutputLabwareExternalID();
         enterLOTNumber();
-        enterProbeLOTNumber();
         enterLpNumber();
         selectSlideCostings('SGP');
       });
@@ -265,29 +248,6 @@ describe('CytAssist Page', () => {
         });
       });
     });
-    describe('Check for Probe LOT number', () => {
-      before(() => {
-        cy.findByTestId('probe-lot-number').within(() => {
-          cy.findByRole('textbox').clear().blur();
-        });
-      });
-      context('When mapping is done  and all field selected except Probe LOT number', () => {
-        it('should display Required field error for external id', () => {
-          cy.findByText('Required field').should('be.visible');
-        });
-        it('keeps the Save button disabled', () => {
-          saveButton().should('not.be.enabled');
-        });
-      });
-      context('When Probe Lot number is entered', () => {
-        before(() => {
-          enterProbeLOTNumber();
-        });
-        it('should enable Save button', () => {
-          saveButton().should('be.enabled');
-        });
-      });
-    });
     describe('Check for Slide costings', () => {
       before(() => {
         selectSlideCostings('');
@@ -347,7 +307,6 @@ describe('CytAssist Page', () => {
           selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD);
           selectSlideCostings('Faculty');
           enterLOTNumber();
-          enterProbeLOTNumber();
           cy.findByTestId('external-barcode').within(() => {
             cy.findByRole('textbox').wait(500).clear().type('H1-9D8VN2V{enter}').blur();
           });
@@ -384,11 +343,6 @@ describe('CytAssist Page', () => {
       it('populates the slide LOT number properly', () => {
         cy.findByTestId('lot-number').within(() => {
           cy.findByRole('textbox').should('have.value', '7712543');
-        });
-      });
-      it('populates the probe LOT number properly', () => {
-        cy.findByTestId('probe-lot-number').within(() => {
-          cy.findByRole('textbox').should('have.value', '123456');
         });
       });
       it('populates the external barcode properly', () => {
@@ -435,7 +389,6 @@ describe('CytAssist Page', () => {
                     lpNumber: 'LP1',
                     labwareType: LabwareTypeName.VISIUM_LP_CYTASSIST_HD,
                     preBarcode: 'V42A20-3752023-10-20',
-                    probeLotNumber: '999456',
                     lotNumber: '1112543',
                     costing: SlideCosting.Faculty,
                     sources: [],
@@ -470,11 +423,6 @@ describe('CytAssist Page', () => {
       it('updates the slide LOT number properly', () => {
         cy.findByTestId('lot-number').within(() => {
           cy.findByRole('textbox').should('have.value', '1112543');
-        });
-      });
-      it('updates the probe LOT number properly', () => {
-        cy.findByTestId('probe-lot-number').within(() => {
-          cy.findByRole('textbox').should('have.value', '999456');
         });
       });
       it('updates the external barcode properly', () => {
@@ -523,11 +471,6 @@ describe('CytAssist Page', () => {
       });
       it('empty the slide LOT number input field', () => {
         cy.findByTestId('lot-number').within(() => {
-          cy.findByRole('textbox').should('have.value', '');
-        });
-      });
-      it('empty the probe LOT number input field', () => {
-        cy.findByTestId('probe-lot-number').within(() => {
           cy.findByRole('textbox').should('have.value', '');
         });
       });
@@ -585,11 +528,6 @@ function enterOutputLabwareExternalID() {
 
 function enterLOTNumber() {
   cy.findByTestId('lot-number').within(() => {
-    cy.findByRole('textbox').clear().type('1234567{enter}').blur();
-  });
-}
-function enterProbeLOTNumber() {
-  cy.findByTestId('probe-lot-number').within(() => {
     cy.findByRole('textbox').clear().type('1234567{enter}').blur();
   });
 }
