@@ -192,6 +192,12 @@ export default function RecordInPlace({
                       ) : (
                         <p className="text-sm italic">No SGP number selected.</p>
                       )}
+                      {values.labware.length > 0 && (
+                        <p>
+                          <span className="font-semibold">{values.labware.length}</span> labware scanned to perform the
+                          operation.
+                        </p>
+                      )}
 
                       {description && (
                         <div className="my-4 mx-4 sm:mx-auto p-1 rounded-md bg-sdb-400 italic">
