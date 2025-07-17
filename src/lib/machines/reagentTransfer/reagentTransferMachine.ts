@@ -143,19 +143,6 @@ export const reagentTransferMachine = createMachine(
       reagentTransferResult: undefined,
       plateType: ''
     },
-    // context: ({
-    //   input
-    // }: {
-    //   input: { destLabware: LabwareFlaggedFieldsFragment | undefined };
-    // }): ReagentTransferContext => ({
-    //   operationType: 'Dual index plate',
-    //   sourceReagentPlate: undefined,
-    //   destLabware: input.destLabware,
-    //   workNumber: '',
-    //   reagentTransfers: [],
-    //   reagentTransferResult: undefined,
-    //   plateType: ''
-    // }),
     states: {
       ready: {
         on: {
