@@ -33,6 +33,7 @@ import ScanInput from '../scanInput/ScanInput';
 import FormikSelect from '../forms/Select';
 import { Position, slideCostingOptions } from '../../lib/helpers';
 import { FormikErrorMessage, selectOptionValues } from '../forms';
+import MutedText from '../MutedText';
 
 type LabwarePlanProps = {
   /**
@@ -223,20 +224,21 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                           <div>Section Thickness</div>
                         </div>
                         <div className={'flex flex-col space-y-4'}>
-                          {outputLabware.slots.map((slot) => (
-                            <div key={slot.address} className="flex flex-row items-start justify-start gap-x-2">
-                              <span className="font-medium text-gray-800 tracking-wide py-2">{slot.address}</span>
+                          {current.context.layoutPlan.plannedActions.size === 0 && (
+                            <MutedText>
+                              Please transfer samples to the slot before entering the section thickness.
+                            </MutedText>
+                          )}
+                          {Array.from(current.context.layoutPlan.plannedActions.keys()).map((address) => (
+                            <div key={address} className="flex flex-row items-start justify-start gap-x-2">
+                              <span className="font-medium text-gray-800 tracking-wide py-2">{address}</span>
                               <FormikInput
                                 className="text-center focus:ring-sdb-100 focus:border-sdb-100 block h-8 bg-white border border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-300"
                                 label={''}
-                                disabled={
-                                  current.matches('printing') ||
-                                  current.matches('done') ||
-                                  !current.context.layoutPlan.plannedActions.has(slot.address)
-                                }
+                                disabled={current.matches('printing') || current.matches('done')}
                                 name={
-                                  current.context.layoutPlan.plannedActions.has(slot.address)
-                                    ? `sectionThickness[${slot.address}]`
+                                  current.context.layoutPlan.plannedActions.has(address)
+                                    ? `sectionThickness[${address}]`
                                     : 'sectionThickness'
                                 }
                                 data-testid={`section-thickness`}
@@ -244,7 +246,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                                 min={0.5}
                                 step={0.5}
                                 onFocus={() => {
-                                  setHighlightedSlots(new Set([slot.address]));
+                                  setHighlightedSlots(new Set([address]));
                                 }}
                                 onBlur={() => {
                                   setHighlightedSlots(new Set());
