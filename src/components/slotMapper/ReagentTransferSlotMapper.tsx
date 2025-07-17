@@ -43,6 +43,8 @@ export interface ReagentTransferMappingProps {
   outputSlotCopies?: Array<OutputSlotCopyData>;
 
   cleanedOutAddresses?: string[];
+
+  sourcePlateType: string;
 }
 
 function ReagentTransferSlotMapper({
@@ -51,7 +53,8 @@ function ReagentTransferSlotMapper({
   initialDestLabware,
   disabled,
   outputSlotCopies,
-  cleanedOutAddresses
+  cleanedOutAddresses,
+  sourcePlateType
 }: ReagentTransferMappingProps) {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine;
@@ -126,6 +129,14 @@ function ReagentTransferSlotMapper({
     return memoOutputSlotCopies.slotCopyContent.length > 0;
   }, [memoOutputSlotCopies, initialSourceLabware, initialDestLabware]);
 
+  const basicBgSourceSlotColorPerPlateType = useMemo(() => {
+    return sourcePlateType === 'Dual Index TT Set A'
+      ? 'green'
+      : sourcePlateType === 'Dual Index TS Set A'
+        ? 'blue'
+        : 'gray';
+  }, [sourcePlateType]);
+
   const getSourceSlotColor = useCallback(
     (labware: LabwareFlaggedFieldsFragment, address: string, slot: SlotFieldsFragment) => {
       if (disabled) {
@@ -137,15 +148,15 @@ function ReagentTransferSlotMapper({
             sourceAddress: address
           })
         ) {
-          return `bg-blue-200`;
+          return `bg-${basicBgSourceSlotColorPerPlateType}-200`;
         }
 
         if (slot?.samples?.length) {
-          return `bg-blue-500`;
+          return `bg-${basicBgSourceSlotColorPerPlateType}-500`;
         }
       }
     },
-    [memoOutputSlotCopies, disabled]
+    [memoOutputSlotCopies, disabled, basicBgSourceSlotColorPerPlateType]
   );
 
   const getDestinationSlotColor = useCallback(
@@ -157,14 +168,14 @@ function ReagentTransferSlotMapper({
           destinationAddress: address
         });
         if (scc) {
-          return `bg-blue-500`;
+          return `bg-${basicBgSourceSlotColorPerPlateType}-500`;
         }
         if (slot?.samples?.length) {
-          return `bg-green-500`;
+          return 'bg-sdb-300';
         }
       }
     },
-    [memoOutputSlotCopies, disabled]
+    [memoOutputSlotCopies, disabled, basicBgSourceSlotColorPerPlateType]
   );
 
   /**
@@ -174,7 +185,6 @@ function ReagentTransferSlotMapper({
     (givenDestinationAddress?: string) => {
       if (!initialSourceLabware || !initialDestLabware) return;
       const address = destinationAddress ? destinationAddress : givenDestinationAddress;
-      // if (initialSourceLabware.barcode && initialDestLabware.barcode && address) {
       if (initialSourceLabware.barcode && address) {
         send({
           type: 'COPY_ONE_TO_ONE_SLOTS',
@@ -274,7 +284,7 @@ function ReagentTransferSlotMapper({
           )}
         </div>
 
-        <div id="destLabwares" className="bg-gray-100" data-testid="destLabwares">
+        <div id="destLabwares" className="bg-gray-100 ml-4" data-testid="destLabwares">
           {initialDestLabware && (
             <Labware
               labware={initialDestLabware}
