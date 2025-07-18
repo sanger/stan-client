@@ -103,11 +103,8 @@ describe('Sectioning Planning', () => {
         cy.findByRole('button', { name: /Next/i }).should('be.disabled');
       });
 
-      it('section thickness inputs initially are empty and disabled', () => {
-        cy.findAllByTestId('section-thickness').each((input) => {
-          cy.wrap(input).should('have.value', '');
-          cy.wrap(input).should('be.disabled');
-        });
+      it('hides section thickness inputs until samples are transferred', () => {
+        cy.findByTestId('section-thickness').should('not.exist');
       });
 
       context('when I try and leave the page', () => {
@@ -143,9 +140,11 @@ describe('Sectioning Planning', () => {
         cy.findByText('Create Labware').should('not.be.disabled');
       });
 
-      it('enables and set section thickness input to the predefined value', () => {
-        cy.findAllByTestId('section-thickness').eq(0).should('have.value', '0.5');
-        cy.findAllByTestId('section-thickness').eq(0).should('be.enabled');
+      it('displays the section thickness input for the planned slot only', () => {
+        cy.findAllByTestId('section-thickness').should('have.length', 1);
+      });
+      it('set the section thickness input with the predefined value', () => {
+        cy.findByTestId('section-thickness').should('have.value', '0.5');
       });
     });
   });
@@ -195,8 +194,6 @@ describe('Sectioning Planning', () => {
 
     context('when request is unsuccessful', () => {
       before(() => {
-        cy.visit('/lab/sectioning');
-
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<PlanMutation, PlanMutationVariables>('Plan', () => {
@@ -212,7 +209,7 @@ describe('Sectioning Planning', () => {
             })
           );
         });
-
+        cy.reload();
         createLabware();
       });
 
