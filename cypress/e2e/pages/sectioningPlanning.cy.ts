@@ -194,6 +194,8 @@ describe('Sectioning Planning', () => {
 
     context('when request is unsuccessful', () => {
       before(() => {
+        cy.visit('/lab/sectioning');
+
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<PlanMutation, PlanMutationVariables>('Plan', () => {
@@ -209,7 +211,7 @@ describe('Sectioning Planning', () => {
             })
           );
         });
-        cy.reload();
+
         createLabware();
       });
 
