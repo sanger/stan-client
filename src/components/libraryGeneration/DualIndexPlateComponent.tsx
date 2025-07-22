@@ -19,6 +19,8 @@ import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../types/stan';
 import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
 import { OutputSlotCopyData } from '../slotMapper/slotMapper.types';
+import warningToast from '../notifications/WarningToast';
+import { toast } from 'react-toastify';
 
 type DualIndexPlateParams = {
   destinationLabware?: LabwareFlaggedFieldsFragment;
@@ -35,7 +37,26 @@ const DualIndexPlateComponent = ({
   outputSlotCopies,
   destinationCleanedOutAddresses
 }: DualIndexPlateParams) => {
-  const { sourceReagentPlate, destLabware, plateType, validationError, cleanedOutAddresses } = current.context;
+  const {
+    sourceReagentPlate,
+    destLabware,
+    plateType,
+    validationError,
+    cleanedOutAddresses,
+    reagentTransfers,
+    serverMessage
+  } = current.context;
+
+  React.useEffect(() => {
+    if (serverMessage) {
+      warningToast({
+        message: serverMessage,
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 5000
+      });
+    }
+  }, [serverMessage]);
+
   React.useEffect(() => {
     if (destinationLabware) {
       send({
@@ -90,20 +111,44 @@ const DualIndexPlateComponent = ({
       <div className="grid grid-cols-2 auto-rows-max">
         <div className="space-y-4">
           <Heading level={4}>Dual Index Plate</Heading>
-          <div className="w-1/2" id="sourceScanInput">
-            <ScanInput
-              onScan={(value) => {
-                send({ type: 'SET_SOURCE_LABWARE', barcode: value });
-              }}
-              disabled={sourceReagentPlate !== undefined}
-            />
-            {validationError && (
-              <div className={'mt-2'}>
-                <ErrorMessage>{validationError}</ErrorMessage>
-              </div>
-            )}
-            <MutedText>Add source labware using the scan input above</MutedText>
+
+          <div className="w-1/2 mt-4 mb-4" id="plateType">
+            <Label name={'Plate Type'}>
+              <CustomReactSelect
+                emptyOption
+                dataTestId={'plateType'}
+                handleChange={(val) => handlePlateTypeChange((val as OptionType).label)}
+                value={sourceReagentPlate ? sourceReagentPlate.plateType ?? plateType : plateType}
+                isDisabled={
+                  (sourceReagentPlate && PLATE_TYPES.includes(sourceReagentPlate.plateType ?? '')) ||
+                  reagentTransfers.length > 0
+                }
+                options={PLATE_TYPES.map((plateType) => {
+                  return {
+                    label: plateType,
+                    value: plateType
+                  };
+                })}
+              />
+            </Label>
+            <MutedText>Select a dual index plate type to start</MutedText>
           </div>
+          {plateType.length > 0 && (
+            <div className="w-1/2" id="sourceScanInput">
+              <ScanInput
+                onScan={(value) => {
+                  send({ type: 'SET_SOURCE_LABWARE', barcode: value });
+                }}
+                disabled={sourceReagentPlate !== undefined}
+              />
+              {validationError && (
+                <div className={'mt-2'}>
+                  <ErrorMessage>{validationError}</ErrorMessage>
+                </div>
+              )}
+              <MutedText>Add source labware using the scan input above</MutedText>
+            </div>
+          )}
         </div>
         <div className="space-y-4">
           <Heading level={4}>Destination Labware</Heading>
@@ -125,26 +170,6 @@ const DualIndexPlateComponent = ({
           )}
         </div>
       </div>
-      {sourceReagentPlate && (
-        <div className="w-1/4 mt-4 mb-4" id="plateType">
-          <Label name={'Plate Type'}>
-            <CustomReactSelect
-              emptyOption
-              dataTestId={'plateType'}
-              handleChange={(val) => handlePlateTypeChange((val as OptionType).label)}
-              value={sourceReagentPlate ? sourceReagentPlate.plateType ?? plateType : plateType}
-              isDisabled={sourceReagentPlate && PLATE_TYPES.includes(sourceReagentPlate.plateType ?? '')}
-              options={PLATE_TYPES.map((plateType) => {
-                return {
-                  label: plateType,
-                  value: plateType
-                };
-              })}
-            />
-          </Label>
-          <MutedText>Select a dual index plate type</MutedText>
-        </div>
-      )}
 
       <ReagentTransferSlotMapper
         initialDestLabware={destinationLabware ?? destLabware}
@@ -153,6 +178,7 @@ const DualIndexPlateComponent = ({
         disabled={current.matches('transferred')}
         outputSlotCopies={outputSlotCopies}
         cleanedOutAddresses={destinationCleanedOutAddresses ?? cleanedOutAddresses}
+        sourcePlateType={sourceReagentPlate?.plateType ?? plateType}
       />
     </div>
   );

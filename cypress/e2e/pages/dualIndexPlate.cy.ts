@@ -5,7 +5,7 @@ import {
   RecordReagentTransferMutationVariables
 } from '../../../src/types/sdk';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
-import { selectOption, selectSGPNumber, shouldBeDisabled } from '../shared/customReactSelect.cy';
+import { selectOption, selectSGPNumber, shouldBeDisabled, shouldBeEnabled } from '../shared/customReactSelect.cy';
 import { HttpResponse } from 'msw';
 
 function scanInDestinationLabware() {
@@ -34,8 +34,18 @@ describe('Dual Index Plate', () => {
     });
   });
 
+  context('when plate type is not set', () => {
+    before(() => {
+      selectOption('plateType', '');
+    });
+    it('hides the source labware scanner', () => {
+      cy.get('#sourceScanInput').should('not.exist');
+    });
+  });
+
   context('when an invalid source labware (dual index plate) barcode is entered', () => {
     before(() => {
+      selectOption('plateType', 'Dual Index TT Set A');
       scanInSourceLabware('invalid');
     });
     it('should display an error message', () => {
@@ -45,7 +55,8 @@ describe('Dual Index Plate', () => {
 
   context('when a valid source labware (dual index plate) barcode is entered', () => {
     before(() => {
-      cy.url().reload();
+      cy.reload();
+      selectOption('plateType', 'Dual Index TT Set A');
       scanInSourceLabware('300051128832186720221202');
     });
     it('should display the dual index plate', () => {
@@ -78,6 +89,9 @@ describe('Dual Index Plate', () => {
       it('displays the table with D1 slot', () => {
         cy.findByRole('table').contains('td', 'A1');
       });
+      it('disables plate type select box', () => {
+        shouldBeDisabled('plateType');
+      });
     });
     context('When user maps source slot to an empty destination slot', () => {
       before(() => {
@@ -104,7 +118,6 @@ describe('Dual Index Plate', () => {
       });
     });
     it('should display two mappings in table', () => {
-      //find("tr) return rows including header
       cy.findByRole('table').find('tr').should('have.length', 3);
     });
     context('when user clicks remove button in the mapping table', () => {
@@ -131,6 +144,9 @@ describe('Dual Index Plate', () => {
       it('should not enable Save button', () => {
         saveButton().should('be.disabled');
       });
+      it('enable plate type select box', () => {
+        shouldBeEnabled('plateType');
+      });
       after(() => {
         cy.get('#sourceLabwares').within(() => {
           cy.findByText('A1').click();
@@ -143,17 +159,8 @@ describe('Dual Index Plate', () => {
   });
 
   describe('On Save', () => {
-    context('When user selects a work number and have a mapping, but no plateType', () => {
-      before(() => {
-        selectSGPNumber('SGP1008');
-      });
-      it('should disable save', () => {
-        saveButton().should('be.disabled');
-      });
-    });
     context('When user selects a work number,plateType and have a mapping', () => {
       before(() => {
-        selectOption('plateType', 'Dual Index TT Set A');
         selectSGPNumber('SGP1008');
       });
       it('should enable save', () => {
@@ -196,14 +203,18 @@ describe('Dual Index Plate', () => {
             })
           );
         });
-        cy.url().reload();
+        cy.reload();
+        selectOption('plateType', 'Dual Index TS Set A');
         scanInSourceLabware('123456789123456789012345');
       });
-      it('should display plate type that is alreAdy assigned to dual index plate', () => {
+      it('should display plate type that is already assigned to dual index plate', () => {
         cy.contains('Dual Index TT Set A').should('be.visible');
       });
       it('should disable plate type selection combo', () => {
         shouldBeDisabled('plateType');
+      });
+      it('displays a warning user message', () => {
+        cy.findByText('Dual Index TT Set A type is already assigned to this plate.').should('be.visible');
       });
     });
 
@@ -229,11 +240,11 @@ describe('Dual Index Plate', () => {
             )
           );
         });
-        cy.url().reload();
+        cy.reload();
         selectSGPNumber('SGP1008');
+        selectOption('plateType', 'Dual Index TS Set A');
         scanInSourceLabware('300051128832186720221202');
         scanInDestinationLabware();
-        selectOption('plateType', 'Dual Index TT Set A');
         cy.get('#sourceLabwares').within(() => {
           cy.findByText('A1').click();
         });

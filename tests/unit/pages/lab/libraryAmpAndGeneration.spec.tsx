@@ -106,7 +106,7 @@ const mockedLibraryAmpAndGenerationMachineContext = {
   sources: [{ barcode: 'STAN-3245', labwareState: LabwareState.Active }],
   destinationLabware: createFlaggedLabware('STAN-5245'),
   reagentTransfers: [],
-  reagentPlateType: '',
+  plateType: 'Dual Index TT Set A',
   slotMeasurements: []
 };
 
@@ -183,8 +183,8 @@ describe('Library Amplification and Generation ', () => {
           ] as any)
           .mockReturnValueOnce([
             {
-              context: { ...mockedSlotCopyMachineContext },
-              value: 'copied',
+              context: { ...mockedLibraryAmpAndGenerationMachineContext },
+              value: 'reagentTransfer',
               matches: jest.fn()
             },
             jest.fn()

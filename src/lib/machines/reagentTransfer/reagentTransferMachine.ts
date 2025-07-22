@@ -56,6 +56,8 @@ export interface ReagentTransferContext {
    */
   serverErrors?: Maybe<ClientError>;
 
+  serverMessage?: string;
+
   validationError?: string;
 
   cleanedOutAddresses?: string[];
@@ -141,19 +143,6 @@ export const reagentTransferMachine = createMachine(
       reagentTransferResult: undefined,
       plateType: ''
     },
-    // context: ({
-    //   input
-    // }: {
-    //   input: { destLabware: LabwareFlaggedFieldsFragment | undefined };
-    // }): ReagentTransferContext => ({
-    //   operationType: 'Dual index plate',
-    //   sourceReagentPlate: undefined,
-    //   destLabware: input.destLabware,
-    //   workNumber: '',
-    //   reagentTransfers: [],
-    //   reagentTransferResult: undefined,
-    //   plateType: ''
-    // }),
     states: {
       ready: {
         on: {
@@ -293,6 +282,7 @@ export const reagentTransferMachine = createMachine(
           : { barcode: context.sourceBarcode, slots: [] };
         if (event.output.reagentPlate && event.output.reagentPlate.plateType) {
           context.plateType = event.output.reagentPlate.plateType;
+          context.serverMessage = event.output.reagentPlate.plateType + ' type is already assigned to this plate.';
         }
         return context;
       }),

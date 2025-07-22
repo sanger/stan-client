@@ -3,5 +3,6 @@ module.exports = {
   theme: {
     extend: {}
   },
-  plugins: []
+  plugins: [],
+  safelist: ['hover:bg-green-600', 'hover:bg-gray-600']
 };

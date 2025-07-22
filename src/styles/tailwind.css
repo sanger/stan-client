@@ -5,6 +5,11 @@
   --default-ring-width: 3px;
   --default-ring-color: var(--color-blue-500);
 }
+.hover\:bg-green-600 {
+  &:hover {
+    background-color: oklch(72.3% 0.219 149.579);
+  }
+}
 
 .grid-cols-12 {
   @apply grid-cols-12;
@@ -75,6 +80,9 @@
 }
 .bg-indigo-200 {
   background-color: oklch(88.3% 0.0557 259.3);
+}
+.bg-green-600 {
+  background-color: oklch(72.3% 0.219 149.579);
 }
 .bg-green-500 {
   background-color: oklch(70.96% 0.1434 154.53);

@@ -71,11 +71,10 @@ describe('LibraryAmpAndGeneration Page', () => {
         });
         describe('After Reagent Transfer', () => {
           before(() => {
+            selectOption('plateType', 'Dual Index TT Set A');
             cy.get('#sourceScanInput').within(() => {
               cy.findByRole('textbox').clear().type(`${dualIndexPlateBarcode}{enter}`);
             });
-            selectOption('plateType', 'Dual Index TT Set A');
-
             transferReagent();
           });
 
@@ -434,10 +433,10 @@ const fillInSampleTransferStep = () => {
 };
 
 const fillInReagentTransferStep = () => {
+  selectOption('plateType', 'Dual Index TT Set A');
   cy.get('#sourceScanInput').within(() => {
     cy.findByRole('textbox').clear().type(`${dualIndexPlateBarcode}{enter}`);
   });
-  selectOption('plateType', 'Dual Index TT Set A');
   transferReagent();
   cy.findByRole('button', { name: 'Record Cycle >' }).click();
 };

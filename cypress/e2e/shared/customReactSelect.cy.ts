@@ -85,6 +85,14 @@ export const shouldBeDisabled = (dataTestId: string) => {
   });
 };
 
+/**Check whether the dropdown is enabled**/
+export const shouldBeEnabled = (dataTestId: string) => {
+  const wrapperDiv = cy.findByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
+  wrapperDiv.within(() => {
+    cy.get('input[type="text"]').should('exist').should('not.have.prop', 'disabled', true);
+  });
+};
+
 /**Check whether the dropdown displays the given value**/
 export const shouldDisplaySelectedValue = (dataTestId: string, value: string, index?: number) => {
   if (!value) return;
