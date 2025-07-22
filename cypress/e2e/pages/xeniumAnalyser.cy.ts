@@ -1,5 +1,7 @@
 import { selectOption } from '../shared/customReactSelect.cy';
 import {
+  FindFilesQuery,
+  FindFilesQueryVariables,
   FindLatestOperationQuery,
   FindLatestOperationQueryVariables,
   RecordAnalyserMutation,
@@ -56,6 +58,32 @@ describe('Xenium Analyser', () => {
       });
       it('the barcodeDisplayer contains the roi barcode', () => {
         cy.findByTestId('2d-barcode').contains('123456789');
+      });
+    });
+
+    describe('When a SGP number is set', () => {
+      context('when a SGP number with previously uploaded file is selected', () => {
+        before(() => {
+          selectOption('STAN-3111-workNumber', 'SGP1009');
+        });
+        it('displays a link to the SGP folder link ', () => {
+          cy.findByTestId('sgp-folder-link').should('exist');
+        });
+      });
+      context('when an SGP number with no previously uploaded file is selected', () => {
+        before(() => {
+          cy.msw().then(({ worker, graphql }) => {
+            worker.use(
+              graphql.query<FindFilesQuery, FindFilesQueryVariables>('FindFiles', () => {
+                return HttpResponse.json({ data: { listFiles: [] } }, { status: 200 });
+              })
+            );
+          });
+          selectOption('STAN-3111-workNumber', 'SGP1009');
+        });
+        it('hides the SGP folder link', () => {
+          cy.findByTestId('sgp-folder-link').should('not.exist');
+        });
       });
     });
   });

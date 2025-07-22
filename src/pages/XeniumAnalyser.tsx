@@ -29,7 +29,7 @@ import { GridDirection, objectKeys } from '../lib/helpers';
 import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { FormikErrorMessage, selectOptionValues } from '../components/forms';
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate } from 'react-router-dom';
 import { fromPromise } from 'xstate';
 import { lotRegx } from './ProbeHybridisationXenium';
 import { joinUnique, samplesFromLabwareOrSLot } from '../components/dataTableColumns';
@@ -40,6 +40,7 @@ import Panel from '../components/Panel';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
+import { findUploadedFiles } from '../lib/services/fileService';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
@@ -55,6 +56,7 @@ type AnalyserLabwareForm = {
   labware: LabwareFlaggedFieldsFragment;
   hybridisation: boolean;
   workNumber: string;
+  hasSgpNumberLink?: boolean;
   position?: CassettePosition;
   samples: Array<SampleWithRegion>;
   analyserScanData?: AnalyserScanDataFieldsFragment;
@@ -232,12 +234,14 @@ const XeniumAnalyser = () => {
       const setLabwareSampleData = async (lw: LabwareFlaggedFieldsFragment) => {
         let samplePositions: SamplePositionFieldsFragment[] = [];
         try {
+          /**Check if the images were been uploaded to the sgp folder**/
+          const hasSgpNumberLink =
+            values.workNumberAll.length > 0 ? await hasUploadedFilesInSgpFolder(values.workNumberAll) : false;
           /**Validate whether probe hybridisation has been recorded on this labware**/
           const latestOp = await stanCore
             .FindLatestOperation({ barcode: lw.barcode, operationType: 'Probe hybridisation Xenium' })
             .then((res) => res.findLatestOp);
           /**If probe hybridisation has been recorded, get the sample positions,otherwise return**/
-
           if (latestOp) {
             /**
              * FindSamplePositions - if no samples in the labware have a region, the array would be empty.
@@ -259,6 +263,7 @@ const XeniumAnalyser = () => {
                     labware,
                     hybridisation: true,
                     workNumber: values.workNumberAll,
+                    hasSgpNumberLink,
                     position: undefined,
                     samples: labwareSamplesWithRegions(labware, samplePositions),
                     analyserScanData: res.analyserScanData
@@ -273,6 +278,7 @@ const XeniumAnalyser = () => {
                 labware,
                 hybridisation: false,
                 workNumber: values.workNumberAll,
+                hasSgpNumberLink,
                 position: undefined,
                 samples: labwareSamplesWithRegions(labware, samplePositions)
               });
@@ -288,6 +294,11 @@ const XeniumAnalyser = () => {
     },
     [labwareSamplesWithRegions, stanCore]
   );
+
+  const hasUploadedFilesInSgpFolder = async (workNumber: string): Promise<boolean> => {
+    const files = await findUploadedFiles([workNumber]);
+    return files.length > 0;
+  };
 
   return (
     <AppShell>
@@ -335,7 +346,7 @@ const XeniumAnalyser = () => {
                 });
               }}
             >
-              {({ values, setFieldValue, setValues, isValid }) => (
+              {({ values, setValues, isValid }) => (
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
                     <Heading level={3}>Labware</Heading>
@@ -439,14 +450,18 @@ const XeniumAnalyser = () => {
                               label={'SGP Number'}
                               name={'workNumberAll'}
                               dataTestId={'workNumberAll'}
-                              onWorkNumberChange={async (workNumber) => {
+                              onWorkNumberChange={async (_workNumber) => {
+                                const workNumber = _workNumber.trim();
+                                const hasSgpNumberLink =
+                                  workNumber.length > 0 ? await hasUploadedFilesInSgpFolder(workNumber) : false;
                                 await setValues((prev) => {
                                   return {
                                     ...prev,
                                     workNumberAll: workNumber,
                                     labware: prev.labware.map((lw) => ({
                                       ...lw,
-                                      workNumber
+                                      workNumber,
+                                      hasSgpNumberLink
                                     }))
                                   };
                                 });
@@ -475,16 +490,44 @@ const XeniumAnalyser = () => {
                                   </TableHead>
                                   <TableBody>
                                     <tr key={lw.labware.barcode}>
-                                      <TableCell className="align-top w-1/10">
+                                      <TableCell className="align-top w-1/10 ">
                                         <WorkNumberSelect
                                           name={`labware.${lwIndex}.workNumber`}
                                           dataTestId={`${lw.labware.barcode}-workNumber`}
-                                          onWorkNumberChange={(workNumber) => {
-                                            setFieldValue(`labware.${lwIndex}.workNumber`, workNumber);
+                                          onWorkNumberChange={async (_workNumber) => {
+                                            const workNumber = _workNumber.trim();
+                                            const hasSgpNumberLink =
+                                              workNumber.length > 0
+                                                ? await hasUploadedFilesInSgpFolder(workNumber)
+                                                : false;
+
+                                            await setValues((prev: XeniumAnalyserFormValues) => {
+                                              const updatedLabware = [...prev.labware];
+                                              updatedLabware[lwIndex] = {
+                                                ...updatedLabware[lwIndex],
+                                                workNumber,
+                                                hasSgpNumberLink
+                                              };
+                                              return { ...prev, labware: updatedLabware };
+                                            });
                                           }}
                                           workNumber={values.labware[lwIndex]?.workNumber}
                                           requiredField={true}
                                         />
+                                        {lw.hasSgpNumberLink && (
+                                          <div
+                                            className="mt-5 flex-row whitespace-nowrap"
+                                            data-testid="sgp-folder-link"
+                                          >
+                                            <Link
+                                              className="text-indigo-800 hover:text-indigo-900 active:text-indigo-950 font-semibold hover:underline"
+                                              to={`/file_manager?workNumber=${values.labware[lwIndex]?.workNumber}`}
+                                              target="_blank"
+                                            >
+                                              {`${values.labware[lwIndex]?.workNumber} Folder Link`}
+                                            </Link>
+                                          </div>
+                                        )}
                                         <FormikErrorMessage name={`labware.${lwIndex}.workNumber`} />
                                       </TableCell>
                                       <TableCell className="align-top w-1/10">
