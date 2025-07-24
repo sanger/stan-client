@@ -285,6 +285,7 @@ export default function StainForm({
                           name={`commentIds.${i}`}
                           dataTestId={`${measurementType.name}-comment`}
                           className="mt-4"
+                          required={true}
                         />
                       </div>
                     ))}
