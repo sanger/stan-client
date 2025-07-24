@@ -62,4 +62,7 @@ query GetConfiguration {
   tissueTypes {
     ...TissueTypeFields
   }
+  cellClasses(includeDisabled: true) {
+    ...CellClassFields
+  }
 }

@@ -75,14 +75,14 @@ export default class RegistrationValidation {
   }
 
   get hmdmc() {
-    return Yup.string().when('species', (species, schema) => {
-      const val = species[0] as unknown as string;
-      return val === 'Human'
+    return Yup.string().when(['species', 'cellClass'], ([species, cellClass], schema) => {
+      const isHumanTissue = species === 'Human' && cellClass === 'tissue';
+      return isHumanTissue
         ? schema
             .oneOf(this.registrationInfo.hmdmcs.map((h) => h.hmdmc))
             .required()
             .label('HuMFre')
-        : schema.length(0);
+        : schema.notRequired().nullable();
     });
   }
 
@@ -211,6 +211,13 @@ export default class RegistrationValidation {
     return validation.requiredString({
       label: 'Biological Risk Assessment Numbers',
       oneOf: this.registrationInfo.bioRisks.map((m) => m.code)
+    });
+  }
+
+  get cellClass() {
+    return validation.requiredString({
+      label: 'Cellular Classification',
+      oneOf: this.registrationInfo.cellClasses.map((cc) => cc.name)
     });
   }
 }

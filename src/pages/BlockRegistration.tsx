@@ -45,6 +45,7 @@ export interface RegistrationFormTissue {
   blocks: RegistrationFormBlock[];
   workNumber: string;
   bioRiskCode: string;
+  cellClass: string;
 }
 
 export interface RegistrationFormValues {
@@ -82,7 +83,8 @@ export function getRegistrationFormTissue(): RegistrationFormTissue {
     blocks: [getRegistrationFormBlock()],
     sampleCollectionDate: '',
     workNumber: '',
-    bioRiskCode: ''
+    bioRiskCode: '',
+    cellClass: ''
   };
 }
 
@@ -98,6 +100,7 @@ function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
           lifeStage: validation.lifeStage,
           species: validation.species,
           hmdmc: validation.hmdmc,
+          cellClass: validation.cellClass,
           tissueType: validation.tissueType,
           bioRiskCode: validation.bioRiskCode,
           sampleCollectionDate: validation.sampleCollectionDate,
@@ -153,7 +156,8 @@ export function buildRegisterTissuesMutationVariables(
                 ? tissue.sampleCollectionDate.toLocaleDateString()
                 : tissue.sampleCollectionDate
               : undefined,
-            bioRiskCode: tissue.bioRiskCode
+            bioRiskCode: tissue.bioRiskCode,
+            cellClass: tissue.cellClass
           };
 
           if (!ignoreExistingTissues && existingTissues.includes(blockRegisterRequest.externalIdentifier)) {

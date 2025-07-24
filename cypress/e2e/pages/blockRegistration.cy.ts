@@ -183,7 +183,7 @@ describe('Block Registration Page', () => {
       });
       context('when there is no sample collection date for fetal sample', () => {
         before(() => {
-          cy.visit('/admin/registration');
+          cy.reload();
           cy.get('[type="radio"][name="manual-registration-btn"]').check();
           fillInRegistrationForm();
           cy.findByLabelText('Sample Collection Date').clear();
@@ -332,6 +332,7 @@ function fillInRegistrationForm() {
     force: true
   });
   selectOption('Species', 'Human');
+  selectOption('cellClass', 'tissue');
   cy.findByLabelText('External Identifier').type('EXT_ID_1');
   selectOption('HuMFre', 'HuMFre1');
   selectOption('Tissue Type', 'Liver');

@@ -1,0 +1,5 @@
+query GetCellClasses($includeDisabled: Boolean) {
+  cellClasses(includeDisabled: $includeDisabled) {
+    ...CellClassFields
+  }
+}

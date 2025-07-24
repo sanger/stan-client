@@ -127,6 +127,15 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 options={selectOptionValues(registrationInfo.species, 'name', 'name')}
                 value={values.tissues[currentIndex].species}
               />
+              <CustomReactSelect
+                label={'Cellular Classification'}
+                name={`tissues.${currentIndex}.cellClass`}
+                emptyOption
+                className="mt-2"
+                dataTestId="cellClass"
+                options={selectOptionValues(registrationInfo.cellClasses, 'name', 'name')}
+                value={values.tissues[currentIndex].cellClass}
+              />
             </motion.div>
 
             <motion.div variants={variants.fadeInWithLift} className="space-y-4">

@@ -30,4 +30,7 @@ query GetRegistrationInfo {
   bioRisks {
     code
   }
+  cellClasses {
+    name
+  }
 }

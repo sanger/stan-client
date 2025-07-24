@@ -19,6 +19,7 @@ import dnapStudyRepository from '../repositories/dnapStudyRepository';
 import probePanelRepository from '../repositories/probePanelRepository';
 import bioRiskRepository from '../repositories/bioRiskRepository';
 import tissueTypeRepository from '../repositories/tissueTypeRepository';
+import cellClassRepository from '../repositories/cellClassRepository';
 
 const configurationHandlers = [
   graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>('GetConfiguration', () => {
@@ -44,7 +45,8 @@ const configurationHandlers = [
         cytassistProbePanels: probePanelRepository.findAll().filter((panel) => panel.type === ProbeType.Cytassist),
         spikeProbePanels: probePanelRepository.findAll().filter((panel) => panel.type === ProbeType.Spike),
         bioRisks: bioRiskRepository.findAll(),
-        tissueTypes: tissueTypeRepository.findAll()
+        tissueTypes: tissueTypeRepository.findAll(),
+        cellClasses: cellClassRepository.findAll()
       }
     });
   })

@@ -82,7 +82,8 @@ export function getRegistrationFormTissueSample(): RegistrationFormOriginalSampl
     blocks: [getRegistrationFormSample()],
     sampleCollectionDate: '',
     workNumber: '',
-    bioRiskCode: ''
+    bioRiskCode: '',
+    cellClass: ''
   };
 }
 
@@ -96,6 +97,7 @@ function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
           donorId: validation.donorId,
           lifeStage: validation.lifeStage,
           species: validation.species,
+          cellClass: validation.cellClass,
           hmdmc: validation.hmdmc,
           tissueType: validation.tissueType,
           bioRiskCode: validation.bioRiskCode,
@@ -161,6 +163,7 @@ function OriginalSampleRegistration() {
               donorIdentifier: tissue.donorId.trim(),
               externalIdentifier: block.externalIdentifier ? block.externalIdentifier.trim() : undefined,
               hmdmc: tissue.hmdmc.trim(),
+              cellClass: tissue.cellClass.trim(),
               labwareType: block.labwareType.trim(),
               lifeStage: Object.values(LifeStage).includes(tissue.lifeStage) ? tissue.lifeStage : undefined,
               tissueType: tissue.tissueType.trim(),

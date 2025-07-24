@@ -14,6 +14,7 @@ import {
   TissueType
 } from '../../types/sdk';
 import { faker } from '@faker-js/faker';
+import cellClassFactory from './cellClassFactory';
 
 export const sampleFactory = Factory.define<Sample>(({ sequence, params, associations }) => ({
   __typename: 'Sample',
@@ -31,7 +32,8 @@ export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(({ params, 
   donor: associations.donor ?? donorFactory.build(),
   hmdmc: associations.hmdmc ?? hmdmcFactory.build(),
   medium: associations.medium ?? mediumFactory.build(),
-  fixative: associations.fixative ?? fixativeFactory.build()
+  fixative: associations.fixative ?? fixativeFactory.build(),
+  cellClass: associations.cellClass ?? cellClassFactory.build()
 }));
 
 export const bioStateFactory: Factory<BioState> = Factory.define<BioState>(({ params, sequence }) => ({

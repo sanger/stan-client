@@ -271,6 +271,7 @@ function fillInForm() {
     force: true
   });
   selectOption('Species', 'Human');
+  selectOption('cellClass', 'tissue');
   cy.findByTestId('External Identifier').type('EXT_ID_1');
   selectOption('HuMFre', 'HuMFre1');
   selectOption('Tissue Type', 'Liver');

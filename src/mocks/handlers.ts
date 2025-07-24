@@ -66,6 +66,7 @@ import spatialLocationHandlers from './handlers/spatialLocationHandlers';
 import tissueTypeHandlers from './handlers/tissueTypeHandlers';
 import reviseWorkNumber from './handlers/WorkNumberHandlers';
 import operationHandlers from './handlers/operationHandlers';
+import cellClassHandlers from './handlers/cellClassHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -133,5 +134,6 @@ export const handlers = [
   ...spatialLocationHandlers,
   ...tissueTypeHandlers,
   ...reviseWorkNumber,
-  ...operationHandlers
+  ...operationHandlers,
+  ...cellClassHandlers
 ];
