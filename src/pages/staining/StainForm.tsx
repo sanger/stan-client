@@ -123,7 +123,12 @@ export default function StainForm({
         seconds: Yup.number().integer().min(1).required().label('Duration')
       })
     ),
-    commentIds: Yup.array().of(Yup.string()),
+    commentIds: Yup.array()
+      .of(Yup.string())
+      .test('comments-match-measurements', 'Each measurement must have a corresponding comment', function (value) {
+        const { timeMeasurements } = this.parent;
+        return Array.isArray(value) && value.length === timeMeasurements.length;
+      }),
     workNumber: Yup.string().required().label('SGP Number')
   });
 
@@ -161,7 +166,7 @@ export default function StainForm({
         send({ type: 'SUBMIT_FORM', values: stainRequest });
       }}
     >
-      {({ values, setFieldValue }) => (
+      {({ values, setFieldValue, setValues }) => (
         <Form>
           <FormikInput label={''} name={'stainType'} type={'hidden'} value={stainType} />
           <GrayBox>
@@ -254,15 +259,23 @@ export default function StainForm({
                             label={''}
                             name={`timeMeasurements.${i}._seconds`}
                             type="number"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                              // Set the seconds for this timeMeasurement
-                              setFieldValue(`timeMeasurements.${i}._seconds`, Number(e.target.value));
+                            onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                              const seconds = Number(e.target.value);
+                              await setValues((prevValues) => {
+                                const prevTimeMeasurement = [...prevValues.timeMeasurements];
+                                const stainMeasurement = prevTimeMeasurement[i];
 
-                              // Update the total seconds for this measurement
-                              setFieldValue(
-                                `timeMeasurements.${i}.seconds`,
-                                measurementType._minutes * 60 + Number(e.target.value)
-                              );
+                                prevTimeMeasurement[i] = {
+                                  ...stainMeasurement,
+                                  _seconds: seconds,
+                                  seconds: stainMeasurement._minutes * 60 + seconds
+                                };
+
+                                return {
+                                  ...prevValues,
+                                  timeMeasurements: prevTimeMeasurement
+                                };
+                              });
                             }}
                             placeholder="ss"
                             min={0}
@@ -282,13 +295,16 @@ export default function StainForm({
                             'text',
                             'id'
                           )}
-                          name={`commentIds.${i}`}
+                          handleChange={async (value) => {
+                            await setFieldValue(`commentIds.${i}`, value ? String(value) : undefined);
+                          }}
                           dataTestId={`${measurementType.name}-comment`}
                           className="mt-4"
                         />
                       </div>
                     ))}
                   </div>
+                  <FormikErrorMessage name="commentIds" />
                 </motion.div>
               )}
             </motion.div>

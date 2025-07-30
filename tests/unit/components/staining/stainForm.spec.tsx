@@ -106,6 +106,7 @@ describe('stainForm.spec.tsx', () => {
         await waitFor(async () => {
           expect(getByText('SGP Number is a required field')).toBeVisible();
           expect(getAllByText('Duration must be greater than or equal to 1')).toHaveLength(3);
+          expect(getByText('Each measurement must have a corresponding comment')).toBeVisible();
         });
       });
     });
