@@ -73,7 +73,7 @@ const ProbeSettings: React.FC<ProbePanelInfo> = ({ probesOptions, probeLabware, 
             />
             <div>
               <FormikInput
-                label="Addresses"
+                label="Section Addresses"
                 name={`labware.${lwIndex}.addresses`}
                 data-testid={`labware.${lwIndex}.addresses`}
                 info={<AddressesFieldInfo />}
