@@ -25,13 +25,15 @@ const tissueTypeHandlers = [
     const tissueType = tissueTypeFactory.build({
       name: variables.request.name,
       code: variables.request.code,
-      spatialLocations: []
+      spatialLocations: [],
+      enabled: true
     });
 
     tissueType.spatialLocations = variables.request.spatialLocations.map((spatialLocation) => {
       return {
         ...spatialLocation,
-        tissueType
+        tissueType,
+        enabled: true
       };
     });
     tissueTypeRepository.save(tissueType);

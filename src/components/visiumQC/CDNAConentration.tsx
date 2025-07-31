@@ -1,6 +1,6 @@
 import Panel from '../Panel';
 import React, { useState } from 'react';
-import { CommentFieldsFragment, LabwareFlaggedFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import { CommentFieldsFragment, LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
@@ -9,12 +9,20 @@ import { useFormikContext } from 'formik';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
 
+export type SlotMeasurementRequestForm = {
+  address: string;
+  name: string;
+  value: string;
+  commentId?: number;
+  sizeRangeId?: number;
+};
 export type CDNAConcentrationProps = {
   labware: LabwareFlaggedFieldsFragment;
-  slotMeasurements: SlotMeasurementRequest[] | undefined;
+  slotMeasurements: SlotMeasurementRequestForm[] | undefined;
   concentrationComments: CommentFieldsFragment[];
   removeLabware: (barcode: string) => void;
   cleanedOutAddress?: string[];
+  libraryConcentrationSizeRange: CommentFieldsFragment[];
 };
 
 enum MeasurementTypes {
@@ -76,7 +84,8 @@ const CDNAConcentration = ({
   slotMeasurements,
   removeLabware,
   concentrationComments,
-  cleanedOutAddress
+  cleanedOutAddress,
+  libraryConcentrationSizeRange
 }: CDNAConcentrationProps) => {
   const { setErrors, setTouched, setFieldValue } = useFormikContext<VisiumQCFormData>();
   const [measurementName, setMeasurementName] = useState('');
@@ -96,13 +105,15 @@ const CDNAConcentration = ({
       return;
     }
     setFieldValue('barcode', labware.barcode);
-    let slotMeasurements: SlotMeasurementRequest[] = [];
+    let slotMeasurements: SlotMeasurementRequestForm[] = [];
     labware.slots.filter(isSlotFilled).forEach((slot) => {
       memoMeasurementConfig.forEach((measurement) => {
         slotMeasurements.push({
           address: slot.address,
           name: measurement.name,
-          value: '0'
+          value: '0',
+          commentId: undefined,
+          sizeRangeId: undefined
         });
       });
     });
@@ -165,6 +176,7 @@ const CDNAConcentration = ({
                     onChangeField={handleChangeField}
                     measurementConfig={memoMeasurementConfig}
                     comments={concentrationComments}
+                    libraryConcentrationSizeRange={libraryConcentrationSizeRange}
                   />
                 )}
               </div>

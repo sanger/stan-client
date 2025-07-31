@@ -10,7 +10,8 @@ import {
   RecordOpWithSlotMeasurementsMutation,
   RecordVisiumQcMutation,
   ResultRequest,
-  SlideCosting
+  SlideCosting,
+  SlotMeasurementRequest
 } from '../types/sdk';
 import AppShell from '../components/AppShell';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -52,6 +53,7 @@ export interface VisiumQCFormData {
   costing?: SlideCosting;
   reagentLot?: string;
   slotComments?: Array<AddressCommentInput>;
+  sizeRange?: Array<AddressCommentInput>;
 }
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
@@ -60,22 +62,26 @@ const validationSchema = Yup.object().shape({
   labwareResult: Yup.array()
     .of(Yup.object())
     .when('qcType', (qcType) => {
-      const val = qcType as unknown as string;
+      const val = qcType[0] as unknown as string;
       if (val === QCType.SLIDE_PROCESSING) {
         return Yup.array().required();
       } else {
         return Yup.array().notRequired();
       }
     }),
-  slotMeasurements: Yup.array()
-    .of(
-      Yup.object().shape({
-        address: Yup.string().required(),
-        name: Yup.string().required(),
-        value: Yup.string().required('Positive value required')
-      })
-    )
-    .notRequired(),
+  slotMeasurements: Yup.array().of(
+    Yup.object().shape({
+      address: Yup.string().required(),
+      name: Yup.string().required(),
+      value: Yup.string().required('Positive value required'),
+      sizeRangeId: Yup.string().when('name', {
+        is: (val: string) => val === 'CDNA CONCENTRATION' || val === 'LIBRARY CONCENTRATION',
+        then: (schema) => schema.required('Size range is required').nonNullable(),
+        otherwise: (schema) => schema.notRequired()
+      }),
+      commentId: Yup.number().optional()
+    })
+  ),
 
   costing: Yup.string().when('qcType', (qcType) => {
     const val = qcType[0] as unknown as string;
@@ -161,6 +167,10 @@ export default function VisiumQC() {
     return visiumQcInfo.comments.filter((comment) => comment.category === 'Concentration');
   }, [visiumQcInfo]);
 
+  const libraryConcentrationSizeRange = React.useMemo(() => {
+    return visiumQcInfo.comments.filter((comment) => comment.category === 'size range');
+  }, [visiumQcInfo]);
+
   const cleanupComments = React.useMemo(() => {
     return visiumQcInfo.comments.filter((comment) => comment.category === 'clean up');
   }, [visiumQcInfo]);
@@ -193,12 +203,20 @@ export default function VisiumQC() {
       values.qcType === QCType.QPCR_RESULTS ||
       (values.qcType === QCType.CDNA_AMPLIFICATION && values.slotMeasurements)
     ) {
+      const msrRequests: SlotMeasurementRequest[] | undefined = values.slotMeasurements?.map((msr) => {
+        return {
+          address: msr.address,
+          name: msr.name,
+          value: msr.value,
+          commentIds: [...(msr.commentId ? [msr.commentId] : []), ...(msr.sizeRangeId ? [msr.sizeRangeId] : [])]
+        };
+      });
       sendCDNA({
         type: 'SUBMIT_FORM',
         values: {
           workNumber: values.workNumber,
           barcode: values.barcode,
-          slotMeasurements: values.slotMeasurements?.map(({ samples, ...rest }) => rest) ?? [],
+          slotMeasurements: msrRequests ?? [],
           operationType: values.qcType
         }
       });
@@ -274,7 +292,7 @@ export default function VisiumQC() {
             onSubmit={onSubmit}
             validationSchema={validationSchema}
           >
-            {({ setFieldValue, values, isValid }) => (
+            {({ setFieldValue, values }) => (
               <Form>
                 <div className="space-y-2 mb-8 ">
                   <Heading level={2}>SGP Number</Heading>
@@ -359,6 +377,7 @@ export default function VisiumQC() {
                                 labware={labwares[0]}
                                 removeLabware={removeLabware}
                                 concentrationComments={concentrationComments}
+                                libraryConcentrationSizeRange={libraryConcentrationSizeRange}
                                 cleanedOutAddress={
                                   cleanedOutAddresses && labwares[0]
                                     ? cleanedOutAddresses.get(labwares[0].id)
@@ -393,7 +412,7 @@ export default function VisiumQC() {
                   />
                 )}
                 <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
-                  <BlueButton disabled={!isEnableSubmit(values) || !isValid} type="submit">
+                  <BlueButton disabled={!isEnableSubmit(values)} type="submit">
                     Save
                   </BlueButton>
                 </div>

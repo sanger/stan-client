@@ -184,6 +184,14 @@ const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({
     category: 'Eosin',
     text: 'Aqueous'
+  }),
+  commentFactory.build({
+    category: 'size range',
+    text: '150 - 500'
+  }),
+  commentFactory.build({
+    category: 'size range',
+    text: '100 - 2500'
   })
 ];
 
