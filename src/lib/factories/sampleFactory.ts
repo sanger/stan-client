@@ -75,12 +75,14 @@ export const spatialLocationFactory = Factory.define<SpatialLocation>(({ params,
   __typename: 'SpatialLocation',
   name: params.name ?? faker.lorem.words(),
   code: params.code ?? _.random(33),
-  tissueType: associations.tissueType ?? tissueTypeFactory.build()
+  tissueType: associations.tissueType ?? tissueTypeFactory.build(),
+  enabled: params.enabled ?? true
 }));
 
 export const tissueTypeFactory = Factory.define<TissueType>(({ sequence, params }) => ({
   __typename: 'TissueType',
   name: params.name ?? `Tissue Type ${sequence}`,
   code: params.code ?? faker.string.alpha({ length: 3, casing: 'upper' }),
-  spatialLocations: []
+  spatialLocations: [],
+  enabled: params.enabled ?? true
 }));

@@ -33,6 +33,10 @@ const renderCDNAConcentration = (props?: CDNAConcentrationProps) => {
       { id: 0, text: 'comment 1', enabled: true, category: 'good' },
       { id: 1, text: 'comment 2', enabled: true, category: 'good' }
     ],
+    libraryConcentrationSizeRange: [
+      { id: 2, text: '50-100', enabled: true, category: 'range size' },
+      { id: 3, text: '100-200', enabled: true, category: 'range size' }
+    ],
     removeLabware: jest.fn()
   };
   return render(
@@ -85,6 +89,7 @@ describe('CDNAConcentration', () => {
     expect(screen.getByTestId('comments1')).toBeInTheDocument();
     expect(screen.getByText('CDNA CONCENTRATION (pg/\u00B5l)')).toBeInTheDocument();
     expect(screen.getByText('AVERAGE SIZE (bp)')).toBeInTheDocument();
+    expect(screen.getByTestId('sizeRange0')).toBeInTheDocument();
   });
   it('displays measurement table when a Library concentration measurement type is selected', async () => {
     renderCDNAConcentration();
@@ -103,6 +108,7 @@ describe('CDNAConcentration', () => {
     expect(screen.getByText('LIBRARY CONCENTRATION (pg/\u00B5l)')).toBeInTheDocument();
     expect(screen.getByText('AVERAGE SIZE (bp)')).toBeInTheDocument();
     expect(screen.getByText('MAIN PEAK SIZE (bp)')).toBeInTheDocument();
+    expect(screen.getByTestId('sizeRange0')).toBeInTheDocument();
   });
   it('invokes remove function when labware is removed', async () => {
     const inputLabware = slideFactory.build() as NewFlaggedLabwareLayout;
@@ -117,6 +123,10 @@ describe('CDNAConcentration', () => {
       concentrationComments: [
         { id: 0, text: 'comment 1', enabled: true, category: 'good' },
         { id: 1, text: 'comment 2', enabled: true, category: 'good' }
+      ],
+      libraryConcentrationSizeRange: [
+        { id: 2, text: '50-100', enabled: true, category: 'range size' },
+        { id: 3, text: '100-200', enabled: true, category: 'range size' }
       ],
       removeLabware: removeFunction
     };
