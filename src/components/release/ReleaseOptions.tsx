@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLoaderData, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppShell from '../AppShell';
 import variants from '../../lib/motionVariants';
 import Heading from '../Heading';
@@ -9,14 +9,12 @@ import PinkButton from '../buttons/PinkButton';
 import { motion } from '../../dependencies/motion';
 import DownloadIcon from '../icons/DownloadIcon';
 import Warning from '../notifications/Warning';
-import { ReleaseFileOptionFieldsFragment } from '../../types/sdk';
 import { RadioButtonInput } from '../forms/RadioGroup';
 import { FileType } from '../../pages/Release';
+import { stanCore } from '../../lib/sdk';
+import { ReleaseFileOptionFieldsFragment } from '../../types/sdk';
 
 const ReleaseOptions = () => {
-  //Get all release options
-  const releaseOptions = useLoaderData() as ReleaseFileOptionFieldsFragment[];
-
   //Get query params, expected url example is /releaseOptions?id=123,456&groups=group1,group2&type=xlsx
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -26,9 +24,24 @@ const ReleaseOptions = () => {
     return {
       id: searchParams.get('id')?.split(',') ?? [],
       groups: searchParams.get('groups')?.split(',') ?? [],
-      type: searchParams.get('type') ?? FileType.TSV
+      type: searchParams.get('type') ?? FileType.TSV,
+      includeDisabled: searchParams.get('includeDisabled') ?? false
     };
   }, [searchParams]);
+
+  const includeDisabledReleaseColumns = React.useMemo(() => {
+    return memoReleaseParams.includeDisabled === 'true';
+  }, [memoReleaseParams]);
+
+  const [releaseOptions, setReleaseOptions] = React.useState<Array<ReleaseFileOptionFieldsFragment>>([]);
+
+  React.useEffect(() => {
+    const fetchReleaseOptions = async () => {
+      const res = await stanCore.GetReleaseColumnOptions({ includeDisabled: includeDisabledReleaseColumns });
+      setReleaseOptions(res.releaseColumnOptions);
+    };
+    fetchReleaseOptions();
+  }, [includeDisabledReleaseColumns]);
 
   return (
     <AppShell>

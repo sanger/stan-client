@@ -132,7 +132,7 @@ function Release() {
       const releaseIds = submissionResult.release.releases.map((r) => r.id);
       return `/releaseOptions?id=${releaseIds.join(',')}&groups=${selectedReleaseColumns
         .map((releaseOption) => releaseOption.queryParamName)
-        .join(',')}&type=${selectedFileType}`;
+        .join(',')}&type=${selectedFileType}&includeDisabled=false`;
     }
   }, [submissionResult, selectedReleaseColumns, selectedFileType]);
 
