@@ -1,6 +1,6 @@
 import Panel from '../Panel';
 import React from 'react';
-import { AddressString, LabwareFlaggedFieldsFragment, SlotCopyContent, SlotMeasurementRequest } from '../../types/sdk';
+import { AddressString, LabwareFlaggedFieldsFragment, SlotCopyContent } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
@@ -13,7 +13,7 @@ import { groupBy } from 'lodash';
 
 export type CDNAProps = {
   labware: LabwareFlaggedFieldsFragment;
-  slotMeasurements?: SlotMeasurementRequest[];
+  slotMeasurements?: SlotMeasurement[];
   removeLabware?: (barcode: string) => void;
   className?: string;
   slotCopyContent?: SlotCopyContent[];
