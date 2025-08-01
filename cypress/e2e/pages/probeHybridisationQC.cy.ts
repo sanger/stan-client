@@ -29,96 +29,54 @@ describe('Probe Hybridisation QC', () => {
     });
   });
   describe('When a labware is scanned', () => {
-    describe('labware has no Probe Hybridisation Xenium operation recorded', () => {
-      before(() => {
-        cy.msw().then(({ worker, graphql }) => {
-          worker.use(
-            graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', () => {
-              return HttpResponse.json({
-                data: {
-                  findLatestOp: null
-                }
-              });
-            })
-          );
-        });
-        cy.get('#labwareScanInput').type('STAN-3111{enter}');
-      });
-      it('shows an error message', () => {
-        cy.findByText(
-          'No Probe Hybridisation Xenium operation has been recorded on the following labware: STAN-3111'
-        ).should('be.visible');
-      });
-      it('should not render the labware image', () => {
-        cy.findByTestId('labware').should('not.exist');
-      });
-      it('should not enable the save button', () => {
-        cy.findByText('Save').should('be.disabled');
+    before(() => {
+      cy.get('#labwareScanInput').type('STAN-3111{enter}');
+    });
+
+    it('shows the labware image', () => {
+      cy.findByTestId('labware').should('be.visible');
+    });
+    it('shows the completion Date time select box', () => {
+      cy.findByTestId('completionDateTime').should('be.visible');
+    });
+    it('should init labware complete time with the general complete time', () => {
+      cy.findByTestId('globalCompletionDateTime').then(($input) => {
+        const generalCompleteTime = $input.val();
+        cy.findByTestId('completionDateTime').should('contain.value', generalCompleteTime);
       });
     });
-    describe('labware has a Probe Hybridisation Xenium operation recorded', () => {
+    it('shows the global comments select box', () => {
+      cy.findByTestId('globalComment').should('be.visible');
+    });
+    it('shows the labware sgp number', () => {
+      cy.findByTestId('workNumber').should('be.visible');
+    });
+
+    describe('when updating the general completion time', () => {
       before(() => {
-        cy.msw().then(({ worker, graphql }) => {
-          worker.use(
-            graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', () => {
-              return HttpResponse.json({
-                data: {
-                  findLatestOp: {
-                    id: 1
-                  }
-                }
-              });
-            })
-          );
-        });
-        cy.get('#labwareScanInput').type('STAN-3111{enter}');
+        cy.findByTestId('globalCompletionDateTime').clear().type('2021-01-01T10:00');
       });
+      it('updates the labware completion time', () => {
+        cy.findByTestId('completionDateTime').should('contain.value', '2021-01-01T10:00');
+      });
+    });
 
-      it('shows the labware image', () => {
-        cy.findByTestId('labware').should('be.visible');
+    describe('When a selecting a comment from the global comment select box', () => {
+      before(() => {
+        selectOption('globalComment', 'Issue with thermal cycler');
       });
-      it('shows the completion Date time select box', () => {
-        cy.findByTestId('completionDateTime').should('be.visible');
+      it('populates table rows comment column automatically with the selected value(s)', () => {
+        cy.get('tbody tr').eq(0).find('td').eq(6).should('have.text', 'Issue with thermal cycler');
       });
-      it('should init labware complete time with the general complete time', () => {
-        cy.findByTestId('globalCompletionDateTime').then(($input) => {
-          const generalCompleteTime = $input.val();
-          cy.findByTestId('completionDateTime').should('contain.value', generalCompleteTime);
-        });
-      });
-      it('shows the global comments select box', () => {
-        cy.findByTestId('globalComment').should('be.visible');
-      });
-      it('shows the labware sgp number', () => {
-        cy.findByTestId('workNumber').should('be.visible');
-      });
+    });
 
-      describe('when updating the general completion time', () => {
-        before(() => {
-          cy.findByTestId('globalCompletionDateTime').clear().type('2021-01-01T10:00');
-        });
-        it('updates the labware completion time', () => {
-          cy.findByTestId('completionDateTime').should('contain.value', '2021-01-01T10:00');
-        });
+    describe('When selecting a global SGP number', () => {
+      before(() => {
+        selectOption('globalWorkNumber', 'SGP1008');
       });
-
-      describe('When a selecting a comment from the global comment select box', () => {
-        before(() => {
-          selectOption('globalComment', 'Issue with thermal cycler');
-        });
-        it('populates table rows comment column automatically with the selected value(s)', () => {
-          cy.get('tbody tr').eq(0).find('td').eq(6).should('have.text', 'Issue with thermal cycler');
-        });
-      });
-
-      describe('When selecting a global SGP number', () => {
-        before(() => {
-          selectOption('globalWorkNumber', 'SGP1008');
-        });
-        it('should populate all the sgp number relative to the scanned labware', () => {
-          cy.findAllByTestId('workNumber').each((el) => {
-            expect(el).to.have.text('SGP1008');
-          });
+      it('should populate all the sgp number relative to the scanned labware', () => {
+        cy.findAllByTestId('workNumber').each((el) => {
+          expect(el).to.have.text('SGP1008');
         });
       });
     });

@@ -142,24 +142,6 @@ export default function ProbeHybridisationQC() {
     [globalWorkNumber, resetSubmissionResult, globalCompletionTime]
   );
 
-  const validateProbeHybridisationQcLabware = useCallback(
-    async (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): Promise<string[]> => {
-      return stanCore
-        .FindLatestOperation({
-          barcode: foundLabware.barcode,
-          operationType: 'Probe hybridisation Xenium'
-        })
-        .then((response) => {
-          return response.findLatestOp !== null
-            ? []
-            : [
-                `No Probe Hybridisation Xenium operation has been recorded on the following labware: ${foundLabware.barcode}`
-              ];
-        });
-    },
-    [stanCore]
-  );
-
   const removeLabwareFromForm = useCallback(
     (removeLabware: (barcode: string) => void, barcode: string) => {
       removeLabware(barcode);
@@ -315,12 +297,7 @@ export default function ProbeHybridisationQC() {
             </div>
             <Heading level={2}>Slides</Heading>
             <p>Please scan a slide</p>
-            <LabwareScanner
-              onAdd={onAddLabware}
-              labwareCheckFunction={validateProbeHybridisationQcLabware}
-              checkForCleanedOutAddresses
-              enableFlaggedLabwareCheck
-            >
+            <LabwareScanner onAdd={onAddLabware} checkForCleanedOutAddresses enableFlaggedLabwareCheck>
               {({ labwares, removeLabware, cleanedOutAddresses }) =>
                 labwares.map((labware, index) => {
                   return (
