@@ -155,7 +155,11 @@ export default function History(props: HistoryProps) {
             const releaseId = props.row.original.eventId;
             details.push(
               <li key={releaseId}>
-                <StyledLink data-testid="release-options-link" to={`/releaseOptions?id=${releaseId}`} target={'_blank'}>
+                <StyledLink
+                  data-testid="release-options-link"
+                  to={`/releaseOptions?id=${releaseId}&includeDisabled=true`}
+                  target={'_blank'}
+                >
                   <BlueButton action="tertiary">Release Options </BlueButton>
                 </StyledLink>
               </li>
