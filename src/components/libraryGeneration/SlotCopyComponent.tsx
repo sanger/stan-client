@@ -45,7 +45,9 @@ const transferTypes = [
   'Library post-clean',
   'Library post-clean 1:20 dilution',
   'Probes pre-clean',
-  'Probes post-clean'
+  'Probes post-clean',
+  'cDNA pre-clean',
+  'cDNA post-clean'
 ];
 
 interface SourceLabwareScanPanelProps {
