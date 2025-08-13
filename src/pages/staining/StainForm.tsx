@@ -30,7 +30,7 @@ import WhiteButton from '../../components/buttons/WhiteButton';
 import { useNavigate } from 'react-router-dom';
 import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 import { fromPromise } from 'xstate';
-import CustomReactSelect from '../../components/forms/CustomReactSelect';
+import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
 
 /**
  * Type used for the values in the form.
@@ -295,8 +295,8 @@ export default function StainForm({
                             'text',
                             'id'
                           )}
-                          handleChange={async (value) => {
-                            await setFieldValue(`commentIds.${i}`, value ? String(value) : undefined);
+                          handleChange={async (option) => {
+                            await setFieldValue(`commentIds.${i}`, option ? (option as OptionType).value : undefined);
                           }}
                           dataTestId={`${measurementType.name}-comment`}
                           className="mt-4"
