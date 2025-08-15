@@ -26,11 +26,10 @@ import { convertLabwareToFlaggedLabware } from '../../lib/helpers/labwareHelper'
  */
 const allowedLabwareTypeNames: Array<LabwareTypeName> = [
   LabwareTypeName.TUBE,
-  LabwareTypeName.SLIDE,
+  LabwareTypeName.SUPERFROST_PLUS,
   LabwareTypeName.VISIUM_TO,
   LabwareTypeName.VISIUM_LP,
   LabwareTypeName.VISIUM_ADH,
-  LabwareTypeName.FOUR_SLOT_SLIDE,
   LabwareTypeName.FETAL_WASTE_CONTAINER,
   LabwareTypeName.XENIUM
 ];

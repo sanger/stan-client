@@ -95,7 +95,7 @@ const planHandlers = [
       },
       {
         associations: {
-          labwareType: labwareTypes[LabwareTypeName.SLIDE].build()
+          labwareType: labwareTypes[LabwareTypeName.SUPERFROST_PLUS].build()
         }
       }
     );

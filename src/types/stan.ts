@@ -27,6 +27,7 @@ export enum LabwareTypeName {
   TUBE = "Tube",
   VISIUM_LP = "Visium LP",
   VISIUM_TO = "Visium TO",
+  SUPERFROST_PLUS = "SuperFrost Plus slide",
   SLIDE = "6 slot slide",
   PLATE = "96 well plate",
   CASSETTE = "Cassette",

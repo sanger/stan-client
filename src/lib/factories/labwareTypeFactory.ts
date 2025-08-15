@@ -33,6 +33,13 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     numColumns: 2,
     labelType: labelTypeFactory.build({ name: `${LabwareTypeName.SLIDE} Label` })
   }),
+  [LabwareTypeName.SUPERFROST_PLUS]: labwareTypeFactory.params({
+    __typename: 'LabwareType',
+    name: LabwareTypeName.SUPERFROST_PLUS,
+    numRows: 10,
+    numColumns: 4,
+    labelType: labelTypeFactory.build({ name: `${LabwareTypeName.SUPERFROST_PLUS} Label` })
+  }),
   [LabwareTypeName.VISIUM_TO]: labwareTypeFactory.params({
     __typename: 'LabwareType',
     name: LabwareTypeName.VISIUM_TO,

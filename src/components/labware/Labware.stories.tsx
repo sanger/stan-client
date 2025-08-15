@@ -5,7 +5,7 @@ import * as slotHelper from '../../lib/helpers/slotHelper';
 import Labware from './Labware';
 import {
   plateFactory,
-  slideFactory,
+  superFrostPlusFactory,
   tubeFactory,
   visiumLPFactory,
   visiumTOFactory
@@ -68,7 +68,7 @@ TUBE.args = {
 };
 
 export const SLIDE = Template.bind({});
-const slide = slideFactory.build();
+const slide = superFrostPlusFactory.build();
 
 SLIDE.args = {
   labware: slide,

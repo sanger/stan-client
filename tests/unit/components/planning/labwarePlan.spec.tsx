@@ -25,20 +25,10 @@ describe('On Mount', () => {
       });
     });
   });
-  describe('When the output labware type set to 4 SLOTS', () => {
+  describe('When the output labware type set to SuperFrost Plus', () => {
     it('displays Number of labware, Sectioning Thickness', () => {
       act(() => {
-        renderLabwarePlan(LabwareTypeName.FOUR_SLOT_SLIDE);
-      });
-      waitFor(() => {
-        expectDisplayNumberOfLabwareAndSectionThicknessInputs();
-      });
-    });
-  });
-  describe('When the output labware type set to SLIDE', () => {
-    it('displays Number of labware, Sectioning Thickness', () => {
-      act(() => {
-        renderLabwarePlan(LabwareTypeName.SLIDE);
+        renderLabwarePlan(LabwareTypeName.SUPERFROST_PLUS);
       });
       waitFor(() => {
         expectDisplayNumberOfLabwareAndSectionThicknessInputs();

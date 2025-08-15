@@ -88,6 +88,10 @@ export const slideFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.SLIDE].build()
 });
 
+export const superFrostPlusFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.SUPERFROST_PLUS].build()
+});
+
 export const visiumTOFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.VISIUM_TO].build()
 });
@@ -157,6 +161,7 @@ export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>
   [LabwareTypeName.TUBE]: tubeFactory,
   [LabwareTypeName.PROVIASETTE]: proviasetteFactory,
   [LabwareTypeName.SLIDE]: slideFactory,
+  [LabwareTypeName.SUPERFROST_PLUS]: superFrostPlusFactory,
   [LabwareTypeName.VISIUM_TO]: visiumTOFactory,
   [LabwareTypeName.VISIUM_LP]: visiumLPFactory,
   [LabwareTypeName.PLATE]: plateFactory,
