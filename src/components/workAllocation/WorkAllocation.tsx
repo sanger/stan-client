@@ -10,7 +10,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTableSort } from '../../lib/hooks/useTableSort';
 import { statusSort } from '../../types/stan';
 import { useDownload } from '../../lib/hooks/useDownload';
-import { useAuth } from '../../context/AuthContext';
 import Warning from '../notifications/Warning';
 import Heading from '../Heading';
 import CustomReactSelect from '../forms/CustomReactSelect';
@@ -121,7 +120,6 @@ export default function WorkAllocation() {
   });
 
   const navigate = useNavigate();
-  const { userRoleIncludes } = useAuth();
 
   /**
    * Rebuild the download data  whenever the worWithComments changes
@@ -256,31 +254,6 @@ export default function WorkAllocation() {
                 by searching using requester, program, worktype or status fields.
               </div>
             </div>
-            {userRoleIncludes(UserRole.Enduser) && (
-              <div
-                data-testid={'reminder-div'}
-                className={'flex flex-row border-l-4 border-green-600 p-2 bg-green-100 text-green-800 font-medium'}
-              >
-                <InfoIcon className={'bg-white inline-block bg-green-100 text-green-800 h-12 w-12'} />
-                <div>
-                  If you have submitted an RNAScope/IHC request, please complete the template for probes/antibody and
-                  fluorophore
-                  <span>
-                    <a
-                      target="_blank"
-                      rel="noreferrer"
-                      href={
-                        'https://fred.wellcomegenomecampus.org/Interact/Pages/Content/Document.aspx?id=6817&utm_source=interact&utm_medium=side_menu_category'
-                      }
-                      className="underline text-blue-600 hover:text-blue-800 font-semibold ml-1"
-                    >
-                      here
-                    </a>
-                  </span>
-                  , and upload it to STAN on the file management page linked to your request number.
-                </div>
-              </div>
-            )}
           </>
         )}
         {requestError && <Warning message={'SGP Request Error'} error={requestError} />}
