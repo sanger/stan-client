@@ -12,6 +12,7 @@ seeds.push(probePanelFactory.build({ enabled: false }));
 seeds.push(probePanelFactory.build({ type: ProbeType.Cytassist, name: 'CytAssist APT gene expression panel' }));
 seeds.push(probePanelFactory.build({ type: ProbeType.Cytassist, name: 'CytAssist ABCFX8 mBrain 100g gene panel' }));
 seeds.push(probePanelFactory.build({ type: ProbeType.Cytassist, name: 'CytAssist Human Colon Gene Expression Panel' }));
+seeds.push(probePanelFactory.build({ type: ProbeType.Cytassist, name: 'Human WT Probes' }));
 
 seeds.push(probePanelFactory.build({ enabled: false }));
 seeds.push(probePanelFactory.build({ type: ProbeType.Spike, name: 'Custom spike 1' }));
