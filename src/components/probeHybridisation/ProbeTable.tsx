@@ -55,8 +55,8 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
             <TableCell>
               <FormikInput
                 label=""
-                data-testid={`labware.${lwIndex}.samplePrepReagentLot`}
-                name={`labware.${lwIndex}.samplePrepReagentLot`}
+                data-testid={`labware.${lwIndex}.reagentLot`}
+                name={`labware.${lwIndex}.reagentLot`}
               />
             </TableCell>
             <TableCell>
