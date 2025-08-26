@@ -39,7 +39,7 @@ type ProbeOperationLabwareForm = {
   labware: LabwareFieldsFragment;
   workNumber: string;
   kitCosting: SlideCosting;
-  samplePrepReagentLot?: string;
+  reagentLot?: string;
   probes: Array<ProbeLot>;
 };
 
@@ -48,7 +48,7 @@ export type ProbeHybridisationXeniumFormValues = {
   performed: string;
   workNumberAll: string;
   costingAll?: SlideCosting;
-  samplePrepReagentLot?: string;
+  reagentLot?: string;
 };
 export const probeLotDefault = { name: '', lot: '', plex: 0 };
 export const lotRegx = /^[A-Z0-9_]{1,25}$/;
@@ -57,7 +57,7 @@ const formInitialValues: ProbeHybridisationXeniumFormValues = {
   labware: [],
   performed: getCurrentDateTime(),
   workNumberAll: '',
-  samplePrepReagentLot: ''
+  reagentLot: ''
 };
 const ProbeHybridisationXenium: React.FC = () => {
   const probePanelInfo = useLoaderData() as GetProbePanelsQuery;
@@ -97,17 +97,14 @@ const ProbeHybridisationXenium: React.FC = () => {
       .max(currentTime, 'Please select a date and time on or before current time')
       .required('Start Time is a required field')
       .label('Start Time'),
-    samplePrepReagentLot: Yup.string().matches(/^\d{6}$/, 'Sample Prep Reagent Lot should be a string of 6 digits'),
+    reagentLot: Yup.string().matches(/^\d{6}$/, 'Sample Prep Reagent Lot should be a string of 6 digits'),
     labware: Yup.array()
       .of(
         Yup.object().shape({
           labware: Yup.object().required(),
           workNumber: Yup.string().required().label('SGP Number'),
           kitCosting: Yup.string().oneOf(Object.values(SlideCosting)).required('Costing is a required field'),
-          samplePrepReagentLot: Yup.string().matches(
-            /^\d{6}$/,
-            'Sample Prep Reagent Lot should be a string of 6 digits'
-          ),
+          reagentLot: Yup.string().matches(/^\d{6}$/, 'Sample Prep Reagent Lot should be a string of 6 digits'),
           probes: Yup.array()
             .of(
               Yup.object().shape({
@@ -164,7 +161,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                       barcode: probeLw.labware.barcode,
                       workNumber: probeLw.workNumber,
                       kitCosting: probeLw.kitCosting,
-                      samplePrepReagentLot: probeLw.samplePrepReagentLot,
+                      reagentLot: probeLw.reagentLot,
                       probes: probeLw.probes
                     }))
                   }
@@ -272,10 +269,10 @@ const ProbeHybridisationXenium: React.FC = () => {
                                   onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
                                     await setValues((prev) => ({
                                       ...prev,
-                                      samplePrepReagentLot: e.target.value,
+                                      reagentLot: e.target.value,
                                       labware: prev.labware.map((lw) => ({
                                         ...lw,
-                                        samplePrepReagentLot: e.target.value
+                                        reagentLot: e.target.value
                                       }))
                                     }));
                                   }}
