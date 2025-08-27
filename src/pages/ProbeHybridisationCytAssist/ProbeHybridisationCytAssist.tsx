@@ -223,7 +223,12 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                                 kitCosting: values.costingAll,
                                 reagentLot: values.reagentLotAll,
                                 customPanel: values.customPanelAll,
-                                probes: []
+                                probes: [
+                                  {
+                                    panel: 'Human WT Probes',
+                                    lot: ''
+                                  }
+                                ]
                               }
                             ]
                           };

@@ -91,56 +91,6 @@ const ProbeSettings: React.FC<ProbePanelInfo> = ({ probesOptions, probeLabware, 
               </tr>
             </TableHead>
             <TableBody>
-              {probeLabware.probes.length === 0 && (
-                <tr>
-                  <TableCell>
-                    <CustomReactSelect
-                      dataTestId={`labware.${lwIndex}.probes.0.panel`}
-                      label=""
-                      name={`labware.${lwIndex}.probes.0.panel`}
-                      options={selectOptionValues(probesOptions.cytAssistProbes, 'name', 'name')}
-                      isMulti={false}
-                      emptyOption={true}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormikInput
-                      label=""
-                      name={`labware.${lwIndex}.probes.0.lot`}
-                      data-testid={`labware.${lwIndex}.probes.0.lot`}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <CustomReactSelect
-                      label=""
-                      dataTestId={`labware.${lwIndex}.probes.0.costing`}
-                      name={`labware.${lwIndex}.probes.0.costing`}
-                      options={selectOptionValues(slideCostingOptions, 'label', 'value')}
-                      isMulti={false}
-                      emptyOption={true}
-                    />
-                  </TableCell>
-                  <TableCell
-                    className={'flex flex-row space-x-2 justify-end items-end'}
-                    data-testid={`labware.${lwIndex}.probes.0.actions`}
-                  >
-                    <FieldArray name={`labware.${lwIndex}.probes`}>
-                      {(helpers) => (
-                        <IconButton
-                          dataTestId={'addButton'}
-                          onClick={async () => {
-                            helpers.push(probeLotDefault);
-                          }}
-                          className={'focus:outline-hidden'}
-                        >
-                          <AddIcon className="inline-block text-green-500 h-5 w-5 -ml-1 mr-2" />
-                        </IconButton>
-                      )}
-                    </FieldArray>
-                  </TableCell>
-                </tr>
-              )}
-
               {probeLabware.probes!.map((probe, probeIndex) => (
                 <tr key={`probeLw.barcode-${lwIndex}-${probeIndex}`}>
                   <TableCell>

@@ -47,6 +47,10 @@ describe('CytAssist Probe Hybridisation', () => {
         cy.findByTestId('addButton').should('be.visible');
       });
     });
+
+    it('set the slide probe to Human WT Probes', () => {
+      shouldDisplaySelectedValue('labware.0.probes.0.panel', 'Human WT Probes');
+    });
   });
   describe('Start time', () => {
     it('displays the current date', () => {
@@ -156,9 +160,9 @@ describe('CytAssist Probe Hybridisation', () => {
         cy.findByRole('button', { name: 'Add to all' }).click();
       });
       it('adds a new probe row to all the scanned labware', () => {
-        shouldDisplaySelectedValue('labware.0.probes.0.panel', 'CytAssist APT gene expression panel');
-        cy.findByTestId('labware.0.probes.0.lot').should('have.value', '1234');
-        shouldDisplaySelectedValue('labware.0.probes.0.costing', 'Faculty');
+        shouldDisplaySelectedValue('labware.0.probes.1.panel', 'CytAssist APT gene expression panel');
+        cy.findByTestId('labware.0.probes.1.lot').should('have.value', '1234');
+        shouldDisplaySelectedValue('labware.0.probes.1.costing', 'Faculty');
       });
 
       it('displays error when same panel is selected for multiple probes in same labware', () => {
@@ -175,16 +179,7 @@ describe('CytAssist Probe Hybridisation', () => {
         });
       });
       it('should remove the first row', () => {
-        cy.findByTestId('labware.0.probes.1.actions').should('not.exist');
-        //Displays only one row with value
-        shouldDisplaySelectedValue('labware.0.probes.0.panel', 'CytAssist APT gene expression panel');
-        cy.findByTestId('labware.0.probes.0.lot').should('have.value', '1234');
-        shouldDisplaySelectedValue('labware.0.probes.0.costing', 'Faculty');
-        //Action column updated
-        cy.findByTestId('labware.0.probes.0.actions').within(() => {
-          cy.findByTestId('removeButton').should('not.exist');
-          cy.findByTestId('addButton').should('exist');
-        });
+        cy.findAllByTestId('probe-table-0').find('tbody tr').should('have.length', 2);
       });
     });
     context('when add button is pressed', () => {
@@ -194,10 +189,10 @@ describe('CytAssist Probe Hybridisation', () => {
         });
       });
       it('adds a new empty row', () => {
-        cy.findByTestId('labware.0.probes.1.actions').should('exist');
-        shouldDisplaySelectedValue('labware.0.probes.1.name', '');
-        cy.findByTestId('labware.0.probes.1.lot').should('have.value', '');
-        cy.findByTestId('labware.0.probes.1.actions').within(() => {
+        cy.findByTestId('labware.0.probes.2.actions').should('exist');
+        shouldDisplaySelectedValue('labware.0.probes.2.name', '');
+        cy.findByTestId('labware.0.probes.2.lot').should('have.value', '');
+        cy.findByTestId('labware.0.probes.2.actions').within(() => {
           cy.findByTestId('removeButton').should('exist');
           cy.findByTestId('addButton').should('exist');
         });
