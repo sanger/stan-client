@@ -42,6 +42,7 @@ export type XeniumMetricsForm = {
   sampleMetricData: Array<SampleMetricData>;
   runName: string;
   runNames: string[];
+  error?: string;
 };
 
 const initialValues: XeniumMetricsForm = {
@@ -49,7 +50,8 @@ const initialValues: XeniumMetricsForm = {
   sampleMetricData: [],
   workNumber: '',
   runNames: [],
-  runName: ''
+  runName: '',
+  error: undefined
 };
 
 const validationSchema = Yup.object().shape({
@@ -110,7 +112,7 @@ const XeniumMetrics = () => {
       setValues: (values: SetStateAction<XeniumMetricsForm>, shouldValidate?: boolean) => {}
     ) => {
       stanCore.GetRunRois({ barcode: labware.barcode, run: runName }).then((response) => {
-        if (response.runRois) {
+        if (response.runRois && response.runRois.length > 0) {
           const groupedByRoi = groupByRoi(response.runRois);
           setValues((prev) => ({
             ...prev,
@@ -124,6 +126,11 @@ const XeniumMetrics = () => {
                 metrics: []
               };
             })
+          }));
+        } else {
+          setValues((prev) => ({
+            ...prev,
+            error: 'No regions of interest are recorded for the scanned labware and the selected run name.'
           }));
         }
       });
@@ -256,9 +263,9 @@ const XeniumMetrics = () => {
                               />
                             </div>
                           )}
-                          {values.runName && values.sampleMetricData.length === 0 && (
+                          {values.error && (
                             <div>
-                              <Warning message="No regions of interest are recorded for the scanned labware and the selected run name."></Warning>
+                              <Warning message={values.error}></Warning>
                             </div>
                           )}
                         </Panel>
