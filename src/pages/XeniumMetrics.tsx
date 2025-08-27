@@ -112,7 +112,7 @@ const XeniumMetrics = () => {
       setValues: (values: SetStateAction<XeniumMetricsForm>, shouldValidate?: boolean) => {}
     ) => {
       stanCore.GetRunRois({ barcode: labware.barcode, run: runName }).then((response) => {
-        if (response.runRois) {
+        if (response.runRois && response.runRois.length > 0) {
           const groupedByRoi = groupByRoi(response.runRois);
           setValues((prev) => ({
             ...prev,
