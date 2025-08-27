@@ -114,7 +114,7 @@ describe('Xenium Probe Hybridisation', () => {
         cy.findByTestId('Sample Prep Reagent Lot').clear().type('123456').blur();
       });
       it('should set Sample Prep Reagent Lot for the scanned labware', () => {
-        cy.findByTestId('labware.0.samplePrepReagentLot').should('contain.value', '123456');
+        cy.findByTestId('labware.0.reagentLot').should('contain.value', '123456');
       });
     });
   });
