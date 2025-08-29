@@ -27,11 +27,9 @@ export enum LabwareTypeName {
   TUBE = "Tube",
   VISIUM_LP = "Visium LP",
   VISIUM_TO = "Visium TO",
-  SLIDE = "6 slot slide",
   PLATE = "96 well plate",
   CASSETTE = "Cassette",
   VISIUM_ADH = "Visium ADH",
-  FOUR_SLOT_SLIDE = "4 slot slide",
   FETAL_WASTE_CONTAINER = "Fetal waste container",
   DUAL_INDEX_PLATE = "Dual index plate",
   POT = "Pot",
@@ -43,7 +41,8 @@ export enum LabwareTypeName {
   VISIUM_LP_CYTASSIST_HD_3_6_5= "CytAssist HD 3' 6.5",
   VISIUM_LP_CYTASSIST_HD_3_11= "CytAssist HD 3' 11",
   XENIUM = "Xenium",
-  STRIP_TUBE = "8 Strip Tube"
+  STRIP_TUBE = "8 Strip Tube",
+  SUPER_FROST_PLUS_SLIDE= "SuperFrost Plus Slide"
 
 }
 

@@ -28,17 +28,17 @@ describe('On Mount', () => {
   describe('When the output labware type set to 4 SLOTS', () => {
     it('displays Number of labware, Sectioning Thickness', () => {
       act(() => {
-        renderLabwarePlan(LabwareTypeName.FOUR_SLOT_SLIDE);
+        renderLabwarePlan(LabwareTypeName.SUPER_FROST_PLUS_SLIDE);
       });
       waitFor(() => {
         expectDisplayNumberOfLabwareAndSectionThicknessInputs();
       });
     });
   });
-  describe('When the output labware type set to SLIDE', () => {
+  describe('When the output labware type set to superForst plus slide', () => {
     it('displays Number of labware, Sectioning Thickness', () => {
       act(() => {
-        renderLabwarePlan(LabwareTypeName.SLIDE);
+        renderLabwarePlan(LabwareTypeName.SUPER_FROST_PLUS_SLIDE);
       });
       waitFor(() => {
         expectDisplayNumberOfLabwareAndSectionThicknessInputs();

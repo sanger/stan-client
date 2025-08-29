@@ -26,13 +26,6 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     numColumns: 1,
     labelType: labelTypeFactory.build({ name: `${LabwareTypeName.PROVIASETTE} Label` })
   }),
-  [LabwareTypeName.SLIDE]: labwareTypeFactory.params({
-    __typename: 'LabwareType',
-    name: LabwareTypeName.SLIDE,
-    numRows: 3,
-    numColumns: 2,
-    labelType: labelTypeFactory.build({ name: `${LabwareTypeName.SLIDE} Label` })
-  }),
   [LabwareTypeName.VISIUM_TO]: labwareTypeFactory.params({
     __typename: 'LabwareType',
     name: LabwareTypeName.VISIUM_TO,
@@ -73,13 +66,6 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     numRows: 4,
     numColumns: 2,
     labelType: labelTypeFactory.build({ name: `${LabwareTypeName.VISIUM_ADH} Label` })
-  }),
-  [LabwareTypeName.FOUR_SLOT_SLIDE]: labwareTypeFactory.params({
-    __typename: 'LabwareType',
-    name: LabwareTypeName.FOUR_SLOT_SLIDE,
-    numRows: 4,
-    numColumns: 1,
-    labelType: labelTypeFactory.build({ name: `${LabwareTypeName.FOUR_SLOT_SLIDE} Label` })
   }),
   [LabwareTypeName.FETAL_WASTE_CONTAINER]: labwareTypeFactory.params({
     __typename: 'LabwareType',
@@ -155,6 +141,13 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     numRows: 8,
     numColumns: 1,
     labelType: labelTypeFactory.build({ name: `${LabwareTypeName.STRIP_TUBE} Label` })
+  }),
+  [LabwareTypeName.SUPER_FROST_PLUS_SLIDE]: labwareTypeFactory.params({
+    __typename: 'LabwareType',
+    name: LabwareTypeName.SUPER_FROST_PLUS_SLIDE,
+    numRows: 10,
+    numColumns: 4,
+    labelType: labelTypeFactory.build({ name: `${LabwareTypeName.SUPER_FROST_PLUS_SLIDE} Label` })
   })
 };
 
