@@ -496,10 +496,10 @@ describe('Visium QC Page', () => {
     context('When user scans in a 96 well plate ', () => {
       before(() => {
         cy.findByTestId('removeButton').click();
-        cy.get('#labwareScanInput').type('STAN-5100{enter}');
+        cy.get('#labwareScanInput').type('STAN-410{enter}');
       });
       it('shows it on the page', () => {
-        cy.findByText('STAN-5100').should('be.visible');
+        cy.findByText('STAN-410').should('be.visible');
       });
 
       it('shows comment field for all slots with samples', () => {

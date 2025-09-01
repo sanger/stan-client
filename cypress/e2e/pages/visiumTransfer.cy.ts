@@ -142,10 +142,10 @@ describe('Transfer Page', () => {
         cy.wrap(elem).findByText('A1').wait(1000).click({ force: true });
       });
       cy.get('#outputLabwares').within((elem) => {
-        cy.wrap(elem).findByText('A2').wait(1000).click({ force: true });
+        cy.wrap(elem).findByText('B1').wait(1000).click({ force: true });
       });
       cy.findByRole('table').contains('td', 'A1');
-      cy.findByRole('table').contains('td', 'A2');
+      cy.findByRole('table').contains('td', 'B1');
     });
   });
 
@@ -224,7 +224,7 @@ describe('Transfer Page', () => {
       before(() => {
         cy.visit('/lab/transfer');
         cy.get('[type="radio"][name="96 Well Plate"]').check();
-        cy.get('#labwareScanInput').type('STAN-3200{enter}');
+        cy.get('#labwareScanInput').type('STAN-9975B{enter}');
       });
       it('display the notification to user about failed slots', () => {
         cy.get('#inputLabwares').within(() => {
@@ -242,7 +242,7 @@ describe('Transfer Page', () => {
         cy.visit('/lab/transfer');
         selectSGPNumber('SGP1008');
         cy.get('[type="radio"][name="96 Well Plate"]').check();
-        cy.get('#labwareScanInput').type('STAN-3100{enter}');
+        cy.get('#labwareScanInput').type('STAN-9975B{enter}');
         cy.findByTestId('copyMode-One to many').click({ force: true });
         selectOption('bioState', 'Probes pre-clean');
         cy.get('#inputLabwares').within(async () => {
@@ -274,7 +274,7 @@ describe('Transfer Page', () => {
         cy.visit('/lab/transfer');
         selectSGPNumber('SGP1008');
         cy.get('[type="radio"][name="96 Well Plate"]').check();
-        cy.get('#labwareScanInput').type('STAN-3100{enter}');
+        cy.get('#labwareScanInput').type('STAN-9975B{enter}');
         cy.findByTestId('bioState').scrollIntoView();
         selectOption('bioState', 'Probes pre-clean');
         cy.findByTestId('copyMode-Many to one').click({ force: true });
@@ -290,7 +290,7 @@ describe('Transfer Page', () => {
         cy.findByTestId('copyMode-Many to one').should('be.checked');
       });
       it('displays the table with A2, B2 slots mapped to D1', () => {
-        cy.findByText('Slot mapping for STAN-3100').should('be.visible');
+        cy.findByText('Slot mapping for STAN-9975B').should('be.visible');
         cy.findByRole('table').contains('td', 'A2');
         cy.findByRole('table').contains('td', 'B2');
         cy.findByRole('table').contains('td', 'D1');

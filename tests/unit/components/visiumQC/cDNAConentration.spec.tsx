@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 
 import { Formik } from 'formik';
 import CDNAConcentration, { CDNAConcentrationProps } from '../../../../src/components/visiumQC/CDNAConentration';
-import { slideFactory } from '../../../../src/lib/factories/labwareFactory';
+import { superFrostPlusSlideFactory } from '../../../../src/lib/factories/labwareFactory';
 import { LabwareFlaggedFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
 import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
@@ -20,7 +20,7 @@ const FormikProps = {
 };
 
 const renderCDNAConcentration = (props?: CDNAConcentrationProps) => {
-  const inputLabware = slideFactory.build() as NewFlaggedLabwareLayout;
+  const inputLabware = superFrostPlusSlideFactory.build() as NewFlaggedLabwareLayout;
   const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
 
   const initialProps = props ?? {
@@ -105,7 +105,7 @@ describe('CDNAConcentration', () => {
     expect(screen.getByText('MAIN PEAK SIZE (bp)')).toBeInTheDocument();
   });
   it('invokes remove function when labware is removed', async () => {
-    const inputLabware = slideFactory.build() as NewFlaggedLabwareLayout;
+    const inputLabware = superFrostPlusSlideFactory.build() as NewFlaggedLabwareLayout;
     const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
     const removeFunction = jest.fn();
     const initialProps = {

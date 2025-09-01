@@ -213,7 +213,7 @@ describe('CytAssist Probe Hybridisation', () => {
     });
     describe('When setting the addresses value', () => {
       before(() => {
-        cy.findByTestId('labware.0.addresses').clear().type('A1, A2');
+        cy.findByTestId('labware.0.addresses').clear().type('A1, B1');
       });
 
       it('highlights the labware slots accordingly', () => {

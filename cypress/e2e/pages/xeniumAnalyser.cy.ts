@@ -166,7 +166,7 @@ describe('Xenium Analyser', () => {
     selectOption('equipmentId', 'Xenium 1');
     selectOption('STAN-3111-workNumber', 'SGP1008');
     selectOption('STAN-3111-position', 'Left');
-    for (let indx = 0; indx < 8; indx++) {
+    for (let indx = 0; indx < 4; indx++) {
       cy.findByTestId(`STAN-3111-${indx}-roi`).clear().type('123456789').blur();
       cy.findByTestId('closeBarcodeDisplayer').click();
     }
