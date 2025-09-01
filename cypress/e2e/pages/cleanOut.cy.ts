@@ -42,7 +42,7 @@ describe('Clean Out Page', () => {
     before(() => {
       cy.findByTestId('labware-STAN-3456').within((elem) => {
         cy.wrap(elem).findByText('A1').wait(1000).click({ force: true });
-        cy.wrap(elem).findByText('A2').wait(1000).click({ cmdKey: true, force: true });
+        cy.wrap(elem).findByText('B1').wait(1000).click({ cmdKey: true, force: true });
       });
     });
 
@@ -110,7 +110,7 @@ const cleanOutSlots = () => {
   cy.get('#labwareScanInput').type('STAN-3456{enter}');
   cy.findByTestId('labware-STAN-3456').within((elem) => {
     cy.wrap(elem).findByText('A1').wait(1000).click({ force: true });
-    cy.wrap(elem).findByText('A2').wait(1000).click({ cmdKey: true, force: true });
+    cy.wrap(elem).findByText('B1').wait(1000).click({ cmdKey: true, force: true });
   });
   cy.findByRole('button', { name: 'Clean Out' }).click();
 };

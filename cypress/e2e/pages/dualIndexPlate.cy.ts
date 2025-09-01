@@ -9,7 +9,7 @@ import { selectOption, selectSGPNumber, shouldBeDisabled, shouldBeEnabled } from
 import { HttpResponse } from 'msw';
 
 function scanInDestinationLabware() {
-  cy.get('#labwareScanInput').type('STAN-5311{enter}');
+  cy.get('#labwareScanInput').type('STAN-4100{enter}');
 }
 
 function scanInSourceLabware(barcode: string) {

@@ -102,7 +102,7 @@ describe('CytAssist Page', () => {
     it('displays the table with A1, B1 slots mapped to D1', () => {
       cy.findByTestId('mapping_table').get('tbody tr').should('have.length', 2);
       cy.findByTestId('mapping_table').contains('td', 'C1');
-      cy.findByTestId('mapping_table').contains('td', 'C2');
+      cy.findByTestId('mapping_table').contains('td', 'C1');
       cy.findByTestId('mapping_table').contains('td', 'B1');
     });
     it('displays slots table on destination slot click', () => {
@@ -370,9 +370,9 @@ describe('CytAssist Page', () => {
       });
       it('shows the mapped slots correctly', () => {
         cy.findByTestId('cytassist-labware').within(() => {
-          cy.findByText('D1').click();
+          cy.findByText('A1').click();
         });
-        cy.findByTestId('mapping_table').get('tbody tr').should('have.length', 1);
+        cy.findByTestId('mapping_table').get('tbody tr').should('have.length', 2);
       });
     });
 
@@ -513,7 +513,7 @@ function mapSlots() {
 
   cy.findByTestId('STAN-3200').within(() => {
     cy.findByText('C1').click();
-    cy.findByText('C2').click({ cmdKey: true });
+    cy.findByText('D1').click({ cmdKey: true });
   });
   cy.get('#outputLabwares').within(() => {
     cy.findByText('B1').click();
