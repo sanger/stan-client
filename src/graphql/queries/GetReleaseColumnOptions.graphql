@@ -1,5 +1,5 @@
-query GetReleaseColumnOptions {
-  releaseColumnOptions {
+query GetReleaseColumnOptions($includeDisabled: Boolean) {
+  releaseColumnOptions(includeDisabled: $includeDisabled) {
     ...ReleaseFileOptionFields
   }
 }

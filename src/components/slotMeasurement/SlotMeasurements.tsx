@@ -1,11 +1,12 @@
 import React from 'react';
-import { CommentFieldsFragment, SampleFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import { CommentFieldsFragment, SampleFieldsFragment } from '../../types/sdk';
 import { Row } from 'react-table';
 import DataTable from '../DataTable';
 import FormikInput from '../forms/Input';
-import { selectOptionValues } from '../forms';
-import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { Dictionary, groupBy } from 'lodash';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { selectOptionValues } from '../forms';
+import { SlotMeasurementRequestForm } from '../visiumQC/CDNAConentration';
 
 export type MeasurementConfigProps = {
   measurementType: string[];
@@ -17,19 +18,20 @@ export type MeasurementConfigProps = {
   readOnly?: boolean;
 };
 
-export interface SlotMeasurement extends SlotMeasurementRequest {
+export interface SlotMeasurement extends SlotMeasurementRequestForm {
   samples?: SampleFieldsFragment[];
 }
 export type SlotMeasurementProps = {
   slotMeasurements: SlotMeasurement[];
   measurementConfig: MeasurementConfigProps[];
   comments?: CommentFieldsFragment[];
+  libraryConcentrationSizeRange?: CommentFieldsFragment[];
   onChangeField: (fieldName: string, value: string) => void;
 };
 
 type MeasurementRow = {
   address: string;
-  measurements: SlotMeasurementRequest[];
+  measurements: SlotMeasurementRequestForm[];
   samples?: SampleFieldsFragment[];
 };
 
@@ -42,7 +44,13 @@ type MeasurementRow = {
  *
  */
 
-const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, comments }: SlotMeasurementProps) => {
+const SlotMeasurements = ({
+  slotMeasurements,
+  measurementConfig,
+  onChangeField,
+  comments,
+  libraryConcentrationSizeRange
+}: SlotMeasurementProps) => {
   const isWithSampleInfo = React.useMemo(
     () => slotMeasurements.some((measurement) => measurement.samples),
     [slotMeasurements]
@@ -106,8 +114,9 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
           ]
         : []),
       ...measurementConfig.map((measurementProp, measurementIndex) => {
+        const unit = measurementProp.unit ? ` (${measurementProp.unit})` : '';
         return {
-          Header: measurementProp.name + ` (${measurementProp.unit})`,
+          Header: measurementProp.name + unit,
           id: measurementProp.name,
           allCapital: false,
           Cell: ({ row }: { row: Row<MeasurementRow> }) => {
@@ -141,6 +150,27 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
           }
         };
       }),
+      ...(libraryConcentrationSizeRange
+        ? [
+            {
+              Header: 'Size Range',
+              id: 'sizeRange',
+              Cell: ({ row }: { row: Row<MeasurementRow> }) => {
+                return (
+                  <CustomReactSelect
+                    label={''}
+                    dataTestId={`sizeRange${row.index}`}
+                    name={`slotMeasurements.${row.index * measurementConfig.length}.sizeRangeId`}
+                    className="min-w-32"
+                    emptyOption={true}
+                    value={row.original.measurements[0].sizeRangeId}
+                    options={selectOptionValues(libraryConcentrationSizeRange, 'text', 'id')}
+                  />
+                );
+              }
+            }
+          ]
+        : []),
       ...(comments?.length
         ? [
             {
@@ -152,7 +182,7 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
                     label={''}
                     dataTestId={`comments${row.index}`}
                     name={`slotMeasurements.${row.index * measurementConfig.length}.commentId`}
-                    className={'flex'}
+                    className="min-w-32"
                     emptyOption={true}
                     value={row.original.measurements[0].commentId}
                     handleChange={(val) => {
@@ -169,7 +199,7 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
           ]
         : [])
     ];
-  }, [comments, onChangeField, isWithSampleInfo, measurementConfig]);
+  }, [comments, onChangeField, isWithSampleInfo, measurementConfig, libraryConcentrationSizeRange]);
 
   return (
     <>

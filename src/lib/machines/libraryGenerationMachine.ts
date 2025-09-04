@@ -4,14 +4,14 @@ import {
   ReagentTransfer,
   RecordLibraryPrepMutation,
   SlotCopyDestination,
-  SlotCopySource,
-  SlotMeasurementRequest
+  SlotCopySource
 } from '../../types/sdk';
 import { stanCore } from '../sdk';
 import { Source } from './slotCopy/slotCopyMachine';
 import { extractServerErrors, NewFlaggedLabwareLayout, ServerErrors } from '../../types/stan';
 import { produce } from '../../dependencies/immer';
 import { ClientError } from 'graphql-request';
+import { SlotMeasurement } from '../../components/slotMeasurement/SlotMeasurements';
 
 type UpdateWorkNumberEvent = {
   type: 'UPDATE_WORK_NUMBER';
@@ -20,7 +20,7 @@ type UpdateWorkNumberEvent = {
 
 type RecordLibraryGenerationEvent = {
   type: 'SAVE';
-  slotMeasurements?: Array<SlotMeasurementRequest>;
+  slotMeasurements?: Array<SlotMeasurement>;
 };
 
 type GoToReagentTransferEvent = {
@@ -29,7 +29,7 @@ type GoToReagentTransferEvent = {
   sources?: Source[];
   destination?: SlotCopyDestination;
   destinationLabware?: NewFlaggedLabwareLayout;
-  slotMeasurements?: SlotMeasurementRequest[];
+  slotMeasurements?: SlotMeasurement[];
   cleanedOutAddresses?: string[];
 };
 
@@ -49,7 +49,7 @@ type GoToAmplificationEvent = {
 
 type UpdateSlotMeasurementsEvent = {
   type: 'UPDATE_SLOT_MEASUREMENTS';
-  slotMeasurements: Array<SlotMeasurementRequest>;
+  slotMeasurements: Array<SlotMeasurement>;
 };
 
 type UpdateSampleDestinationEvent = {
@@ -106,7 +106,7 @@ type LibraryPrepContext = {
   /** The type of reagent plate involved. */
   reagentPlateType?: string;
   /** The measurement to record on slots in the destination. */
-  slotMeasurements?: Array<SlotMeasurementRequest>;
+  slotMeasurements?: Array<SlotMeasurement>;
   /** used for the labware display at the reagent transfer step */
   destinationLabware?: NewFlaggedLabwareLayout;
 

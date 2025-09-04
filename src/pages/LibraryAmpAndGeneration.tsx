@@ -14,7 +14,7 @@ import { libraryGenerationMachine } from '../lib/machines/libraryGenerationMachi
 import Warning from '../components/notifications/Warning';
 import reagentTransferMachine from '../lib/machines/reagentTransfer/reagentTransferMachine';
 import DualIndexPlateComponent from '../components/libraryGeneration/DualIndexPlateComponent';
-import { LabwareFlaggedFieldsFragment, SlotCopyContent, SlotMeasurementRequest } from '../types/sdk';
+import { LabwareFlaggedFieldsFragment, SlotCopyContent } from '../types/sdk';
 import PromptOnLeave from '../components/notifications/PromptOnLeave';
 import { BlockerFunctionParams } from './Store';
 import BlueButton from '../components/buttons/BlueButton';
@@ -311,7 +311,7 @@ export const LibraryAmpAndGeneration = () => {
               currentLibraryGeneration.matches('recording') ||
               currentLibraryGeneration.matches('recorded')) && (
               <>
-                <Formik<{ slotMeasurements: Array<SlotMeasurementRequest> | undefined }>
+                <Formik<{ slotMeasurements: Array<SlotMeasurement> | undefined }>
                   initialValues={{
                     slotMeasurements: currentLibraryGeneration.context.slotMeasurements
                   }}

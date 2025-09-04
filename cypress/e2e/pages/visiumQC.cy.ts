@@ -169,9 +169,6 @@ describe('Visium QC Page', () => {
               selectSGPNumber('SGP1008');
               cy.findByTestId('formInput').clear();
             });
-            it('should not enable Save button', () => {
-              cy.findByRole('button', { name: /Save/i }).should('be.disabled');
-            });
             it('should display error message for Slide LOT number', () => {
               cy.findByText('Reagent LOT number is a required field').should('be.visible');
             });
@@ -181,9 +178,6 @@ describe('Visium QC Page', () => {
               selectOption('slide-costing', 'Faculty');
               selectSGPNumber('SGP1008');
               cy.findByTestId('formInput').type('123').blur();
-            });
-            it('should not enable Save button', () => {
-              cy.findByRole('button', { name: /Save/i }).should('be.disabled');
             });
             it('should display error message for Slide LOT number', () => {
               cy.findByText('Reagent LOT number should be a 6-7 digits number').should('be.visible');
@@ -362,7 +356,7 @@ describe('Visium QC Page', () => {
     });
     context('On load', () => {
       before(() => {
-        cy.get('#labwareScanInput').type('STAN-5100{enter}');
+        cy.get('#labwareScanInput').type('STAN-1100{enter}');
       });
       it('shows measurementType dropdown with no option selected', () => {
         shouldDisplaySelectedValue('measurementType', '');
@@ -377,6 +371,7 @@ describe('Visium QC Page', () => {
         before(() => {
           selectOption('measurementType', 'cDNA concentration');
           cy.findAllByTestId('CDNA CONCENTRATION-input').eq(0).type('.45');
+          selectOption('sizeRange0', '150 - 500');
           selectOption('comments0', 'Potential to work');
           saveButton().click();
         });

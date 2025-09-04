@@ -567,14 +567,7 @@ const RouteLayout = () => {
           />
         </Route>
         <Route>
-          <Route
-            path="/releaseOptions"
-            loader={async () => {
-              const res = await stanCore.GetReleaseColumnOptions();
-              return res.releaseColumnOptions;
-            }}
-            element={<ReleaseOptions />}
-          />
+          <Route path="/releaseOptions" element={<ReleaseOptions />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/admin/flagLabware" element={<FlagLabware />} />

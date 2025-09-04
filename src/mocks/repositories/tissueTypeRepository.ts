@@ -8,7 +8,8 @@ const tissueTypeSeeds: Array<TissueType> = tissueTypeFactory.buildList(5).map((t
   const tissueSp = spatialLocationFactory.buildList(3).map((spatialLocation, index) => ({
     ...spatialLocation,
     tissueType,
-    name: `${tissueType.name} sp ${index + 1}`
+    name: `${tissueType.name} sp ${index + 1}`,
+    enabled: true
   }));
   spatialLocations.push(...tissueSp);
   return {
