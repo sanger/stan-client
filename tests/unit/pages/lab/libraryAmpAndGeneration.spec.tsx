@@ -128,8 +128,8 @@ describe('Library Amplification and Generation ', () => {
       expect(screen.getByText('Output Labware')).toBeVisible();
     });
     it('loads with default destination as 96 plate', () => {
-      expect(screen.getByTestId('96 Well Plate')).not.toBeChecked();
-      expect(screen.getByTestId('8 Strip Tube')).not.toBeChecked();
+      expect(screen.getByTestId('96 well plate')).not.toBeChecked();
+      expect(screen.getByTestId('8 strip tube')).not.toBeChecked();
       expect(screen.getByTestId('Scan Labware')).not.toBeChecked();
     });
     it('loads with empty source labware', () => {

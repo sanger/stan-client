@@ -9,8 +9,8 @@ import { ClientError } from 'graphql-request';
 import { Draft } from 'immer';
 
 export enum DestinationSelectionMode {
-  PLATE = '96 Well Plate',
-  STRIP_TUBE = '8 Strip Tube',
+  PLATE = '96 well plate',
+  STRIP_TUBE = '8 strip tube',
   SCAN = 'Scan Labware'
 }
 export interface SlotMapperProps {
