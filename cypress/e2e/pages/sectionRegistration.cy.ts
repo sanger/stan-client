@@ -83,7 +83,7 @@ describe('Section Registration Page', () => {
   describe('Manual Registration ', () => {
     before(() => {
       cy.visit('/admin/section_registration');
-      selectOption('initialLabwareType', '6 slot slide');
+      selectOption('initialLabwareType', 'SuperFrost Plus Slide');
     });
 
     describe('Spatial Locations', () => {
@@ -101,7 +101,7 @@ describe('Section Registration Page', () => {
         });
 
         after(() => {
-          cy.findByRole('button', { name: '- Remove 6 slot slide' }).click();
+          cy.findByRole('button', { name: '- Remove SuperFrost Plus Slide' }).click();
         });
       });
     });
@@ -151,7 +151,7 @@ describe('Section Registration Page', () => {
         cy.findByTestId('workNumber').should('exist');
       });
       it('should not be showing a Remove Slide button', () => {
-        cy.findByRole('button', { name: /- Remove 6 slot slide/i }).should('not.exist');
+        cy.findByRole('button', { name: /- Remove SuperFrost Plus Slide/i }).should('not.exist');
       });
 
       it('should not be showing a Remove Section button', () => {

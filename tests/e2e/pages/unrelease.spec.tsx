@@ -69,7 +69,7 @@ describe('Unrelease', () => {
   describe('Validation', () => {
     it('when the section number is below 0, it shows an error', async () => {
       await waitFor(async () => {
-        await scanLabware('STAN-611');
+        await scanLabware('STAN-1111');
         const highSectionInput = screen.getAllByRole('spinbutton')[0] as HTMLInputElement;
         fireEvent.change(highSectionInput, { target: { value: -1 } });
         expect(highSectionInput).toHaveValue(-1);

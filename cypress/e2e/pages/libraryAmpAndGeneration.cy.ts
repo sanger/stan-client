@@ -29,7 +29,7 @@ describe('LibraryAmpAndGeneration Page', () => {
       describe('When all required fields for mapping are fulfilled', () => {
         before(() => {
           cy.get('[type="radio"][name="8 Strip Tube"]').check();
-          cy.get('#labwareScanInput').type('STAN-5345{enter}');
+          cy.get('#labwareScanInput').type('STAN-9975B{enter}');
           mappingSamples('A1', 'B1');
           selectOption('input-labware-state', 'used');
           selectOption('bioState', 'Probes pre-clean');
@@ -40,16 +40,16 @@ describe('LibraryAmpAndGeneration Page', () => {
       });
       describe('When mapping from multiple sources labware', () => {
         before(() => {
-          cy.get('#labwareScanInput').type('STAN-1345{enter}');
+          cy.get('#labwareScanInput').type('STAN-9912{enter}');
           selectOption('input-labware-state', 'used');
           mappingSamples('A1', 'A1');
         });
         it('displays different sources in separate page', () => {
-          cy.findByText('Slot mapping for STAN-1345').should('exist');
+          cy.findByText('Slot mapping for STAN-9912').should('exist');
           const sourcesLeftPaginationButton = cy.findAllByTestId('left-button').eq(0);
           sourcesLeftPaginationButton.should('be.enabled');
           sourcesLeftPaginationButton.click();
-          cy.findByText('Slot mapping for STAN-5345').should('exist');
+          cy.findByText('Slot mapping for STAN-9975B').should('exist');
         });
         describe('On Reagent Transfer button click', () => {
           before(() => {
@@ -87,7 +87,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             cy.findByRole('button', { name: '< Sample Transfer' }).click();
           });
           it('displays the previously scanned source(s)', () => {
-            cy.findByTestId('labware-STAN-5345').should('be.visible');
+            cy.findByTestId('labware-STAN-9975B').should('be.visible');
           });
           it('displays the previously selected destination', () => {
             cy.findByTestId('labware-').should('be.visible');
@@ -153,7 +153,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             //scan a destination labware instead of using a pre-defined Layout
             cy.findByTestId('Scan Labware').click();
             cy.findByTestId('dest-scanner').within((elem) => {
-              cy.wrap(elem).get('#labwareScanInput').type('STAN-5345{enter}');
+              cy.wrap(elem).get('#labwareScanInput').type('STAN-9000F{enter}');
             });
           });
           it('removes the previously mapped samples', () => {
@@ -166,8 +166,8 @@ describe('LibraryAmpAndGeneration Page', () => {
 
         describe('When moving to Transfer Reagent', () => {
           before(() => {
-            mappingSamples('A1', 'H1');
-            mappingSamples('A2', 'H2');
+            mappingSamples('A1', 'A1');
+            mappingSamples('A2', 'A2');
             cy.findByRole('button', { name: 'Reagent Transfer >' }).click();
           });
           it('displays the previously scanned dual index plate', () => {
@@ -177,7 +177,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             shouldDisplaySelectedValue('plateType', 'Dual Index TT Set A');
           });
           it('displays the newly scanned destination plate', () => {
-            cy.findByText('STAN-5345').should('be.visible');
+            cy.findByText('STAN-9000F').should('be.visible');
           });
           it('removes the previously transferred reagents', () => {
             cy.findByRole('table').should('not.exist');
@@ -218,14 +218,14 @@ describe('LibraryAmpAndGeneration Page', () => {
             cy.findByTestId('Scan Labware').should('be.checked');
           });
           it('keeps the previously scanned destination', () => {
-            cy.findByText('STAN-5345').should('be.visible');
+            cy.findByText('STAN-9000F').should('be.visible');
           });
         });
 
         describe('When moving to Transfer Reagent', () => {
           before(() => {
-            cy.get('#labwareScanInput').type('STAN-5345{enter}');
-            mappingSamples('A1', 'F1');
+            cy.get('#labwareScanInput').type('STAN-9975B{enter}');
+            mappingSamples('A1', 'A1');
             selectOption('input-labware-state', 'used');
             cy.findByRole('button', { name: 'Reagent Transfer >' }).click();
           });
@@ -236,7 +236,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             shouldDisplaySelectedValue('plateType', 'Dual Index TT Set A');
           });
           it('displays the previously scanned destination plate', () => {
-            cy.findByText('STAN-5345').should('be.visible');
+            cy.findByText('STAN-9000F').should('be.visible');
           });
           it('removes the previously transferred reagents', () => {
             cy.findByRole('table').should('not.exist');
@@ -304,7 +304,7 @@ describe('LibraryAmpAndGeneration Page', () => {
                   visiumPermData: {
                     samplePositionResults: [],
                     addressPermData: [],
-                    labware: createFlaggedLabware('STAN-5345')
+                    labware: createFlaggedLabware('STAN-9000F')
                   }
                 }
               });
@@ -425,7 +425,7 @@ const fillInTheRequest = () => {
 
 const fillInSampleTransferStep = () => {
   cy.get('[type="radio"][name="96 Well Plate"]').check();
-  cy.get('#labwareScanInput').type('STAN-5345{enter}');
+  cy.get('#labwareScanInput').type('STAN-9975B{enter}');
   mappingSamples('A1', 'A1');
   selectOption('input-labware-state', 'used');
   selectOption('bioState', 'Probes pre-clean');
@@ -442,7 +442,9 @@ const fillInReagentTransferStep = () => {
 };
 
 const fillInRecordCycleStep = () => {
-  cy.findByTestId('all-Cycles').type('3');
+  cy.findAllByTestId('all-Cycles').each(($el) => {
+    cy.wrap($el).clear().type('3');
+  });
 };
 const mappingSamples = (addressSource: string, addressDestination: string) => {
   cy.get('#inputLabwares').within((elem) => {

@@ -31,8 +31,7 @@ import * as sampleColumns from '../components/dataTableColumns/sampleColumns';
 import { SampleDataTableRow } from '../components/dataTableColumns/sampleColumns';
 
 const availableLabware: Array<LabwareTypeName> = [
-  LabwareTypeName.FOUR_SLOT_SLIDE,
-  LabwareTypeName.SLIDE,
+  LabwareTypeName.SUPER_FROST_PLUS_SLIDE,
   LabwareTypeName.TUBE,
   LabwareTypeName.VISIUM_LP,
   LabwareTypeName.VISIUM_TO,

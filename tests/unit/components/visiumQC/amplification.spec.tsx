@@ -44,7 +44,7 @@ describe('Amplification', () => {
         expect(cqTable).toHaveTextContent('External ID');
         expect(cqTable).toHaveTextContent('Section Number');
         expect(cqTable).toHaveTextContent('CQ VALUE');
-        expect(screen.getAllByTestId('CYCLES-input')).toHaveLength(6);
+        expect(screen.getAllByTestId('CYCLES-input')).toHaveLength(8);
         // validate labware slots have CQ value
         forEach(cqTable!.rows, (row) => {
           expect(row.cells[3]).not.toHaveTextContent('');

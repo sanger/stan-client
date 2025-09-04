@@ -84,10 +84,6 @@ export const tubeFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.TUBE].build()
 });
 
-export const slideFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.SLIDE].build()
-});
-
 export const visiumTOFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.VISIUM_TO].build()
 });
@@ -106,10 +102,6 @@ export const cassetteFactory = unregisteredLabwareFactory.associations({
 
 export const visiumADHFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.VISIUM_ADH].build()
-});
-
-export const fourSlotSlideFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.FOUR_SLOT_SLIDE].build()
 });
 
 export const fetalWasteFactory = unregisteredLabwareFactory.associations({
@@ -153,16 +145,18 @@ export const visiumLPCytAssistHD365Factory = unregisteredLabwareFactory.associat
 export const visiumLPCytAssistHD311Factory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11].build()
 });
+
+export const superFrostPlusSlideFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.SUPER_FROST_PLUS_SLIDE].build()
+});
 export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>> = {
   [LabwareTypeName.TUBE]: tubeFactory,
   [LabwareTypeName.PROVIASETTE]: proviasetteFactory,
-  [LabwareTypeName.SLIDE]: slideFactory,
   [LabwareTypeName.VISIUM_TO]: visiumTOFactory,
   [LabwareTypeName.VISIUM_LP]: visiumLPFactory,
   [LabwareTypeName.PLATE]: plateFactory,
   [LabwareTypeName.CASSETTE]: cassetteFactory,
   [LabwareTypeName.VISIUM_ADH]: visiumADHFactory,
-  [LabwareTypeName.FOUR_SLOT_SLIDE]: fourSlotSlideFactory,
   [LabwareTypeName.FETAL_WASTE_CONTAINER]: fetalWasteFactory,
   [LabwareTypeName.DUAL_INDEX_PLATE]: dualIndexPlateFactory,
   [LabwareTypeName.PRE_BARCODED_TUBE]: preBarcodedFactory,
@@ -174,7 +168,8 @@ export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>
   [LabwareTypeName.STRIP_TUBE]: stripTubeFactory,
   [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_11]: visiumLPCytAssistHD11Factory,
   [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5]: visiumLPCytAssistHD365Factory,
-  [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11]: visiumLPCytAssistHD311Factory
+  [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11]: visiumLPCytAssistHD311Factory,
+  [LabwareTypeName.SUPER_FROST_PLUS_SLIDE]: superFrostPlusSlideFactory
 };
 
 export const flaggedLabwareLayout = (labwareType: string) => {

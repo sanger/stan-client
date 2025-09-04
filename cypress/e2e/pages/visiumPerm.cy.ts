@@ -8,7 +8,7 @@ describe('Visium Perm', () => {
 
   describe('filling in form', () => {
     before(() => {
-      cy.get('#labwareScanInput').type('STAN-4111{enter}');
+      cy.get('#labwareScanInput').type('STAN-2004{enter}');
     });
 
     it('enables the button', () => {
@@ -33,7 +33,7 @@ describe('Visium Perm', () => {
     before(() => {
       cy.visit('/lab/visium_perm');
       selectSGPNumber('SGP1008');
-      cy.get('#labwareScanInput').type('STAN-4011{enter}');
+      cy.get('#labwareScanInput').type('STAN-2004{enter}');
     });
 
     it('displays control tube scanner', () => {
@@ -43,14 +43,14 @@ describe('Visium Perm', () => {
     context('when user scans control tube', () => {
       before(() => {
         cy.findByTestId('controltubeDiv').within(() => {
-          cy.get('#labwareScanInput').type('STAN-3111{enter}');
+          cy.get('#labwareScanInput').type('STAN-3201{enter}');
         });
       });
       it('displays the table with control tube', () => {
-        cy.findByText('STAN-3111').should('be.visible');
+        cy.findByText('STAN-3201').should('be.visible');
       });
       it('displays Positive control checkbox for all slots', () => {
-        cy.findAllByRole('checkbox', { name: /Positive Control/i }).should('have.length', 4);
+        cy.findAllByRole('checkbox', { name: /Positive Control/i }).should('have.length', 8);
       });
     });
 
@@ -59,7 +59,7 @@ describe('Visium Perm', () => {
         cy.findAllByRole('checkbox').eq(0).click();
       });
       it('displays the control tube barcode for A1 slot', () => {
-        cy.findAllByTestId('permData.0.label').should('have.text', 'STAN-3111');
+        cy.findAllByTestId('permData.0.label').should('have.text', 'STAN-3201');
       });
     });
 
@@ -69,7 +69,7 @@ describe('Visium Perm', () => {
       });
       it('removes the control tube from A1 and displays in A2', () => {
         cy.findAllByTestId('permData.0.label').should('have.text', '');
-        cy.findAllByTestId('permData.1.label').should('have.text', 'STAN-3111');
+        cy.findAllByTestId('permData.2.label').should('have.text', 'STAN-3201');
       });
     });
 
@@ -80,7 +80,7 @@ describe('Visium Perm', () => {
         });
       });
       it('removes the control tube assigned', () => {
-        cy.findAllByText('STAN-3111').should('not.exist');
+        cy.findAllByText('STAN-3201').should('not.exist');
       });
     });
     context('when submit button clicked with control tube data', () => {

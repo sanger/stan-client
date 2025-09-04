@@ -290,7 +290,7 @@ describe('Sectioning Confirmation', () => {
           { barcode: 'STAN-0001C' },
           {
             associations: {
-              labwareType: labwareTypes[LabwareTypeName.SLIDE].build()
+              labwareType: labwareTypes[LabwareTypeName.SUPER_FROST_PLUS_SLIDE].build()
             }
           }
         );
