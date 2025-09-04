@@ -268,12 +268,15 @@ function SectionRegistrationForm({ registrationInfo }: SectionRegistrationFormPa
                 dataTestId="labwareTypesSelect"
                 handleChange={(value) => setLabwareTypeSelect((value as OptionType).value)}
                 value={labwareTypeSelect}
-                options={availableLabware.map((labwareTypeName) => {
-                  return {
-                    value: labwareTypeName.toString(),
-                    label: labwareTypeName.toString()
-                  };
-                })}
+                options={availableLabware
+                  .values()
+                  .toArray()
+                  .map((labwareTypeName) => {
+                    return {
+                      value: labwareTypeName.toString(),
+                      label: labwareTypeName.toString()
+                    };
+                  })}
               />
 
               <FieldArray name={'labwares'}>
