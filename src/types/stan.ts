@@ -42,7 +42,7 @@ export enum LabwareTypeName {
   VISIUM_LP_CYTASSIST_HD_3_11= "CytAssist HD 3' 11",
   XENIUM = "Xenium",
   STRIP_TUBE = "8 Strip Tube",
-  SUPER_FROST_PLUS_SLIDE= "SuperFrost Plus Slide"
+  SUPER_FROST_PLUS_SLIDE= "SuperFrost Plus slide"
 
 }
 

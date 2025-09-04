@@ -30,13 +30,15 @@ import { fromPromise } from 'xstate';
 import * as sampleColumns from '../components/dataTableColumns/sampleColumns';
 import { SampleDataTableRow } from '../components/dataTableColumns/sampleColumns';
 
-const availableLabware: Array<LabwareTypeName> = [
-  LabwareTypeName.SUPER_FROST_PLUS_SLIDE,
-  LabwareTypeName.TUBE,
-  LabwareTypeName.VISIUM_LP,
-  LabwareTypeName.VISIUM_TO,
-  LabwareTypeName.XENIUM
-];
+const availableLabware: Map<String, LabwareTypeName> = new Map(
+  [
+    LabwareTypeName.SUPER_FROST_PLUS_SLIDE,
+    LabwareTypeName.TUBE,
+    LabwareTypeName.VISIUM_LP,
+    LabwareTypeName.VISIUM_TO,
+    LabwareTypeName.XENIUM
+  ].map((lt) => [lt.toLowerCase(), lt])
+);
 
 type SectionRegistrationFormSection = {
   clientId: string;
@@ -216,9 +218,9 @@ export const SectionRegistration: React.FC = () => {
     const queryString = parseQueryString(location.search);
     if (
       typeof queryString['initialLabware'] === 'string' &&
-      availableLabware.includes(queryString['initialLabware'] as LabwareTypeName)
+      availableLabware.has(queryString['initialLabware'].toLowerCase())
     ) {
-      return queryString['initialLabware'] as LabwareTypeName;
+      return availableLabware.get(queryString['initialLabware'].toLowerCase());
     }
   }, [location]);
 
@@ -324,12 +326,15 @@ export const SectionRegistration: React.FC = () => {
                         { replace: true }
                       )
                     }
-                    options={availableLabware.map((labwareTypeName) => {
-                      return {
-                        value: labwareTypeName,
-                        label: labwareTypeName
-                      };
-                    })}
+                    options={availableLabware
+                      .values()
+                      .toArray()
+                      .map((labwareTypeName) => {
+                        return {
+                          value: labwareTypeName,
+                          label: labwareTypeName
+                        };
+                      })}
                     className=" rounded-md md:w-1/2"
                   />
                 </div>
