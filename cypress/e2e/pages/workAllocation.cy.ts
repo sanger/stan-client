@@ -261,11 +261,11 @@ describe('Work Allocation', () => {
         cy.findByRole('button', { name: /Submit/i }).click();
       });
 
-      it('displays succes message and notification to complete RNAscope/IHC template', () => {
+      it('displays success message', () => {
         cy.findByText(
           /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project \(cost code description\) TEST999, Omero project OMERO_TEST999, DNAP study name 'S10315 - Orphan Tumour Study_NB_sNuc' and program PROGRAM_999 using cost code S999 with the work requester et2/
         ).should('exist');
-        cy.findAllByTestId('reminder-div').should('have.length', 2);
+        cy.findAllByTestId('reminder-div').should('have.length', 1);
       });
     });
   });
