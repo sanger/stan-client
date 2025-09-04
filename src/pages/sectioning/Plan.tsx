@@ -24,7 +24,7 @@ import { convertLabwareToFlaggedLabware } from '../../lib/helpers/labwareHelper'
 /**
  * Types of labware the user is allowed to section onto
  */
-const allowedLabwareTypeNames: Array<LabwareTypeName> = [
+const allowedLabwareTypeNames: Array<String> = [
   LabwareTypeName.TUBE,
   LabwareTypeName.SUPER_FROST_PLUS_SLIDE,
   LabwareTypeName.VISIUM_TO,
@@ -32,7 +32,7 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
   LabwareTypeName.VISIUM_ADH,
   LabwareTypeName.FETAL_WASTE_CONTAINER,
   LabwareTypeName.XENIUM
-];
+].map((name) => name.toLowerCase());
 
 function Plan() {
   /**
@@ -56,7 +56,7 @@ function Plan() {
    * Limit the labware types the user can Section on to.
    */
   const allowedLabwareTypes = React.useMemo(
-    () => sectioningInfo.labwareTypes.filter((lw) => allowedLabwareTypeNames.includes(lw.name as LabwareTypeName)),
+    () => sectioningInfo.labwareTypes.filter((lw) => allowedLabwareTypeNames.includes(lw.name.toLowerCase())),
     [sectioningInfo.labwareTypes]
   );
 
