@@ -18,17 +18,17 @@ describe('LibraryAmpAndGeneration Page', () => {
     });
     describe('When updating the destination selection mode', () => {
       before(() => {
-        cy.get('[type="radio"][name="8 Strip Tube"]').check();
-        cy.get('[type="radio"][name="96 Well Plate"]').check();
+        cy.get('[type="radio"][name="8 strip tube"]').check();
+        cy.get('[type="radio"][name="96 well plate"]').check();
       });
       it('does not append destination plates', () => {
         cy.findByTestId('pager-text-div').contains('1 of 1');
       });
     });
-    describe('Mapping Source with 8 Strip Tube Output labware', () => {
+    describe('Mapping Source with 8 strip tube Output labware', () => {
       describe('When all required fields for mapping are fulfilled', () => {
         before(() => {
-          cy.get('[type="radio"][name="8 Strip Tube"]').check();
+          cy.get('[type="radio"][name="8 strip tube"]').check();
           cy.get('#labwareScanInput').type('STAN-9975B{enter}');
           mappingSamples('A1', 'B1');
           selectOption('input-labware-state', 'used');
@@ -99,7 +99,7 @@ describe('LibraryAmpAndGeneration Page', () => {
             shouldDisplaySelectedValue('bioState', 'Probes pre-clean');
           });
           it('displays the previously selected output labware selection option', () => {
-            cy.findByTestId('8 Strip Tube').should('be.checked');
+            cy.findByTestId('8 strip tube').should('be.checked');
           });
           it('displays the previously mapped samples', () => {
             cy.findByTestId('mapping_table').should('be.visible');
@@ -424,7 +424,7 @@ const fillInTheRequest = () => {
 };
 
 const fillInSampleTransferStep = () => {
-  cy.get('[type="radio"][name="96 Well Plate"]').check();
+  cy.get('[type="radio"][name="96 well plate"]').check();
   cy.get('#labwareScanInput').type('STAN-9975B{enter}');
   mappingSamples('A1', 'A1');
   selectOption('input-labware-state', 'used');

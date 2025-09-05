@@ -460,7 +460,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     }
   },
   {
-    Header: 'Last Date 96 Well Plate Released',
+    Header: 'Last Date 96 well plate Released',
     accessor: 'lastRelease96WellPlateData',
     Cell: (props: CellProps<WorkProgressResultTableEntry>) =>
       formatDateFieldDisplay(props, 'lastRelease96WellPlateData'),

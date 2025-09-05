@@ -132,7 +132,7 @@ describe('Work Progress', () => {
           'Last Visium TO Staining Date',
           'Last Visium LP Staining Date',
           'Last cDNA Transfer Date',
-          'Last Date 96 Well Plate Released'
+          'Last Date 96 well plate Released'
         ].forEach((columName, index) => {
           cy.get('th').eq(index).contains(columName);
         });
