@@ -52,7 +52,7 @@ type FetchPrintersErrorEvent = {
   error: ClientError;
 };
 
-type PrintEvent = { type: 'PRINT'; labelsPerBarcode?: number; printer?: Maybe<PrinterFieldsFragment> };
+type PrintEvent = { type: 'PRINT'; labelsPerBarcode?: number; printer?: string };
 
 type UpdateSelectedLabelPrinterEvent = {
   type: 'UPDATE_SELECTED_LABEL_PRINTER';

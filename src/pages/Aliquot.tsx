@@ -126,17 +126,21 @@ function Aliquot() {
           </div>
           <div className="space-y-4 mt-8">
             <Heading level={3}>Destination Tubes</Heading>
-            <p className="mt-2">Enter the number of tubes you are creating.</p>
-            <Input
-              type="number"
-              value={numLabware}
-              min={0}
-              data-testid={'numLabware'}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleNumLabwareChange(Number(e.currentTarget.value))
-              }
-              className={'md:w-1/2 '}
-            />
+            <div className="grid grid-cols-2 w-1/2">
+              <p className="mt-2">Enter the number of tubes you are creating:</p>
+              <Input
+                type="number"
+                value={numLabware}
+                min={0}
+                data-testid={'numLabware'}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleNumLabwareChange(Number(e.currentTarget.value))
+                }
+                className={
+                  'w-1/4 h-10 ring-sdb-100 focus:border-sdb-100 block border border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed text-center'
+                }
+              />
+            </div>
           </div>
           {current.matches('aliquotingDone') && (
             <motion.div

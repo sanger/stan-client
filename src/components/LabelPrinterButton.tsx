@@ -30,23 +30,22 @@ const LabelPrinterButton: React.FC<LabelPrinterButtonProps> = ({
 
   useEffect(() => {
     const subscription = service.subscribe((state) => {
-      if (state.context.selectedPrinter && state.matches({ ready: 'printSuccess' })) {
-        onPrint?.(state.context.selectedPrinter, state.context.labwares, labelsPerBarcode);
+      const printerToUse = selectedPrinter || state.context.selectedPrinter;
+      if (printerToUse && state.matches({ ready: 'printSuccess' })) {
+        onPrint?.(printerToUse, state.context.labwares, labelsPerBarcode);
       }
 
-      if (state.context.selectedPrinter && state.matches({ ready: 'printError' })) {
-        onPrintError?.(state.context.selectedPrinter, state.context.labwares, labelsPerBarcode);
+      if (printerToUse && state.matches({ ready: 'printError' })) {
+        onPrintError?.(printerToUse, state.context.labwares, labelsPerBarcode);
       }
     });
-
     return () => subscription.unsubscribe();
-  }, [service, onPrint, onPrintError, labelsPerBarcode]);
-
+  }, [service, onPrint, onPrintError, labelsPerBarcode, selectedPrinter]);
   return (
     <button
       id={'printButton'}
       disabled={current.matches('fetching') || current.matches('printing')}
-      onClick={() => send({ type: 'PRINT', labelsPerBarcode, printer: selectedPrinter })}
+      onClick={() => send({ type: 'PRINT', labelsPerBarcode, printer: selectedPrinter?.name })}
       type="button"
       className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-xs px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-100 active:opacity-75 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
     >
