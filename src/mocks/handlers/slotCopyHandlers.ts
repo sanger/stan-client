@@ -22,6 +22,8 @@ const savedSlotCopy: SlotCopyLoad = {
   labwareType: LabwareTypeName.VISIUM_LP_CYTASSIST,
   preBarcode: 'H1-9D8VN2V',
   probeLotNumber: '123456',
+  reagentALot: '555432',
+  reagentBLot: '945621',
   lotNumber: '7712543',
   costing: SlideCosting.Sgp,
   sources: [],
