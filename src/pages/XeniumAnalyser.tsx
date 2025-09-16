@@ -20,7 +20,7 @@ import { motion } from '../dependencies/motion';
 import variants from '../lib/motionVariants';
 import Heading from '../components/Heading';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
-import { Form, Formik } from 'formik';
+import { Field, Form, Formik } from 'formik';
 import FormikInput from '../components/forms/Input';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Table, { TabelSubHeader, TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
@@ -41,6 +41,7 @@ import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
 import { findUploadedFiles } from '../lib/services/fileService';
+import Label from '../components/forms/Label';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
@@ -69,6 +70,7 @@ type XeniumAnalyserFormValues = {
   decodingConsumablesLot?: string;
   equipmentId: number | undefined;
   runName: string;
+  repeat: boolean;
   performed: string;
   labware: Array<AnalyserLabwareForm>;
   workNumberAll: string;
@@ -76,6 +78,7 @@ type XeniumAnalyserFormValues = {
 };
 const formInitialValues: XeniumAnalyserFormValues = {
   runName: '',
+  repeat: false,
   lotNumberB: '',
   lotNumberA: '',
   cellSegmentationLot: '',
@@ -337,6 +340,7 @@ const XeniumAnalyser = () => {
                     performed: values.performed.replace('T', ' ') + ':00',
                     equipmentId: values.equipmentId!,
                     runName: values.runName,
+                    repeat: values.repeat,
                     lotNumberA: values.lotNumberA,
                     lotNumberB: values.lotNumberB,
                     cellSegmentationLot: values.cellSegmentationLot,
@@ -408,44 +412,6 @@ const XeniumAnalyser = () => {
                             />
                           </div>
                           <div className={'flex flex-col'}>
-                            <FormikInput label={'Run Name'} type="text" name="runName" data-testid="runName" />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
-                          <div className={'flex flex-col'}>
-                            <FormikInput
-                              label={'Decoding reagent A lot number'}
-                              type="text"
-                              name="lotNumberA"
-                              data-testid="lotNumberA"
-                            />
-                          </div>
-                          <div className={'flex flex-col'}>
-                            <FormikInput
-                              label={'Decoding reagent B lot number'}
-                              type="text"
-                              name="lotNumberB"
-                              data-testid="lotNumberB"
-                            />
-                          </div>
-                          <div className={'flex flex-col'}>
-                            <FormikInput
-                              label={'Cell segmentation lot number'}
-                              type="text"
-                              name="cellSegmentationLot"
-                              data-testid="cellSegmentationLot"
-                            />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
-                          <div className={'flex flex-col'}>
-                            <FormikInput
-                              label={'Decoding consumables lot number'}
-                              name="decodingConsumablesLot"
-                              data-testid="decodingConsumablesLot"
-                            />
-                          </div>
-                          <div className={'flex flex-col'}>
                             <WorkNumberSelect
                               label={'SGP Number'}
                               name={'workNumberAll'}
@@ -467,6 +433,58 @@ const XeniumAnalyser = () => {
                                 });
                               }}
                               requiredField={false}
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
+                          <div className="flex flex-row">
+                            <div className="w-1/2">
+                              <FormikInput label={'Run Name'} type="text" name="runName" data-testid="runName" />
+                            </div>
+                            <div>
+                              <Label name={'Is a repeat run'} className={'ml-4 mt-1'}>
+                                <Field
+                                  type="checkbox"
+                                  data-testid="is-repeat-run"
+                                  name="repeat"
+                                  className="appearance-none h-6 w-6 mt-1 rounded-md border border-gray-300 focus:border-sdb-100
+                                     checked:before:content-['✔'] checked:bg-blue-300
+                                   checked:before:text-white checked:before:flex checked:before:items-center checked:before:justify-center"
+                                />
+                              </Label>
+                            </div>
+                          </div>
+                          <div className={'flex flex-col'}>
+                            <FormikInput
+                              label={'Decoding reagent A lot number'}
+                              type="text"
+                              name="lotNumberA"
+                              data-testid="lotNumberA"
+                            />
+                          </div>
+                          <div className={'flex flex-col'}>
+                            <FormikInput
+                              label={'Decoding reagent B lot number'}
+                              type="text"
+                              name="lotNumberB"
+                              data-testid="lotNumberB"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
+                          <div className={'flex flex-col'}>
+                            <FormikInput
+                              label={'Cell segmentation lot number'}
+                              type="text"
+                              name="cellSegmentationLot"
+                              data-testid="cellSegmentationLot"
+                            />
+                          </div>
+                          <div className={'flex flex-col'}>
+                            <FormikInput
+                              label={'Decoding consumables lot number'}
+                              name="decodingConsumablesLot"
+                              data-testid="decodingConsumablesLot"
                             />
                           </div>
                         </div>
