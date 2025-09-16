@@ -34,6 +34,7 @@ describe('Xenium Analyser QC', () => {
       cy.findByTestId('workNumberAll').should('be.visible');
       cy.findByTestId('completion').should('be.visible');
       cy.findByTestId('runName').should('be.visible');
+      cy.findByTestId('terminated').should('be.visible');
     });
   });
   describe('When  two labware is scanned ', () => {

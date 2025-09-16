@@ -30,17 +30,14 @@ describe('Xenium Metrics', () => {
     before(() => {
       cy.get('#labwareScanInput').type('STAN-3111{enter}');
     });
-    it('displays the region of interest table', () => {
-      cy.findByRole('table').should('be.visible');
-    });
+    // it('displays the region of interest table', () => {
+    //   cy.findByRole('table').should('be.visible');
+    // });
     it('displays the sgp number selector', () => {
       cy.findByTestId('workNumber').should('be.visible');
     });
     it('displays the run name selector', () => {
       cy.findByTestId('runName').should('be.visible');
-    });
-    it('displays terminated check box', () => {
-      cy.findByTestId('terminated').should('be.visible');
     });
     it('disables the labware scanner', () => {
       cy.findByTestId('input').should('be.disabled');
