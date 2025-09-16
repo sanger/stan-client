@@ -65,3 +65,18 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref)
   );
   return <input ref={ref} className={inputClassNames} {...props} />;
 });
+
+export const FormikCheckbox = ({ label, dataTestId, name, className, ...rest }: Omit<FormikInputProps, 'type'>) => {
+  return (
+    <Label name={label} className={'ml-4 mt-1'}>
+      <Field
+        type="checkbox"
+        data-testid={dataTestId}
+        name={name}
+        className="appearance-none h-6 w-6 mt-1 rounded-md border border-gray-300 focus:border-sdb-100
+                                     checked:before:content-['✔'] checked:bg-blue-300
+                                   checked:before:text-white checked:before:flex checked:before:items-center checked:before:justify-center"
+      />
+    </Label>
+  );
+};

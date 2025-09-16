@@ -20,8 +20,8 @@ import { motion } from '../dependencies/motion';
 import variants from '../lib/motionVariants';
 import Heading from '../components/Heading';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
-import { Field, Form, Formik } from 'formik';
-import FormikInput from '../components/forms/Input';
+import { Form, Formik } from 'formik';
+import FormikInput, { FormikCheckbox } from '../components/forms/Input';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Table, { TabelSubHeader, TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
@@ -41,7 +41,6 @@ import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
 import { findUploadedFiles } from '../lib/services/fileService';
-import Label from '../components/forms/Label';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
@@ -442,16 +441,7 @@ const XeniumAnalyser = () => {
                               <FormikInput label={'Run Name'} type="text" name="runName" data-testid="runName" />
                             </div>
                             <div>
-                              <Label name={'Is a repeat run'} className={'ml-4 mt-1'}>
-                                <Field
-                                  type="checkbox"
-                                  data-testid="is-repeat-run"
-                                  name="repeat"
-                                  className="appearance-none h-6 w-6 mt-1 rounded-md border border-gray-300 focus:border-sdb-100
-                                     checked:before:content-['✔'] checked:bg-blue-300
-                                   checked:before:text-white checked:before:flex checked:before:items-center checked:before:justify-center"
-                                />
-                              </Label>
+                              <FormikCheckbox name="repeat" dataTestId="is-repeat-run" label="Is a repeat run" />
                             </div>
                           </div>
                           <div className={'flex flex-col'}>
