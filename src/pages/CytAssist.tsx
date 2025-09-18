@@ -26,6 +26,7 @@ import LabelPrinter from '../components/LabelPrinter';
 import ButtonBar from '../components/ButtonBar';
 import MultipleLabwareSlotMapper from '../components/slotMapper/MultipleLabwareSlotMapper';
 import { selectOptionValues } from '../components/forms';
+import { Input } from '../components/forms/Input';
 
 interface OutputLabwareScanPanelProps {
   preBarcode: Maybe<string> | undefined;
@@ -35,6 +36,7 @@ interface OutputLabwareScanPanelProps {
   onChangeLpNumber: (lpNumber: string) => void;
   draftedValues: CytAssistOutputLabwareForm;
   children?: React.ReactNode;
+  onReagentLotNumberChange: (reagentLotNumber: string, reagentType: 'A' | 'B') => void;
 }
 
 export type CytAssistOutputLabwareForm = {
@@ -43,9 +45,12 @@ export type CytAssistOutputLabwareForm = {
   costing: string;
   slideLotNumber: string;
   lpNumber: string;
+  reagentALot: string;
+  reagentBLot: string;
 };
 
 const lotNumberRegex = /^\d{6,7}$/;
+const reagentLotNumberRegex = /^\d{6}$/;
 
 const LP_NUMBERS = Array.from({ length: 20 }, (_, i) => `LP${i + 1}`);
 
@@ -66,7 +71,23 @@ const validationSchema = () => {
     costing: Yup.string().required('Required field'),
     slideLotNumber: Yup.string()
       .required('Required field')
-      .matches(lotNumberRegex, 'Invalid format: Required 6-7 digit number')
+      .matches(lotNumberRegex, 'Invalid format: Required 6-7 digit number'),
+    reagentALot: Yup.string().when('labwareType', (labwareType, schema) => {
+      const val = labwareType[0] as unknown as string;
+      return val === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11 || val === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5
+        ? Yup.string()
+            .required('Reagent A lot is a required field for this labware type')
+            .matches(reagentLotNumberRegex, 'Invalid format: Required 6 digit number')
+        : Yup.string().optional().matches(reagentLotNumberRegex, 'Invalid format: Required 6 digit number');
+    }),
+    reagentBLot: Yup.string().when('labwareType', (labwareType, schema) => {
+      const val = labwareType[0] as unknown as string;
+      return val === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11 || val === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5
+        ? Yup.string()
+            .required('Reagent B lot is a required field for this labware type')
+            .matches(reagentLotNumberRegex, 'Invalid format: Required 6 digit number')
+        : Yup.string().optional().matches(reagentLotNumberRegex, 'Invalid format: Required 6 digit number');
+    })
   });
 };
 
@@ -76,6 +97,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   onChangeCosting,
   onChangeLOTNumber,
   onChangeLpNumber,
+  onReagentLotNumberChange,
   draftedValues,
   children
 }) => {
@@ -147,6 +169,32 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
                 name={'preBarcode'}
               />
               {errors.preBarcode && <MutedText className={'text-red-400'}>{errors.preBarcode}</MutedText>}
+            </div>
+            <div>
+              <Label name="Cytassist HD 3’ Reagent A LOT" />
+              <Input
+                type="text"
+                name="reagentALot"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onReagentLotNumberChange(e.currentTarget.value, 'A')
+                }
+                value={draftedValues.reagentALot}
+                data-testid="reagentALot"
+              />
+              {errors.reagentALot && <MutedText className={'text-red-400'}>{errors.reagentALot}</MutedText>}
+            </div>
+            <div>
+              <Label name="Cytassist HD 3’ Reagent B LOT" />
+              <Input
+                type="text"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onReagentLotNumberChange(e.currentTarget.value, 'B')
+                }
+                value={draftedValues.reagentBLot}
+                data-testid="reagentBLot"
+                name="reagentBLot"
+              />
+              {errors.reagentBLot && <MutedText className={'text-red-400'}>{errors.reagentBLot}</MutedText>}
             </div>
           </div>
 
@@ -280,6 +328,19 @@ const CytAssist = () => {
     [send, selectedDestination]
   );
 
+  const handleChangeReagentLot = React.useCallback(
+    (reagentLotNumber: string, reagentType: 'A' | 'B') => {
+      if (!selectedDestination) return;
+      send({
+        type: 'UPDATE_REAGENT_LOT_NUMBER',
+        labware: selectedDestination.labware,
+        reagentLotNumber,
+        reagentType
+      });
+    },
+    [send, selectedDestination]
+  );
+
   /**
    * Save action invoked, so check whether a warning to be given to user if any labware with no perm done is copied
    ***/
@@ -349,8 +410,11 @@ const CytAssist = () => {
                 labwareType: selectedDestination ? selectedDestination.slotCopyDetails.labwareType ?? '' : '',
                 costing: selectedDestination ? selectedDestination.slotCopyDetails.costing ?? '' : '',
                 slideLotNumber: selectedDestination ? selectedDestination.slotCopyDetails.lotNumber ?? '' : '',
-                lpNumber: selectedDestination ? selectedDestination.slotCopyDetails.lpNumber ?? '' : ''
+                lpNumber: selectedDestination ? selectedDestination.slotCopyDetails.lpNumber ?? '' : '',
+                reagentALot: selectedDestination ? selectedDestination.slotCopyDetails.reagentALot ?? '' : '',
+                reagentBLot: selectedDestination ? selectedDestination.slotCopyDetails.reagentBLot ?? '' : ''
               }}
+              onReagentLotNumberChange={handleChangeReagentLot}
             >
               <MultipleLabwareSlotMapper
                 locked={current.matches('copied')}
@@ -375,7 +439,8 @@ const CytAssist = () => {
                   !selectedDestination ||
                   !selectedDestination.slotCopyDetails.preBarcode ||
                   !selectedDestination.slotCopyDetails.costing ||
-                  !selectedDestination.slotCopyDetails.lotNumber
+                  !selectedDestination.slotCopyDetails.lotNumber ||
+                  selectedDestination.slotCopyDetails.contents.length === 0
                 }
                 onClick={onSaveAction}
               >

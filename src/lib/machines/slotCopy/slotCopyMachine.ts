@@ -188,6 +188,13 @@ type UpdateDestinationLpNumber = {
   lpNumber: string;
 };
 
+type UpdateReagentLotNumber = {
+  type: 'UPDATE_REAGENT_LOT_NUMBER';
+  labware: NewFlaggedLabwareLayout;
+  reagentType: 'A' | 'B';
+  reagentLotNumber: string;
+};
+
 type SaveDraft = {
   type: 'SAVE_DRAFT';
 };
@@ -244,7 +251,8 @@ export type SlotCopyEvent =
   | SlotDraftSaveEvent
   | ReloadDraftedCytAssist
   | ReloadDraftedCytAssistDoneEvent
-  | ReloadDraftedCytAssistErrorEvent;
+  | ReloadDraftedCytAssistErrorEvent
+  | UpdateReagentLotNumber;
 
 /**
  * SlotCopy Machine Config
@@ -313,6 +321,9 @@ export const slotCopyMachine = createMachine(
           UPDATE_DESTINATION_LP_NUMBER: {
             actions: 'assignDestinationLpNumber'
           },
+          UPDATE_REAGENT_LOT_NUMBER: {
+            actions: 'assignReagentLotNumber'
+          },
           RELOAD_DRAFTED_CYTASSIST: {
             target: 'reloadDraftedCytAssist'
           },
@@ -375,6 +386,9 @@ export const slotCopyMachine = createMachine(
           },
           UPDATE_DESTINATION_LP_NUMBER: {
             actions: 'assignDestinationLpNumber'
+          },
+          UPDATE_REAGENT_LOT_NUMBER: {
+            actions: 'assignReagentLotNumber'
           },
           SAVE: 'copying',
           RELOAD_DRAFTED_CYTASSIST: {
@@ -499,6 +513,8 @@ export const slotCopyMachine = createMachine(
               lpNumber: cytAssistLabware.slotCopyDetails.lpNumber,
               probeLotNumber: cytAssistLabware.slotCopyDetails.probeLotNumber,
               lotNumber: cytAssistLabware.slotCopyDetails.lotNumber,
+              reagentALot: cytAssistLabware.slotCopyDetails.reagentALot,
+              reagentBLot: cytAssistLabware.slotCopyDetails.reagentALot,
               contents: cytAssistLabware.slotCopyDetails.contents.map((scc) => scc),
               sources: []
             };
@@ -766,6 +782,18 @@ export const slotCopyMachine = createMachine(
             return draft;
           }
           destination.slotCopyDetails.lpNumber = event.lpNumber;
+          return draft;
+        });
+      }),
+      assignReagentLotNumber: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_REAGENT_LOT_NUMBER') return context;
+        return produce(context, (draft): Draft<SlotCopyContext> => {
+          const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
+          if (!destination) {
+            return draft;
+          }
+          if (event.reagentType === 'A') destination.slotCopyDetails.reagentALot = event.reagentLotNumber;
+          if (event.reagentType === 'B') destination.slotCopyDetails.reagentBLot = event.reagentLotNumber;
           return draft;
         });
       }),
