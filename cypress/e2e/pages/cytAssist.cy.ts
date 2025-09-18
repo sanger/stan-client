@@ -266,6 +266,25 @@ describe('CytAssist Page', () => {
         });
       });
     });
+    context('labware type is of type Cytassist 3', () => {
+      before(() => {
+        cy.findByTestId('reagentALot').clear().blur();
+        cy.findByTestId('reagentBLot').clear().blur();
+        selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11);
+      });
+      it('displays required field error message', () => {
+        cy.findByText('Reagent A lot is a required field for this labware type').should('be.visible');
+        cy.findByText('Reagent B lot is a required field for this labware type').should('be.visible');
+      });
+    });
+    context('When Reagent LOT number is entered in incorrect format', () => {
+      before(() => {
+        enterReagentALOTNumber('1234567');
+      });
+      it('displays invalid format error message', () => {
+        cy.findByText('Invalid format: Required 6 digit number').should('exist');
+      });
+    });
   });
 
   describe('On save', () => {
@@ -287,7 +306,8 @@ describe('CytAssist Page', () => {
             })
           );
         });
-
+        cy.reload();
+        fillForm();
         saveButton().click();
       });
       it('shows an error', () => {
@@ -303,20 +323,7 @@ describe('CytAssist Page', () => {
       describe('When user selects CytAssist HD 6.5 labwareType', () => {
         before(() => {
           cy.reload();
-          selectSGPNumber('SGP1008');
-          selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD);
-          selectSlideCostings('Faculty');
-          enterLOTNumber();
-          cy.findByTestId('external-barcode').within(() => {
-            cy.findByRole('textbox').wait(500).clear().type('H1-9D8VN2V{enter}').blur();
-          });
-          cy.get('#labwareScanInput').type('STAN-3100{enter}').wait(500);
-          cy.get('#inputLabwares').within(() => {
-            cy.findByText('A1').wait(500).click();
-          });
-          cy.get('#outputLabwares').within(() => {
-            cy.findByText('A1').wait(500).click();
-          });
+          fillForm();
           saveButton().click();
         });
         it('displays print labels', () => {
@@ -532,6 +539,13 @@ function enterLOTNumber() {
   });
 }
 
+function enterReagentALOTNumber(lotNumber: string) {
+  cy.findByTestId('reagentALot').clear().type(`${lotNumber}{enter}`);
+}
+function enterReagentBLOTNumber(lotNumber: string) {
+  cy.findByTestId('reagentBLot').clear().type(`${lotNumber}{enter}`);
+}
+
 function enterLpNumber(lpNumber: string = 'LP1') {
   selectOption('lpNumber', lpNumber);
 }
@@ -541,3 +555,21 @@ function selectLabwareType(type: string) {
 function selectSlideCostings(costing: string) {
   selectOption('output-labware-costing', costing);
 }
+
+const fillForm = () => {
+  cy.reload();
+  selectSGPNumber('SGP1008');
+  selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD);
+  selectSlideCostings('Faculty');
+  enterLOTNumber();
+  cy.findByTestId('external-barcode').within(() => {
+    cy.findByRole('textbox').wait(500).clear().type('H1-9D8VN2V{enter}').blur();
+  });
+  cy.get('#labwareScanInput').type('STAN-3100{enter}').wait(500);
+  cy.get('#inputLabwares').within(() => {
+    cy.findByText('A1').wait(500).click();
+  });
+  cy.get('#outputLabwares').within(() => {
+    cy.findByText('A1').wait(500).click();
+  });
+};
