@@ -20,7 +20,7 @@ import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import { XeniumLabwareQC } from '../components/xeniumQC/XeniumLabwareQC';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import BlueButton from '../components/buttons/BlueButton';
-import FormikInput from '../components/forms/Input';
+import FormikInput, { FormikCheckbox } from '../components/forms/Input';
 import { createSessionStorageForLabwareAwaiting, getCurrentDateTime } from '../types/stan';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { useLoaderData, useNavigate } from 'react-router-dom';
@@ -50,6 +50,7 @@ export type XeniumQCFormData = {
   workNumberAll: string;
   labware: Array<QcFormLabware>;
   completion: string;
+  terminated: boolean;
 };
 
 const getRegionsOfInterestGroupedByRoi = async (barcode: string): Promise<Record<string, RoiFieldsFragment[]>> => {
@@ -124,7 +125,8 @@ const XeniumQC = () => {
   const initialValues: XeniumQCFormData = {
     workNumberAll: '',
     labware: [],
-    completion: currentTime
+    completion: currentTime,
+    terminated: false
   };
 
   const getRelatedLabwareData = useCallback(
@@ -181,6 +183,7 @@ const XeniumQC = () => {
             onSubmit={async (values) => {
               const request: QcLabwareRequest = {
                 operationType: 'XENIUM ANALYSER QC',
+                terminated: values.terminated,
                 labware: values.labware.map((lw) => {
                   return {
                     completion: lw.completion!.replace('T', ' ') + ':00',
@@ -238,7 +241,21 @@ const XeniumQC = () => {
                             {labwares.length > 0 && (
                               <>
                                 <div className={'flex flex-row w-full py-6 space-x-4'} data-testid={'xenium-qc-div'}>
-                                  <div className={'w-1/2'}>
+                                  <div className={'w-1/5'}>
+                                    <WorkNumberSelect
+                                      label={'SGP Number'}
+                                      name={'workNumberAll'}
+                                      dataTestId={'workNumberAll'}
+                                      onWorkNumberChange={(workNumber) => {
+                                        setFieldValue('workNumberAll', workNumber);
+                                        labwares.forEach((lw, index) => {
+                                          setFieldValue(`labware.${index}.workNumber`, workNumber);
+                                        });
+                                      }}
+                                      workNumber={values.workNumberAll}
+                                    />
+                                  </div>
+                                  <div className={'w-1/5'}>
                                     <FormikInput
                                       label={'Completion Time'}
                                       data-testid={'completion'}
@@ -254,20 +271,11 @@ const XeniumQC = () => {
                                       value={values.completion}
                                     />
                                   </div>
-                                  <div className={'w-1/2'}>
-                                    <WorkNumberSelect
-                                      label={'SGP Number'}
-                                      name={'workNumberAll'}
-                                      dataTestId={'workNumberAll'}
-                                      onWorkNumberChange={(workNumber) => {
-                                        setFieldValue('workNumberAll', workNumber);
-                                        labwares.forEach((lw, index) => {
-                                          setFieldValue(`labware.${index}.workNumber`, workNumber);
-                                        });
-                                      }}
-                                      workNumber={values.workNumberAll}
-                                    />
-                                  </div>
+                                  <FormikCheckbox
+                                    label={'Run terminated early'}
+                                    name="terminated"
+                                    dataTestId={'terminated'}
+                                  />
                                 </div>
 
                                 {labwares.map((lw, index) => (
