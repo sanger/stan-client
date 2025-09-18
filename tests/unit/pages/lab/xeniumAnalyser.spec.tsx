@@ -42,6 +42,7 @@ describe('Xenium analyser', () => {
           expect(screen.getByText('Analyser Details')).toBeVisible();
           expect(screen.getByTestId('performed')).toBeVisible();
           expect(screen.getByTestId('runName')).toBeVisible();
+          expect(screen.getByTestId('is-repeat-run')).toBeVisible();
           expect(screen.getByTestId('equipmentId')).toBeVisible();
           expect(screen.getByTestId('lotNumberA')).toBeVisible();
           expect(screen.getByTestId('lotNumberB')).toBeVisible();
