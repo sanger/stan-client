@@ -39,6 +39,7 @@ type CompletionRequestForm = {
 
 type ProbeHybridisationQCFormValues = {
   request: Array<CompletionRequestForm>;
+  labwareWithHypSlotsMap: Map<string, Array<string>>; //store labware barcode and list of slots that have hyb prob
 };
 
 const getCommentTextFromField = (
@@ -76,7 +77,10 @@ export default function ProbeHybridisationQC() {
 
   const [globalWorkNumber, setGlobalWorkNumber] = React.useState('');
   const [globalCompletionTime, setGlobalCompletionTime] = React.useState(getCurrentDateTime());
-  const [formValues, setFormValues] = React.useState<ProbeHybridisationQCFormValues>({ request: [] });
+  const [formValues, setFormValues] = React.useState<ProbeHybridisationQCFormValues>({
+    request: [],
+    labwareWithHypSlotsMap: new Map()
+  });
   const [submissionError, setSubmissionError] = React.useState<Array<ClientError>>([]);
   const [submissionSuccess, setSubmissionSuccess] = React.useState<Array<String>>([]);
 
@@ -239,6 +243,23 @@ export default function ProbeHybridisationQC() {
     return formValues.request.length > 0 && formValues.request.every((rq) => rq.workNumber !== '');
   }, [formValues]);
 
+  const fetchProbeHybSlots = async (
+    labwares: LabwareFlaggedFieldsFragment[],
+    foundLabware: LabwareFlaggedFieldsFragment
+  ): Promise<string[]> => {
+    const response = await stanCore.GetProbeHybSlots({ barcode: foundLabware.barcode });
+    if (response.probeHybSlots.length === 0) {
+      return [`No probe hybridisation operation has been recorded on the following labware: ${foundLabware.barcode}`];
+    }
+    setFormValues((prev) => {
+      return {
+        ...prev,
+        labwareWithHypSlotsMap: prev.labwareWithHypSlotsMap?.set(foundLabware.barcode, response.probeHybSlots)
+      };
+    });
+    return [];
+  };
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -297,7 +318,12 @@ export default function ProbeHybridisationQC() {
             </div>
             <Heading level={2}>Slides</Heading>
             <p>Please scan a slide</p>
-            <LabwareScanner onAdd={onAddLabware} checkForCleanedOutAddresses enableFlaggedLabwareCheck>
+            <LabwareScanner
+              onAdd={onAddLabware}
+              checkForCleanedOutAddresses
+              enableFlaggedLabwareCheck
+              labwareCheckFunction={fetchProbeHybSlots}
+            >
               {({ labwares, removeLabware, cleanedOutAddresses }) =>
                 labwares.map((labware, index) => {
                   return (
@@ -423,64 +449,71 @@ export default function ProbeHybridisationQC() {
                             </tr>
                           </TableHead>
                           <TableBody>
-                            {labware.slots.flatMap((slot) => {
-                              return slot.samples.flatMap((sample) => {
-                                return (
-                                  <tr key={`${labware.barcode}-${slot.address}-${sample.id}`}>
-                                    <TableCell width={100}>{slot.address}</TableCell>
-                                    <TableCell width={120}>{sample.section}</TableCell>
-                                    <TableCell width={200}>{sample.tissue.donor.donorName}</TableCell>
-                                    <TableCell width={200}>{sample.tissue.spatialLocation.tissueType.name}</TableCell>
-                                    <TableCell width={100}>{sample.tissue.spatialLocation.code}</TableCell>
-                                    <TableCell>{sample.tissue.replicate!}</TableCell>
-                                    <TableCell className="w-full">
-                                      <CustomReactSelect
-                                        isMulti={true}
-                                        options={selectOptionValues(comments, 'text', 'id')}
-                                        value={getCommentTextFromField(
-                                          formValues,
-                                          labware.barcode,
-                                          slot.address,
-                                          sample.id
-                                        )}
-                                        handleChange={(values) => {
-                                          const updatedSampleAddressComments: Array<SampleAddressComment> =
-                                            mapCommentOptionsToValues(values as OptionType[]).map((commentId) => {
+                            {labware.slots
+                              .filter((slot) => {
+                                const slotsWithProb = formValues.labwareWithHypSlotsMap?.get(labware.barcode) || [];
+                                return slotsWithProb.includes(slot.address);
+                              })
+                              .flatMap((slot) => {
+                                return slot.samples.flatMap((sample) => {
+                                  return (
+                                    <tr key={`${labware.barcode}-${slot.address}-${sample.id}`}>
+                                      <TableCell width={100}>{slot.address}</TableCell>
+                                      <TableCell width={120}>{sample.section}</TableCell>
+                                      <TableCell width={200}>{sample.tissue.donor.donorName}</TableCell>
+                                      <TableCell width={200}>{sample.tissue.spatialLocation.tissueType.name}</TableCell>
+                                      <TableCell width={100}>{sample.tissue.spatialLocation.code}</TableCell>
+                                      <TableCell>{sample.tissue.replicate!}</TableCell>
+                                      <TableCell className="w-full">
+                                        <CustomReactSelect
+                                          isMulti={true}
+                                          options={selectOptionValues(comments, 'text', 'id')}
+                                          value={getCommentTextFromField(
+                                            formValues,
+                                            labware.barcode,
+                                            slot.address,
+                                            sample.id
+                                          )}
+                                          handleChange={(values) => {
+                                            const updatedSampleAddressComments: Array<SampleAddressComment> =
+                                              mapCommentOptionsToValues(values as OptionType[]).map((commentId) => {
+                                                return {
+                                                  sampleId: sample.id,
+                                                  address: slot.address,
+                                                  commentId
+                                                };
+                                              });
+                                            setFormValues((prev) => {
                                               return {
-                                                sampleId: sample.id,
-                                                address: slot.address,
-                                                commentId
+                                                ...prev,
+                                                request: prev.request.map((rq) => {
+                                                  if (rq.labware.barcode === labware.barcode) {
+                                                    return {
+                                                      ...rq,
+                                                      labware: {
+                                                        ...rq.labware,
+                                                        comments: updatedSampleAddressComments.concat(
+                                                          rq.labware.comments.filter((c) => {
+                                                            return (
+                                                              c.sampleId !== sample.id || c.address !== slot.address
+                                                            );
+                                                          })
+                                                        )
+                                                      }
+                                                    };
+                                                  } else {
+                                                    return rq;
+                                                  }
+                                                })
                                               };
                                             });
-                                          setFormValues((prev) => {
-                                            return {
-                                              ...prev,
-                                              request: prev.request.map((rq) => {
-                                                if (rq.labware.barcode === labware.barcode) {
-                                                  return {
-                                                    ...rq,
-                                                    labware: {
-                                                      ...rq.labware,
-                                                      comments: updatedSampleAddressComments.concat(
-                                                        rq.labware.comments.filter((c) => {
-                                                          return c.sampleId !== sample.id || c.address !== slot.address;
-                                                        })
-                                                      )
-                                                    }
-                                                  };
-                                                } else {
-                                                  return rq;
-                                                }
-                                              })
-                                            };
-                                          });
-                                        }}
-                                      />
-                                    </TableCell>
-                                  </tr>
-                                );
-                              });
-                            })}
+                                          }}
+                                        />
+                                      </TableCell>
+                                    </tr>
+                                  );
+                                });
+                              })}
                           </TableBody>
                         </Table>
                       </div>
