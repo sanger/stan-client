@@ -67,6 +67,7 @@ import tissueTypeHandlers from './handlers/tissueTypeHandlers';
 import reviseWorkNumber from './handlers/WorkNumberHandlers';
 import operationHandlers from './handlers/operationHandlers';
 import cellClassHandlers from './handlers/cellClassHandlers';
+import proteinPanelHandlers from './handlers/proteinPanelHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -135,5 +136,6 @@ export const handlers = [
   ...tissueTypeHandlers,
   ...reviseWorkNumber,
   ...operationHandlers,
-  ...cellClassHandlers
+  ...cellClassHandlers,
+  ...proteinPanelHandlers
 ];

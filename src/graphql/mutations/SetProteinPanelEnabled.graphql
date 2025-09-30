@@ -1,0 +1,5 @@
+mutation SetProteinPanelEnabled($name: String!, $enabled: Boolean!) {
+  setProteinPanelEnabled(name: $name, enabled: $enabled) {
+    ...ProteinPanelFields
+  }
+}

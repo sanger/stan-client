@@ -57,7 +57,7 @@ export const FlaggedBarcodeLink = (barcode: string, priority?: FlagPriority | nu
     <div className="whitespace-nowrap" key={index}>
       <StyledLink
         data-testid="flagged-barcode-link"
-        className="text-sp bg-transparent hover:text-sp-700 active:text-sp-800"
+        className="text-sp bg-transparent hover:text-sp-700 active:text-sp-800 text-decoration-line: underline"
         to={`/labware/${barcode}`}
         target="_blank"
       >

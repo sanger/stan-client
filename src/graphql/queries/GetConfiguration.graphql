@@ -65,4 +65,7 @@ query GetConfiguration {
   cellClasses(includeDisabled: true) {
     ...CellClassFields
   }
+  proteinPanels(includeDisabled: true) {
+    ...ProteinPanelFields
+  }
 }

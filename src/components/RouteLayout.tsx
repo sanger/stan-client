@@ -332,7 +332,11 @@ const RouteLayout = () => {
               const commentsQuery = await stanCore.GetComments({
                 commentCategory: 'Cell Segmentation'
               });
-              return commentsQuery.comments;
+              const proteinPanels = await stanCore.GetProteinPanels({ includeDisabled: false });
+              return {
+                comments: commentsQuery.comments,
+                proteinPanels: proteinPanels.proteinPanels
+              };
             }}
             element={<CellSegmentation />}
           />

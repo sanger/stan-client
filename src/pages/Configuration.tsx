@@ -44,8 +44,9 @@ export default function Configuration() {
     'HuMFre Numbers',
     'Omero Projects',
     'Probe Panels',
-    'Projects',
     'Programs',
+    'Projects',
+    'Protein Panels',
     'Release Destinations',
     'Release Recipients',
     'Species',
@@ -440,6 +441,32 @@ export default function Configuration() {
             type: 'CHECKBOX'
           }}
         />
+      </div>,
+
+      /**Protein Panels**/
+      <div className="space-y-8">
+        <div data-testid="config">
+          <Heading level={2}>Protein Panels - Xenium</Heading>
+          <p className="mt-3 mb-6 text-lg" />
+          <EntityManager
+            initialEntities={configuration.proteinPanels}
+            displayKeyColumnName={'name'}
+            valueColumnName={'enabled'}
+            onChangeValue={(entity, value) => {
+              const enabled = typeof value === 'boolean' ? value : false;
+              return stanCore
+                .SetProteinPanelEnabled({
+                  enabled,
+                  name: entity.name
+                })
+                .then((res) => res.setProteinPanelEnabled);
+            }}
+            onCreate={(name) => stanCore.AddProteinPanel({ name }).then((res) => res.addProteinPanel)}
+            valueFieldComponentInfo={{
+              type: 'CHECKBOX'
+            }}
+          />
+        </div>
       </div>,
 
       /**Release Destinations**/

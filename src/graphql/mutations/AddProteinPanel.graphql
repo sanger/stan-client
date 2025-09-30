@@ -1,0 +1,5 @@
+mutation AddProteinPanel($name: String!) {
+  addProteinPanel(name: $name) {
+    ...ProteinPanelFields
+  }
+}
