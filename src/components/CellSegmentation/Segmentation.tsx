@@ -277,7 +277,7 @@ export const Segmentation = ({ comments, proteinPanels }: CellSegmentationDataLo
                   </div>
                   {labwares.length > 0 &&
                     values.cellSegmentation.map((cellSeg, index) => (
-                      <Panel key={cellSeg.labware.barcode}>
+                      <Panel key={cellSeg.labware.barcode} dataTestId={`cellSegmentation.${index}`}>
                         <div className="grid grid-cols-2 mb-4 ">
                           {FlaggedBarcodeLink(cellSeg.labware.barcode, cellSeg.labware.flagPriority)}
                           <div className="flex flex-row items-center justify-end">
