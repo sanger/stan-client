@@ -33,6 +33,10 @@ describe('Probe Hybridisation QC', () => {
       cy.get('#labwareScanInput').type('STAN-3111{enter}');
     });
 
+    it('sets only slots with prob hybridisation performed on them ', () => {
+      cy.get('tbody tr').should('have.length', 2);
+    });
+
     it('shows the labware image', () => {
       cy.findByTestId('labware').should('be.visible');
     });
