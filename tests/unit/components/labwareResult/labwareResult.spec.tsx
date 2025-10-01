@@ -2,14 +2,17 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { selectOption } from '../../../generic/utilities';
 import React from 'react';
 import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
-import { CommentFieldsFragment, LabwareFlaggedFieldsFragment } from '../../../../src/types/sdk';
+import {
+  CommentFieldsFragment,
+  LabwareFlaggedFieldsFragment,
+  LabwareResult as CoreLabwareResult
+} from '../../../../src/types/sdk';
 import LabwareResult from '../../../../src/components/labwareResult/LabwareResult';
-import { LabwareResult as CoreLabwareResult } from '../../../../src/types/sdk';
 import '@testing-library/jest-dom';
 import { enableMapSet } from 'immer';
 import { emptySlotFactory, filledSlotFactory } from '../../../../src/lib/factories/slotFactory';
 import SlotColumnInfo from '../../../../src/components/labware/SlotColumnInfo';
-import { TISSUE_COVERAGE_MEASUREMENT_NAME } from '../../../../src/pages/StainingQC';
+import { QC_TYPES, TISSUE_COVERAGE_MEASUREMENT_NAME } from '../../../../src/pages/StainingQC';
 import * as xState from '@xstate/react';
 import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
 
@@ -29,13 +32,13 @@ const comments: CommentFieldsFragment[] = [
   {
     id: 1,
     text: 'Comment1',
-    category: 'stain QC',
+    category: QC_TYPES.IMAGING_QC,
     enabled: true
   },
   {
     id: 2,
     text: 'Comment2',
-    category: 'stain QC',
+    category: QC_TYPES.IMAGING_QC,
     enabled: true
   }
 ];

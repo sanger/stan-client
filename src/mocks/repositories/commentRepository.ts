@@ -1,6 +1,7 @@
 import { CommentFieldsFragment } from '../../types/sdk';
 import { createSessionStorageRepository } from './index';
 import commentFactory from '../../lib/factories/commentFactory';
+import { QC_TYPES } from '../../pages/StainingQC';
 
 const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({ text: 'Section Folded', category: 'section' }),
@@ -34,15 +35,15 @@ const seeds: Array<CommentFieldsFragment> = [
     category: 'Work status'
   }),
   commentFactory.build({
-    category: 'stain QC',
+    category: QC_TYPES.IMAGING_QC,
     text: 'Slide damaged'
   }),
   commentFactory.build({
-    category: 'stain QC',
+    category: QC_TYPES.IMAGING_QC,
     text: 'Wrong morphology'
   }),
   commentFactory.build({
-    category: 'stain QC',
+    category: QC_TYPES.IMAGING_QC,
     text: 'Section invisible',
     enabled: false
   }),

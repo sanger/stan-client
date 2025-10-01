@@ -30,8 +30,13 @@ type StainingQCProps = {
 
 export const TISSUE_COVERAGE_MEASUREMENT_NAME = 'Tissue coverage';
 
-const STAIN_QC_TYPES = ['Stain QC', 'Tissue coverage', 'Pretreatment QC'];
+export enum QC_TYPES {
+  IMAGING_QC = 'Imaging QC', //renamed from Stain QC to Imaging QC
+  TISSUE_COVERAGE = 'Tissue coverage',
+  PRETREATMENT_QC = 'Pretreatment QC'
+}
 
+// We renamed this operation from Staining QC to Imaging QC in the UI and kept the endpoint the same.
 export default function StainingQC({ info }: StainingQCProps) {
   const [workNumber, setWorkNumber] = useState<string>('');
   const [qcType, setQCType] = useState<string>('');
@@ -48,7 +53,7 @@ export default function StainingQC({ info }: StainingQCProps) {
         submitForm: fromPromise(({ input }) => {
           if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           let newLabwareResults: CoreLabwareResult[] = [];
-          if (input.event.values.operationType === STAIN_QC_TYPES[0]) {
+          if (input.event.values.operationType === QC_TYPES.IMAGING_QC) {
             //Remove slotMeasurements from labwareResults if qcType is Stain QC
             newLabwareResults = input.event.values.labwareResults.map((labwareResult: CoreLabwareResult) => {
               return {
@@ -58,7 +63,7 @@ export default function StainingQC({ info }: StainingQCProps) {
             });
           }
           //Remove sampleResults from labwareResults if qcType is Tissue coverage
-          if (input.event.values.operationType === STAIN_QC_TYPES[1]) {
+          if (input.event.values.operationType === QC_TYPES.TISSUE_COVERAGE) {
             /**Omit all measurements for which the tissue coverage is not specified**/
             newLabwareResults = input.event.values.labwareResults.map((labwareResult: CoreLabwareResult) => {
               const slotMeasurements = labwareResult.slotMeasurements?.filter(
@@ -71,7 +76,7 @@ export default function StainingQC({ info }: StainingQCProps) {
                   };
             });
           }
-          if (input.event.values.operationType === STAIN_QC_TYPES[2]) {
+          if (input.event.values.operationType === QC_TYPES.PRETREATMENT_QC) {
             //Remove slotMeasurements from labwareResults and passFail from each sampleResult if qcType is Pretreatment QC
             newLabwareResults = input.event.values.labwareResults.map((labwareResult: CoreLabwareResult) => {
               return {
@@ -118,7 +123,7 @@ export default function StainingQC({ info }: StainingQCProps) {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Staining QC</AppShell.Title>
+        <AppShell.Title>Imaging QC</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
@@ -142,7 +147,7 @@ export default function StainingQC({ info }: StainingQCProps) {
                 handleChange={(value) => {
                   setQCType((value as OptionType).value);
                 }}
-                options={STAIN_QC_TYPES.map((qcType) => ({
+                options={Object.values(QC_TYPES).map((qcType) => ({
                   label: qcType,
                   value: qcType
                 }))}
@@ -176,9 +181,9 @@ export default function StainingQC({ info }: StainingQCProps) {
                           onChange={(labwareResult) => {
                             labwareResults.update(labwareResult);
                           }}
-                          displayComments={qcType === STAIN_QC_TYPES[0] || qcType === STAIN_QC_TYPES[2]}
-                          displayPassFail={qcType === STAIN_QC_TYPES[0]}
-                          displayMeasurement={qcType === STAIN_QC_TYPES[1]}
+                          displayComments={qcType === QC_TYPES.IMAGING_QC || qcType === QC_TYPES.PRETREATMENT_QC}
+                          displayPassFail={qcType === QC_TYPES.IMAGING_QC}
+                          displayMeasurement={qcType === QC_TYPES.TISSUE_COVERAGE}
                           cleanedOutAddresses={cleanedOutAddresses?.get(labware.id)}
                         />
                       </Panel>

@@ -1,7 +1,8 @@
 import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
+import { QC_TYPES } from '../../../src/pages/StainingQC';
 
 describe('Staining QC', () => {
-  describe('When Stain QC is selected', () => {
+  describe('When Imaging QC is selected', () => {
     before(() => {
       cy.visit('/lab/staining_qc');
     });
@@ -9,9 +10,9 @@ describe('Staining QC', () => {
       it('displays Operation complete message', () => {
         selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').type('STAN-411{enter}');
-        selectOption('qcType', 'Stain QC');
+        selectOption('qcType', QC_TYPES.IMAGING_QC);
         cy.findByRole('button', { name: 'Save' }).should('be.enabled').click();
-        cy.findByText('Stain QC complete').should('be.visible');
+        cy.findByText(`${QC_TYPES.IMAGING_QC} complete`).should('be.visible');
       });
     });
   });
