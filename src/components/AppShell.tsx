@@ -85,6 +85,44 @@ function AppShell({ children }: AppShellParams) {
               <Authenticated role={UserRole.Normal}>
                 <Menu caption={'Lab Work'} topMostMenu={true}>
                   <Menu
+                    caption={'Original Sample'}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Original sample operations'}
+                  >
+                    <NavLinkMenuItem
+                      caption={'Labware generation'}
+                      path="/lab/original_sample_processing"
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={
+                        'Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative.'
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={'Solution Transfer'}
+                      path="/lab/solution_transfer"
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Records solution transfer operation of samples.'}
+                    />
+                    <NavLinkMenuItem
+                      caption={'Paraffin Processing'}
+                      path="/lab/paraffin_processing"
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Records the type of processing cycle run on the sample.'}
+                    />
+                    <NavLinkMenuItem
+                      caption={'Sample Processing Comments'}
+                      path="/lab/sample_processing_comments"
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Records extra labware generation comments.'}
+                    />
+                    <NavLinkMenuItem
+                      caption={'Add External ID'}
+                      path="/lab/add_external_id"
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Add an External ID to an original sample.'}
+                    />
+                  </Menu>
+                  <Menu
                     caption={'Sectioning'}
                     icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Recording sectioning planning and confirmation.'}
@@ -110,47 +148,6 @@ function AppShell({ children }: AppShellParams) {
                       }
                     />
                   </Menu>
-                  <Menu
-                    caption={'Original Sample'}
-                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Original sample operations'}
-                  >
-                    <NavLinkMenuItem
-                      caption={'Labware generation'}
-                      path="/lab/original_sample_processing"
-                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={
-                        'Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative.'
-                      }
-                    />
-                    <NavLinkMenuItem
-                      caption={'Paraffin Processing'}
-                      path="/lab/paraffin_processing"
-                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Records the type of processing cycle run on the sample.'}
-                    />
-
-                    <NavLinkMenuItem
-                      caption={'Solution Transfer'}
-                      path="/lab/solution_transfer"
-                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Records solution transfer operation of samples.'}
-                    />
-                    <NavLinkMenuItem
-                      caption={'Add External ID'}
-                      path="/lab/add_external_id"
-                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Add an External ID to an original sample.'}
-                    />
-
-                    <NavLinkMenuItem
-                      caption={'Sample Processing Comments'}
-                      path="/lab/sample_processing_comments"
-                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Records extra labware generation comments.'}
-                    />
-                  </Menu>
-
                   <NavLinkMenuItem
                     caption={'Fetal Waste'}
                     path="/lab/fetal_waste"
@@ -187,22 +184,53 @@ function AppShell({ children }: AppShellParams) {
                       description={'Aliquot a tube of solution out into multiple new tubes.'}
                     />
                   </Menu>
+
+                  <NavLinkMenuItem
+                    caption={'Stain'}
+                    path={'/lab/staining'}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Stain slides and record incubation details.'}
+                  />
                   <Menu
-                    caption={'Staining'}
-                    description={'Recording staining slides and QC'}
+                    caption={'Imaging'}
+                    description={''}
                     icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                   >
                     <NavLinkMenuItem
-                      caption={'Stain slides'}
-                      path={'/lab/staining'}
+                      caption={'Imaging'}
+                      path={'/lab/imaging'}
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Stain slides and record incubation details.'}
+                      description={'Record that images have been taken for a batch of labware.'}
                     />
                     <NavLinkMenuItem
-                      caption={'Staining QC'}
+                      caption={'Imaging QC'}
                       path={'/lab/staining_qc'}
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Pass or fail samples on a stained slide.'}
+                    />
+                  </Menu>
+                  <Menu
+                    caption={'Probe Hybridisation'}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Recording Probe hybridisation'}
+                  >
+                    <NavLinkMenuItem
+                      caption={'Probe Hybridisation CytAssist'}
+                      path={'/lab/probe_hybridisation_cytassist'}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Recording Probe hybridisation for CytAssist slides.'}
+                    />
+                    <NavLinkMenuItem
+                      caption={'Probe Hybridisation Xenium'}
+                      path={'/lab/probe_hybridisation_xenium'}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Recording Probe hybridisation for Xenium slides.'}
+                    />
+                    <NavLinkMenuItem
+                      caption={'Probe hybridisation QC'}
+                      path={'/lab/probe_hybridisation_qc'}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Recording Probe hybridisation QC completion date and set sample sections comments.'}
                     />
                   </Menu>
                   <Menu
@@ -210,6 +238,12 @@ function AppShell({ children }: AppShellParams) {
                     icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Recording Visium process'}
                   >
+                    <NavLinkMenuItem
+                      caption={'CytAssist'}
+                      path={'/lab/cytassist'}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Record the transfer of sections to a CytAssist slide.'}
+                    />
                     <NavLinkMenuItem
                       caption={'Transfer'}
                       path={'/lab/transfer'}
@@ -222,7 +256,14 @@ function AppShell({ children }: AppShellParams) {
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Pass or fail samples on a visium slide.'}
                     />
-
+                    <NavLinkMenuItem
+                      caption={'Library Amp and Generation'}
+                      path={'/lab/libraryGeneration'}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={
+                        'Record the library amplification, dual index plate, and the cycle number for the Visium CytAssist.'
+                      }
+                    />
                     <NavLinkMenuItem
                       caption={'Visium Permeabilisation'}
                       path={'/lab/visium_perm'}
@@ -240,44 +281,7 @@ function AppShell({ children }: AppShellParams) {
                       path={'/lab/dual_index_plate'}
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Record the transfer of dual-index reagent to 96 well plate.'}
-                    />
-                    <NavLinkMenuItem
-                      caption={'CytAssist'}
-                      path={'/lab/cytassist'}
-                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Record the transfer of sections to a CytAssist slide.'}
-                    />
-                    <NavLinkMenuItem
-                      caption={'Library Amplification and Generation'}
-                      path={'/lab/libraryGeneration'}
-                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={
-                        'Record the library amplification, dual index plate, and the cycle number for the Visium CytAssist.'
-                      }
-                    />
-                  </Menu>
-                  <Menu
-                    caption={'Probe Hybridisation'}
-                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Recording Probe hybridisation'}
-                  >
-                    <NavLinkMenuItem
-                      caption={'CytAssist'}
-                      path={'/lab/probe_hybridisation_cytassist'}
-                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Recording Probe hybridisation for CytAssist slides.'}
-                    />
-                    <NavLinkMenuItem
-                      caption={'Xenium'}
-                      path={'/lab/probe_hybridisation_xenium'}
-                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Recording Probe hybridisation for Xenium slides.'}
-                    />
-                    <NavLinkMenuItem
-                      caption={'Probe hybridisation QC'}
-                      path={'/lab/probe_hybridisation_qc'}
-                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Recording Probe hybridisation QC completion date and set sample sections comments.'}
+                      isDisabled={true}
                     />
                   </Menu>
                   <Menu
@@ -315,12 +319,6 @@ function AppShell({ children }: AppShellParams) {
                       description={'Recording region of interest metrics for Xenium slides'}
                     />
                   </Menu>
-                  <NavLinkMenuItem
-                    caption={'Imaging'}
-                    path={'/lab/imaging'}
-                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Record that images have been taken for a batch of labware.'}
-                  />
                 </Menu>
               </Authenticated>
               <Authenticated role={UserRole.Enduser}>
@@ -328,6 +326,12 @@ function AppShell({ children }: AppShellParams) {
               </Authenticated>
               <Authenticated role={UserRole.Normal}>
                 <Menu caption={'Admin'} topMostMenu={true}>
+                  <NavLinkMenuItem
+                    caption={'Original Sample Registration'}
+                    path={'/admin/tissue_registration'}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Register tissue samples which can be either fixed or fresh into STAN.'}
+                  />
                   <NavLinkMenuItem
                     caption={'Block Registration'}
                     path={'/admin/registration'}
@@ -341,48 +345,6 @@ function AppShell({ children }: AppShellParams) {
                     description={'Register sections of tissue on pre-barcoded labware into STAN.'}
                   />
                   <NavLinkMenuItem
-                    caption={'Original Sample Registration'}
-                    path={'/admin/tissue_registration'}
-                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Register tissue samples which can be either fixed or fresh into STAN.'}
-                  />
-                  <NavLinkMenuItem
-                    caption={'Clean Out'}
-                    path={'/admin/cleanout'}
-                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Clean the wells/slots of a labware.'}
-                  />
-                  <NavLinkMenuItem
-                    caption={'Destroy'}
-                    path={'/admin/destroy'}
-                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Destroy multiple pieces of labware and have STAN remove them from storage.'}
-                  />
-                  <NavLinkMenuItem
-                    caption={'Flag Labware'}
-                    path={'/admin/flagLabware'}
-                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Flag a labware and record a reason.'}
-                  />
-                  <NavLinkMenuItem
-                    caption={'Reactivate'}
-                    path={'/admin/reactivate'}
-                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Reactivate destroyed and discarded labware.'}
-                  />
-                  <NavLinkMenuItem
-                    caption={'Re-assign Request Number'}
-                    path={'/admin/reassign_request_number'}
-                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Re-assign request numbers to labware.'}
-                  />
-                  <NavLinkMenuItem
-                    caption={'Revise Work Number'}
-                    path={'/admin/revise_work_number'}
-                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Update work number of prior operations'}
-                  />
-                  <NavLinkMenuItem
                     caption={'Release'}
                     path={'/admin/release'}
                     icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
@@ -393,6 +355,42 @@ function AppShell({ children }: AppShellParams) {
                     path={'/admin/unrelease'}
                     icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={' Re-use STAN labware that has previously been released.'}
+                  />
+                  <NavLinkMenuItem
+                    caption={'Flag Labware'}
+                    path={'/admin/flagLabware'}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Flag a labware and record a reason.'}
+                  />
+                  <NavLinkMenuItem
+                    caption={'Re-assign Request Number'}
+                    path={'/admin/reassign_request_number'}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Re-assign request numbers to labware.'}
+                  />
+                  <NavLinkMenuItem
+                    caption={'Destroy'}
+                    path={'/admin/destroy'}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Destroy multiple pieces of labware and have STAN remove them from storage.'}
+                  />
+                  <NavLinkMenuItem
+                    caption={'Reactivate'}
+                    path={'/admin/reactivate'}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Reactivate destroyed and discarded labware.'}
+                  />
+                  <NavLinkMenuItem
+                    caption={'Revise Work Number'}
+                    path={'/admin/revise_work_number'}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Update work number of prior operations'}
+                  />
+                  <NavLinkMenuItem
+                    caption={'Clean Out'}
+                    path={'/admin/cleanout'}
+                    icon={<SupportIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Clean the wells/slots of a labware.'}
                   />
                 </Menu>
               </Authenticated>
@@ -491,17 +489,24 @@ function AppShell({ children }: AppShellParams) {
                 <motion.div variants={variants.menuItemVariants} className="py-6 px-2 space-y-6">
                   <div className="pt-4 border-t border-gray-700">
                     <h3 className="px-3 text-sm font-bold text-sp-600">Lab Work</h3>
+                    <h4 className="px-3 pt-2 text-sm font-normal mt-2 ml-2 text-sp-600">Original Sample</h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
+                      <StanMobileNavLink to="/lab/original_sample_processing">Labware Generation</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/solution_transfer">Solution Transfer</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/original_sample_processing">Paraffin Processing</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/sample_processing_comments">
+                        Sample Processing Comments
+                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/add_external_id">Add External ID</StanMobileNavLink>
+                    </div>
                     <h4 className="px-3 pt-2 text-sm font-normal mt-2 ml-2 text-sp-600">Sectioning</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
+                      <StanMobileNavLink to="/lab/sectioning/orientation_qc">Orientation QC</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/sectioning">Planning</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/sectioning/confirm">Confirmation</StanMobileNavLink>
                     </div>
                     <StanMobileNavLink to="/lab/fetal_waste">Fetal Waste</StanMobileNavLink>
-                    <h4 className="px-3 pt-2 text-sm font-normal mt-2 ml-2 text-sp-600">Original Sample</h4>
-                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/original_sample_processing">Labware Generation</StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/original_sample_processing">Paraffin Processing</StanMobileNavLink>
-                    </div>
+
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">RNA</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/extraction">Extraction</StanMobileNavLink>
@@ -509,29 +514,35 @@ function AppShell({ children }: AppShellParams) {
                       <StanMobileNavLink to="/lab/rna_analysis">Analysis</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/aliquoting">Aliquoting</StanMobileNavLink>
                     </div>
-                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Staining</h4>
+                    <StanMobileNavLink to="/lab/staining">Stain</StanMobileNavLink>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Imaging</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/staining">Stain slides</StanMobileNavLink>
-
-                      <StanMobileNavLink to="/lab/staining_qc">Staining QC</StanMobileNavLink>
-                    </div>
-                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Visium</h4>
-                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/transfer">Transfer</StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/visium_perm">Visium Permeabilisation</StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/visium_analysis">Visium Analysis</StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/dual_index_plate">Dual Index Plate</StanMobileNavLink>
-                    </div>
-                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/visium_qc">Visium QC</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/imaging">Imaging</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/staining_qc">Imaging QC</StanMobileNavLink>
                     </div>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Probe Hybridisation</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/probe_hybridisation_xenium">Xenium</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/probe_hybridisation_cytassist">
+                        Probe Hybridisation CytAssist
+                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/probe_hybridisation_xenium">
+                        Probe Hybridisation Xenium
+                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/probe_hybridisation_qc">Probe Hybridisation QC</StanMobileNavLink>
                     </div>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Visium</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/probe_hybridisation_qc">Probe hybridisation QC</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/cytassist">CytAssist</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/transfer">Transfer</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/visium_qc">Visium QC</StanMobileNavLink>
+                      <StanMobileNavLink to="lab/libraryGeneration">Library Amp and Generation</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/visium_perm">Visium Permeabilisation</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/visium_analysis">Visium Analysis</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/dual_index_plate" isDisabled={true}>
+                        Dual Index Plate
+                      </StanMobileNavLink>
                     </div>
+
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Xenium</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/cell_segmentation">Cell Segmentation</StanMobileNavLink>
@@ -539,9 +550,6 @@ function AppShell({ children }: AppShellParams) {
                       <StanMobileNavLink to="/lab/xenium_analyser">Xenium Analyser</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/xenium_qc">Xenium Analyser QC</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/xenium_metrics">Xenium Metrics</StanMobileNavLink>
-                    </div>
-                    <div className="grid grid-cols-2 mt-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/imaging">Imaging</StanMobileNavLink>
                     </div>
                   </div>
                   <Authenticated role={UserRole.Enduser}>
@@ -551,24 +559,19 @@ function AppShell({ children }: AppShellParams) {
                     <div className="pt-4 border-t border-gray-700">
                       <h3 className="px-3 text-sm font-bold text-sp-600">Admin</h3>
                       <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                        <StanMobileNavLink to="/admin/registration">Registration</StanMobileNavLink>
-
-                        <StanMobileNavLink to="/admin/slide_registration">Slide Registration</StanMobileNavLink>
-                        <StanMobileNavLink to={'/admin/tissue_registration'}>Tissue Registration</StanMobileNavLink>
-
-                        <StanMobileNavLink to="/admin/cleanout">Clean Out</StanMobileNavLink>
-                        <StanMobileNavLink to="/admin/destroy">Destroy</StanMobileNavLink>
-                        <StanMobileNavLink to={'/admin/flagLabware'}>Flag Labware</StanMobileNavLink>
-
-                        <StanMobileNavLink to="/admin/reactivate">Reactivate</StanMobileNavLink>
-
-                        <StanMobileNavLink to="/admin/revise_work_number">Re-assign Request Number</StanMobileNavLink>
-
-                        <StanMobileNavLink to="/admin/revise_work_number">Revise Work Number</StanMobileNavLink>
-
+                        <StanMobileNavLink to={'/admin/tissue_registration'}>
+                          Original Sample Registration
+                        </StanMobileNavLink>
+                        <StanMobileNavLink to="/admin/registration">Block Registration</StanMobileNavLink>
+                        <StanMobileNavLink to="/admin/section_registration">Section Registration</StanMobileNavLink>
                         <StanMobileNavLink to="/admin/release">Release</StanMobileNavLink>
-
                         <StanMobileNavLink to="/admin/unrelease">Unrelease</StanMobileNavLink>
+                        <StanMobileNavLink to={'/admin/flagLabware'}>Flag Labware</StanMobileNavLink>
+                        <StanMobileNavLink to="/admin/revise_work_number">Re-assign Request Number</StanMobileNavLink>
+                        <StanMobileNavLink to="/admin/destroy">Destroy</StanMobileNavLink>
+                        <StanMobileNavLink to="/admin/reactivate">Reactivate</StanMobileNavLink>
+                        <StanMobileNavLink to="/admin/revise_work_number">Revise Work Number</StanMobileNavLink>
+                        <StanMobileNavLink to="/admin/cleanout">Clean Out</StanMobileNavLink>
                       </div>
                     </div>
                   </Authenticated>
