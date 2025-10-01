@@ -1,0 +1,3 @@
+query GetProbeHybSlots($barcode: String!) {
+  probeHybSlots(barcode: $barcode)
+}

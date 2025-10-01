@@ -1,5 +1,7 @@
 import { graphql, HttpResponse } from 'msw';
 import {
+  GetProbeHybSlotsQuery,
+  GetProbeHybSlotsQueryVariables,
   RecordCompletionMutation,
   RecordCompletionMutationVariables,
   RecordProbeOperationMutation,
@@ -35,6 +37,16 @@ const probeHybridisationHandlers = [
               }
             ]
           }
+        }
+      },
+      { status: 200 }
+    );
+  }),
+  graphql.query<GetProbeHybSlotsQuery, GetProbeHybSlotsQueryVariables>('GetProbeHybSlots', () => {
+    return HttpResponse.json(
+      {
+        data: {
+          probeHybSlots: ['A1', 'B1']
         }
       },
       { status: 200 }
