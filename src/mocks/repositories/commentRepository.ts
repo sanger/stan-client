@@ -34,15 +34,15 @@ const seeds: Array<CommentFieldsFragment> = [
     category: 'Work status'
   }),
   commentFactory.build({
-    category: 'stain QC',
+    category: 'Imaging QC',
     text: 'Slide damaged'
   }),
   commentFactory.build({
-    category: 'stain QC',
+    category: 'Imaging QC',
     text: 'Wrong morphology'
   }),
   commentFactory.build({
-    category: 'stain QC',
+    category: 'Imaging QC',
     text: 'Section invisible',
     enabled: false
   }),
