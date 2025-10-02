@@ -16,9 +16,15 @@ const StanNavLink = ({ children, ...rest }: StanNavLinkProps) => {
   );
 };
 
-interface StanMobileNavLinkProps extends NavLinkProps {}
+interface StanMobileNavLinkProps extends NavLinkProps {
+  isDisabled?: boolean;
+  children: string;
+}
 
-const StanMobileNavLink = ({ children, ...rest }: StanMobileNavLinkProps) => {
+const StanMobileNavLink = ({ children, isDisabled, ...rest }: StanMobileNavLinkProps) => {
+  if (isDisabled) {
+    return <div className="block px-3 py-2 rounded-md text-base font-medium text-gray-500">{children}</div>;
+  }
   return (
     <NavLink
       {...rest}
