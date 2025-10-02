@@ -55,7 +55,8 @@ describe('Cell Segmentation', () => {
                     costing: SlideCosting.WarrantyReplacement,
                     comments: [],
                     workNumber: '',
-                    reagentLot: ''
+                    reagentLot: '',
+                    proteinPanels: []
                   }
                 ],
                 workNumberAll: '',
@@ -75,8 +76,11 @@ describe('Cell Segmentation', () => {
     it('renders apply to all div', () => {
       expect(screen.getByTestId('apply-to-all-div')).toBeVisible();
     });
-    it('renders cell segmentation user entries table', () => {
-      expect(screen.getByTestId('cell-segmentation-values')).toBeVisible();
+    it('renders protein panel div', () => {
+      expect(screen.getByTestId('add-to-all-div')).toBeVisible();
+    });
+    it('renders cell segmentation labware section', () => {
+      expect(screen.getByTestId('cellSegmentation.0')).toBeVisible();
     });
   });
 });

@@ -1,0 +1,5 @@
+query GetProteinPanels($includeDisabled: Boolean) {
+  proteinPanels(includeDisabled: $includeDisabled) {
+    ...ProteinPanelFields
+  }
+}

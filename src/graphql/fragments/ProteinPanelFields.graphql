@@ -1,0 +1,4 @@
+fragment ProteinPanelFields on ProteinPanel {
+  name
+  enabled
+}

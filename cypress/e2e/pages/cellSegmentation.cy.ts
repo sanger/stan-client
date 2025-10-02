@@ -1,6 +1,6 @@
 import { HttpResponse } from 'msw';
 import { SegmentationMutation, SegmentationMutationVariables } from '../../../src/types/sdk';
-import { selectOption } from '../shared/customReactSelect.cy';
+import { selectOption, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
 
 describe('Cell Segmentation Page', () => {
   context('Apply to all', () => {
@@ -13,7 +13,7 @@ describe('Cell Segmentation Page', () => {
         selectOption('workNumberAll', 'SGP1008');
       });
       it('should update all work numbers', () => {
-        cy.findByTestId('cellSegmentation.0.workNumber').should('have.text', 'SGP1008');
+        shouldDisplaySelectedValue('cellSegmentation.0.workNumber', 'SGP1008');
       });
     });
     describe('When comment for all is updated', () => {
@@ -21,7 +21,7 @@ describe('Cell Segmentation Page', () => {
         selectOption('commentsAll', 'Looks good');
       });
       it('should update all the comment fields', () => {
-        cy.findByTestId('cellSegmentation.0.comments').should('have.text', 'Looks good');
+        shouldDisplaySelectedValue('cellSegmentation.0.comments', 'Looks good');
       });
     });
     describe('When cost for all is updated', () => {
@@ -29,7 +29,7 @@ describe('Cell Segmentation Page', () => {
         selectOption('costingAll', 'Faculty');
       });
       it('should update all the cost fields', () => {
-        cy.findByTestId('cellSegmentation.0.costing').should('have.text', 'Faculty');
+        shouldDisplaySelectedValue('cellSegmentation.0.costing', 'Faculty');
       });
     });
     describe('When performed for all is updated', () => {
@@ -38,6 +38,43 @@ describe('Cell Segmentation Page', () => {
       });
       it('should update all performed fields', () => {
         cy.findByTestId('cellSegmentation.0.performed').should('have.value', '2020-01-01T10:00');
+      });
+    });
+  });
+  context('Protein Panels', () => {
+    describe('When protein panel values are empty', () => {
+      it('disables the add to all button', () => {
+        cy.findByTestId('addProteinPanel').should('be.disabled');
+      });
+    });
+    describe('When protein panel values are invalid', () => {
+      before(() => {
+        selectOption('proteinPanelName', 'Xenium protein Tumour subpanel');
+        cy.findByTestId('LOT number').clear().type('12345');
+        selectOption('proteinPanelCosting', 'Faculty');
+      });
+      it('disables the add to all button', () => {
+        cy.findByTestId('addProteinPanel').should('be.disabled');
+      });
+    });
+    describe('When protein panel values are valid', () => {
+      before(() => {
+        selectOption('proteinPanelName', 'Xenium protein Tumour subpanel');
+        cy.findByTestId('LOT number').clear().type('123456');
+        selectOption('proteinPanelCosting', 'Faculty');
+      });
+      it('enables the add to all button', () => {
+        cy.findByTestId('addProteinPanel').should('be.enabled');
+      });
+    });
+    describe('When add to all button is clicked', () => {
+      before(() => {
+        cy.findByTestId('addProteinPanel').click();
+      });
+      it('should add the protein panel to all labware entries', () => {
+        shouldDisplaySelectedValue('cellSegmentation.0.proteinPanels.0.name', 'Xenium protein Tumour subpanel');
+        shouldDisplaySelectedValue('cellSegmentation.0.proteinPanels.0.costing', 'Faculty');
+        cy.findByTestId('cellSegmentation.0.proteinPanels.0.lot').should('have.value', '123456');
       });
     });
   });

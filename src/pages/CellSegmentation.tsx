@@ -4,6 +4,8 @@ import {
   CommentFieldsFragment,
   LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
+  PanelLot,
+  ProteinPanelFieldsFragment,
   SegmentationLabware,
   SegmentationMutation,
   SegmentationRequest,
@@ -20,8 +22,13 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import { fromPromise } from 'xstate';
 import { useMachine } from '@xstate/react';
 import Warning from '../components/notifications/Warning';
-import { Segmentation } from '../components/CellSegmentation/CellSegmentation';
+import { Segmentation } from '../components/CellSegmentation/Segmentation';
 import WhiteButton from '../components/buttons/WhiteButton';
+
+export type CellSegmentationDataLorder = {
+  comments: CommentFieldsFragment[];
+  proteinPanels: ProteinPanelFieldsFragment[];
+};
 
 type CellSegmentationProps = {
   labware: LabwareFlaggedFieldsFragment;
@@ -30,6 +37,7 @@ type CellSegmentationProps = {
   costing: SlideCosting;
   comments?: string[];
   reagentLot?: string;
+  proteinPanels?: PanelLot[];
 };
 
 export type CellSegmentationFormProps = {
@@ -52,13 +60,23 @@ const defaultFormValues: CellSegmentationFormProps = {
 
 const validationSchema = Yup.object().shape({
   reagentLotAll: Yup.string().matches(/^\d{6}$/, 'Reagent Lot should be 6-digit number'),
+  proteinPanelLot: Yup.string().matches(/^\d{6}$/, 'Protein panel LOT number should be 6-digit number'),
   cellSegmentation: Yup.array().of(
     Yup.object().shape({
       workNumber: Yup.string().required('SGP number is required'),
       performed: Yup.string().required('Performed time is required'),
       costing: Yup.string().oneOf(Object.values(SlideCosting)).required('Costing is required'),
       comments: Yup.array().of(Yup.string()).optional(),
-      reagentLot: Yup.string().matches(/^\d{6}$/, 'Reagent Lot should be a 6-digit number')
+      reagentLot: Yup.string().matches(/^\d{6}$/, 'Reagent Lot should be a 6-digit number'),
+      proteinPanels: Yup.array().of(
+        Yup.object().shape({
+          name: Yup.string().required('Protein panel name is required'),
+          lot: Yup.string()
+            .required('Protein panel LOT number')
+            .matches(/^\d{6}$/, 'Protein panel LOT number be 6-digit number'),
+          costing: Yup.string().oneOf(Object.values(SlideCosting)).required('Protein panel costing is required')
+        })
+      )
     })
   )
 });
@@ -71,7 +89,8 @@ const toSegmentationRequest = (values: CellSegmentationFormProps): SegmentationR
       performed: formatDateTimeForCore(cellSeg.performed),
       costing: cellSeg.costing,
       commentIds: cellSeg.comments ? cellSeg.comments.map((comment) => parseInt(comment)) : [],
-      reagentLot: cellSeg.reagentLot
+      reagentLot: cellSeg.reagentLot,
+      proteinPanels: cellSeg.proteinPanels
     };
   });
   return {
@@ -81,7 +100,7 @@ const toSegmentationRequest = (values: CellSegmentationFormProps): SegmentationR
 };
 
 export const CellSegmentation = ({ initialFormValues = defaultFormValues }) => {
-  const comments = useLoaderData() as CommentFieldsFragment[];
+  const { comments, proteinPanels } = useLoaderData() as CellSegmentationDataLorder;
   const navigate = useNavigate();
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
@@ -119,7 +138,7 @@ export const CellSegmentation = ({ initialFormValues = defaultFormValues }) => {
               {({ isValid, values }) => (
                 <>
                   <Form>
-                    <Segmentation comments={comments} isQc={false} />
+                    <Segmentation comments={comments} proteinPanels={proteinPanels} />
                     {values.cellSegmentation.length > 0 && (
                       <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
                         <BlueButton type="submit" disabled={!isValid}>

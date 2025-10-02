@@ -17,11 +17,9 @@ import WorkNumberSelect from '../WorkNumberSelect';
 import LabwareSamplesTable from './LabwareSamplesTable';
 import StyledLink from '../StyledLink';
 import FlagIcon from '../icons/FlagIcon';
-import { slideCostingOptions } from '../../lib/helpers';
 
 type CellSegmentationPageProps = {
   comments: CommentFieldsFragment[];
-  isQc: boolean;
 };
 
 type CellSegmentationProps = {
@@ -54,7 +52,7 @@ const labwareLink = (labware: LabwareFlaggedFieldsFragment) => {
     </div>
   );
 };
-export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
+export const SegmentationQc = ({ comments }: CellSegmentationPageProps) => {
   const { values, setFieldValue, setValues } = useFormikContext<CellSegmentationFormProps>();
   return (
     <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
@@ -68,8 +66,7 @@ export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
               labware: labware,
               workNumber: prev.workNumberAll ?? '',
               performed: prev.performedAll ?? '',
-              comments: prev.commentsAll ?? [],
-              costing: !isQc ? prev.costingAll ?? '' : undefined
+              comments: prev.commentsAll ?? []
             });
             return { ...prev, cellSegmentation };
           });
@@ -167,45 +164,6 @@ export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
                             />
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 mt-2 pt-4">
-                          {!isQc && (
-                            <>
-                              <div className={'flex flex-col'}>
-                                <CustomReactSelect
-                                  label={'Costing'}
-                                  options={selectOptionValues(slideCostingOptions, 'label', 'value')}
-                                  name="costingAll"
-                                  dataTestId="costingAll"
-                                  emptyOption={true}
-                                  onChange={async (val) => {
-                                    const costingAll = (val as OptionType).value;
-                                    await setValues((prev) => {
-                                      let cellSegmentation = [...prev.cellSegmentation];
-                                      cellSegmentation.forEach((cellSeg) => {
-                                        cellSeg.costing = costingAll;
-                                      });
-                                      return { ...prev, cellSegmentation, costingAll };
-                                    });
-                                  }}
-                                />
-                              </div>
-                              <div className={'flex flex-col'}>
-                                <FormikInput
-                                  label={'Reagent Lot'}
-                                  name={'reagentLotAll'}
-                                  onChange={async (e: React.ChangeEvent<HTMLSelectElement>) => {
-                                    await setValues((prev) => {
-                                      const cellSegmentation = prev.cellSegmentation.map((cellSeg) => {
-                                        return { ...cellSeg, reagentLot: e.target.value };
-                                      });
-                                      return { ...prev, cellSegmentation, reagentLotAll: e.target.value };
-                                    });
-                                  }}
-                                />
-                              </div>
-                            </>
-                          )}
-                        </div>
                       </motion.div>
                     </div>
                   </div>
@@ -216,8 +174,6 @@ export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
                           <TableHeader>Barcode</TableHeader>
                           <TableHeader>SGP Number</TableHeader>
                           <TableHeader>Performed</TableHeader>
-                          {!isQc && <TableHeader>Costing</TableHeader>}
-                          {!isQc && <TableHeader>Reagent Lot</TableHeader>}
                           <TableHeader>Comment</TableHeader>
                         </tr>
                       </TableHead>
@@ -243,32 +199,6 @@ export const Segmentation = ({ comments, isQc }: CellSegmentationPageProps) => {
                                 data-testid={`cellSegmentation.${index}.performed`}
                               />
                             </TableCell>
-                            {!isQc && (
-                              <>
-                                <TableCell>
-                                  <CustomReactSelect
-                                    options={selectOptionValues(slideCostingOptions, 'label', 'value')}
-                                    name={`cellSegmentation.${index}.costing`}
-                                    dataTestId={`cellSegmentation.${index}.costing`}
-                                    emptyOption={true}
-                                    value={cellSeg.costing}
-                                    onChange={async (val) => {
-                                      await setFieldValue(
-                                        `cellSegmentation.${index}.costing`,
-                                        (val as OptionType).value
-                                      );
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell>
-                                  <FormikInput
-                                    label={''}
-                                    name={`cellSegmentation.${index}.reagentLot`}
-                                    data-testid={`cellSegmentation.${index}.reagentLot`}
-                                  />
-                                </TableCell>
-                              </>
-                            )}
                             <TableCell>
                               <CustomReactSelect
                                 name={`cellSegmentation.${index}.comments`}

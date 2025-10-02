@@ -20,6 +20,7 @@ import probePanelRepository from '../repositories/probePanelRepository';
 import bioRiskRepository from '../repositories/bioRiskRepository';
 import tissueTypeRepository from '../repositories/tissueTypeRepository';
 import cellClassRepository from '../repositories/cellClassRepository';
+import proteinPanelRepository from '../repositories/proteinPanelRepository';
 
 const configurationHandlers = [
   graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>('GetConfiguration', () => {
@@ -46,7 +47,8 @@ const configurationHandlers = [
         spikeProbePanels: probePanelRepository.findAll().filter((panel) => panel.type === ProbeType.Spike),
         bioRisks: bioRiskRepository.findAll(),
         tissueTypes: tissueTypeRepository.findAll(),
-        cellClasses: cellClassRepository.findAll()
+        cellClasses: cellClassRepository.findAll(),
+        proteinPanels: proteinPanelRepository.findAll()
       }
     });
   })

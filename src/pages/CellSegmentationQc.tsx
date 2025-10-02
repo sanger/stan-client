@@ -18,9 +18,9 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import { fromPromise } from 'xstate';
 import { useMachine } from '@xstate/react';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
-import { Segmentation } from '../components/CellSegmentation/CellSegmentation';
 import Warning from '../components/notifications/Warning';
 import WhiteButton from '../components/buttons/WhiteButton';
+import { SegmentationQc } from '../components/CellSegmentation/SegmentationQc';
 
 type CellSegmentationQcProps = {
   labware: LabwareFlaggedFieldsFragment;
@@ -106,7 +106,7 @@ export const CellSegmentationQc = ({ initialFormValues = defaultFormValues }) =>
             >
               {({ isValid, values }) => (
                 <Form>
-                  <Segmentation comments={comments} isQc={true} />
+                  <SegmentationQc comments={comments} />
                   {values.cellSegmentation.length > 0 && (
                     <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
                       <BlueButton type="submit" disabled={!isValid}>
