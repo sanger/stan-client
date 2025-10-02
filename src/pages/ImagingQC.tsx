@@ -30,9 +30,9 @@ type StainingQCProps = {
 
 export const TISSUE_COVERAGE_MEASUREMENT_NAME = 'Tissue coverage';
 
-const STAIN_QC_TYPES = ['Stain QC', 'Tissue coverage', 'Pretreatment QC'];
+const QC_TYPES = ['Imaging QC', 'Tissue coverage', 'Pretreatment QC'];
 
-export default function StainingQC({ info }: StainingQCProps) {
+export default function ImagingQC({ info }: StainingQCProps) {
   const [workNumber, setWorkNumber] = useState<string>('');
   const [qcType, setQCType] = useState<string>('');
 
@@ -48,7 +48,7 @@ export default function StainingQC({ info }: StainingQCProps) {
         submitForm: fromPromise(({ input }) => {
           if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           let newLabwareResults: CoreLabwareResult[] = [];
-          if (input.event.values.operationType === STAIN_QC_TYPES[0]) {
+          if (input.event.values.operationType === QC_TYPES[0]) {
             //Remove slotMeasurements from labwareResults if qcType is Stain QC
             newLabwareResults = input.event.values.labwareResults.map((labwareResult: CoreLabwareResult) => {
               return {
@@ -58,7 +58,7 @@ export default function StainingQC({ info }: StainingQCProps) {
             });
           }
           //Remove sampleResults from labwareResults if qcType is Tissue coverage
-          if (input.event.values.operationType === STAIN_QC_TYPES[1]) {
+          if (input.event.values.operationType === QC_TYPES[1]) {
             /**Omit all measurements for which the tissue coverage is not specified**/
             newLabwareResults = input.event.values.labwareResults.map((labwareResult: CoreLabwareResult) => {
               const slotMeasurements = labwareResult.slotMeasurements?.filter(
@@ -71,7 +71,7 @@ export default function StainingQC({ info }: StainingQCProps) {
                   };
             });
           }
-          if (input.event.values.operationType === STAIN_QC_TYPES[2]) {
+          if (input.event.values.operationType === QC_TYPES[2]) {
             //Remove slotMeasurements from labwareResults and passFail from each sampleResult if qcType is Pretreatment QC
             newLabwareResults = input.event.values.labwareResults.map((labwareResult: CoreLabwareResult) => {
               return {
@@ -114,11 +114,10 @@ export default function StainingQC({ info }: StainingQCProps) {
   );
 
   const blueButtonDisabled = labwareResults.items.length <= 0 || workNumber === '' || qcType === '';
-
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Staining QC</AppShell.Title>
+        <AppShell.Title>Imaging QC</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
@@ -134,7 +133,7 @@ export default function StainingQC({ info }: StainingQCProps) {
           <div className="space-y-2">
             <Heading level={2}>QC Type</Heading>
 
-            <p>Select QC Type.</p>
+            <p>Select QC Type</p>
 
             <div className="mt-4 md:w-1/2">
               <CustomReactSelect
@@ -142,7 +141,7 @@ export default function StainingQC({ info }: StainingQCProps) {
                 handleChange={(value) => {
                   setQCType((value as OptionType).value);
                 }}
-                options={STAIN_QC_TYPES.map((qcType) => ({
+                options={QC_TYPES.map((qcType) => ({
                   label: qcType,
                   value: qcType
                 }))}
@@ -154,7 +153,7 @@ export default function StainingQC({ info }: StainingQCProps) {
           <div className="mt-8 space-y-2">
             <Heading level={2}>Slides</Heading>
 
-            <p>Please scan in any slides you wish to QC.</p>
+            <p>Please scan in any slides you wish to QC</p>
 
             <LabwareScanner
               onAdd={onAddLabware}
@@ -176,9 +175,9 @@ export default function StainingQC({ info }: StainingQCProps) {
                           onChange={(labwareResult) => {
                             labwareResults.update(labwareResult);
                           }}
-                          displayComments={qcType === STAIN_QC_TYPES[0] || qcType === STAIN_QC_TYPES[2]}
-                          displayPassFail={qcType === STAIN_QC_TYPES[0]}
-                          displayMeasurement={qcType === STAIN_QC_TYPES[1]}
+                          displayComments={qcType === QC_TYPES[0] || qcType === QC_TYPES[2]}
+                          displayPassFail={qcType === QC_TYPES[0]}
+                          displayMeasurement={qcType === QC_TYPES[1]}
                           cleanedOutAddresses={cleanedOutAddresses?.get(labware.id)}
                         />
                       </Panel>
@@ -188,7 +187,7 @@ export default function StainingQC({ info }: StainingQCProps) {
             </LabwareScanner>
           </div>
 
-          {serverError && <Warning message={'Failed to record Staining QC'} error={serverError} />}
+          {serverError && <Warning message={'Failed to record Imaging QC'} error={serverError} />}
 
           <div className={'mt-4 flex flex-row items-center justify-end'}>
             <BlueButton

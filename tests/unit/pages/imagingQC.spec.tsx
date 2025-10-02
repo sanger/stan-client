@@ -1,10 +1,10 @@
 import React from 'react';
-import { render, fireEvent, screen, act, cleanup } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { describe } from '@jest/globals';
 import { BrowserRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import { CommentFieldsFragment } from '../../../src/types/sdk';
-import StainingQC from '../../../src/pages/StainingQC';
+import ImagingQC from '../../../src/pages/ImagingQC';
 import { scanLabware, selectOption, shouldDisplayValue } from '../../generic/utilities';
 import { enableMapSet } from 'immer';
 
@@ -25,13 +25,13 @@ const comments: CommentFieldsFragment[] = [
   {
     id: 1,
     text: 'Comment1',
-    category: 'stain QC',
+    category: 'Imaging QC',
     enabled: true
   },
   {
     id: 2,
     text: 'Comment2',
-    category: 'stain QC',
+    category: 'Imaging QC',
     enabled: true
   }
 ];
@@ -53,7 +53,7 @@ describe('On load', () => {
     act(() => {
       render(
         <BrowserRouter>
-          <StainingQC info={{ comments }} />
+          <ImagingQC info={{ comments }} />
         </BrowserRouter>
       );
     });
@@ -64,14 +64,14 @@ describe('On load', () => {
       expect(screen.queryByTestId('labwareResult')).not.toBeInTheDocument();
     });
     it('should not enable save button without labwareScanned', async () => {
-      await selectOption('qcType', 'Stain QC');
+      await selectOption('qcType', 'Imaging QC');
       expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
     });
   });
   describe('When labware have been scanned', () => {
     beforeEach(async () => {
       await scanLabware('STAN-3112');
-      await selectOption('qcType', 'Stain QC');
+      await selectOption('qcType', 'Imaging QC');
     });
     it('should display labware result panel', async () => {
       expect(screen.getByTestId('labwareResult')).toBeInTheDocument();
@@ -80,14 +80,14 @@ describe('On load', () => {
       expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
     });
     it('should not enable save button without workNumber', async () => {
-      await selectOption('qcType', 'Stain QC');
+      await selectOption('qcType', 'Imaging QC');
       expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
     });
   });
-  describe('When Stain QC qcType is selected', () => {
+  describe('When Imaging QC qcType is selected', () => {
     beforeEach(async () => {
       await scanLabware('STAN-3112');
-      await selectOption('qcType', 'Stain QC');
+      await selectOption('qcType', 'Imaging QC');
     });
     it('should display comment dropdowns as enabled', async () => {
       expect(screen.getAllByTestId('comment').length).toBeGreaterThan(0);
