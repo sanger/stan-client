@@ -2,8 +2,8 @@ import { graphql, HttpResponse } from 'msw';
 import {
   GetStainingQcInfoQuery,
   GetStainingQcInfoQueryVariables,
-  RecordStainResultMutationVariables,
-  RecordStainResultMutation
+  RecordStainResultMutation,
+  RecordStainResultMutationVariables
 } from '../../types/sdk';
 import commentRepository from '../repositories/commentRepository';
 
@@ -11,7 +11,7 @@ const stainingQCHandlers = [
   graphql.query<GetStainingQcInfoQuery, GetStainingQcInfoQueryVariables>('GetStainingQCInfo', () => {
     return HttpResponse.json({
       data: {
-        comments: commentRepository.findAll().filter((comment) => comment.category === 'stain QC' && comment.enabled)
+        comments: commentRepository.findAll().filter((comment) => comment.category === 'Imaging QC' && comment.enabled)
       }
     });
   }),

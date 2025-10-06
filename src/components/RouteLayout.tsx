@@ -38,7 +38,7 @@ import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
 import XeniumAnalyser from '../pages/XeniumAnalyser';
 import CytAssist from '../pages/CytAssist';
 import Staining from '../pages/Staining';
-import StainingQC from '../pages/StainingQC';
+import ImagingQC from '../pages/ImagingQC';
 import RecordInPlace from '../pages/RecordInPlace';
 import columns from './dataTableColumns/labwareColumns';
 import BlockRegistration from '../pages/BlockRegistration';
@@ -375,10 +375,10 @@ const RouteLayout = () => {
         </Route>
         <Route element={<AuthLayout />}>
           <Route
-            path="/lab/staining_qc"
+            path="/lab/imaging_qc"
             element={
               <DataFetcher dataFetcher={stanCore.GetStainingQCInfo}>
-                {(stainingQcInfo) => <StainingQC info={stainingQcInfo} />}
+                {(stainingQcInfo) => <ImagingQC info={stainingQcInfo} />}
               </DataFetcher>
             }
           />

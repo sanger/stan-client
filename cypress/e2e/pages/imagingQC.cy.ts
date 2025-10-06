@@ -1,24 +1,24 @@
 import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 
-describe('Staining QC', () => {
-  describe('When Stain QC is selected', () => {
+describe('Imaging QC', () => {
+  describe('When Imaging QC is selected', () => {
     before(() => {
-      cy.visit('/lab/staining_qc');
+      cy.visit('/lab/imaging_qc');
     });
     context('when Save is selected', () => {
       it('displays Operation complete message', () => {
         selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').type('STAN-411{enter}');
-        selectOption('qcType', 'Stain QC');
+        selectOption('qcType', 'Imaging QC');
         cy.findByRole('button', { name: 'Save' }).should('be.enabled').click();
-        cy.findByText('Stain QC complete').should('be.visible');
+        cy.findByText('Imaging QC complete').should('be.visible');
       });
     });
   });
 
   describe('when Tissue coverage is selected', () => {
     before(() => {
-      cy.visit('/lab/staining_qc');
+      cy.visit('/lab/imaging_qc');
     });
     context('when Save is selected', () => {
       it('displays Operation complete message', () => {
@@ -33,7 +33,7 @@ describe('Staining QC', () => {
 
   describe('when Pretreatment QC is selected', () => {
     before(() => {
-      cy.visit('/lab/staining_qc');
+      cy.visit('/lab/imaging_qc');
     });
 
     context('when Save is selected', () => {

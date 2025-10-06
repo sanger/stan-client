@@ -1,4 +1,4 @@
-import { screen, within, waitForOptions, waitFor as _waitFor, queryByAttribute } from '@testing-library/react';
+import { queryByAttribute, screen, waitFor as _waitFor, waitForOptions, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserRole } from '../../src/types/sdk';
 import { merge } from 'lodash';
@@ -45,7 +45,7 @@ export const selectOption = async (dataTestId: string, optionValue: string, inde
   const input = within(selectDiv).getByRole('combobox', { hidden: true });
   await waitFor(() => expect(input).toBeInTheDocument());
   await userEvent.type(input, '{arrowDown}');
-  const option = screen.getAllByText(optionValue)[0];
+  const option = within(selectDiv).getAllByText(optionValue)[0];
   await waitFor(() => expect(option).toBeInTheDocument());
   await userEvent.click(option);
 };

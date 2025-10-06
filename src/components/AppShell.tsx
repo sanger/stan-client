@@ -204,7 +204,7 @@ function AppShell({ children }: AppShellParams) {
                     />
                     <NavLinkMenuItem
                       caption={'Imaging QC'}
-                      path={'/lab/staining_qc'}
+                      path={'/lab/imaging_qc'}
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Pass or fail samples on a stained slide.'}
                     />
@@ -518,7 +518,7 @@ function AppShell({ children }: AppShellParams) {
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Imaging</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/imaging">Imaging</StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/staining_qc">Imaging QC</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/imaging_qc">Imaging QC</StanMobileNavLink>
                     </div>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Probe Hybridisation</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
