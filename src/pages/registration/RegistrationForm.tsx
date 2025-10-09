@@ -18,6 +18,7 @@ import { TissueValues } from './Registration';
 import CustomReactSelect from '../../components/forms/CustomReactSelect';
 import { RegistrationFormBlockSample } from '../OriginalSampleRegistration';
 import { LifeStageMap } from './SectionForm';
+import { HUMAN_NAME } from '../../mocks/repositories/speciesRepository';
 
 export type TextType = 'Block' | 'Embedding';
 
@@ -40,6 +41,11 @@ interface RegistrationFormParams<T> {
   keywordsMap?: Map<TextType, string>;
 }
 
+export const isHuman = (specieName: string): boolean => {
+  if (!specieName) return false;
+  return specieName.toLowerCase() === HUMAN_NAME.toLowerCase();
+};
+
 const RegistrationForm = <T extends TissueValues<B>, B>({
   registrationInfo,
   availableLabwareTypes,
@@ -61,7 +67,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
   }, [registrationInfo.tissueTypes, values.tissues, currentIndex]);
 
   // Only enable HMDMC when the species is Human
-  const isHMDMCEnabled = values.tissues[currentIndex].species === 'Human';
+  const isHMDMCEnabled = isHuman(values.tissues[currentIndex].species);
   useEffect(() => {
     if (!isHMDMCEnabled) {
       setFieldValue(`tissues.${currentIndex}.hmdmc`, '', true);

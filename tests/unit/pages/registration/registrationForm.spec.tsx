@@ -11,7 +11,7 @@ import {
   RegistrationFormOriginalSample
 } from '../../../../src/pages/OriginalSampleRegistration';
 import { Formik } from 'formik';
-import RegistrationForm from '../../../../src/pages/registration/RegistrationForm';
+import RegistrationForm, { HUMAN_NAME } from '../../../../src/pages/registration/RegistrationForm';
 import React from 'react';
 import { getRegistrationFormTissue, RegistrationFormTissue } from '../../../../src/pages/BlockRegistration';
 import slotRegionRepository from '../../../../src/mocks/repositories/slotRegionRepository';
@@ -233,7 +233,7 @@ describe('RegistrationForm', () => {
       describe('when Species is set to Human', () => {
         beforeAll(() => {
           const humanTissue = getRegistrationFormTissueSample();
-          humanTissue.species = 'Human';
+          humanTissue.species = HUMAN_NAME;
           mockUseFormikContext.mockReturnValue({
             setFieldTouched: jest.fn(),
             setFieldValue: jest.fn(),
@@ -243,7 +243,7 @@ describe('RegistrationForm', () => {
           renderOriginalRegistrationForm();
         });
         it('enables HumFre field', async () => {
-          await selectOption('Species', 'Human');
+          await selectOption('Species', HUMAN_NAME);
           expect(getSelect('HuMFre')).toBeEnabled();
         });
       });
