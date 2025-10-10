@@ -8,7 +8,7 @@ import {
   shouldDisplaySelectedValue
 } from '../shared/customReactSelect.cy';
 import { http, HttpResponse } from 'msw';
-import { HUMAN_NAME } from '../../../src/mocks/repositories/speciesRepository';
+import { HUMAN_NAME } from '../../../src/lib/constants';
 
 describe('Section Registration Page', () => {
   describe('Initial display', () => {

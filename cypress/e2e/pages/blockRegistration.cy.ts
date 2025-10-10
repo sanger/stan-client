@@ -4,7 +4,7 @@ import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/r
 import { RegisterTissuesMutation, RegisterTissuesMutationVariables } from '../../../src/types/sdk';
 import { tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
-import { HUMAN_NAME } from '../../../src/mocks/repositories/speciesRepository';
+import { HUMAN_NAME } from '../../../src/lib/constants';
 
 describe('Block Registration Page', () => {
   beforeEach(() => {

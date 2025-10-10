@@ -1,8 +1,8 @@
 import { SpeciesFieldsFragment } from '../../types/sdk';
 import { createSessionStorageRepository } from './index';
 import speciesFactory from '../../lib/factories/speciesFactory';
+import { HUMAN_NAME } from '../../lib/constants';
 
-export const HUMAN_NAME = 'Homo sapiens (Human)';
 const speciesSeeds: Array<SpeciesFieldsFragment> = [
   speciesFactory.build({ name: HUMAN_NAME }),
   speciesFactory.build({ name: 'Mouse' }),

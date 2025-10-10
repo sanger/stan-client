@@ -1,5 +1,5 @@
 import { selectOption } from './customReactSelect.cy';
-import { HUMAN_NAME } from '../../../src/mocks/repositories/speciesRepository';
+import { HUMAN_NAME } from '../../../src/lib/constants';
 
 export enum RegistrationType {
   BLOCK,

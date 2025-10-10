@@ -3,7 +3,7 @@ import { GetRegistrationInfoQuery, LabwareType, LifeStage } from '../../../../sr
 import solutionRepository from '../../../../src/mocks/repositories/solutionRepository';
 import hmdmcRepository from '../../../../src/mocks/repositories/hmdmcRepository';
 import fixativeRepository from '../../../../src/mocks/repositories/fixativeRepository';
-import speciesRepository, { HUMAN_NAME } from '../../../../src/mocks/repositories/speciesRepository';
+import speciesRepository from '../../../../src/mocks/repositories/speciesRepository';
 import { labwareTypes } from '../../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../../src/types/stan';
 import {
@@ -20,6 +20,7 @@ import bioRiskRepository from '../../../../src/mocks/repositories/bioRiskReposit
 import userEvent from '@testing-library/user-event';
 import { selectOption } from '../../../generic/utilities';
 import cellClassRepository from '../../../../src/mocks/repositories/cellClassRepository';
+import { HUMAN_NAME } from '../../../../src/lib/constants';
 
 const registrationInfo: GetRegistrationInfoQuery = {
   solutions: solutionRepository.findAll(),

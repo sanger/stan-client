@@ -6,7 +6,7 @@ import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/r
 import { selectFocusBlur, selectOption } from '../shared/customReactSelect.cy';
 import { http, HttpResponse } from 'msw';
 import { shouldHaveOption } from '../../../tests/generic/utilities';
-import { HUMAN_NAME } from '../../../src/mocks/repositories/speciesRepository';
+import { HUMAN_NAME } from '../../../src/lib/constants';
 
 describe('Registration', () => {
   before(() => {

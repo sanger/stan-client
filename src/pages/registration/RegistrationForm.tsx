@@ -18,7 +18,7 @@ import { TissueValues } from './Registration';
 import CustomReactSelect from '../../components/forms/CustomReactSelect';
 import { RegistrationFormBlockSample } from '../OriginalSampleRegistration';
 import { LifeStageMap } from './SectionForm';
-import { HUMAN_NAME } from '../../mocks/repositories/speciesRepository';
+import { HUMAN_NAME } from '../../lib/constants';
 
 export type TextType = 'Block' | 'Embedding';
 
