@@ -3,7 +3,7 @@ import { GetRegistrationInfoQuery, LabwareType, LifeStage } from '../../../../sr
 import solutionRepository from '../../../../src/mocks/repositories/solutionRepository';
 import hmdmcRepository from '../../../../src/mocks/repositories/hmdmcRepository';
 import fixativeRepository from '../../../../src/mocks/repositories/fixativeRepository';
-import speciesRepository from '../../../../src/mocks/repositories/speciesRepository';
+import speciesRepository, { HUMAN_NAME } from '../../../../src/mocks/repositories/speciesRepository';
 import { labwareTypes } from '../../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../../src/types/stan';
 import {
@@ -11,7 +11,7 @@ import {
   RegistrationFormOriginalSample
 } from '../../../../src/pages/OriginalSampleRegistration';
 import { Formik } from 'formik';
-import RegistrationForm, { HUMAN_NAME } from '../../../../src/pages/registration/RegistrationForm';
+import RegistrationForm from '../../../../src/pages/registration/RegistrationForm';
 import React from 'react';
 import { getRegistrationFormTissue, RegistrationFormTissue } from '../../../../src/pages/BlockRegistration';
 import slotRegionRepository from '../../../../src/mocks/repositories/slotRegionRepository';
