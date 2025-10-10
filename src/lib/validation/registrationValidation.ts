@@ -2,6 +2,7 @@ import * as validation from './index';
 import * as Yup from 'yup';
 import { GetRegistrationInfoQuery, LifeStage } from '../../types/sdk';
 import { LifeStageMap } from '../../pages/registration/SectionForm';
+import { isHuman } from '../../pages/registration/RegistrationForm';
 
 export default class RegistrationValidation {
   private registrationInfo: GetRegistrationInfoQuery;
@@ -76,7 +77,7 @@ export default class RegistrationValidation {
 
   get hmdmc() {
     return Yup.string().when(['species', 'cellClass'], ([species, cellClass], schema) => {
-      const isHumanTissue = species === 'Human' && cellClass === 'tissue';
+      const isHumanTissue = isHuman(species) && cellClass === 'tissue';
       return isHumanTissue
         ? schema
             .oneOf(this.registrationInfo.hmdmcs.map((h) => h.hmdmc))

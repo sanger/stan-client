@@ -20,6 +20,7 @@ import bioRiskRepository from '../../../../src/mocks/repositories/bioRiskReposit
 import userEvent from '@testing-library/user-event';
 import { selectOption } from '../../../generic/utilities';
 import cellClassRepository from '../../../../src/mocks/repositories/cellClassRepository';
+import { HUMAN_NAME } from '../../../../src/lib/constants';
 
 const registrationInfo: GetRegistrationInfoQuery = {
   solutions: solutionRepository.findAll(),
@@ -233,7 +234,7 @@ describe('RegistrationForm', () => {
       describe('when Species is set to Human', () => {
         beforeAll(() => {
           const humanTissue = getRegistrationFormTissueSample();
-          humanTissue.species = 'Human';
+          humanTissue.species = HUMAN_NAME;
           mockUseFormikContext.mockReturnValue({
             setFieldTouched: jest.fn(),
             setFieldValue: jest.fn(),
@@ -243,7 +244,7 @@ describe('RegistrationForm', () => {
           renderOriginalRegistrationForm();
         });
         it('enables HumFre field', async () => {
-          await selectOption('Species', 'Human');
+          await selectOption('Species', HUMAN_NAME);
           expect(getSelect('HuMFre')).toBeEnabled();
         });
       });

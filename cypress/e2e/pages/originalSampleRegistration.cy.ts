@@ -6,6 +6,7 @@ import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/r
 import { selectFocusBlur, selectOption } from '../shared/customReactSelect.cy';
 import { http, HttpResponse } from 'msw';
 import { shouldHaveOption } from '../../../tests/generic/utilities';
+import { HUMAN_NAME } from '../../../src/lib/constants';
 
 describe('Registration', () => {
   before(() => {
@@ -270,7 +271,7 @@ function fillInForm() {
   cy.findByLabelText('Sample Collection Date').type('2022-01-01', {
     force: true
   });
-  selectOption('Species', 'Human');
+  selectOption('Species', HUMAN_NAME);
   selectOption('cellClass', 'tissue');
   cy.findByTestId('External Identifier').type('EXT_ID_1');
   selectOption('HuMFre', 'HuMFre1');

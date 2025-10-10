@@ -1,4 +1,5 @@
 import { selectOption } from './customReactSelect.cy';
+import { HUMAN_NAME } from '../../../src/lib/constants';
 
 export enum RegistrationType {
   BLOCK,
@@ -56,7 +57,7 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
     describe('HuMFre', () => {
       context('when species is set to human', () => {
         before(() => {
-          selectOption('Species', 'Human');
+          selectOption('Species', HUMAN_NAME);
         });
         it('enables HuMFre', () => {
           cy.findByLabelText('HuMFre').should('be.enabled');
