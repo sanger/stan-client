@@ -4,6 +4,7 @@ import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/r
 import { RegisterTissuesMutation, RegisterTissuesMutationVariables } from '../../../src/types/sdk';
 import { tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
+import { HUMAN_NAME } from '../../../src/lib/constants';
 
 describe('Block Registration Page', () => {
   beforeEach(() => {
@@ -331,7 +332,7 @@ function fillInRegistrationForm() {
   cy.findByLabelText('Sample Collection Date').type('2022-01-01', {
     force: true
   });
-  selectOption('Species', 'Human');
+  selectOption('Species', HUMAN_NAME);
   selectOption('cellClass', 'tissue');
   cy.findByLabelText('External Identifier').type('EXT_ID_1');
   selectOption('HuMFre', 'HuMFre1');

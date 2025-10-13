@@ -13,6 +13,7 @@ import { selectOptionValues } from '../../components/forms';
 import PinkButton from '../../components/buttons/PinkButton';
 import { SectionRegistrationContext, SectionRegistrationFormValues } from '../SectionRegistration';
 import CustomReactSelect from '../../components/forms/CustomReactSelect';
+import { isHuman } from './RegistrationForm';
 
 type SectionFormParams = {
   registrationInfo: GetRegistrationInfoQuery;
@@ -99,7 +100,7 @@ export default function SectionForm({
   /**
    * Only when the species is "Human", should the HMDMC field be enabled
    */
-  const isHMDMCEnabled = values.labwares[currentIndex]?.slots[slotAddress]?.[sectionIndex].species === 'Human';
+  const isHMDMCEnabled = isHuman(values.labwares[currentIndex]?.slots[slotAddress]?.[sectionIndex].species);
   const hmdmcField = `labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.hmdmc`;
 
   /**

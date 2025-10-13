@@ -8,6 +8,7 @@ import {
   shouldDisplaySelectedValue
 } from '../shared/customReactSelect.cy';
 import { http, HttpResponse } from 'msw';
+import { HUMAN_NAME } from '../../../src/lib/constants';
 
 describe('Section Registration Page', () => {
   describe('Initial display', () => {
@@ -342,7 +343,7 @@ function fillInForm() {
   selectOption('Fixative', 'None');
   selectOption('Medium', 'Paraffin');
   cy.findByLabelText('Donor ID').clear().type('DONOR_1');
-  selectOption('Species', 'Human');
+  selectOption('Species', HUMAN_NAME);
   selectOption('cellClass', 'tissue');
   selectOption('HuMFre', 'HuMFre1');
   selectOption('Tissue Type', 'Liver');
