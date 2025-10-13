@@ -47,22 +47,6 @@ const ProbeSettings: React.FC<ProbePanelInfo> = ({ probesOptions, probeLabware, 
               workNumber={values.labware[lwIndex].workNumber}
             />
             <CustomReactSelect
-              label="Kit Costing"
-              dataTestId={`labware.${lwIndex}.kitCosting`}
-              name={`labware.${lwIndex}.kitCosting`}
-              options={selectOptionValues(slideCostingOptions, 'label', 'value')}
-              value={probeLabware.kitCosting}
-              emptyOption={true}
-            />
-            <div>
-              <FormikInput
-                label="Reagent LOT"
-                data-testid={`labware.${lwIndex}.reagentLot`}
-                name={`labware.${lwIndex}.reagentLot`}
-                className=""
-              />
-            </div>
-            <CustomReactSelect
               label="Custom Probe Panel"
               dataTestId={`labware.${lwIndex}.customPanel`}
               name={`labware.${lwIndex}.customPanel`}

@@ -84,36 +84,6 @@ describe('CytAssist Probe Hybridisation', () => {
       });
     });
   });
-  describe('Labware Costing for all', () => {
-    context('When labware costing is selected for all labware', () => {
-      before(() => {
-        selectOption('costingAll', 'SGP');
-      });
-      it('should select costing for all labware', () => {
-        shouldDisplaySelectedValue('labware.0.kitCosting', 'SGP');
-      });
-    });
-  });
-  describe('Labware reagent Lot for all', () => {
-    context('When Reagent Lot is set for all labware', () => {
-      before(() => {
-        selectOption('customPanelAll', 'Custom spike 1');
-      });
-      it('should set custom probe panel for the scanned labware', () => {
-        shouldDisplaySelectedValue('labware.0.customPanel', 'Custom spike 1');
-      });
-    });
-  });
-  describe('Labware custom probe panel for all', () => {
-    context('When a custom probe panel is set for all labware', () => {
-      before(() => {
-        cy.findByTestId('reagentLotAll').clear().type('123456').blur();
-      });
-      it('should set Sample Prep Reagent Lot for the scanned labware', () => {
-        cy.findByTestId('labware.0.reagentLot').should('contain.value', '123456');
-      });
-    });
-  });
   describe('Probe for all', () => {
     context('when probe settings are correctly entered', () => {
       before(() => {
@@ -267,8 +237,6 @@ const fillInTheForm = () => {
   cy.reload();
   cy.get('#labwareScanInput').type('STAN-3111{enter}');
   selectOption('labware.0.workNumber', 'SGP1008');
-  selectOption('labware.0.kitCosting', 'SGP');
-  cy.findByTestId('labware.0.reagentLot').type('345678');
   selectOption('labware.0.customPanel', 'Custom spike 1');
   selectOption('labware.0.probes.0.panel', 'CytAssist APT gene expression panel');
   cy.findByTestId('labware.0.probes.0.lot').type('1234');
