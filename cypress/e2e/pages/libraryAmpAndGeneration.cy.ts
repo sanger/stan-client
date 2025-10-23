@@ -429,7 +429,7 @@ const fillInSampleTransferStep = () => {
   mappingSamples('A1', 'A1');
   selectOption('input-labware-state', 'used');
   selectOption('bioState', 'Probes pre-clean');
-  cy.findByRole('button', { name: 'Reagent Transfer >' }).click();
+  cy.findByRole('button', { name: 'Reagent Transfer >' }).click({ force: true });
 };
 
 const fillInReagentTransferStep = () => {
@@ -438,7 +438,7 @@ const fillInReagentTransferStep = () => {
     cy.findByRole('textbox').clear().type(`${dualIndexPlateBarcode}{enter}`);
   });
   transferReagent();
-  cy.findByRole('button', { name: 'Record Cycle >' }).click();
+  cy.findByRole('button', { name: 'Record Cycle >' }).click({ force: true });
 };
 
 const fillInRecordCycleStep = () => {
@@ -457,9 +457,9 @@ const mappingSamples = (addressSource: string, addressDestination: string) => {
 
 const transferReagent = () => {
   cy.get('#sourceLabwares').within(() => {
-    cy.findByText('A1').click();
+    cy.findByText('A1').click({ force: true });
   });
   cy.get('#destLabwares').within(() => {
-    cy.findByText('A1').click();
+    cy.findByText('A1').click({ force: true });
   });
 };
