@@ -123,7 +123,7 @@ describe('LibraryAmpAndGeneration Page', () => {
     });
     describe('On Record Cycle button click', () => {
       before(() => {
-        cy.findByRole('button', { name: 'Record Cycle >' }).click();
+        cy.findByRole('button', { name: 'Record Cycle >' }).scrollIntoView().click({ force: true });
       });
       it('displays the destination labware', () => {
         cy.findByTestId('labware-').should('be.visible');
@@ -188,7 +188,7 @@ describe('LibraryAmpAndGeneration Page', () => {
         describe('When moving to Record Cycle', () => {
           before(() => {
             transferReagent();
-            cy.findByRole('button', { name: 'Record Cycle >' }).click();
+            cy.findByRole('button', { name: 'Record Cycle >' }).scrollIntoView().click({ force: true });
           });
           it('displays the previously entered cycle value', () => {
             cy.findAllByTestId('CYCLES-input').each((elem) => {
@@ -247,7 +247,7 @@ describe('LibraryAmpAndGeneration Page', () => {
         describe('When moving to Record Cycle', () => {
           before(() => {
             transferReagent();
-            cy.findByRole('button', { name: 'Record Cycle >' }).click();
+            cy.findByRole('button', { name: 'Record Cycle >' }).scrollIntoView().click({ force: true });
           });
           it('removes the previously entered cycle values ', () => {
             cy.findAllByTestId('CYCLES-input').each((elem) => {
