@@ -123,7 +123,7 @@ describe('LibraryAmpAndGeneration Page', () => {
     });
     describe('On Record Cycle button click', () => {
       before(() => {
-        cy.findByRole('button', { name: 'Record Cycle >' }).scrollIntoView().click({ force: true });
+        cy.findByRole('button', { name: 'Record Cycle >' }).click();
       });
       it('displays the destination labware', () => {
         cy.findByTestId('labware-').should('be.visible');
@@ -188,7 +188,7 @@ describe('LibraryAmpAndGeneration Page', () => {
         describe('When moving to Record Cycle', () => {
           before(() => {
             transferReagent();
-            cy.findByRole('button', { name: 'Record Cycle >' }).scrollIntoView().click({ force: true });
+            cy.findByRole('button', { name: 'Record Cycle >' }).click();
           });
           it('displays the previously entered cycle value', () => {
             cy.findAllByTestId('CYCLES-input').each((elem) => {
@@ -247,7 +247,7 @@ describe('LibraryAmpAndGeneration Page', () => {
         describe('When moving to Record Cycle', () => {
           before(() => {
             transferReagent();
-            cy.findByRole('button', { name: 'Record Cycle >' }).scrollIntoView().click({ force: true });
+            cy.findByRole('button', { name: 'Record Cycle >' }).click();
           });
           it('removes the previously entered cycle values ', () => {
             cy.findAllByTestId('CYCLES-input').each((elem) => {
@@ -428,7 +428,7 @@ const fillInSampleTransferStep = () => {
   mappingSamples('A1', 'A1');
   selectOption('input-labware-state', 'used');
   selectOption('bioState', 'Probes pre-clean');
-  cy.findByRole('button', { name: 'Reagent Transfer >' }).click({ force: true });
+  cy.findByRole('button', { name: 'Reagent Transfer >' }).click();
 };
 
 const fillInReagentTransferStep = () => {
@@ -437,7 +437,7 @@ const fillInReagentTransferStep = () => {
     cy.findByRole('textbox').clear().type(`${dualIndexPlateBarcode}{enter}`);
   });
   transferReagent();
-  cy.findByRole('button', { name: 'Record Cycle >' }).click({ force: true });
+  cy.findByRole('button', { name: 'Record Cycle >' }).click();
 };
 
 const fillInRecordCycleStep = () => {
@@ -456,9 +456,9 @@ const mappingSamples = (addressSource: string, addressDestination: string) => {
 
 const transferReagent = () => {
   cy.get('#sourceLabwares').within(() => {
-    cy.findByText('A1').click({ force: true });
+    cy.findByText('A1').click();
   });
   cy.get('#destLabwares').within(() => {
-    cy.findByText('A1').click({ force: true });
+    cy.findByText('A1').click();
   });
 };
