@@ -19,7 +19,6 @@ describe('LibraryAmpAndGeneration Page', () => {
     describe('When updating the destination selection mode', () => {
       before(() => {
         cy.get('[type="radio"][name="8 strip tube"]').check();
-        cy.get('[type="radio"][name="96 well plate"]').check();
       });
       it('does not append destination plates', () => {
         cy.findByTestId('pager-text-div').contains('1 of 1');
@@ -167,7 +166,7 @@ describe('LibraryAmpAndGeneration Page', () => {
         describe('When moving to Transfer Reagent', () => {
           before(() => {
             mappingSamples('A1', 'A1');
-            mappingSamples('A2', 'A2');
+            mappingSamples('B1', 'A2');
             cy.findByRole('button', { name: 'Reagent Transfer >' }).click();
           });
           it('displays the previously scanned dual index plate', () => {
