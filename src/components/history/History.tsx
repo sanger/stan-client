@@ -377,7 +377,7 @@ export default function History(props: HistoryProps) {
             {history.entries.length > 0 && (
               <div className="mx-auto max-w-screen-xl">
                 <TopScrollingBar>
-                  <DataTable columns={historyColumns} data={history.entries} fixedHeader={true} />
+                  <DataTable columns={historyColumns} data={history.entries} fixedHeader={true} showFilter={true} />
                 </TopScrollingBar>
               </div>
             )}

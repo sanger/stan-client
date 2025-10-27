@@ -55,15 +55,18 @@ const FormikInput = ({
 
 export default FormikInput;
 
-interface InputProps extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {}
-export const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
+interface InputProps extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
+  extraClassName?: string;
+}
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(({ extraClassName, ...rest }, ref) => {
   const inputClassNames = classNames(
     {
-      'w-full bg-white h-10 disabled:bg-gray-200 text-center': props.type !== 'checkbox' || props.type !== 'radio'
+      'w-full bg-white h-10 disabled:bg-gray-200 text-center': rest.type !== 'checkbox' && rest.type !== 'radio'
     },
     defaultInputClassNames
   );
-  return <input ref={ref} className={inputClassNames} {...props} />;
+
+  return <input ref={ref} className={`${inputClassNames} ${extraClassName || ''}`} {...rest} />;
 });
 
 export const FormikCheckbox = ({ label, dataTestId, name, className, ...rest }: Omit<FormikInputProps, 'type'>) => {
