@@ -2,6 +2,7 @@ import React, { ReactNode, useImperativeHandle } from 'react';
 import { Column, PluginHook, SortingRule, TableState, useSortBy, useTable } from 'react-table';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from './Table';
 import { motion } from '../dependencies/motion';
+import { Input } from './forms/Input';
 
 type ColumnWithAllCapitalProp<T extends object = {}> = Column<T> & {
   allCapital?: boolean;
@@ -32,6 +33,8 @@ interface DataTableProps<T extends object> {
   cellClassName?: string;
 
   noHeader?: boolean;
+
+  showFilter?: boolean;
 }
 
 const DataTableComponent = <T extends Object>(
@@ -42,7 +45,8 @@ const DataTableComponent = <T extends Object>(
     sortable = false,
     fixedHeader = false,
     cellClassName,
-    noHeader = false
+    noHeader = false,
+    showFilter = false
   }: React.PropsWithChildren<DataTableProps<T>>,
   ref?: React.Ref<T[]>
 ): React.ReactElement<DataTableProps<T>> => {
@@ -54,6 +58,13 @@ const DataTableComponent = <T extends Object>(
   /**
    * Memoize memoedData
    */
+
+  /**
+   * Holds the current filter values for each column.
+   * The `Map` key is the column ID, and the value is the filter string entered by the user.
+   * This allows filtering the table by multiple columns simultaneously.
+   */
+  const [filterByColumns, setFilterByColumns] = React.useState<Map<string, string>>(new Map());
   const memoedData = React.useMemo(() => data, [data]);
 
   const plugins: PluginHook<T>[] = [];
@@ -69,6 +80,17 @@ const DataTableComponent = <T extends Object>(
     }
   }
 
+  const dataToDisplay = React.useMemo(() => {
+    if (filterByColumns.size === 0) return memoedData;
+
+    return memoedData.filter((row) =>
+      Array.from(filterByColumns.entries()).every(([columnId, filter]) => {
+        const cellValue = row[columnId as keyof T];
+        return cellValue?.toString().toLowerCase().includes(filter.toLowerCase());
+      })
+    );
+  }, [memoedData, filterByColumns]);
+
   /**
    * The `useTable` hook from {@link https://react-table.tanstack.com/docs/overview React Table}
    * @see {@link https://react-table.tanstack.com/docs/api/useTable}
@@ -76,7 +98,7 @@ const DataTableComponent = <T extends Object>(
   const instance = useTable(
     {
       columns: memoedColumns,
-      data: memoedData,
+      data: dataToDisplay,
       initialState
     },
     ...plugins
@@ -110,38 +132,58 @@ const DataTableComponent = <T extends Object>(
                   allCapital={(column as ColumnWithAllCapitalProp).allCapital}
                   {...column.getHeaderProps(sortable ? column.getSortByToggleProps() : undefined)}
                 >
-                  {column.render('Header') as ReactNode}
-                  {column.isSorted ? (
-                    column.isSortedDesc ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        className="inline-block h-4 w-4"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                  <div className="grid grid-rows-2">
+                    {column.render('Header') as ReactNode}
+                    {column.isSorted ? (
+                      column.isSortedDesc ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          className="inline-block h-4 w-4"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          className="inline-block h-4 w-4"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )
                     ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        className="inline-block h-4 w-4"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )
-                  ) : (
-                    ''
-                  )}
+                      ''
+                    )}
+                    {showFilter && (
+                      <Input
+                        name={`filter-${column.id}`}
+                        extraClassName="text-black"
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const filter = e.target.value.trim();
+                          setFilterByColumns((prev) => {
+                            const newMap = new Map(prev);
+                            if (filter.length > 0) {
+                              newMap.set(column.id, filter);
+                            } else {
+                              newMap.delete(column.id);
+                            }
+                            return newMap;
+                          });
+                        }}
+                      />
+                    )}
+                  </div>
                 </TableHeader>
               ))}
             </tr>
