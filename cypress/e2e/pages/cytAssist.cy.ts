@@ -37,6 +37,28 @@ describe('CytAssist Page', () => {
     });
   });
 
+  context('when CyAssist labware type is three-point', () => {
+    before(() => {
+      selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5);
+    });
+    it('displays Reagent A and Reagent B lot inputs, and hides the default reagent input', () => {
+      cy.findByTestId('reagentALot').should('be.visible');
+      cy.findByTestId('reagentBLot').should('be.visible');
+      cy.findByTestId('reagentLot').should('not.exist');
+    });
+  });
+
+  context('when CyAssist labware type is not three-point', () => {
+    before(() => {
+      selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_XL);
+    });
+    it('displays only the default reagent barcode input, and hides Reagent A and B inputs', () => {
+      cy.findByTestId('reagentALot').should('not.exist');
+      cy.findByTestId('reagentBLot').should('not.exist');
+      cy.findByTestId('reagentLot').should('be.visible');
+    });
+  });
+
   context('when scanning a non active labware', () => {
     before(() => {
       const discardedLabware = createFlaggedLabware('STAN-4100');
@@ -268,18 +290,27 @@ describe('CytAssist Page', () => {
     });
     context('labware type is of type Cytassist 3', () => {
       before(() => {
+        selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11);
         cy.findByTestId('reagentALot').clear().blur();
         cy.findByTestId('reagentBLot').clear().blur();
-        selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11);
       });
       it('displays required field error message', () => {
         cy.findByText('Reagent A lot is a required field for this labware type').should('be.visible');
         cy.findByText('Reagent B lot is a required field for this labware type').should('be.visible');
       });
     });
+    context('labware type is not of type Cytassist 3', () => {
+      before(() => {
+        selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_XL);
+        cy.findByTestId('reagentLot').clear().blur();
+      });
+      it('displays required field error message', () => {
+        cy.findByText('Reagent lot is a required field for this labware type').should('be.visible');
+      });
+    });
     context('When Reagent LOT number is entered in incorrect format', () => {
       before(() => {
-        enterReagentALOTNumber('1234567');
+        enterReagentLOTNumber('1234567');
       });
       it('displays invalid format error message', () => {
         cy.findByText('Invalid format: Required 6 digit number').should('exist');
@@ -537,6 +568,10 @@ function enterLOTNumber() {
   cy.findByTestId('lot-number').within(() => {
     cy.findByRole('textbox').clear().type('1234567{enter}').blur();
   });
+}
+
+function enterReagentLOTNumber(lotNumber: string) {
+  cy.findByTestId('reagentLot').clear().type(`${lotNumber}{enter}`);
 }
 
 function enterReagentALOTNumber(lotNumber: string) {
