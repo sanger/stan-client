@@ -30,7 +30,6 @@ import { fromPromise } from 'xstate';
 import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
 import { selectOptionValues } from '../../components/forms';
 import WhiteButton from '../../components/buttons/WhiteButton';
-import { slideCostingOptions } from '../../lib/helpers';
 import Panel from '../../components/Panel';
 import ProbeSettings from './ProbeSettings';
 
@@ -38,8 +37,6 @@ export type ProbeHybridisationCytAssistFormValues = {
   labware: ProbeOperationLabwareForm[];
   performed: string;
   workNumberAll: string;
-  costingAll?: SlideCosting;
-  reagentLotAll?: string;
   customPanelAll?: string;
   probePanelAll: CytAssistProbe;
 };
@@ -47,8 +44,6 @@ export type ProbeHybridisationCytAssistFormValues = {
 type ProbeOperationLabwareForm = {
   labware: LabwareFieldsFragment;
   workNumber: string;
-  kitCosting?: SlideCosting;
-  reagentLot?: string;
   probes: Array<CytAssistProbe>;
   customPanel?: string;
   activeProbeIndex?: number;
@@ -68,7 +63,6 @@ const formInitialValues: ProbeHybridisationCytAssistFormValues = {
   labware: [],
   performed: getCurrentDateTime(),
   workNumberAll: '',
-  reagentLotAll: '',
   probePanelAll: probeLotDefault
 };
 
@@ -135,8 +129,6 @@ const ProbeHybridisationCytAssist: React.FC = () => {
           labware: Yup.object().required(),
           workNumber: Yup.string().required().label('SGP Number'),
           customPanel: Yup.string().optional(),
-          kitCosting: Yup.string().oneOf(Object.values(SlideCosting)).required('Costing is a required field'),
-          reagentLot: Yup.string().matches(/^\d{6}$/, 'Reagent LOT should be a string of 6 digits'),
           probes: Yup.array()
             .of(
               Yup.object().shape({
@@ -191,8 +183,6 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                     labware: values.labware.map((probeLw) => ({
                       barcode: probeLw.labware.barcode,
                       workNumber: probeLw.workNumber,
-                      kitCosting: probeLw.kitCosting!,
-                      reagentLot: probeLw.reagentLot,
                       spike: probeLw.customPanel,
                       addresses: probeLw.addresses?.split(',').map((addr) => addr.trim()),
                       probes: probeLw.probes.map((probe) => ({
@@ -220,8 +210,6 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                               {
                                 labware: lw as LabwareFieldsFragment,
                                 workNumber: values.workNumberAll,
-                                kitCosting: values.costingAll,
-                                reagentLot: values.reagentLotAll,
                                 customPanel: values.customPanelAll,
                                 probes: [
                                   {
@@ -261,7 +249,7 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                             <Heading level={3}>Apply to all</Heading>
                             <div className={'flex flex-col mt-4'}>
                               <div className={'w-full border-2 border-gray-100 mb-4'} />
-                              <div className={'grid grid-cols-7 gap-x-4'}>
+                              <div className={'grid grid-cols-5 gap-x-4'}>
                                 <WorkNumberSelect
                                   label={'SGP Number'}
                                   name={'workNumberAll'}
@@ -279,43 +267,6 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                                     });
                                   }}
                                   requiredField={false}
-                                />
-                                <CustomReactSelect
-                                  isMulti={false}
-                                  label={'Kit Costing'}
-                                  name={'costingAll'}
-                                  value={'costingAll'}
-                                  handleChange={async (val) => {
-                                    const kitCosting = (val as OptionType).label as SlideCosting;
-                                    await setValues((prev) => {
-                                      return {
-                                        ...prev,
-                                        costingAll: kitCosting,
-                                        labware: prev.labware.map((lw) => ({
-                                          ...lw,
-                                          kitCosting
-                                        }))
-                                      };
-                                    });
-                                  }}
-                                  emptyOption={true}
-                                  dataTestId="costingAll"
-                                  options={selectOptionValues(slideCostingOptions, 'label', 'value')}
-                                />
-                                <FormikInput
-                                  data-testid={'reagentLotAll'}
-                                  label={'Reagent Lot'}
-                                  name={'reagentLotAll'}
-                                  onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                                    await setValues((prev) => ({
-                                      ...prev,
-                                      reagentLotAll: e.target.value,
-                                      labware: prev.labware.map((lw) => ({
-                                        ...lw,
-                                        reagentLot: e.target.value
-                                      }))
-                                    }));
-                                  }}
                                 />
                                 <CustomReactSelect
                                   dataTestId={'customPanelAll'}
