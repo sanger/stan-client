@@ -1,0 +1,3 @@
+query FindIfOpExists($operationType: String!, $barcode: String!, $run: String, $workNumber: String) {
+  opExists(operationType: $operationType, barcode: $barcode, run: $run, workNumber: $workNumber)
+}
