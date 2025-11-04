@@ -22,7 +22,7 @@ import { DestinationSelectionMode } from '../../../components/slotMapper/slotMap
 import { Draft } from 'immer';
 import { flaggedLabwareLayout } from '../../factories/labwareFactory';
 import { eventBus } from '../../../eventBus';
-import { initialOutputLabware } from '../../../pages/CytAssist';
+import { CytAssistReagentType, initialOutputLabware } from '../../../pages/CytAssist';
 
 /**
  * Context for SlotCopy Machine
@@ -121,6 +121,11 @@ type UpdateDestinationCosting = {
   labware: NewFlaggedLabwareLayout;
   labwareCosting: SlideCosting | undefined;
 };
+type UpdateReagentCosting = {
+  type: 'UPDATE_DESTINATION_REAGENT_COSTING';
+  labware: NewFlaggedLabwareLayout;
+  reagentCosting: SlideCosting | undefined;
+};
 type UpdateDestinationBioState = {
   type: 'UPDATE_DESTINATION_BIO_STATE';
   labware: NewFlaggedLabwareLayout;
@@ -191,7 +196,7 @@ type UpdateDestinationLpNumber = {
 type UpdateReagentLotNumber = {
   type: 'UPDATE_REAGENT_LOT_NUMBER';
   labware: NewFlaggedLabwareLayout;
-  reagentType: 'A' | 'B';
+  reagentType: CytAssistReagentType;
   reagentLotNumber: string;
 };
 
@@ -252,7 +257,8 @@ export type SlotCopyEvent =
   | ReloadDraftedCytAssist
   | ReloadDraftedCytAssistDoneEvent
   | ReloadDraftedCytAssistErrorEvent
-  | UpdateReagentLotNumber;
+  | UpdateReagentLotNumber
+  | UpdateReagentCosting;
 
 /**
  * SlotCopy Machine Config
@@ -308,6 +314,9 @@ export const slotCopyMachine = createMachine(
           },
           UPDATE_DESTINATION_COSTING: {
             actions: 'assignDestinationCosting'
+          },
+          UPDATE_DESTINATION_REAGENT_COSTING: {
+            actions: 'assignDestinationReagentCosting'
           },
           UPDATE_DESTINATION_BIO_STATE: {
             actions: 'assignDestinationBioState'
@@ -374,6 +383,9 @@ export const slotCopyMachine = createMachine(
           },
           UPDATE_DESTINATION_COSTING: {
             actions: 'assignDestinationCosting'
+          },
+          UPDATE_DESTINATION_REAGENT_COSTING: {
+            actions: 'assignDestinationReagentCosting'
           },
           UPDATE_DESTINATION_BIO_STATE: {
             actions: 'assignDestinationBioState'
@@ -737,6 +749,16 @@ export const slotCopyMachine = createMachine(
           destination.slotCopyDetails.costing = event.labwareCosting;
         });
       }),
+      assignDestinationReagentCosting: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_DESTINATION_REAGENT_COSTING') return context;
+        return produce(context, (draft) => {
+          const destination = draft.destinations.find((dest) => dest.labware.id === event.labware.id);
+          if (!destination) {
+            return draft;
+          }
+          destination.slotCopyDetails.reagentCosting = event.reagentCosting;
+        });
+      }),
       assignDestinationLOTNumber: assign(({ context, event }) => {
         if (event.type !== 'UPDATE_DESTINATION_LOT_NUMBER') return context;
         return produce(context, (draft): Draft<SlotCopyContext> => {
@@ -792,8 +814,12 @@ export const slotCopyMachine = createMachine(
           if (!destination) {
             return draft;
           }
-          if (event.reagentType === 'A') destination.slotCopyDetails.reagentALot = event.reagentLotNumber;
-          if (event.reagentType === 'B') destination.slotCopyDetails.reagentBLot = event.reagentLotNumber;
+          if (event.reagentType === CytAssistReagentType.A)
+            destination.slotCopyDetails.reagentALot = event.reagentLotNumber;
+          if (event.reagentType === CytAssistReagentType.B)
+            destination.slotCopyDetails.reagentBLot = event.reagentLotNumber;
+          if (event.reagentType === CytAssistReagentType.Default)
+            destination.slotCopyDetails.reagentLot = event.reagentLotNumber;
           return draft;
         });
       }),

@@ -28,6 +28,12 @@ import MultipleLabwareSlotMapper from '../components/slotMapper/MultipleLabwareS
 import { selectOptionValues } from '../components/forms';
 import { Input } from '../components/forms/Input';
 
+export enum CytAssistReagentType {
+  A = 'A',
+  B = 'B',
+  Default = 'default'
+}
+
 interface OutputLabwareScanPanelProps {
   preBarcode: Maybe<string> | undefined;
   onChangeBarcode: (barcode: string) => void;
@@ -36,7 +42,8 @@ interface OutputLabwareScanPanelProps {
   onChangeLpNumber: (lpNumber: string) => void;
   draftedValues: CytAssistOutputLabwareForm;
   children?: React.ReactNode;
-  onReagentLotNumberChange: (reagentLotNumber: string, reagentType: 'A' | 'B') => void;
+  onReagentLotNumberChange: (reagentLotNumber: string, reagentType: CytAssistReagentType) => void;
+  onChangeReagentCosting: (costing: string) => void;
 }
 
 export type CytAssistOutputLabwareForm = {
@@ -45,14 +52,23 @@ export type CytAssistOutputLabwareForm = {
   costing: string;
   slideLotNumber: string;
   lpNumber: string;
+  reagentLot: string;
   reagentALot: string;
   reagentBLot: string;
+  reagentCosting: string;
 };
 
 const lotNumberRegex = /^\d{6,7}$/;
 const reagentLotNumberRegex = /^\d{6}$/;
 
 const LP_NUMBERS = Array.from({ length: 20 }, (_, i) => `LP${i + 1}`);
+
+const isCytAssistThreePointLabware = (labwareType: string) => {
+  return (
+    labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11 ||
+    labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5
+  );
+};
 
 const validationSchema = () => {
   return Yup.object().shape({
@@ -74,7 +90,7 @@ const validationSchema = () => {
       .matches(lotNumberRegex, 'Invalid format: Required 6-7 digit number'),
     reagentALot: Yup.string().when('labwareType', (labwareType, schema) => {
       const val = labwareType[0] as unknown as string;
-      return val === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11 || val === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5
+      return isCytAssistThreePointLabware(val)
         ? Yup.string()
             .required('Reagent A lot is a required field for this labware type')
             .matches(reagentLotNumberRegex, 'Invalid format: Required 6 digit number')
@@ -82,13 +98,28 @@ const validationSchema = () => {
     }),
     reagentBLot: Yup.string().when('labwareType', (labwareType, schema) => {
       const val = labwareType[0] as unknown as string;
-      return val === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11 || val === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5
+      return isCytAssistThreePointLabware(val)
         ? Yup.string()
             .required('Reagent B lot is a required field for this labware type')
             .matches(reagentLotNumberRegex, 'Invalid format: Required 6 digit number')
         : Yup.string().optional().matches(reagentLotNumberRegex, 'Invalid format: Required 6 digit number');
+    }),
+    reagentLot: Yup.string().when('labwareType', (labwareType, schema) => {
+      const val = labwareType[0] as unknown as string;
+      return isCytAssistThreePointLabware(val)
+        ? Yup.string().optional().matches(reagentLotNumberRegex, 'Invalid format: Required 6 digit number')
+        : Yup.string()
+            .required('Reagent lot is a required field for this labware type')
+            .matches(reagentLotNumberRegex, 'Invalid format: Required 6 digit number');
     })
   });
+};
+
+const isCytAssist_3 = (labwareType: string) => {
+  return (
+    labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11 ||
+    labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5
+  );
 };
 
 /**Component to configure the output CytAssist labware**/
@@ -98,6 +129,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   onChangeLOTNumber,
   onChangeLpNumber,
   onReagentLotNumberChange,
+  onChangeReagentCosting,
   draftedValues,
   children
 }) => {
@@ -112,7 +144,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
     >
       {({ errors, values }) => (
         <Form>
-          <div className={'grid grid-cols-3 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
+          <div className={'grid grid-cols-4 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
             <div>
               <Label name="LP number" />
               <CustomReactSelect
@@ -130,7 +162,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
             </div>
 
             <div>
-              <Label name={'Slide costings'} />
+              <Label name={'Slide costing'} />
               <CustomReactSelect
                 handleChange={(val) => {
                   onChangeCosting((val as OptionType).label);
@@ -171,31 +203,66 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
               {errors.preBarcode && <MutedText className={'text-red-400'}>{errors.preBarcode}</MutedText>}
             </div>
             <div>
-              <Label name="Cytassist HD 3’ Reagent A LOT" />
-              <Input
-                type="text"
-                name="reagentALot"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  onReagentLotNumberChange(e.currentTarget.value, 'A')
-                }
-                value={draftedValues.reagentALot}
-                data-testid="reagentALot"
+              <Label name={'Reagent costing'} />
+              <CustomReactSelect
+                handleChange={(val) => {
+                  onChangeReagentCosting((val as OptionType).label);
+                }}
+                handleBlur={(val) => {
+                  val && onChangeReagentCosting((val as OptionType).label);
+                }}
+                value={draftedValues.reagentCosting}
+                name={'costing'}
+                emptyOption={true}
+                dataTestId="reagent-costing"
+                options={selectOptionValues(slideCostingOptions, 'label', 'value')}
               />
-              {errors.reagentALot && <MutedText className={'text-red-400'}>{errors.reagentALot}</MutedText>}
             </div>
-            <div>
-              <Label name="Cytassist HD 3’ Reagent B LOT" />
-              <Input
-                type="text"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  onReagentLotNumberChange(e.currentTarget.value, 'B')
-                }
-                value={draftedValues.reagentBLot}
-                data-testid="reagentBLot"
-                name="reagentBLot"
-              />
-              {errors.reagentBLot && <MutedText className={'text-red-400'}>{errors.reagentBLot}</MutedText>}
-            </div>
+            {isCytAssist_3(values.labwareType) && (
+              <>
+                <div>
+                  <Label name="Cytassist HD 3’ Reagent A LOT" />
+                  <Input
+                    type="text"
+                    name="reagentALot"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onReagentLotNumberChange(e.currentTarget.value, CytAssistReagentType.A)
+                    }
+                    value={draftedValues.reagentALot}
+                    data-testid="reagentALot"
+                  />
+                  {errors.reagentALot && <MutedText className={'text-red-400'}>{errors.reagentALot}</MutedText>}
+                </div>
+                <div>
+                  <Label name="Cytassist HD 3’ Reagent B LOT" />
+                  <Input
+                    type="text"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onReagentLotNumberChange(e.currentTarget.value, CytAssistReagentType.B)
+                    }
+                    value={draftedValues.reagentBLot}
+                    data-testid="reagentBLot"
+                    name="reagentBLot"
+                  />
+                  {errors.reagentBLot && <MutedText className={'text-red-400'}>{errors.reagentBLot}</MutedText>}
+                </div>
+              </>
+            )}
+            {values.labwareType && !isCytAssist_3(values.labwareType) && (
+              <div>
+                <Label name="CytAssist/HD Reagent kit LOT" />
+                <Input
+                  type="text"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onReagentLotNumberChange(e.currentTarget.value, CytAssistReagentType.Default)
+                  }
+                  value={draftedValues.reagentLot}
+                  data-testid="reagentLot"
+                  name="reagentLot"
+                />
+                {errors.reagentLot && <MutedText className={'text-red-400'}>{errors.reagentLot}</MutedText>}
+              </div>
+            )}
           </div>
 
           {children}
@@ -283,6 +350,18 @@ const CytAssist = () => {
     [send, selectedDestination]
   );
 
+  const handleChangeReagentCosting = React.useCallback(
+    (costing: string) => {
+      if (!selectedDestination) return;
+      send({
+        type: 'UPDATE_DESTINATION_REAGENT_COSTING',
+        labware: selectedDestination.labware,
+        reagentCosting: costing.length === 0 ? undefined : (costing as unknown as SlideCosting)
+      });
+    },
+    [send, selectedDestination]
+  );
+
   const handleChangeLOTNumber = React.useCallback(
     (lotNumber: string, isProbe: boolean) => {
       if (!selectedDestination) return;
@@ -329,7 +408,7 @@ const CytAssist = () => {
   );
 
   const handleChangeReagentLot = React.useCallback(
-    (reagentLotNumber: string, reagentType: 'A' | 'B') => {
+    (reagentLotNumber: string, reagentType: CytAssistReagentType) => {
       if (!selectedDestination) return;
       send({
         type: 'UPDATE_REAGENT_LOT_NUMBER',
@@ -405,14 +484,17 @@ const CytAssist = () => {
               onChangeCosting={handleChangeCosting}
               onChangeLOTNumber={handleChangeLOTNumber}
               onChangeLpNumber={handleChangeLpNumber}
+              onChangeReagentCosting={handleChangeReagentCosting}
               draftedValues={{
                 preBarcode: selectedDestination ? selectedDestination.slotCopyDetails.preBarcode ?? '' : '',
                 labwareType: selectedDestination ? selectedDestination.slotCopyDetails.labwareType ?? '' : '',
                 costing: selectedDestination ? selectedDestination.slotCopyDetails.costing ?? '' : '',
                 slideLotNumber: selectedDestination ? selectedDestination.slotCopyDetails.lotNumber ?? '' : '',
                 lpNumber: selectedDestination ? selectedDestination.slotCopyDetails.lpNumber ?? '' : '',
+                reagentLot: selectedDestination ? selectedDestination.slotCopyDetails.reagentLot ?? '' : '',
                 reagentALot: selectedDestination ? selectedDestination.slotCopyDetails.reagentALot ?? '' : '',
-                reagentBLot: selectedDestination ? selectedDestination.slotCopyDetails.reagentBLot ?? '' : ''
+                reagentBLot: selectedDestination ? selectedDestination.slotCopyDetails.reagentBLot ?? '' : '',
+                reagentCosting: selectedDestination ? selectedDestination.slotCopyDetails.reagentCosting ?? '' : ''
               }}
               onReagentLotNumberChange={handleChangeReagentLot}
             >
