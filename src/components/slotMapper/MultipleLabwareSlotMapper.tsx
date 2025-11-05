@@ -30,6 +30,9 @@ import { CytAssistOutputLabwareForm } from '../../pages/CytAssist';
 import { flaggedLabwareLayout } from '../../lib/factories/labwareFactory';
 import { eventBus } from '../../eventBus';
 import { SavedDraft } from '../../lib/machines/slotCopy/slotCopyMachine';
+import { stanCore } from '../../lib/sdk';
+import warningToast from '../notifications/WarningToast';
+import { toast } from 'react-toastify';
 
 type SelectedSlots = {
   labware: LabwareFlaggedFieldsFragment;
@@ -56,6 +59,14 @@ const validatePreBarcode = (preBarcode: string, labwareType: string) => {
     valid: isValid,
     errorMessage: isValid ? undefined : 'Invalid format. Example: V42A20-3752023-10-20'
   };
+};
+
+const doesOpExistForLabware = async (barcode: string, operationType: string) => {
+  const response = await stanCore.FindIfOpExists({
+    operationType,
+    barcode
+  });
+  return response.opExists;
 };
 
 /**
@@ -488,21 +499,51 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
     }
   }, [send, currentOutput, deselectAll, outputSlotCopies]);
 
+  const [warningMessage, setWarningMessage] = useState<string | undefined>(undefined);
+
+  const areProbHybOpsPerformed = React.useCallback(async (barcode: string) => {
+    const warningMessages: string[] = [];
+    const isProbeHybCytAssistPerformed = await doesOpExistForLabware(barcode, 'Probe hybridisation Cytassist');
+    if (!isProbeHybCytAssistPerformed) {
+      warningMessages.push(`No 'Probe hybridisation Cytassist' operation has been recorded for labware ${barcode}.`);
+    }
+    const isProbeHybCytAssistQcPerformed = await doesOpExistForLabware(barcode, 'Probe hybridisation Cytassist QC');
+    if (!isProbeHybCytAssistQcPerformed) {
+      warningMessages.push(`No 'Probe hybridisation Cytassist QC' operation has been recorded for labware ${barcode}.`);
+    }
+    if (warningMessages.length > 0) {
+      setWarningMessage(warningMessages.join('\n'));
+    } else {
+      setWarningMessage(undefined);
+    }
+  }, []);
+
   /**
    * Callback whenever the input labware is added or removed by the labware scanner
    */
   const onLabwareScannerChange = React.useCallback(
-    (labware: LabwareFlaggedFieldsFragment[], cleanedOutAddresses?: Map<number, string[]>) => {
+    async (labware: LabwareFlaggedFieldsFragment[], cleanedOutAddresses?: Map<number, string[]>) => {
       send({ type: 'UPDATE_INPUT_LABWARE', labware, cleanedOutAddresses });
     },
     [send]
   );
 
-  const isLabwareActive = useCallback(
-    (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): string[] => {
+  React.useEffect(() => {
+    if (warningMessage) {
+      warningToast({
+        message: warningMessage,
+        position: toast.POSITION.TOP_LEFT,
+        autoClose: 8000
+      });
+    }
+  }, [warningMessage]);
+
+  const ensureLabwareReadyForProcessing = useCallback(
+    async (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): Promise<string[]> => {
+      await areProbHybOpsPerformed(foundLabware.barcode);
       return foundLabware.state !== LabwareState.Active ? [`Labware is not active: [ ${foundLabware.barcode}]`] : [];
     },
-    []
+    [areProbHybOpsPerformed]
   );
 
   /**
@@ -554,7 +595,7 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
             enableFlaggedLabwareCheck
             checkForCleanedOutAddresses
             initialLabwares={inputLabware}
-            labwareCheckFunction={isLabwareActive}
+            labwareCheckFunction={ensureLabwareReadyForProcessing}
           >
             {({ removeLabware, cleanedOutAddresses }) => {
               if (inputLabware.length === 0) {
