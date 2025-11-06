@@ -116,6 +116,7 @@ const XeniumMetrics = () => {
           const groupedByRoi = groupByRoi(response.runRois);
           setValues((prev) => ({
             ...prev,
+            error: undefined,
             labware: labware,
             sampleMetricData: Object.keys(groupedByRoi).map((roi) => {
               return {
@@ -130,12 +131,57 @@ const XeniumMetrics = () => {
         } else {
           setValues((prev) => ({
             ...prev,
+            sampleMetricData: [],
             error: 'No regions of interest are recorded for the scanned labware and the selected run name.'
           }));
         }
       });
     },
     [stanCore]
+  );
+
+  const validateAndFetchRois = useCallback(
+    async (
+      labware: LabwareFlaggedFieldsFragment,
+      workNumber: string,
+      runName: string,
+      setValues: (values: SetStateAction<XeniumMetricsForm>, shouldValidate?: boolean) => {}
+    ) => {
+      if (!workNumber && runName) {
+        setValues((prev) => ({
+          ...prev,
+          sampleMetricData: [],
+          error: `Please select a work number before selecting a run name.`
+        }));
+        return;
+      }
+      if (!runName) {
+        setValues((prev) => ({
+          ...prev,
+          sampleMetricData: [],
+          error: undefined
+        }));
+        return;
+      }
+
+      const response = await stanCore.FindIfOpExists({
+        operationType: 'Xenium Analyser QC',
+        barcode: labware.barcode,
+        workNumber: workNumber,
+        run: runName
+      });
+      if (response.opExists) {
+        await getRois(labware, runName, setValues);
+      } else {
+        setValues((prev) => ({
+          ...prev,
+          sampleMetricData: [],
+          error: `Xenium Analyser QC operation has not been performed on labware ${labware.barcode} for work number ${workNumber} and run name ${runName}.`
+        }));
+        return;
+      }
+    },
+    [stanCore, getRois]
   );
 
   const formMachine = React.useMemo(() => {
@@ -213,7 +259,10 @@ const XeniumMetrics = () => {
                         <div className="grid grid-cols-2 gap-x-6 mt-2 pt-4">
                           <WorkNumberSelect
                             label={'SGP Number'}
-                            onWorkNumberChange={(workNumber: string) => setFieldValue('workNumber', workNumber)}
+                            onWorkNumberChange={async (workNumber: string) => {
+                              await setFieldValue('workNumber', workNumber);
+                              await validateAndFetchRois(labware, workNumber, values.runName, setValues);
+                            }}
                           />
                           <CustomReactSelect
                             label={'Run Name'}
@@ -229,7 +278,7 @@ const XeniumMetrics = () => {
                             onChange={async (val) => {
                               const runName = (val as OptionType).label;
                               await setFieldValue('runName', runName);
-                              await getRois(labware, runName, setValues);
+                              await validateAndFetchRois(labware, values.workNumber, runName, setValues);
                             }}
                           />
                         </div>

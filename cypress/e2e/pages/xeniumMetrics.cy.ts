@@ -43,6 +43,30 @@ describe('Xenium Metrics', () => {
       cy.findByTestId('input').should('be.disabled');
     });
   });
+  describe('When the user does not select an SGP number', () => {
+    before(() => {
+      cy.reload();
+      cy.get('#labwareScanInput').type('STAN-3111{enter}');
+      selectOption('runName', 'Run Name 1');
+    });
+    it('displays an error message', () => {
+      cy.findByText('Please select a work number before selecting a run name.').should('be.visible');
+    });
+  });
+  describe('When xenium analyser QC is not performed for the selected SGP number and run name', () => {
+    before(() => {
+      cy.reload();
+      cy.get('#labwareScanInput').type('STAN-3111{enter}');
+      selectOption('runName', 'Run Name 2');
+      selectSGPNumber('SGP1008');
+    });
+    it('displays an error message', () => {
+      cy.contains(
+        'Xenium Analyser QC operation has not been performed on labware STAN-3111 for work number SGP1008 and run name Run Name 2'
+      ).should('be.visible');
+    });
+  });
+
   describe('When a labware with no run names is scanned', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {
@@ -75,6 +99,7 @@ describe('Xenium Metrics', () => {
       before(() => {
         cy.get('#labwareScanInput').type('STAN-3111{enter}');
         selectOption('runName', 'Run Name 1');
+        selectSGPNumber('SGP1008');
       });
       it('displays the region of interest table', () => {
         cy.findByRole('table').should('be.visible');
@@ -96,6 +121,7 @@ describe('Xenium Metrics', () => {
         cy.reload();
         cy.get('#labwareScanInput').type('STAN-3111{enter}');
         selectOption('runName', 'Run Name 1');
+        selectSGPNumber('SGP1008');
       });
 
       it('displays an error message', () => {
