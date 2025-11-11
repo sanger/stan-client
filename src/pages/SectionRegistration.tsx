@@ -61,6 +61,7 @@ type SectionRegistrationFormLabware = {
   labwareTypeName: LabwareTypeName;
   externalLabwareBarcode: string;
   xeniumBarcode: string;
+  xeniumLotNumber: string;
   fixative: string;
   medium: string;
   slots: { [key: string]: Array<SectionRegistrationFormSection> };
@@ -77,6 +78,7 @@ function buildSectionRegisterRequest(values: SectionRegistrationFormValues): Sec
       return {
         externalBarcode: labware.externalLabwareBarcode.trim(),
         preBarcode: labware.xeniumBarcode,
+        lot: labware.xeniumLotNumber.trim(),
         labwareType: labware.labwareTypeName.trim(),
         contents: Object.keys(labware.slots).flatMap((address) => {
           return labware.slots[address].map((sample) => ({
@@ -118,6 +120,7 @@ function buildLabware(labwareTypeName: LabwareTypeName): SectionRegistrationForm
     labwareTypeName,
     externalLabwareBarcode: '',
     xeniumBarcode: '',
+    xeniumLotNumber: '',
     fixative: '',
     medium: '',
     slots: { A1: [buildSample()] }
@@ -153,6 +156,7 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
         Yup.object().shape({
           externalLabwareBarcode: validation.externalLabwareBarcode,
           xeniumBarcode: validation.xeniumBarcode,
+          xeniumLotNumber: validation.xeniumLotNumber,
           fixative: validation.fixative,
           medium: validation.medium,
           slots: Yup.lazy((obj: any) => {
