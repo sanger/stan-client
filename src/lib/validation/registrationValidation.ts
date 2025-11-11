@@ -35,7 +35,7 @@ export default class RegistrationValidation {
       return val === 'Xenium'
         ? validation.requiredString({
             label: 'Xenium LOT Number',
-            pattern: /^\d-\d{4}[A-Z]$/,
+            restrictChars: /^\d-\d{4}[A-Z]$/,
             errorMessage: 'Xenium LOT number should be in format: Digit, hyphen, 4 digits, uppercase letter.'
           })
         : Yup.string().notRequired();
