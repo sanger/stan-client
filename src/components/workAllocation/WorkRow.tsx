@@ -346,6 +346,7 @@ export default function WorkRow({
       <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
       <TableCell colSpan={2}>{renderWorkDnapProjectField(work.workNumber, work.dnapStudy ?? undefined)}</TableCell>
       <TableCell>{work.program.name}</TableCell>
+      <TableCell>{work.facultyLead?.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>
         {isEditEnabledForStatus(work.status) &&

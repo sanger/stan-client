@@ -9,6 +9,7 @@ import {
   OmeroProjectFieldsFragment,
   ProgramFieldsFragment,
   ProjectFieldsFragment,
+  ReleaseDestinationFieldsFragment,
   ReleaseRecipientFieldsFragment,
   UserRole,
   WorkStatus,
@@ -78,6 +79,8 @@ export type WorkAllocationFormValues = {
    * Whether an R&D number is being created. Will use a different prefix on call to core.
    */
   isRnD: boolean;
+
+  facultyLead: string;
 };
 
 type WorkAllocationEvent =
@@ -147,7 +150,7 @@ type WorkAllocationContext = {
   programs: Array<ProgramFieldsFragment>;
 
   /**
-   * List of cost codes to to allocate Work to
+   * List of cost codes to allocate Work to
    */
   costCodes: Array<CostCodeFieldsFragment>;
 
@@ -155,6 +158,11 @@ type WorkAllocationContext = {
    * List of possible reasons Work state changed
    */
   availableComments: Array<CommentFieldsFragment>;
+
+  /**
+   * List of the release destination teams to be used as faculty lead
+   */
+  facultyLeads: Array<ReleaseDestinationFieldsFragment>;
 
   /**
    * Notification to show to the user when something good happens
@@ -212,6 +220,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
         costCodes: [],
         omeroProjects: [],
         availableComments: [],
+        facultyLeads: [],
         urlParams
       },
       initial: 'loading',
@@ -266,7 +275,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
                 numBlocks,
                 numSlides,
                 numOriginalSamples,
-                ssStudyId
+                ssStudyId,
+                facultyLead
               } = input.values;
               return stanCore.CreateWork({
                 workType,
@@ -279,6 +289,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
                 numSlides,
                 numOriginalSamples,
                 omeroProject,
+                facultyLead,
                 ssStudyId: ssStudyId ? Number(ssStudyId) : null
               });
             }),
@@ -312,7 +323,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             worksWithComments,
             workTypes,
             costCodes,
-            releaseRecipients
+            releaseRecipients,
+            releaseDestinations
           } = workAllocation;
           if (currentUser.user && currentUser.user.role === UserRole.Enduser) {
             releaseRecipients.push({
@@ -330,7 +342,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             workWithComments: worksWithComments,
             workTypes,
             costCodes,
-            workRequesters: releaseRecipients
+            workRequesters: releaseRecipients,
+            facultyLeads: releaseDestinations
           };
         }),
 
@@ -357,7 +370,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             numSlides,
             numOriginalSamples,
             omeroProject,
-            dnapStudy
+            dnapStudy,
+            facultyLead
           } = event.output.createWork;
           const blockSlideSampleMsg = [
             numBlocks ? `${numBlocks} blocks` : undefined,
@@ -373,9 +387,9 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
               workType.name
             } - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
               omeroProject ? `, Omero project ${omeroProject.name}` : ''
-            }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''} and program ${program.name} using cost code ${
-              costCode.code
-            } with the work requester ${workRequester?.username}`;
+            }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''}, program ${program.name} 
+            ${facultyLead ? `and faculty lead ${facultyLead.name}` : ''}
+             using cost code ${costCode.code} with the work requester ${workRequester?.username}`;
           });
         }),
 

@@ -42,7 +42,8 @@ const initialValues: WorkAllocationFormValues = {
   numBlocks: undefined,
   numOriginalSamples: undefined,
   ssStudyId: '',
-  studyName: undefined
+  studyName: undefined,
+  facultyLead: ''
 };
 export const MAX_NUM_BLOCKANDSLIDES = 200;
 
@@ -107,6 +108,7 @@ export default function WorkAllocation() {
     workTypes,
     workRequesters,
     availableComments,
+    facultyLeads,
     requestError,
     successMessage,
     allocatedWorkNumber
@@ -514,6 +516,15 @@ export default function WorkAllocation() {
                     </div>
                   )}
                 </div>
+                <div className="md:flex-grow">
+                  <CustomReactSelect
+                    label="Faculty lead"
+                    name="facultyLead"
+                    emptyOption={true}
+                    dataTestId={'facultyLead'}
+                    options={selectOptionValues(facultyLeads, 'name', 'name')}
+                  />
+                </div>
               </div>
 
               <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
@@ -601,6 +612,7 @@ export default function WorkAllocation() {
                         DNAP Study ID
                       </TableHeader>
                       <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Faculty lead')}>Faculty lead</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Number of Blocks')}>Number of Blocks</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Number of Slides')}>Number of Slides</TableHeader>

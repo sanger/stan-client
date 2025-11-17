@@ -2,11 +2,15 @@ import { graphql, HttpResponse } from 'msw';
 import {
   CreateWorkMutation,
   CreateWorkMutationVariables,
+  DnapStudy,
   FindWorkInfoQuery,
   FindWorkInfoQueryVariables,
   FindWorkNumbersQuery,
   FindWorkNumbersQueryVariables,
+  FindWorksCreatedByQuery,
+  FindWorksCreatedByQueryVariables,
   GetAllWorkInfoQuery,
+  GetAllWorkInfoQueryVariables,
   GetSuggestedLabwareForWorkQuery,
   GetSuggestedLabwareForWorkQueryVariables,
   GetWorkAllocationInfoQuery,
@@ -14,6 +18,8 @@ import {
   GetWorkNumbersQuery,
   GetWorkNumbersQueryVariables,
   OmeroProject,
+  UpdateWorkDnapStudyMutation,
+  UpdateWorkDnapStudyMutationVariables,
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumBlocksMutationVariables,
   UpdateWorkNumSlidesMutation,
@@ -24,13 +30,7 @@ import {
   UpdateWorkPriorityMutationVariables,
   UpdateWorkStatusMutation,
   UpdateWorkStatusMutationVariables,
-  WorkStatus,
-  FindWorksCreatedByQuery,
-  FindWorksCreatedByQueryVariables,
-  DnapStudy,
-  UpdateWorkDnapStudyMutation,
-  UpdateWorkDnapStudyMutationVariables,
-  GetAllWorkInfoQueryVariables
+  WorkStatus
 } from '../../types/sdk';
 import costCodeRepository from '../repositories/costCodeRepository';
 import projectRepository from '../repositories/projectRepository';
@@ -45,6 +45,8 @@ import programRepository from '../repositories/programRepository';
 import omeroProjectRepository from '../repositories/omeroProjectRepository';
 import labwareFactory from '../../lib/factories/labwareFactory';
 import dnapStudyRepository from '../repositories/dnapStudyRepository';
+import releaseDestinationRepository from '../repositories/releaseDestinationRepository';
+import ReleaseDestinationRepository from '../repositories/releaseDestinationRepository';
 
 const workHandlers = [
   graphql.query<GetWorkAllocationInfoQuery, GetWorkAllocationInfoQueryVariables>(
@@ -79,7 +81,8 @@ const workHandlers = [
           }),
           workTypes: workTypeRepository.findAll().filter(isEnabled),
           releaseRecipients: releaseRecipientRepository.findAll().filter(isEnabled),
-          dnapStudies: dnapStudyRepository.findAll().filter(isEnabled)
+          dnapStudies: dnapStudyRepository.findAll().filter(isEnabled),
+          releaseDestinations: releaseDestinationRepository.findAll().filter(isEnabled)
         }
       });
     }
@@ -129,6 +132,9 @@ const workHandlers = [
       ? omeroProjectRepository.find('name', variables.omeroProject)
       : undefined;
     const dnapStudy = variables.ssStudyId ? dnapStudyRepository.find('ssId', variables.ssStudyId) : undefined;
+    const facultyLead = variables.facultyLead
+      ? ReleaseDestinationRepository.find('name', variables.facultyLead)
+      : undefined;
     const workRequester = releaseRecipientRepository.find('username', variables.workRequester);
 
     if (!workType) {
@@ -157,7 +163,7 @@ const workHandlers = [
         numOriginalSamples: variables.numOriginalSamples
       },
       {
-        associations: { workType, costCode, project, program, workRequester, omeroProject, dnapStudy },
+        associations: { workType, costCode, project, program, workRequester, omeroProject, dnapStudy, facultyLead },
         transient: { isRnD: variables.prefix === 'R&D' }
       }
     );
