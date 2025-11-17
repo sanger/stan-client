@@ -22,6 +22,9 @@ fragment WorkFields on Work {
   dnapStudy {
     ...DnapStudyFields
   }
+  facultyLead {
+    ...ReleaseDestinationFields
+  }
   numBlocks
   numSlides
   numOriginalSamples
