@@ -29,7 +29,8 @@ const FormikInput = ({
 }: FormikInputProps) => {
   const inputClassNames = classNames(
     {
-      'bg-white border h-10 w-full disabled:bg-gray-200': type !== 'checkbox'
+      'bg-white border w-full disabled:bg-gray-200': type !== 'checkbox',
+      'h-10': type !== 'checkbox' && type !== 'textarea'
     },
     defaultInputClassNames
   );

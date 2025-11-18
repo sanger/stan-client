@@ -580,9 +580,10 @@ const XeniumAnalyser = () => {
                                                 </label>
                                                 <label className="items-center w-2/10">{sample.sectionNumber}</label>
                                                 <FormikInput
+                                                  as="textarea"
                                                   label={''}
                                                   className="w-3/10"
-                                                  type="text"
+                                                  type="textarea"
                                                   name={`labware.${lwIndex}.samples.${sampleIndex}.roi`}
                                                   data-testid={`${lw.labware.barcode}-${sampleIndex}-roi`}
                                                   onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
