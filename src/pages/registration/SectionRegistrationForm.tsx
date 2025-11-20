@@ -157,7 +157,12 @@ function SectionRegistrationForm({ registrationInfo }: SectionRegistrationFormPa
             </motion.div>
             {currentLabware.labwareTypeName === LabwareTypeName.XENIUM && (
               <motion.div variants={variants.fadeInWithLift}>
-                <FormikInput label={'Xenium Slide Barcode'} name={`labwares.${currentIndex}.xeniumBarcode`} />
+                <FormikInput
+                  label={'Xenium Slide Barcode'}
+                  name={`labwares.${currentIndex}.xeniumBarcode`}
+                  className="mb-8"
+                />
+                <FormikInput label={'Xenium LOT Number'} name={`labwares.${currentIndex}.xeniumLotNumber`} />
               </motion.div>
             )}
 

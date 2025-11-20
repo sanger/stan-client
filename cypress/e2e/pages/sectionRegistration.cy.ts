@@ -311,6 +311,10 @@ describe('Section Registration Page', () => {
           cy.findByLabelText('Xenium Slide Barcode').should('be.visible');
         });
 
+        it('displays Xenium LOT Number input', () => {
+          cy.findByLabelText('Xenium LOT Number').should('be.visible');
+        });
+
         it('requires Xenium barcode field to only permit 7 digit number', () => {
           cy.findByLabelText('Xenium Slide Barcode').type('Eabc1').blur();
           cy.findByText('Xenium Barcode must be a 7 digit number.').should('be.visible');

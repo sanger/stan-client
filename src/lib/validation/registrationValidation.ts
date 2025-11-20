@@ -29,6 +29,18 @@ export default class RegistrationValidation {
         : Yup.string().notRequired();
     });
   }
+  get xeniumLotNumber() {
+    return Yup.string().when('labwareTypeName', (labwareTypeName) => {
+      const val = labwareTypeName[0] as unknown as string;
+      return val === 'Xenium'
+        ? validation.requiredString({
+            label: 'Xenium LOT Number',
+            restrictChars: /^\d-\d{4}[A-Z]$/,
+            errorMessage: 'Xenium LOT number should be in format: Digit, hyphen, 4 digits, uppercase letter.'
+          })
+        : Yup.string().notRequired();
+    });
+  }
 
   get fixative() {
     return validation.requiredString({
