@@ -26,4 +26,7 @@ query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatu
   dnapStudies(includeDisabled: false) {
     ...DnapStudyFields
   }
+  releaseDestinations(includeDisabled: false) {
+    ...ReleaseDestinationFields
+  }
 }
