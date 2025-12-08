@@ -40,6 +40,7 @@ type ProbeOperationLabwareForm = {
   workNumber: string;
   kitCosting: SlideCosting;
   reagentLot?: string;
+  cassetteLot?: string;
   probes: Array<ProbeLot>;
 };
 
@@ -49,6 +50,7 @@ export type ProbeHybridisationXeniumFormValues = {
   workNumberAll: string;
   costingAll?: SlideCosting;
   reagentLot?: string;
+  cassetteLot?: string;
 };
 export const probeLotDefault = { name: '', lot: '', plex: 0 };
 export const lotRegx = /^[A-Z0-9_]{1,25}$/;
@@ -57,7 +59,8 @@ const formInitialValues: ProbeHybridisationXeniumFormValues = {
   labware: [],
   performed: getCurrentDateTime(),
   workNumberAll: '',
-  reagentLot: ''
+  reagentLot: '',
+  cassetteLot: ''
 };
 const ProbeHybridisationXenium: React.FC = () => {
   const probePanelInfo = useLoaderData() as GetProbePanelsQuery;
@@ -98,6 +101,7 @@ const ProbeHybridisationXenium: React.FC = () => {
       .required('Start Time is a required field')
       .label('Start Time'),
     reagentLot: Yup.string().matches(/^\d{6}$/, 'Sample Prep Reagent Lot should be a string of 6 digits'),
+    cassetteLot: Yup.string().matches(/^\d{6}$/, 'Cassette Lot should be a string of 6 digits'),
     labware: Yup.array()
       .of(
         Yup.object().shape({
@@ -105,6 +109,7 @@ const ProbeHybridisationXenium: React.FC = () => {
           workNumber: Yup.string().required().label('SGP Number'),
           kitCosting: Yup.string().oneOf(Object.values(SlideCosting)).required('Costing is a required field'),
           reagentLot: Yup.string().matches(/^\d{6}$/, 'Sample Prep Reagent Lot should be a string of 6 digits'),
+          cassetteLot: Yup.string().matches(/^\d{6}$/, 'Cassette Lot should be a string of 6 digits'),
           probes: Yup.array()
             .of(
               Yup.object().shape({
@@ -162,6 +167,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                       workNumber: probeLw.workNumber,
                       kitCosting: probeLw.kitCosting,
                       reagentLot: probeLw.reagentLot,
+                      cassetteLot: probeLw.cassetteLot,
                       probes: probeLw.probes
                     }))
                   }
@@ -273,6 +279,20 @@ const ProbeHybridisationXenium: React.FC = () => {
                                       labware: prev.labware.map((lw) => ({
                                         ...lw,
                                         reagentLot: e.target.value
+                                      }))
+                                    }));
+                                  }}
+                                />
+                                <FormikInput
+                                  label={'Cassette Lot'}
+                                  name={'cassetteLot'}
+                                  onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                    await setValues((prev) => ({
+                                      ...prev,
+                                      cassetteLot: e.target.value,
+                                      labware: prev.labware.map((lw) => ({
+                                        ...lw,
+                                        cassetteLot: e.target.value
                                       }))
                                     }));
                                   }}
