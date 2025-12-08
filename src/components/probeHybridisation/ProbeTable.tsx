@@ -26,6 +26,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
           <TableHeader>SGP Number</TableHeader>
           <TableHeader>Kit Costing</TableHeader>
           <TableHeader>Sample Prep Reagent Lot</TableHeader>
+          <TableHeader>Cassette Lot</TableHeader>
           <TableHeader>Probe</TableHeader>
         </tr>
       </TableHead>
@@ -57,6 +58,13 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                 label=""
                 data-testid={`labware.${lwIndex}.reagentLot`}
                 name={`labware.${lwIndex}.reagentLot`}
+              />
+            </TableCell>
+            <TableCell>
+              <FormikInput
+                label=""
+                data-testid={`labware.${lwIndex}.cassetteLot`}
+                name={`labware.${lwIndex}.cassetteLot`}
               />
             </TableCell>
             <TableCell>
