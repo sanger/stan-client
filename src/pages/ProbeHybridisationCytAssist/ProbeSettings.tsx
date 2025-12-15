@@ -57,6 +57,13 @@ const ProbeSettings: React.FC<ProbePanelInfo> = ({ probesOptions, probeLabware, 
             />
             <div>
               <FormikInput
+                label="Cassette Lot"
+                name={`labware.${lwIndex}.cassetteLot`}
+                data-testid={`labware.${lwIndex}.cassetteLot`}
+              />
+            </div>
+            <div>
+              <FormikInput
                 label="Section Addresses"
                 name={`labware.${lwIndex}.addresses`}
                 data-testid={`labware.${lwIndex}.addresses`}
