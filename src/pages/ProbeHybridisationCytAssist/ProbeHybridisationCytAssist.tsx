@@ -297,6 +297,7 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                                 />
                                 <FormikInput
                                   label={'Cassette Lot'}
+                                  data-testid={'cassetteLotAll'}
                                   name={'cassetteLotAll'}
                                   onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
                                     await setValues((prev) => ({
