@@ -36,6 +36,7 @@ describe('CytAssist Probe Hybridisation', () => {
     });
     it('displays the scanned labware in probe table', () => {
       cy.findByTestId('labware.0.workNumber').should('be.visible');
+      cy.findByTestId('labware.0.cassetteLot').should('be.visible');
       cy.findByTestId('labware.0.customPanel').scrollIntoView().should('be.visible');
       cy.findByTestId('labware.0.probes.0.panel').should('be.visible');
       cy.findByTestId('labware.0.probes.0.lot').should('be.visible');
@@ -84,6 +85,18 @@ describe('CytAssist Probe Hybridisation', () => {
       });
     });
   });
+
+  describe('Cassette Lot for all', () => {
+    context('When Cassette Lot is entered for all labware', () => {
+      before(() => {
+        cy.findByTestId('cassetteLotAll').type('123456');
+      });
+      it('should enter 123456 for all labware', () => {
+        cy.findByTestId('labware.0.cassetteLot').should('contain.value', '123456');
+      });
+    });
+  });
+
   describe('Probe for all', () => {
     context('when probe settings are correctly entered', () => {
       before(() => {
