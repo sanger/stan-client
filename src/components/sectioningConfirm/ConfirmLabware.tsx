@@ -2,28 +2,23 @@ import React, { useEffect } from 'react';
 import { useMachine, useSelector } from '@xstate/react';
 import variants from '../../lib/motionVariants';
 import Labware from '../labware/Labware';
-import PinkButton from '../buttons/PinkButton';
-import Modal, { ModalBody, ModalFooter } from '../Modal';
 import Heading from '../Heading';
-import BlueButton from '../buttons/BlueButton';
 import { motion } from '../../dependencies/motion';
 import { selectOptionValues } from '../forms';
-import LayoutPlanner from '../LayoutPlanner';
 import Label from '../forms/Label';
-import { sortRightDown } from '../../lib/helpers/labwareHelper';
 import LabwareComments, { SectionNumberSetting } from './LabwareComments';
-import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../pages/sectioning';
+import { buildSlotColor, buildSlotText } from '../../pages/sectioning';
 import { createConfirmLabwareMachine } from './confirmLabware.machine';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
-import { CommentFieldsFragment, ConfirmSectionLabware, SlotRegionFieldsFragment } from '../../types/sdk';
+import { CommentFieldsFragment, ConfirmSectionLabware } from '../../types/sdk';
 import RemoveButton from '../buttons/RemoveButton';
-import { ConfirmationModal } from '../modal/ConfirmationModal';
-import { SectionNumberMode } from './SectioningConfirm';
-import { LabwareTypeName } from '../../types/stan';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { Position } from '../../lib/helpers';
 import WorkNumberSelect from '../WorkNumberSelect';
 import { selectConfirmOperationLabware } from './index';
+import { SectionNumberMode } from './SectioningConfirm';
+import { LabwareTypeName } from '../../types/stan';
+import { ConfirmationModal } from '../modal/ConfirmationModal';
 
 interface ConfirmLabwareProps {
   /**
@@ -40,14 +35,7 @@ interface ConfirmLabwareProps {
    */
   comments: Array<CommentFieldsFragment>;
 
-  /**
-   * The list of regions in slot that will be available for the user to choose for each section.
-   * Region is to specify where the user is keeping the section of a sample in a slot, if there are multiple samples(/sections)
-   */
-  slotRegions: Array<SlotRegionFieldsFragment>;
-
-  /**
-   * Is section number enabled?
+  /* Is section number enabled?
    */
   sectionNumberEnabled?: boolean;
 
@@ -66,41 +54,23 @@ interface ConfirmLabwareProps {
   removePlan: (barcode: string) => void;
 
   /**
-   * Callback on section updates
-   * @param layoutPlan : Plan in which section chnaged
-   */
-  onSectionUpdate?: (layoutPlan: LayoutPlan) => void;
-
-  /**
    * Callback on section number changes
    * @param layoutPlan - Plan changed
    * @param slotAddress - Address of the slot in which the section belongs
-   * @param sectionIndex - Index of section in slot
    * @param sectionNumber - New section number
    */
-  onSectionNumberChange?: (
-    layoutPlan: LayoutPlan,
-    slotAddress: string,
-    sectionIndex: number,
-    sectionNumber: number
-  ) => void;
+  onSectionNumberChange?: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: number) => void;
 
-  onSectionThicknessChange?: (
-    layoutPlan: LayoutPlan,
-    slotAddress: string,
-    sectionIndex: number,
-    sectionThickness: string
-  ) => void;
+  onSectionThicknessChange?: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionThickness: string) => void;
 }
 
 const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   workNumber,
   originalLayoutPlan,
   comments,
-  slotRegions,
   onChange,
   sectionNumberEnabled = true,
-  onSectionUpdate,
+  // onSectionUpdate,
   onSectionNumberChange,
   removePlan,
   mode,
@@ -112,8 +82,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   const [current, send, service] = useMachine(confirmLabwareMachine);
   const confirmOperationLabware = useSelector(service, selectConfirmOperationLabware);
 
-  const { addressToCommentMap, labware, layoutPlan, commentsForAllSections } = current.context;
-  const { layoutMachine } = current.context;
+  const { labware, layoutPlan, commentsForAllSections } = current.context;
   const [notifyDelete, setNotifyDelete] = React.useState(false);
   const notifySectionChange = React.useRef(false);
 
@@ -123,25 +92,22 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     }
   }, [onChange, confirmOperationLabware]);
 
-  useEffect(() => {
-    //Notify parent only for layout changes
-    if (layoutPlan && current.matches('editableMode') && notifySectionChange.current) {
-      notifySectionChange.current = false;
-      onSectionUpdate && onSectionUpdate(layoutPlan);
-    }
-  }, [layoutPlan, service, onSectionUpdate, current, layoutMachine]);
-
-  /***Update sources whenever there is an update in a source in parent**/
-  useEffect(() => {
-    if (originalLayoutPlan) {
-      send({ type: 'UPDATE_ALL_SOURCES', plannedActions: originalLayoutPlan.plannedActions });
-    }
-  }, [originalLayoutPlan, send]);
+  //
+  // useEffect(() => {
+  //   //Notify parent only for layout changes
+  //   if (layoutPlan && current.matches('editableMode') && notifySectionChange.current) {
+  //     notifySectionChange.current = false;
+  //     onSectionUpdate && onSectionUpdate(layoutPlan);
+  //   }
+  // }, [layoutPlan, service, onSectionUpdate, current, layoutMachine]);
 
   const handleRemovePlan = React.useCallback(() => {
+    console.log('==================== Handle Remove Plan ==================== 1');
     if (mode === SectionNumberMode.Auto && sectionNumberEnabled) {
       setNotifyDelete(true);
     } else {
+      console.log('==================== Handle Remove Plan ====================');
+      console.log(layoutPlan.destinationLabware.barcode);
       notifySectionChange.current = true;
       removePlan(layoutPlan.destinationLabware.barcode!);
     }
@@ -181,17 +147,11 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
             labware={labware}
-            onClick={() => sectionNumberEnabled && send({ type: 'EDIT_LAYOUT' })}
             slotText={(address) => buildSlotText(layoutPlan, address)}
-            slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
             slotColor={(address) => buildSlotColor(layoutPlan, address)}
             barcodeInfoPosition={Position.TopRight}
+            sectionGroups={layoutPlan.plannedActions}
           />
-          {sectionNumberEnabled && (
-            <PinkButton disabled={current.matches('done')} onClick={() => send({ type: 'EDIT_LAYOUT' })}>
-              Edit Layout
-            </PinkButton>
-          )}
         </div>
         {sectionNumberEnabled && (
           <div className="p-4 space-y-2 space-x-2 bg-gray-100">
@@ -200,18 +160,16 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             </Heading>
             <div className={'grid grid-cols-4 gap-x-1 py-2 text-gray-500 text-center'}>
               <div>Section number</div>
+              <div>Address(es)</div>
               <div>Section Thickness</div>
-              <div>Region</div>
               <div>Comment</div>
             </div>
             <div className="w-full space-y-4">
               <div data-testid="labware-comments" className={'flex flex-col space-y-4'}>
-                {sortRightDown(labware.slots).map((slot) => (
+                {Object.keys(layoutPlan.plannedActions).map((sectionGroupId) => (
                   <LabwareComments
-                    key={slot.address}
-                    slot={slot}
-                    slotRegions={slotRegions}
-                    value={addressToCommentMap.get(slot.address) ?? ''}
+                    key={sectionGroupId}
+                    sectionGroupId={sectionGroupId}
                     disabledComment={current.matches('done')}
                     sectionNumberDisplay={
                       labware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER
@@ -222,46 +180,28 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                     }
                     comments={comments}
                     layoutPlan={layoutPlan}
-                    onSlotRegionChange={(slotAddress, sectionIndex, region) =>
-                      send({
-                        type: 'SET_REGION_FOR_SECTION',
-                        address: slot.address,
-                        sectionIndex,
-                        region
-                      })
-                    }
-                    onCommentChange={(slotAddress, sectionIndex, commentIds) => {
-                      send({
-                        type: 'SET_COMMENT_FOR_ADDRESS',
-                        address: slot.address,
-                        commentId: commentIds.length > 0 ? commentIds[0] : ''
-                      });
+                    onCommentChange={(commentIds) => {
                       send({
                         type: 'SET_COMMENTS_FOR_SECTION',
-                        address: slot.address,
-                        sectionIndex,
+                        sectionGroupId,
                         commentIds
                       });
                     }}
-                    onSectionNumberChange={(slotAddress, sectionIndex, sectionNumber) => {
-                      /**Notify parent, so as to modify section number in original layout*/
-                      onSectionNumberChange &&
-                        onSectionNumberChange(layoutPlan, slotAddress, sectionIndex, sectionNumber);
-                      send({
-                        type: 'UPDATE_SECTION_NUMBER',
-                        slotAddress,
-                        sectionIndex,
-                        sectionNumber
-                      });
-                    }}
-                    onSectionThicknessChange={(slotAddress, sectionIndex, thickness) => {
-                      onSectionThicknessChange &&
-                        onSectionThicknessChange(layoutPlan, slotAddress, sectionIndex, thickness);
+                    onSectionThicknessChange={(sectionGroupId, thickness) => {
+                      onSectionThicknessChange && onSectionThicknessChange(layoutPlan, sectionGroupId, thickness);
                       send({
                         type: 'UPDATE_SECTION_THICKNESS',
-                        slotAddress,
-                        sectionIndex,
+                        sectionGroupId,
                         thickness
+                      });
+                    }}
+                    onSectionNumberChange={(sectionGroupId, sectionNumber) => {
+                      /**Notify parent, so as to modify section number in original layout*/
+                      onSectionNumberChange && onSectionNumberChange(layoutPlan, sectionGroupId, sectionNumber);
+                      send({
+                        type: 'UPDATE_SECTION_NUMBER',
+                        sectionGroupId,
+                        sectionNumber
                       });
                     }}
                   />
@@ -287,59 +227,28 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
           </div>
         )}
       </div>
-
-      <Modal show={current.matches('editingLayout')}>
-        <ModalBody>
-          <Heading level={3}>Set Layout</Heading>
-          {layoutMachine && (
-            <LayoutPlanner actor={layoutMachine}>
-              <div className="my-2 text-gray-900 text-sm leading-normal">
-                <p>Click a slot to increase the number of sections in that slot.</p>
-                <p>To reduce the number of sections in a slot, use Ctrl-Click.</p>
-              </div>
-            </LayoutPlanner>
-          )}
-        </ModalBody>
-        {layoutMachine && (
-          <ModalFooter>
-            <BlueButton
-              onClick={() => {
-                notifySectionChange.current = true;
-                layoutMachine.send({ type: 'DONE' });
-              }}
-              className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Done
-            </BlueButton>
-          </ModalFooter>
-        )}
-      </Modal>
-      {
-        <ConfirmationModal
-          show={notifyDelete}
-          header={'Removing labware'}
-          message={{ type: 'Warning', text: 'Section number update' }}
-          confirmOptions={[
-            {
-              label: 'Cancel',
-              action: () => {
-                setNotifyDelete(false);
-              }
-            },
-            {
-              label: 'Continue',
-              action: () => {
-                layoutPlan &&
-                  layoutPlan.destinationLabware.barcode &&
-                  removePlan(layoutPlan.destinationLabware.barcode);
-                setNotifyDelete(false);
-              }
+      <ConfirmationModal
+        show={notifyDelete}
+        header={'Removing labware'}
+        message={{ type: 'Warning', text: 'Section number update' }}
+        confirmOptions={[
+          {
+            label: 'Cancel',
+            action: () => {
+              setNotifyDelete(false);
             }
-          ]}
-        >
-          <p className={'font-bold mt-8'}>Planned section numbers of other labware will be updated.</p>
-        </ConfirmationModal>
-      }
+          },
+          {
+            label: 'Continue',
+            action: () => {
+              layoutPlan && layoutPlan.destinationLabware.barcode && removePlan(layoutPlan.destinationLabware.barcode);
+              setNotifyDelete(false);
+            }
+          }
+        ]}
+      >
+        <p className={'font-bold mt-8'}>Planned section numbers of other labware will be updated.</p>
+      </ConfirmationModal>
     </motion.div>
   );
 };

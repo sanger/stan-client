@@ -1,0 +1,5 @@
+query GetSectioningComments {
+  comments(category: "section") {
+    ...CommentFields
+  }
+}

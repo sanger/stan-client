@@ -58,6 +58,7 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
   const [current, send] = useMachine(memoPlanFinderMachine);
   const { plans, requestError, validationError } = current.context;
   const showError = requestError || validationError;
+
   /**
    * Whenever the plans are updated, call the onChange callback
    */
@@ -83,7 +84,10 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
    * Callback for removing a plan by barcode
    */
   const removePlanByBarcode = useCallback(
-    (barcode: string) => send({ type: 'REMOVE_PLAN_BY_BARCODE', barcode }),
+    (barcode: string) => {
+      console.log('REMOVE PLANBER BArcode');
+      send({ type: 'REMOVE_PLAN_BY_BARCODE', barcode });
+    },
     [send]
   );
   const memoizedChildren = React.useMemo(

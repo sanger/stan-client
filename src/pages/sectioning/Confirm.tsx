@@ -1,7 +1,7 @@
 import React from 'react';
 import AppShell from '../../components/AppShell';
 import { reload } from '../../lib/sdk';
-import { FindPlanDataQuery, GetSectioningConfirmInfoQuery, LabwareFieldsFragment } from '../../types/sdk';
+import { FindPlanDataQuery, GetSectioningCommentsQuery, LabwareFieldsFragment } from '../../types/sdk';
 import SectioningConfirm from '../../components/sectioningConfirm/SectioningConfirm';
 import { Link, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { useConfirmLeave } from '../../lib/hooks';
@@ -16,7 +16,7 @@ import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 import PromptOnLeave from '../../components/notifications/PromptOnLeave';
 
 function Confirm() {
-  const sectioningConfirmInfo = useLoaderData() as GetSectioningConfirmInfoQuery;
+  const sectionComments = (useLoaderData() as GetSectioningCommentsQuery).comments;
   const location = useLocation();
   const state = location.state as { plans?: Array<FindPlanDataQuery> };
   const plans: Array<FindPlanDataQuery> = state?.plans ?? [];
@@ -48,8 +48,7 @@ function Confirm() {
           {confirmedLabwares.length <= 0 ? (
             <SectioningConfirm
               initialPlans={plans}
-              comments={sectioningConfirmInfo.comments}
-              slotRegions={sectioningConfirmInfo.slotRegions}
+              comments={sectionComments}
               onConfirmed={(labwares) => {
                 if (labwares) {
                   setConfirmedLabwares(labwares ?? []);

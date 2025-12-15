@@ -5,38 +5,23 @@ import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import RemoveIcon from '../icons/RemoveIcon';
 import { createConfirmLabwareMachine } from './confirmLabware.machine';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
-import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../pages/sectioning';
+import { buildSlotColor, buildSlotText } from '../../pages/sectioning';
 import { Input } from '../forms/Input';
-import Modal, { ModalBody, ModalFooter } from '../Modal';
-import Heading from '../Heading';
-import LayoutPlanner from '../LayoutPlanner';
-import BlueButton from '../buttons/BlueButton';
-import PinkButton from '../buttons/PinkButton';
 import Labware from '../labware/Labware';
 import { CommentFieldsFragment, ConfirmSectionLabware } from '../../types/sdk';
-import { ConfirmationModal } from '../modal/ConfirmationModal';
-import { SectionNumberMode } from './SectioningConfirm';
 import { Position } from '../../lib/helpers';
-import WorkNumberSelect from '../WorkNumberSelect';
 import { selectConfirmOperationLabware } from './index';
+import { SectionNumberMode } from './SectioningConfirm';
+import WorkNumberSelect from '../WorkNumberSelect';
+import { ConfirmationModal } from '../modal/ConfirmationModal';
 
 interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
   onSectionUpdate: (layoutPlan: LayoutPlan) => void;
-  onSectionNumberChange: (
-    layoutPlan: LayoutPlan,
-    slotAddress: string,
-    sectionIndex: number,
-    sectionNumber: number
-  ) => void;
-  onSectionThicknessChange: (
-    layoutPlan: LayoutPlan,
-    slotAddress: string,
-    sectionIndex: number,
-    sectionThickness: string
-  ) => void;
+  onSectionNumberChange: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: number) => void;
+  onSectionThicknessChange: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionThickness: string) => void;
   mode: SectionNumberMode;
   workNumber: string;
 }
@@ -99,18 +84,8 @@ interface TubeRowProps {
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
   onSectionUpdate: (layoutPlan: LayoutPlan) => void;
-  onSectionNumberChange: (
-    layoutPlan: LayoutPlan,
-    slotAddress: string,
-    sectionIndex: number,
-    sectionNumber: number
-  ) => void;
-  onSectionThicknessChange: (
-    layoutPlan: LayoutPlan,
-    slotAddress: string,
-    sectionIndex: number,
-    sectionThickness: string
-  ) => void;
+  onSectionNumberChange: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: number) => void;
+  onSectionThicknessChange: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionThickness: string) => void;
   mode: SectionNumberMode;
   workNumber: string;
 }
@@ -129,7 +104,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
     return createConfirmLabwareMachine(comments, initialLayoutPlan.destinationLabware, initialLayoutPlan, workNumber);
   }, [comments, initialLayoutPlan, workNumber]);
   const [current, send, service] = useMachine(confirmLabwareMachine);
-  const { cancelled, layoutPlan, labware, layoutMachine } = current.context;
+  const { cancelled, layoutPlan, labware } = current.context;
   const [notifyCancel, setNotifyCancel] = React.useState(false);
   const notifySectionChange = React.useRef(false);
 
@@ -152,11 +127,6 @@ const TubeRow: React.FC<TubeRowProps> = ({
     }
   }, [layoutPlan, service, onSectionUpdate, current]);
 
-  /**Update for source changes in parent**/
-  useEffect(() => {
-    send({ type: 'UPDATE_ALL_SOURCES', plannedActions: initialLayoutPlan.plannedActions });
-  }, [initialLayoutPlan, send]);
-
   const rowClassnames = classNames(
     {
       'opacity-50': cancelled
@@ -175,27 +145,25 @@ const TubeRow: React.FC<TubeRowProps> = ({
 
   /***Update section numbers and thickness **/
   const handleOnChange = useCallback(
-    (slotAddress: string, sectionNumber: number, sectionIndex: number) => {
+    (sectionGroupId: string, sectionNumber: number) => {
       /**Notify parent, so as to modify section number in original layout**/
-      onSectionNumberChange(layoutPlan, slotAddress, sectionIndex, sectionNumber);
+      onSectionNumberChange(layoutPlan, sectionGroupId, sectionNumber);
       send({
         type: 'UPDATE_SECTION_NUMBER',
-        slotAddress,
-        sectionNumber,
-        sectionIndex
+        sectionGroupId,
+        sectionNumber
       });
     },
     [send, layoutPlan, onSectionNumberChange]
   );
 
   const handleSectionThicknessOnChange = useCallback(
-    (slotAddress: string, sectionIndex: number, sectionThickness: string) => {
-      onSectionThicknessChange(layoutPlan, slotAddress, sectionIndex, sectionThickness);
+    (sectionGroupId: string, sectionThickness: string) => {
+      onSectionThicknessChange(layoutPlan, sectionGroupId, sectionThickness);
       send({
         type: 'UPDATE_SECTION_THICKNESS',
-        slotAddress,
         thickness: sectionThickness,
-        sectionIndex
+        sectionGroupId
       });
     },
     [send, layoutPlan, onSectionThicknessChange]
@@ -230,18 +198,10 @@ const TubeRow: React.FC<TubeRowProps> = ({
           <div className="py-4 flex flex-col items-center justify-between space-y-8">
             <Labware
               labware={labware}
-              onClick={() => {
-                !cancelled && send({ type: 'EDIT_LAYOUT' });
-              }}
               slotText={(address) => buildSlotText(layoutPlan, address)}
-              slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
               slotColor={(address) => buildSlotColor(layoutPlan, address)}
               barcodeInfoPosition={Position.TopRight}
             />
-
-            <PinkButton disabled={current.matches('.done')} onClick={() => !cancelled && send({ type: 'EDIT_LAYOUT' })}>
-              Edit Layout
-            </PinkButton>
           </div>
         </TableCell>
 
@@ -262,37 +222,35 @@ const TubeRow: React.FC<TubeRowProps> = ({
           />
         </TableCell>
         <TableCell>
-          {layoutPlan.plannedActions.get('A1')?.map((source, index) => (
-            <div className="mb-1">
-              <Input
-                key={source.address + String(index)}
-                data-testid={`section-thickness-tube-${layoutPlan.destinationLabware.barcode}`}
-                type="number"
-                value={source.sampleThickness}
-                min={0.5}
-                step={0.5}
-                onClick={(e) => e.stopPropagation()}
-                onChange={(e) => handleSectionThicknessOnChange('A1', index, e.target.value)}
-              />
-            </div>
-          ))}
+          <div className="mb-1">
+            <Input
+              data-testid={`section-thickness-tube-${layoutPlan.destinationLabware.barcode}`}
+              type="number"
+              value={layoutPlan.plannedActions['A1'].source.sampleThickness}
+              min={0.5}
+              step={0.5}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => handleSectionThicknessOnChange('A1', e.target.value)}
+            />
+          </div>
         </TableCell>
         <TableCell>
-          {layoutPlan.plannedActions.get('A1')?.map((source, index) => (
-            <div className="mb-1">
-              <Input
-                key={source.address + String(index)}
-                data-testid={`sectionnumber-tube-${layoutPlan.destinationLabware.barcode}`}
-                type="number"
-                value={source.newSection === 0 ? '' : String(source.newSection)}
-                min={1}
-                disabled={cancelled || mode === SectionNumberMode.Auto}
-                // So the row click handler doesn't get triggered
-                onClick={(e) => e.stopPropagation()}
-                onChange={(e) => handleOnChange('A1', Number(e.target.value), index)}
-              />
-            </div>
-          ))}
+          <div className="mb-1">
+            <Input
+              data-testid={`sectionnumber-tube-${layoutPlan.destinationLabware.barcode}`}
+              type="number"
+              value={
+                layoutPlan.plannedActions['A1'].source.newSection === 0
+                  ? ''
+                  : String(layoutPlan.plannedActions['A1'].source.newSection)
+              }
+              min={1}
+              disabled={cancelled || mode === SectionNumberMode.Auto}
+              // So the row click handler doesn't get triggered
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => handleOnChange('A1', Number(e.target.value))}
+            />
+          </div>
         </TableCell>
         <TableCell onClick={handleOnRemoveClick}>
           <RemoveIcon
@@ -301,32 +259,6 @@ const TubeRow: React.FC<TubeRowProps> = ({
           />
         </TableCell>
       </tr>
-      {layoutMachine && (
-        <Modal show={current.matches('editingLayout')}>
-          <ModalBody>
-            <Heading level={3}>Set Layout</Heading>
-            {layoutMachine && (
-              <LayoutPlanner actor={layoutMachine}>
-                <div className="my-2 text-gray-900 text-sm leading-normal">
-                  <p>Click a slot to increase the number of sections in that slot.</p>
-                  <p>To reduce the number of sections in a slot, use Ctrl-Click.</p>
-                </div>
-              </LayoutPlanner>
-            )}
-          </ModalBody>
-          <ModalFooter>
-            <BlueButton
-              onClick={() => {
-                notifySectionChange.current = true;
-                layoutMachine.send({ type: 'DONE' });
-              }}
-              className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Done
-            </BlueButton>
-          </ModalFooter>
-        </Modal>
-      )}
     </>
   );
 };

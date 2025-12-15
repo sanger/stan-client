@@ -126,9 +126,9 @@ export const planFinderMachine = (plans: Map<string, FindPlanDataQuery>) =>
         clearErrors: assign(({ context }) => {
           return { ...context, requestError: null, validationError: null };
         }),
-
         removePlanByBarcode: assign(({ context, event }) => {
           if (event.type !== 'REMOVE_PLAN_BY_BARCODE') return context;
+          console.log('removing plan for barcode:', event.barcode);
           return produce(context, (draft) => {
             draft.plans.delete(event.barcode);
           });

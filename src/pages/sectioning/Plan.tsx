@@ -38,7 +38,7 @@ function Plan() {
   /**
    * The list of currently completed plans from the planner
    */
-  const [planProps, setPlanProps] = useState<Maybe<PlanChangedProps<PlanMutation>>>(null);
+  const [planProps, setPlanProps] = useState<Maybe<PlanChangedProps<PlanMutationWithGroups>>>(null);
 
   /**
    * For tracking whether the user gets a prompt if they tried to navigate to another page
@@ -64,7 +64,7 @@ function Plan() {
    * Callback for when a user adds or removes a plan.
    */
   const handlePlanChange = useCallback(
-    (props: PlanChangedProps<PlanMutation>) => {
+    (props: PlanChangedProps<PlanMutationWithGroups>) => {
       const allPlansComplete = props.completedPlans.length > 0 && props.numberOfPlans === props.completedPlans.length;
       setShouldConfirm(!allPlansComplete);
       setPlanProps(props);
@@ -77,7 +77,7 @@ function Plan() {
     sourceLabware: LabwareFlaggedFieldsFragment[],
     sampleColors: Map<number, string>,
     deleteAction: (cid: string) => void,
-    confirmAction?: (cid: string, plan: PlanMutation) => void
+    confirmAction?: (cid: string, plan: PlanMutationWithGroups) => void
   ) => {
     return (
       <>
@@ -138,7 +138,7 @@ function Plan() {
       </AppShell.Header>
       <AppShell.Main>
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
-          <Planner<PlanMutation>
+          <Planner<PlanMutationWithGroups>
             operationType={'Section'}
             numPlansToCreate={numLabware}
             sectionThickness={sectionThickness}
@@ -172,10 +172,12 @@ function Plan() {
 
 export default Plan;
 
+export type PlanMutationWithGroups = PlanMutation & { groups: Array<Array<string>> };
+
 /**
  * Useful for passing as initial state to Sectioning Confirm.
  */
-function planPropsToPlanData(planProps: Maybe<PlanChangedProps<PlanMutation>>): Array<FindPlanDataQuery> {
+function planPropsToPlanData(planProps: Maybe<PlanChangedProps<PlanMutationWithGroups>>): Array<FindPlanDataQuery> {
   if (planProps == null) {
     return [];
   }
@@ -194,6 +196,10 @@ function planPropsToPlanData(planProps: Maybe<PlanChangedProps<PlanMutation>>): 
     .groupBy((pa) => pa.destination.labwareId)
     .value();
 
+  const groups = _(planProps.completedPlans)
+    .flatMap((cp) => cp.groups)
+    .value();
+
   return Object.keys(planActions).map((labwareId) => {
     return {
       planData: {
@@ -204,7 +210,8 @@ function planPropsToPlanData(planProps: Maybe<PlanChangedProps<PlanMutation>>): 
             name: 'Section'
           },
           planActions: planActions[labwareId]
-        }
+        },
+        groups: groups
       }
     };
   });
