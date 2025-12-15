@@ -20,7 +20,7 @@ const ProbeSettings: React.FC<ProbePanelInfo> = ({ probesOptions, probeLabware, 
 
   return (
     <>
-      <div className="grid grid-cols-5 w-full gap-x-2 ">
+      <div className="grid grid-cols-4 w-full gap-x-2 ">
         <div data-testid={probeLabware.labware.barcode}>
           <Labware
             labware={probeLabware.labware}
@@ -35,8 +35,8 @@ const ProbeSettings: React.FC<ProbePanelInfo> = ({ probesOptions, probeLabware, 
             highlightedSlots={new Set(values.labware[lwIndex].addresses?.split(',').map((addr) => addr.trim()) || [])}
           />
         </div>
-        <div className="col-span-4">
-          <div className="grid grid-cols-3 w-full gap-4 mb-4 ">
+        <div className="col-span-3">
+          <div className="grid grid-cols-4 w-full gap-4 mb-4 ">
             <WorkNumberSelect
               label="SGP Number"
               name={`labware.${lwIndex}.workNumber`}
