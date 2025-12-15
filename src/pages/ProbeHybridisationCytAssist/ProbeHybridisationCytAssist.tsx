@@ -39,6 +39,7 @@ export type ProbeHybridisationCytAssistFormValues = {
   workNumberAll: string;
   customPanelAll?: string;
   probePanelAll: CytAssistProbe;
+  cassetteLotAll?: string;
 };
 
 type ProbeOperationLabwareForm = {
@@ -48,6 +49,7 @@ type ProbeOperationLabwareForm = {
   customPanel?: string;
   activeProbeIndex?: number;
   addresses?: string;
+  cassetteLot?: string;
 };
 
 export type CytAssistProbe = {
@@ -63,7 +65,8 @@ const formInitialValues: ProbeHybridisationCytAssistFormValues = {
   labware: [],
   performed: getCurrentDateTime(),
   workNumberAll: '',
-  probePanelAll: probeLotDefault
+  probePanelAll: probeLotDefault,
+  cassetteLotAll: ''
 };
 
 export type ProbesOptions = {
@@ -113,6 +116,7 @@ const ProbeHybridisationCytAssist: React.FC = () => {
       .max(currentTime, 'Please select a date and time on or before current time')
       .required('Start Time is a required field')
       .label('Start Time'),
+    cassetteLotAll: Yup.string().matches(/^\d{6}$/, 'Cassette Lot should be a string of 6 digits'),
     probePanelAll: Yup.object().shape({
       panel: Yup.string(),
       lot: Yup.string()
@@ -129,6 +133,7 @@ const ProbeHybridisationCytAssist: React.FC = () => {
           labware: Yup.object().required(),
           workNumber: Yup.string().required().label('SGP Number'),
           customPanel: Yup.string().optional(),
+          cassetteLot: Yup.string().matches(/^\d{6}$/, 'Cassette Lot should be a string of 6 digits'),
           probes: Yup.array()
             .of(
               Yup.object().shape({
@@ -185,6 +190,7 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                       workNumber: probeLw.workNumber,
                       spike: probeLw.customPanel,
                       addresses: probeLw.addresses?.split(',').map((addr) => addr.trim()),
+                      cassetteLot: probeLw.cassetteLot,
                       probes: probeLw.probes.map((probe) => ({
                         name: probe.panel,
                         lot: probe.lot,
@@ -211,6 +217,7 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                                 labware: lw as LabwareFieldsFragment,
                                 workNumber: values.workNumberAll,
                                 customPanel: values.customPanelAll,
+                                cassetteLot: values.cassetteLotAll,
                                 probes: [
                                   {
                                     panel: 'Human WT Probes',
@@ -249,7 +256,7 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                             <Heading level={3}>Apply to all</Heading>
                             <div className={'flex flex-col mt-4'}>
                               <div className={'w-full border-2 border-gray-100 mb-4'} />
-                              <div className={'grid grid-cols-5 gap-x-4'}>
+                              <div className={'grid grid-cols-6 gap-x-4'}>
                                 <WorkNumberSelect
                                   label={'SGP Number'}
                                   name={'workNumberAll'}
@@ -286,6 +293,20 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                                         }))
                                       };
                                     });
+                                  }}
+                                />
+                                <FormikInput
+                                  label={'Cassette Lot'}
+                                  name={'cassetteLotAll'}
+                                  onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                    await setValues((prev) => ({
+                                      ...prev,
+                                      cassetteLotAll: e.target.value,
+                                      labware: prev.labware.map((lw) => ({
+                                        ...lw,
+                                        cassetteLot: e.target.value
+                                      }))
+                                    }));
                                   }}
                                 />
                                 <div className={'col-span-3'}>
