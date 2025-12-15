@@ -44,6 +44,7 @@ interface OutputLabwareScanPanelProps {
   children?: React.ReactNode;
   onReagentLotNumberChange: (reagentLotNumber: string, reagentType: CytAssistReagentType) => void;
   onChangeReagentCosting: (costing: string) => void;
+  onChangeCassetteLot: (cassetteLot: string) => void;
 }
 
 export type CytAssistOutputLabwareForm = {
@@ -56,10 +57,12 @@ export type CytAssistOutputLabwareForm = {
   reagentALot: string;
   reagentBLot: string;
   reagentCosting: string;
+  cassetteLot: string;
 };
 
 const lotNumberRegex = /^\d{6,7}$/;
 const reagentLotNumberRegex = /^\d{6}$/;
+const cassetteLotRegex = /^\d{6}$/;
 
 const LP_NUMBERS = Array.from({ length: 20 }, (_, i) => `LP${i + 1}`);
 
@@ -111,7 +114,8 @@ const validationSchema = () => {
         : Yup.string()
             .required('Reagent lot is a required field for this labware type')
             .matches(reagentLotNumberRegex, 'Invalid format: Required 6 digit number');
-    })
+    }),
+    cassetteLot: Yup.string().optional().matches(cassetteLotRegex, 'Invalid format: Required 6 digit number')
   });
 };
 
@@ -130,6 +134,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   onChangeLpNumber,
   onReagentLotNumberChange,
   onChangeReagentCosting,
+  onChangeCassetteLot,
   draftedValues,
   children
 }) => {
@@ -263,6 +268,18 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
                 {errors.reagentLot && <MutedText className={'text-red-400'}>{errors.reagentLot}</MutedText>}
               </div>
             )}
+            <div data-testid={'cassette-lot'}>
+              <Label name={'Cassette Lot'} />
+              <ScanInput
+                onScan={(val) => onChangeCassetteLot(val)}
+                onBlur={(e) => {
+                  onChangeCassetteLot(e.currentTarget.value);
+                }}
+                allowEmptyValue={true}
+                name={'cassetteLot'}
+              />
+              {errors.cassetteLot && <MutedText className={'text-red-400'}>{errors.cassetteLot}</MutedText>}
+            </div>
           </div>
 
           {children}
@@ -420,6 +437,18 @@ const CytAssist = () => {
     [send, selectedDestination]
   );
 
+  const handleChangeCassetteLot = React.useCallback(
+    (cassetteLot: string) => {
+      if (!selectedDestination) return;
+      send({
+        type: 'UPDATE_CASSETTE_LOT',
+        labware: selectedDestination.labware,
+        cassetteLot
+      });
+    },
+    [send, selectedDestination]
+  );
+
   /**
    * Save action invoked, so check whether a warning to be given to user if any labware with no perm done is copied
    ***/
@@ -494,9 +523,11 @@ const CytAssist = () => {
                 reagentLot: selectedDestination ? selectedDestination.slotCopyDetails.reagentLot ?? '' : '',
                 reagentALot: selectedDestination ? selectedDestination.slotCopyDetails.reagentALot ?? '' : '',
                 reagentBLot: selectedDestination ? selectedDestination.slotCopyDetails.reagentBLot ?? '' : '',
-                reagentCosting: selectedDestination ? selectedDestination.slotCopyDetails.reagentCosting ?? '' : ''
+                reagentCosting: selectedDestination ? selectedDestination.slotCopyDetails.reagentCosting ?? '' : '',
+                cassetteLot: selectedDestination ? selectedDestination.slotCopyDetails.cassetteLot ?? '' : ''
               }}
               onReagentLotNumberChange={handleChangeReagentLot}
+              onChangeCassetteLot={handleChangeCassetteLot}
             >
               <MultipleLabwareSlotMapper
                 locked={current.matches('copied')}
