@@ -429,6 +429,7 @@ describe('CytAssist Page', () => {
                     preBarcode: 'V42A20-3752023-10-20',
                     lotNumber: '1112543',
                     costing: SlideCosting.Faculty,
+                    cassetteLot: '123456',
                     sources: [],
                     contents: [
                       {
@@ -581,6 +582,12 @@ function enterReagentBLOTNumber(lotNumber: string) {
   cy.findByTestId('reagentBLot').clear().type(`${lotNumber}{enter}`);
 }
 
+function enterCassetteLot(number: string = '123456') {
+  cy.findByTestId('cassetteLot').within(() => {
+    cy.findByRole('textbox').clear().type(`${number}{enter}`).blur();
+  });
+}
+
 function enterLpNumber(lpNumber: string = 'LP1') {
   selectOption('lpNumber', lpNumber);
 }
@@ -597,6 +604,7 @@ const fillForm = () => {
   selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD);
   selectSlideCostings('Faculty');
   enterLOTNumber();
+  enterCassetteLot();
   cy.findByTestId('external-barcode').within(() => {
     cy.findByRole('textbox').wait(500).clear().type('H1-9D8VN2V{enter}').blur();
   });
