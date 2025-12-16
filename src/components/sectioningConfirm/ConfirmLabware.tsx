@@ -70,7 +70,6 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   comments,
   onChange,
   sectionNumberEnabled = true,
-  // onSectionUpdate,
   onSectionNumberChange,
   removePlan,
   mode,
@@ -102,12 +101,9 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   // }, [layoutPlan, service, onSectionUpdate, current, layoutMachine]);
 
   const handleRemovePlan = React.useCallback(() => {
-    console.log('==================== Handle Remove Plan ==================== 1');
     if (mode === SectionNumberMode.Auto && sectionNumberEnabled) {
       setNotifyDelete(true);
     } else {
-      console.log('==================== Handle Remove Plan ====================');
-      console.log(layoutPlan.destinationLabware.barcode);
       notifySectionChange.current = true;
       removePlan(layoutPlan.destinationLabware.barcode!);
     }

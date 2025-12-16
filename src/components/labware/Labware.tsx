@@ -410,26 +410,23 @@ const Labware = ({
         <div className={gridClasses}>
           {buildAddresses({ numColumns, numRows }, gridDirection).map((address, i) => {
             return (
-              <>
-                <div key={address} className={`p-1 ${slotSectionBgColor()[address]} rounded-lg transition`}>
-                  <Slot
-                    key={i}
-                    address={address}
-                    slot={slotByAddress[address]}
-                    size={numColumns > 2 ? 'medium' : numColumns > 6 || numRows > 6 ? 'small' : 'large'}
-                    onClick={internalOnClick}
-                    onCtrlClick={onCtrlClick}
-                    onShiftClick={onShiftClick}
-                    onMouseEnter={onSlotMouseEnter}
-                    onMouseLeave={onSlotMouseLeave}
-                    text={slotText}
-                    secondaryText={slotSecondaryText}
-                    color={_slotColor}
-                    selected={selectedAddresses?.has(address) || (highlightedSlots?.has(address) ?? false)}
-                    isCleanedOut={cleanedOutAddresses?.includes(address)}
-                  />
-                </div>
-              </>
+              <div key={address} className={`p-1 ${slotSectionBgColor()[address]} rounded-lg transition`}>
+                <Slot
+                  address={address}
+                  slot={slotByAddress[address]}
+                  size={numColumns > 2 ? 'medium' : numColumns > 6 || numRows > 6 ? 'small' : 'large'}
+                  onClick={internalOnClick}
+                  onCtrlClick={onCtrlClick}
+                  onShiftClick={onShiftClick}
+                  onMouseEnter={onSlotMouseEnter}
+                  onMouseLeave={onSlotMouseLeave}
+                  text={slotText}
+                  secondaryText={slotSecondaryText}
+                  color={_slotColor}
+                  selected={selectedAddresses?.has(address) || (highlightedSlots?.has(address) ?? false)}
+                  isCleanedOut={cleanedOutAddresses?.includes(address)}
+                />
+              </div>
             );
           })}
         </div>

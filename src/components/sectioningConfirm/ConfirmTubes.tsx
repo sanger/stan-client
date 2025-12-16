@@ -169,6 +169,10 @@ const TubeRow: React.FC<TubeRowProps> = ({
     [send, layoutPlan, onSectionThicknessChange]
   );
 
+  const sectionNumber =
+    layoutPlan.plannedActions['A1'].source.newSection === 0 || cancelled
+      ? ''
+      : layoutPlan.plannedActions['A1'].source.newSection;
   return (
     <>
       <ConfirmationModal
@@ -197,6 +201,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
         <TableCell>
           <div className="py-4 flex flex-col items-center justify-between space-y-8">
             <Labware
+              key={layoutPlan.destinationLabware.barcode}
               labware={labware}
               slotText={(address) => buildSlotText(layoutPlan, address)}
               slotColor={(address) => buildSlotColor(layoutPlan, address)}
@@ -239,11 +244,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
             <Input
               data-testid={`sectionnumber-tube-${layoutPlan.destinationLabware.barcode}`}
               type="number"
-              value={
-                layoutPlan.plannedActions['A1'].source.newSection === 0
-                  ? ''
-                  : String(layoutPlan.plannedActions['A1'].source.newSection)
-              }
+              value={sectionNumber}
               min={1}
               disabled={cancelled || mode === SectionNumberMode.Auto}
               // So the row click handler doesn't get triggered

@@ -238,9 +238,6 @@ export function createSectioningConfirmMachine() {
             (csl) => csl.barcode === event.confirmSectionLabware.barcode
           );
           let confirmLabware = event.confirmSectionLabware;
-          console.log('======= UPDATE_CONFIRM_SECTION_LABWARE === ');
-          console.log(confirmLabware);
-          console.log(context);
           /**
            When the request is submitted for fetal waste labware, It needs to be sent with
            a ConfirmSection that has a destination address and a sample id,
@@ -546,7 +543,7 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
       if (planned) {
         const source: Source = {
           sampleId: planned.source.samples[0].id, // we only support single sample sources for sectioning,
-          newSection: planned.newSection!,
+          newSection: 0,
           sampleThickness: planned.sampleThickness?.toString(),
           labware: plan.planData.sources.find((lw) => lw.id === planned.source.labwareId)!
         };

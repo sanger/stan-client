@@ -154,7 +154,7 @@ export function findPlanData(sourceLabware: Labware, destinationLabware: Labware
           }
         ]
       },
-      groups: [['A1', 'A2'], ['B1', 'B2'], ['C1']]
+      groups: [['A1']]
     }
   };
 }

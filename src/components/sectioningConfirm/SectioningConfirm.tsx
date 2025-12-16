@@ -65,10 +65,6 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
     workNumber
   } = current.context;
 
-  console.log('==== SectioningConfirm Render ====');
-  console.log('Current State:', current.value);
-  console.log('Context:', current.context);
-
   /**
    * Call the {@code onConfirmed} callback when machine reaches the {@code confirmed} state
    */
@@ -271,7 +267,6 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
                           {lps.map((layoutPlan) => (
                             <ConfirmLabware
                               onChange={handleConfirmChange}
-                              // onSectionUpdate={handleSectionUpdate}
                               removePlan={removePlanByBarcode}
                               key={layoutPlan.destinationLabware.barcode}
                               originalLayoutPlan={layoutPlan}

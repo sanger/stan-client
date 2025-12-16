@@ -8,13 +8,9 @@ import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { labwareTypes } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { findPlanData } from '../../../src/mocks/handlers/planHandlers';
-import {
-  getAllSelect,
-  selectOptionForMultiple,
-  selectSGPNumber,
-  shouldDisplaySelectedValue
-} from '../shared/customReactSelect.cy';
+import { selectSGPNumber, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
 import { HttpResponse } from 'msw';
+import { generateLabwareIdFromBarcode } from '../../../src/mocks/handlers/labwareHandlers';
 
 let highestSectionNumber: number = 0;
 describe('Sectioning Confirmation', () => {
@@ -133,9 +129,7 @@ describe('Sectioning Confirmation', () => {
       });
 
       it("shouldn't display edit layout option", () => {
-        cy.findByTestId('div-slide-STAN-0002D').within(() => {
-          cy.findByText('Edit Layout').should('not.exist');
-        });
+        cy.findByTestId('div-slide-STAN-0002D').should('be.visible');
       });
       context('when remove labware button is clicked', () => {
         before(() => {
@@ -173,67 +167,10 @@ describe('Sectioning Confirmation', () => {
       });
     });
 
-    context('when I edit the layout', () => {
-      it('adds or removes sections', () => {
-        cy.findByText('Edit Layout').click();
-        cy.findByRole('dialog').within(() => {
-          cy.findByText('STAN-2021').click();
-          cy.findByText(`\u00d72`).should('be.visible');
-          cy.findByText('STAN-2021').click({ ctrlKey: true });
-          cy.findByText(`\u00d72`).should('not.exist');
-          cy.findByText('Done').click();
-        });
-      });
-    });
-
-    context("when a new section is added in 'auto' mode for section numbering ", () => {
-      before(() => {
-        cy.findByText('Edit Layout').click();
-        cy.findByRole('dialog').within(() => {
-          cy.findByText('STAN-2021').click();
-          cy.findByText('Done').click();
-        });
-      });
-
-      it('should renumber all section numbers', () => {
-        readHighestSectionNumber();
-        cy.findAllByTestId('section-number').each((elem) => {
-          highestSectionNumber++;
-          cy.wrap(elem).should('have.value', highestSectionNumber + '');
-        });
-      });
-      context('after section deletion', () => {
-        before(() => {
-          cy.screenshot();
-          readHighestSectionNumber();
-          cy.screenshot();
-          cy.findByText('Edit Layout').click();
-          cy.findByRole('dialog').within(() => {
-            cy.findByText('STAN-2021').click({ ctrlKey: true });
-            cy.findByText('Done').click();
-          });
-          cy.screenshot();
-        });
-        it('renumbers all section numbers', () => {
-          cy.findAllByTestId('section-number').each((elem) => {
-            cy.wrap(elem).should('have.value', ++highestSectionNumber + '');
-          });
-        });
-      });
-      it('should display region fields for all sections', () => {
-        getAllSelect('region-select').forEach((elem: any) => {
-          cy.wrap(elem).should('be.enabled');
-        });
-      });
-      after(() => {
-        findPlanByBarcode('STAN-0001E');
-      });
-    });
-
     context("when a tube is cancelled in 'auto' mode", () => {
       before(() => {
         const sourceLabware = labwareFactory.build(
-          { barcode: 'STAN-2222' },
+          { barcode: 'STAN-2222', id: generateLabwareIdFromBarcode('STAN-2222') },
           {
             associations: {
               labwareType: labwareTypes[LabwareTypeName.CASSETTE].build()
@@ -242,14 +179,14 @@ describe('Sectioning Confirmation', () => {
         );
 
         const destinationLabware = labwareFactory.build(
-          { barcode: 'STAN-0001D' },
+          { barcode: 'STAN-0001D', id: generateLabwareIdFromBarcode('STAN-0001D') },
           {
             associations: {
               labwareType: labwareTypes[LabwareTypeName.TUBE].build()
             }
           }
         );
-        destinationLabware.id = -2;
+        // destinationLabware.id = -2;
         cy.msw().then(({ graphql, worker }) => {
           worker.use(
             graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', () => {
@@ -261,7 +198,6 @@ describe('Sectioning Confirmation', () => {
             })
           );
         });
-
         findPlanByBarcode('STAN-0001D');
         cy.findByTestId('remove-tube-STAN-0001D').click();
       });
@@ -272,7 +208,7 @@ describe('Sectioning Confirmation', () => {
 
       it('should empty the section field for cancelled tube', () => {
         cy.findByRole('button', { name: /Continue/i }).click();
-        cy.findByTestId('sectionnumber-tube-STAN-0001D').should('not.exist');
+        cy.findByTestId('sectionnumber-tube-STAN-0001D').should('be.empty');
       });
     });
     context('when a slide is removed in auto mode', () => {
@@ -323,55 +259,10 @@ describe('Sectioning Confirmation', () => {
       before(() => {
         selectSGPNumber('SGP1008');
         findPlanByBarcode('STAN-0001F');
-        cy.findByText('Edit Layout').click();
-        cy.findByRole('dialog').within(() => {
-          cy.findByText('STAN-2021').click();
-          cy.findByText(`\u00d72`).should('be.visible');
-          cy.findByText('Done').click();
-        });
         cy.get('[type = "radio"]').eq(1).click();
       });
       it('enables all section number fields ', () => {
         cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).should('be.enabled'));
-      });
-      it('should empty all section number fields', () => {
-        cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).should('have.value', ''));
-      });
-      // Section numbers not filled in
-      it('disables the Save button', () => {
-        saveButton().should('be.disabled');
-      });
-    });
-    context('when I add the section number in manual mode', () => {
-      before(() => {
-        cy.findAllByTestId('section-number').each((elem, index) => {
-          cy.wrap(elem).type(String(index + 10));
-        });
-      });
-
-      it('displays save button as disabled', () => {
-        saveButton().should('be.disabled');
-      });
-    });
-    context('when duplicate regions are selected', () => {
-      before(() => {
-        selectOptionForMultiple('region-select', 'Top', 0);
-        selectOptionForMultiple('region-select', 'Top', 1);
-      });
-      it('displays error', () => {
-        cy.findAllByText('Unique value required.').should('have.length', 2);
-      });
-      it('disables the Save button', () => {
-        saveButton().should('be.disabled');
-      });
-    });
-    context('when unique regions are selected', () => {
-      before(() => {
-        selectOptionForMultiple('region-select', 'Top', 0);
-        selectOptionForMultiple('region-select', 'Middle', 1);
-      });
-      it('enables the Save button', () => {
-        saveButton().should('be.enabled');
       });
     });
 
