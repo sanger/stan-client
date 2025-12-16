@@ -268,7 +268,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
                 {errors.reagentLot && <MutedText className={'text-red-400'}>{errors.reagentLot}</MutedText>}
               </div>
             )}
-            <div data-testid={'cassette-lot'}>
+            <div data-testid={'cassetteLot'}>
               <Label name={'Cassette Lot'} />
               <ScanInput
                 onScan={(val) => onChangeCassetteLot(val)}
