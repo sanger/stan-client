@@ -110,19 +110,22 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
         });
     }, [layoutMachine, selectedSectionId]);
 
-    const processSectionGroup = useCallback(
+    const setSectionGroup = useCallback(() => {
+      layoutMachine &&
+        layoutMachine.send({
+          type: 'ADD_SECTION_GROUP',
+          sectionId: selectedSectionId
+        });
+    }, [layoutMachine, selectedSectionId]);
+
+    const setSelectedSectionId = useCallback(
       (sectionId: number) => {
         send({
           type: 'ASSIGN_SELECTED_SECTION_ID',
           sectionId
         });
-        layoutMachine &&
-          layoutMachine.send({
-            type: 'ADD_SECTION_GROUP',
-            sectionId
-          });
       },
-      [send, layoutMachine]
+      [send]
     );
 
     // Special case column that renders a label printer button for each row
@@ -254,7 +257,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                           )}
                           {Object.keys(current.context.layoutPlan.plannedActions).map((sectionGroupId) => (
                             <div key={sectionGroupId} className="grid grid-cols-2 text-center">
-                              <span className="font-medium text-gray-800 tracking-wide">
+                              <span className="font-medium text-gray-800 tracking-wide" data-testid="section-addresses">
                                 {Array.from(current.context.layoutPlan.plannedActions[sectionGroupId].addresses).join(
                                   ', '
                                 )}
@@ -336,29 +339,39 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                 <Heading level={5}>Define sections</Heading>
                 <p className="my-2 text-gray-900 text-xs leading-normal">
                   Hold 'Ctrl' (Cmd for Mac) key to select the slots that you would like to group into a section, then
-                  click 'Define section' to create it.
+                  click a section color to create it. To remove a section, select the section color that you would like
+                  to remove and click 'Remove section'.
                 </p>
-                <div className="grid grid-cols-2 mt-4">
-                  <div className="grid grid-cols-11">
+                <div className="grid grid-cols-2">
+                  <div className="grid grid-cols-19 gap-2">
                     {layoutMachine &&
                       SECTION_GROUPS_BG_COLORS.map((bgColor, index) => {
                         const highlightClass = selectedSectionId === index ? `ring-3 ring-offset-2 ring-gray-700` : '';
                         return (
                           <div
+                            data-testid={`section-group-color-${index}`}
                             className={`h-5 w-5 rounded-full ${bgColor} ${highlightClass}`}
                             onClick={() => {
-                              processSectionGroup(index);
+                              setSelectedSectionId(index);
                             }}
                           ></div>
                         );
                       })}
                   </div>
-                  <div className="text-xs font-medium  flex flex-row-reverse cursor-pointer">
+                  <div className="text-xs font-medium flex flex-row-reverse cursor-pointer">
                     <span
+                      data-testid="remove-section-button"
                       onClick={removeSectionGroup}
                       className="p-2 shadow-xs  text-red-700 underline hover:bg-gray-100 focus:border-sdb-400 focus:shadow-md-outline-sdb active:bg-gray-200 rounded-md focus:outline-hidden focus:ring-2 focus:ring-offset-2"
                     >
                       Remove section
+                    </span>
+                    <span
+                      data-testid="create-update-section-button"
+                      onClick={setSectionGroup}
+                      className="p-2 shadow-xs  text-red-700 underline hover:bg-gray-100 focus:border-sdb-400 focus:shadow-md-outline-sdb active:bg-gray-200 rounded-md focus:outline-hidden focus:ring-2 focus:ring-offset-2"
+                    >
+                      Create/Update section
                     </span>
                   </div>
                 </div>

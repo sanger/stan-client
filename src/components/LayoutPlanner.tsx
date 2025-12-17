@@ -44,7 +44,7 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
       warningToast({
         message: errorMessage,
         position: toast.POSITION.TOP_RIGHT,
-        autoClose: 5000
+        autoClose: 7000
       });
       actor.send({
         type: 'RESET_ERROR_MESSAGE'

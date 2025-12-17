@@ -15,7 +15,6 @@ export enum Actions {
   ASSIGN_DESTINATION = 'layoutMachine.assignDestination',
   REMOVE_PLANNED_ACTION = 'layoutMachine.removePlannedAction',
   ASSIGN_DESTINATION_ACTIONS = 'layoutMachine.assignDestinationActions',
-  TOGGLE_DESTINATION = 'layoutMachine.toggleDestination',
   ADD_SOURCE_TO_SLOT_DEST = 'layoutMachine.addSourceToSlotDest',
   REMOVE_SOURCE_FROM_SLOT_DEST = 'layoutMachine.removeSourceFromSlotDest',
   SEND_LAYOUT_TO_PARENT = 'layoutMachine.sendLayoutToParent',
@@ -38,14 +37,13 @@ type LayoutMachineImplementation = {
   emitted: any;
 };
 
-const deleteDestinationAddressFromGroup = (
+const sectionGroupIdForDestinationAddress = (
   plannedActions: Record<string, PlannedSectionDetails>,
   address: string
-): Record<string, PlannedSectionDetails> => {
+) => {
   // CASE 1 — The "address" is actually the key of a sectionGroup
   if (plannedActions[address]) {
-    delete plannedActions[address];
-    return plannedActions;
+    return address;
   }
 
   // CASE 2 — Look inside each sectionGroup to find the address in .addresses
@@ -53,17 +51,33 @@ const deleteDestinationAddressFromGroup = (
     const addresses = plannedActions[sectionGroupId].addresses;
 
     if (addresses.has(address)) {
-      // If removing the address leaves the group empty → delete the whole sectionGroup
-      addresses.delete(address);
-
-      if (addresses.size === 0) {
-        delete plannedActions[sectionGroupId];
-      }
-
-      return plannedActions;
+      return sectionGroupId;
     }
   }
 
+  return null;
+};
+
+const deleteDestinationAddressFromGroup = (
+  plannedActions: Record<string, PlannedSectionDetails>,
+  address: string
+): Record<string, PlannedSectionDetails> => {
+  const sectionGroupId = sectionGroupIdForDestinationAddress(plannedActions, address);
+
+  if (sectionGroupId) {
+    // CASE 1 — The "address" is actually the key of a sectionGroup
+    if (sectionGroupId === address) {
+      delete plannedActions[sectionGroupId];
+      return plannedActions;
+    }
+    // CASE 2 — The "address" is inside a sectionGroup
+    const addresses = plannedActions[sectionGroupId].addresses;
+    // If removing the address leaves the group empty → delete the whole sectionGroup
+    addresses.delete(address);
+    if (addresses.size === 0) {
+      delete plannedActions[sectionGroupId];
+    }
+  }
   return plannedActions;
 };
 
@@ -81,8 +95,6 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
         return context;
       }
       return produce(context, (draft) => {
-        // draft.layoutPlan.plannedActions.delete(event.address);
-
         draft.layoutPlan.plannedActions = deleteDestinationAddressFromGroup(
           draft.layoutPlan.plannedActions,
           event.address
@@ -102,7 +114,6 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
           !context.selected ||
           (plannedActions[event.address] && context.selected.sampleId === plannedActions[event.address].source.sampleId)
         ) {
-          // plannedActions.delete(event.address);
           draft.layoutPlan.plannedActions = deleteDestinationAddressFromGroup(
             draft.layoutPlan.plannedActions,
             event.address
@@ -110,14 +121,11 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
         } else {
           const action: Source = Object.assign({}, draft.selected);
           action.replicateNumber = tissue(Object.assign({}, action.labware as LabwareFieldsFragment))?.replicate ?? '';
-          //  plannedActions.set(event.address, [action]);
-
           draft.layoutPlan.plannedActions[event.address] = {
             addresses: new Set([event.address]),
             source: action
           };
         }
-        // draft.layoutPlan.plannedActions = plannedActions;
       });
     }),
 
@@ -126,7 +134,6 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
         return context;
       }
       return produce(context, (draft) => {
-        //draft.layoutPlan.plannedActions.delete(event.address);
         draft.layoutPlan.plannedActions = deleteDestinationAddressFromGroup(
           draft.layoutPlan.plannedActions,
           event.address
@@ -140,8 +147,6 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
       }
       return produce(context, (draft) => {
         draft.layoutPlan.destinationLabware.slots.forEach((slot) => {
-          // draft.layoutPlan.plannedActions.set(slot.address, [event.source]);
-
           draft.layoutPlan.plannedActions[slot.address] = {
             addresses: new Set([slot.address]),
             source: event.source
@@ -149,73 +154,6 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
         });
       });
     }),
-    // // OLD ADD SECTION LOGIC FOR MULTISECTION SUPPORT
-    // [Actions.ADD_SOURCE_TO_SLOT_DEST]: assign(({ context, event }) => {
-    //   if (event.type !== 'SELECT_DESTINATION') {
-    //     return context;
-    //   }
-    //   return produce(context, (draft) => {
-    //     if (!draft.possibleActions) {
-    //       draft.possibleActions = new Map();
-    //     }
-    //     if (!context.possibleActions?.has(event.address)) {
-    //       return context;
-    //     }
-    //     const slotActions = draft.possibleActions?.get(event.address)!;
-    //     //Initialise section numbers to 0 for new additions
-    //     Array.from(slotActions.values()).forEach((val: Source) => (val.newSection = 0));
-    //     const plannedActionsForSlot = draft.layoutPlan.plannedActions.get(event.address);
-    //     if (!plannedActionsForSlot) {
-    //       draft.layoutPlan.plannedActions.set(event.address, slotActions);
-    //     } else {
-    //       draft.layoutPlan.plannedActions.set(event.address, [...plannedActionsForSlot, ...slotActions]);
-    //     }
-    //   });
-    // }),
-    //
-    // // OLD REMOVE_SECTION LOGIC FOR MULTISECTION SUPPORT
-    // [Actions.REMOVE_SOURCE_FROM_SLOT_DEST]: assign(({ context, event }) => {
-    //   if (event.type !== 'REMOVE_SOURCE_FROM_SLOT_DEST') {
-    //     return context;
-    //   }
-    //   if (!context.possibleActions?.has(event.address)) {
-    //     return context;
-    //   }
-    //   return produce(context, (draft) => {
-    //     const slotActions = draft.layoutPlan.plannedActions.get(event.address) ?? [];
-    //
-    //     if (slotActions.length > 1) {
-    //       slotActions.pop();
-    //     } else if (slotActions.length === 1) {
-    //       draft.layoutPlan.plannedActions.delete(event.address);
-    //     }
-    //   });
-    // }),
-    //
-    // [Actions.TOGGLE_DESTINATION]: assign(({ context, event }) => {
-    //   if (event.type !== 'SELECT_DESTINATION') {
-    //     return context;
-    //   }
-    //   // If there was never anything in this slot, do nothing
-    //   if (context.possibleActions && !context.possibleActions.has(event.address)) {
-    //     return context;
-    //   }
-    //   return produce(context, (draft) => {
-    //     const slotActions = draft.layoutPlan.plannedActions.get(event.address) ?? [];
-    //
-    //     if (slotActions.length > 1) {
-    //       slotActions.pop();
-    //     } else if (slotActions.length === 1) {
-    //       draft.layoutPlan.plannedActions.delete(event.address);
-    //     } else {
-    //       const source = draft.possibleActions?.get(event.address);
-    //       if (source) {
-    //         draft.layoutPlan.plannedActions.set(event.address, source);
-    //       }
-    //     }
-    //     return context;
-    //   });
-    // }),
     [Actions.SEND_LAYOUT_TO_PARENT]: sendParent(({ context }) => {
       return {
         type: 'ASSIGN_LAYOUT_PLAN',
@@ -233,22 +171,13 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
       }
       return produce(context, (draft) => {
         const selected = draft.selectedSlots;
-
         // User has selected slots --------------------------------------
         if (selected && selected.size > 0) {
-          // ---- Validation: ensure all slots have a non-empty ----------
-
-          // Prevent re-using an already assigned color
-          if (draft.layoutPlan.plannedActions[event.sectionId]) {
-            draft.errorMessage = `This color is already applied. Please remove it before re-applying`;
-            return;
-          }
-
-          // ---- Validation: ensure all slots have a non-empty, same source ----------
           let referenceSource: Source | undefined;
 
           for (const address of selected) {
-            const planned = draft.layoutPlan.plannedActions[address];
+            const addressSectionGroupId = sectionGroupIdForDestinationAddress(draft.layoutPlan.plannedActions, address);
+            const planned = addressSectionGroupId && draft.layoutPlan.plannedActions[addressSectionGroupId];
 
             if (!planned) {
               draft.errorMessage = `Cannot assign an empty slot to a section. Please assign a source to slot ${address} first.`;
@@ -273,12 +202,22 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
           for (const sectionGroupId of Object.keys(draft.layoutPlan.plannedActions)) {
             const group = draft.layoutPlan.plannedActions[sectionGroupId];
 
-            for (const slot of selected) {
-              group.addresses.delete(slot);
+            for (const slotAddress of selected) {
+              group.addresses.delete(slotAddress);
             }
             if (group.addresses.size === 0) {
               delete draft.layoutPlan.plannedActions[sectionGroupId];
             }
+          }
+          // --- Remove address that used to be assigned to the same section group --------------------------------------
+          const previousSection = draft.layoutPlan.plannedActions[event.sectionId];
+          if (previousSection) {
+            previousSection.addresses.forEach((address) => {
+              draft.layoutPlan.plannedActions[address] = {
+                addresses: new Set(address),
+                source: { ...previousSection.source }
+              };
+            });
           }
           // --- Apply the new section group ----------------------------------------
           draft.layoutPlan.plannedActions[event.sectionId] = {
