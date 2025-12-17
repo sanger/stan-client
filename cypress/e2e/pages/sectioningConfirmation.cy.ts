@@ -12,7 +12,6 @@ import { selectSGPNumber, shouldDisplaySelectedValue } from '../shared/customRea
 import { HttpResponse } from 'msw';
 import { generateLabwareIdFromBarcode } from '../../../src/mocks/handlers/labwareHandlers';
 
-let highestSectionNumber: number = 0;
 describe('Sectioning Confirmation', () => {
   before(() => {
     cy.visit('/lab/sectioning/confirm');
