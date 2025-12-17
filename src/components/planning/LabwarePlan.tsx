@@ -472,11 +472,6 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
       .matches(/^\d{7}$/, 'Xenium barcode should be a 7-digit number');
   }
   if (labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER) {
-    // formShape.sectionThickness = Yup.object().test(
-    //   'has-at-least-one-key',
-    //   'Section thickness must have at least one entry',
-    //   (value) => value && Object.keys(value).length > 0
-    // );
     formShape.plannedActions = Yup.object()
       .shape(
         {} as Record<string, Yup.ObjectSchema<any>> // allows dynamic keys

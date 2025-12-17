@@ -91,15 +91,6 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     }
   }, [onChange, confirmOperationLabware]);
 
-  //
-  // useEffect(() => {
-  //   //Notify parent only for layout changes
-  //   if (layoutPlan && current.matches('editableMode') && notifySectionChange.current) {
-  //     notifySectionChange.current = false;
-  //     onSectionUpdate && onSectionUpdate(layoutPlan);
-  //   }
-  // }, [layoutPlan, service, onSectionUpdate, current, layoutMachine]);
-
   const handleRemovePlan = React.useCallback(() => {
     if (mode === SectionNumberMode.Auto && sectionNumberEnabled) {
       setNotifyDelete(true);
