@@ -1,22 +1,22 @@
 import {
-  ConfirmSection,
   ConfirmSectionLabware,
   ConfirmSectionMutation,
   FindPlanDataQuery,
   LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
-  Maybe
+  Maybe,
+  PlanActionFieldsFragment
 } from '../../types/sdk';
 import { assign, createMachine, fromCallback, fromPromise } from 'xstate';
 import { stanCore } from '../../lib/sdk';
-import { LayoutPlan, Source } from '../../lib/machines/layout/layoutContext';
+import { LayoutPlan, PlannedSectionDetails, Source } from '../../lib/machines/layout/layoutContext';
 import _, { Dictionary, groupBy } from 'lodash';
-import { Address, LabwareTypeName } from '../../types/stan';
-import { buildSampleColors, sortDownRight } from '../../lib/helpers/labwareHelper';
-import { SectionNumberMode } from './SectioningConfirm';
+import { LabwareTypeName } from '../../types/stan';
 import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
 import { ClientError } from 'graphql-request';
 import { produce } from '../../dependencies/immer';
+import { SectionNumberMode } from './SectioningConfirm';
+import { buildSampleColors } from '../../lib/helpers/labwareHelper';
 
 type SectioningConfirmContext = {
   /**
@@ -44,11 +44,6 @@ type SectioningConfirmContext = {
    * It may not be always be valid e.g. section numbers yet to be filled in
    */
   confirmSectionLabware: Array<ConfirmSectionLabware>;
-
-  /**
-   * Useful for the UI to know if user should be allowed to confirm yet
-   */
-  isConfirmSectionLabwareValid: boolean;
 
   /**
    * Created labwares returned from stan core after a confirmSection (if success)
@@ -89,8 +84,7 @@ type SectioningConfirmEvent =
   | {
       type: 'UPDATE_SECTION_NUMBER';
       layoutPlan: LayoutPlan;
-      slotAddress: string;
-      sectionIndex: number;
+      sectionGroupId: string;
       sectionNumber: number;
     }
   | {
@@ -109,8 +103,7 @@ type SectioningConfirmEvent =
   | {
       type: 'UPDATE_SECTION_THICKNESS';
       layoutPlan: LayoutPlan;
-      slotAddress: string;
-      sectionIndex: number;
+      sectionGroupId: string;
       sectionThickness: string;
     };
 
@@ -130,25 +123,6 @@ const isValidSectionLabware = (ctx: SectioningConfirmContext): boolean => {
     /** Has every section got a section number? **/
     const validSectionNumber = csl.confirmSections?.every((cs) => (cs.newSection ? cs.newSection > 0 : false)) ?? false;
     if (!validSectionNumber) return false;
-
-    /**Create a dictionary of slot addresses
-     * key is the address
-     * value is array of all sections in thet address
-     * **/
-    let slotDictionary: Dictionary<Array<ConfirmSection>> = groupBy(csl.confirmSections, (cs) => cs.destinationAddress);
-    let slotAddresses = Object.keys(slotDictionary);
-    for (let indx = 0; indx < slotAddresses.length; indx++) {
-      const sections = slotDictionary[slotAddresses[indx]];
-      /**If there are multiple sections in this slot address, it should have distinct regions assigned for each section**/
-      if (sections.length > 1) {
-        /** Every section in slot has a region?**/
-        let isValidRegion = sections.every((cs) => (cs.region ? cs.region.length > 0 : false)) ?? false;
-        if (!isValidRegion) return false;
-        /** Are regions defined in a slot unique? **/
-        const regionsInSection = sections.map((section) => section.region);
-        if (regionsInSection.length !== new Set(regionsInSection).size) return false;
-      }
-    }
     return true;
   });
 };
@@ -165,7 +139,6 @@ export function createSectioningConfirmMachine() {
         workNumber: '',
         plans: [],
         confirmSectionLabware: [],
-        isConfirmSectionLabwareValid: false,
         layoutPlansByLabwareType: {},
         sourceLabware: [],
         requestError: null,
@@ -282,7 +255,7 @@ export function createSectioningConfirmMachine() {
                 ? event.confirmSectionLabware.confirmSections.map((cs) => {
                     return {
                       sampleId: cs.sampleId,
-                      destinationAddress: cs.destinationAddress,
+                      destinationAddresses: cs.destinationAddresses,
                       thickness: cs.thickness
                     };
                   })
@@ -359,11 +332,11 @@ export function createSectioningConfirmMachine() {
               event.layoutPlan.destinationLabware.barcode!
             );
             if (planInContext) {
-              const source = Array.from(planInContext.plannedActions.values())
-                .flatMap((sources) => sources)
-                .find((source, indx) => source.address === event.slotAddress && indx === event.sectionIndex);
-              if (source) {
-                source.newSection = event.sectionNumber;
+              const sectionGroupId = Object.keys(planInContext.plannedActions).find(
+                (sectionGroupId) => sectionGroupId === event.sectionGroupId
+              );
+              if (sectionGroupId) {
+                planInContext.plannedActions[sectionGroupId].source.newSection = event.sectionNumber;
               }
             }
           });
@@ -378,12 +351,7 @@ export function createSectioningConfirmMachine() {
               event.layoutPlan.destinationLabware.barcode!
             );
             if (planInContext) {
-              const source = Array.from(planInContext.plannedActions.values())
-                .flatMap((sources) => sources)
-                .find((source, indx) => source.address === event.slotAddress && indx === event.sectionIndex);
-              if (source) {
-                source.sampleThickness = event.sectionThickness;
-              }
+              planInContext.plannedActions[event.sectionGroupId].source.sampleThickness = event.sectionThickness;
             }
           });
         }),
@@ -405,7 +373,7 @@ export function createSectioningConfirmMachine() {
           return { ...context, sectionNumberMode: event.mode };
         }),
 
-        assignSourceLabware: assign(({ context, event }) => {
+        assignSourceLabware: assign(({ context }) => {
           return produce(context, (draft) => {
             draft.sourceLabware = _(draft.plans)
               .flatMap((plan) => plan.planData.sources)
@@ -529,26 +497,33 @@ function fillInSectionNumbersInLayoutPlan(
 }
 function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, startNumbers?: Map<string, number>) {
   /**Get slots column wise to fill the section numbers**/
-  sortDownRight(layoutPlan.destinationLabware.slots).forEach((slot) => {
-    const action = layoutPlan.plannedActions.get(slot.address);
-    if (action) {
-      action.length > 0 &&
-        action.forEach((item) => {
-          let newSectionNum = 0;
-          if (startNumbers && item.labware && startNumbers.has(item.labware.barcode) && incrementFill) {
-            //Get the highest section number of the source labware for this section
-            newSectionNum = startNumbers.get(item.labware.barcode)! + 1;
-            //Store the current highest section number so that it will be incremental for next section
-            startNumbers.set(item.labware.barcode, newSectionNum);
-          }
-          item.newSection = newSectionNum;
-        });
-      //Mutate the layoutPlan so that the child will be notified of this change and the changes will be rendered
-      layoutPlan.plannedActions.set(slot.address, [...action]);
+  Object.entries(layoutPlan.plannedActions).forEach(([sectionGroupId, plan]) => {
+    let newSectionNum = 0;
+    if (startNumbers && startNumbers.has(plan.source.labware.barcode) && incrementFill) {
+      //Get the highest section number of the source labware for this section
+      newSectionNum = startNumbers.get(plan.source.labware.barcode)! + 1;
+      //Store the current highest section number so that it will be incremental for next section
+      startNumbers.set(plan.source.labware.barcode, newSectionNum);
     }
+    plan.source.newSection = newSectionNum;
+    //Mutate the layoutPlan so that the child will be notified of this change and the changes will be rendered
+    layoutPlan.plannedActions[sectionGroupId] = { ...plan };
   });
 }
 
+/**
+ * Finds the planned action whose destination address matches the given address.
+ *
+ * @param plannedActions - The list of planned actions to search through.
+ * @param address - The destination slot address to match.
+ * @returns The matching PlanAction if found, otherwise undefined.
+ */
+export const findPlanActionByDestinationAddress = (
+  plannedActions: Array<PlanActionFieldsFragment>,
+  address: string
+) => {
+  return plannedActions.find((pa) => pa.destination.address === address);
+};
 /**
  * Convert the structure that comes back from core into lists of {@link LayoutPlan LayoutPlans}
  *
@@ -560,34 +535,31 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
 
   // For each layoutPlan build a LayoutPlan
   const layoutPlans: Array<LayoutPlan> = plans.map((plan) => {
+    const plannedActions = {} as Record<string, PlannedSectionDetails>;
+    const sources: Array<Source> = [];
+
+    plan.planData.groups.forEach((group, index) => {
+      const planned = findPlanActionByDestinationAddress(plan.planData.plan.planActions, group[0]);
+      if (planned) {
+        const source: Source = {
+          sampleId: planned.source.samples[0].id, // we only support single sample sources for sectioning,
+          newSection: 0,
+          sampleThickness: planned.sampleThickness?.toString(),
+          labware: plan.planData.sources.find((lw) => lw.id === planned.source.labwareId)!
+        };
+        sources.push(source);
+        const sectionGroupId = group.length === 1 ? group[0] : index.toString();
+        plannedActions[sectionGroupId] = {
+          addresses: new Set(group),
+          source
+        };
+      }
+    });
     return {
       destinationLabware: plan.planData.destination,
       sampleColors,
-      plannedActions: plan.planData.plan.planActions.reduce<Map<Address, Array<Source>>>((memo, planAction) => {
-        const slotActions: Array<Source> = [
-          {
-            sampleId: planAction.sample.id,
-            labware: sourceLabwares.find((lw) => lw.id === planAction.source.labwareId)!,
-            newSection: 0,
-            address: planAction.source.address,
-            sampleThickness: planAction.sampleThickness ?? undefined
-          }
-        ];
-        const plannedActionsForSlot = memo.get(planAction.destination.address);
-        if (!plannedActionsForSlot) {
-          memo.set(planAction.destination.address, slotActions);
-        } else {
-          memo.set(planAction.destination.address, [...plannedActionsForSlot, ...slotActions]);
-        }
-
-        return memo;
-      }, new Map()),
-
-      /**
-       * Layout planner doesn't need to show any sources when doing section confirmation.
-       * User will only be able to add or remove the number of sections in a slot.
-       */
-      sources: []
+      sources: sources,
+      plannedActions: plannedActions
     };
   });
   return layoutPlans;

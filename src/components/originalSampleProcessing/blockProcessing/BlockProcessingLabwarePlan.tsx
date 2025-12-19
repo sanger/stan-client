@@ -4,7 +4,7 @@ import { useMachine } from '@xstate/react';
 import { motion } from '../../../dependencies/motion';
 import variants from '../../../lib/motionVariants';
 import Labware from '../../labware/Labware';
-import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../../pages/sectioning';
+import { buildSlotColor, buildSlotText } from '../../../pages/sectioning';
 import PinkButton from '../../buttons/PinkButton';
 import Heading from '../../Heading';
 import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../../types/stan';
@@ -78,7 +78,7 @@ function buildInitialLayoutPlan(
     ),
     sampleColors,
     destinationLabware: outputLabware,
-    plannedActions: new Map()
+    plannedActions: {}
   };
 }
 
@@ -116,13 +116,13 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
      */
     React.useEffect(() => {
       const subscription = actor.subscribe((state) => {
-        if (state.context.layoutPlan.plannedActions.size <= 0) return;
-        const plannedActions: Source[] | undefined = state.context.layoutPlan.plannedActions.get('A1');
-        if (plannedActions && plannedActions.length > 0) {
-          setFieldValue(`plans.${rowIndex}.sourceBarcode`, plannedActions[0].labware.barcode);
-          setFieldValue(`plans.${rowIndex}.replicateNumber`, plannedActions[0].replicateNumber);
-          setDisableRepNumber(plannedActions[0].replicateNumber!.length > 0);
-          notifySourceSelection(cid, plannedActions[0].labware.barcode);
+        if (!state.context.layoutPlan.plannedActions) return;
+        const plannedActionSource: Source | undefined = state.context.layoutPlan.plannedActions['A1'].source;
+        if (plannedActionSource) {
+          setFieldValue(`plans.${rowIndex}.sourceBarcode`, plannedActionSource.labware.barcode);
+          setFieldValue(`plans.${rowIndex}.replicateNumber`, plannedActionSource.replicateNumber);
+          setDisableRepNumber(plannedActionSource.replicateNumber!.length > 0);
+          notifySourceSelection(cid, plannedActionSource.labware.barcode);
         }
       });
       return () => subscription.unsubscribe();
@@ -144,7 +144,6 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                 onClick={() => send({ type: 'EDIT_LAYOUT' })}
                 name={outputLabware.labwareType.name}
                 slotText={(address) => buildSlotText(layoutPlan, address)}
-                slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
                 slotColor={(address) => buildSlotColor(layoutPlan, address)}
               />
 

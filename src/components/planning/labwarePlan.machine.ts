@@ -1,18 +1,19 @@
 import { ActorRef, assign, createMachine, fromPromise } from 'xstate';
-import { Maybe, PlanMutation, PlanRequestLabware, SlideCosting } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment, Maybe, PlanMutation, PlanRequestLabware, SlideCosting } from '../../types/sdk';
 import { LabwareTypeName, ServerErrors } from '../../types/stan';
-import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
+import { LayoutPlan, PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
 import { stanCore } from '../../lib/sdk';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
+import { PlanMutationWithGroups } from '../../pages/sectioning/Plan';
 
 //region Events
 type CreateLabwareEvent = {
   type: 'CREATE_LABWARE';
-  sectionThickness?: { [slotAddress: string]: number };
   barcode?: string;
   lotNumber?: string;
   costing?: SlideCosting;
   operationType: string;
+  plannedActions: Record<string, PlannedSectionDetails>;
 };
 
 type UpdateLayoutPlanEvent = {
@@ -39,6 +40,11 @@ type CancelEditLayout = {
   type: 'CANCEL_EDIT_LAYOUT';
 };
 
+type AssignSelectedSectionId = {
+  type: 'ASSIGN_SELECTED_SECTION_ID';
+  sectionId: number;
+};
+
 type LabwarePlanEvent =
   | { type: 'EDIT_LAYOUT' }
   | { type: 'CANCEL_EDIT_LAYOUT' }
@@ -48,7 +54,8 @@ type LabwarePlanEvent =
   | PlanSectionResolveEvent
   | PlanSectionRejectEvent
   | AssignLayoutPlanEvent
-  | CancelEditLayout;
+  | CancelEditLayout
+  | AssignSelectedSectionId;
 //endregion Events
 
 /**
@@ -68,7 +75,7 @@ interface LabwarePlanContext {
   /**
    * A plan returned from core
    */
-  plan?: PlanMutation;
+  plan?: PlanMutationWithGroups;
 
   /**
    * Message from the label printer containing details of the printer's success
@@ -84,6 +91,8 @@ interface LabwarePlanContext {
    * Actor reference to the layout machine, so the spawned machine can be accessed from the context
    */
   layoutMachine?: ActorRef<any, any>;
+
+  selectedSectionId?: number;
 }
 
 /**
@@ -131,7 +140,9 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           id: 'layoutMachine',
           entry: [
             assign({
-              layoutMachine: ({ spawn, context }) => spawn(createLayoutMachine(context.layoutPlan))
+              layoutMachine: ({ spawn, context }) => {
+                return spawn(createLayoutMachine(context.layoutPlan));
+              }
             })
           ],
           on: {
@@ -142,6 +153,9 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
             CANCEL_EDIT_LAYOUT: {
               actions: 'cancelEditLayout',
               target: 'prep'
+            },
+            ASSIGN_SELECTED_SECTION_ID: {
+              actions: 'assignSelectedSectionId'
             }
           }
         },
@@ -161,12 +175,8 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
                 return undefined;
               }
               const planRequestLabware = buildPlanRequestLabware({
-                sampleThickness: event.sectionThickness,
-                lotNumber: event.lotNumber,
-                costing: event.costing,
-                layoutPlan: context.layoutPlan,
                 destinationLabwareTypeName: context.layoutPlan.destinationLabware.labwareType.name,
-                barcode: event.barcode
+                ...event
               });
               return {
                 labware: [planRequestLabware],
@@ -206,15 +216,22 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           if (event.type !== 'CANCEL_EDIT_LAYOUT') {
             return context;
           }
-          return { ...context, layoutPlan: { ...context.layoutPlan, plannedActions: new Map() } };
+          return {
+            ...context,
+            layoutPlan: { ...context.layoutPlan, plannedActions: {} as Record<string, PlannedSectionDetails> }
+          };
         }),
 
         assignPlanResponse: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.planSection' || !event.output) {
             return context;
           }
+          context.layoutPlan.destinationLabware = event.output.plan.labware[0] as LabwareFlaggedFieldsFragment;
+          const groups: Array<Array<string>> = Object.values(context.layoutPlan.plannedActions).map((planned) =>
+            Array.from(planned.addresses)
+          );
 
-          return { ...context, plan: event.output };
+          return { ...context, plan: { ...event.output, groups } };
         }),
 
         assignRequestErrors: assign(({ context, event }) => {
@@ -222,6 +239,12 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
             return context;
           }
           return { context, requestError: event.error };
+        }),
+        assignSelectedSectionId: assign(({ context, event }) => {
+          if (event.type !== 'ASSIGN_SELECTED_SECTION_ID') {
+            return context;
+          }
+          return { ...context, selectedSectionId: event.sectionId };
         })
       },
 
@@ -229,16 +252,15 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
         isVisiumLP: ({ context }) =>
           context.layoutPlan.destinationLabware.labwareType.name === LabwareTypeName.VISIUM_LP,
 
-        isLayoutValid: ({ context }) => context.layoutPlan.plannedActions.size > 0
+        isLayoutValid: ({ context }) => Object.keys(context.layoutPlan.plannedActions).length > 0
       }
     }
   );
 
 type BuildPlanRequestLabwareParams = {
   destinationLabwareTypeName: string;
-  layoutPlan: LayoutPlan;
+  plannedActions: Record<string, PlannedSectionDetails>;
   barcode?: string;
-  sampleThickness?: { [slotAddress: string]: number };
   lotNumber?: string;
   costing?: SlideCosting;
 };
@@ -246,8 +268,7 @@ type BuildPlanRequestLabwareParams = {
 function buildPlanRequestLabware({
   barcode,
   destinationLabwareTypeName,
-  layoutPlan,
-  sampleThickness,
+  plannedActions,
   lotNumber,
   costing
 }: BuildPlanRequestLabwareParams): PlanRequestLabware {
@@ -256,17 +277,18 @@ function buildPlanRequestLabware({
     barcode,
     lotNumber,
     costing,
-    actions: Array.from(layoutPlan.plannedActions.keys()).flatMap((address) => {
-      const sources = layoutPlan.plannedActions.get(address)!;
-      return sources.map((source) => ({
-        address,
-        sampleThickness: sampleThickness ? sampleThickness[address].toString() : '',
-        sampleId: source.sampleId,
+
+    actions: Object.keys(plannedActions).map((sectionGroupId) => {
+      const sectionDetail = plannedActions[sectionGroupId];
+      return {
+        addresses: Array.from(sectionDetail.addresses),
+        sampleThickness: sectionDetail.source.sampleThickness,
+        sampleId: sectionDetail.source.sampleId,
         source: {
-          barcode: source.labware.barcode,
-          address: source.address
+          barcode: sectionDetail.source.labware.barcode,
+          address: sectionDetail.source.address
         }
-      }));
+      };
     })
   };
 }

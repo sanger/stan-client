@@ -18,7 +18,7 @@ describe('Slot', () => {
       });
       expect(screen.getByText('A1')).toBeVisible();
       //It displays a small shape
-      expect(screen.getByTestId('slot')).toHaveClass('h-12 w-12');
+      expect(screen.getByTestId('slot')).toHaveClass('size-16');
     });
     it('displays a non-selected slot with size small', () => {
       act(() => {
@@ -28,7 +28,7 @@ describe('Slot', () => {
       });
       expect(screen.getByText('A1')).toBeVisible();
       //Displays a small shape
-      expect(screen.getByTestId('slot')).toHaveClass('h-12 w-12');
+      expect(screen.getByTestId('slot')).toHaveClass('size-16');
       //Displays slot as not selected
       expect(screen.getByTestId('slot')).toHaveClass('border border-gray-800');
       //Fills slot as selected with a default color
@@ -51,7 +51,7 @@ describe('Slot', () => {
       });
       expect(screen.getByText('A1')).toBeVisible();
       //Displays a large shape
-      expect(screen.getByTestId('slot')).toHaveClass('h-20 w-20');
+      expect(screen.getByTestId('slot')).toHaveClass('size-20');
       //Displays slot as selected with a pink border
       expect(screen.getByTestId('slot')).toHaveClass('ring-3 ring-pink-600 ring-offset-2');
       //Fills slot as selected with a given color

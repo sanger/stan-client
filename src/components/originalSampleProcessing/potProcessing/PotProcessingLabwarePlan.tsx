@@ -4,7 +4,7 @@ import { useMachine } from '@xstate/react';
 import { motion } from '../../../dependencies/motion';
 import variants from '../../../lib/motionVariants';
 import Labware from '../../labware/Labware';
-import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../../pages/sectioning';
+import { buildSlotColor, buildSlotText } from '../../../pages/sectioning';
 import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../../types/stan';
 import { selectOptionValues } from '../../forms';
 import BlueButton from '../../buttons/BlueButton';
@@ -13,6 +13,7 @@ import Warning from '../../notifications/Warning';
 import { createLabwarePlanMachine } from '../../planning/labwarePlan.machine';
 import { PotFormData } from './PotProcessing';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
+import { PlannedSectionDetails } from '../../../lib/machines/layout/layoutContext';
 
 type PotProcessingLabwarePlanProps = {
   /**
@@ -75,14 +76,17 @@ function buildInitialLayoutPlan(
     destinationLabware: outputLabware,
     plannedActions:
       sourceLabware.length > 0
-        ? new Map().set('A1', [
-            {
-              sampleId: sourceLabware[0].slots[0].samples[0].id,
-              labware: sourceLabware[0],
-              newSection: 0
+        ? {
+            A1: {
+              source: {
+                sampleId: sourceLabware[0].slots[0].samples[0].id,
+                labware: sourceLabware[0],
+                newSection: 0
+              },
+              addresses: new Set(['A1'])
             }
-          ])
-        : new Map()
+          }
+        : ({} as Record<string, PlannedSectionDetails>)
   };
 }
 
@@ -132,7 +136,6 @@ const PotProcessingLabwarePlan = React.forwardRef<HTMLDivElement, PotProcessingL
                 labware={outputLabware}
                 name={outputLabware.labwareType.name}
                 slotText={(address) => buildSlotText(layoutPlan, address)}
-                slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
                 slotColor={(address) => buildSlotColor(layoutPlan, address)}
               />
             </div>

@@ -14,5 +14,6 @@ query FindPlanData($barcode: String!) {
         ...PlanActionFields
       }
     }
+    groups
   }
 }

@@ -9,6 +9,7 @@ import { labwareTypes } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { selectOption } from '../shared/customReactSelect.cy';
 import { HttpResponse } from 'msw';
+import { SECTION_GROUPS_BG_COLORS } from '../../../src/lib/helpers';
 
 describe('Sectioning Planning', () => {
   before(() => {
@@ -59,6 +60,7 @@ describe('Sectioning Planning', () => {
           );
         });
         cy.get('#labwareScanInput').type('STAN-113{enter}');
+        cy.get('#labwareScanInput').type('STAN-2113{enter}');
       });
 
       it('should display a warning message', () => {
@@ -145,6 +147,193 @@ describe('Sectioning Planning', () => {
       });
       it('set the section thickness input with the predefined value', () => {
         cy.findByTestId('section-thickness').should('have.value', '0.5');
+      });
+    });
+  });
+
+  describe('Section Groups', () => {
+    context('assigning slots with the same source sample to a section', () => {
+      before(() => {
+        selectOption('labware-type', 'Visium TO');
+        cy.findByText('+ Add Labware').click();
+        cy.findByText('Edit Layout').click();
+        cy.findByRole('dialog').within(() => {
+          //assign samples to slots
+          cy.findAllByText('STAN-113').first().click();
+          cy.findByText('A1').click();
+          cy.findByText('B1').click();
+          cy.findAllByText('STAN-2113').first().click();
+          cy.findByText('B2').click();
+          cy.findByText('C2').click();
+          cy.findByText('D2').click();
+        });
+      });
+      it('applies the same background color to slots belonging to the same section', () => {
+        cy.findByRole('dialog').within(() => {
+          //Grouping slots A1 and B1 together
+          cy.findAllByTestId('slot')
+            .filter((_, slot) => slot.textContent === 'STAN-113')
+            .should('have.length', 2)
+            .then(($slots) => {
+              cy.wrap($slots.eq(0)).click({ cmdKey: true, force: true });
+              cy.wrap($slots.eq(1)).click({ cmdKey: true, force: true });
+            });
+
+          cy.findByTestId('section-group-color-1').click();
+          cy.findByTestId('create-update-section-button').click();
+
+          cy.findAllByTestId('slot')
+            .filter((_, slot) => slot.textContent === 'STAN-113')
+            .should('have.length', 2)
+            .then(($slots) => {
+              cy.wrap($slots.eq(0)).parent('div').should('have.class', SECTION_GROUPS_BG_COLORS[1]);
+              cy.wrap($slots.eq(1)).parent('div').should('have.class', SECTION_GROUPS_BG_COLORS[1]);
+            });
+
+          //Grouping slots B2 and C2 together
+          cy.findAllByTestId('slot')
+            .filter((_, slot) => slot.textContent === 'STAN-2113')
+            .should('have.length', 3)
+            .then(($slots) => {
+              cy.wrap($slots.eq(0)).click({ commandKey: true });
+              cy.wrap($slots.eq(1)).click({ commandKey: true });
+            });
+
+          cy.findByTestId('section-group-color-2').click();
+          cy.findByTestId('create-update-section-button').click();
+
+          cy.findAllByTestId('slot')
+            .filter((_, slot) => slot.textContent === 'STAN-2113')
+            .should('have.length', 3)
+            .then(($slots) => {
+              cy.wrap($slots.eq(0)).parent('div').should('have.class', SECTION_GROUPS_BG_COLORS[2]);
+              cy.wrap($slots.eq(1)).parent('div').should('have.class', SECTION_GROUPS_BG_COLORS[2]);
+            });
+          cy.findByText('Done').click();
+        });
+      });
+
+      it('groups slot address by section in the labware section thickness table', () => {
+        cy.findAllByTestId('section-addresses')
+          .should('have.length', 3)
+          .then((sectionAddresses) => {
+            cy.wrap(sectionAddresses.eq(0)).should('have.text', 'A1, B1');
+            cy.wrap(sectionAddresses.eq(1)).should('have.text', 'B2, C2');
+            cy.wrap(sectionAddresses.eq(2)).should('have.text', 'D2');
+          });
+      });
+
+      context('when updating a pre-defined section group', () => {
+        before(() => {
+          cy.findByText('Edit Layout').click();
+          cy.findByRole('dialog').within(() => {
+            // Adding D2 to the existing section group with B2 and C2
+            cy.findAllByTestId('slot')
+              .filter((_, slot) => slot.textContent === 'STAN-2113')
+              .should('have.length', 3)
+              .then(($slots) => {
+                cy.wrap($slots.eq(0)).click({ cmdKey: true, force: true });
+                cy.wrap($slots.eq(1)).click({ cmdKey: true, force: true });
+                cy.wrap($slots.eq(2)).click({ cmdKey: true, force: true });
+              });
+
+            cy.findByTestId('section-group-color-4').click();
+            cy.findByTestId('create-update-section-button').click();
+          });
+        });
+
+        it('updates the slot background color accordingly', () => {
+          cy.findByRole('dialog').within(() => {
+            cy.findAllByTestId('slot')
+              .filter((_, slot) => slot.textContent === 'STAN-2113')
+              .should('have.length', 3)
+              .then(($slots) => {
+                cy.wrap($slots.eq(0)).parent('div').should('have.class', SECTION_GROUPS_BG_COLORS[4]);
+                cy.wrap($slots.eq(1)).parent('div').should('have.class', SECTION_GROUPS_BG_COLORS[4]);
+                cy.wrap($slots.eq(2)).parent('div').should('have.class', SECTION_GROUPS_BG_COLORS[4]);
+              });
+          });
+        });
+
+        after(() => {
+          cy.findByText('Done').click();
+        });
+      });
+
+      after(() => {
+        cy.findByText('Delete Layout').click();
+      });
+    });
+
+    context('assigning slots with the different source samples to a section', () => {
+      before(() => {
+        selectOption('labware-type', 'Visium TO');
+        cy.findByText('+ Add Labware').click();
+        cy.findByText('Edit Layout').click();
+        cy.findByRole('dialog').within(() => {
+          //assign samples to slots
+          cy.findAllByText('STAN-113').first().click();
+          cy.findByText('A1').click();
+          cy.findAllByText('STAN-2113').first().click();
+          cy.findByText('C2').click();
+
+          //Grouping slots A1(sourced by STAN-113) and C2((sourced by STAN-2113) together
+          cy.findAllByTestId('slot')
+            .filter((_, slot) => slot.textContent === 'STAN-113')
+            .first()
+            .click({ cmdKey: true, force: true });
+
+          cy.findAllByTestId('slot')
+            .filter((_, slot) => slot.textContent === 'STAN-2113')
+            .first()
+            .click({ cmdKey: true, force: true });
+
+          cy.findByTestId('section-group-color-0').click();
+          cy.findByTestId('create-update-section-button').click();
+        });
+      });
+      it('errors and does not group them', () => {
+        cy.findAllByTestId('slot')
+          .filter((_, slot) => slot.textContent === 'STAN-113')
+          .first()
+          .parent('div')
+          .should('not.have.class', SECTION_GROUPS_BG_COLORS[0]);
+
+        cy.findAllByTestId('slot')
+          .filter((_, slot) => slot.textContent === 'STAN-2113')
+          .first()
+          .parent('div')
+          .should('not.have.class', SECTION_GROUPS_BG_COLORS[0]);
+      });
+    });
+
+    context('assigning empty slots to a section', () => {
+      before(() => {
+        cy.findByRole('dialog').within(() => {
+          //Grouping slots A1(sourced by STAN-113) and A2(empty) together
+          cy.findAllByTestId('slot')
+            .filter((_, slot) => slot.textContent === 'STAN-113')
+            .first()
+            .click({ cmdKey: true, force: true });
+
+          cy.findByText('A2').click({ cmdKey: true, force: true });
+
+          cy.findByTestId('section-group-color-0').click();
+          cy.findByTestId('create-update-section-button').click();
+        });
+      });
+      it('errors and does not group them', () => {
+        cy.findAllByTestId('slot')
+          .filter((_, slot) => slot.textContent === 'STAN-113')
+          .first()
+          .parent('div')
+          .should('not.have.class', SECTION_GROUPS_BG_COLORS[0]);
+
+        cy.findAllByTestId('slot')
+          .filter((_, slot) => slot.textContent === 'A2')
+          .first()
+          .parent('div')
+          .should('not.have.class', SECTION_GROUPS_BG_COLORS[0]);
       });
     });
   });

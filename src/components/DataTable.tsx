@@ -127,65 +127,67 @@ const DataTableComponent = <T extends Object>(
         <TableHead fixed={fixedHeader}>
           {headerGroups.map((headerGroup, indx) => (
             <tr {...headerGroup.getHeaderGroupProps()} key={indx}>
-              {headerGroup.headers.map((column) => (
-                <TableHeader
-                  allCapital={(column as ColumnWithAllCapitalProp).allCapital}
-                  {...column.getHeaderProps(sortable ? column.getSortByToggleProps() : undefined)}
-                >
-                  <div className="grid grid-rows-2">
-                    {column.render('Header') as ReactNode}
-                    {column.isSorted ? (
-                      column.isSortedDesc ? (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          className="inline-block h-4 w-4"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+              {headerGroup.headers.map((column) => {
+                const { key, ...headerProps } = column.getHeaderProps(
+                  sortable ? column.getSortByToggleProps() : undefined
+                );
+                return (
+                  <TableHeader key={key} allCapital={(column as ColumnWithAllCapitalProp).allCapital} {...headerProps}>
+                    <div className="grid grid-rows-2">
+                      {column.render('Header') as ReactNode}
+                      {column.isSorted ? (
+                        column.isSortedDesc ? (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className="inline-block h-4 w-4"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className="inline-block h-4 w-4"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )
                       ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          className="inline-block h-4 w-4"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )
-                    ) : (
-                      ''
-                    )}
-                    {showFilter && (
-                      <Input
-                        name={`filter-${column.id}`}
-                        extraClassName="text-black"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const filter = e.target.value.trim();
-                          setFilterByColumns((prev) => {
-                            const newMap = new Map(prev);
-                            if (filter.length > 0) {
-                              newMap.set(column.id, filter);
-                            } else {
-                              newMap.delete(column.id);
-                            }
-                            return newMap;
-                          });
-                        }}
-                      />
-                    )}
-                  </div>
-                </TableHeader>
-              ))}
+                        ''
+                      )}
+                      {showFilter && (
+                        <Input
+                          name={`filter-${column.id}`}
+                          extraClassName="text-black"
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const filter = e.target.value.trim();
+                            setFilterByColumns((prev) => {
+                              const newMap = new Map(prev);
+                              if (filter.length > 0) {
+                                newMap.set(column.id, filter);
+                              } else {
+                                newMap.delete(column.id);
+                              }
+                              return newMap;
+                            });
+                          }}
+                        />
+                      )}
+                    </div>
+                  </TableHeader>
+                );
+              })}
             </tr>
           ))}
         </TableHead>
@@ -193,8 +195,9 @@ const DataTableComponent = <T extends Object>(
       <TableBody {...getTableBodyProps()}>
         {rows.map((row) => {
           prepareRow(row);
+          const { key, ...rowProps } = row.getRowProps();
           return (
-            <motion.tr initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} {...row.getRowProps()}>
+            <motion.tr initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} key={key} {...rowProps}>
               {row.cells.map((cell, indx) => {
                 return (
                   <TableCell className={cellClassName} {...cell.getCellProps()} key={row.index + ',' + indx}>

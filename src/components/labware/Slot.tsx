@@ -49,11 +49,11 @@ export function Slot({
       'bg-gray-100 text-gray-800': !bgColor,
       'ring-3 ring-pink-600 ring-offset-2': selected,
       'border border-gray-800': !selected,
-      'h-20 w-20': size === 'large',
-      'h-16 w-16': size === 'medium',
-      'h-12 w-12': size === 'small'
+      'size-20 text-xs': size === 'large',
+      'size-18 text-[11px]': size === 'medium',
+      'size-16 text-[10px]': size === 'small'
     },
-    'inline-flex flex-col items-center justify-center mx-auto rounded-full text-xs font-semibold'
+    'inline-flex flex-col items-center justify-center mx-auto rounded-full font-semibold'
   );
 
   const onClickHandler = React.useCallback(

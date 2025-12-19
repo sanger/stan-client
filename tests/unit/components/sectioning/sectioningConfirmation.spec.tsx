@@ -200,6 +200,7 @@ const mockedPlanData = () => {
   return {
     sources: [sourceLabware],
     destination: destinationLabware,
+    groups: [['A1']],
     plan: {
       operationType: {
         __typename: 'OperationType',
@@ -227,7 +228,9 @@ const mockedPlanData = () => {
           sample: {
             __typename: 'Sample',
             id: sourceLabware.slots[0].samples[0].id
-          }
+          },
+          newSection: 0,
+          sampleThickness: 0.5
         }
       ]
     }
