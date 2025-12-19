@@ -11,7 +11,6 @@ import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
 import PinkButton from '../../components/buttons/PinkButton';
 import ButtonBar from '../../components/ButtonBar';
 import { Link, useLoaderData } from 'react-router-dom';
-import _ from 'lodash';
 import { useConfirmLeave } from '../../lib/hooks';
 import LabwarePlan from '../../components/planning/LabwarePlan';
 import labwareScanTableColumns from '../../components/dataTableColumns/labwareColumns';
@@ -182,37 +181,17 @@ function planPropsToPlanData(planProps: Maybe<PlanChangedProps<PlanMutationWithG
     return [];
   }
 
-  const sources = planProps.sourceLabware;
-
-  const destinationLabware = _(planProps.completedPlans)
-    .flatMap((cp) => cp.plan.labware)
-    .keyBy((lw) => lw.id)
-    .value();
-
-  const planActions = _(planProps.completedPlans)
-    .map((cp) => cp.plan)
-    .flatMap((plan) => plan.operations)
-    .flatMap((operation) => operation.planActions)
-    .groupBy((pa) => pa.destination.labwareId)
-    .value();
-
-  const groups = _(planProps.completedPlans)
-    .flatMap((cp) => cp.groups)
-    .value();
-
-  return Object.keys(planActions).map((labwareId) => {
-    return {
-      planData: {
-        sources: sources,
-        destination: convertLabwareToFlaggedLabware([destinationLabware[labwareId]])[0],
-        plan: {
-          operationType: {
-            name: 'Section'
-          },
-          planActions: planActions[labwareId]
+  return planProps.completedPlans.map((cp) => ({
+    planData: {
+      sources: planProps.sourceLabware,
+      destination: convertLabwareToFlaggedLabware(cp.plan.labware)[0],
+      plan: {
+        operationType: {
+          name: 'Section'
         },
-        groups: groups
-      }
-    };
-  });
+        planActions: cp.plan.operations.flatMap((operation) => operation.planActions)
+      },
+      groups: cp.groups
+    }
+  }));
 }
