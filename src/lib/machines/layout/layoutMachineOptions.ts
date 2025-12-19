@@ -214,7 +214,7 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
           if (previousSection) {
             previousSection.addresses.forEach((address) => {
               draft.layoutPlan.plannedActions[address] = {
-                addresses: new Set(address),
+                addresses: new Set([address]),
                 source: { ...previousSection.source }
               };
             });
