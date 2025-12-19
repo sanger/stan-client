@@ -400,6 +400,12 @@ const Labware = ({
     return result;
   };
 
+  const slotSize = (count: number) => {
+    if (count > 6) return 'small';
+    if (count > 3) return 'medium';
+    return 'large';
+  };
+
   return (
     <div className={'flex flex-row'} data-testid={`labware-${labware.barcode ?? ''}`}>
       {slotColumns.length > 0 && slotBuilder && (
@@ -414,7 +420,7 @@ const Labware = ({
                 <Slot
                   address={address}
                   slot={slotByAddress[address]}
-                  size={numColumns > 2 ? 'medium' : numColumns > 6 || numRows > 6 ? 'small' : 'large'}
+                  size={slotSize(LabwareDirection.Horizontal ? numRows : numColumns)}
                   onClick={internalOnClick}
                   onCtrlClick={onCtrlClick}
                   onShiftClick={onShiftClick}
