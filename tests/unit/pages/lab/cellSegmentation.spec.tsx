@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { describe } from '@jest/globals';
 import { BrowserRouter } from 'react-router-dom';
@@ -22,6 +22,7 @@ const mockedScannedLabware = createFlaggedLabware('STAN-1111');
 afterEach(() => {
   cleanup();
 });
+
 jest.mock('../../../../src/components/labwareScanner/LabwareScanner', () => ({
   __esModule: true,
   default: function MockLabwareScanner({ children }: { children: (props: any) => React.ReactNode }) {
@@ -79,8 +80,10 @@ describe('Cell Segmentation', () => {
     it('renders protein panel div', () => {
       expect(screen.getByTestId('add-to-all-div')).toBeVisible();
     });
-    it('renders cell segmentation labware section', () => {
-      expect(screen.getByTestId('cellSegmentation.0')).toBeVisible();
+    it('renders cell segmentation labware section', async () => {
+      await waitFor(() => {
+        expect(screen.getByTestId('cellSegmentation.0')).toBeVisible();
+      });
     });
   });
 });
