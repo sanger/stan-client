@@ -11,8 +11,7 @@ import {
   ConfirmSectionLabware,
   FindPlanDataQuery,
   LabwareFieldsFragment,
-  LabwareFlaggedFieldsFragment,
-  SlotRegionFieldsFragment
+  LabwareFlaggedFieldsFragment
 } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import { createSectioningConfirmMachine } from './sectioningConfirm.machine';
@@ -30,12 +29,6 @@ type SectioningConfirmProps = {
    * The list of comments that will be available for the user to choose for each section
    */
   comments: Array<CommentFieldsFragment>;
-
-  /**
-   * The list of regions in slot taht will be available for the user to choose for each section.
-   * Region is to specify where the user is keeping the section of a sample in a slot, if there are multiple samples(/sections)
-   */
-  slotRegions: Array<SlotRegionFieldsFragment>;
 
   /**
    * The initial list of plans
@@ -57,12 +50,7 @@ export enum SectionNumberMode {
  * Component for managing the confirmation of a list of Sectioning Plans.
  * Responsible for calling core with the {@code confirmSection} request.
  */
-export default function SectioningConfirm({
-  comments,
-  slotRegions,
-  initialPlans,
-  onConfirmed
-}: SectioningConfirmProps) {
+export default function SectioningConfirm({ comments, initialPlans, onConfirmed }: SectioningConfirmProps) {
   const sectioningMachine = React.useMemo(() => {
     return createSectioningConfirmMachine();
   }, []);
@@ -145,12 +133,11 @@ export default function SectioningConfirm({
   );
 
   const handleSectionNumberChange = useCallback(
-    (layoutPlan: LayoutPlan, slotAddress: string, sectionIndex: number, sectionNumber: number) => {
+    (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: number) => {
       send({
         type: 'UPDATE_SECTION_NUMBER',
         layoutPlan,
-        slotAddress,
-        sectionIndex,
+        sectionGroupId,
         sectionNumber
       });
     },
@@ -158,12 +145,11 @@ export default function SectioningConfirm({
   );
 
   const handleSectionThicknessChange = useCallback(
-    (layoutPlan: LayoutPlan, slotAddress: string, sectionIndex: number, sectionThickness: string) => {
+    (layoutPlan: LayoutPlan, sectionGroupId: string, sectionThickness: string) => {
       send({
         type: 'UPDATE_SECTION_THICKNESS',
         layoutPlan,
-        slotAddress,
-        sectionIndex,
+        sectionGroupId,
         sectionThickness
       });
     },
@@ -241,7 +227,6 @@ export default function SectioningConfirm({
                           key={layoutPlan.destinationLabware.barcode}
                           originalLayoutPlan={layoutPlan}
                           comments={comments}
-                          slotRegions={slotRegions}
                           mode={sectionNumberMode}
                           sectionNumberEnabled={false}
                           workNumber={workNumber}
@@ -282,12 +267,10 @@ export default function SectioningConfirm({
                           {lps.map((layoutPlan) => (
                             <ConfirmLabware
                               onChange={handleConfirmChange}
-                              onSectionUpdate={handleSectionUpdate}
                               removePlan={removePlanByBarcode}
                               key={layoutPlan.destinationLabware.barcode}
                               originalLayoutPlan={layoutPlan}
                               comments={comments}
-                              slotRegions={slotRegions}
                               mode={sectionNumberMode}
                               onSectionNumberChange={handleSectionNumberChange}
                               onSectionThicknessChange={handleSectionThicknessChange}

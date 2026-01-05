@@ -2,7 +2,7 @@ import React, { ElementType } from 'react';
 import classNames from 'classnames';
 
 interface HeadingProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement> {
-  level: 1 | 2 | 3 | 4;
+  level: 1 | 2 | 3 | 4 | 5;
   showBorder?: boolean;
 }
 
@@ -15,6 +15,7 @@ const Heading = ({ children, level, className, showBorder = true }: HeadingProps
       'text-2xl font-bold tracking-tight leading-relaxed': level === 2,
       'text-xl font-bold tracking-tight leading-relaxed': level === 3,
       'text-lg font-medium tracking-tight leading-relaxed': level === 4,
+      'text-g font-medium tracking-tight leading-relaxed': level === 5,
       'border-b-2 border-sp': showBorder
     },
     className

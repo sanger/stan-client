@@ -74,16 +74,40 @@ export const createLayoutMachine = (layoutPlan: LayoutPlan, possibleActions?: La
 
             SET_ALL_DESTINATIONS: {
               actions: Actions.ASSIGN_DESTINATION_ACTIONS
+            },
+            ADD_SECTION_GROUP: {
+              actions: Actions.ADD_SECTION_GROUP
+            },
+            ASSIGN_SELECTED_SLOTS: {
+              actions: Actions.ASSIGN_SELECTED_SLOTS
+            },
+            REMOVE_SECTION_GROUP: {
+              actions: Actions.REMOVE_SECTION_GROUP
+            },
+            RESET_ERROR_MESSAGE: {
+              actions: Actions.RESET_ERROR_MESSAGE
             }
           }
         },
         [State.DEST_ONLY_MODE]: {
           on: {
             SELECT_DESTINATION: {
-              actions: Actions.ADD_SECTION
+              actions: Actions.ADD_SOURCE_TO_SLOT_DEST
             },
-            REMOVE_SECTION: {
-              actions: Actions.REMOVE_SECTION
+            REMOVE_SOURCE_FROM_SLOT_DEST: {
+              actions: Actions.REMOVE_SOURCE_FROM_SLOT_DEST
+            },
+            ADD_SECTION_GROUP: {
+              actions: Actions.ADD_SECTION_GROUP
+            },
+            REMOVE_SECTION_GROUP: {
+              actions: Actions.REMOVE_SECTION_GROUP
+            },
+            ASSIGN_SELECTED_SLOTS: {
+              actions: Actions.ASSIGN_SELECTED_SLOTS
+            },
+            RESET_ERROR_MESSAGE: {
+              actions: Actions.RESET_ERROR_MESSAGE
             }
           }
         },

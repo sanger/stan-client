@@ -83,7 +83,9 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
    * Callback for removing a plan by barcode
    */
   const removePlanByBarcode = useCallback(
-    (barcode: string) => send({ type: 'REMOVE_PLAN_BY_BARCODE', barcode }),
+    (barcode: string) => {
+      send({ type: 'REMOVE_PLAN_BY_BARCODE', barcode });
+    },
     [send]
   );
   const memoizedChildren = React.useMemo(

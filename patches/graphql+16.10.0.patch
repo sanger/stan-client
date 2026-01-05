@@ -1,0 +1,12 @@
+diff --git a/node_modules/graphql/utilities/lexicographicSortSchema.js b/node_modules/graphql/utilities/lexicographicSortSchema.js
+index ea884b6..49ab981 100644
+--- a/node_modules/graphql/utilities/lexicographicSortSchema.js
++++ b/node_modules/graphql/utilities/lexicographicSortSchema.js
+@@ -97,6 +97,7 @@ function lexicographicSortSchema(schema) {
+   function sortNamedType(type) {
+     if (
+       (0, _definition.isScalarType)(type) ||
++      (0, _definition.isEnumType)(type) ||
+       (0, _introspection.isIntrospectionType)(type)
+     ) {
+       return type;

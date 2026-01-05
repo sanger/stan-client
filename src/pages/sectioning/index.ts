@@ -1,23 +1,18 @@
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
 
-export function buildSlotText(layoutPlan: LayoutPlan, address: string) {
-  const action = layoutPlan.plannedActions.get(address);
-  if (action && action.length > 0 && action[0].labware) {
-    return action[0].labware.barcode;
+function selectSourceSlotPlan(layoutPlan: LayoutPlan, addressPlanId: string) {
+  const source = layoutPlan.plannedActions[addressPlanId]?.source;
+  if (source) return source;
+  return Object.values(layoutPlan.plannedActions).find((planned) => planned.addresses.has(addressPlanId))?.source;
+}
+export function buildSlotText(layoutPlan: LayoutPlan, addressPlanId: string) {
+  const source = selectSourceSlotPlan(layoutPlan, addressPlanId);
+  if (source) {
+    return source.labware.barcode;
   }
 }
 
-export function buildSlotSecondaryText(layoutPlan: LayoutPlan, address: string) {
-  const action = layoutPlan.plannedActions.get(address);
-  if (action && action.length > 1) {
-    return `\u00d7${action.length}`;
-  }
-}
-
-export function buildSlotColor(layoutPlan: LayoutPlan, address: string) {
-  const action = layoutPlan.plannedActions.get(address);
-  if (action && action.length > 0) {
-    return layoutPlan.sampleColors.get(action[0].sampleId);
-  }
-  return undefined;
+export function buildSlotColor(layoutPlan: LayoutPlan, addressPlanId: string) {
+  const source = selectSourceSlotPlan(layoutPlan, addressPlanId);
+  if (source) return layoutPlan.sampleColors.get(source.sampleId);
 }
