@@ -6,7 +6,7 @@ config:
     Address: string
     Timestamp: string
     Date: string
-  sort: false
+  sort: true
 
 generates:
   src/types/sdk.ts:
