@@ -14,6 +14,7 @@ fragment SlotCopyLoadFields on SlotCopyLoad {
   lotNumber
   probeLotNumber
   preBarcode
+  cassetteLot
   contents {
     sourceBarcode
     sourceAddress
