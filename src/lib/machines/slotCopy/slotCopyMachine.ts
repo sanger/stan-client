@@ -540,6 +540,7 @@ export const slotCopyMachine = createMachine(
               lotNumber: cytAssistLabware.slotCopyDetails.lotNumber,
               reagentALot: cytAssistLabware.slotCopyDetails.reagentALot,
               reagentBLot: cytAssistLabware.slotCopyDetails.reagentALot,
+              cassetteLot: cytAssistLabware.slotCopyDetails.cassetteLot,
               contents: cytAssistLabware.slotCopyDetails.contents.map((scc) => scc),
               sources: []
             };
