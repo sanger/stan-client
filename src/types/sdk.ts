@@ -2428,6 +2428,8 @@ export type ProbeOperationLabware = {
   addresses?: InputMaybe<Array<Scalars['Address']['input']>>;
   /** The barcode of the labware. */
   barcode: Scalars['String']['input'];
+  /** Cassette lot number. */
+  cassetteLot?: InputMaybe<Scalars['String']['input']>;
   /** The costing for the kit used on this labware, if any. */
   kitCosting?: InputMaybe<SlideCosting>;
   /** The probes used on this labware. */
@@ -3787,6 +3789,8 @@ export type SlotCopyDestination = {
   barcode?: InputMaybe<Scalars['String']['input']>;
   /** The bio state for samples in the destination (if specified). */
   bioState?: InputMaybe<Scalars['String']['input']>;
+  /** Cassette lot number, if specified. */
+  cassetteLot?: InputMaybe<Scalars['String']['input']>;
   /** The specifications of which source slots are being copied into what addresses in the destination labware. */
   contents: Array<SlotCopyContent>;
   /** The costing of the slide, if specified. */
@@ -3818,6 +3822,8 @@ export type SlotCopyLoad = {
   barcode?: Maybe<Scalars['String']['output']>;
   /** The bio state for samples in the destination (if specified). */
   bioState?: Maybe<Scalars['String']['output']>;
+  /** Cassette lot number, if specified. */
+  cassetteLot?: Maybe<Scalars['String']['output']>;
   /** The specifications of which source slots are being copied into what addresses in the destination labware. */
   contents: Array<SlotCopyLoadContent>;
   /** The costing of the slide, if specified. */
@@ -3886,6 +3892,8 @@ export type SlotCopySave = {
   barcode?: InputMaybe<Scalars['String']['input']>;
   /** The bio state for samples in the destination (if specified). */
   bioState?: InputMaybe<Scalars['String']['input']>;
+  /** Cassette lot number, if specified. */
+  cassetteLot?: InputMaybe<Scalars['String']['input']>;
   /** The specifications of which source slots are being copied into what addresses in the destination labware. */
   contents: Array<SlotCopyContent>;
   /** The costing of the slide, if specified. */
