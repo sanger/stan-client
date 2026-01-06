@@ -319,6 +319,31 @@ describe('CytAssist Page', () => {
         cy.findByText('Invalid format: Required 6 digit number').should('exist');
       });
     });
+
+    context('When Cassette Lot is entered in correct format', () => {
+      before(() => {
+        enterCassetteLot('123456');
+      });
+      it('should not display invalid format error message', () => {
+        cy.findByTestId('cassetteLot')
+          .closest('div')
+          .within(() => {
+            cy.findByText('Invalid format: Required 6 digit number').should('not.exist');
+          });
+      });
+    });
+    context('When Cassette Lot is entered in wrong format', () => {
+      before(() => {
+        enterCassetteLot('42');
+      });
+      it('should display invalid format error message', () => {
+        cy.findByTestId('cassetteLot')
+          .closest('div')
+          .within(() => {
+            cy.findByText('Invalid format: Required 6 digit number').should('be.visible');
+          });
+      });
+    });
   });
 
   describe('On save', () => {
@@ -391,6 +416,11 @@ describe('CytAssist Page', () => {
           cy.findByRole('textbox').should('have.value', 'H1-9D8VN2V');
         });
       });
+      it('populates the Cassette Lot properly', () => {
+        cy.findByTestId('cassetteLot').within(() => {
+          cy.findByRole('textbox').should('have.value', '123456');
+        });
+      });
       it('selects the correct output labware type', () => {
         shouldDisplaySelectedValue('output-labware-type', 'CytAssist 6.5');
       });
@@ -432,7 +462,7 @@ describe('CytAssist Page', () => {
                     preBarcode: 'V42A20-3752023-10-20',
                     lotNumber: '1112543',
                     costing: SlideCosting.Faculty,
-                    cassetteLot: '123456',
+                    cassetteLot: '654321',
                     sources: [],
                     contents: [
                       {
@@ -470,6 +500,11 @@ describe('CytAssist Page', () => {
       it('updates the external barcode properly', () => {
         cy.findByTestId('external-barcode').within(() => {
           cy.findByRole('textbox').should('have.value', 'V42A20-3752023-10-20');
+        });
+      });
+      it('updates the cassette lot properly', () => {
+        cy.findByTestId('cassetteLot').within(() => {
+          cy.findByRole('textbox').should('have.value', '654321');
         });
       });
       it('re-selects the correct output labware type', () => {
@@ -518,6 +553,11 @@ describe('CytAssist Page', () => {
       });
       it('empty the external barcode input field', () => {
         cy.findByTestId('external-barcode').within(() => {
+          cy.findByRole('textbox').should('have.value', '');
+        });
+      });
+      it('empty the cassette lot input field', () => {
+        cy.findByTestId('cassetteLot').within(() => {
           cy.findByRole('textbox').should('have.value', '');
         });
       });
