@@ -35,6 +35,9 @@ describe('CytAssist Page', () => {
     it('should select the first option by default', () => {
       cy.findByTestId('copyMode-One to one').should('be.checked');
     });
+    it('displays the Cassette Lot input', () => {
+      cy.findByTestId('cassetteLot').should('be.visible');
+    });
   });
 
   context('when CyAssist labware type is three-point', () => {
@@ -582,7 +585,7 @@ function enterReagentBLOTNumber(lotNumber: string) {
   cy.findByTestId('reagentBLot').clear().type(`${lotNumber}{enter}`);
 }
 
-function enterCassetteLot(number: string = '123456') {
+function enterCassetteLot(number: string) {
   cy.findByTestId('cassetteLot').within(() => {
     cy.findByRole('textbox').clear().type(`${number}{enter}`).blur();
   });
@@ -604,7 +607,7 @@ const fillForm = () => {
   selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD);
   selectSlideCostings('Faculty');
   enterLOTNumber();
-  enterCassetteLot();
+  enterCassetteLot('123456');
   cy.findByTestId('external-barcode').within(() => {
     cy.findByRole('textbox').wait(500).clear().type('H1-9D8VN2V{enter}').blur();
   });
