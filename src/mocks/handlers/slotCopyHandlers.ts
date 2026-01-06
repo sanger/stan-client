@@ -25,6 +25,7 @@ const savedSlotCopy: SlotCopyLoad = {
   reagentALot: '555432',
   reagentBLot: '945621',
   lotNumber: '7712543',
+  cassetteLot: '123456',
   costing: SlideCosting.Sgp,
   sources: [],
   contents: [
