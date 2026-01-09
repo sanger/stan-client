@@ -7,8 +7,9 @@ import SlotMeasurements, { MeasurementConfigProps, SlotMeasurement } from '../sl
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
 import { CDNAProps } from './Amplification';
+import { Input } from '../forms/Input';
 
-const QPcrResults = ({ labware, slotMeasurements, removeLabware, cleanedOutAddress }: CDNAProps) => {
+const QPcrResults = ({ labware, slotMeasurements, removeLabware, cleanedOutAddress, comments }: CDNAProps) => {
   const { values, setErrors, setTouched, setFieldValue } = useFormikContext<VisiumQCFormData>();
 
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(
@@ -17,7 +18,6 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware, cleanedOutAddre
         measurementType: ['Cq value'],
         name: 'CQ VALUE',
         stepIncrement: '.01',
-        validateFunction: validateCqMeasurementValue,
         initialMeasurementVal: ''
       }
     ],
@@ -46,42 +46,19 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware, cleanedOutAddre
     setFieldValue('slotMeasurements', slotMeasurements);
   }, [labware, setErrors, setTouched, setFieldValue, memoMeasurementConfig]);
 
-  const handleChangeMeasurement = React.useCallback(
-    (measurementName: string, measurementValue: string) => {
-      setFieldValue(measurementName, measurementValue, true);
-    },
-    [setFieldValue]
-  );
-
   const handleChangeAllMeasurements = React.useCallback(
-    (measurementValue: string) => {
+    async (measurementValue: string) => {
       //Reset Errors
       setErrors({});
-      setTouched({});
+      await setTouched({});
       const measurements = values?.slotMeasurements ? [...values.slotMeasurements] : [];
       measurements.forEach((measuerementReq) => {
         measuerementReq.value = measurementValue;
       });
-      setFieldValue('slotMeasurements', values.slotMeasurements, true);
+      await setFieldValue('slotMeasurements', measurements, true);
     },
     [values, setErrors, setTouched, setFieldValue]
   );
-
-  /***
-   * Accept values with two decimal values for cq value
-   * @param value
-   */
-  function validateCqMeasurementValue(value: string) {
-    let error;
-    if (value === '') {
-      error = 'Required';
-    } else {
-      if (Number(value) < 0) {
-        error = 'Positive value required';
-      }
-    }
-    return error;
-  }
 
   const onRemoveLabware = React.useCallback(
     (barcode: string) => {
@@ -105,35 +82,32 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware, cleanedOutAddre
                 />
               }
             </div>
-            {
-              <div className={'flex flex-row w-1/2 ml-2 space-x-6'}>
-                <div className={'flex flex-col'}>
-                  <label className={'mt-2'}>Cq value</label>
-                  <input
-                    className={'rounded-md'}
-                    type={'number'}
-                    data-testid="all-Cq value"
-                    step="0.1"
-                    onChange={(e: any) => {
-                      handleChangeAllMeasurements(e.currentTarget.value);
-                    }}
-                    min={0}
-                  />
-                </div>
+            <div className={'flex flex-row w-1/2 ml-2 space-x-6'}>
+              <div className={'grid grid-cols-2 gap-1'}>
+                <label className={'mt-2'}>Cq value</label>
+                <Input
+                  type={'number'}
+                  data-testid="all-Cq value"
+                  step="0.1"
+                  onChange={async (e: any) => {
+                    await handleChangeAllMeasurements(e.currentTarget.value);
+                  }}
+                  min={0}
+                />
               </div>
-            }
+            </div>
 
             <div className={'grid grid-cols-11 gap-2 justify-between'}>
               <div className="col-span-6">
                 {slotMeasurements && slotMeasurements.length > 0 && (
                   <SlotMeasurements
                     slotMeasurements={slotMeasurements}
-                    onChangeField={handleChangeMeasurement}
                     measurementConfig={memoMeasurementConfig}
+                    comments={comments}
                   />
                 )}
               </div>
-              <div className="col-span-5 w-full flex items-center justify-center p-4" data-testid={'labware'}>
+              <div className="col-span-5 w-full flex p-4" data-testid={'labware'}>
                 <Labware labware={labware} name={labware.labwareType.name} cleanedOutAddresses={cleanedOutAddress} />
               </div>
             </div>

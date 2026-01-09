@@ -73,13 +73,21 @@ const validationSchema = Yup.object().shape({
     Yup.object().shape({
       address: Yup.string().required(),
       name: Yup.string().required(),
-      value: Yup.string().required('Positive value required'),
+      value: Yup.number()
+        .min(0.01, 'Value must be greater than or equal to 0.01')
+        .required('Measurement value is required'),
       sizeRangeId: Yup.string().when('name', {
         is: (val: string) => val === 'CDNA CONCENTRATION' || val === 'LIBRARY CONCENTRATION',
         then: (schema) => schema.required('Size range is required').nonNullable(),
         otherwise: (schema) => schema.notRequired()
       }),
-      commentId: Yup.number().optional()
+      commentId: Yup.number().when('qcType', (qcType) => {
+        const val = qcType[0] as QCType;
+        if (val === QCType.QPCR_RESULTS) {
+          return Yup.number().required('Comment is required').typeError('Comment is required');
+        }
+        return Yup.number().optional();
+      })
     })
   ),
 
@@ -173,6 +181,10 @@ export default function VisiumQC() {
 
   const cleanupComments = React.useMemo(() => {
     return visiumQcInfo.comments.filter((comment) => comment.category === 'clean up');
+  }, [visiumQcInfo]);
+
+  const qPcrComments = React.useMemo(() => {
+    return visiumQcInfo.comments.filter((comment) => comment.category === QCType.QPCR_RESULTS);
   }, [visiumQcInfo]);
 
   const [currentCDNA, sendCDNA] = useMachine(formMachine.cdnaFormMachine);
@@ -292,7 +304,7 @@ export default function VisiumQC() {
             onSubmit={onSubmit}
             validationSchema={validationSchema}
           >
-            {({ setFieldValue, values }) => (
+            {({ setFieldValue, values, setValues }) => (
               <Form>
                 <div className="space-y-2 mb-8 ">
                   <Heading level={2}>SGP Number</Heading>
@@ -308,10 +320,13 @@ export default function VisiumQC() {
                 <Heading level={2}>QC Type</Heading>
                 <div className="mt-4 md:w-1/2">
                   <CustomReactSelect
-                    handleChange={(val) => {
-                      setFieldValue('qcType', (val as OptionType).label);
+                    handleChange={async (val) => {
                       setLabwareLimit((val as OptionType).label === QCType.SLIDE_PROCESSING ? 2 : 1);
-                      setFieldValue('slotMeasurements', undefined);
+                      await setValues({
+                        ...values,
+                        slotMeasurements: undefined,
+                        qcType: (val as OptionType).label as QCType
+                      });
                     }}
                     dataTestId={'qcType'}
                     emptyOption={true}
@@ -396,6 +411,7 @@ export default function VisiumQC() {
                                     ? cleanedOutAddresses.get(labwares[0].id)
                                     : undefined
                                 }
+                                comments={qPcrComments}
                               />
                             );
                         }

@@ -4,7 +4,7 @@ import { Row } from 'react-table';
 import DataTable from '../DataTable';
 import FormikInput from '../forms/Input';
 import { Dictionary, groupBy } from 'lodash';
-import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import CustomReactSelect from '../forms/CustomReactSelect';
 import { selectOptionValues } from '../forms';
 import { SlotMeasurementRequestForm } from '../visiumQC/CDNAConentration';
 
@@ -13,7 +13,6 @@ export type MeasurementConfigProps = {
   name: string;
   unit?: string;
   stepIncrement?: string;
-  validateFunction?: (value: string) => void;
   initialMeasurementVal?: string;
   readOnly?: boolean;
 };
@@ -26,7 +25,6 @@ export type SlotMeasurementProps = {
   measurementConfig: MeasurementConfigProps[];
   comments?: CommentFieldsFragment[];
   libraryConcentrationSizeRange?: CommentFieldsFragment[];
-  onChangeField: (fieldName: string, value: string) => void;
 };
 
 type MeasurementRow = {
@@ -47,7 +45,6 @@ type MeasurementRow = {
 const SlotMeasurements = ({
   slotMeasurements,
   measurementConfig,
-  onChangeField,
   comments,
   libraryConcentrationSizeRange
 }: SlotMeasurementProps) => {
@@ -123,7 +120,7 @@ const SlotMeasurements = ({
             return measurementProp.readOnly ? (
               <span>{row.original.measurements[0].value}</span>
             ) : (
-              <>
+              <div>
                 <FormikInput
                   key={row.original.address + measurementProp.name + row.index}
                   data-testid={`${measurementProp.name}-input`}
@@ -134,18 +131,11 @@ const SlotMeasurements = ({
                       ? `slotMeasurements.${row.index * measurementConfig.length + measurementIndex}.value`
                       : `slotMeasurements.${row.index}.value`
                   }
-                  onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                    onChangeField(
-                      `slotMeasurements.${row.index * measurementConfig.length + measurementIndex}.value`,
-                      e.currentTarget.value
-                    );
-                  }}
-                  validate={measurementProp.validateFunction}
                   min={0}
                   style={{ minWidth: '5em' }}
                   step={measurementProp.stepIncrement}
                 />
-              </>
+              </div>
             );
           }
         };
@@ -184,13 +174,6 @@ const SlotMeasurements = ({
                     name={`slotMeasurements.${row.index * measurementConfig.length}.commentId`}
                     className="min-w-32"
                     emptyOption={true}
-                    value={row.original.measurements[0].commentId}
-                    handleChange={(val) => {
-                      onChangeField?.(
-                        `slotMeasurements.${row.index * measurementConfig.length}.commentId`,
-                        (val as OptionType).value
-                      );
-                    }}
                     options={selectOptionValues(comments, 'text', 'id')}
                   />
                 );
@@ -199,7 +182,7 @@ const SlotMeasurements = ({
           ]
         : [])
     ];
-  }, [comments, onChangeField, isWithSampleInfo, measurementConfig, libraryConcentrationSizeRange]);
+  }, [comments, isWithSampleInfo, measurementConfig, libraryConcentrationSizeRange]);
 
   return (
     <>

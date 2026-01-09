@@ -8,6 +8,8 @@ import { enableMapSet } from 'immer';
 import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
 import QPcrResults from '../../../../src/components/visiumQC/QPcrResults';
 import { sampleFactory, tissueFactory } from '../../../../src/lib/factories/sampleFactory';
+import commentRepository from '../../../../src/mocks/repositories/commentRepository';
+import { selectOption } from '../../../generic/utilities';
 
 afterEach(() => {
   cleanup();
@@ -24,6 +26,7 @@ const FormikProps = {
 };
 
 const mockRemoveLabware = jest.fn();
+const qPCRComments = commentRepository.findAll().filter((comment) => comment.category === 'qPCR results');
 
 const renderQpcrResults = () => {
   const inputLabware = superFrostPlusSlideFactory.build() as NewFlaggedLabwareLayout;
@@ -43,6 +46,7 @@ const renderQpcrResults = () => {
       { address: 'A2', name: 'Cq value', value: '0', samples: [] }
     ],
     labware: labware,
+    comments: qPCRComments,
     removeLabware: mockRemoveLabware
   };
   return render(
@@ -63,6 +67,13 @@ describe('QPcrResults', () => {
       expect(cqTable).toHaveTextContent('test 2');
       expect(cqTable).toHaveTextContent('1');
       expect(cqTable).toHaveTextContent('2');
+    });
+  });
+  it('enables user to select comments', async () => {
+    renderQpcrResults();
+    await waitFor(() => {
+      selectOption('comments0', qPCRComments[0].text);
+      expect(screen.queryByRole('table')).toHaveTextContent(qPCRComments[0].text);
     });
   });
   it('invokes remove function when labware is removed', async () => {
