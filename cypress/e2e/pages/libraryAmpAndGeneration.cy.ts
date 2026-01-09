@@ -457,9 +457,9 @@ const mappingSamples = (addressSource: string, addressDestination: string) => {
 
 const transferReagent = () => {
   cy.get('#sourceLabwares').within(() => {
-    cy.findByText('A1').click({ force: true });
+    cy.findByText('A1').wait(1000).click({ force: true });
   });
   cy.get('#destLabwares').within(() => {
-    cy.findByText('A1').click({ force: true });
+    cy.findByText('A1').wait(1000).click({ force: true });
   });
 };
