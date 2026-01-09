@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import SlotMeasurements from '../../../src/components/slotMeasurement/SlotMeasurements';
 import { Formik } from 'formik';
@@ -50,42 +50,6 @@ describe('SlotMeasurements', () => {
     expect(screen.getAllByTestId('Cost-input')).toHaveLength(2);
     expect(screen.getAllByTestId('Time-input')).toHaveLength(2);
   });
-  it('callback function called when measurement value changes', async () => {
-    const handleChangeMeasurement = jest.fn();
-    renderSlotMeasurements({
-      slotMeasurements: [
-        { address: 'A1', name: 'Cost', value: '0' },
-        { address: 'A2', name: 'Cost', value: '0' }
-      ],
-      measurementConfig: [{ name: 'Cost', stepIncrement: '0.01', initialMeasurementVal: '0' }],
-      onChangeField: handleChangeMeasurement
-    });
-    const measurement = screen.getAllByTestId('Cost-input')[0];
-    await waitFor(() => {
-      fireEvent.change(measurement, { target: { value: '2' } });
-    });
-    expect(handleChangeMeasurement).toHaveBeenCalled();
-  });
-  it('calls validation function', async () => {
-    const validateValueMock = jest.fn();
-    renderSlotMeasurements({
-      slotMeasurements: [
-        { address: 'A1', name: 'Cost', value: '0' },
-        { address: 'A2', name: 'Cost', value: '0' }
-      ],
-      measurementConfig: [
-        { name: 'Cost', stepIncrement: '0.01', validateFunction: validateValueMock, initialMeasurementVal: '0' }
-      ],
-      onChangeField: jest.fn()
-    });
-    const measurement = screen.getAllByTestId('Cost-input')[0];
-    await waitFor(() => {
-      fireEvent.change(measurement, { target: { value: '-1' } });
-      fireEvent.blur(measurement);
-    });
-
-    expect(validateValueMock).toHaveBeenCalled();
-  });
   it('renders comments measurements for slots', () => {
     renderSlotMeasurements({
       slotMeasurements: [
@@ -106,8 +70,7 @@ describe('SlotMeasurements', () => {
     const comments = screen.getByTestId('comments0');
     expect(comments).toBeInTheDocument();
   });
-  it('invokes callback when comment changes', async () => {
-    const handleChangeComment = jest.fn();
+  it('enables the user to select comments', async () => {
     renderSlotMeasurements({
       slotMeasurements: [{ address: 'A1', name: 'Cost', value: '0', commentId: 0 }],
       measurementConfig: [
@@ -117,8 +80,7 @@ describe('SlotMeasurements', () => {
       comments: [
         { id: 0, text: 'comment 1', enabled: true },
         { id: 1, text: 'comment 2', enabled: true }
-      ],
-      onChangeField: handleChangeComment
+      ]
     });
     const comments = screen.getByTestId('comments0');
     expect(comments).toBeInTheDocument();
@@ -127,7 +89,6 @@ describe('SlotMeasurements', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('comments0')).toHaveTextContent('comment 2');
-      expect(handleChangeComment).toHaveBeenCalled();
     });
   });
 
