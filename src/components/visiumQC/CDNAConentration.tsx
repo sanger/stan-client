@@ -30,52 +30,34 @@ enum MeasurementTypes {
   LibraryConcentration = 'Library concentration'
 }
 
-/***
- *  Only acceptable 0 and decimal numbers of format ###.## Visium concentration
- * @param value
- */
-function validateConcentrationMeasurementValue(value: string) {
-  let error;
-  if (value === '') {
-    error = 'Required';
-  } else if (Number(value) < 0) {
-    error = 'Positive value required';
-  }
-  return error;
-}
-
 const measurements: MeasurementConfigProps[] = [
   {
     measurementType: [MeasurementTypes.cDNAConcentration],
     name: 'CDNA CONCENTRATION',
     unit: 'pg/\u00B5l',
     stepIncrement: '.01',
-    initialMeasurementVal: '0',
-    validateFunction: validateConcentrationMeasurementValue
+    initialMeasurementVal: '0'
   },
   {
     measurementType: [MeasurementTypes.LibraryConcentration],
     name: `LIBRARY CONCENTRATION`,
     unit: 'pg/\u00B5l',
     stepIncrement: '.01',
-    initialMeasurementVal: '0',
-    validateFunction: validateConcentrationMeasurementValue
+    initialMeasurementVal: '0'
   },
   {
     measurementType: [MeasurementTypes.cDNAConcentration, MeasurementTypes.LibraryConcentration],
     name: 'AVERAGE SIZE',
     unit: 'bp',
     stepIncrement: '1',
-    initialMeasurementVal: '0',
-    validateFunction: validateConcentrationMeasurementValue
+    initialMeasurementVal: '0'
   },
   {
     measurementType: [MeasurementTypes.LibraryConcentration],
     name: 'MAIN PEAK SIZE',
     unit: 'bp',
     stepIncrement: '1',
-    initialMeasurementVal: '0',
-    validateFunction: validateConcentrationMeasurementValue
+    initialMeasurementVal: '0'
   }
 ];
 
@@ -119,13 +101,6 @@ const CDNAConcentration = ({
     });
     setFieldValue('slotMeasurements', slotMeasurements);
   }, [labware, measurementName, setErrors, setTouched, setFieldValue, memoMeasurementConfig]);
-
-  const handleChangeField = React.useCallback(
-    (fieldName: string, value: string) => {
-      setFieldValue(fieldName, value, true);
-    },
-    [setFieldValue]
-  );
 
   const onRemoveLabware = React.useCallback(
     (barcode: string) => {
@@ -173,7 +148,6 @@ const CDNAConcentration = ({
                 {slotMeasurements && slotMeasurements.length > 0 && measurementName.length > 0 && (
                   <SlotMeasurements
                     slotMeasurements={slotMeasurements}
-                    onChangeField={handleChangeField}
                     measurementConfig={memoMeasurementConfig}
                     comments={concentrationComments}
                     libraryConcentrationSizeRange={libraryConcentrationSizeRange}

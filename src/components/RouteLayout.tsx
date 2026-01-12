@@ -249,8 +249,7 @@ const RouteLayout = () => {
           <Route
             path="/lab/visium_qc"
             loader={async () => {
-              const res = await stanCore.GetComments({ includeDisabled: false });
-              return res;
+              return await stanCore.GetComments({ includeDisabled: false });
             }}
             element={<VisiumQC />}
           />

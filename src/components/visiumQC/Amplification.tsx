@@ -1,6 +1,6 @@
 import Panel from '../Panel';
 import React from 'react';
-import { AddressString, LabwareFlaggedFieldsFragment, SlotCopyContent } from '../../types/sdk';
+import { AddressString, CommentFieldsFragment, LabwareFlaggedFieldsFragment, SlotCopyContent } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
@@ -18,6 +18,7 @@ export type CDNAProps = {
   className?: string;
   slotCopyContent?: SlotCopyContent[];
   cleanedOutAddress?: string[];
+  comments?: Array<CommentFieldsFragment>;
 };
 
 const fetchCqMeasurementsByBarcode = async (barcode: string): Promise<Array<AddressString>> => {
@@ -75,7 +76,6 @@ const Amplification = ({
         measurementType: ['Amplification'],
         name: 'CYCLES',
         stepIncrement: '1',
-        validateFunction: validateCyclesMeasurementValue,
         initialMeasurementVal: ''
       }
     ],
@@ -143,13 +143,6 @@ const Amplification = ({
     initSlotMeasurements
   ]);
 
-  const handleChangeMeasurement = React.useCallback(
-    (measurementName: string, measurementValue: string) => {
-      setFieldValue(measurementName, measurementValue, true);
-    },
-    [setFieldValue]
-  );
-
   const handleChangeAllMeasurements = React.useCallback(
     async (measurementValue: string) => {
       //Reset Errors
@@ -165,25 +158,6 @@ const Amplification = ({
     },
     [setErrors, setTouched, setFieldValue, values.slotMeasurements]
   );
-
-  /***
-   * Only accept integer values for cDNA Amplification
-   * @param value
-   */
-  function validateCyclesMeasurementValue(value: string) {
-    let error;
-    if (value === '') {
-      error = 'Required';
-    } else {
-      if (Number(value) < 0) {
-        error = 'Positive value required';
-      }
-      if (!Number.isInteger(Number(value))) {
-        error = 'Integer value required';
-      }
-    }
-    return error;
-  }
 
   const onRemoveLabware = React.useCallback(
     (barcode: string) => {
@@ -235,7 +209,6 @@ const Amplification = ({
                 {values.slotMeasurements && values.slotMeasurements.length > 0 && (
                   <SlotMeasurements
                     slotMeasurements={values.slotMeasurements}
-                    onChangeField={handleChangeMeasurement}
                     measurementConfig={memoMeasurementConfig}
                   />
                 )}

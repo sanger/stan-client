@@ -371,6 +371,7 @@ describe('Visium QC Page', () => {
         before(() => {
           selectOption('measurementType', 'cDNA concentration');
           cy.findAllByTestId('CDNA CONCENTRATION-input').eq(0).type('.45');
+          cy.findAllByTestId('AVERAGE SIZE-input').eq(0).type('1');
           selectOption('sizeRange0', '150 - 500');
           selectOption('comments0', 'Potential to work');
           saveButton().click();

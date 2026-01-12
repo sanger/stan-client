@@ -192,6 +192,18 @@ const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({
     category: 'size range',
     text: '100 - 2500'
+  }),
+  commentFactory.build({
+    category: 'qPCR results',
+    text: 'Not recommended to proceed'
+  }),
+  commentFactory.build({
+    category: 'qPCR results',
+    text: 'Optimal'
+  }),
+  commentFactory.build({
+    category: 'qPCR results',
+    text: 'Potential to work'
   })
 ];
 
