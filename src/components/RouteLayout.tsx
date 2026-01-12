@@ -119,7 +119,7 @@ const RouteLayout = () => {
             path="/lab/sectioning/confirm"
             element={<Confirm />}
             loader={async () => {
-              return await stanCore.GetSectioningConfirmInfo();
+              return await stanCore.GetSectioningComments();
             }}
           />
         </Route>

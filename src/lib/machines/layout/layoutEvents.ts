@@ -36,8 +36,8 @@ export function selectDestination(address: Address): SelectDestinationEvent {
   };
 }
 
-export type RemoveSectionEvent = {
-  type: 'REMOVE_SECTION';
+export type RemoveSourceFromSlotDestEvent = {
+  type: 'REMOVE_SOURCE_FROM_SLOT_DEST';
   address: Address;
 };
 
@@ -46,9 +46,9 @@ export type SendLayoutToParent = {
   output: LayoutPlan;
 };
 
-export function removeSection(address: Address): RemoveSectionEvent {
+export function removeSourceFromSlotDest(address: Address): RemoveSourceFromSlotDestEvent {
   return {
-    type: 'REMOVE_SECTION',
+    type: 'REMOVE_SOURCE_FROM_SLOT_DEST',
     address
   };
 }
@@ -67,6 +67,23 @@ export function done(): DoneEvent {
   return { type: 'DONE' };
 }
 
+type AddSectionGroupEvent = {
+  type: 'ADD_SECTION_GROUP';
+  sectionId: string;
+};
+
+type RemoveSectionGroupEvent = {
+  type: 'REMOVE_SECTION_GROUP';
+  sectionId: number;
+};
+
+type AssignSelectedSlots = {
+  type: 'ASSIGN_SELECTED_SLOTS';
+  selectedSlots: Set<Address>;
+};
+
+type ResetErrorMessageEvent = { type: 'RESET_ERROR_MESSAGE' };
+
 export type LayoutEvents =
   | SelectSourceEvent
   | SelectDestinationEvent
@@ -74,5 +91,9 @@ export type LayoutEvents =
   | RequestLayoutPlanEvent
   | CancelEvent
   | DoneEvent
-  | RemoveSectionEvent
-  | SendLayoutToParent;
+  | RemoveSourceFromSlotDestEvent
+  | SendLayoutToParent
+  | AddSectionGroupEvent
+  | AssignSelectedSlots
+  | RemoveSectionGroupEvent
+  | ResetErrorMessageEvent;

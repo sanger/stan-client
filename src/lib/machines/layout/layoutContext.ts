@@ -20,8 +20,14 @@ export interface LayoutPlan {
   /**
    * Map of destination slot friendly address to planned source
    */
-  plannedActions: Map<Address, Array<Source>>;
+  //Map<Address, Array<Source>>;
+  plannedActions: Record<string, PlannedSectionDetails>;
 }
+
+export type PlannedSectionDetails = {
+  addresses: Set<Address>;
+  source: Source;
+};
 
 export interface Source {
   sampleId: number;
@@ -38,4 +44,9 @@ export interface LayoutContext {
   layoutPlan: LayoutPlan;
   possibleActions?: LayoutPlan['plannedActions'];
   selected: Maybe<Source>;
+  errorMessage?: string;
+  //selected slots to assign to a section
+  selectedSlots?: Set<Address>;
+  // keep track of which section is currently being edited
+  selectedSectionId?: number;
 }

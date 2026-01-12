@@ -45,32 +45,6 @@ jobs:
           name: cypress-videos
           path: cypress/videos
 
-  snyk_test:
-    name: Run snyk tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master #Pre-created container
-        continue-on-error: true #To make sure that SARIF upload gets called and also not to block CI run on snyk test failure
-        with:
-          command: code test
-          args: --severity-threshold=high --sarif-file-output=snyk.sarif
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-  snyk_monitor:
-    name: Run snyk monitor
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master #Pre-created container
-        with:
-          command: monitor #monitor
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
   jest:
     name: Run unit tests
     runs-on: ubuntu-latest

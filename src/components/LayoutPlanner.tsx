@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { isEqual } from 'lodash';
-import Labware from './labware/Labware';
+import Labware, { LabwareImperativeRef } from './labware/Labware';
 import { LayoutContext, LayoutEvents } from '../lib/machines/layout';
 import {
-  removeSection,
+  removeSourceFromSlotDest,
   selectDestination,
   selectSource,
   setAllDestinations
 } from '../lib/machines/layout/layoutEvents';
-import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../pages/sectioning';
+import { buildSlotColor, buildSlotText } from '../pages/sectioning';
 import { ActorRef, MachineSnapshot } from 'xstate';
 import { Position } from '../lib/helpers';
+import warningToast from './notifications/WarningToast';
+import { toast } from 'react-toastify';
 
 interface LayoutPlannerProps {
   actor: ActorRef<MachineSnapshot<LayoutContext, LayoutEvents, any, any, any, any, any, any>, any>;
@@ -19,7 +21,7 @@ interface LayoutPlannerProps {
 
 const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
   const [context, setContext] = React.useState<LayoutContext>(actor.getSnapshot().context);
-  const { layoutPlan, selected } = context ?? {};
+  const { layoutPlan, selected, errorMessage } = context ?? {};
   React.useEffect(() => {
     const subscription = actor.subscribe((snapshot) => {
       setContext(snapshot.context ?? {});
@@ -27,22 +29,58 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
     return () => subscription.unsubscribe();
   }, [actor]);
 
+  const labwareRef = useRef<LabwareImperativeRef>();
+
+  const deselectLabwareSlots = React.useCallback(() => {
+    labwareRef.current?.deselectAll();
+  }, [labwareRef]);
+
+  useEffect(() => {
+    deselectLabwareSlots();
+  }, [deselectLabwareSlots, layoutPlan.plannedActions]);
+
+  useEffect(() => {
+    if (errorMessage) {
+      warningToast({
+        message: errorMessage,
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 7000
+      });
+      actor.send({
+        type: 'RESET_ERROR_MESSAGE'
+      });
+      deselectLabwareSlots();
+    }
+  }, [actor, errorMessage, deselectLabwareSlots]);
+
   return (
     <div>
       {children}
       <div className="my-6 md:flex md:flex-row md:items-centre md:justify-around">
-        <div className="">
+        <div>
           {layoutPlan?.destinationLabware && (
             <Labware
+              labwareRefCallback={(el: LabwareImperativeRef) => {
+                if (el) {
+                  labwareRef.current = el;
+                }
+              }}
               labware={layoutPlan.destinationLabware}
               name={layoutPlan.destinationLabware.labwareType.name}
-              selectable={'none'}
+              selectionMode={'multi'}
+              selectable={'any'}
               onSlotClick={(address) => actor.send(selectDestination(address))}
-              onSlotCtrlClick={(address) => actor.send(removeSection(address))}
+              onSlotCtrlClick={(address) => actor.send(removeSourceFromSlotDest(address))}
               slotText={(address) => buildSlotText(layoutPlan, address)}
-              slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
               slotColor={(address) => buildSlotColor(layoutPlan, address)}
               barcodeInfoPosition={Position.TopRight}
+              sectionGroups={layoutPlan.plannedActions}
+              onSelect={(selectedAddresses) => {
+                actor.send({
+                  type: 'ASSIGN_SELECTED_SLOTS',
+                  selectedSlots: new Set(selectedAddresses)
+                });
+              }}
             />
           )}
         </div>

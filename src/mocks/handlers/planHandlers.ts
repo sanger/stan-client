@@ -36,12 +36,13 @@ const planHandlers = [
               const labware = JSON.parse(labwareJson);
 
               return {
+                sampleThickness: '1,5',
                 newSection: parseInt(uniqueId()),
                 sample: {
                   id: planAction.sampleId
                 },
                 source: {
-                  address: planAction.address,
+                  address: planAction.addresses[0],
                   labwareId: labware.id,
                   samples: [
                     {
@@ -50,7 +51,7 @@ const planHandlers = [
                   ]
                 },
                 destination: {
-                  address: planAction.address,
+                  address: planAction.addresses[0],
                   labwareId: newLabware.id
                 }
               };
@@ -152,7 +153,8 @@ export function findPlanData(sourceLabware: Labware, destinationLabware: Labware
             sampleThickness: '2.5'
           }
         ]
-      }
+      },
+      groups: [['A1']]
     }
   };
 }

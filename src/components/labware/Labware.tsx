@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useImperativeHandle, useMemo } from 'react';
 import classNames from 'classnames';
 import { Slot } from './Slot';
-import { buildAddresses, GridDirection, isSameArray, LabwareDirection, Position } from '../../lib/helpers';
+import {
+  buildAddresses,
+  GridDirection,
+  isSameArray,
+  LabwareDirection,
+  Position,
+  SECTION_GROUPS_BG_COLORS
+} from '../../lib/helpers';
 import _ from 'lodash';
 import { FlagPriority, LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
 import createLabwareMachine from './labware.machine';
@@ -14,6 +21,7 @@ import { Link } from 'react-router-dom';
 import FlagIcon from '../icons/FlagIcon';
 import BarcodeIcon from '../icons/BarcodeIcon';
 import BubleChatIcon from '../icons/BubleChatIcon';
+import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
 
 export interface LabwareProps {
   /**
@@ -148,6 +156,12 @@ export interface LabwareProps {
    * Specifies the orientation of the labware layout. Defaults to vertical.
    */
   labwareDirection?: LabwareDirection;
+
+  /**
+   * Optional mapping of section groups.
+   * Each key represents a section name or ID, and the value is an array of addresses belonging to that section.
+   */
+  sectionGroups?: Record<string, PlannedSectionDetails>;
 }
 
 export type LabwareImperativeRef = {
@@ -183,7 +197,8 @@ const Labware = ({
   gridDirection,
   highlightedSlots,
   labwareDirection,
-  labwareRefCallback
+  labwareRefCallback,
+  sectionGroups
 }: React.PropsWithChildren<LabwareProps>) => {
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine();
@@ -257,7 +272,7 @@ const Labware = ({
   const labwareDisplayClass =
     isBarcodeInfoAtTheLeftSide || isBarcodeInfoAtTheRightSide ? 'flex flex row' : 'inline-block';
 
-  const labwareClasses = `${labwareDisplayClass} border border-sdb py-2 bg-blue-100 rounded-lg transition duration-300 ease-in-out items-center`;
+  const labwareClasses = `${labwareDisplayClass} border border-sdb py-2 rounded-lg bg-blue-100 transition duration-300 ease-in-out items-center`;
 
   const grid =
     labwareDirection && labwareDirection === LabwareDirection.Horizontal
@@ -373,6 +388,24 @@ const Labware = ({
     </div>
   );
 
+  const slotSectionBgColor = (): Record<string, string> => {
+    const result: Record<string, string> = {};
+
+    if (!sectionGroups) return result;
+    Object.entries(sectionGroups).forEach(([groupId, sectionDetails]) => {
+      sectionDetails.addresses.forEach((address) => {
+        result[address] = SECTION_GROUPS_BG_COLORS[Number(groupId)];
+      });
+    });
+    return result;
+  };
+
+  const slotSize = (count: number) => {
+    if (count > 6) return 'small';
+    if (count > 3) return 'medium';
+    return 'large';
+  };
+
   return (
     <div className={'flex flex-row'} data-testid={`labware-${labware.barcode ?? ''}`}>
       {slotColumns.length > 0 && slotBuilder && (
@@ -381,24 +414,27 @@ const Labware = ({
       <div onClick={() => onClick?.()} className={labwareClasses}>
         {(isBarcodeInfoAtTheLeftSide || isBarcodeInfoAtTheTop) && BarcodeInformation()}
         <div className={gridClasses}>
-          {buildAddresses({ numColumns, numRows }, gridDirection).map((address, i) => (
-            <Slot
-              key={i}
-              address={address}
-              slot={slotByAddress[address]}
-              size={numColumns > 2 ? 'medium' : numColumns > 6 || numRows > 6 ? 'small' : 'large'}
-              onClick={internalOnClick}
-              onCtrlClick={onCtrlClick}
-              onShiftClick={onShiftClick}
-              onMouseEnter={onSlotMouseEnter}
-              onMouseLeave={onSlotMouseLeave}
-              text={slotText}
-              secondaryText={slotSecondaryText}
-              color={_slotColor}
-              selected={selectedAddresses?.has(address) || (highlightedSlots?.has(address) ?? false)}
-              isCleanedOut={cleanedOutAddresses?.includes(address)}
-            />
-          ))}
+          {buildAddresses({ numColumns, numRows }, gridDirection).map((address, i) => {
+            return (
+              <div key={address} className={`p-1 ${slotSectionBgColor()[address]} rounded-lg transition`}>
+                <Slot
+                  address={address}
+                  slot={slotByAddress[address]}
+                  size={slotSize(LabwareDirection.Horizontal ? numRows : numColumns)}
+                  onClick={internalOnClick}
+                  onCtrlClick={onCtrlClick}
+                  onShiftClick={onShiftClick}
+                  onMouseEnter={onSlotMouseEnter}
+                  onMouseLeave={onSlotMouseLeave}
+                  text={slotText}
+                  secondaryText={slotSecondaryText}
+                  color={_slotColor}
+                  selected={selectedAddresses?.has(address) || (highlightedSlots?.has(address) ?? false)}
+                  isCleanedOut={cleanedOutAddresses?.includes(address)}
+                />
+              </div>
+            );
+          })}
         </div>
         {(!barcodeInfoPosition || isBarcodeInfoAtTheBottom || isBarcodeInfoAtTheRightSide) && BarcodeInformation()}
       </div>
