@@ -2428,6 +2428,8 @@ export type ProbeOperationLabware = {
   addresses?: InputMaybe<Array<Scalars['Address']['input']>>;
   /** The barcode of the labware. */
   barcode: Scalars['String']['input'];
+  /** Cassette lot number. */
+  cassetteLot?: InputMaybe<Scalars['String']['input']>;
   /** The costing for the kit used on this labware, if any. */
   kitCosting?: InputMaybe<SlideCosting>;
   /** The probes used on this labware. */
