@@ -38,6 +38,7 @@ export interface Source {
   region?: string;
   commentIds?: number[];
   replicateNumber?: string;
+  externalName?: Maybe<string>;
 }
 
 export interface LayoutContext {

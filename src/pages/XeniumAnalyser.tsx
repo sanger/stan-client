@@ -9,8 +9,7 @@ import {
   EquipmentFieldsFragment,
   LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
-  RecordAnalyserMutation,
-  SamplePositionFieldsFragment
+  RecordAnalyserMutation
 } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import * as Yup from 'yup';
@@ -41,12 +40,12 @@ import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
 import { findUploadedFiles } from '../lib/services/fileService';
+import { sectionGroupsBySample } from '../lib/helpers/labwareHelper';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
-type SampleWithRegion = {
-  address: string;
+type SectionWithRegion = {
+  addresses: Array<string>;
   sampleId: number;
-  region: string;
   sectionNumber?: string;
   externalName?: string;
   roi: string;
@@ -58,7 +57,7 @@ type AnalyserLabwareForm = {
   workNumber: string;
   hasSgpNumberLink?: boolean;
   position?: CassettePosition;
-  samples: Array<SampleWithRegion>;
+  sections: Array<SectionWithRegion>;
   analyserScanData?: AnalyserScanDataFieldsFragment;
 };
 
@@ -187,7 +186,7 @@ const XeniumAnalyser = () => {
           hybridisation: Yup.boolean(),
           workNumber: Yup.string().required().label('SGP Number'),
           position: Yup.string().required(),
-          samples: Yup.array()
+          sections: Yup.array()
             .of(
               Yup.object().shape({
                 roi: Yup.string()
@@ -204,27 +203,53 @@ const XeniumAnalyser = () => {
       .min(1)
   });
 
-  /**Create samples with region information */
-  const labwareSamplesWithRegions = React.useCallback(
-    (lw: LabwareFlaggedFieldsFragment, samplePositions: SamplePositionFieldsFragment[]) => {
-      const samples: SampleWithRegion[] = [];
-      lw.slots.forEach((slot) => {
-        slot.samples.forEach((sample) => {
-          const samplePosition = samplePositions.find((sp) => sp.address === slot.address && sp.sampleId === sample.id);
-          samples.push({
-            address: slot.address,
-            sampleId: sample.id,
-            region: samplePosition?.region ?? '',
-            externalName: sample.tissue.externalName ?? '',
-            sectionNumber: String(sample.section) ?? '',
-            roi: sample.tissue.externalName ?? ''
-          });
+  /**
+   * Builds a list of labware sections with region information.
+   *
+   * Sections are derived in two ways:
+   * 1. Slots that belong to an explicit section group (as defined during the sectioning operation)
+   *    are grouped together under the same section.
+   * 2. Any remaining slots that are not part of a section group are treated as individual sections.
+   *
+   * This ensures that:
+   * - Explicitly grouped sections are preserved
+   * - Ungrouped slots are still represented as standalone sections
+   *
+   * @param lw - Labware with flagged slot and sample information
+   * @returns An array of sections, each containing addresses, sample identity, and region metadata
+   */
+  const labwareSections = React.useCallback((lw: LabwareFlaggedFieldsFragment) => {
+    const sectionGroups = sectionGroupsBySample(lw);
+    const groupedAddress = new Set<string>();
+    const sections: SectionWithRegion[] = [];
+    for (const sectionGroup of Object.values(sectionGroups)) {
+      const addresses = Array.from(sectionGroup.addresses);
+      addresses.forEach((address) => {
+        groupedAddress.add(address);
+      });
+      sections.push({
+        addresses: addresses,
+        sampleId: sectionGroup.source.sampleId,
+        externalName: sectionGroup.source.externalName ?? '',
+        sectionNumber: String(sectionGroup.source.newSection) ?? '',
+        roi: sectionGroup.source.externalName ?? ''
+      });
+    }
+    lw.slots.forEach((slot) => {
+      if (groupedAddress.has(slot.address)) return;
+      slot.samples.forEach((sample) => {
+        sections.push({
+          addresses: [slot.address],
+          sampleId: sample.id,
+          externalName: sample.tissue.externalName ?? '',
+          sectionNumber: String(sample.section) ?? '',
+          roi: sample.tissue.externalName ?? ''
         });
       });
-      return samples;
-    },
-    []
-  );
+    });
+
+    return sections;
+  }, []);
 
   /**This creates the slot related information for the labware */
   const createTableDataForSlots = React.useCallback(
@@ -234,7 +259,6 @@ const XeniumAnalyser = () => {
       values: XeniumAnalyserFormValues
     ) => {
       const setLabwareSampleData = async (lw: LabwareFlaggedFieldsFragment) => {
-        let samplePositions: SamplePositionFieldsFragment[] = [];
         try {
           /**Check if the images were been uploaded to the sgp folder**/
           const hasSgpNumberLink =
@@ -245,14 +269,6 @@ const XeniumAnalyser = () => {
             .then((res) => res.findLatestOp);
           /**If probe hybridisation has been recorded, get the sample positions,otherwise return**/
           if (latestOp) {
-            /**
-             * FindSamplePositions - if no samples in the labware have a region, the array would be empty.
-             * Fetch sample positions first and then add the region to the sample information got from the labware
-             * to create samples
-             */
-            samplePositions = await stanCore
-              .FindSamplePositions({ labwareBarcode: lw.barcode })
-              .then((res) => res.samplePositions);
             stanCore.GetAnalyserScanData({ barcode: labware.barcode }).then((res) => {
               setValues((prev) => {
                 const analyserLabware: AnalyserLabwareForm | undefined = prev.labware.find(
@@ -267,7 +283,7 @@ const XeniumAnalyser = () => {
                     workNumber: values.workNumberAll,
                     hasSgpNumberLink,
                     position: undefined,
-                    samples: labwareSamplesWithRegions(labware, samplePositions),
+                    sections: labwareSections(labware),
                     analyserScanData: res.analyserScanData
                   });
                 }
@@ -282,7 +298,7 @@ const XeniumAnalyser = () => {
                 workNumber: values.workNumberAll,
                 hasSgpNumberLink,
                 position: undefined,
-                samples: labwareSamplesWithRegions(labware, samplePositions)
+                sections: labwareSections(labware)
               });
               return { ...prev };
             });
@@ -294,7 +310,7 @@ const XeniumAnalyser = () => {
       };
       setLabwareSampleData(labware);
     },
-    [labwareSamplesWithRegions, stanCore]
+    [labwareSections, stanCore]
   );
 
   const hasUploadedFilesInSgpFolder = async (workNumber: string): Promise<boolean> => {
@@ -316,20 +332,20 @@ const XeniumAnalyser = () => {
               validationSchema={validationSchema}
               onSubmit={async (values) => {
                 const labwareROIData: AnalyserLabware[] = values.labware.map((lw) => {
-                  const labwareSample = values.labware.find((ls) => ls.labware.barcode === lw.labware.barcode);
+                  const labwareSections = values.labware.find((ls) => ls.labware.barcode === lw.labware.barcode);
                   return {
                     barcode: lw.labware.barcode,
                     workNumber: lw.workNumber,
                     decodingConsumablesLot: values.decodingConsumablesLot,
                     position: lw.position?.toLowerCase() === 'left' ? CassettePosition.Left : CassettePosition.Right,
-                    samples: labwareSample
-                      ? labwareSample.samples.map((sample) => {
-                          return {
-                            address: sample.address,
-                            sampleId: sample.sampleId,
-                            roi: sample.roi
-                          };
-                        })
+                    samples: labwareSections
+                      ? labwareSections.sections.flatMap((sectionWithRegion) =>
+                          sectionWithRegion.addresses.map((address) => ({
+                            address,
+                            sampleId: sectionWithRegion.sampleId,
+                            roi: sectionWithRegion.roi
+                          }))
+                        )
                       : []
                   };
                 });
@@ -556,7 +572,7 @@ const XeniumAnalyser = () => {
                                         >
                                           <div className={'flex gap-x-10'}>
                                             <TabelSubHeader className="whitespace-normal break-words w-2/10">
-                                              Slot address
+                                              Addresses
                                             </TabelSubHeader>
                                             <TabelSubHeader className="whitespace-normal break-words w-3/10">
                                               External Id
@@ -568,31 +584,33 @@ const XeniumAnalyser = () => {
                                               Region
                                             </TabelSubHeader>
                                           </div>
-                                          {lw.samples.map((sample, sampleIndex) => {
+                                          {lw.sections.map((section, sectionIndex) => {
                                             return (
                                               <div
                                                 className={'flex gap-x-10'}
-                                                key={`${lw.labware.barcode}-${sample.sampleId}`}
+                                                key={`${lw.labware.barcode}-${section.sampleId}`}
                                               >
-                                                <label className="items-center w-2/10">{sample.address}</label>
-                                                <label className="items-center whitespace-normal break-words w-3/10">
-                                                  {sample.externalName}
+                                                <label className="items-center w-2/10">
+                                                  {section.addresses.join(', ')}
                                                 </label>
-                                                <label className="items-center w-2/10">{sample.sectionNumber}</label>
+                                                <label className="items-center whitespace-normal break-words w-3/10">
+                                                  {section.externalName}
+                                                </label>
+                                                <label className="items-center w-2/10">{section.sectionNumber}</label>
                                                 <FormikInput
                                                   as="textarea"
                                                   label={''}
                                                   className="w-3/10"
                                                   type="textarea"
-                                                  name={`labware.${lwIndex}.samples.${sampleIndex}.roi`}
-                                                  data-testid={`${lw.labware.barcode}-${sampleIndex}-roi`}
+                                                  name={`labware.${lwIndex}.sections.${sectionIndex}.roi`}
+                                                  data-testid={`${lw.labware.barcode}-${sectionIndex}-roi`}
                                                   onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
                                                     const barcode = e.target.value.trim();
                                                     if (barcode.length !== 0) {
                                                       const barcodeDisplayerProps = {
                                                         barcode,
                                                         warningMessage:
-                                                          barcode !== sample.externalName
+                                                          barcode !== section.externalName
                                                             ? 'The region does not match the sample external name'
                                                             : undefined
                                                       };

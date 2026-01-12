@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useImperativeHandle, useMemo } from 'react';
+import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import classNames from 'classnames';
 import { Slot } from './Slot';
 import {
@@ -22,6 +22,7 @@ import FlagIcon from '../icons/FlagIcon';
 import BarcodeIcon from '../icons/BarcodeIcon';
 import BubleChatIcon from '../icons/BubleChatIcon';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
+import { sectionGroupsBySample } from '../../lib/helpers/labwareHelper';
 
 export interface LabwareProps {
   /**
@@ -388,23 +389,29 @@ const Labware = ({
     </div>
   );
 
-  const slotSectionBgColor = (): Record<string, string> => {
-    const result: Record<string, string> = {};
+  const sections = useRef<Record<string, PlannedSectionDetails> | undefined>(sectionGroups);
 
-    if (!sectionGroups) return result;
-    Object.entries(sectionGroups).forEach(([groupId, sectionDetails]) => {
+  const slotSectionBgColor = React.useMemo((): Record<string, string> => {
+    const result: Record<string, string> = {};
+    if (!sections.current) {
+      sections.current = sectionGroupsBySample(labware as LabwareFlaggedFieldsFragment);
+    }
+    if (!sections.current) return result;
+
+    Object.entries(sections.current).forEach(([groupId, sectionDetails]) => {
       sectionDetails.addresses.forEach((address) => {
         result[address] = SECTION_GROUPS_BG_COLORS[Number(groupId)];
       });
     });
     return result;
-  };
+  }, [labware]);
 
-  const slotSize = (count: number) => {
-    if (count > 6) return 'small';
-    if (count > 3) return 'medium';
-    return 'large';
-  };
+  const slotSizeClassNames = useMemo(() => {
+    const count = LabwareDirection.Horizontal ? numRows : numColumns;
+    if (count > 6) return { size: 'size-16', parentDivSize: 'size-17', textSize: 'text-[10px]' };
+    if (count > 3) return { size: 'size-18', parentDivSize: 'size-19', textSize: ' text-[11px]' };
+    return { size: 'size-20', parentDivSize: 'size-21', textSize: 'text-xs' };
+  }, [numColumns, numRows]);
 
   return (
     <div className={'flex flex-row'} data-testid={`labware-${labware.barcode ?? ''}`}>
@@ -416,11 +423,14 @@ const Labware = ({
         <div className={gridClasses}>
           {buildAddresses({ numColumns, numRows }, gridDirection).map((address, i) => {
             return (
-              <div key={address} className={`p-1 ${slotSectionBgColor()[address]} rounded-lg transition`}>
+              <div
+                key={address}
+                className={`p-1 rounded-lg ${slotSectionBgColor[address]} ${slotSizeClassNames.parentDivSize}`}
+              >
                 <Slot
                   address={address}
                   slot={slotByAddress[address]}
-                  size={slotSize(LabwareDirection.Horizontal ? numRows : numColumns)}
+                  sizeClassNames={slotSizeClassNames}
                   onClick={internalOnClick}
                   onCtrlClick={onCtrlClick}
                   onShiftClick={onShiftClick}

@@ -10,6 +10,7 @@ import { backgroundColorClassNames } from '../helpers';
 import { orderBy } from 'lodash';
 import { Addressable, LabwareTypeName } from '../../types/stan';
 import * as slotHelper from './slotHelper';
+import { PlannedSectionDetails } from '../machines/layout/layoutContext';
 
 /**
  * Determines whether a labware type is a tube or not.
@@ -227,4 +228,51 @@ export const convertLabwareToFlaggedLabware = (labware: LabwareFieldsFragment[])
  */
 export const extractLabwareFromFlagged = (flagged: LabwareFlaggedFieldsFragment[]): LabwareFieldsFragment[] => {
   return flagged.map(({ flagged, ...rest }) => rest as LabwareFieldsFragment);
+};
+
+/**
+ * Groups labware slots by sample and section number.
+ *
+ * Each group represents a planned section created during the sectioning operation,
+ * identified by a combination of `sample.id` and `sample.section`.
+ *
+ * For each group, all slot addresses containing the same sample in the same section
+ * are collected together. This allows the UI and downstream logic to reconstruct
+ * section groupings that span multiple slots.
+ *
+ * Slots containing samples without a section number are ignored.
+ *
+ * */
+export const sectionGroupsBySample = (
+  labware: LabwareFieldsFragment | LabwareFlaggedFieldsFragment
+): Record<string, PlannedSectionDetails> => {
+  const sectionGroups: Record<string, PlannedSectionDetails> = {};
+  labware.slots.forEach((slot) => {
+    slot.samples.forEach((sample) => {
+      if (sample.section == null) return;
+      const key = `${sample.id}-${sample.section}`;
+      const group = (sectionGroups[key] ??= {
+        addresses: new Set<string>(),
+        source: {
+          sampleId: sample.id,
+          labware: labware,
+          newSection: sample.section,
+          externalName: sample.tissue.externalName
+        }
+      });
+
+      group.addresses.add(slot.address);
+    });
+  });
+
+  // Filter out section groups that span only a single address, then re-index the remaining
+  // groups using sequential numeric keys. These numeric keys are used by the UI layer
+  // to consistently map section groups to layout colours.
+  return Object.fromEntries(
+    Object.entries(sectionGroups)
+      .filter(([, sectionDetails]) => {
+        return sectionDetails.addresses.size > 1;
+      })
+      .map(([, sectionDetails], index) => [index, sectionDetails])
+  );
 };
