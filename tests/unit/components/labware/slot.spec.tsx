@@ -13,7 +13,12 @@ describe('Slot', () => {
     it('displays a slot', () => {
       act(() => {
         render(
-          <Slot address={'A1'} slot={filledSlotFactory.build({ address: 'A1' })} size={'small'} selected={false} />
+          <Slot
+            address={'A1'}
+            slot={filledSlotFactory.build({ address: 'A1' })}
+            slotSizeProps={{ size: 'size-16', parentDivSize: 'size-17', textSize: 'text-[10px]' }}
+            selected={false}
+          />
         );
       });
       expect(screen.getByText('A1')).toBeVisible();
@@ -23,7 +28,12 @@ describe('Slot', () => {
     it('displays a non-selected slot with size small', () => {
       act(() => {
         render(
-          <Slot address={'A1'} slot={filledSlotFactory.build({ address: 'A1' })} size={'small'} selected={false} />
+          <Slot
+            address={'A1'}
+            slot={filledSlotFactory.build({ address: 'A1' })}
+            slotSizeProps={{ size: 'size-16', parentDivSize: 'size-17', textSize: 'text-[10px]' }}
+            selected={false}
+          />
         );
       });
       expect(screen.getByText('A1')).toBeVisible();
@@ -43,7 +53,7 @@ describe('Slot', () => {
           <Slot
             address={'A1'}
             slot={filledSlotFactory.build({ address: 'A1' })}
-            size={'large'}
+            slotSizeProps={{ size: 'size-20', parentDivSize: 'size-21', textSize: 'text-xs' }}
             selected={true}
             color={color}
           />
@@ -66,7 +76,7 @@ describe('Slot', () => {
           <Slot
             address={'A2'}
             slot={filledSlotFactory.build({ address: 'A2' })}
-            size={'large'}
+            slotSizeProps={{ size: 'size-20', parentDivSize: 'size-21', textSize: 'text-xs' }}
             selected={true}
             onClick={mockCallBack}
             onShiftClick={mockShiftCallBack}
@@ -94,7 +104,7 @@ describe('Slot', () => {
           <Slot
             address={'A2'}
             slot={filledSlotFactory.build({ address: 'A2' })}
-            size={'large'}
+            slotSizeProps={{ size: 'size-20', parentDivSize: 'size-21', textSize: 'text-xs' }}
             selected={true}
             secondaryText={(_address: string, _slot: SlotFieldsFragment) => 'Testing'}
           />

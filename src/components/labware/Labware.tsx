@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useImperativeHandle, useMemo } from 'react';
 import classNames from 'classnames';
 import { Slot } from './Slot';
 import {
@@ -389,24 +389,23 @@ const Labware = ({
     </div>
   );
 
-  const sections = useRef<Record<string, PlannedSectionDetails> | undefined>(sectionGroups);
-
-  const slotSectionBgColor = React.useMemo((): Record<string, string> => {
+  const slotSectionBgColor = (): Record<string, string> => {
     const result: Record<string, string> = {};
-    if (!sections.current) {
-      sections.current = sectionGroupsBySample(labware as LabwareFlaggedFieldsFragment);
-    }
-    if (!sections.current) return result;
 
-    Object.entries(sections.current).forEach(([groupId, sectionDetails]) => {
+    if (!sectionGroups) {
+      sectionGroups = sectionGroupsBySample(labware as LabwareFlaggedFieldsFragment);
+    }
+    if (!sectionGroups) return result;
+
+    Object.entries(sectionGroups).forEach(([groupId, sectionDetails]) => {
       sectionDetails.addresses.forEach((address) => {
         result[address] = SECTION_GROUPS_BG_COLORS[Number(groupId)];
       });
     });
     return result;
-  }, [labware]);
+  };
 
-  const slotSizeClassNames = useMemo(() => {
+  const slotSizeProps = useMemo(() => {
     const count = LabwareDirection.Horizontal ? numRows : numColumns;
     if (count > 6) return { size: 'size-16', parentDivSize: 'size-17', textSize: 'text-[10px]' };
     if (count > 3) return { size: 'size-18', parentDivSize: 'size-19', textSize: ' text-[11px]' };
@@ -425,12 +424,12 @@ const Labware = ({
             return (
               <div
                 key={address}
-                className={`p-1 rounded-lg ${slotSectionBgColor[address]} ${slotSizeClassNames.parentDivSize}`}
+                className={`p-1 rounded-lg ${slotSectionBgColor()[address]} ${slotSizeProps.parentDivSize}`}
               >
                 <Slot
                   address={address}
                   slot={slotByAddress[address]}
-                  sizeClassNames={slotSizeClassNames}
+                  slotSizeProps={slotSizeProps}
                   onClick={internalOnClick}
                   onCtrlClick={onCtrlClick}
                   onShiftClick={onShiftClick}

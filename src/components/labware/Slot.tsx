@@ -8,7 +8,7 @@ import CrossOverIcon from '../icons/CrossOverIcon';
 type SlotProps = {
   address: string;
   slot: SlotFieldsFragment;
-  sizeClassNames: { size: string; parentDivSize: string; textSize: string };
+  slotSizeProps: { size: string; parentDivSize: string; textSize: string };
   onClick?: (address: string, slot: SlotFieldsFragment) => void;
   onCtrlClick?: (address: string, slot: SlotFieldsFragment) => void;
   onShiftClick?: (address: string, slot: SlotFieldsFragment) => void;
@@ -24,7 +24,7 @@ type SlotProps = {
 export function Slot({
   address,
   slot,
-  sizeClassNames,
+  slotSizeProps,
   onClick,
   onCtrlClick,
   onShiftClick,
@@ -50,7 +50,7 @@ export function Slot({
       'ring-3 ring-pink-600 ring-offset-2': selected,
       'border border-gray-800': !selected
     },
-    `${sizeClassNames.size} ${sizeClassNames.textSize} inline-flex flex-col items-center justify-center mx-auto rounded-full font-semibold`
+    `${slotSizeProps.size} ${slotSizeProps.textSize} inline-flex flex-col items-center justify-center mx-auto rounded-full font-semibold`
   );
 
   const onClickHandler = React.useCallback(
