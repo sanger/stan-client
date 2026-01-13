@@ -230,24 +230,11 @@ const XeniumAnalyser = () => {
       sections.push({
         addresses: addresses,
         sampleId: sectionGroup.source.sampleId,
-        externalName: sectionGroup.source.externalName ?? '',
+        externalName: sectionGroup.source.tissue?.externalName ?? '',
         sectionNumber: String(sectionGroup.source.newSection) ?? '',
-        roi: sectionGroup.source.externalName ?? ''
+        roi: sectionGroup.source.tissue?.externalName ?? ''
       });
     }
-    lw.slots.forEach((slot) => {
-      if (groupedAddress.has(slot.address)) return;
-      slot.samples.forEach((sample) => {
-        sections.push({
-          addresses: [slot.address],
-          sampleId: sample.id,
-          externalName: sample.tissue.externalName ?? '',
-          sectionNumber: String(sample.section) ?? '',
-          roi: sample.tissue.externalName ?? ''
-        });
-      });
-    });
-
     return sections;
   }, []);
 

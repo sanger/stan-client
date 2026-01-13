@@ -231,7 +231,8 @@ export const extractLabwareFromFlagged = (flagged: LabwareFlaggedFieldsFragment[
 };
 
 /**
- * Groups labware slots by sample and section number.
+ * Groups labware slots by sample and section number, then returns the groups
+ * ordered by section number and re-indexed with sequential numeric keys.
  *
  * Each group represents a planned section created during the sectioning operation,
  * identified by a combination of `sample.id` and `sample.section`.
@@ -240,9 +241,12 @@ export const extractLabwareFromFlagged = (flagged: LabwareFlaggedFieldsFragment[
  * are collected together. This allows the UI and downstream logic to reconstruct
  * section groupings that span multiple slots.
  *
- * Slots containing samples without a section number are ignored.
+ * Groups are sorted by `sectionNumber` (`sample.section`) in ascending order before
+ * being re-indexed. The resulting numeric keys (starting from 0) are used by the UI
+ * layer to consistently map section groups to layout colours.
  *
- * */
+ * Slots containing samples without a section number are ignored.
+ */
 export const sectionGroupsBySample = (
   labware: LabwareFieldsFragment | LabwareFlaggedFieldsFragment
 ): Record<string, PlannedSectionDetails> => {
@@ -257,22 +261,17 @@ export const sectionGroupsBySample = (
           sampleId: sample.id,
           labware: labware,
           newSection: sample.section,
-          externalName: sample.tissue.externalName
+          tissue: sample.tissue
         }
       });
-
       group.addresses.add(slot.address);
     });
   });
-
-  // Filter out section groups that span only a single address, then re-index the remaining
-  // groups using sequential numeric keys. These numeric keys are used by the UI layer
-  // to consistently map section groups to layout colours.
   return Object.fromEntries(
-    Object.entries(sectionGroups)
-      .filter(([, sectionDetails]) => {
-        return sectionDetails.addresses.size > 1;
+    Object.values(sectionGroups)
+      .sort((a, b) => {
+        return a.source.newSection - b.source.newSection;
       })
-      .map(([, sectionDetails], index) => [index, sectionDetails])
+      .map((sectionDetails, index) => [index, sectionDetails])
   );
 };

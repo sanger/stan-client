@@ -396,12 +396,13 @@ const Labware = ({
       sectionGroups = sectionGroupsBySample(labware as LabwareFlaggedFieldsFragment);
     }
     if (!sectionGroups) return result;
-
-    Object.entries(sectionGroups).forEach(([groupId, sectionDetails]) => {
-      sectionDetails.addresses.forEach((address) => {
-        result[address] = SECTION_GROUPS_BG_COLORS[Number(groupId)];
+    Object.entries(sectionGroups)
+      .filter(([, sectionDetails]) => sectionDetails.addresses.size > 1)
+      .forEach(([groupId, sectionDetails]) => {
+        sectionDetails.addresses.forEach((address) => {
+          result[address] = SECTION_GROUPS_BG_COLORS[Number(groupId)];
+        });
       });
-    });
     return result;
   };
 

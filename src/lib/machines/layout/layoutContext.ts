@@ -1,4 +1,4 @@
-import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, Maybe } from '../../../types/sdk';
+import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, Maybe, TissueFieldsFragment } from '../../../types/sdk';
 import { Address, NewFlaggedLabwareLayout } from '../../../types/stan';
 
 export interface LayoutPlan {
@@ -38,7 +38,7 @@ export interface Source {
   region?: string;
   commentIds?: number[];
   replicateNumber?: string;
-  externalName?: Maybe<string>;
+  tissue?: TissueFieldsFragment;
 }
 
 export interface LayoutContext {
