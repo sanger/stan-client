@@ -14,7 +14,7 @@ import StripyCard, { StripyCardDetail } from '../components/StripyCard';
 import Heading from '../components/Heading';
 import LabelPrinter from '../components/LabelPrinter';
 import DataTable from '../components/DataTable';
-import * as sampleColumns from '../components/dataTableColumns/sampleColumns';
+import * as sectionColumns from '../components/dataTableColumns/sectionColumns';
 import { Authenticated } from '../components/Authenticated';
 import History from '../components/history/History';
 import { LabwareStatePill } from '../components/LabwareStatePill';
@@ -114,22 +114,22 @@ export default function LabwareDetails() {
 
               <DataTable
                 columns={[
-                  sampleColumns.slotAddress(),
-                  sampleColumns.externalId(),
-                  sampleColumns.tissueType(),
-                  sampleColumns.sectionNumber(),
-                  sampleColumns.sectionPosition(),
-                  sampleColumns.bioState(),
-                  sampleColumns.replicateNumber(),
-                  sampleColumns.spatialLocation(),
-                  sampleColumns.lifeStage(),
-                  sampleColumns.donorName(),
-                  sampleColumns.medium(),
-                  sampleColumns.fixative(),
-                  sampleColumns.huMFre(),
-                  sampleColumns.bioRiskCode()
+                  sectionColumns.addresses(),
+                  sectionColumns.externalId(),
+                  sectionColumns.tissueType(),
+                  sectionColumns.sectionNumber(),
+                  sectionColumns.sectionPosition(),
+                  sectionColumns.bioState(),
+                  sectionColumns.replicateNumber(),
+                  sectionColumns.spatialLocation(),
+                  sectionColumns.lifeStage(),
+                  sectionColumns.donorName(),
+                  sectionColumns.medium(),
+                  sectionColumns.fixative(),
+                  sectionColumns.huMFre(),
+                  sectionColumns.bioRiskCode()
                 ]}
-                data={sampleColumns.buildSampleDataTableRows(labware, samplePositionResults, labwareBioRiskCodes)}
+                data={sectionColumns.buildSectionDataTableRows(labware, samplePositionResults, labwareBioRiskCodes)}
               />
             </div>
           </div>

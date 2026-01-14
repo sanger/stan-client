@@ -261,7 +261,8 @@ export const sectionGroupsBySample = (
           sampleId: sample.id,
           labware: labware,
           newSection: sample.section,
-          tissue: sample.tissue
+          tissue: sample.tissue,
+          bioState: sample.bioState
         }
       });
       group.addresses.add(slot.address);

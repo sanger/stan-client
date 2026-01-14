@@ -1,11 +1,5 @@
 import { Column } from 'react-table';
-import {
-  LabwareFieldsFragment,
-  LabwareType,
-  SampleBioRisk,
-  SampleFieldsFragment,
-  SamplePositionFieldsFragment
-} from '../../types/sdk';
+import { LabwareType, SampleFieldsFragment } from '../../types/sdk';
 import { capitalize } from 'lodash';
 import MutedText from '../MutedText';
 
@@ -17,40 +11,6 @@ export type SampleDataTableRow = SampleFieldsFragment & { slotAddress: string } 
 } & { barcode?: string } & { labwareType?: LabwareType } & { bioRiskCode?: string };
 
 type ColumnFactory<E = any> = (meta?: E) => Column<SampleDataTableRow>;
-
-const samplePositionMapBySampleIdSlotId = (
-  samplePositionResults: SamplePositionFieldsFragment[]
-): Record<string, SamplePositionFieldsFragment> => {
-  const spMap: Record<string, SamplePositionFieldsFragment> = {};
-  for (const samplePosition of samplePositionResults) {
-    spMap[`${samplePosition.sampleId}-${samplePosition.slotId}`] = samplePosition;
-  }
-  return spMap;
-};
-
-/**
- * Creates a list of all samples along with their slot address in a labware.
- * Most likely for use in a {@link DataTable}.
- */
-
-export function buildSampleDataTableRows(
-  labware: LabwareFieldsFragment,
-  samplePositionResults: SamplePositionFieldsFragment[],
-  labwareBioRiskCodes: Array<SampleBioRisk>
-): SampleDataTableRow[] {
-  const samplePositionResultsMap = samplePositionMapBySampleIdSlotId(samplePositionResults);
-
-  return labware.slots.flatMap((slot) => {
-    return slot.samples.map((sample) => {
-      return {
-        ...sample,
-        slotAddress: slot.address,
-        sectionPosition: samplePositionResultsMap[`${sample.id}-${slot.id}`]?.region,
-        bioRiskCode: labwareBioRiskCodes.find((sbr) => sbr.sampleId === sample.id)?.bioRiskCode
-      };
-    });
-  });
-}
 
 export const slotAddress: ColumnFactory = () => ({
   Header: 'Address',
