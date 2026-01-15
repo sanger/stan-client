@@ -1,4 +1,10 @@
-import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, Maybe, TissueFieldsFragment } from '../../../types/sdk';
+import {
+  BioState,
+  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
+  Maybe,
+  TissueFieldsFragment
+} from '../../../types/sdk';
 import { Address, NewFlaggedLabwareLayout } from '../../../types/stan';
 
 export interface LayoutPlan {
@@ -39,6 +45,7 @@ export interface Source {
   commentIds?: number[];
   replicateNumber?: string;
   tissue?: TissueFieldsFragment;
+  bioState?: BioState;
 }
 
 export interface LayoutContext {
