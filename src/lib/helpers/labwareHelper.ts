@@ -267,11 +267,18 @@ export const sectionGroupsBySample = (
       group.addresses.add(slot.address);
     });
   });
-  return Object.fromEntries(
-    Object.values(sectionGroups)
-      .sort((a, b) => {
-        return a.source.newSection - b.source.newSection;
-      })
-      .map((sectionDetails, index) => [index, sectionDetails])
+
+  // Group by tissue external name to ensure sections from the same tissue are together in the final ordering
+  const grouped = Object.values(sectionGroups).reduce<Record<string, PlannedSectionDetails[]>>((acc, section) => {
+    const key = section.source.tissue?.donor.donorName ?? '';
+    (acc[key] ??= []).push(section);
+    return acc;
+  }, {});
+
+  // Ordering within each tissue group by section number - ascending ordered
+  const sorted = Object.values(grouped).flatMap((group) =>
+    group.sort((a, b) => a.source.newSection - b.source.newSection)
   );
+
+  return Object.fromEntries(sorted.map((sectionDetails, index) => [index, sectionDetails]));
 };
