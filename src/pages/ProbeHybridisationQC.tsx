@@ -10,7 +10,7 @@ import Panel from '../components/Panel';
 import RemoveButton from '../components/buttons/RemoveButton';
 import Labware from '../components/labware/Labware';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
-import { FormikErrorMessage, selectOptionValues } from '../components/forms';
+import { selectOptionValues } from '../components/forms';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
 import { formatDateTimeForCore, getCurrentDateTime } from '../types/stan';
 import BlueButton from '../components/buttons/BlueButton';
@@ -140,14 +140,16 @@ export default function ProbeHybridisationQC() {
   };
 
   const validationSchema = Yup.object().shape({
-    hybQCLabware: Yup.array().of(
-      Yup.object().shape({
-        workNumber: Yup.string().required('SGP number is required'),
-        completionTime: Yup.date()
-          .required('Completion time is required')
-          .max(new Date(), `Please select a date on or before ${getCurrentDateTime()}`)
-      })
-    )
+    hybQCLabware: Yup.array()
+      .of(
+        Yup.object().shape({
+          workNumber: Yup.string().required('SGP number is required'),
+          completionTime: Yup.date()
+            .required('Completion time is required')
+            .max(new Date(), 'Please select a time on or before current time')
+        })
+      )
+      .min(1, 'At least one slide must be scanned in to proceed')
   });
 
   return (
@@ -179,7 +181,7 @@ export default function ProbeHybridisationQC() {
             onSubmit={async (values) => convertValuesAndSubmit(values)}
             validateOnMount={true}
           >
-            {({ values, setFieldValue, setValues }) => (
+            {({ values, setFieldValue, setValues, isValid }) => (
               <Form>
                 <div className="mt-8 space-y-2">
                   <div className="grid grid-cols-2 gap-x-1">
@@ -277,7 +279,6 @@ export default function ProbeHybridisationQC() {
                                         await setFieldValue(`hybQCLabware.${index}.workNumber`, workNumber);
                                       }}
                                     />
-                                    <FormikErrorMessage name={`hybQCLabware.${index}.workNumber`} />
                                   </div>
                                   <div>
                                     <FormikInput
@@ -365,7 +366,9 @@ export default function ProbeHybridisationQC() {
                     }
                   </LabwareScanner>
                   <div className={'sm:flex mt-4 sm:flex-row justify-end'} key="submit">
-                    <BlueButton type="submit">Save</BlueButton>
+                    <BlueButton type="submit" disabled={!isValid}>
+                      Save
+                    </BlueButton>
                   </div>
                 </div>
               </Form>

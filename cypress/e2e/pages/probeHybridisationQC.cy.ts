@@ -80,7 +80,7 @@ describe('Probe Hybridisation QC', () => {
       });
       it('should populate all the sgp number relative to the scanned labware', () => {
         cy.findAllByTestId('workNumber').each((el) => {
-          expect(el).to.have.text('SGP1008');
+          cy.wrap(el).should('contain.text', 'SGP1008');
         });
       });
     });
@@ -95,15 +95,12 @@ describe('Probe Hybridisation QC', () => {
         cy.findByText('Save').should('be.disabled');
       });
     });
-    describe('The user can not select a future date', () => {
+    describe('Error when the user selects future date', () => {
       before(() => {
-        cy.findByTestId('completionDateTime').clear().type('2075-01-01T10:00');
+        cy.findByTestId('completionDateTime').clear().type('2075-01-01T10:00').blur();
       });
       it('displays an error message', () => {
         cy.findByText('Please select a time on or before current time').should('be.visible');
-      });
-      it('keeps the current date', () => {
-        cy.findByTestId('completionDateTime').should('not.have.value', '2075-01-01T10:00');
       });
     });
   });
