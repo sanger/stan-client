@@ -4471,6 +4471,8 @@ export type StainTypeFieldsFragment = { __typename?: 'StainType', name: string, 
 
 export type SuggestedWorkFieldsFragment = { __typename?: 'SuggestedWork', barcode: string, workNumber?: string | null };
 
+export type TissueFieldsFragment = { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } };
+
 export type TissueTypeFieldsFragment = { __typename?: 'TissueType', name: string, code: string, spatialLocations: Array<{ __typename?: 'SpatialLocation', code: number, name: string }> };
 
 export type UserFieldsFragment = { __typename?: 'User', username: string, role: UserRole };
@@ -5903,35 +5905,40 @@ export const LabwareTypeFieldsFragmentDoc = gql`
   }
 }
     `;
+export const TissueFieldsFragmentDoc = gql`
+    fragment TissueFields on Tissue {
+  donor {
+    donorName
+    lifeStage
+  }
+  externalName
+  spatialLocation {
+    tissueType {
+      name
+    }
+    code
+    name
+  }
+  hmdmc {
+    hmdmc
+  }
+  replicate
+  medium {
+    name
+  }
+  fixative {
+    name
+    enabled
+  }
+  collectionDate
+}
+    `;
 export const SampleFieldsFragmentDoc = gql`
     fragment SampleFields on Sample {
   id
   section
   tissue {
-    donor {
-      donorName
-      lifeStage
-    }
-    externalName
-    spatialLocation {
-      tissueType {
-        name
-      }
-      code
-      name
-    }
-    hmdmc {
-      hmdmc
-    }
-    replicate
-    medium {
-      name
-    }
-    fixative {
-      name
-      enabled
-    }
-    collectionDate
+    ...TissueFields
   }
   bioState {
     name
@@ -6634,7 +6641,8 @@ export const AliquotDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const ConfirmDocument = gql`
     mutation Confirm($request: ConfirmOperationRequest!) {
   confirmOperation(request: $request) {
@@ -6655,7 +6663,8 @@ export const ConfirmDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const ConfirmSectionDocument = gql`
     mutation ConfirmSection($request: ConfirmSectionRequest!) {
   confirmSection(request: $request) {
@@ -6676,7 +6685,8 @@ export const ConfirmSectionDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const CreateWorkDocument = gql`
     mutation CreateWork($prefix: String!, $workType: String!, $workRequester: String!, $project: String!, $program: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int, $numOriginalSamples: Int, $omeroProject: String, $ssStudyId: Int, $facultyLead: String) {
   createWork(
@@ -6755,7 +6765,8 @@ export const ExtractDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const FlagLabwareDocument = gql`
     mutation FlagLabware($request: FlagLabwareRequest!) {
   flagLabware(request: $request) {
@@ -6799,7 +6810,8 @@ export const PerformParaffinProcessingDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const PerformSolutionTransferDocument = gql`
     mutation PerformSolutionTransfer($request: SolutionTransferRequest!) {
   performSolutionTransfer(request: $request) {
@@ -6820,7 +6832,8 @@ export const PerformSolutionTransferDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const PerformTissueBlockDocument = gql`
     mutation PerformTissueBlock($request: TissueBlockRequest!) {
   performTissueBlock(request: $request) {
@@ -6841,7 +6854,8 @@ export const PerformTissueBlockDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const PerformTissuePotDocument = gql`
     mutation PerformTissuePot($request: PotProcessingRequest!) {
   performPotProcessing(request: $request) {
@@ -6862,7 +6876,8 @@ export const PerformTissuePotDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const PlanDocument = gql`
     mutation Plan($request: PlanRequest!) {
   plan(request: $request) {
@@ -6883,6 +6898,7 @@ export const PlanDocument = gql`
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${PlanActionFieldsFragmentDoc}`;
 export const PrintDocument = gql`
     mutation Print($barcodes: [String!]!, $printer: String!) {
@@ -6949,7 +6965,8 @@ export const RecordInPlaceDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const RecordLibraryPrepDocument = gql`
     mutation RecordLibraryPrep($request: LibraryPrepRequest!) {
   libraryPrep(request: $request) {
@@ -6964,7 +6981,8 @@ export const RecordLibraryPrepDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const RecordMetricsDocument = gql`
     mutation RecordMetrics($request: SampleMetricsRequest!) {
   recordSampleMetrics(request: $request) {
@@ -7066,7 +7084,8 @@ export const RecordSampleProcessingCommentsDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const RecordStainResultDocument = gql`
     mutation RecordStainResult($request: ResultRequest!) {
   recordStainResult(request: $request) {
@@ -7104,7 +7123,8 @@ export const RegisterOriginalSamplesDocument = gql`
 ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const RegisterSectionsDocument = gql`
     mutation RegisterSections($request: SectionRegisterRequest!) {
   registerSections(request: $request) {
@@ -7116,7 +7136,8 @@ export const RegisterSectionsDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const RegisterTissuesDocument = gql`
     mutation RegisterTissues($request: RegisterRequest!) {
   register(request: $request) {
@@ -7127,7 +7148,8 @@ export const RegisterTissuesDocument = gql`
 ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const ReleaseLabwareDocument = gql`
     mutation ReleaseLabware($releaseRequest: ReleaseRequest!) {
   release(request: $releaseRequest) {
@@ -7167,7 +7189,8 @@ export const SegmentationDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const SetBioRiskEnabledDocument = gql`
     mutation SetBioRiskEnabled($code: String!, $enabled: Boolean!) {
   setBioRiskEnabled(code: $code, enabled: $enabled) {
@@ -7252,6 +7275,7 @@ export const SetOpWorkRequestDocument = gql`
 ${ActionFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${UserFieldsFragmentDoc}`;
 export const SetProbePanelEnabledDocument = gql`
     mutation SetProbePanelEnabled($type: ProbeType!, $name: String!, $enabled: Boolean!) {
@@ -7341,7 +7365,8 @@ export const SlotCopyDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const StainDocument = gql`
     mutation Stain($request: StainRequest!) {
   stain(request: $request) {
@@ -7572,7 +7597,8 @@ export const ExtractResultDocument = gql`
     ${LabwareFlaggedFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const FindDocument = gql`
     query Find($request: FindRequest!) {
   find(request: $request) {
@@ -7648,7 +7674,8 @@ export const FindFlaggedLabwareDocument = gql`
     ${LabwareFlaggedFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const FindHistoryDocument = gql`
     query FindHistory($workNumber: String, $barcode: String, $donorName: [String!], $externalName: [String!], $eventType: String) {
   history(
@@ -7666,6 +7693,7 @@ ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${HistoryEntryFieldsFragmentDoc}
 ${FlagBarcodesFieldsFragmentDoc}`;
 export const FindHistoryForDonorNameDocument = gql`
@@ -7679,6 +7707,7 @@ ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${HistoryEntryFieldsFragmentDoc}
 ${FlagBarcodesFieldsFragmentDoc}`;
 export const FindHistoryForExternalNameDocument = gql`
@@ -7692,6 +7721,7 @@ ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${HistoryEntryFieldsFragmentDoc}
 ${FlagBarcodesFieldsFragmentDoc}`;
 export const FindHistoryForLabwareBarcodeDocument = gql`
@@ -7705,6 +7735,7 @@ ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${HistoryEntryFieldsFragmentDoc}
 ${FlagBarcodesFieldsFragmentDoc}`;
 export const FindHistoryForSampleIdDocument = gql`
@@ -7718,6 +7749,7 @@ ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${HistoryEntryFieldsFragmentDoc}
 ${FlagBarcodesFieldsFragmentDoc}`;
 export const FindHistoryForWorkNumberDocument = gql`
@@ -7731,6 +7763,7 @@ ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${HistoryEntryFieldsFragmentDoc}
 ${FlagBarcodesFieldsFragmentDoc}`;
 export const FindHistoryGraphDocument = gql`
@@ -7766,7 +7799,8 @@ export const FindLabwareDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const FindLabwareLocationDocument = gql`
     query FindLabwareLocation($barcodes: [String!]!) {
   stored(barcodes: $barcodes) {
@@ -7814,6 +7848,7 @@ export const FindPassFailsDocument = gql`
 ${ActionFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${UserFieldsFragmentDoc}
 ${SlotPassFailFieldsFragmentDoc}`;
 export const FindPermDataDocument = gql`
@@ -7837,6 +7872,7 @@ export const FindPermDataDocument = gql`
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${SamplePositionFieldsFragmentDoc}`;
 export const FindPlanDataDocument = gql`
     query FindPlanData($barcode: String!) {
@@ -7862,6 +7898,7 @@ export const FindPlanDataDocument = gql`
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${PlanActionFieldsFragmentDoc}`;
 export const FindReagentPlateDocument = gql`
     query FindReagentPlate($barcode: String!) {
@@ -8173,7 +8210,8 @@ export const GetLabwareInLocationDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const GetLabwareOperationsDocument = gql`
     query GetLabwareOperations($barcode: String!, $operationType: String!) {
   labwareOperations(barcode: $barcode, operationType: $operationType) {
@@ -8184,6 +8222,7 @@ export const GetLabwareOperationsDocument = gql`
 ${ActionFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}
 ${UserFieldsFragmentDoc}`;
 export const GetNextReplicateNumberDocument = gql`
     query GetNextReplicateNumber($barcodes: [String!]!) {
@@ -8277,7 +8316,8 @@ export const GetRegionsOfInterestDocument = gql`
 }
     ${LabwareRoiFieldsFragmentDoc}
 ${RoiFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const GetRegistrationInfoDocument = gql`
     query GetRegistrationInfo {
   species {
@@ -8350,7 +8390,8 @@ export const GetRunRoisDocument = gql`
   }
 }
     ${RoiFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const GetSampleProcessingCommentsInfoDocument = gql`
     query GetSampleProcessingCommentsInfo {
   comments: comments(includeDisabled: false, category: "Sample Processing") {
@@ -8430,7 +8471,8 @@ export const GetSuggestedLabwareForWorkDocument = gql`
     ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const GetSuggestedWorkForLabwareDocument = gql`
     query GetSuggestedWorkForLabware($barcodes: [String!]!, $includeInactive: Boolean) {
   suggestedWorkForLabware(barcodes: $barcodes, includeInactive: $includeInactive) {

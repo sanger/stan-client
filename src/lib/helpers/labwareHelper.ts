@@ -10,6 +10,7 @@ import { backgroundColorClassNames } from '../helpers';
 import { orderBy } from 'lodash';
 import { Addressable, LabwareTypeName } from '../../types/stan';
 import * as slotHelper from './slotHelper';
+import { PlannedSectionDetails } from '../machines/layout/layoutContext';
 
 /**
  * Determines whether a labware type is a tube or not.
@@ -227,4 +228,50 @@ export const convertLabwareToFlaggedLabware = (labware: LabwareFieldsFragment[])
  */
 export const extractLabwareFromFlagged = (flagged: LabwareFlaggedFieldsFragment[]): LabwareFieldsFragment[] => {
   return flagged.map(({ flagged, ...rest }) => rest as LabwareFieldsFragment);
+};
+
+/**
+ * Groups labware slots by sample and section number, then returns the groups
+ * ordered by section number and re-indexed with sequential numeric keys.
+ *
+ * Each group represents a planned section created during the sectioning operation,
+ * identified by a combination of `sample.id` and `sample.section`.
+ *
+ * For each group, all slot addresses containing the same sample in the same section
+ * are collected together. This allows the UI and downstream logic to reconstruct
+ * section groupings that span multiple slots.
+ *
+ * Groups are sorted by `sectionNumber` (`sample.section`) in ascending order before
+ * being re-indexed. The resulting numeric keys (starting from 0) are used by the UI
+ * layer to consistently map section groups to layout colours.
+ *
+ * Slots containing samples without a section number are ignored.
+ */
+export const sectionGroupsBySample = (
+  labware: LabwareFieldsFragment | LabwareFlaggedFieldsFragment
+): Record<string, PlannedSectionDetails> => {
+  const sectionGroups: Record<string, PlannedSectionDetails> = {};
+  labware.slots.forEach((slot) => {
+    slot.samples.forEach((sample) => {
+      if (sample.section == null) return;
+      const key = `${sample.id}-${sample.section}`;
+      const group = (sectionGroups[key] ??= {
+        addresses: new Set<string>(),
+        source: {
+          sampleId: sample.id,
+          labware: labware,
+          newSection: sample.section,
+          tissue: sample.tissue
+        }
+      });
+      group.addresses.add(slot.address);
+    });
+  });
+  return Object.fromEntries(
+    Object.values(sectionGroups)
+      .sort((a, b) => {
+        return a.source.newSection - b.source.newSection;
+      })
+      .map((sectionDetails, index) => [index, sectionDetails])
+  );
 };

@@ -22,6 +22,7 @@ import FlagIcon from '../icons/FlagIcon';
 import BarcodeIcon from '../icons/BarcodeIcon';
 import BubleChatIcon from '../icons/BubleChatIcon';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
+import { sectionGroupsBySample } from '../../lib/helpers/labwareHelper';
 
 export interface LabwareProps {
   /**
@@ -391,20 +392,26 @@ const Labware = ({
   const slotSectionBgColor = (): Record<string, string> => {
     const result: Record<string, string> = {};
 
+    if (!sectionGroups) {
+      sectionGroups = sectionGroupsBySample(labware as LabwareFlaggedFieldsFragment);
+    }
     if (!sectionGroups) return result;
-    Object.entries(sectionGroups).forEach(([groupId, sectionDetails]) => {
-      sectionDetails.addresses.forEach((address) => {
-        result[address] = SECTION_GROUPS_BG_COLORS[Number(groupId)];
+    Object.entries(sectionGroups)
+      .filter(([, sectionDetails]) => sectionDetails.addresses.size > 1)
+      .forEach(([groupId, sectionDetails]) => {
+        sectionDetails.addresses.forEach((address) => {
+          result[address] = SECTION_GROUPS_BG_COLORS[Number(groupId)];
+        });
       });
-    });
     return result;
   };
 
-  const slotSize = (count: number) => {
-    if (count > 6) return 'small';
-    if (count > 3) return 'medium';
-    return 'large';
-  };
+  const slotSizeProps = useMemo(() => {
+    const count = LabwareDirection.Horizontal ? numRows : numColumns;
+    if (count > 6) return { size: 'size-16', parentDivSize: 'size-17', textSize: 'text-[10px]' };
+    if (count > 3) return { size: 'size-18', parentDivSize: 'size-19', textSize: ' text-[11px]' };
+    return { size: 'size-20', parentDivSize: 'size-21', textSize: 'text-xs' };
+  }, [numColumns, numRows]);
 
   return (
     <div className={'flex flex-row'} data-testid={`labware-${labware.barcode ?? ''}`}>
@@ -416,11 +423,14 @@ const Labware = ({
         <div className={gridClasses}>
           {buildAddresses({ numColumns, numRows }, gridDirection).map((address, i) => {
             return (
-              <div key={address} className={`p-1 ${slotSectionBgColor()[address]} rounded-lg transition`}>
+              <div
+                key={address}
+                className={`p-1 rounded-lg ${slotSectionBgColor()[address]} ${slotSizeProps.parentDivSize}`}
+              >
                 <Slot
                   address={address}
                   slot={slotByAddress[address]}
-                  size={slotSize(LabwareDirection.Horizontal ? numRows : numColumns)}
+                  slotSizeProps={slotSizeProps}
                   onClick={internalOnClick}
                   onCtrlClick={onCtrlClick}
                   onShiftClick={onShiftClick}

@@ -1,0 +1,26 @@
+fragment TissueFields on Tissue {
+  donor {
+    donorName
+    lifeStage
+  }
+  externalName
+  spatialLocation {
+    tissueType {
+      name
+    }
+    code
+    name
+  }
+  hmdmc {
+    hmdmc
+  }
+  replicate
+  medium {
+    name
+  }
+  fixative {
+    name
+    enabled
+  }
+  collectionDate
+}
