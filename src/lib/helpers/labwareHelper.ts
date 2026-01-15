@@ -270,7 +270,7 @@ export const sectionGroupsBySample = (
 
   // Group by tissue external name to ensure sections from the same tissue are together in the final ordering
   const grouped = Object.values(sectionGroups).reduce<Record<string, PlannedSectionDetails[]>>((acc, section) => {
-    const key = section.source.tissue?.externalName ?? '';
+    const key = section.source.tissue?.donor.donorName ?? '';
     (acc[key] ??= []).push(section);
     return acc;
   }, {});
