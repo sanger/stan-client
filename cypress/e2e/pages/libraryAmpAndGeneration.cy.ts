@@ -437,6 +437,7 @@ const fillInReagentTransferStep = () => {
     cy.findByRole('textbox').clear().type(`${dualIndexPlateBarcode}{enter}`);
   });
   transferReagent();
+  cy.findByRole('table').should('exist');
   cy.findByRole('button', { name: 'Record Cycle >' }).click();
 };
 
@@ -456,9 +457,9 @@ const mappingSamples = (addressSource: string, addressDestination: string) => {
 
 const transferReagent = () => {
   cy.get('#sourceLabwares').within(() => {
-    cy.findByText('A1').click();
+    cy.findByText('A1').wait(1000).click({ force: true });
   });
   cy.get('#destLabwares').within(() => {
-    cy.findByText('A1').click();
+    cy.findByText('A1').wait(1000).click({ force: true });
   });
 };

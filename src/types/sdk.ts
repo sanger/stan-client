@@ -3789,6 +3789,8 @@ export type SlotCopyDestination = {
   barcode?: InputMaybe<Scalars['String']['input']>;
   /** The bio state for samples in the destination (if specified). */
   bioState?: InputMaybe<Scalars['String']['input']>;
+  /** Cassette lot number, if specified. */
+  cassetteLot?: InputMaybe<Scalars['String']['input']>;
   /** The specifications of which source slots are being copied into what addresses in the destination labware. */
   contents: Array<SlotCopyContent>;
   /** The costing of the slide, if specified. */
@@ -3820,6 +3822,8 @@ export type SlotCopyLoad = {
   barcode?: Maybe<Scalars['String']['output']>;
   /** The bio state for samples in the destination (if specified). */
   bioState?: Maybe<Scalars['String']['output']>;
+  /** Cassette lot number, if specified. */
+  cassetteLot?: Maybe<Scalars['String']['output']>;
   /** The specifications of which source slots are being copied into what addresses in the destination labware. */
   contents: Array<SlotCopyLoadContent>;
   /** The costing of the slide, if specified. */
@@ -3888,6 +3892,8 @@ export type SlotCopySave = {
   barcode?: InputMaybe<Scalars['String']['input']>;
   /** The bio state for samples in the destination (if specified). */
   bioState?: InputMaybe<Scalars['String']['input']>;
+  /** Cassette lot number, if specified. */
+  cassetteLot?: InputMaybe<Scalars['String']['input']>;
   /** The specifications of which source slots are being copied into what addresses in the destination labware. */
   contents: Array<SlotCopyContent>;
   /** The costing of the slide, if specified. */
@@ -4449,7 +4455,7 @@ export type SampleFieldsFragment = { __typename?: 'Sample', id: number, section?
 
 export type SamplePositionFieldsFragment = { __typename?: 'SamplePosition', address: string, region: string, sampleId: number, slotId: number, operationId: number };
 
-export type SlotCopyLoadFieldsFragment = { __typename?: 'SlotCopyLoad', operationType: string, workNumber: string, lpNumber: string, executionType?: ExecutionType | null, labwareType?: string | null, barcode?: string | null, bioState?: string | null, costing?: SlideCosting | null, lotNumber?: string | null, probeLotNumber?: string | null, preBarcode?: string | null, sources: Array<{ __typename?: 'SlotCopyLoadSource', barcode: string, labwareState: LabwareState }>, contents: Array<{ __typename?: 'SlotCopyLoadContent', sourceBarcode: string, sourceAddress: string, destinationAddress: string }> };
+export type SlotCopyLoadFieldsFragment = { __typename?: 'SlotCopyLoad', operationType: string, workNumber: string, lpNumber: string, executionType?: ExecutionType | null, labwareType?: string | null, barcode?: string | null, bioState?: string | null, costing?: SlideCosting | null, lotNumber?: string | null, probeLotNumber?: string | null, preBarcode?: string | null, cassetteLot?: string | null, sources: Array<{ __typename?: 'SlotCopyLoadSource', barcode: string, labwareState: LabwareState }>, contents: Array<{ __typename?: 'SlotCopyLoadContent', sourceBarcode: string, sourceAddress: string, destinationAddress: string }> };
 
 export type SlotFieldsFragment = { __typename?: 'Slot', id: number, address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> };
 
@@ -4936,7 +4942,7 @@ export type SaveSlotCopyMutationVariables = Exact<{
 }>;
 
 
-export type SaveSlotCopyMutation = { __typename?: 'Mutation', saveSlotCopy: { __typename?: 'SlotCopyLoad', operationType: string, workNumber: string, lpNumber: string, executionType?: ExecutionType | null, labwareType?: string | null, barcode?: string | null, bioState?: string | null, costing?: SlideCosting | null, lotNumber?: string | null, probeLotNumber?: string | null, preBarcode?: string | null, sources: Array<{ __typename?: 'SlotCopyLoadSource', barcode: string, labwareState: LabwareState }>, contents: Array<{ __typename?: 'SlotCopyLoadContent', sourceBarcode: string, sourceAddress: string, destinationAddress: string }> } };
+export type SaveSlotCopyMutation = { __typename?: 'Mutation', saveSlotCopy: { __typename?: 'SlotCopyLoad', operationType: string, workNumber: string, lpNumber: string, executionType?: ExecutionType | null, labwareType?: string | null, barcode?: string | null, bioState?: string | null, costing?: SlideCosting | null, lotNumber?: string | null, probeLotNumber?: string | null, preBarcode?: string | null, cassetteLot?: string | null, sources: Array<{ __typename?: 'SlotCopyLoadSource', barcode: string, labwareState: LabwareState }>, contents: Array<{ __typename?: 'SlotCopyLoadContent', sourceBarcode: string, sourceAddress: string, destinationAddress: string }> } };
 
 export type SegmentationMutationVariables = Exact<{
   request: SegmentationRequest;
@@ -5814,7 +5820,7 @@ export type ReloadSlotCopyQueryVariables = Exact<{
 }>;
 
 
-export type ReloadSlotCopyQuery = { __typename?: 'Query', reloadSlotCopy?: { __typename?: 'SlotCopyLoad', operationType: string, workNumber: string, lpNumber: string, executionType?: ExecutionType | null, labwareType?: string | null, barcode?: string | null, bioState?: string | null, costing?: SlideCosting | null, lotNumber?: string | null, probeLotNumber?: string | null, preBarcode?: string | null, sources: Array<{ __typename?: 'SlotCopyLoadSource', barcode: string, labwareState: LabwareState }>, contents: Array<{ __typename?: 'SlotCopyLoadContent', sourceBarcode: string, sourceAddress: string, destinationAddress: string }> } | null };
+export type ReloadSlotCopyQuery = { __typename?: 'Query', reloadSlotCopy?: { __typename?: 'SlotCopyLoad', operationType: string, workNumber: string, lpNumber: string, executionType?: ExecutionType | null, labwareType?: string | null, barcode?: string | null, bioState?: string | null, costing?: SlideCosting | null, lotNumber?: string | null, probeLotNumber?: string | null, preBarcode?: string | null, cassetteLot?: string | null, sources: Array<{ __typename?: 'SlotCopyLoadSource', barcode: string, labwareState: LabwareState }>, contents: Array<{ __typename?: 'SlotCopyLoadContent', sourceBarcode: string, sourceAddress: string, destinationAddress: string }> } | null };
 
 export const AddressPermDataFieldsFragmentDoc = gql`
     fragment AddressPermDataFields on AddressPermData {
@@ -6248,6 +6254,7 @@ export const SlotCopyLoadFieldsFragmentDoc = gql`
   lotNumber
   probeLotNumber
   preBarcode
+  cassetteLot
   contents {
     sourceBarcode
     sourceAddress
