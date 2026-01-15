@@ -279,7 +279,6 @@ export default function ProbeHybridisationQC() {
                                         await setFieldValue(`hybQCLabware.${index}.workNumber`, workNumber);
                                       }}
                                     />
-                                    {/*<FormikErrorMessage name={`hybQCLabware.${index}.workNumber`} />*/}
                                   </div>
                                   <div>
                                     <FormikInput
