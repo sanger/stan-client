@@ -276,10 +276,15 @@ export const sectionGroupsBySample = (
     return acc;
   }, {});
 
-  // Ordering within each tissue group by section number - ascending ordered
-  const sorted = Object.values(grouped).flatMap((group) =>
-    group.sort((a, b) => a.source.newSection - b.source.newSection)
-  );
+  // Flatten and index
+  const result: Record<number, PlannedSectionDetails> = {};
+  let index = 0;
 
-  return Object.fromEntries(sorted.map((sectionDetails, index) => [index, sectionDetails]));
+  for (const group of Object.values(grouped)) {
+    for (const section of group) {
+      result[index++] = section;
+    }
+  }
+
+  return result;
 };
