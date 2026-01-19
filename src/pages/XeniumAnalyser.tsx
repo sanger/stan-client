@@ -486,11 +486,9 @@ const XeniumAnalyser = () => {
                         .filter((lw) => lw.hybridisation)
                         .map((lw, lwIndex) => (
                           <motion.div variants={variants.fadeInWithLift} className="mt-4" key={lw.labware.barcode}>
-                            <div className="flex flex-row gap-x-6">
-                              <div>
-                                <Labware labware={lw.labware} gridDirection={GridDirection.LeftUp} />
-                              </div>
-                              <div className="w-full">
+                            <div className="grid grid-cols-4 gap-x-2">
+                              <Labware labware={lw.labware} gridDirection={GridDirection.LeftUp} />
+                              <div className="col-span-3">
                                 <Table className="text-sm">
                                   <TableHead>
                                     <tr>
