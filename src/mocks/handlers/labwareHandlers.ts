@@ -19,6 +19,10 @@ import { DeepPartial } from 'fishery';
 
 export function createLabware(barcode: string) {
   // The number after STAN- determines what kind of labware will be returned
+  const jsonLabware = sessionStorage.getItem(`labware-${barcode}`);
+  if (jsonLabware) {
+    return JSON.parse(jsonLabware) as Labware;
+  }
   const magicNumber = parseInt(barcode.substring(5, 6));
   const labwareType = labwareTypeInstances[magicNumber % labwareTypeInstances.length];
   // The number after that determines how many samples to put in each slot
