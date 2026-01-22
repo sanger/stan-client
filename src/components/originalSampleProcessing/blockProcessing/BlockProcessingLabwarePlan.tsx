@@ -117,7 +117,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
     React.useEffect(() => {
       const subscription = actor.subscribe((state) => {
         if (!state.context.layoutPlan.plannedActions) return;
-        const plannedActionSource: Source | undefined = state.context.layoutPlan.plannedActions['A1'].source;
+        const plannedActionSource: Source | undefined = state.context.layoutPlan.plannedActions['A1']?.source;
         if (plannedActionSource) {
           setFieldValue(`plans.${rowIndex}.sourceBarcode`, plannedActionSource.labware.barcode);
           setFieldValue(`plans.${rowIndex}.replicateNumber`, plannedActionSource.replicateNumber);
