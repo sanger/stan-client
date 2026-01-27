@@ -4,9 +4,7 @@ import {
   LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   QcLabwareRequest,
-  RecordQcLabwareMutation,
-  RoiFieldsFragment,
-  SampleFieldsFragment
+  RecordQcLabwareMutation
 } from '../types/sdk';
 import * as Yup from 'yup';
 import { stanCore, StanCoreContext } from '../lib/sdk';
@@ -25,12 +23,13 @@ import { createSessionStorageForLabwareAwaiting, getCurrentDateTime } from '../t
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { fromPromise } from 'xstate';
-import { groupByRoi } from '../components/xeniumMetrics/RoiTable';
+import { mapRoisToSectionGroups, RoiSectionGroup } from '../components/xeniumMetrics/RoiTable';
 import WhiteButton from '../components/buttons/WhiteButton';
+import { PlannedSectionDetails } from '../lib/machines/layout/layoutContext';
 
-export type SampleComment = {
+export type SectionGroupsComments = {
   roi: string;
-  sampleAddress: Array<{ sample: SampleFieldsFragment; address: string }>;
+  sectionGroups: Array<PlannedSectionDetails>;
   comments: string[];
 };
 
@@ -40,7 +39,7 @@ type QcFormLabware = {
   completion: string;
   comments: string[];
   roiComments: string[];
-  sampleComments: Array<SampleComment>;
+  sectionsComments: Array<SectionGroupsComments>;
   runNames?: string[];
   selectedRunName?: string;
   lw: LabwareFlaggedFieldsFragment;
@@ -53,12 +52,14 @@ export type XeniumQCFormData = {
   terminated: boolean;
 };
 
-const getRegionsOfInterestGroupedByRoi = async (barcode: string): Promise<Record<string, RoiFieldsFragment[]>> => {
+const getRegionsOfInterestGroupedByRoi = async (
+  labware: LabwareFlaggedFieldsFragment
+): Promise<Record<string, RoiSectionGroup>> => {
   const response = await stanCore.GetRegionsOfInterest({
-    barcodes: [barcode]
+    barcodes: [labware.barcode]
   });
   if (response.rois.length === 0 || response.rois[0]!.rois.length === 0) return {};
-  return groupByRoi(response.rois[0]!.rois!);
+  return mapRoisToSectionGroups(labware, response.rois[0]!.rois!);
 };
 
 const getRunNames = async (barcode: string): Promise<string[]> => {
@@ -135,7 +136,7 @@ const XeniumQC = () => {
       setValues: (values: SetStateAction<XeniumQCFormData>, shouldValidate?: boolean) => {}
     ): Promise<string[]> => {
       try {
-        const groupedByRoi = await getRegionsOfInterestGroupedByRoi(labware.barcode);
+        const groupedByRoi = await getRegionsOfInterestGroupedByRoi(labware);
         if (Object.keys(groupedByRoi).length === 0)
           return [`No region of interest is recorded against the scanned labware ${labware.barcode}.`];
         const runNames = await getRunNames(labware.barcode);
@@ -148,11 +149,9 @@ const XeniumQC = () => {
             comments: [],
             roiComments: [],
             runNames,
-            sampleComments: Object.keys(groupedByRoi).map((roi) => {
+            sectionsComments: Object.keys(groupedByRoi).map((roi) => {
               return {
-                sampleAddress: groupedByRoi[roi].map((data) => {
-                  return { sample: data.sample ?? '', address: data.address };
-                }),
+                sectionGroups: groupedByRoi[roi].sectionGroup,
                 roi,
                 comments: []
               };
@@ -191,14 +190,16 @@ const XeniumQC = () => {
                     workNumber: lw.workNumber,
                     comments: lw.comments.map((comment) => Number(comment)),
                     runName: lw.selectedRunName,
-                    sampleComments: lw.sampleComments?.flatMap((sampleComment) => {
-                      return sampleComment.sampleAddress.flatMap((sampleAdress) => {
-                        return sampleComment.comments.map((commentId) => {
-                          return {
-                            sampleId: sampleAdress.sample.id,
-                            address: sampleAdress.address,
-                            commentId: Number(commentId)
-                          };
+                    sampleComments: lw.sectionsComments?.flatMap((sectionComment) => {
+                      return sectionComment.sectionGroups.flatMap((section) => {
+                        return Array.from(section.addresses).flatMap((address) => {
+                          return sectionComment.comments.map((commentId) => {
+                            return {
+                              sampleId: section.source.sampleId,
+                              address,
+                              commentId: Number(commentId)
+                            };
+                          });
                         });
                       });
                     })

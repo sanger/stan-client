@@ -6,7 +6,7 @@ import WorkNumberSelect from '../WorkNumberSelect';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { selectOptionValues } from '../forms';
 import { FieldArray, useFormikContext } from 'formik';
-import { SampleComment, XeniumQCFormData } from '../../pages/XeniumQC';
+import { SectionGroupsComments, XeniumQCFormData } from '../../pages/XeniumQC';
 import { CellProps } from 'react-table';
 import Warning from '../notifications/Warning';
 import { FlaggedBarcodeLink } from '../dataTableColumns/labwareColumns';
@@ -89,10 +89,10 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
               <div>
                 <header className="text-lg font-bold py-8">Region of interest</header>
               </div>
-              {!values.labware[index]?.sampleComments && (
+              {!values.labware[index]?.sectionsComments && (
                 <Warning data-testid={'warning'} message={'No regions of interest recorded for this labware.'} />
               )}
-              {values.labware[index]?.sampleComments?.length > 0 && (
+              {values.labware[index]?.sectionsComments?.length > 0 && (
                 <div className="grid grid-cols-6 gap-4">
                   <div className="col-span-2">
                     <CustomReactSelect
@@ -111,9 +111,9 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                                 return {
                                   ...labware,
                                   roiComments: comments,
-                                  sampleComments: labware.sampleComments.map((sampleComment) => {
+                                  sectionsComments: labware.sectionsComments.map((sectionComment) => {
                                     return {
-                                      ...sampleComment,
+                                      ...sectionComment,
                                       comments
                                     };
                                   })
@@ -130,32 +130,22 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                       )}
                     />
                   </div>
-                  {values.labware[index]?.sampleComments.length > 0 && (
+                  {values.labware[index]?.sectionsComments.length > 0 && (
                     <div className={'col-span-4'}>
                       <RoiTable
-                        data={values.labware[index]?.sampleComments.map((data) => {
-                          return {
-                            roi: data.roi,
-                            externalIdAddress: data.sampleAddress.map((sampleAddress) => {
-                              return {
-                                externalId: sampleAddress.sample.tissue.externalName ?? '',
-                                address: sampleAddress.address
-                              };
-                            })
-                          };
-                        })}
+                        data={values.labware[index]?.sectionsComments}
                         actionColumn={{
                           Header: 'Comment',
                           accessor: 'comments',
-                          Cell: (props: CellProps<SampleComment>) => {
+                          Cell: (props: CellProps<SectionGroupsComments>) => {
                             return (
                               <CustomReactSelect
-                                dataTestId={`labware.${index}.sampleComments`}
-                                name={`labware.${index}.sampleComments.${props.row.index}.comments`}
+                                dataTestId={`labware.${index}.sectionsComments`}
+                                name={`labware.${index}.sectionsComments.${props.row.index}.comments`}
                                 emptyOption={true}
                                 options={selectOptionValues(comments, 'text', 'id')}
                                 isMulti={true}
-                                value={values.labware[index]?.sampleComments?.[props.row.index]?.comments?.map(
+                                value={values.labware[index]?.sectionsComments?.[props.row.index]?.comments?.map(
                                   (commentId) => comments.find((comment) => comment.id === Number(commentId))?.text
                                 )}
                               />

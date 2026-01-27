@@ -103,7 +103,7 @@ describe('Xenium Analyser QC', () => {
         selectOption('labware.0.roi-comments', comments[0].text);
       });
       it('sets the comment to all labware regions of interest', () => {
-        cy.findAllByTestId('labware.0.sampleComments').each((comment) => {
+        cy.findAllByTestId('labware.0.sectionsComments').each((comment) => {
           cy.wrap(comment).should('contain.text', comments[0].text);
         });
       });
