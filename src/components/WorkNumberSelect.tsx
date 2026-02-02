@@ -184,10 +184,10 @@ export default function WorkNumberSelect({
       />
       {!name && error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
       <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
-        {currentSelectedWork && currentSelectedWork.project.length > 0 && (
+        {currentSelectedWork && currentSelectedWork.project?.length > 0 && (
           <Pill color={'pink'}>{currentSelectedWork.project}</Pill>
         )}
-        {currentSelectedWork && currentSelectedWork.workRequester.length > 0 && (
+        {currentSelectedWork && currentSelectedWork.workRequester?.length > 0 && (
           <Pill color={'pink'}>{currentSelectedWork.workRequester}</Pill>
         )}
       </div>

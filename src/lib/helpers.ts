@@ -288,6 +288,17 @@ export const SECTION_GROUPS_BG_COLORS = [
   'bg-rose-300',
   'bg-slate-300'
 ];
+
+export const REGION_BORDER_COLORS = [
+  'border-black',
+  'border-slate-500',
+  'border-sky-500',
+  'border-teal-500',
+  'border-green-500',
+  'border-violet-500',
+  'border-yellow-500',
+  'border-red-500'
+];
 /**
  * Get a timestamp as a string
  * @return timestamp in the format yyyyMMddHHmmss

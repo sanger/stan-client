@@ -20,9 +20,9 @@ import variants from '../lib/motionVariants';
 import Heading from '../components/Heading';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import { Form, Formik } from 'formik';
-import FormikInput, { FormikCheckbox } from '../components/forms/Input';
+import FormikInput, { FormikCheckbox, Input } from '../components/forms/Input';
 import WorkNumberSelect from '../components/WorkNumberSelect';
-import Table, { TabelSubHeader, TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
 import { GridDirection, objectKeys } from '../lib/helpers';
 import BlueButton from '../components/buttons/BlueButton';
@@ -34,34 +34,53 @@ import { lotRegx } from './ProbeHybridisationXenium';
 import { joinUnique, samplesFromLabwareOrSLot } from '../components/dataTableColumns';
 import RemoveButton from '../components/buttons/RemoveButton';
 import PassIcon from '../components/icons/PassIcon';
-import Labware from '../components/labware/Labware';
+import Labware from '../components/labwarePerSection/Labware';
 import Panel from '../components/Panel';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
 import { findUploadedFiles } from '../lib/services/fileService';
 import { sectionGroupsBySample } from '../lib/helpers/labwareHelper';
+import Label from '../components/forms/Label';
+import PinkButton from '../components/buttons/PinkButton';
+import Modal, { ModalBody, ModalFooter } from '../components/Modal';
+import RegionDefiner from '../components/xeniumAnalyser/RegionDefiner';
+import { PlannedSectionDetails } from '../lib/machines/layout/layoutContext';
+import RoiTable from '../components/xeniumMetrics/RoiTable';
+import { Row } from 'react-table';
 
-/**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
-type SectionWithRegion = {
-  addresses: Array<string>;
-  sampleId: number;
-  sectionNumber?: string;
-  externalName?: string;
+export type Region = {
   roi: string;
+  colorIndexNumber?: number;
+  sectionGroups: Array<PlannedSectionDetails>;
 };
 
-type AnalyserLabwareForm = {
+export type AnalyserLabwareForm = {
   labware: LabwareFlaggedFieldsFragment;
   hybridisation: boolean;
   workNumber: string;
   hasSgpNumberLink?: boolean;
   position?: CassettePosition;
-  sections: Array<SectionWithRegion>;
+  regions: Array<Region>;
   analyserScanData?: AnalyserScanDataFieldsFragment;
+  /**
+   * Temporarily stores the color index selected by the user while defining
+   * a new region in the RegionDefiner component.
+   *
+   * This value is cleared once region creation or removal is completed.
+   */
+  selectedRegionColorIndex?: number;
+
+  /**
+   * Temporarily stores the set of slot / section addresses selected by the user
+   * when creating or modifying a region in the RegionDefiner component.
+   *
+   * This value is cleared after the region operation completes.
+   */
+  selectedAddresses?: Set<string>;
 };
 
-type XeniumAnalyserFormValues = {
+export type XeniumAnalyserFormValues = {
   lotNumberA: string;
   lotNumberB: string;
   cellSegmentationLot: string;
@@ -70,6 +89,11 @@ type XeniumAnalyserFormValues = {
   runName: string;
   repeat: boolean;
   performed: string;
+  /**
+   * Controls whether the RegionDefiner UI is visible.
+   * When true, the user can create, edit, or remove regions.
+   */
+  showRegionDefiner: boolean;
   labware: Array<AnalyserLabwareForm>;
   workNumberAll: string;
   barcodeDisplayerProps?: BarcodeDisplayerProps;
@@ -81,6 +105,7 @@ const formInitialValues: XeniumAnalyserFormValues = {
   lotNumberA: '',
   cellSegmentationLot: '',
   equipmentId: undefined,
+  showRegionDefiner: false,
   labware: [],
   performed: '',
   workNumberAll: ''
@@ -89,6 +114,10 @@ const formInitialValues: XeniumAnalyserFormValues = {
 type BarcodeDisplayerProps = {
   barcode: string;
   warningMessage?: string;
+};
+
+export const regionName = (runName: string, sgpNumber: string, index: number) => {
+  return [sgpNumber, runName, `Region${index + 1}`].filter(Boolean).join('_');
 };
 
 const LabwareAnalyserTable = (labwareForm: AnalyserLabwareForm) => {
@@ -180,19 +209,24 @@ const XeniumAnalyser = () => {
     decodingConsumablesLot: Yup.string()
       .optional()
       .matches(/^\d{6}$/, 'Consumables lot number should be a 6-digit number'),
+    showRegionDefiner: Yup.boolean(),
     labware: Yup.array()
       .of(
         Yup.object().shape({
           hybridisation: Yup.boolean(),
           workNumber: Yup.string().required().label('SGP Number'),
           position: Yup.string().required(),
-          sections: Yup.array()
+          selectedRegionColorIndex: Yup.number(),
+          selectedAddresses: Yup.array(),
+          regions: Yup.array()
             .of(
               Yup.object().shape({
                 roi: Yup.string()
                   .required('Region of interest is a required field')
                   .label('ROI')
-                  .max(64, 'Region of interest field should be string of maximum length 64')
+                  .max(64, 'Region of interest field should be string of maximum length 64'),
+                sectionGroups: Yup.array().min(1).required('At least one section group per region'),
+                colorIndexNumber: Yup.number()
               })
             )
             .required()
@@ -204,38 +238,20 @@ const XeniumAnalyser = () => {
   });
 
   /**
-   * Builds a list of labware sections with region information.
-   *
-   * Sections are derived in two ways:
-   * 1. Slots that belong to an explicit section group (as defined during the sectioning operation)
-   *    are grouped together under the same section.
-   * 2. Any remaining slots that are not part of a section group are treated as individual sections.
-   *
-   * This ensures that:
-   * - Explicitly grouped sections are preserved
-   * - Ungrouped slots are still represented as standalone sections
-   *
-   * @param lw - Labware with flagged slot and sample information
-   * @returns An array of sections, each containing addresses, sample identity, and region metadata
+   * Builds a list of labware regions.
+   * Initially, each section group is assigned to its own region.
    */
-  const labwareSections = React.useCallback((lw: LabwareFlaggedFieldsFragment) => {
+  const labwareRegions = React.useCallback((lw: LabwareFlaggedFieldsFragment) => {
     const sectionGroups = sectionGroupsBySample(lw);
-    const groupedAddress = new Set<string>();
-    const sections: SectionWithRegion[] = [];
-    for (const sectionGroup of Object.values(sectionGroups)) {
-      const addresses = Array.from(sectionGroup.addresses);
-      addresses.forEach((address) => {
-        groupedAddress.add(address);
+    const regions: Array<Region> = [];
+    Object.values(sectionGroups).forEach((sectionGroup, index) => {
+      const roi = regionName('', '', index);
+      regions.push({
+        roi: roi,
+        sectionGroups: [sectionGroup]
       });
-      sections.push({
-        addresses: addresses,
-        sampleId: sectionGroup.source.sampleId,
-        externalName: sectionGroup.source.tissue?.externalName ?? '',
-        sectionNumber: String(sectionGroup.source.newSection) ?? '',
-        roi: sectionGroup.source.tissue?.externalName ?? ''
-      });
-    }
-    return sections;
+    });
+    return regions;
   }, []);
 
   /**This creates the slot related information for the labware */
@@ -270,7 +286,7 @@ const XeniumAnalyser = () => {
                     workNumber: values.workNumberAll,
                     hasSgpNumberLink,
                     position: undefined,
-                    sections: labwareSections(labware),
+                    regions: labwareRegions(labware),
                     analyserScanData: res.analyserScanData
                   });
                 }
@@ -285,7 +301,7 @@ const XeniumAnalyser = () => {
                 workNumber: values.workNumberAll,
                 hasSgpNumberLink,
                 position: undefined,
-                sections: labwareSections(labware)
+                regions: labwareRegions(labware)
               });
               return { ...prev };
             });
@@ -297,7 +313,7 @@ const XeniumAnalyser = () => {
       };
       setLabwareSampleData(labware);
     },
-    [labwareSections, stanCore]
+    [labwareRegions, stanCore]
   );
 
   const hasUploadedFilesInSgpFolder = async (workNumber: string): Promise<boolean> => {
@@ -326,12 +342,14 @@ const XeniumAnalyser = () => {
                     decodingConsumablesLot: values.decodingConsumablesLot,
                     position: lw.position?.toLowerCase() === 'left' ? CassettePosition.Left : CassettePosition.Right,
                     samples: labwareSections
-                      ? labwareSections.sections.flatMap((sectionWithRegion) =>
-                          sectionWithRegion.addresses.map((address) => ({
-                            address,
-                            sampleId: sectionWithRegion.sampleId,
-                            roi: sectionWithRegion.roi
-                          }))
+                      ? labwareSections?.regions!.flatMap((region) =>
+                          region.sectionGroups.flatMap((section) =>
+                            Array.from(section.addresses).flatMap((address) => ({
+                              address,
+                              sampleId: section.source.sampleId,
+                              roi: region.roi
+                            }))
+                          )
                         )
                       : []
                   };
@@ -352,7 +370,7 @@ const XeniumAnalyser = () => {
                 });
               }}
             >
-              {({ values, setValues, isValid }) => (
+              {({ values, setValues, isValid, setFieldValue }) => (
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
                     <Heading level={3}>Labware</Heading>
@@ -429,7 +447,11 @@ const XeniumAnalyser = () => {
                                     labware: prev.labware.map((lw) => ({
                                       ...lw,
                                       workNumber,
-                                      hasSgpNumberLink
+                                      hasSgpNumberLink,
+                                      regions: lw.regions.map((region, index) => ({
+                                        ...region,
+                                        roi: regionName(prev.runName, workNumber, index)
+                                      }))
                                     }))
                                   };
                                 });
@@ -441,7 +463,31 @@ const XeniumAnalyser = () => {
                         <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
                           <div className="flex flex-row">
                             <div className="w-1/2">
-                              <FormikInput label={'Run Name'} type="text" name="runName" data-testid="runName" />
+                              <Label name={'Run Name'} className={'whitespace-nowrap'} />
+                              <Input
+                                type="text"
+                                name="runName"
+                                data-testid="runName"
+                                onChange={async (e) => {
+                                  const runName = e.target.value.trim();
+                                  if (runName && runName.length > 0) {
+                                    await setValues((prev) => ({
+                                      ...prev,
+                                      runName,
+                                      labware: prev.labware.map((lw) => ({
+                                        ...lw,
+                                        regions: lw.regions?.reduce<Array<Region>>((acc, region, i) => {
+                                          acc[i] = {
+                                            ...region,
+                                            roi: regionName(runName, lw.workNumber, i)
+                                          };
+                                          return acc;
+                                        }, [])
+                                      }))
+                                    }));
+                                  }
+                                }}
+                              />
                             </div>
                             <div>
                               <FormikCheckbox name="repeat" dataTestId="is-repeat-run" label="Is a repeat run" />
@@ -487,19 +533,26 @@ const XeniumAnalyser = () => {
                         .map((lw, lwIndex) => (
                           <motion.div variants={variants.fadeInWithLift} className="mt-4" key={lw.labware.barcode}>
                             <div className="grid grid-cols-4 gap-x-2">
-                              <Labware labware={lw.labware} gridDirection={GridDirection.LeftUp} />
+                              <div className="flex flex-col items-center justify-between space-y-8">
+                                <Labware
+                                  labware={lw.labware}
+                                  gridDirection={GridDirection.LeftUp}
+                                  regions={lw.regions}
+                                />
+                                <PinkButton
+                                  onClick={async () => {
+                                    await setFieldValue('showRegionDefiner', true);
+                                  }}
+                                >
+                                  Define Regions
+                                </PinkButton>
+                              </div>
                               <div className="col-span-3">
-                                <Table className="text-sm">
-                                  <TableHead>
-                                    <tr>
-                                      <TableHeader>SGP Number</TableHeader>
-                                      <TableHeader>Cassette Position</TableHeader>
-                                      <TableHeader>Samples</TableHeader>
-                                    </tr>
-                                  </TableHead>
-                                  <TableBody>
-                                    <tr key={lw.labware.barcode}>
-                                      <TableCell className="align-top w-1/10 ">
+                                <div className="grid grid-cols-7 gap-x-2">
+                                  <div className="col-span-1">
+                                    <div className="grid grid-rows-3 ">
+                                      <div>
+                                        <label>SGP Number</label>
                                         <WorkNumberSelect
                                           name={`labware.${lwIndex}.workNumber`}
                                           dataTestId={`${lw.labware.barcode}-workNumber`}
@@ -509,16 +562,22 @@ const XeniumAnalyser = () => {
                                               workNumber.length > 0
                                                 ? await hasUploadedFilesInSgpFolder(workNumber)
                                                 : false;
-
-                                            await setValues((prev: XeniumAnalyserFormValues) => {
-                                              const updatedLabware = [...prev.labware];
-                                              updatedLabware[lwIndex] = {
-                                                ...updatedLabware[lwIndex],
-                                                workNumber,
-                                                hasSgpNumberLink
-                                              };
-                                              return { ...prev, labware: updatedLabware };
-                                            });
+                                            await setValues((prev) => ({
+                                              ...prev,
+                                              labware: prev.labware.map((lw, index) =>
+                                                index !== lwIndex
+                                                  ? lw
+                                                  : {
+                                                      ...lw,
+                                                      workNumber,
+                                                      hasSgpNumberLink,
+                                                      regions: lw.regions.map((region, i) => ({
+                                                        ...region,
+                                                        roi: regionName(prev.runName, workNumber, i)
+                                                      }))
+                                                    }
+                                              )
+                                            }));
                                           }}
                                           workNumber={values.labware[lwIndex]?.workNumber}
                                           requiredField={true}
@@ -538,8 +597,9 @@ const XeniumAnalyser = () => {
                                           </div>
                                         )}
                                         <FormikErrorMessage name={`labware.${lwIndex}.workNumber`} />
-                                      </TableCell>
-                                      <TableCell className="align-top w-1/10">
+                                      </div>
+                                      <div>
+                                        <label>Cassette Position</label>
                                         <CustomReactSelect
                                           options={objectKeys(CassettePosition).map((val) => {
                                             return { value: val, label: val };
@@ -548,74 +608,56 @@ const XeniumAnalyser = () => {
                                           dataTestId={`${lw.labware.barcode}-position`}
                                           emptyOption={true}
                                         />
-                                      </TableCell>
-
-                                      <TableCell className="align-top w-8/10">
-                                        <div
-                                          className={'flex flex-col space-y-2 w-full'}
-                                          data-testid={`${lw.labware.barcode}-samples`}
-                                        >
-                                          <div className={'flex gap-x-10'}>
-                                            <TabelSubHeader className="whitespace-normal break-words w-2/10">
-                                              Addresses
-                                            </TabelSubHeader>
-                                            <TabelSubHeader className="whitespace-normal break-words w-3/10">
-                                              External Id
-                                            </TabelSubHeader>
-                                            <TabelSubHeader className="whitespace-normal break-words w-2/10">
-                                              Section number
-                                            </TabelSubHeader>
-                                            <TabelSubHeader className="whitespace-normal break-words w-3/10">
-                                              Region
-                                            </TabelSubHeader>
-                                          </div>
-                                          {lw.sections.map((section, sectionIndex) => {
-                                            return (
-                                              <div
-                                                className={'flex gap-x-10'}
-                                                key={`${lw.labware.barcode}-${section.sampleId}`}
-                                              >
-                                                <label className="items-center w-2/10">
-                                                  {section.addresses.join(', ')}
-                                                </label>
-                                                <label className="items-center whitespace-normal break-words w-3/10">
-                                                  {section.externalName}
-                                                </label>
-                                                <label className="items-center w-2/10">{section.sectionNumber}</label>
-                                                <FormikInput
-                                                  as="textarea"
-                                                  label={''}
-                                                  className="w-3/10"
-                                                  type="textarea"
-                                                  name={`labware.${lwIndex}.sections.${sectionIndex}.roi`}
-                                                  data-testid={`${lw.labware.barcode}-${sectionIndex}-roi`}
-                                                  onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                                                    const barcode = e.target.value.trim();
-                                                    if (barcode.length !== 0) {
-                                                      const barcodeDisplayerProps = {
-                                                        barcode,
-                                                        warningMessage:
-                                                          barcode !== section.externalName
-                                                            ? 'The region does not match the sample external name'
-                                                            : undefined
-                                                      };
-                                                      await setValues((prev) => ({
-                                                        ...prev,
-                                                        barcodeDisplayerProps
-                                                      }));
-                                                    }
-                                                  }}
-                                                />
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      </TableCell>
-                                    </tr>
-                                  </TableBody>
-                                </Table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="col-span-6">
+                                    <RoiTable
+                                      roiColumn={{
+                                        Header: 'Region',
+                                        Cell: ({ row }: { row: Row }) => {
+                                          return (
+                                            <div className="grid grid-cols-1">
+                                              <FormikInput
+                                                label={''}
+                                                type="textarea"
+                                                as="textarea"
+                                                name={`labware[${lwIndex}].regions[${row.index}].roi`}
+                                                onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                                  const barcode = e.target.value.trim();
+                                                  if (barcode.length !== 0) {
+                                                    await setFieldValue('barcodeDisplayerProps', { barcode });
+                                                  }
+                                                }}
+                                              />
+                                            </div>
+                                          );
+                                        }
+                                      }}
+                                      data={values.labware[lwIndex].regions!.flatMap((region) => ({
+                                        roi: region.roi,
+                                        sectionGroups: region.sectionGroups
+                                      }))}
+                                    ></RoiTable>
+                                  </div>
+                                </div>
                               </div>
                             </div>
+                            <Modal show={values.showRegionDefiner}>
+                              <ModalBody>
+                                <RegionDefiner labwareIndex={lwIndex} />
+                              </ModalBody>
+                              <ModalFooter>
+                                <BlueButton
+                                  className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+                                  onClick={async () => {
+                                    await setFieldValue('showRegionDefiner', false);
+                                  }}
+                                >
+                                  Done
+                                </BlueButton>
+                              </ModalFooter>
+                            </Modal>
                           </motion.div>
                         ))}
                       <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
