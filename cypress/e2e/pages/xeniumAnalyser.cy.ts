@@ -48,7 +48,7 @@ describe('Xenium Analyser', () => {
     });
     context('when a region of interest is set', () => {
       before(() => {
-        cy.findByTestId('STAN-3111-1-roi').clear().type('123456789').blur();
+        cy.findByText('Region1').clear().type('123456789').blur();
       });
       after(() => {
         cy.findByTestId('closeBarcodeDisplayer').click();
@@ -86,8 +86,53 @@ describe('Xenium Analyser', () => {
         });
       });
     });
+
+    describe('Defining new regions of interest', () => {
+      before(() => {
+        cy.findByTestId('define-regions-button').click();
+      });
+      it('displays regions definer component', () => {
+        cy.findByText('Set Regions').should('be.visible');
+      });
+      describe('creating a new region', () => {
+        before(() => {
+          cy.findByTestId('region-color-0').click();
+          cy.findByTestId('labware-region-definer-container').within(() => {
+            cy.findByText('A1').click();
+            cy.findByText('B1').click({ cmdKey: true });
+          });
+          cy.findByTestId('create-update-region-button').click();
+          cy.findByText('Done').click();
+        });
+        it('adds a region border with the same selected color on the the selected slots', () => {
+          cy.findByTestId('labware-STAN-3111').within(() => {
+            cy.get('div.border-black').should('have.length', 2);
+          });
+        });
+        it('updates the regions table accordingly', () => {
+          cy.findByTestId('STAN-3111-regions-table').get('tbody tr').should('have.length', 4);
+        });
+      });
+
+      describe('removing a region', () => {
+        before(() => {
+          cy.findByTestId('define-regions-button').click();
+          cy.findByTestId('region-color-0').click();
+          cy.findByTestId('remove-region-button').click();
+          cy.findByText('Done').click();
+        });
+        it('removes the region border from the slots of that region', () => {
+          cy.findByTestId('labware-STAN-3111').within(() => {
+            cy.get('div.border-black').should('have.length', 0);
+          });
+        });
+        it('updates the regions table accordingly', () => {
+          cy.findByTestId('STAN-3111-regions-table').get('tbody tr').should('have.length', 5);
+        });
+      });
+    });
   });
-  describe('When  two labware is scanned ', () => {
+  describe('When  two labware are scanned ', () => {
     before(() => {
       cy.get('#labwareScanInput').type('STAN-3112{enter}'); //scan second labware
     });
@@ -95,13 +140,13 @@ describe('Xenium Analyser', () => {
       cy.findAllByRole('table').eq(1).contains('STAN-3112');
       cy.findByTestId('STAN-3112-workNumber').should('exist');
       cy.findByTestId('STAN-3112-position').should('exist');
-      cy.findByTestId('STAN-3112-samples').should('exist');
+      cy.findByTestId('STAN-3112-regions-table').should('exist');
     });
     it('should disable any further labware scanning', () => {
       cy.get('#labwareScanInput').should('be.disabled');
     });
   });
-  describe('When  two labware is scanned and one is removed', () => {
+  describe('When  two labware are scanned and one is removed', () => {
     before(() => {
       cy.findAllByTestId('removeButton').eq(1).click();
     });
@@ -109,7 +154,7 @@ describe('Xenium Analyser', () => {
       cy.findByText('STAN-3112').should('not.exist');
       cy.findByTestId('STAN-3112-workNumber').should('not.exist');
       cy.findByTestId('STAN-3112-position').should('not.exist');
-      cy.findByTestId('STAN-3112-samples').should('not.exist');
+      cy.findByTestId('STAN-3112-regions-table').should('not.exist');
     });
     it('should enable labware scanning', () => {
       cy.get('#labwareScanInput').should('be.enabled');

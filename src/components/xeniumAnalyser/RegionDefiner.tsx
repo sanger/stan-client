@@ -27,7 +27,7 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
     labwareRef.current?.deselectAll();
   }, [labwareRef]);
 
-  const displayWarningToast = useCallback(
+  const handleWarning = useCallback(
     (warningMessage: string, fieldName: string) => {
       warningToast({
         message: warningMessage,
@@ -46,13 +46,13 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
     if (!isLabwareErrorObject(labwareError)) return;
 
     if (labwareError.selectedRegionColorIndex) {
-      displayWarningToast(labwareError.selectedRegionColorIndex, `labware[${labwareIndex}].selectedRegionColorIndex`);
+      handleWarning(labwareError.selectedRegionColorIndex, `labware[${labwareIndex}].selectedRegionColorIndex`);
     }
 
     if (labwareError.selectedAddresses) {
-      displayWarningToast(labwareError.selectedAddresses, `labware[${labwareIndex}].selectedAddresses`);
+      handleWarning(labwareError.selectedAddresses, `labware[${labwareIndex}].selectedAddresses`);
     }
-  }, [errors.labware, displayWarningToast, labwareIndex]);
+  }, [errors.labware, handleWarning, labwareIndex]);
 
   const reIndexAndRenameRegions = (regions: Region[], runName: string, sgpNumber: string) => {
     return regions.map((region, index) => ({
@@ -65,7 +65,6 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
     // ----------------------------------
     // Validate inputs
     // ----------------------------------
-
     const selectedRegionColorIndex = analyserLabware.selectedRegionColorIndex;
 
     if (selectedRegionColorIndex === undefined) {
@@ -96,11 +95,9 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
 
     // Stores all sections that will form the new region
     const newRegionSections: PlannedSectionDetails[] = [];
-
     // ----------------------------------
     // Extract selected sections
     // ----------------------------------
-
     analyserLabware.regions.forEach((region) => {
       // Sections that stay in this region
       const remaining: PlannedSectionDetails[] = [];
@@ -140,7 +137,6 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
         }
       }
     });
-
     // ----------------------------------
     // Validation: must combine at least two sections
     // ----------------------------------
@@ -162,11 +158,9 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
       sectionGroups: newRegionSections,
       colorIndexNumber: selectedRegionColorIndex
     });
-
     // ----------------------------------
     // Update formik values after renaming and re-indexing regions
     // ----------------------------------
-
     await setValues((prev) => ({
       ...prev,
       labware: prev.labware.map((labware, index) =>
@@ -269,6 +263,7 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
               analyserLabware.selectedRegionColorIndex === index ? `ring-3 ring-offset-2 ring-gray-700` : '';
             return (
               <div
+                key={`region-color-${index}`}
                 data-testid={`region-color-${index}`}
                 className={`h-5 w-5 rounded-full border-2 lg bg-blue-100 ${borderColor} ${highlightClass}`}
                 onClick={async () => {
@@ -287,7 +282,7 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
             Remove Region
           </span>
           <span
-            data-testid="create-update-section-button"
+            data-testid="create-update-region-button"
             onClick={() => setRegion(values.runName, analyserLabware.workNumber)}
             className="p-2 shadow-xs  text-red-700 underline hover:bg-gray-100 focus:border-sdb-400 focus:shadow-md-outline-sdb active:bg-gray-200 rounded-md focus:outline-hidden focus:ring-2 focus:ring-offset-2"
           >
@@ -296,7 +291,7 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
         </div>
       </div>
       <div className="my-6 md:flex md:flex-row md:items-centre md:justify-around">
-        <div>
+        <div data-testid="labware-region-definer-container">
           <Labware
             labwareRefCallback={(el: LabwareImperativeRef) => {
               if (el) {
@@ -308,7 +303,9 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
             selectionMode={'multi'}
             selectable={'non_empty'}
             onSelect={async (addresses) => {
-              await setFieldValue(`labware[${labwareIndex}].selectedAddresses`, addresses);
+              if (addresses.length > 0) {
+                await setFieldValue(`labware[${labwareIndex}].selectedAddresses`, addresses);
+              }
             }}
             regions={analyserLabware.regions}
           />

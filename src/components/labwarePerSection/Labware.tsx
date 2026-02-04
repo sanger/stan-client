@@ -453,7 +453,7 @@ const Labware = ({
         <div className={gridClasses}>
           {buildAddresses({ numColumns, numRows }, gridDirection).map((address, i) => {
             return (
-              <div key={address} className={regionWrapperClass(address)}>
+              <div key={address} className={regionWrapperClass(address)} data-testid={`slot-wrapper-${address}`}>
                 <div
                   key={address}
                   className={`p-1 rounded-lg ${slotSectionBgColor()[address]} ${slotSizeProps.parentDivSize}`}
