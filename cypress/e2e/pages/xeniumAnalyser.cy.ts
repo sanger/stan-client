@@ -48,7 +48,7 @@ describe('Xenium Analyser', () => {
     });
     context('when a region of interest is set', () => {
       before(() => {
-        cy.findByText('Region1').clear().type('123456789').blur();
+        cy.findByTestId('STAN-3111-1-roi').clear().type('123456789').blur();
       });
       after(() => {
         cy.findByTestId('closeBarcodeDisplayer').click();
@@ -112,6 +112,9 @@ describe('Xenium Analyser', () => {
         it('updates the regions table accordingly', () => {
           cy.findByTestId('STAN-3111-regions-table').get('tbody tr').should('have.length', 4);
         });
+        it('updates the region name accordingly', () => {
+          cy.findByText('SGP1009_Region1').should('be.visible');
+        });
       });
 
       describe('removing a region', () => {
@@ -128,6 +131,9 @@ describe('Xenium Analyser', () => {
         });
         it('updates the regions table accordingly', () => {
           cy.findByTestId('STAN-3111-regions-table').get('tbody tr').should('have.length', 5);
+        });
+        it('renames the region of interest with the sample external id', () => {
+          cy.findByText('SGP1009_Region1').should('not.exist');
         });
       });
     });

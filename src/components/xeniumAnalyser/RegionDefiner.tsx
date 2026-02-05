@@ -3,7 +3,12 @@ import Labware from '../labwarePerSection/Labware';
 import { FormikErrors, useFormikContext } from 'formik';
 import { GridDirection, REGION_BORDER_COLORS } from '../../lib/helpers';
 import Heading from '../Heading';
-import { AnalyserLabwareForm, Region, regionName, XeniumAnalyserFormValues } from '../../pages/XeniumAnalyser';
+import {
+  AnalyserLabwareForm,
+  Region,
+  reIndexAndRenameRegions,
+  XeniumAnalyserFormValues
+} from '../../pages/XeniumAnalyser';
 import { LabwareImperativeRef } from '../labware/Labware';
 import warningToast from '../notifications/WarningToast';
 import { toast } from 'react-toastify';
@@ -53,13 +58,6 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
       handleWarning(labwareError.selectedAddresses, `labware[${labwareIndex}].selectedAddresses`);
     }
   }, [errors.labware, handleWarning, labwareIndex]);
-
-  const reIndexAndRenameRegions = (regions: Region[], runName: string, sgpNumber: string) => {
-    return regions.map((region, index) => ({
-      ...region,
-      roi: regionName(runName, sgpNumber, index)
-    }));
-  };
 
   const setRegion = async (runName: string, sgpNumber: string) => {
     // ----------------------------------

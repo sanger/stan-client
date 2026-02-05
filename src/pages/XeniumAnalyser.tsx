@@ -114,8 +114,18 @@ type BarcodeDisplayerProps = {
   warningMessage?: string;
 };
 
-export const regionName = (runName: string, sgpNumber: string, index: number) => {
-  return [sgpNumber, runName, `Region${index + 1}`].filter(Boolean).join('_');
+export const reIndexAndRenameRegions = (regions: Region[], runName: string, sgpNumber: string): Array<Region> => {
+  let index = 0;
+  return regions.map((region) => {
+    const roi: string =
+      region.sectionGroups.length === 1 && region.sectionGroups[0].source.tissue?.externalName
+        ? region.sectionGroups[0].source.tissue.externalName
+        : [sgpNumber, runName, `Region${index++ + 1}`].filter(Boolean).join('_');
+    return {
+      ...region,
+      roi: roi
+    };
+  });
 };
 
 const LabwareAnalyserTable = (labwareForm: AnalyserLabwareForm) => {
@@ -241,15 +251,10 @@ const XeniumAnalyser = () => {
    */
   const labwareRegions = React.useCallback((lw: LabwareFlaggedFieldsFragment) => {
     const sectionGroups = sectionGroupsBySample(lw);
-    const regions: Array<Region> = [];
-    Object.values(sectionGroups).forEach((sectionGroup, index) => {
-      const roi = regionName('', '', index);
-      regions.push({
-        roi: roi,
-        sectionGroups: [sectionGroup]
-      });
-    });
-    return regions;
+    return Object.values(sectionGroups).map((sectionGroup, index) => ({
+      roi: sectionGroup.source.tissue?.externalName ?? `Region${index + 1}`,
+      sectionGroups: [sectionGroup]
+    }));
   }, []);
 
   /**This creates the slot related information for the labware */
@@ -446,10 +451,7 @@ const XeniumAnalyser = () => {
                                       ...lw,
                                       workNumber,
                                       hasSgpNumberLink,
-                                      regions: lw.regions.map((region, index) => ({
-                                        ...region,
-                                        roi: regionName(prev.runName, workNumber, index)
-                                      }))
+                                      regions: reIndexAndRenameRegions(lw.regions, prev.runName, workNumber)
                                     }))
                                   };
                                 });
@@ -474,10 +476,7 @@ const XeniumAnalyser = () => {
                                       runName,
                                       labware: prev.labware.map((lw) => ({
                                         ...lw,
-                                        regions: lw.regions.map((region, i) => ({
-                                          ...region,
-                                          roi: regionName(runName, lw.workNumber, i)
-                                        }))
+                                        regions: reIndexAndRenameRegions(lw.regions, runName, lw.workNumber)
                                       }))
                                     }));
                                   }
@@ -570,10 +569,11 @@ const XeniumAnalyser = () => {
                                                       ...lw,
                                                       workNumber,
                                                       hasSgpNumberLink,
-                                                      regions: lw.regions.map((region, i) => ({
-                                                        ...region,
-                                                        roi: regionName(prev.runName, workNumber, i)
-                                                      }))
+                                                      regions: reIndexAndRenameRegions(
+                                                        lw.regions,
+                                                        prev.runName,
+                                                        workNumber
+                                                      )
                                                     }
                                               )
                                             }));
