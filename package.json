@@ -51,7 +51,7 @@
     "tailwindcss": "^4.0.9",
     "typescript": "5.7.2",
     "use-immer": "^0.9.0",
-    "webpack": "5.96.1",
+    "webpack": "5.104.1",
     "xlsx": "^0.18.5",
     "xstate": "5.19.0",
     "yup": "^1.2.0"
