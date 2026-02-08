@@ -505,11 +505,15 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
     const warningMessages: string[] = [];
     const isProbeHybCytAssistPerformed = await doesOpExistForLabware(barcode, 'Probe hybridisation Cytassist');
     if (!isProbeHybCytAssistPerformed) {
-      warningMessages.push(`No 'Probe hybridisation Cytassist' operation has been recorded for labware ${barcode}.`);
+      warningMessages.push(
+        `No 'Probe hybridisation Cytassist' operation has been recorded for labware ${barcode}. (not required for 3')`
+      );
     }
     const isProbeHybQcPerformed = await doesOpExistForLabware(barcode, 'Probe hybridisation QC');
     if (!isProbeHybQcPerformed) {
-      warningMessages.push(`No 'Probe hybridisation QC' operation has been recorded for labware ${barcode}.`);
+      warningMessages.push(
+        `No 'Probe hybridisation QC' operation has been recorded for labware ${barcode}. (not required for 3')`
+      );
     }
     if (warningMessages.length > 0) {
       setWarningMessage(warningMessages.join('\n'));

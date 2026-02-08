@@ -7,7 +7,9 @@ import {
   ReloadSlotCopyQueryVariables,
   SlideCosting,
   SlotCopyMutation,
-  SlotCopyMutationVariables
+  SlotCopyMutationVariables,
+  FindIfOpExistsQuery,
+  FindIfOpExistsQueryVariables
 } from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
 import { LabwareTypeName } from '../../../src/types/stan';
@@ -37,6 +39,34 @@ describe('CytAssist Page', () => {
     });
     it('displays the Cassette Lot input', () => {
       cy.findByTestId('cassetteLot').should('be.visible');
+    });
+  });
+
+  context('when scanning a labware missing Probe Hybridisation CytAssist or QC', () => {
+    before(() => {
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.query<FindIfOpExistsQuery, FindIfOpExistsQueryVariables>('FindIfOpExists', () => {
+            return HttpResponse.json({
+              data: {
+                opExists: false
+              }
+            });
+          })
+        );
+      });
+      cy.get('#labwareScanInput').type('STAN-3100{enter}');
+    });
+    it('should display a warning message', () => {
+      cy.findByText(
+        "No 'Probe hybridisation Cytassist' operation has been recorded for labware STAN-3100. (not required for 3')"
+      ).should('be.visible');
+      cy.findByText(
+        "No 'Probe hybridisation QC' operation has been recorded for labware STAN-3100. (not required for 3')"
+      ).should('be.visible');
+    });
+    after(() => {
+      cy.findByTestId('removeButton').click();
     });
   });
 
