@@ -58,10 +58,12 @@ describe('CytAssist Page', () => {
       cy.get('#labwareScanInput').type('STAN-3100{enter}');
     });
     it('should display a warning message', () => {
-      cy.findByText(
+      cy.contains(
+        '.Toastify__toast-body',
         "No 'Probe hybridisation Cytassist' operation has been recorded for labware STAN-3100. (not required for 3')"
       ).should('be.visible');
-      cy.findByText(
+      cy.contains(
+        '.Toastify__toast-body',
         "No 'Probe hybridisation QC' operation has been recorded for labware STAN-3100. (not required for 3')"
       ).should('be.visible');
     });
