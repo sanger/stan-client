@@ -60,12 +60,8 @@ describe('CytAssist Page', () => {
     it('should display a warning message', () => {
       cy.contains(
         '.Toastify__toast-body',
-        "No 'Probe hybridisation Cytassist' operation has been recorded for labware STAN-3100. (not required for 3')"
-      ).should('be.visible');
-      cy.contains(
-        '.Toastify__toast-body',
-        "No 'Probe hybridisation QC' operation has been recorded for labware STAN-3100. (not required for 3')"
-      ).should('be.visible');
+        "Labware STAN-3100 is missing the following operations (not required for 3'): 'Probe hybridisation Cytassist' , 'Probe hybridisation QC'"
+      );
     });
     after(() => {
       cy.findByTestId('removeButton').click();
