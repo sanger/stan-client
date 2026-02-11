@@ -385,6 +385,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                             'plannedActions',
                             layoutMachine.getSnapshot().context.layoutPlan.plannedActions
                           );
+                          await validateForm();
                         }
                       }}
                       className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
