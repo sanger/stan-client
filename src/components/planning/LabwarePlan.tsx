@@ -161,7 +161,6 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
         className="relative p-3 shadow-md"
       >
         <Formik<FormValues>
-          enableReinitialize={true}
           initialValues={buildInitialValues(operationType, outputLabware, layoutPlan.plannedActions)}
           validationSchema={buildValidationSchema(outputLabware.labwareType)}
           onSubmit={async (values) => {
@@ -172,7 +171,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
             send({ type: 'CREATE_LABWARE', ...newValues });
           }}
         >
-          {({ isValid, validateForm }) => (
+          {({ isValid, validateForm, setFieldValue }) => (
             <Form>
               <div className="md:grid md:grid-cols-2">
                 <div className="py-4 flex flex-col items-center justify-between space-y-8">
@@ -189,9 +188,9 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
                   {current.matches('prep') && (
                     <PinkButton
-                      onClick={() => {
+                      onClick={async () => {
                         send({ type: 'EDIT_LAYOUT' });
-                        validateForm();
+                        await validateForm();
                       }}
                     >
                       Edit Layout
@@ -317,80 +316,88 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                   )}
                 </div>
               </div>
+
+              <Modal show={current.matches('editingLayout')}>
+                <ModalBody>
+                  <Heading level={3}>Set Layout</Heading>
+                  {layoutMachine && (
+                    <LayoutPlanner actor={layoutMachine}>
+                      <div className="my-2 text-gray-900 text-xs leading-normal">
+                        <p>
+                          If section(s) may fill more that one slotin the destination labware, you can define a new
+                          section using the 'Define section' button.
+                        </p>
+                        <p>
+                          To add sections to a slot, select a source for the buttons on the right, and then click a
+                          destination slot or the defined sections. Clicking a filled slot/section will empty it.
+                        </p>
+                      </div>
+                      <Heading level={5}>Define sections</Heading>
+                      <p className="my-2 text-gray-900 text-xs leading-normal">
+                        Hold 'Ctrl' (Cmd for Mac) key to select the slots that you would like to group into a section,
+                        then click a section color to create it. To remove a section, select the section color that you
+                        would like to remove and click 'Remove section'.
+                      </p>
+                      <div className="grid grid-cols-2">
+                        <div className="grid grid-cols-19 gap-2">
+                          {layoutMachine &&
+                            SECTION_GROUPS_BG_COLORS.map((bgColor, index) => {
+                              const highlightClass =
+                                selectedSectionId === index ? `ring-3 ring-offset-2 ring-gray-700` : '';
+                              return (
+                                <div
+                                  data-testid={`section-group-color-${index}`}
+                                  className={`h-5 w-5 rounded-full ${bgColor} ${highlightClass}`}
+                                  onClick={() => {
+                                    setSelectedSectionId(index);
+                                  }}
+                                ></div>
+                              );
+                            })}
+                        </div>
+                        <div className="text-xs font-medium flex flex-row-reverse cursor-pointer">
+                          <span
+                            data-testid="remove-section-button"
+                            onClick={removeSectionGroup}
+                            className="p-2 shadow-xs  text-red-700 underline hover:bg-gray-100 focus:border-sdb-400 focus:shadow-md-outline-sdb active:bg-gray-200 rounded-md focus:outline-hidden focus:ring-2 focus:ring-offset-2"
+                          >
+                            Remove section
+                          </span>
+                          <span
+                            data-testid="create-update-section-button"
+                            onClick={setSectionGroup}
+                            className="p-2 shadow-xs  text-red-700 underline hover:bg-gray-100 focus:border-sdb-400 focus:shadow-md-outline-sdb active:bg-gray-200 rounded-md focus:outline-hidden focus:ring-2 focus:ring-offset-2"
+                          >
+                            Create/Update section
+                          </span>
+                        </div>
+                      </div>
+                    </LayoutPlanner>
+                  )}
+                </ModalBody>
+                {layoutMachine && (
+                  <ModalFooter>
+                    <BlueButton
+                      onClick={async () => {
+                        layoutMachine.send({ type: 'DONE' });
+                        if (layoutMachine.getSnapshot().matches('done')) {
+                          await setFieldValue(
+                            'plannedActions',
+                            layoutMachine.getSnapshot().context.layoutPlan.plannedActions
+                          );
+                          await validateForm();
+                        }
+                      }}
+                      className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+                    >
+                      Done
+                    </BlueButton>
+                  </ModalFooter>
+                )}
+              </Modal>
             </Form>
           )}
         </Formik>
-
-        <Modal show={current.matches('editingLayout')}>
-          <ModalBody>
-            <Heading level={3}>Set Layout</Heading>
-            {layoutMachine && (
-              <LayoutPlanner actor={layoutMachine}>
-                <div className="my-2 text-gray-900 text-xs leading-normal">
-                  <p>
-                    If section(s) may fill more that one slotin the destination labware, you can define a new section
-                    using the 'Define section' button.
-                  </p>
-                  <p>
-                    To add sections to a slot, select a source for the buttons on the right, and then click a
-                    destination slot or the defined sections. Clicking a filled slot/section will empty it.
-                  </p>
-                </div>
-                <Heading level={5}>Define sections</Heading>
-                <p className="my-2 text-gray-900 text-xs leading-normal">
-                  Hold 'Ctrl' (Cmd for Mac) key to select the slots that you would like to group into a section, then
-                  click a section color to create it. To remove a section, select the section color that you would like
-                  to remove and click 'Remove section'.
-                </p>
-                <div className="grid grid-cols-2">
-                  <div className="grid grid-cols-19 gap-2">
-                    {layoutMachine &&
-                      SECTION_GROUPS_BG_COLORS.map((bgColor, index) => {
-                        const highlightClass = selectedSectionId === index ? `ring-3 ring-offset-2 ring-gray-700` : '';
-                        return (
-                          <div
-                            data-testid={`section-group-color-${index}`}
-                            className={`h-5 w-5 rounded-full ${bgColor} ${highlightClass}`}
-                            onClick={() => {
-                              setSelectedSectionId(index);
-                            }}
-                          ></div>
-                        );
-                      })}
-                  </div>
-                  <div className="text-xs font-medium flex flex-row-reverse cursor-pointer">
-                    <span
-                      data-testid="remove-section-button"
-                      onClick={removeSectionGroup}
-                      className="p-2 shadow-xs  text-red-700 underline hover:bg-gray-100 focus:border-sdb-400 focus:shadow-md-outline-sdb active:bg-gray-200 rounded-md focus:outline-hidden focus:ring-2 focus:ring-offset-2"
-                    >
-                      Remove section
-                    </span>
-                    <span
-                      data-testid="create-update-section-button"
-                      onClick={setSectionGroup}
-                      className="p-2 shadow-xs  text-red-700 underline hover:bg-gray-100 focus:border-sdb-400 focus:shadow-md-outline-sdb active:bg-gray-200 rounded-md focus:outline-hidden focus:ring-2 focus:ring-offset-2"
-                    >
-                      Create/Update section
-                    </span>
-                  </div>
-                </div>
-              </LayoutPlanner>
-            )}
-          </ModalBody>
-          {layoutMachine && (
-            <ModalFooter>
-              <BlueButton
-                onClick={() => {
-                  layoutMachine.send({ type: 'DONE' });
-                }}
-                className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Done
-              </BlueButton>
-            </ModalFooter>
-          )}
-        </Modal>
       </motion.div>
     );
   }
