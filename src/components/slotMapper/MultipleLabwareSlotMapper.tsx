@@ -502,17 +502,18 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
   const [warningMessage, setWarningMessage] = useState<string | undefined>(undefined);
 
   const areProbHybOpsPerformed = React.useCallback(async (barcode: string) => {
-    const warningMessages: string[] = [];
-    const isProbeHybCytAssistPerformed = await doesOpExistForLabware(barcode, 'Probe hybridisation Cytassist');
-    if (!isProbeHybCytAssistPerformed) {
-      warningMessages.push(`No 'Probe hybridisation Cytassist' operation has been recorded for labware ${barcode}.`);
+    // List of required operations
+    const requiredOps = ['Probe hybridisation Cytassist', 'Probe hybridisation QC'];
+    const missingOps: string[] = [];
+    for (const op of requiredOps) {
+      if (!(await doesOpExistForLabware(barcode, op))) {
+        missingOps.push(`'${op}'`); // single quoted
+      }
     }
-    const isProbeHybQcPerformed = await doesOpExistForLabware(barcode, 'Probe hybridisation QC');
-    if (!isProbeHybQcPerformed) {
-      warningMessages.push(`No 'Probe hybridisation QC' operation has been recorded for labware ${barcode}.`);
-    }
-    if (warningMessages.length > 0) {
-      setWarningMessage(warningMessages.join('\n'));
+    if (missingOps.length > 0) {
+      setWarningMessage(
+        `Labware ${barcode} is missing the following operations (not required for 3'): ${missingOps.join(' , ')}`
+      );
     } else {
       setWarningMessage(undefined);
     }
