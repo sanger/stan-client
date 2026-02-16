@@ -2,10 +2,10 @@ import { Column } from 'react-table';
 import React from 'react';
 import { useDownload } from '../../lib/hooks/useDownload';
 import DownloadIcon from '../icons/DownloadIcon';
-import { RoiTableRow } from './RoiTable';
+import { SectionMetricData } from '../../pages/XeniumMetrics';
 
 type RoiTableDownloaderProps = {
-  data: Array<RoiTableRow>;
+  data: Array<SectionMetricData>;
   barcode: string;
 };
 
