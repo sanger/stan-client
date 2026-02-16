@@ -5,12 +5,15 @@ import { LabwareFlaggedFieldsFragment, RoiFieldsFragment } from '../../types/sdk
 import { alphaNumericSortDefault } from '../../types/stan';
 import { sectionGroupsBySample } from '../../lib/helpers/labwareHelper';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
-import { Region } from '../../pages/XeniumAnalyser';
 
-type RoiTableProps<T extends RoiFieldsFragment> = {
-  actionColumn?: Column<T>;
-  roiColumn?: Column<T>;
-  data: Array<Region>;
+export type RoiTableRow = {
+  roi: string;
+  sectionGroups: Array<PlannedSectionDetails>;
+};
+
+export type RoiTableProps<T extends RoiFieldsFragment> = {
+  actionColumn: Column<T>;
+  data: RoiTableRow[];
 };
 
 export const groupRoisByRegionName = (rois: RoiFieldsFragment[]): Record<string, RoiFieldsFragment[]> => {
@@ -65,17 +68,17 @@ export const mapRoisToSectionGroups = (
   });
   return roiSectionsMap;
 };
-const RoiTable = ({ actionColumn, roiColumn, data }: RoiTableProps<any>) => {
+const RoiTable = ({ actionColumn, data }: RoiTableProps<any>) => {
   return (
     <DataTable
       columns={[
-        ...(roiColumn
-          ? [roiColumn as Column<Region>]
-          : [{ Header: 'Region of interest', accessor: 'roi' } as Column<Region>]),
-
+        {
+          Header: 'Region of interest',
+          accessor: 'roi'
+        },
         {
           Header: 'External ID',
-          Cell: ({ row }: { row: Row<Region> }) => {
+          Cell: ({ row }: { row: Row<RoiTableRow> }) => {
             return (
               <div className="grid grid-cols-1">
                 {row.original.sectionGroups.map((section, index) => {
@@ -91,7 +94,7 @@ const RoiTable = ({ actionColumn, roiColumn, data }: RoiTableProps<any>) => {
         },
         {
           Header: 'Section Number',
-          Cell: ({ row }: { row: Row<Region> }) => {
+          Cell: ({ row }: { row: Row<RoiTableRow> }) => {
             return (
               <div className="grid grid-cols-1 text-wrap">
                 {row.original.sectionGroups.map((section, index) => {
@@ -107,7 +110,7 @@ const RoiTable = ({ actionColumn, roiColumn, data }: RoiTableProps<any>) => {
         },
         {
           Header: 'Address(es)',
-          Cell: ({ row }: { row: Row<Region> }) => {
+          Cell: ({ row }: { row: Row<RoiTableRow> }) => {
             return (
               <div className="grid grid-cols-1 text-wrap">
                 {row.original.sectionGroups.map((section, index) => {
@@ -121,7 +124,7 @@ const RoiTable = ({ actionColumn, roiColumn, data }: RoiTableProps<any>) => {
             );
           }
         },
-        ...(actionColumn ? [actionColumn as Column<Region>] : [])
+        actionColumn as Column<RoiTableRow>
       ]}
       data={data}
     />
