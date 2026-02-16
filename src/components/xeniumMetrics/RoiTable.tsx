@@ -6,12 +6,12 @@ import { alphaNumericSortDefault } from '../../types/stan';
 import { sectionGroupsBySample } from '../../lib/helpers/labwareHelper';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
 
-type RoiTableRow = {
+export type RoiTableRow = {
   roi: string;
   sectionGroups: Array<PlannedSectionDetails>;
 };
 
-type RoiTableProps<T extends RoiFieldsFragment> = {
+export type RoiTableProps<T extends RoiFieldsFragment> = {
   actionColumn: Column<T>;
   data: RoiTableRow[];
 };
