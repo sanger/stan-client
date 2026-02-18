@@ -9,7 +9,7 @@ type RoiTableDownloaderProps = {
   barcode: string;
 };
 
-type TaleDataRow = {
+type TableDataRow = {
   roi: string;
   externalId: string;
   sectionNumber: number;
@@ -17,7 +17,7 @@ type TaleDataRow = {
 };
 
 const RoiTableDownloader = ({ barcode, data }: RoiTableDownloaderProps) => {
-  const dataEntries: Array<TaleDataRow> = React.useMemo(() => {
+  const dataEntries: Array<TableDataRow> = React.useMemo(() => {
     return data.flatMap((row) => {
       return row.sectionGroups.map((sectionGroup) => {
         return {
@@ -29,7 +29,7 @@ const RoiTableDownloader = ({ barcode, data }: RoiTableDownloaderProps) => {
       });
     });
   }, [data]);
-  const columns: Array<Column<TaleDataRow>> = React.useMemo(() => {
+  const columns: Array<Column<TableDataRow>> = React.useMemo(() => {
     return [
       {
         Header: 'Region of interest',
