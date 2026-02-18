@@ -22,6 +22,7 @@ import { FlaggedBarcodeLink } from '../components/dataTableColumns/labwareColumn
 import MetricsReader from '../components/xeniumMetrics/MetricsReader';
 import { Row } from 'react-table';
 import { PlannedSectionDetails } from '../lib/machines/layout/layoutContext';
+import RoiTableDownloader from '../components/xeniumMetrics/RoiTableDownloader';
 
 export type Metric = {
   name: string;
@@ -293,6 +294,7 @@ const XeniumMetrics = () => {
                           </div>
                           {values.sectionsMetricData.length > 0 && (
                             <div className="my-4">
+                              <RoiTableDownloader barcode={labware.barcode} data={values.sectionsMetricData} />
                               <RoiTable
                                 data={values.sectionsMetricData}
                                 actionColumn={{

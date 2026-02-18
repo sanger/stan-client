@@ -94,7 +94,7 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
               )}
               {values.labware[index]?.sectionsComments?.length > 0 && (
                 <div className="grid grid-cols-6 gap-4">
-                  <div className="col-span-2">
+                  <div className="col-span-1">
                     <CustomReactSelect
                       label={'Apply to all'}
                       dataTestId={`labware.${index}.roi-comments`}
@@ -131,7 +131,7 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                     />
                   </div>
                   {values.labware[index]?.sectionsComments.length > 0 && (
-                    <div className={'col-span-4'}>
+                    <div className={'col-span-5'}>
                       <RoiTable
                         data={values.labware[index]?.sectionsComments}
                         actionColumn={{
