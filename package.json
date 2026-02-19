@@ -35,7 +35,7 @@
     "immer": "^10.1.1",
     "js-cookie": "^3.0.5",
     "jsbarcode": "^3.11.6",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.23",
     "motion": "^12.4.7",
     "papaparse": "^5.4.1",
     "postcss": "^8.4.49",
