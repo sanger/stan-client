@@ -19,7 +19,7 @@ import cellClassFactory from './cellClassFactory';
 export const sampleFactory = Factory.define<Sample>(({ sequence, params, associations }) => ({
   __typename: 'Sample',
   id: params.id ?? sequence,
-  section: params.section ?? _.random(10),
+  section: params.section ?? String(_.random(10)),
   tissue: associations.tissue ?? tissueFactory.build(),
   bioState: associations.bioState ?? bioStateFactory.build()
 }));
