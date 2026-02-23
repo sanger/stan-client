@@ -37,7 +37,7 @@ const renderMetricReader = (sectionsMetricData: SectionMetricData[]) => {
 const source: Source = {
   sampleId: 1,
   labware: createFlaggedLabware('STAN-0001'),
-  newSection: 1,
+  newSection: '1',
   tissue: tissueFactory.build({ externalName: 'id1' })
 };
 describe('metricsReader', () => {
