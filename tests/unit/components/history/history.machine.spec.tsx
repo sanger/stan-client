@@ -26,7 +26,7 @@ const mockHistorySearchResults: HistoryTableEntry[] = [
     sampleID: 1,
     donorName: 'Donor 1',
     externalName: 'External 1',
-    sectionNumber: 1,
+    sectionNumber: '1',
     eventType: 'Event 1',
     biologicalState: 'Tissue',
     labwareState: LabwareState.Active,
