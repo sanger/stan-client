@@ -98,8 +98,8 @@ describe('SlotMeasurements', () => {
         {
           address: 'A1',
           samples: [
-            sampleFactory.build({ section: 2, tissue: tissueFactory.build({ externalName: 'P69044' }) }),
-            sampleFactory.build({ section: 1, tissue: tissueFactory.build({ externalName: 'P69045' }) })
+            sampleFactory.build({ section: '2', tissue: tissueFactory.build({ externalName: 'P69044' }) }),
+            sampleFactory.build({ section: '1', tissue: tissueFactory.build({ externalName: 'P69045' }) })
           ],
           value: '0'
         }
