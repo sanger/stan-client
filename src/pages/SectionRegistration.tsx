@@ -49,7 +49,7 @@ type SectionRegistrationFormSection = {
   externalIdentifier: string;
   spatialLocation: number;
   replicateNumber: string;
-  sectionNumber: number;
+  sectionNumber: string;
   sectionThickness: number;
   region?: string;
   dateSectioned?: Date;
@@ -139,7 +139,7 @@ function buildSample(): SectionRegistrationFormSection {
     externalIdentifier: '',
     spatialLocation: 0,
     replicateNumber: '',
-    sectionNumber: 0,
+    sectionNumber: '0',
     sectionThickness: 0,
     region: '',
     dateSectioned: undefined,
