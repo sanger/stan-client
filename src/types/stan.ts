@@ -147,7 +147,7 @@ export type SearchResultTableEntry = {
   donorId: string;
   tissueType: string;
   location: Maybe<SearchResultTableEntryLocation>;
-  sectionNumber?: Maybe<number>;
+  sectionNumber?: Maybe<string>;
   replicate?: Maybe<string>;
   labwareCreated: Date;
   embeddingMedium: string;
