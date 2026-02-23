@@ -39,8 +39,8 @@ const renderQpcrResults = () => {
         name: 'Cq value',
         value: '0',
         samples: [
-          sampleFactory.build({ section: 2, tissue: tissue[1] }),
-          sampleFactory.build({ section: 1, tissue: tissue[0] })
+          sampleFactory.build({ section: '2', tissue: tissue[1] }),
+          sampleFactory.build({ section: '1', tissue: tissue[0] })
         ]
       },
       { address: 'A2', name: 'Cq value', value: '0', samples: [] }
