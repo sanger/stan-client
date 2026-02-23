@@ -70,7 +70,7 @@ function buildInitialLayoutPlan(
           return {
             sampleId: sample.id,
             labware: lw,
-            newSection: 0,
+            newSection: '0',
             address: slot.address
           };
         })
