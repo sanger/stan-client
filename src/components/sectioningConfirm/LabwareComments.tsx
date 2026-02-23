@@ -17,7 +17,7 @@ interface LabwareCommentsProps {
   disabledComment?: boolean;
   sectionNumberDisplay?: SectionNumberSetting;
   onCommentChange: (commentIds: string[]) => void;
-  onSectionNumberChange: (sectionGroupId: string, sectionNumber: number) => void;
+  onSectionNumberChange: (sectionGroupId: string, sectionNumber: string) => void;
   onSectionThicknessChange: (sectionGroupId: string, thickness: string) => void;
 }
 
@@ -41,10 +41,10 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
               <Input
                 type="number"
                 data-testid={'section-number'}
-                value={sectionDetail.source.newSection === 0 ? '' : String(sectionDetail.source.newSection)}
+                value={sectionDetail.source.newSection === '0' ? '' : String(sectionDetail.source.newSection)}
                 min={1}
                 disabled={sectionNumberDisplay === SectionNumberSetting.DISABLE}
-                onChange={(e) => onSectionNumberChange(sectionGroupId, Number(e.target.value))}
+                onChange={(e) => onSectionNumberChange(sectionGroupId, e.target.value)}
               />
               <Input
                 type="text"

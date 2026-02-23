@@ -20,7 +20,7 @@ interface ConfirmTubesProps {
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
   onSectionUpdate: (layoutPlan: LayoutPlan) => void;
-  onSectionNumberChange: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: number) => void;
+  onSectionNumberChange: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: string) => void;
   onSectionThicknessChange: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionThickness: string) => void;
   mode: SectionNumberMode;
   workNumber: string;
@@ -84,7 +84,7 @@ interface TubeRowProps {
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
   onSectionUpdate: (layoutPlan: LayoutPlan) => void;
-  onSectionNumberChange: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: number) => void;
+  onSectionNumberChange: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: string) => void;
   onSectionThicknessChange: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionThickness: string) => void;
   mode: SectionNumberMode;
   workNumber: string;
@@ -145,7 +145,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
 
   /***Update section numbers and thickness **/
   const handleOnChange = useCallback(
-    (sectionGroupId: string, sectionNumber: number) => {
+    (sectionGroupId: string, sectionNumber: string) => {
       /**Notify parent, so as to modify section number in original layout**/
       onSectionNumberChange(layoutPlan, sectionGroupId, sectionNumber);
       send({
@@ -170,7 +170,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
   );
 
   const sectionNumber =
-    layoutPlan.plannedActions['A1'].source.newSection === 0 || cancelled
+    layoutPlan.plannedActions['A1'].source.newSection === '0' || cancelled
       ? ''
       : layoutPlan.plannedActions['A1'].source.newSection;
   return (
@@ -249,7 +249,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
               disabled={cancelled || mode === SectionNumberMode.Auto}
               // So the row click handler doesn't get triggered
               onClick={(e) => e.stopPropagation()}
-              onChange={(e) => handleOnChange('A1', Number(e.target.value))}
+              onChange={(e) => handleOnChange('A1', e.target.value)}
             />
           </div>
         </TableCell>

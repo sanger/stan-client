@@ -59,7 +59,7 @@ interface ConfirmLabwareProps {
    * @param slotAddress - Address of the slot in which the section belongs
    * @param sectionNumber - New section number
    */
-  onSectionNumberChange?: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: number) => void;
+  onSectionNumberChange?: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: string) => void;
 
   onSectionThicknessChange?: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionThickness: string) => void;
 }
