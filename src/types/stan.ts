@@ -272,7 +272,7 @@ export type HistoryTableEntry = {
   donorName?: string;
   sampleID?: Maybe<number>;
   externalName?: string;
-  sectionNumber?: number;
+  sectionNumber?: string;
   eventType: string;
   biologicalState?: string;
   labwareState: LabwareState;
