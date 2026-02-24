@@ -218,7 +218,7 @@ export default function SectionForm({
 
       <FormikInput
         label="Section Number"
-        type="number"
+        type="text"
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.sectionNumber`}
       />
 

@@ -160,11 +160,13 @@ export default class RegistrationValidation {
   }
 
   get sectionNumber() {
-    return validation.requiredNumber({
+    return validation.requiredString({
       label: 'Section Number',
-      min: 0
+      restrictChars: /^[0-9]+[a-z]*$/,
+      errorMessage: 'Section Number must be one or more digits optionally followed by lowercase letters.'
     });
   }
+
   get region() {
     return Yup.string()
       .oneOf(this.registrationInfo.slotRegions.map((sr) => sr.name))

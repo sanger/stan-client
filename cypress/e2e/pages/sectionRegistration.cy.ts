@@ -134,6 +134,13 @@ describe('Section Registration Page', () => {
         cy.findByText('Sectioned Date is a required field').should('be.visible');
       });
 
+      it('requires Section Number to only permit certain characters', () => {
+        cy.findByLabelText('Section Number').type('X').blur(); // not [0-9]+[a-z]*
+        cy.findByText('Section Number must be one or more digits optionally followed by lowercase letters.').should(
+          'be.visible'
+        );
+      });
+
       it('requires Section External Identifier to only permit certain characters', () => {
         cy.findByLabelText('Section External Identifier').type('EXT&99').blur();
         cy.findByText(

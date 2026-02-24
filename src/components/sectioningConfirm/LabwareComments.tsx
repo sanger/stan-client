@@ -39,7 +39,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
           {sectionNumberDisplay !== SectionNumberSetting.HIDE && (
             <>
               <Input
-                type="number"
+                type="text"
                 data-testid={'section-number'}
                 value={sectionDetail.source.newSection === '0' ? '' : String(sectionDetail.source.newSection)}
                 min={1}
