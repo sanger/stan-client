@@ -23,7 +23,7 @@ const RoiTableDownloader = ({ barcode, data }: RoiTableDownloaderProps) => {
         return {
           roi: row.roi,
           externalId: sectionGroup.source.tissue?.externalName ?? '',
-          sectionNumber: sectionGroup.source.newSection ?? '0',
+          sectionNumber: sectionGroup.source.newSection ?? '',
           addresses: Array.from(sectionGroup.addresses).join(', ')
         };
       });

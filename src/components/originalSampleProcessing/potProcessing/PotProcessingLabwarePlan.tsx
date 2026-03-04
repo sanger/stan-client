@@ -66,7 +66,7 @@ function buildInitialLayoutPlan(
           return {
             sampleId: sample.id,
             labware: lw,
-            newSection: '0',
+            newSection: '',
             address: slot.address
           };
         })
@@ -81,7 +81,7 @@ function buildInitialLayoutPlan(
               source: {
                 sampleId: sourceLabware[0].slots[0].samples[0].id,
                 labware: sourceLabware[0],
-                newSection: '0'
+                newSection: ''
               },
               addresses: new Set(['A1'])
             }

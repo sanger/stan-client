@@ -169,10 +169,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
     [send, layoutPlan, onSectionThicknessChange]
   );
 
-  const sectionNumber =
-    layoutPlan.plannedActions['A1'].source.newSection === '0' || cancelled
-      ? ''
-      : layoutPlan.plannedActions['A1'].source.newSection;
+  const sectionNumber = cancelled ? '' : layoutPlan.plannedActions['A1'].source.newSection;
   return (
     <>
       <ConfirmationModal

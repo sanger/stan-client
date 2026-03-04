@@ -41,7 +41,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
               <Input
                 type="text"
                 data-testid={'section-number'}
-                value={sectionDetail.source.newSection === '0' ? '' : String(sectionDetail.source.newSection)}
+                value={sectionDetail.source.newSection}
                 min={1}
                 disabled={sectionNumberDisplay === SectionNumberSetting.DISABLE}
                 onChange={(e) => onSectionNumberChange(sectionGroupId, e.target.value)}

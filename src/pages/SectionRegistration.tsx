@@ -139,7 +139,7 @@ function buildSample(): SectionRegistrationFormSection {
     externalIdentifier: '',
     spatialLocation: 0,
     replicateNumber: '',
-    sectionNumber: '0',
+    sectionNumber: '',
     sectionThickness: 0,
     region: '',
     dateSectioned: undefined,

@@ -122,9 +122,7 @@ const isValidSectionLabware = (ctx: SectioningConfirmContext): boolean => {
     }
     /** Has every section got a section number? **/
     const validSectionNumber =
-      csl.confirmSections?.every(
-        (cs) => cs.newSection && cs.newSection.trim().length > 0 && cs.newSection.trim() !== '0'
-      ) ?? false;
+      csl.confirmSections?.every((cs) => cs.newSection && cs.newSection.trim().length > 0) ?? false;
     if (!validSectionNumber) return false;
     return true;
   });
@@ -546,7 +544,7 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
       if (planned) {
         const source: Source = {
           sampleId: planned.source.samples[0].id, // we only support single sample sources for sectioning,
-          newSection: '0',
+          newSection: '',
           sampleThickness: planned.sampleThickness?.toString(),
           labware: plan.planData.sources.find((lw) => lw.id === planned.source.labwareId)!
         };
