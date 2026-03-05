@@ -65,7 +65,7 @@ const formValues = ({
   lotNumberA: '',
   cellSegmentationLot: '',
   equipmentId: undefined,
-  showRegionDefiner: false,
+  activeRegionDefinerLabwareIndex: -1,
   labware: [labwareAnalyser({ selectedAddresses, selectedRegionColorIndex, regions })],
   performed: '',
   workNumberAll: ''
