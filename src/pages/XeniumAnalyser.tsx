@@ -88,10 +88,11 @@ export type XeniumAnalyserFormValues = {
   repeat: boolean;
   performed: string;
   /**
-   * Controls whether the RegionDefiner UI is visible.
-   * When true, the user can create, edit, or remove regions.
+   * Controls the visibility of the RegionDefiner UI.
+   * A value greater than 0 indicates the index of the labware
+   * for which the user can create, edit, or remove regions.
    */
-  showRegionDefiner: boolean;
+  activeRegionDefinerLabwareIndex: number;
   labware: Array<AnalyserLabwareForm>;
   workNumberAll: string;
   barcodeDisplayerProps?: BarcodeDisplayerProps;
@@ -103,7 +104,7 @@ const formInitialValues: XeniumAnalyserFormValues = {
   lotNumberA: '',
   cellSegmentationLot: '',
   equipmentId: undefined,
-  showRegionDefiner: false,
+  activeRegionDefinerLabwareIndex: -1,
   labware: [],
   performed: '',
   workNumberAll: ''
@@ -217,7 +218,7 @@ const XeniumAnalyser = () => {
     decodingConsumablesLot: Yup.string()
       .optional()
       .matches(/^\d{6}$/, 'Consumables lot number should be a 6-digit number'),
-    showRegionDefiner: Yup.boolean(),
+    activeRegionDefinerLabwareIndex: Yup.number(),
     labware: Yup.array()
       .of(
         Yup.object().shape({
@@ -527,19 +528,19 @@ const XeniumAnalyser = () => {
                         .map((lw, lwIndex) => (
                           <motion.div variants={variants.fadeInWithLift} className="mt-4" key={lw.labware.barcode}>
                             <div className="grid grid-cols-4 gap-x-2">
-                              <div className="flex flex-col items-center justify-between space-y-8">
+                              <div className="flex flex-col items-center space-y-8">
                                 <Labware
                                   labware={lw.labware}
                                   gridDirection={GridDirection.LeftUp}
                                   regions={lw.regions}
                                   onSlotClick={async () => {
-                                    await setFieldValue('showRegionDefiner', true);
+                                    await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
                                   }}
                                 />
                                 <PinkButton
                                   data-testid={'define-regions-button'}
                                   onClick={async () => {
-                                    await setFieldValue('showRegionDefiner', true);
+                                    await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
                                   }}
                                 >
                                   Define Regions
@@ -681,15 +682,15 @@ const XeniumAnalyser = () => {
                                 </div>
                               </div>
                             </div>
-                            <Modal show={values.showRegionDefiner}>
+                            <Modal show={values.activeRegionDefinerLabwareIndex > -1}>
                               <ModalBody>
-                                <RegionDefiner labwareIndex={lwIndex} />
+                                <RegionDefiner labwareIndex={values.activeRegionDefinerLabwareIndex} />
                               </ModalBody>
                               <ModalFooter>
                                 <BlueButton
                                   className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
                                   onClick={async () => {
-                                    await setFieldValue('showRegionDefiner', false);
+                                    await setFieldValue('activeRegionDefinerLabwareIndex', -1);
                                   }}
                                 >
                                   Done
