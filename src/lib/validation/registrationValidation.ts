@@ -3,6 +3,7 @@ import * as Yup from 'yup';
 import { GetRegistrationInfoQuery, LifeStage } from '../../types/sdk';
 import { LifeStageMap } from '../../pages/registration/SectionForm';
 import { isHuman } from '../../pages/registration/RegistrationForm';
+import { SECTION_NUMBER_ERROR_MESSAGE } from '../constants';
 
 export default class RegistrationValidation {
   private registrationInfo: GetRegistrationInfoQuery;
@@ -162,8 +163,8 @@ export default class RegistrationValidation {
   get sectionNumber() {
     return validation.requiredString({
       label: 'Section Number',
-      restrictChars: /^[0-9]+[a-z]*$/,
-      errorMessage: 'Section Number must be one or more digits optionally followed by lowercase letters.'
+      restrictChars: /^[1-9][0-9]*[a-z]*$/,
+      errorMessage: SECTION_NUMBER_ERROR_MESSAGE
     });
   }
 

@@ -8,7 +8,7 @@ import {
   shouldDisplaySelectedValue
 } from '../shared/customReactSelect.cy';
 import { http, HttpResponse } from 'msw';
-import { HUMAN_NAME } from '../../../src/lib/constants';
+import { HUMAN_NAME, SECTION_NUMBER_ERROR_MESSAGE } from '../../../src/lib/constants';
 
 describe('Section Registration Page', () => {
   describe('Initial display', () => {
@@ -135,10 +135,13 @@ describe('Section Registration Page', () => {
       });
 
       it('requires Section Number to only permit certain characters', () => {
-        cy.findByLabelText('Section Number').type('X').blur(); // not [0-9]+[a-z]*
-        cy.findByText('Section Number must be one or more digits optionally followed by lowercase letters.').should(
-          'be.visible'
-        );
+        cy.findByLabelText('Section Number').type('X').blur(); // not [1-9][0-9]*[a-z]*
+        cy.findByText(SECTION_NUMBER_ERROR_MESSAGE).should('be.visible');
+      });
+
+      it('requires Section Number to start with a non-zero digit', () => {
+        cy.findByLabelText('Section Number').type('0').blur(); // not [1-9][0-9]*[a-z]*
+        cy.findByText(SECTION_NUMBER_ERROR_MESSAGE).should('be.visible');
       });
 
       it('requires Section External Identifier to only permit certain characters', () => {
