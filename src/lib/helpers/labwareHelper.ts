@@ -259,7 +259,7 @@ export const sectionGroupsBySample = (
         source: {
           sampleId: sample.id,
           labware: labware,
-          newSection: sample.section ?? 0,
+          newSection: sample.section ?? '',
           tissue: sample.tissue,
           bioState: sample.bioState
         }
