@@ -6,7 +6,7 @@
   "dependencies": {
     "@react-aria/tabs": "^3.9.7",
     "@sanger/ui-styling": "^4.3.0",
-    "@storybook/react-webpack5": "^7.6.3",
+    "@storybook/react-webpack5": "^8.2.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/postcss": "^4.0.0",
     "@tailwindcss/typography": "^0.5.15",
@@ -51,7 +51,7 @@
     "tailwindcss": "^4.0.9",
     "typescript": "5.7.2",
     "use-immer": "^0.9.0",
-    "webpack": "5.96.1",
+    "webpack": "5.104.1",
     "xlsx": "^0.18.5",
     "xstate": "5.19.0",
     "yup": "^1.2.0"
