@@ -44,7 +44,7 @@ const labwareAnalyser = ({
             source: {
               sampleId: slot.samples[0].id,
               labware: labware,
-              newSection: 1,
+              newSection: '1',
               tissue: slot.samples[0].tissue
             },
             addresses: new Set([slot.address])
@@ -181,7 +181,7 @@ describe('RegionDefiner component', () => {
                   source: {
                     sampleId: labware.slots[0].samples[0].id,
                     labware: labware,
-                    newSection: 1,
+                    newSection: '1',
                     tissue: labware.slots[0].samples[0].tissue
                   },
                   addresses: new Set(['A1', 'A2'])
@@ -190,7 +190,7 @@ describe('RegionDefiner component', () => {
                   source: {
                     sampleId: labware.slots[1].samples[0].id,
                     labware: labware,
-                    newSection: 2,
+                    newSection: '2',
                     tissue: labware.slots[1].samples[0].tissue
                   },
                   addresses: new Set(['B1', 'B2'])

@@ -12,7 +12,7 @@ type RoiTableDownloaderProps = {
 type TableDataRow = {
   roi: string;
   externalId: string;
-  sectionNumber: number;
+  sectionNumber: string;
   addresses: string;
 };
 
@@ -23,7 +23,7 @@ const RoiTableDownloader = ({ barcode, data }: RoiTableDownloaderProps) => {
         return {
           roi: row.roi,
           externalId: sectionGroup.source.tissue?.externalName ?? '',
-          sectionNumber: sectionGroup.source.newSection ?? 0,
+          sectionNumber: sectionGroup.source.newSection ?? '',
           addresses: Array.from(sectionGroup.addresses).join(', ')
         };
       });

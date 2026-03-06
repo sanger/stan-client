@@ -3,6 +3,7 @@ import * as Yup from 'yup';
 import { GetRegistrationInfoQuery, LifeStage } from '../../types/sdk';
 import { LifeStageMap } from '../../pages/registration/SectionForm';
 import { isHuman } from '../../pages/registration/RegistrationForm';
+import { SECTION_NUMBER_ERROR_MESSAGE } from '../constants';
 
 export default class RegistrationValidation {
   private registrationInfo: GetRegistrationInfoQuery;
@@ -160,11 +161,13 @@ export default class RegistrationValidation {
   }
 
   get sectionNumber() {
-    return validation.requiredNumber({
+    return validation.requiredString({
       label: 'Section Number',
-      min: 0
+      restrictChars: /^[1-9][0-9]*[a-z]*$/,
+      errorMessage: SECTION_NUMBER_ERROR_MESSAGE
     });
   }
+
   get region() {
     return Yup.string()
       .oneOf(this.registrationInfo.slotRegions.map((sr) => sr.name))

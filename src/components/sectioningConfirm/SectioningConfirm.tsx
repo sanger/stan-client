@@ -133,7 +133,7 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
   );
 
   const handleSectionNumberChange = useCallback(
-    (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: number) => {
+    (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: string) => {
       send({
         type: 'UPDATE_SECTION_NUMBER',
         layoutPlan,
