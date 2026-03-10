@@ -113,8 +113,6 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
       id: slot.id,
       address: slot.address,
       labwareId: slot.labwareId,
-      blockHighestSection: slot.blockHighestSection,
-      block: slot.block,
       samples: slot.samples.map((sample) => ({
         id: sample.id,
         section: sample.section,
@@ -150,6 +148,7 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
           },
           __typename: 'Tissue'
         },
+        blockHighestSection: sample.blockHighestSection,
         __typename: 'Sample'
       }))
     }))
@@ -169,8 +168,10 @@ export function isLabwareUsable(labware: Pick<Labware, 'state'>): boolean {
  * @param labware the labware to check
  * @return true if labware has one slot with a block inside; false otherwise
  */
-export function hasBlock(labware: Pick<LabwareFieldsFragment, 'slots'>): boolean {
-  return labware.slots.length === 1 && labware.slots[0].block;
+export function blockHighestSection(labware: Pick<LabwareFieldsFragment, 'slots'>): number | undefined | null {
+  return labware.slots
+    .flatMap((slot) => slot.samples)
+    .find((sample) => sample.blockHighestSection !== undefined || null)?.blockHighestSection;
 }
 
 /**

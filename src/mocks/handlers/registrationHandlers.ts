@@ -1,16 +1,11 @@
 import { graphql, HttpResponse } from 'msw';
-import { uniqueId } from 'lodash';
 import {
   GetRegistrationInfoQuery,
   GetRegistrationInfoQueryVariables,
   LabwareState,
   LifeStage,
   RegisterOriginalSamplesMutation,
-  RegisterOriginalSamplesMutationVariables,
-  RegisterSectionsMutation,
-  RegisterSectionsMutationVariables,
-  RegisterTissuesMutation,
-  RegisterTissuesMutationVariables
+  RegisterOriginalSamplesMutationVariables
 } from '../../types/sdk';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import speciesRepository from '../repositories/speciesRepository';
@@ -119,140 +114,6 @@ const registrationHandlers = [
     );
   }),
 
-  graphql.mutation<RegisterTissuesMutation, RegisterTissuesMutationVariables>('RegisterTissues', () => {
-    return HttpResponse.json({
-      data: {
-        register: {
-          clashes: [],
-          labwareSolutions: [
-            {
-              barcode: 'LW_BC_1',
-              solutionName: 'Ethanol'
-            }
-          ],
-          labware: [
-            {
-              id: 1,
-              barcode: 'LW_BC_1',
-              released: false,
-              discarded: false,
-              destroyed: false,
-              state: LabwareState.Active,
-              created: new Date().toISOString(),
-              labwareType: {
-                name: 'Proviasette',
-                numRows: 1,
-                numColumns: 1,
-                labelType: {
-                  name: 'Label Type 1'
-                }
-              },
-              slots: [
-                {
-                  id: 1,
-                  address: 'A1',
-                  labwareId: 1,
-                  block: true,
-                  samples: [
-                    {
-                      id: 1,
-                      tissue: {
-                        externalName: 'EXT1',
-                        replicate: '5',
-                        fixative: {
-                          name: 'Formalin',
-                          enabled: true
-                        },
-                        medium: {
-                          name: 'Paraffin'
-                        },
-                        donor: {
-                          donorName: 'Donor 3',
-                          lifeStage: LifeStage.Adult
-                        },
-                        spatialLocation: {
-                          name: 'Cortex',
-                          code: 3,
-                          tissueType: {
-                            name: 'Lung'
-                          }
-                        }
-                      },
-                      bioState: { name: 'Tissue' }
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      }
-    });
-  }),
-
-  graphql.mutation<RegisterSectionsMutation, RegisterSectionsMutationVariables>('RegisterSections', ({ variables }) => {
-    return HttpResponse.json({
-      data: {
-        registerSections: {
-          labware: variables.request.labware.map((labware) => {
-            let labwareId = parseInt(uniqueId());
-            return {
-              id: labwareId,
-              released: false,
-              discarded: false,
-              destroyed: false,
-              state: LabwareState.Active,
-              created: Date(),
-              labwareType: {
-                name: labware.labwareType,
-                // numRows and numColumns not correct but don't need to be for this particular mock
-                numRows: 1,
-                numColumns: 1,
-                labelType: {
-                  name: 'Label Type 1'
-                }
-              },
-              barcode: labware.externalBarcode,
-              slots: labware.contents.map((content) => ({
-                id: -1,
-                labwareId,
-                block: false,
-                address: content.address,
-                samples: [
-                  {
-                    id: parseInt(uniqueId()),
-                    tissue: {
-                      spatialLocation: {
-                        name: 'Cortex',
-                        code: content.spatialLocation,
-                        tissueType: {
-                          name: content.tissueType
-                        }
-                      },
-                      externalName: content.externalIdentifier,
-                      replicate: content.replicateNumber,
-                      medium: {
-                        name: content.medium
-                      },
-                      fixative: {
-                        name: content.fixative,
-                        enabled: true
-                      },
-                      donor: {
-                        donorName: content.donorIdentifier,
-                        lifeStage: content.lifeStage
-                      }
-                    },
-                    bioState: { name: 'Tissue' }
-                  }
-                ]
-              }))
-            };
-          })
-        }
-      }
-    });
-  }),
   graphql.mutation<RegisterOriginalSamplesMutation, RegisterOriginalSamplesMutationVariables>(
     'RegisterOriginalSamples',
     () => {
@@ -288,7 +149,6 @@ const registrationHandlers = [
                     id: 1,
                     address: 'A1',
                     labwareId: 1,
-                    block: true,
                     samples: [
                       {
                         id: 1,

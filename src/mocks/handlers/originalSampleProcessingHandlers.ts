@@ -78,9 +78,11 @@ const originalSampleProcessingHandlers = [
   graphql.mutation<PerformTissueBlockMutation, PerformTissueBlockMutationVariables>(
     'PerformTissueBlock',
     ({ variables }) => {
-      const confirmedLabwares = variables.request.labware.map((confirmLabware) => {
-        const labware = createLabware(confirmLabware.sourceBarcode);
-        return buildLabwareFragment(labware);
+      const confirmedLabwares = variables.request.labware.flatMap((confirmLabware) => {
+        return confirmLabware.contents
+          .map((content) => content.sourceBarcode)
+          .map((barcode) => createLabware(barcode))
+          .map((lw) => buildLabwareFragment(lw));
       });
 
       return HttpResponse.json({

@@ -20,9 +20,9 @@ import WorkNumberSelect from '../WorkNumberSelect';
 import RadioGroup, { RadioButtonInput } from '../forms/RadioGroup';
 import { objectKeys } from '../../lib/helpers';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
-import { Column } from 'react-table';
 import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 import DataTable from '../DataTable';
+import { Column } from 'react-table';
 
 type SectioningConfirmProps = {
   /**
@@ -189,7 +189,7 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
                       <DataTable
                         columns={[
                           columns.flaggedBarcode(),
-                          columns.highestSectionForSlot('A1') as Column<LabwareFlaggedFieldsFragment>
+                          columns.highestSectionForSlot() as Column<LabwareFlaggedFieldsFragment>
                         ]}
                         data={sourceLabware}
                       />

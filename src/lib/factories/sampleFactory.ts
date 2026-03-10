@@ -21,7 +21,8 @@ export const sampleFactory = Factory.define<Sample>(({ sequence, params, associa
   id: params.id ?? sequence,
   section: params.section ?? String(_.random(10)),
   tissue: associations.tissue ?? tissueFactory.build(),
-  bioState: associations.bioState ?? bioStateFactory.build()
+  bioState: associations.bioState ?? bioStateFactory.build(),
+  blockHighestSection: params.blockHighestSection ?? Math.ceil(Math.random() * 20)
 }));
 
 export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(({ params, associations }) => ({
