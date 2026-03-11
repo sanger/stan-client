@@ -166,12 +166,11 @@ export function isLabwareUsable(labware: Pick<Labware, 'state'>): boolean {
  * Determines whether a piece of labware has one slot which contains a block
  * e.g. a non-empty Proviasette
  * @param labware the labware to check
- * @return true if labware has one slot with a block inside; false otherwise
+ * @return the highest section within a slot if labware has one slot with a block inside; undefined otherwise
  */
 export function blockHighestSection(labware: Pick<LabwareFieldsFragment, 'slots'>): number | undefined | null {
-  return labware.slots
-    .flatMap((slot) => slot.samples)
-    .find((sample) => sample.blockHighestSection !== undefined || null)?.blockHighestSection;
+  return labware.slots.flatMap((slot) => slot.samples).find((sample) => sample.blockHighestSection)
+    ?.blockHighestSection;
 }
 
 /**
