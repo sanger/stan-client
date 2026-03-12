@@ -115,13 +115,13 @@ type BarcodeDisplayerProps = {
   warningMessage?: string;
 };
 
-export const reIndexAndRenameRegions = (regions: Region[], runName: string, sgpNumber: string): Array<Region> => {
+export const reIndexAndRenameRegions = (regions: Region[], runName: string, barcode: string): Array<Region> => {
   let index = 0;
   return regions.map((region) => {
     const roi: string =
       region.sectionGroups.length === 1 && region.sectionGroups[0].source.tissue?.externalName
         ? region.sectionGroups[0].source.tissue.externalName
-        : [sgpNumber, runName, `Region${index++ + 1}`].filter(Boolean).join('_');
+        : [barcode, runName, `Region${index++ + 1}`].filter(Boolean).join('_');
     return {
       ...region,
       roi: roi
@@ -452,7 +452,7 @@ const XeniumAnalyser = () => {
                                       ...lw,
                                       workNumber,
                                       hasSgpNumberLink,
-                                      regions: reIndexAndRenameRegions(lw.regions, prev.runName, workNumber)
+                                      regions: reIndexAndRenameRegions(lw.regions, prev.runName, lw.labware.barcode)
                                     }))
                                   };
                                 });
@@ -477,7 +477,7 @@ const XeniumAnalyser = () => {
                                       runName,
                                       labware: prev.labware.map((lw) => ({
                                         ...lw,
-                                        regions: reIndexAndRenameRegions(lw.regions, runName, lw.workNumber)
+                                        regions: reIndexAndRenameRegions(lw.regions, runName, lw.labware.barcode)
                                       }))
                                     }));
                                   }
@@ -573,7 +573,7 @@ const XeniumAnalyser = () => {
                                                       regions: reIndexAndRenameRegions(
                                                         lw.regions,
                                                         prev.runName,
-                                                        workNumber
+                                                        lw.labware.barcode
                                                       )
                                                     }
                                               )
