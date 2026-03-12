@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [devel]
 
+# Allow skipping tests triggered by a push
+if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip tests]')
+
 jobs:
   cypress:
     name: Run cypress tests
