@@ -7,13 +7,9 @@ export const slotFactory = Factory.define<Slot>(({ params, associations, transie
     __typename: 'Slot',
     id: params.id ?? 1,
     address: params.address ?? 'A1',
-    block: params.block ?? false,
     samples: associations.samples ?? sampleFactory.buildList(transientParams.numberOfSamples ?? 0),
     labwareId: params.labwareId ?? 1
   };
-
-  slot.blockHighestSection = slot.block ? params.blockHighestSection ?? Math.ceil(Math.random() * 20) : undefined;
-
   return slot;
 });
 

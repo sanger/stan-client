@@ -20,7 +20,7 @@ import * as Yup from 'yup';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { useMachine } from '@xstate/react';
 import { objectKeys } from '../lib/helpers';
-import { hasBlock } from '../lib/helpers/labwareHelper';
+import { blockHighestSection } from '../lib/helpers/labwareHelper';
 import { fromPromise } from 'xstate';
 
 export enum OrientationType {
@@ -53,7 +53,7 @@ const OrientationQC = () => {
   const { serverError } = current.context;
 
   const blockLabwareCheck = (labware: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment) => {
-    return hasBlock(foundLabware) ? [] : ['Labware ' + foundLabware.barcode + ' is not a block labware.'];
+    return blockHighestSection(foundLabware) ? [] : ['Labware ' + foundLabware.barcode + ' is not a block labware.'];
   };
 
   return (

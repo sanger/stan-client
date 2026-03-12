@@ -7,13 +7,13 @@ import {
   SampleFieldsFragment
 } from '../../types/sdk';
 import Circle from '../Circle';
-import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
 import { joinUnique, samplesFromLabwareOrSLot, valueFromSamples } from './index';
 import StyledLink from '../StyledLink';
 import FlagIcon from '../icons/FlagIcon';
 import MutedText from '../MutedText';
 import BubleChatIcon from '../icons/BubleChatIcon';
 import { backgroundColorClassNames } from '../../lib/helpers';
+import { blockHighestSection } from '../../lib/helpers/labwareHelper';
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
@@ -146,10 +146,10 @@ const bioState: ColumnFactory = () => {
   };
 };
 
-const highestSectionForSlot: ColumnFactory = (slotAddress) => {
+const highestSectionForSlot: ColumnFactory = () => {
   return {
     Header: 'Highest Section for Block',
-    accessor: (labware) => maybeFindSlotByAddress(labware.slots, slotAddress)?.blockHighestSection ?? '-'
+    accessor: (labware) => blockHighestSection(labware) ?? '-'
   };
 };
 

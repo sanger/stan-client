@@ -121,6 +121,8 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
         if (plannedActionSource) {
           setFieldValue(`plans.${rowIndex}.sourceBarcode`, plannedActionSource.labware.barcode);
           setFieldValue(`plans.${rowIndex}.replicateNumber`, plannedActionSource.replicateNumber);
+          // Todo - temporary set to the first sample but to update within x1499-1a client
+          setFieldValue(`plans.${rowIndex}.sourceSampleId`, plannedActionSource.labware.slots[0].samples[0].id);
           setDisableRepNumber(plannedActionSource.replicateNumber!.length > 0);
           notifySourceSelection(cid, plannedActionSource.labware.barcode);
         }
