@@ -167,7 +167,7 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
               ...labware,
               selectedAddresses: undefined,
               selectedRegionColorIndex: undefined,
-              regions: reIndexAndRenameRegions(regions, runName, sgpNumber)
+              regions: reIndexAndRenameRegions(regions, runName, labware.labware.barcode)
             }
           : labware
       )
@@ -236,7 +236,7 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
               regions: reIndexAndRenameRegions(
                 [...remainingRegions, ...splitSectionsIntoRegions],
                 values.runName,
-                labware.workNumber
+                labware.labware.barcode
               )
             }
           : labware
