@@ -20,9 +20,6 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
         slotFactory.build(
           {
             address,
-            block: [LabwareTypeName.PROVIASETTE, LabwareTypeName.CASSETTE].includes(
-              labware.labwareType.name as LabwareTypeName
-            ),
             labwareId: labware.id
           },
           {

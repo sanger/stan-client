@@ -12,11 +12,10 @@ import { stanCore } from '../../lib/sdk';
 import { LayoutPlan, PlannedSectionDetails, Source } from '../../lib/machines/layout/layoutContext';
 import _, { Dictionary, groupBy } from 'lodash';
 import { LabwareTypeName } from '../../types/stan';
-import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
 import { ClientError } from 'graphql-request';
 import { produce } from '../../dependencies/immer';
 import { SectionNumberMode } from './SectioningConfirm';
-import { buildSampleColors } from '../../lib/helpers/labwareHelper';
+import { blockHighestSection, buildSampleColors } from '../../lib/helpers/labwareHelper';
 
 type SectioningConfirmContext = {
   /**
@@ -383,10 +382,7 @@ export function createSectioningConfirmMachine() {
 
             //Set all highest section numbers for all source labware
             draft.sourceLabware.forEach((sourceLabware) => {
-              draft.highestSectionNumbers.set(
-                sourceLabware.barcode,
-                maybeFindSlotByAddress(sourceLabware.slots, 'A1')?.blockHighestSection ?? 0
-              );
+              draft.highestSectionNumbers.set(sourceLabware.barcode, blockHighestSection(sourceLabware) ?? 0);
             });
           });
         }),

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, act, waitFor, cleanup } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { describe } from '@jest/globals';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
@@ -26,10 +26,10 @@ describe('Orientation QC', () => {
         ({ variables }) => {
           const barcode = variables.barcode;
           const labware = createFlaggedLabware(barcode);
-          if (barcode === 'STAN-3111') {
+          if (barcode === 'STAN-3112') {
             labware.slots = [labware.slots[0]];
             labware.slots[0].samples = [labware.slots[0].samples[0]];
-            labware.slots[0].block = true;
+            labware.slots[0].samples[0].blockHighestSection = undefined;
           }
           const payload: FindFlaggedLabwareQuery = {
             labwareFlagged: labware

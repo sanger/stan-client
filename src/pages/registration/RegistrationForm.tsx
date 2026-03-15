@@ -17,7 +17,6 @@ import { RegistrationFormValues } from '../BlockRegistration';
 import { TissueValues } from './Registration';
 import CustomReactSelect from '../../components/forms/CustomReactSelect';
 import { RegistrationFormBlockSample } from '../OriginalSampleRegistration';
-import { LifeStageMap } from './SectionForm';
 import { HUMAN_NAME } from '../../lib/constants';
 
 export type TextType = 'Block' | 'Embedding';
@@ -40,6 +39,17 @@ interface RegistrationFormParams<T> {
    */
   keywordsMap?: Map<TextType, string>;
 }
+
+export const LifeStageMap: Record<string, string> = {
+  ...Object.entries(LifeStage).reduce(
+    (acc, [key, value]) => {
+      acc[key] = value;
+      return acc;
+    },
+    {} as Record<string, string>
+  ),
+  'N/A': 'n/a'
+};
 
 export const isHuman = (specieName: string): boolean => {
   if (!specieName) return false;
