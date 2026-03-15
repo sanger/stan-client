@@ -3658,8 +3658,8 @@ export type SampleResult = {
 
 /** Information about a section of tissue (already taken from some a block tracked elsewhere) to register. */
 export type SectionRegisterContent = {
-  /** The address of the slot in the labware where this section should be created. */
-  address: Scalars['Address']['input'];
+  /** The addresses of the slots in the labware where this section should be created. */
+  addresses: Array<Scalars['Address']['input']>;
   /** The biological risk code for this sample. */
   bioRiskCode: Scalars['String']['input'];
   /** The cellular classification of the section. */
