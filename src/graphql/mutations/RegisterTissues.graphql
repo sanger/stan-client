@@ -1,5 +1,5 @@
-mutation RegisterTissues($request: RegisterRequest!) {
-  register(request: $request) {
+mutation RegisterTissues($request: BlockRegisterRequest!) {
+  registerBlocks(request: $request) {
     ...RegisterResultFields
   }
 }
