@@ -13,7 +13,6 @@ import {
 import { Formik } from 'formik';
 import RegistrationForm from '../../../../src/pages/registration/RegistrationForm';
 import React from 'react';
-import { getRegistrationFormTissue, RegistrationFormTissue } from '../../../../src/pages/BlockRegistration';
 import slotRegionRepository from '../../../../src/mocks/repositories/slotRegionRepository';
 import '@testing-library/jest-dom';
 import bioRiskRepository from '../../../../src/mocks/repositories/bioRiskRepository';
@@ -93,25 +92,6 @@ const renderOriginalRegistrationForm = (tissues?: RegistrationFormOriginalSample
           availableLabwareTypes={availableLabwareTypes}
           defaultFormTissueValues={tissues ?? getRegistrationFormTissueSample()}
           keywordsMap={keywords}
-        />
-      </Formik>
-    </div>
-  );
-};
-const renderBlockRegistrationForm = (tissues?: RegistrationFormTissue) => {
-  return render(
-    <div>
-      <Formik
-        initialValues={{
-          tissues: [tissues ?? getRegistrationFormTissue()],
-          workNumbers: []
-        }}
-        onSubmit={() => {}}
-      >
-        <RegistrationForm
-          registrationInfo={registrationInfo}
-          availableLabwareTypes={availableLabwareTypes}
-          defaultFormTissueValues={tissues ?? getRegistrationFormTissue()}
         />
       </Formik>
     </div>
@@ -299,95 +279,6 @@ describe('RegistrationForm', () => {
       it('removes the sample', async () => {
         expect(screen.getAllByTestId('sample-info-div')).toHaveLength(1);
         expect(screen.queryByRole('button', { name: 'Delete Sample' })).not.toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Block registration', () => {
-    describe('on Mount', () => {
-      beforeAll(() => {
-        renderBlockRegistrationForm();
-      });
-      it('displays all required fields', () => {
-        //Donor Information
-        expect(screen.getByText('Donor Information')).toBeInTheDocument();
-        expect(screen.getByLabelText('Donor ID')).toBeInTheDocument();
-        //Fetal should be selected by default in life stage
-        expect(screen.getByText('Life Stage')).toBeInTheDocument();
-        expect(screen.getByTestId('adult')).toBeChecked();
-        expect(screen.getByRole('combobox', { name: 'Species' })).toBeInTheDocument();
-
-        //Tissue Information
-        expect(screen.getByText('Tissue Information')).toBeInTheDocument();
-        expect(screen.getByText('HuMFre')).toBeInTheDocument();
-        expect(screen.getByRole('combobox', { name: 'Biological Risk Assessment Numbers' })).toBeInTheDocument();
-
-        //humfre
-        expect(screen.getByTestId('HuMFre')).toBeInTheDocument();
-        //humfre is disabled
-        const humfre = getSelect('HuMFre');
-        expect(humfre).toBeDisabled();
-
-        expect(screen.getByTestId('Tissue Type')).toBeInTheDocument();
-        expect(screen.getByText('Block Information')).toBeInTheDocument();
-
-        //Sample information
-        //only one sample page
-        expect(screen.getAllByTestId('sample-info-div')).toHaveLength(1);
-        expect(screen.getByTestId('External Identifier')).toBeInTheDocument();
-
-        expect(screen.getByTestId('Spatial Location')).toBeInTheDocument();
-        //spatial location is disabled
-        expect(screen.getByTestId('Spatial Location')).toBeEnabled();
-
-        expect(screen.getByTestId('Replicate Number')).toBeInTheDocument();
-        expect(screen.getByTestId('Last Known Section Number')).toBeInTheDocument();
-        expect(screen.getByTestId('Labware Type')).toBeInTheDocument();
-
-        //Embedding Information
-        expect(screen.getByText('Embedding Information')).toBeInTheDocument();
-        expect(screen.getByTestId('Fixative')).toBeInTheDocument();
-        expect(screen.getByTestId('Medium')).toBeInTheDocument();
-
-        //buttons
-        expect(screen.getByRole('button', { name: '+ Add Another Tissue Block' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: '+ Add Another Tissue' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Register' })).toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: 'Delete Block' })).not.toBeInTheDocument();
-      });
-    });
-
-    describe('Button clicks', () => {
-      beforeAll(() => {
-        tissues.blocks = [tissues.blocks[0], tissues.blocks[0]];
-        mockUseFormikContext.mockReturnValue({
-          setFieldTouched: jest.fn(),
-          setFieldValue: jest.fn(),
-          errors: undefined,
-          values: { tissues: [tissues], workNumbers: [] }
-        });
-        renderBlockRegistrationForm();
-      });
-      it('creates another block', async () => {
-        await waitFor(() => screen.getByRole('button', { name: '+ Add Another Tissue Block' }).click());
-
-        //Two sample pages
-        expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
-        expect(screen.getAllByRole('button', { name: 'Delete Block' })).toHaveLength(2);
-        //Check for newly created sample values
-        const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
-
-        const slDiv = within(sampleDiv).getAllByTestId('Spatial Location');
-        expect(slDiv[0]).toHaveTextContent('Cortex');
-
-        const extId = within(sampleDiv).getByTestId('External Identifier');
-        expect(extId).toHaveTextContent('');
-
-        const lwTypeDiv = within(sampleDiv).getAllByTestId('Labware Type');
-        expect(lwTypeDiv[0]).toHaveTextContent('Cassette');
-
-        const mediumDiv = within(sampleDiv).getByTestId('Medium');
-        expect(mediumDiv).not.toHaveTextContent('OCT');
       });
     });
   });

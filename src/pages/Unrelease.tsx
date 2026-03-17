@@ -11,7 +11,7 @@ import { motion } from '../dependencies/motion';
 import variants from '../lib/motionVariants';
 import Heading from '../components/Heading';
 import MutedText from '../components/MutedText';
-import { hasBlock } from '../lib/helpers/labwareHelper';
+import { blockHighestSection } from '../lib/helpers/labwareHelper';
 import { CellProps, Column } from 'react-table';
 import FormikInput from '../components/forms/Input';
 import { identity } from 'lodash';
@@ -46,13 +46,6 @@ const fetchInitialLabware = async (initialBarcodes: string[]) => {
   return await Promise.all(
     initialBarcodes.map((barcode) => stanCore.FindFlaggedLabware({ barcode }).then((labware) => labware.labwareFlagged))
   );
-};
-
-const blockHighestSection = (labware: LabwareFlaggedFieldsFragment) => {
-  if (hasBlock(labware)) {
-    return labware.slots[0].blockHighestSection;
-  }
-  return undefined;
 };
 
 export default function Unrelease() {

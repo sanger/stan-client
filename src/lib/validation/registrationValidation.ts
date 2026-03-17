@@ -1,9 +1,8 @@
 import * as validation from './index';
 import * as Yup from 'yup';
 import { GetRegistrationInfoQuery, LifeStage } from '../../types/sdk';
-import { LifeStageMap } from '../../pages/registration/SectionForm';
-import { isHuman } from '../../pages/registration/RegistrationForm';
-import { SECTION_NUMBER_ERROR_MESSAGE } from '../constants';
+import { LifeStageMap } from '../../pages/registration/RegistrationForm';
+import { HUMAN_NAME, SECTION_NUMBER_ERROR_MESSAGE } from '../constants';
 
 export default class RegistrationValidation {
   private registrationInfo: GetRegistrationInfoQuery;
@@ -13,35 +12,11 @@ export default class RegistrationValidation {
     this.registrationInfo = registrationInfo;
     this.tissueSampleRegistration = tissueSampleRegistration ?? false;
   }
-  get externalLabwareBarcode() {
-    return validation.requiredString({
-      label: 'External Labware Barcode'
-    });
-  }
-  get xeniumBarcode() {
-    return Yup.string().when('labwareTypeName', (labwareTypeName) => {
-      const val = labwareTypeName[0] as unknown as string;
-      return val === 'Xenium'
-        ? validation.requiredString({
-            label: 'Xenium Barcode',
-            restrictChars: /^[0-9]{7}$/,
-            errorMessage: 'Xenium Barcode must be a 7 digit number.'
-          })
-        : Yup.string().notRequired();
-    });
-  }
-  get xeniumLotNumber() {
-    return Yup.string().when('labwareTypeName', (labwareTypeName) => {
-      const val = labwareTypeName[0] as unknown as string;
-      return val === 'Xenium'
-        ? validation.requiredString({
-            label: 'Xenium LOT Number',
-            restrictChars: /^\d-\d{4}[A-Z]$/,
-            errorMessage: 'Xenium LOT number should be in format: Digit, hyphen, 4 digits, uppercase letter.'
-          })
-        : Yup.string().notRequired();
-    });
-  }
+
+  isHuman = (specieName: string): boolean => {
+    if (!specieName) return false;
+    return specieName.toLowerCase() === HUMAN_NAME.toLowerCase();
+  };
 
   get fixative() {
     return validation.requiredString({
@@ -90,7 +65,7 @@ export default class RegistrationValidation {
 
   get hmdmc() {
     return Yup.string().when(['species', 'cellClass'], ([species, cellClass], schema) => {
-      const isHumanTissue = isHuman(species) && cellClass === 'tissue';
+      const isHumanTissue = this.isHuman(species) && cellClass === 'tissue';
       return isHumanTissue
         ? schema
             .oneOf(this.registrationInfo.hmdmcs.map((h) => h.hmdmc))
@@ -119,13 +94,6 @@ export default class RegistrationValidation {
         restrictChars: validation.DEFAULT_PERMITTED_CHARS
       });
     }
-  }
-
-  get sectionExternalIdentifier() {
-    return validation.requiredString({
-      label: 'Section External Identifier',
-      restrictChars: validation.ALPHANUMERIC_WITH_DOT_AND_DASH
-    });
   }
 
   get spatialLocation() {

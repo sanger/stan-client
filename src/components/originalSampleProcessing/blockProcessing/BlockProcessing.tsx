@@ -42,6 +42,7 @@ export type BlockFormValue = {
   replicateNumber: string;
   commentId?: number;
   preBarcode?: string;
+  sourceSampleId: number;
 };
 export type BlockFormData = {
   workNumber: string;
@@ -258,11 +259,18 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
     return {
       workNumber: formData.workNumber,
       labware: formData.plans.map((plan) => ({
-        sourceBarcode: plan.sourceBarcode,
+        labwareType: plan.labwareType,
         preBarcode: plan.preBarcode,
-        commentId: plan.commentId,
-        replicate: plan.replicateNumber,
-        labwareType: plan.labwareType
+        contents: [
+          {
+            sourceBarcode: plan.sourceBarcode,
+            commentId: plan.commentId,
+            replicate: plan.replicateNumber,
+            // Todo - temporary set to the first sample but to update within x1499-1a client
+            addresses: ['A1'],
+            sourceSampleId: plan.sourceSampleId
+          }
+        ]
       })),
       discardSourceBarcodes: formData.discardSources?.filter((ds) => ds.discard).map((ds) => ds.sourceBarcode)
     };
