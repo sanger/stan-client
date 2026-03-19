@@ -1396,7 +1396,7 @@ export type MutationConfirmSectionArgs = {
  */
 export type MutationCreateWorkArgs = {
   costCode: Scalars['String']['input'];
-  facultyLead?: InputMaybe<Scalars['String']['input']>;
+  facultyLead: Scalars['String']['input'];
   numBlocks?: InputMaybe<Scalars['Int']['input']>;
   numOriginalSamples?: InputMaybe<Scalars['Int']['input']>;
   numSlides?: InputMaybe<Scalars['Int']['input']>;
@@ -6707,7 +6707,7 @@ ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
 ${TissueFieldsFragmentDoc}`;
 export const CreateWorkDocument = gql`
-    mutation CreateWork($prefix: String!, $workType: String!, $workRequester: String!, $project: String!, $program: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int, $numOriginalSamples: Int, $omeroProject: String, $ssStudyId: Int, $facultyLead: String) {
+    mutation CreateWork($prefix: String!, $workType: String!, $workRequester: String!, $project: String!, $program: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int, $numOriginalSamples: Int, $omeroProject: String, $ssStudyId: Int, $facultyLead: String!) {
   createWork(
     prefix: $prefix
     workType: $workType

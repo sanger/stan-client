@@ -10,7 +10,7 @@ mutation CreateWork(
   $numOriginalSamples: Int
   $omeroProject: String
   $ssStudyId: Int
-  $facultyLead: String
+  $facultyLead: String!
 ) {
   createWork(
     prefix: $prefix
