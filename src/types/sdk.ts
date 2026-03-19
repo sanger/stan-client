@@ -174,8 +174,32 @@ export type BioState = {
   name: Scalars['String']['output'];
 };
 
-/** A request to register a new block of tissue. */
+/** A request to register in a piece of labware containing one or more block-samples. */
+export type BlockRegisterLabware = {
+  /** The external barcode of the labware. */
+  externalBarcode: Scalars['String']['input'];
+  /** The fixative used for the tissue. */
+  fixative: Scalars['String']['input'];
+  /** The name of the type of labware containing the block. */
+  labwareType: Scalars['String']['input'];
+  /** The medium used for the tissue. */
+  medium: Scalars['String']['input'];
+  /** The samples in this block. */
+  samples: Array<BlockRegisterSample>;
+};
+
+/** A request to register new blocks of tissue. */
 export type BlockRegisterRequest = {
+  /** The labware to register. */
+  labware: Array<BlockRegisterLabware>;
+  /** The work numbers for the request. */
+  workNumbers: Array<Scalars['String']['input']>;
+};
+
+/** A sample inside a block being registered. */
+export type BlockRegisterSample = {
+  /** The slot addresses containing the sample. */
+  addresses: Array<Scalars['Address']['input']>;
   /** The biological risk number for this block. */
   bioRiskCode: Scalars['String']['input'];
   /** The cellular classification of the tissue. */
@@ -186,18 +210,12 @@ export type BlockRegisterRequest = {
   existingTissue?: InputMaybe<Scalars['Boolean']['input']>;
   /** The external identifier used to identify the tissue. */
   externalIdentifier: Scalars['String']['input'];
-  /** The fixative used for the tissue. */
-  fixative: Scalars['String']['input'];
   /** The highest section already taken from the tissue block. */
   highestSection: Scalars['Int']['input'];
   /** The HMDMC to use for the tissue. */
   hmdmc?: InputMaybe<Scalars['String']['input']>;
-  /** The name of the type of labware containing the block. */
-  labwareType: Scalars['String']['input'];
   /** The life stage of the donor. */
   lifeStage?: InputMaybe<LifeStage>;
-  /** The medium used for the tissue. */
-  medium: Scalars['String']['input'];
   /** The string to use for the replicate number of the tissue. */
   replicateNumber: Scalars['String']['input'];
   /** The date the original sample was collected, if known. */
@@ -1026,10 +1044,10 @@ export type Mutation = {
   recordStainResult: OperationResult;
   /** Record Visium QC. */
   recordVisiumQC: OperationResult;
-  /** Register blocks of tissue. */
-  register: RegisterResult;
   /** Log in with your Sanger id and create an end user account. */
   registerAsEndUser: LoginResult;
+  /** Register blocks of tissue. */
+  registerBlocks: RegisterResult;
   /** Register original samples. */
   registerOriginalSamples: RegisterResult;
   /** Register sections of tissue. */
@@ -1668,8 +1686,9 @@ export type MutationRecordVisiumQcArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
-export type MutationRegisterArgs = {
-  request: RegisterRequest;
+export type MutationRegisterAsEndUserArgs = {
+  password: Scalars['String']['input'];
+  username: Scalars['String']['input'];
 };
 
 
@@ -1677,9 +1696,8 @@ export type MutationRegisterArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
-export type MutationRegisterAsEndUserArgs = {
-  password: Scalars['String']['input'];
-  username: Scalars['String']['input'];
+export type MutationRegisterBlocksArgs = {
+  request: BlockRegisterRequest;
 };
 
 
@@ -3434,12 +3452,6 @@ export type RegisterClash = {
   tissue: Tissue;
 };
 
-/** A request to register one or more blocks of tissue. */
-export type RegisterRequest = {
-  blocks: Array<BlockRegisterRequest>;
-  workNumbers: Array<Scalars['String']['input']>;
-};
-
 /** The result of a register request. It is expected to contain either labware or clashes. */
 export type RegisterResult = {
   __typename?: 'RegisterResult';
@@ -3658,8 +3670,8 @@ export type SampleResult = {
 
 /** Information about a section of tissue (already taken from some a block tracked elsewhere) to register. */
 export type SectionRegisterContent = {
-  /** The address of the slot in the labware where this section should be created. */
-  address: Scalars['Address']['input'];
+  /** The addresses of the slots in the labware where this section should be created. */
+  addresses: Array<Scalars['Address']['input']>;
   /** The biological risk code for this sample. */
   bioRiskCode: Scalars['String']['input'];
   /** The cellular classification of the section. */
@@ -4934,11 +4946,11 @@ export type RegisterSectionsMutationVariables = Exact<{
 export type RegisterSectionsMutation = { __typename?: 'Mutation', registerSections: { __typename?: 'RegisterResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }> } };
 
 export type RegisterTissuesMutationVariables = Exact<{
-  request: RegisterRequest;
+  request: BlockRegisterRequest;
 }>;
 
 
-export type RegisterTissuesMutation = { __typename?: 'Mutation', register: { __typename?: 'RegisterResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, clashes: Array<{ __typename?: 'RegisterClash', tissue: { __typename?: 'Tissue', externalName?: string | null, donor: { __typename?: 'Donor', donorName: string }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } } }, labware: Array<{ __typename?: 'Labware', barcode: string, labwareType: { __typename?: 'LabwareType', name: string } }> }>, labwareSolutions: Array<{ __typename?: 'LabwareSolutionName', barcode: string, solutionName: string } | null> } };
+export type RegisterTissuesMutation = { __typename?: 'Mutation', registerBlocks: { __typename?: 'RegisterResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, clashes: Array<{ __typename?: 'RegisterClash', tissue: { __typename?: 'Tissue', externalName?: string | null, donor: { __typename?: 'Donor', donorName: string }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } } }, labware: Array<{ __typename?: 'Labware', barcode: string, labwareType: { __typename?: 'LabwareType', name: string } }> }>, labwareSolutions: Array<{ __typename?: 'LabwareSolutionName', barcode: string, solutionName: string } | null> } };
 
 export type ReleaseLabwareMutationVariables = Exact<{
   releaseRequest: ReleaseRequest;
@@ -7146,8 +7158,8 @@ ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
 ${TissueFieldsFragmentDoc}`;
 export const RegisterTissuesDocument = gql`
-    mutation RegisterTissues($request: RegisterRequest!) {
-  register(request: $request) {
+    mutation RegisterTissues($request: BlockRegisterRequest!) {
+  registerBlocks(request: $request) {
     ...RegisterResultFields
   }
 }
