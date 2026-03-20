@@ -146,6 +146,10 @@ export const visiumLPCytAssistHD311Factory = unregisteredLabwareFactory.associat
 export const superFrostPlusSlideFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.SUPER_FROST_PLUS_SLIDE].build()
 });
+
+export const schottSlideFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.SCHOTT_SLIDE].build()
+});
 export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>> = {
   [LabwareTypeName.TUBE]: tubeFactory,
   [LabwareTypeName.PROVIASETTE]: proviasetteFactory,
@@ -166,7 +170,8 @@ export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>
   [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_11]: visiumLPCytAssistHD11Factory,
   [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5]: visiumLPCytAssistHD365Factory,
   [LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11]: visiumLPCytAssistHD311Factory,
-  [LabwareTypeName.SUPER_FROST_PLUS_SLIDE]: superFrostPlusSlideFactory
+  [LabwareTypeName.SUPER_FROST_PLUS_SLIDE]: superFrostPlusSlideFactory,
+  [LabwareTypeName.SCHOTT_SLIDE]: schottSlideFactory
 };
 
 export const flaggedLabwareLayout = (labwareType: string) => {
