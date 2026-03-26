@@ -47,7 +47,10 @@ const transferTypes = [
   'Probes pre-clean',
   'Probes post-clean',
   'cDNA pre-clean',
-  'cDNA post-clean'
+  'cDNA post-clean',
+  'cDNA fragmentation',
+  'cDNA adaptor ligation',
+  'Poly(A) RNA'
 ];
 
 interface SourceLabwareScanPanelProps {
@@ -306,7 +309,7 @@ function SlotCopyComponent({
   const onDestinationSelectionModeChange = React.useCallback(
     (mode: DestinationSelectionMode) => {
       destinationSelectionMode.current = mode;
-      let labware: NewFlaggedLabwareLayout[] = [];
+      let labware: NewFlaggedLabwareLayout[];
       const newLabware = newOutputLabwareBySelectionMode(mode);
       if (addPlateOption && newLabware.length > 0) {
         toast(addDestinationPlateNotification(newLabware[0].labwareType.name), {
