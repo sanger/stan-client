@@ -213,6 +213,10 @@ export default function WorkAllocation() {
       .oneOf(costCodes.map((cc) => cc.code))
       .required()
       .label('Cost Code'),
+    facultyLead: Yup.string()
+      .oneOf(facultyLeads.map((fl) => fl.name))
+      .required()
+      .label('Faculty lead'),
     omeroProject: Yup.string()
       .oneOf(omeroProjects.map((cc) => cc.name))
       .optional()
