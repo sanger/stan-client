@@ -7,9 +7,7 @@ import { LabwareFlaggedFieldsFragment, RecordMetricsMutation, SampleMetricsReque
 import { StanCoreContext } from '../lib/sdk';
 import Panel from '../components/Panel';
 import RemoveButton from '../components/buttons/RemoveButton';
-import { Row } from 'react-table';
 import { UploadProgress, UploadResult } from '../components/upload/useUpload';
-import MetricsReader from '../components/xeniumMetrics/MetricsReader';
 import BlueButton from '../components/buttons/BlueButton';
 import * as Yup from 'yup';
 import createFormMachine from '../lib/machines/form/formMachine';
@@ -17,18 +15,22 @@ import { fromPromise } from 'xstate';
 import { useMachine } from '@xstate/react';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
-import RoiTable, { groupByRoi } from '../components/xeniumMetrics/RoiTable';
+import RoiTable, { mapRoisToSectionGroups } from '../components/xeniumMetrics/RoiTable';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import { FlaggedBarcodeLink } from '../components/dataTableColumns/labwareColumns';
+import MetricsReader from '../components/xeniumMetrics/MetricsReader';
+import { Row } from 'react-table';
+import { PlannedSectionDetails } from '../lib/machines/layout/layoutContext';
+import RoiTableDownloader from '../components/xeniumMetrics/RoiTableDownloader';
 
 export type Metric = {
   name: string;
   value: string;
 };
 
-export type SampleMetricData = {
-  externalIdAddress: Array<{ externalId: string; address: string }>;
+export type SectionMetricData = {
+  sectionGroups: Array<PlannedSectionDetails>;
   roi: string;
   metrics: Array<Metric>;
   file?: File;
@@ -39,7 +41,7 @@ export type SampleMetricData = {
 export type XeniumMetricsForm = {
   workNumber: string;
   labware: LabwareFlaggedFieldsFragment | undefined;
-  sampleMetricData: Array<SampleMetricData>;
+  sectionsMetricData: Array<SectionMetricData>;
   runName: string;
   runNames: string[];
   error?: string;
@@ -47,7 +49,7 @@ export type XeniumMetricsForm = {
 
 const initialValues: XeniumMetricsForm = {
   labware: undefined,
-  sampleMetricData: [],
+  sectionsMetricData: [],
   workNumber: '',
   runNames: [],
   runName: '',
@@ -57,12 +59,10 @@ const initialValues: XeniumMetricsForm = {
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required(),
   labware: Yup.object().required(),
-  sampleMetricData: Yup.array()
+  sectionsMetricData: Yup.array()
     .of(
       Yup.object().shape({
-        sampleIdAddress: Yup.array()
-          .of(Yup.object().shape({ sampleId: Yup.number(), address: Yup.string() }))
-          .min(1),
+        sectionGroups: Yup.array().min(1),
         roi: Yup.string().required(),
         metrics: Yup.array(),
         file: Yup.mixed().optional(),
@@ -113,16 +113,14 @@ const XeniumMetrics = () => {
     ) => {
       stanCore.GetRunRois({ barcode: labware.barcode, run: runName }).then((response) => {
         if (response.runRois && response.runRois.length > 0) {
-          const groupedByRoi = groupByRoi(response.runRois);
+          const groupedByRoi = mapRoisToSectionGroups(labware, response.runRois);
           setValues((prev) => ({
             ...prev,
             error: undefined,
             labware: labware,
-            sampleMetricData: Object.keys(groupedByRoi).map((roi) => {
+            sectionsMetricData: Object.keys(groupedByRoi).map((roi) => {
               return {
-                externalIdAddress: groupedByRoi[roi].map((data) => {
-                  return { externalId: data.sample.tissue.externalName ?? '', address: data.address };
-                }),
+                sectionGroups: groupedByRoi[roi].sectionGroup,
                 roi,
                 metrics: []
               };
@@ -131,7 +129,7 @@ const XeniumMetrics = () => {
         } else {
           setValues((prev) => ({
             ...prev,
-            sampleMetricData: [],
+            sectionsMetricData: [],
             error: 'No regions of interest are recorded for the scanned labware and the selected run name.'
           }));
         }
@@ -150,7 +148,7 @@ const XeniumMetrics = () => {
       if (!workNumber && runName) {
         setValues((prev) => ({
           ...prev,
-          sampleMetricData: [],
+          sectionsMetricData: [],
           error: `Please select a work number before selecting a run name.`
         }));
         return;
@@ -158,7 +156,7 @@ const XeniumMetrics = () => {
       if (!runName) {
         setValues((prev) => ({
           ...prev,
-          sampleMetricData: [],
+          sectionsMetricData: [],
           error: undefined
         }));
         return;
@@ -175,7 +173,7 @@ const XeniumMetrics = () => {
       } else {
         setValues((prev) => ({
           ...prev,
-          sampleMetricData: [],
+          sectionsMetricData: [],
           error: `Xenium Analyser QC operation has not been performed on labware ${labware.barcode} for work number ${workNumber} and run name ${runName}.`
         }));
         return;
@@ -203,7 +201,7 @@ const XeniumMetrics = () => {
     setValues((prev) => ({
       ...prev,
       labware: undefined,
-      sampleMetricData: [],
+      sectionsMetricData: [],
       workNumber: '',
       runName: ''
     }));
@@ -226,7 +224,7 @@ const XeniumMetrics = () => {
                 workNumber: values.workNumber,
                 runName: values.runName,
                 barcode: values.labware!.barcode,
-                metrics: values.sampleMetricData.flatMap((data) =>
+                metrics: values.sectionsMetricData.flatMap((data) =>
                   data.metrics.map((metric) => ({
                     roi: data.roi,
                     name: metric.name,
@@ -294,18 +292,14 @@ const XeniumMetrics = () => {
                               />
                             </div>
                           </div>
-                          {values.sampleMetricData.length > 0 && (
+                          {values.sectionsMetricData.length > 0 && (
                             <div className="my-4">
+                              <RoiTableDownloader barcode={labware.barcode} data={values.sectionsMetricData} />
                               <RoiTable
-                                data={values.sampleMetricData.map((data) => {
-                                  return {
-                                    roi: data.roi,
-                                    externalIdAddress: data.externalIdAddress
-                                  };
-                                })}
+                                data={values.sectionsMetricData}
                                 actionColumn={{
                                   Header: 'File Metrics',
-                                  Cell: ({ row }: { row: Row<SampleMetricData> }) => {
+                                  Cell: ({ row }: { row: Row<SectionMetricData> }) => {
                                     return <MetricsReader rowIndex={row.index} />;
                                   }
                                 }}
@@ -322,7 +316,7 @@ const XeniumMetrics = () => {
                     ))
                   }
                 </LabwareScanner>
-                {values.labware && values.sampleMetricData.length > 0 && (
+                {values.labware && values.sectionsMetricData.length > 0 && (
                   <div className={'sm:flex pt-4 sm:flex-row justify-end'}>
                     <BlueButton type="submit" disabled={!isValid}>
                       Save

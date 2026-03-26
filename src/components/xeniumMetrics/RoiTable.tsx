@@ -1,20 +1,19 @@
 import DataTable from '../DataTable';
 import { Column, Row } from 'react-table';
 import React from 'react';
-import { RoiFieldsFragment } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment, RoiFieldsFragment } from '../../types/sdk';
 import { alphaNumericSortDefault } from '../../types/stan';
-
-type RoiTableRow = {
-  roi: string;
-  externalIdAddress: Array<{ externalId: string; address: string }>;
-};
+import { sectionGroupsBySample } from '../../lib/helpers/labwareHelper';
+import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
+import { Region } from '../../pages/XeniumAnalyser';
 
 type RoiTableProps<T extends RoiFieldsFragment> = {
-  actionColumn: Column<T>;
-  data: RoiTableRow[];
+  actionColumn?: Column<T>;
+  roiColumn?: Column<T>;
+  data: Array<Region>;
 };
 
-export const groupByRoi = (rois: RoiFieldsFragment[]): Record<string, RoiFieldsFragment[]> => {
+export const groupRoisByRegionName = (rois: RoiFieldsFragment[]): Record<string, RoiFieldsFragment[]> => {
   return rois
     .sort((a, b) => alphaNumericSortDefault(a.address, b.address))
     .reduce(
@@ -28,23 +27,61 @@ export const groupByRoi = (rois: RoiFieldsFragment[]): Record<string, RoiFieldsF
       {} as Record<string, RoiFieldsFragment[]>
     );
 };
-const RoiTable = ({ actionColumn, data }: RoiTableProps<any>) => {
+
+export type RoiSectionGroup = {
+  roi: string;
+  sectionGroup: Array<PlannedSectionDetails>;
+};
+
+/**
+ * Maps The grouped ROIs to their corresponding section groups in labware
+ */
+export const mapRoisToSectionGroups = (
+  labware: LabwareFlaggedFieldsFragment,
+  rois: RoiFieldsFragment[]
+): Record<string, RoiSectionGroup> => {
+  const sectionGroups = Object.values(sectionGroupsBySample(labware));
+  const groupedByRoi: Record<string, RoiFieldsFragment[]> = groupRoisByRegionName(rois);
+  const roiSectionsMap: Record<string, RoiSectionGroup> = {};
+  const addedAddresses: Set<string> = new Set();
+
+  Object.values(groupedByRoi).forEach((roiList) => {
+    roiList.forEach((group) => {
+      const matchingSectionGroup = sectionGroups.find((sectionGroup) => {
+        return (
+          sectionGroup.source.sampleId === group.sample.id &&
+          sectionGroup.addresses.has(group.address) &&
+          !addedAddresses.has(group.address)
+        );
+      });
+      if (matchingSectionGroup) {
+        matchingSectionGroup.addresses.forEach((addresses) => {
+          addedAddresses.add(addresses);
+        });
+        roiSectionsMap[group.roi] = roiSectionsMap[group.roi] || { roi: group.roi, sectionGroup: [] };
+        roiSectionsMap[group.roi].sectionGroup.push(matchingSectionGroup);
+      }
+    });
+  });
+  return roiSectionsMap;
+};
+const RoiTable = ({ actionColumn, roiColumn, data }: RoiTableProps<any>) => {
   return (
     <DataTable
       columns={[
-        {
-          Header: 'Region of interest',
-          accessor: 'roi'
-        },
+        ...(roiColumn
+          ? [roiColumn as Column<Region>]
+          : [{ Header: 'Region of interest', accessor: 'roi' } as Column<Region>]),
+
         {
           Header: 'External ID',
-          Cell: ({ row }: { row: Row<RoiTableRow> }) => {
+          Cell: ({ row }: { row: Row<Region> }) => {
             return (
-              <div className="grid grid-cols-1 text-wrap">
-                {row.original.externalIdAddress.map((data, index) => {
+              <div className="grid grid-cols-1">
+                {row.original.sectionGroups.map((section, index) => {
                   return (
-                    <label className="py-1" key={`${data.externalId}-${index}`}>
-                      {data.externalId}
+                    <label className="py-1" key={`externalName-${index}`}>
+                      {section.source.tissue?.externalName}
                     </label>
                   );
                 })}
@@ -53,14 +90,14 @@ const RoiTable = ({ actionColumn, data }: RoiTableProps<any>) => {
           }
         },
         {
-          Header: 'Address',
-          Cell: ({ row }: { row: Row<RoiTableRow> }) => {
+          Header: 'Section Number',
+          Cell: ({ row }: { row: Row<Region> }) => {
             return (
               <div className="grid grid-cols-1 text-wrap">
-                {row.original.externalIdAddress.map((data, index) => {
+                {row.original.sectionGroups.map((section, index) => {
                   return (
-                    <label className="py-1" key={`${data.address}-${index}`}>
-                      {data.address}
+                    <label className="py-1" key={`section-${index}`}>
+                      {section.source.newSection}
                     </label>
                   );
                 })}
@@ -68,7 +105,23 @@ const RoiTable = ({ actionColumn, data }: RoiTableProps<any>) => {
             );
           }
         },
-        actionColumn as Column<RoiTableRow>
+        {
+          Header: 'Address(es)',
+          Cell: ({ row }: { row: Row<Region> }) => {
+            return (
+              <div className="grid grid-cols-1 text-wrap">
+                {row.original.sectionGroups.map((section, index) => {
+                  return (
+                    <label className="py-1" key={`addresses-${index}`}>
+                      {Array.from(section.addresses).join(', ')}
+                    </label>
+                  );
+                })}
+              </div>
+            );
+          }
+        },
+        ...(actionColumn ? [actionColumn as Column<Region>] : [])
       ]}
       data={data}
     />

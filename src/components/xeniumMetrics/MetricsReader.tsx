@@ -25,7 +25,7 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
         await setValues((prev) => {
           return {
             ...prev,
-            sampleMetricData: prev.sampleMetricData.map((data, index) => {
+            sectionsMetricData: prev.sectionsMetricData.map((data, index) => {
               if (index === rowIndex) {
                 return {
                   ...data,
@@ -48,7 +48,7 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
       await setValues((prev) => {
         return {
           ...prev,
-          sampleMetricData: prev.sampleMetricData.map((data, index) => {
+          sectionsMetricData: prev.sectionsMetricData.map((data, index) => {
             if (index === rowIndex) {
               return {
                 ...data,
@@ -67,14 +67,14 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
 
   /**Handler for 'Upload' button click**/
   const onUploadAction = React.useCallback(async () => {
-    if (!values.sampleMetricData[rowIndex].file) return;
-    await setFieldValue(`sampleMetricData[${rowIndex}].uploadInProgress`, { progress: true });
-    Papa.parse(values.sampleMetricData[rowIndex].file as File, {
+    if (!values.sectionsMetricData[rowIndex].file) return;
+    await setFieldValue(`sectionsMetricData[${rowIndex}].uploadInProgress`, { progress: true });
+    Papa.parse(values.sectionsMetricData[rowIndex].file as File, {
       header: true,
       skipEmptyLines: true,
       complete: async function (results, parser) {
         if (results.errors.length > 0) {
-          await setFieldValue(`sampleMetricData[${rowIndex}].uploadResult`, {
+          await setFieldValue(`sectionsMetricData[${rowIndex}].uploadResult`, {
             error: new Error(
               'Error while parsing the uploaded file: ' + results.errors.map((error) => error.message).join(', ')
             ),
@@ -94,14 +94,14 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
           await setValues((prev) => {
             return {
               ...prev,
-              sampleMetricData: prev.sampleMetricData.map((data, index) => {
+              sectionsMetricData: prev.sectionsMetricData.map((data, index) => {
                 if (index === rowIndex) {
                   return {
                     ...data,
                     uploadResult: {
                       error: undefined,
                       success: true,
-                      file: values.sampleMetricData[rowIndex].file!
+                      file: values.sectionsMetricData[rowIndex].file!
                     },
                     uploadInProgress: undefined,
                     metrics: metrics
@@ -114,13 +114,13 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
         }
       }
     });
-  }, [setFieldValue, setValues, rowIndex, values.sampleMetricData]);
+  }, [setFieldValue, setValues, rowIndex, values.sectionsMetricData]);
 
   const onRemoveFile = React.useCallback(async () => {
     await setValues((prev) => {
       return {
         ...prev,
-        sampleMetricData: prev.sampleMetricData.map((data, index) => {
+        sectionsMetricData: prev.sectionsMetricData.map((data, index) => {
           if (index === rowIndex) {
             return {
               ...data,
@@ -161,9 +161,9 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
             miniButton
             type={'button'}
             disabled={
-              !values.sampleMetricData[rowIndex].file ||
-              values.sampleMetricData[rowIndex].uploadInProgress?.progress ||
-              values.sampleMetricData[rowIndex].metrics.length > 0
+              !values.sectionsMetricData[rowIndex].file ||
+              values.sectionsMetricData[rowIndex].uploadInProgress?.progress ||
+              values.sectionsMetricData[rowIndex].metrics.length > 0
             }
             onClick={onUploadAction}
             data-testid={'upload-btn'}
@@ -171,23 +171,23 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
           >
             <UploadIcon
               className={
-                !values.sampleMetricData[rowIndex].file ? 'text-gray-300 disabled:cursor-not-allowed' : 'text-white'
+                !values.sectionsMetricData[rowIndex].file ? 'text-gray-300 disabled:cursor-not-allowed' : 'text-white'
               }
             />
           </BlueButton>
         </div>
       </div>
 
-      {values.sampleMetricData[rowIndex].file && (
+      {values.sectionsMetricData[rowIndex].file && (
         <div data-testid={'file-description'} className={'p-2 border-b-2 border-gray-200 bg-white'}>
-          <div key={`${values.sampleMetricData[rowIndex].file?.name}`} className={'flex flex-row justify-between'}>
+          <div key={`${values.sectionsMetricData[rowIndex].file?.name}`} className={'flex flex-row justify-between'}>
             <div className="flex">
               <div>
                 <FileIcon data-testid={'fileIcon'} className={'mr-2 text-gray-600'} />
               </div>
-              <span className={'whitespace-nowrap'}>{values.sampleMetricData[rowIndex].file?.name}</span>
+              <span className={'whitespace-nowrap'}>{values.sectionsMetricData[rowIndex].file?.name}</span>
               <div className="flex p-1 space-x-4">
-                {values.sampleMetricData[rowIndex].uploadResult?.success ? (
+                {values.sectionsMetricData[rowIndex].uploadResult?.success ? (
                   <PassIcon className={'h-4 w-4 text-green-600'} />
                 ) : (
                   <FailIcon
@@ -198,7 +198,7 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
               </div>
             </div>
             <div className={'flex justify-end p-2 space-x-4'}>
-              {values.sampleMetricData[rowIndex].uploadResult?.success && (
+              {values.sectionsMetricData[rowIndex].uploadResult?.success && (
                 <div className="grid grid-cols-2 justify-end">
                   <FailIcon
                     className={'h-4 w-4 cursor-pointer text-red-500 hover:bg-gray-200 '}
@@ -210,17 +210,17 @@ const MetricsReader = ({ rowIndex }: FileParserProps) => {
           </div>
         </div>
       )}
-      {values.sampleMetricData[rowIndex].uploadResult?.error && (
+      {values.sectionsMetricData[rowIndex].uploadResult?.error && (
         <div
           data-testid={'error-div'}
           className={'flex flex-col text-red-600 text-sm p-2 border-b-2 border-gray-200 bg-white'}
         >
           Error:
-          {values.sampleMetricData[rowIndex].uploadResult?.error?.message}
+          {values.sectionsMetricData[rowIndex].uploadResult?.error?.message}
         </div>
       )}
 
-      {values.sampleMetricData[rowIndex].uploadInProgress?.progress && (
+      {values.sectionsMetricData[rowIndex].uploadInProgress?.progress && (
         <div className="flex flex-row whitespace-nowrap p-4 space-x-6 justify-start">
           <div className={'text-blue-600 text-sm'}>{'Uploading in progress...'}</div>
           <LoadingSpinner className={'w-3 h-3 mt-1 text-blue-600'} />

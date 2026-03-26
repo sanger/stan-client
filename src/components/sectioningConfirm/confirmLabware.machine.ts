@@ -81,7 +81,7 @@ type ToggleCancelEvent = { type: 'TOGGLE_CANCEL' };
 type UpdateSectionNumberEvent = {
   type: 'UPDATE_SECTION_NUMBER';
   sectionGroupId: string;
-  sectionNumber: number;
+  sectionNumber: string;
 };
 export type CommitConfirmationEvent = {
   type: 'COMMIT_CONFIRMATION';

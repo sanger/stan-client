@@ -253,14 +253,13 @@ export const sectionGroupsBySample = (
   const sectionGroups: Record<string, PlannedSectionDetails> = {};
   labware.slots.forEach((slot) => {
     slot.samples.forEach((sample) => {
-      if (sample.section == null) return;
       const key = `${sample.id}-${sample.section}`;
       const group = (sectionGroups[key] ??= {
         addresses: new Set<string>(),
         source: {
           sampleId: sample.id,
           labware: labware,
-          newSection: sample.section,
+          newSection: sample.section ?? '',
           tissue: sample.tissue,
           bioState: sample.bioState
         }

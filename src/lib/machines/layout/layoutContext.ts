@@ -38,7 +38,7 @@ export type PlannedSectionDetails = {
 export interface Source {
   sampleId: number;
   labware: LabwareFieldsFragment | LabwareFlaggedFieldsFragment;
-  newSection: number;
+  newSection: string;
   sampleThickness?: string;
   address?: Maybe<Address>;
   region?: string;

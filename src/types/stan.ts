@@ -147,7 +147,7 @@ export type SearchResultTableEntry = {
   donorId: string;
   tissueType: string;
   location: Maybe<SearchResultTableEntryLocation>;
-  sectionNumber?: Maybe<number>;
+  sectionNumber?: Maybe<string>;
   replicate?: Maybe<string>;
   labwareCreated: Date;
   embeddingMedium: string;
@@ -272,7 +272,7 @@ export type HistoryTableEntry = {
   donorName?: string;
   sampleID?: Maybe<number>;
   externalName?: string;
-  sectionNumber?: number;
+  sectionNumber?: string;
   eventType: string;
   biologicalState?: string;
   labwareState: LabwareState;

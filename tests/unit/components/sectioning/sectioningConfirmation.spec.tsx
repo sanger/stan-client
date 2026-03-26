@@ -229,7 +229,7 @@ const mockedPlanData = () => {
             __typename: 'Sample',
             id: sourceLabware.slots[0].samples[0].id
           },
-          newSection: 0,
+          newSection: '',
           sampleThickness: 0.5
         }
       ]

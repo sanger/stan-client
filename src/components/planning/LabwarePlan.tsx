@@ -534,7 +534,7 @@ export function buildInitialLayoutPlan(
           return {
             sampleId: sample.id,
             labware: lw,
-            newSection: 0,
+            newSection: '',
             address: slot.address,
             sampleThickness: globalSectionThickness
           };

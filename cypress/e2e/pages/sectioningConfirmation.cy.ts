@@ -42,8 +42,23 @@ describe('Sectioning Confirmation', () => {
     });
   });
 
+  context('when manual section numbering mode is selected', () => {
+    before(() => {
+      cy.visit('/lab/sectioning/confirm');
+      selectSGPNumber('SGP1008');
+      findPlanByBarcode('STAN-0001F');
+      cy.get('[type = "radio"]').eq(1).click();
+    });
+    it('allows entering string section number as string', () => {
+      cy.findAllByTestId('section-number').eq(0).clear().type('1a');
+      saveButton().click();
+      cy.findByText('Sections Confirmed').should('be.visible');
+    });
+  });
+
   context('when I scan in a labware with a plan', () => {
     before(() => {
+      cy.visit('/lab/sectioning/confirm');
       selectSGPNumber('SGP1008');
       findPlanByBarcode('STAN-0001F');
     });

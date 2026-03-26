@@ -85,7 +85,7 @@ type SectioningConfirmEvent =
       type: 'UPDATE_SECTION_NUMBER';
       layoutPlan: LayoutPlan;
       sectionGroupId: string;
-      sectionNumber: number;
+      sectionNumber: string;
     }
   | {
       type: 'UPDATE_PLANS';
@@ -121,7 +121,8 @@ const isValidSectionLabware = (ctx: SectioningConfirmContext): boolean => {
       return true;
     }
     /** Has every section got a section number? **/
-    const validSectionNumber = csl.confirmSections?.every((cs) => (cs.newSection ? cs.newSection > 0 : false)) ?? false;
+    const validSectionNumber =
+      csl.confirmSections?.every((cs) => cs.newSection && cs.newSection.trim().length > 0) ?? false;
     if (!validSectionNumber) return false;
     return true;
   });
@@ -505,7 +506,7 @@ function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, 
       //Store the current highest section number so that it will be incremental for next section
       startNumbers.set(plan.source.labware.barcode, newSectionNum);
     }
-    plan.source.newSection = newSectionNum;
+    plan.source.newSection = String(newSectionNum);
     //Mutate the layoutPlan so that the child will be notified of this change and the changes will be rendered
     layoutPlan.plannedActions[sectionGroupId] = { ...plan };
   });
@@ -543,7 +544,7 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
       if (planned) {
         const source: Source = {
           sampleId: planned.source.samples[0].id, // we only support single sample sources for sectioning,
-          newSection: 0,
+          newSection: '',
           sampleThickness: planned.sampleThickness?.toString(),
           labware: plan.planData.sources.find((lw) => lw.id === planned.source.labwareId)!
         };
