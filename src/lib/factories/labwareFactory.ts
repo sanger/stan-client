@@ -1,10 +1,11 @@
 import { Factory } from 'fishery';
 import { Labware, LabwareState } from '../../types/sdk';
-import { labwareTypes } from './labwareTypeFactory';
+import { labwareTypeFactory, labwareTypes } from './labwareTypeFactory';
 import { LabwareTypeName, NewFlaggedLabwareLayout, NewLabwareLayout } from '../../types/stan';
 import { uniqueId } from 'lodash';
 import { buildAddresses, GridDirection } from '../helpers';
 import { slotFactory } from './slotFactory';
+import labelTypeFactory from './labelTypeFactory';
 
 export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
   ({ params, associations, afterBuild, transientParams }) => {
@@ -72,6 +73,19 @@ const labwareFactory = Factory.define<Labware>(({ sequence, params, associations
   }) as Labware;
 });
 export default labwareFactory;
+
+export const multiSampleBlockLabwareFactory = (blockTypeName: LabwareTypeName, numColumns: number, numRows: number) => {
+  return unregisteredLabwareFactory.associations({
+    labwareType: labwareTypeFactory
+      .params({
+        name: blockTypeName,
+        numColumns,
+        numRows,
+        labelType: labelTypeFactory.build({ name: `${blockTypeName} Label` })
+      })
+      .build()
+  });
+};
 
 export const proviasetteFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.PROVIASETTE].build()
