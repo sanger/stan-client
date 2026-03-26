@@ -148,6 +148,13 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     numRows: 10,
     numColumns: 4,
     labelType: labelTypeFactory.build({ name: `${LabwareTypeName.SUPER_FROST_PLUS_SLIDE} Label` })
+  }),
+  [LabwareTypeName.SCHOTT_SLIDE]: labwareTypeFactory.params({
+    __typename: 'LabwareType',
+    name: LabwareTypeName.SCHOTT_SLIDE,
+    numRows: 10,
+    numColumns: 4,
+    labelType: labelTypeFactory.build({ name: `${LabwareTypeName.SCHOTT_SLIDE} Label` })
   })
 };
 
