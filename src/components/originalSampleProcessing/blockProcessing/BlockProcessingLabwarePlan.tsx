@@ -1,5 +1,5 @@
 import { GetBlockProcessingInfoQuery, LabwareFlaggedFieldsFragment, TissueBlockContent } from '../../../types/sdk';
-import React, { useState } from 'react';
+import React from 'react';
 import { useMachine } from '@xstate/react';
 import { motion } from '../../../dependencies/motion';
 import variants from '../../../lib/motionVariants';
@@ -14,7 +14,7 @@ import BlueButton from '../../buttons/BlueButton';
 import WhiteButton from '../../buttons/WhiteButton';
 import { useFormikContext } from 'formik';
 import Warning from '../../notifications/Warning';
-import FormikInput, { Input } from '../../forms/Input';
+import FormikInput from '../../forms/Input';
 import { createLabwarePlanMachine } from '../../planning/labwarePlan.machine';
 import { BlockFormData } from './BlockProcessing';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
@@ -76,6 +76,14 @@ function buildInitialLayoutPlan(
   };
 }
 
+function validatePreBarcode(value: string) {
+  let error;
+  if (value && !value.match(/[a-zA-Z]{2}\d{8}/)) {
+    error = 'Barcode should be in the format with two letters followed by 8 numbers';
+  }
+  return error;
+}
+
 const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcessingLabwarePlanProps>(
   ({ cid, outputLabware, blockProcessInfo, sourceLabware, sampleColors, onDelete }, ref) => {
     const labwarePlanMachine = React.useMemo(() => {
@@ -85,7 +93,6 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
     const { requestError, layoutPlan } = current.context;
     const { layoutMachine } = current.context;
     const { setFieldValue, values, setValues } = useFormikContext<BlockFormData>();
-    const [disableRepNumber, setDisableRepNumber] = useState<boolean>(false);
     /**
      * Fill all form fields that need to be auto-filled
      */
@@ -110,7 +117,9 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
             addresses: Array.from(plannedAction.addresses),
             sourceBarcode,
             replicate: plannedAction.source.replicateNumber,
-            sourceSampleId: plannedAction.source.sampleId
+            sourceSampleId: plannedAction.source.sampleId,
+            isEditReplicateDisabled:
+              plannedAction.source.replicateNumber && parseInt(plannedAction.source.replicateNumber) > 0
           };
 
           const existing = planContents.get(sourceBarcode);
@@ -130,7 +139,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
         });
       });
       return () => subscription.unsubscribe();
-    }, [setValues, layoutPlan.plannedActions, cid, setDisableRepNumber, actor, outputLabware.labwareType.name]);
+    }, [setValues, layoutPlan.plannedActions, cid, actor, outputLabware.labwareType.name]);
 
     return (
       <motion.div
@@ -173,13 +182,18 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
               )}
             </div>
             <div className="border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow-md">
-              <div className="py-4 px-8 w-full space-y-4">
+              <div className="py-4 px-8 w-full space-y-4" data-testid="planned-source-table">
                 {current.matches('prep.errored') && (
                   <Warning message={'There was an error creating the Labware'} error={requestError} />
                 )}
 
                 {outputLabware.labwareType.name === LabwareTypeName.PRE_BARCODED_TUBE && (
-                  <FormikInput name={`plans.${cid}.preBarcode`} label={'Barcode'} type={'text'} />
+                  <FormikInput
+                    name={`plans.${cid}.preBarcode`}
+                    label={'Barcode'}
+                    type={'text'}
+                    validate={validatePreBarcode}
+                  />
                 )}
                 <Table>
                   <TableHead>
@@ -195,9 +209,16 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                         <tr key={`${tissueContent.sourceBarcode}-${index}`}>
                           <TableCell>{tissueContent.sourceBarcode}</TableCell>
                           <TableCell>
-                            <Input
+                            <FormikInput
+                              validateField={(number: number) => {
+                                if (number === 0) return 'Replicate number is required';
+                                return '';
+                              }}
+                              name={`replicateNumber`}
+                              data-testid="replicate-number"
                               type={'number'}
-                              disabled={disableRepNumber}
+                              label={''}
+                              disabled={tissueContent.isEditReplicateDisabled}
                               value={tissueContent.replicate ?? ''}
                               onChange={async (event: React.ChangeEvent<HTMLInputElement>) => {
                                 const plans = values.plans;
@@ -206,6 +227,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                                 plans.set(cid, plan!);
                                 await setFieldValue('plans', plans);
                               }}
+                              min={0}
                             />
                           </TableCell>
                           <TableCell>

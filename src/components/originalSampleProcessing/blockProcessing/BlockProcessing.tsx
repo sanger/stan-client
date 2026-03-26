@@ -1,9 +1,11 @@
 import {
   GetBlockProcessingInfoQuery,
+  InputMaybe,
   LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   PerformTissueBlockMutation,
-  TissueBlockLabware,
+  Scalars,
+  TissueBlockContent,
   TissueBlockRequest
 } from '../../../types/sdk';
 import { useMachine } from '@xstate/react';
@@ -12,6 +14,7 @@ import BlueButton from '../../buttons/BlueButton';
 import React from 'react';
 import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../../types/stan';
 import columns from '../../dataTableColumns/labwareColumns';
+import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import BlockProcessingLabwarePlan from './BlockProcessingLabwarePlan';
 import { Dictionary, groupBy } from 'lodash';
@@ -37,10 +40,20 @@ import { fromPromise } from 'xstate';
  * Used as Formik's values
  */
 
+type TissueBlockContentForm = TissueBlockContent & {
+  isEditReplicateDisabled?: boolean;
+};
+
+type TissueBlockLabwareForm = {
+  contents: Array<TissueBlockContentForm>;
+  labwareType: Scalars['String']['input'];
+  preBarcode?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type BlockFormData = {
   workNumber: string;
   //labware cid for key
-  plans: Map<string, TissueBlockLabware>;
+  plans: Map<string, TissueBlockLabwareForm>;
   discardSources?: { sourceBarcode: string; discard: boolean }[];
 };
 
@@ -199,7 +212,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
               onChange={(e) => setSelectedLabwareNumColumns(Number(e.currentTarget.value))}
               value={selectedLabwareNumColumns}
               data-testid={'selectedLabwareNumColumns'}
-              min={1}
               max={4}
             />
             <input
@@ -208,7 +220,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
               onChange={(e) => setSelectedLabwareNumRows(Number(e.currentTarget.value))}
               value={selectedLabwareNumRows}
               data-testid={'selectedLabwareNumRows'}
-              min={1}
               max={10}
             />
           </div>
@@ -224,6 +235,24 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
     selectedLabwareNumColumns,
     selectedLabwareNumRows
   ]);
+
+  /**
+   * Builds a yup validator for the labware plan form
+   */
+  function buildValidationSchema(): Yup.AnyObjectSchema {
+    return Yup.object().shape({
+      workNumber: Yup.string().required('SGP Number is required'),
+      plans: Yup.mixed<Map<string, TissueBlockLabwareForm>>().required(),
+      discardSources: Yup.array()
+        .of(
+          Yup.object().shape({
+            sourceBarcode: Yup.string().optional(),
+            discard: Yup.boolean().optional()
+          })
+        )
+        .optional()
+    });
+  }
 
   /**Reformat form data as mutation input**/
   const buildTissueBlockRequest = (formData: BlockFormData): TissueBlockRequest => {
@@ -293,6 +322,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
               workNumber: '',
               plans: new Map()
             }}
+            validationSchema={buildValidationSchema}
             onSubmit={async (values) => {
               send({
                 type: 'SUBMIT_FORM',
@@ -300,7 +330,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
               });
             }}
           >
-            {({ setFieldValue, values }) => (
+            {({ setFieldValue, values, isValid }) => (
               <Form>
                 <motion.div variants={variants.fadeInWithLift} className="space-y-10">
                   <motion.div variants={variants.fadeInWithLift}>
@@ -332,7 +362,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
 
                   <motion.div variants={variants.fadeInWithLift} className={'sm:flex mt-4 sm:flex-row justify-end'}>
                     <ButtonBar>
-                      <BlueButton type={'submit'} disabled={values.plans.size < 1}>
+                      <BlueButton type={'submit'} disabled={!isValid}>
                         Save
                       </BlueButton>
                     </ButtonBar>
