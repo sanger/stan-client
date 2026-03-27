@@ -52,7 +52,7 @@ type TissueBlockLabwareForm = {
 
 export type BlockFormData = {
   workNumber: string;
-  //labware cid for key
+  //Plan cid for key
   plans: Map<string, TissueBlockLabwareForm>;
   discardSources?: { sourceBarcode: string; discard: boolean }[];
 };

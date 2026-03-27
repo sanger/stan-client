@@ -79,7 +79,7 @@ function buildInitialLayoutPlan(
 function validatePreBarcode(value: string) {
   let error;
   if (value && !value.match(/[a-zA-Z]{2}\d{8}/)) {
-    error = 'Barcode should be in the format with two letters followed by 8 numbers';
+    error = 'Barcode should be two letters followed by 8 numbers';
   }
   return error;
 }
