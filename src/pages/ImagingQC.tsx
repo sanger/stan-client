@@ -23,6 +23,7 @@ import { useCollection } from '../lib/hooks/useCollection';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { fromPromise } from 'xstate';
+import { useLocation } from 'react-router-dom';
 
 type StainingQCProps = {
   info: GetStainingQcInfoQuery;
@@ -33,10 +34,13 @@ export const TISSUE_COVERAGE_MEASUREMENT_NAME = 'Tissue coverage';
 const QC_TYPES = ['Imaging QC', 'Tissue coverage', 'Pretreatment QC'];
 
 export default function ImagingQC({ info }: StainingQCProps) {
+  const location = useLocation();
+  const recordedLabware = location.state as { labware?: Array<LabwareFlaggedFieldsFragment> };
   const [workNumber, setWorkNumber] = useState<string>('');
   const [qcType, setQCType] = useState<string>('');
 
   const labwareResults = useCollection<CoreLabwareResult>({
+    initialItems: recordedLabware?.labware?.map((labware) => buildLabwareResult(labware)),
     getKey: (item) => item.barcode
   });
 
@@ -156,6 +160,7 @@ export default function ImagingQC({ info }: StainingQCProps) {
             <p>Please scan in any slides you wish to QC</p>
 
             <LabwareScanner
+              initialLabwares={recordedLabware?.labware}
               onAdd={onAddLabware}
               onRemove={onRemoveLabware}
               enableFlaggedLabwareCheck
@@ -163,7 +168,7 @@ export default function ImagingQC({ info }: StainingQCProps) {
             >
               {({ labwares, removeLabware, cleanedOutAddresses }) =>
                 labwares.map(
-                  (labware, index) =>
+                  (labware) =>
                     labwareResults.getItem(labware.barcode) && (
                       <Panel key={labware.barcode}>
                         <LabwareResult
