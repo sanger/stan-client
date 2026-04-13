@@ -25,6 +25,7 @@ describe('Block Processing', () => {
     context('when source labware is loaded', () => {
       before(() => {
         scanInput('STAN-113');
+        scanInput('STAN-213');
       });
 
       it('Add labware button is enabled', () => {
@@ -49,6 +50,42 @@ describe('Block Processing', () => {
 
         it('re-enables scan labware input', () => {
           cy.get('#labwareScanInput').should('not.be.disabled');
+        });
+      });
+    });
+  });
+  describe('Multi sample Proviasette block', () => {
+    context('when adding a Proviasette with 2 rows and 2 columns', () => {
+      before(() => {
+        selectOption('labwareType', 'Proviasette');
+        cy.findByTestId('selectedLabwareNumRows').type('{selectall}2');
+        cy.findByTestId('selectedLabwareNumColumns').type('{selectall}2');
+        cy.findByText('+ Add Labware').click();
+      });
+      after(() => {
+        cy.findAllByText('Delete Layout').first().click();
+      });
+
+      it('display labware layout with 4 slots', () => {
+        cy.findAllByTestId('slot').should('have.length', 4);
+      });
+      describe('when adding different sources to differen slots', () => {
+        before(() => {
+          cy.findAllByText('Edit Layout').first().click();
+          cy.findByRole('dialog').within(() => {
+            cy.findByText('STAN-113').click();
+            cy.findByText('A1').click();
+            cy.findByText('A2').click();
+            cy.findAllByText('STAN-213').first().click();
+            cy.findByText('B1').click();
+            cy.findByText('Done').click();
+          });
+        });
+        it('adds a source row for each selected source', () => {
+          cy.findByTestId('planned-source-table').within(() => {
+            cy.findByText('STAN-113').should('exist');
+            cy.findByText('STAN-213').should('exist');
+          });
         });
       });
     });
@@ -78,9 +115,11 @@ describe('Block Processing', () => {
           });
         });
         it('should display STAN-113', () => {
-          cy.findByTestId(`divSection-Tube`).within(() => {
-            cy.findByText('STAN-113').should('exist');
-          });
+          cy.findAllByTestId('planned-source-table')
+            .first()
+            .within(() => {
+              cy.findByText('STAN-113').should('exist');
+            });
         });
       });
 
@@ -125,7 +164,7 @@ describe('Block Processing', () => {
         cy.findAllByLabelText('Barcode').last().type('Barcode1').blur();
       });
       it('should display an error message', () => {
-        cy.findByText('Barcode should be in the format with two letters followed by 8 numbers').should('be.visible');
+        cy.findByText('Barcode should be two letters followed by 8 numbers').should('be.visible');
       });
       after(() => {
         cy.findByText('Delete Layout').click();
@@ -150,7 +189,7 @@ describe('Block Processing', () => {
     before(() => {
       cy.visit('/lab/original_sample_processing?type=block');
     });
-    context('when adding grouped labware for replicate number baed on original samples', () => {
+    context('when adding grouped labware for replicate number based on original samples', () => {
       const sources = ['STAN-1111', 'STAN-2111', 'STAN-3111', 'STAN-4111'];
       before(() => {
         //Mock handler will ensure that they are grouped in two's
@@ -170,10 +209,15 @@ describe('Block Processing', () => {
 
       it('should autofill all replicate numbers consecutively based on original samples of source labware', () => {
         //they are randomly generated so we can't check the exact value
-        cy.findAllByLabelText('Replicate Number').eq(0).should('not.have.value', '').and('be.disabled');
-        cy.findAllByLabelText('Replicate Number').eq(1).should('not.have.value', '').and('be.disabled');
-        cy.findAllByLabelText('Replicate Number').eq(2).should('not.have.value', '').and('be.disabled');
-        cy.findAllByLabelText('Replicate Number').eq(3).should('not.have.value', '').and('be.disabled');
+        cy.findAllByTestId('replicate-number')
+          .should('have.length', 4)
+          .then(($inputs) => {
+            // Wait for all to be populated first
+            cy.wrap($inputs.eq(0)).should('not.have.value', '').and('be.disabled');
+            cy.wrap($inputs.eq(1)).should('not.have.value', '').and('be.disabled');
+            cy.wrap($inputs.eq(2)).should('not.have.value', '').and('be.disabled');
+            cy.wrap($inputs.eq(3)).should('not.have.value', '').and('be.disabled');
+          });
       });
     });
     context('when adding multiple labware with same source labware', () => {
@@ -187,7 +231,7 @@ describe('Block Processing', () => {
         });
       });
       it('should autofill all replicate numbers so that it continues the sequence of source labware', () => {
-        cy.findAllByLabelText('Replicate Number').eq(4).should('not.have.value', '').and('be.disabled');
+        cy.findAllByTestId('replicate-number').eq(4).should('not.have.value', '').and('be.disabled');
       });
     });
     context('when adding a labware with a source labware that does not hold a replicate number', () => {
@@ -206,7 +250,7 @@ describe('Block Processing', () => {
         });
       });
       it('replicate number field should be empty and enabled', () => {
-        cy.findByLabelText('Replicate Number').should('have.value', '').and('be.enabled');
+        cy.findAllByTestId('replicate-number').should('have.value', '').and('be.enabled');
       });
     });
   });
@@ -229,12 +273,14 @@ describe('Block Processing', () => {
         cy.visit('/lab/original_sample_processing?type=block');
         scanInput('STAN-113');
         addLabware('Tube');
+        cy.findAllByText('Edit Layout').last().click();
+        cy.findByRole('dialog').within(() => {
+          cy.findByText('STAN-113').click();
+          cy.findByText('A1').click();
+          cy.findByText('Done').click();
+        });
         selectOption('workNumber', '');
-        cy.findByTestId('Replicate Number').click();
         selectOption('comments', '');
-      });
-      it('Shows error for replicate number', () => {
-        cy.findByText('Replicate number is required').should('be.visible');
       });
       it('Shows error for SGP Number', () => {
         cy.findByText('SGP number is required').should('be.visible');
@@ -349,8 +395,8 @@ describe('Block Processing', () => {
   });
 });
 function checkBlockProcessingFields() {
-  cy.findByLabelText('Replicate Number').should('be.visible');
-  cy.findByLabelText('Labware generation comments').should('be.visible');
+  cy.findByText('Replicate Number').should('be.visible');
+  cy.findByText('Labware generation comments').should('be.visible');
 }
 
 function scanInput(barcode: string) {

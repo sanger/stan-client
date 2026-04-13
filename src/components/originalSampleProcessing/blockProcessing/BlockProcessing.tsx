@@ -1,8 +1,11 @@
 import {
   GetBlockProcessingInfoQuery,
+  InputMaybe,
   LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   PerformTissueBlockMutation,
+  Scalars,
+  TissueBlockContent,
   TissueBlockRequest
 } from '../../../types/sdk';
 import { useMachine } from '@xstate/react';
@@ -36,17 +39,21 @@ import { fromPromise } from 'xstate';
 /**
  * Used as Formik's values
  */
-export type BlockFormValue = {
-  sourceBarcode: string;
-  labwareType: string;
-  replicateNumber: string;
-  commentId?: number;
-  preBarcode?: string;
-  sourceSampleId: number;
+
+type TissueBlockContentForm = TissueBlockContent & {
+  isEditReplicateDisabled?: boolean;
 };
+
+type TissueBlockLabwareForm = {
+  contents: Array<TissueBlockContentForm>;
+  labwareType: Scalars['String']['input'];
+  preBarcode?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type BlockFormData = {
   workNumber: string;
-  plans: BlockFormValue[];
+  //Plan cid for key
+  plans: Map<string, TissueBlockLabwareForm>;
   discardSources?: { sourceBarcode: string; discard: boolean }[];
 };
 
@@ -59,6 +66,10 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
 
 type BlockProcessingParams = {
   readonly processingInfo?: GetBlockProcessingInfoQuery;
+};
+
+const isMultiSampleBlockLabware = (labwareTypeName: LabwareTypeName) => {
+  return [LabwareTypeName.PROVIASETTE, LabwareTypeName.CASSETTE].includes(labwareTypeName);
 };
 
 export default function BlockProcessing({ processingInfo }: BlockProcessingParams) {
@@ -86,9 +97,8 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
 
   const [selectedLabwareType, setSelectedLabwareType] = React.useState<string>(LabwareTypeName.TUBE);
   const [numLabware, setNumLabware] = React.useState<number>(1);
-
-  /**To keep the mapping between source selected and the plan. Key is source labware barcode and value is unique id for a plan created**/
-  const [planToSourceMap, setPlanToSourceMap] = React.useState(new Map<string, string>());
+  const [selectedLabwareNumColumns, setSelectedLabwareNumColumns] = React.useState<number>(1);
+  const [selectedLabwareNumRows, setSelectedLabwareNumRows] = React.useState<number>(1);
 
   /**
    * Limit the labware types the user can Section on to.
@@ -99,24 +109,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
       ? blockProcessingInfo.labwareTypes.filter((lw) => allowedLabwareTypeNames.includes(lw.name as LabwareTypeName))
       : [];
   }, [processingInfo, processingInfoLoaderData]);
-
-  /**A source is selected for a plan, so update the mapping state between source and plan**/
-  const notifySourceSelection = React.useCallback(
-    (cid: string, sourceBarcode: string) => {
-      if (planToSourceMap.has(cid) && planToSourceMap.get(cid) === sourceBarcode) {
-        return;
-      }
-      setPlanToSourceMap((prev) => {
-        const map = new Map<string, string>();
-        Array.from(prev.entries()).forEach(([key, value]) => {
-          map.set(key, value);
-        });
-        map.set(cid, sourceBarcode);
-        return map;
-      });
-    },
-    [planToSourceMap]
-  );
 
   /** Display created Labware plans**/
   const buildPlanLayouts = React.useCallback(
@@ -143,8 +135,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
         planWithKeys,
         (planWithKey) => planWithKey.plan!.labwareType.name
       );
-
-      let rowIndx: number = 0;
       return Object.keys(layoutPlanGroupedByType).length > 0 ? (
         <div className={'flex flex-col py-10 gap-y-20'}>
           {allowedLabwareTypeNames.map((labwareType) => {
@@ -154,7 +144,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                 <div className={'flex flex-col'} data-testid={`divSection-${labwareType}`} key={labwareType}>
                   <Heading className={'mb-8'} level={2}>{`${labwareType.toString()}s`}</Heading>
                   {labwarePlans.map((lwPlan, indx) => {
-                    rowIndx++;
                     return (
                       <BlockProcessingLabwarePlan
                         key={lwPlan.cid}
@@ -164,13 +153,11 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                         sourceLabware={sourceLabware}
                         sampleColors={sampleColors}
                         onDelete={deleteAction}
-                        rowIndex={rowIndx - 1}
                         ref={
                           labwareType === selectedLabwareType && indx === labwarePlans.length - numLabware
                             ? scrollRef
                             : undefined
                         }
-                        notifySourceSelection={notifySourceSelection}
                       />
                     );
                   })}
@@ -183,7 +170,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
         <></>
       );
     },
-    [processingInfo, selectedLabwareType, numLabware, notifySourceSelection]
+    [processingInfo, selectedLabwareType, numLabware]
   );
 
   /**
@@ -191,27 +178,63 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
    */
   const buildPlanCreationSettings = React.useCallback(() => {
     return (
-      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-center text-sm">
-        <div className="text-gray-500">Labware type</div>
-        <div className="text-gray-500">Number of labware</div>
-        <CustomReactSelect
-          className="block text-left"
-          handleChange={(val) => setSelectedLabwareType((val as OptionType).value)}
-          dataTestId={'labwareType'}
-          value={selectedLabwareType}
-          options={selectOptionValues(allowedLabwareTypes, 'name', 'name')}
-        />
-        <input
-          type="number"
-          className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
-          onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
-          value={numLabware}
-          data-testid={'numLabware'}
-          min={1}
-        />
+      <div className={'text-center text-sm'}>
+        <div className="grid grid-cols-2 gap-x-4">
+          <div className="text-gray-500">Number of labware</div>
+          <div className="text-gray-500">Labware type</div>
+          <input
+            type="number"
+            className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
+            onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
+            value={numLabware}
+            data-testid={'numLabware'}
+            min={1}
+          />
+          <CustomReactSelect
+            className="block text-left"
+            handleChange={(val) => {
+              setSelectedLabwareType((val as OptionType).value);
+              setSelectedLabwareNumColumns(1);
+              setSelectedLabwareNumRows(1);
+            }}
+            dataTestId={'labwareType'}
+            value={selectedLabwareType}
+            options={selectOptionValues(allowedLabwareTypes, 'name', 'name')}
+          />
+        </div>
+        {isMultiSampleBlockLabware(selectedLabwareType as LabwareTypeName) && (
+          <div className="grid grid-cols-2 gap-x-4 mt-2">
+            <div className="text-gray-500">Number of columns</div>
+            <div className="text-gray-500">Number of rows</div>
+            <input
+              type="number"
+              className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
+              onChange={(e) => setSelectedLabwareNumColumns(Number(e.currentTarget.value))}
+              value={selectedLabwareNumColumns}
+              data-testid={'selectedLabwareNumColumns'}
+              max={4}
+            />
+            <input
+              type="number"
+              className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
+              onChange={(e) => setSelectedLabwareNumRows(Number(e.currentTarget.value))}
+              value={selectedLabwareNumRows}
+              data-testid={'selectedLabwareNumRows'}
+              max={10}
+            />
+          </div>
+        )}
       </div>
     );
-  }, [selectedLabwareType, setSelectedLabwareType, numLabware, setNumLabware, allowedLabwareTypes]);
+  }, [
+    selectedLabwareType,
+    setSelectedLabwareType,
+    numLabware,
+    setNumLabware,
+    allowedLabwareTypes,
+    selectedLabwareNumColumns,
+    selectedLabwareNumRows
+  ]);
 
   /**
    * Builds a yup validator for the labware plan form
@@ -219,30 +242,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   function buildValidationSchema(): Yup.AnyObjectSchema {
     return Yup.object().shape({
       workNumber: Yup.string().required('SGP Number is required'),
-      plans: Yup.array()
-        .of(
-          Yup.object().shape({
-            sourceBarcode: Yup.string().required().min(1),
-            replicateNumber: Yup.string().required('Replicate number is required'),
-            commentId: Yup.number().optional(),
-            labwareType: Yup.string()
-              .required()
-              .oneOf(allowedLabwareTypes.map((type) => type.name)),
-            preBarcode: Yup.string().when('labwareType', (labwareType, schema) => {
-              const val = labwareType[0] as unknown as string;
-              return val === LabwareTypeName.PRE_BARCODED_TUBE
-                ? Yup.string()
-                    .required('Barcode is required')
-                    .matches(
-                      /[a-zA-Z]{2}\d{8}/,
-                      'Barcode should be in the format with two letters followed by 8 numbers'
-                    )
-                : schema;
-            })
-          })
-        )
-        .required()
-        .min(1),
+      plans: Yup.mixed<Map<string, TissueBlockLabwareForm>>().required(),
       discardSources: Yup.array()
         .of(
           Yup.object().shape({
@@ -258,20 +258,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   const buildTissueBlockRequest = (formData: BlockFormData): TissueBlockRequest => {
     return {
       workNumber: formData.workNumber,
-      labware: formData.plans.map((plan) => ({
-        labwareType: plan.labwareType,
-        preBarcode: plan.preBarcode,
-        contents: [
-          {
-            sourceBarcode: plan.sourceBarcode,
-            commentId: plan.commentId,
-            replicate: plan.replicateNumber,
-            // Todo - temporary set to the first sample but to update within x1499-1a client
-            addresses: ['A1'],
-            sourceSampleId: plan.sourceSampleId
-          }
-        ]
-      })),
+      labware: [...formData.plans.values()],
       discardSourceBarcodes: formData.discardSources?.filter((ds) => ds.discard).map((ds) => ds.sourceBarcode)
     };
   };
@@ -333,7 +320,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
           <Formik<BlockFormData>
             initialValues={{
               workNumber: '',
-              plans: []
+              plans: new Map()
             }}
             validationSchema={buildValidationSchema}
             onSubmit={async (values) => {
@@ -343,7 +330,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
               });
             }}
           >
-            {({ setFieldValue, values }) => (
+            {({ setFieldValue, values, isValid }) => (
               <Form>
                 <motion.div variants={variants.fadeInWithLift} className="space-y-10">
                   <motion.div variants={variants.fadeInWithLift}>
@@ -366,17 +353,20 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                       columns.replicate()
                     ]}
                     buildPlanCreationSettings={buildPlanCreationSettings}
+                    selectedLabwareNumColumns={selectedLabwareNumColumns}
+                    selectedLabwareNumRows={selectedLabwareNumRows}
                   />
                   {serverError && (
                     <Warning message={'Failed to perform block labware generation'} error={serverError} />
                   )}
-                  {values.plans.length > 0 && (
-                    <motion.div variants={variants.fadeInWithLift} className={'sm:flex mt-4 sm:flex-row justify-end'}>
-                      <ButtonBar>
-                        <BlueButton type={'submit'}>Save</BlueButton>
-                      </ButtonBar>
-                    </motion.div>
-                  )}
+
+                  <motion.div variants={variants.fadeInWithLift} className={'sm:flex mt-4 sm:flex-row justify-end'}>
+                    <ButtonBar>
+                      <BlueButton type={'submit'} disabled={!isValid}>
+                        Save
+                      </BlueButton>
+                    </ButtonBar>
+                  </motion.div>
                 </motion.div>
               </Form>
             )}
