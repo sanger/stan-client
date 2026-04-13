@@ -189,7 +189,7 @@ describe('Block Processing', () => {
     before(() => {
       cy.visit('/lab/original_sample_processing?type=block');
     });
-    context('when adding grouped labware for replicate number baed on original samples', () => {
+    context('when adding grouped labware for replicate number based on original samples', () => {
       const sources = ['STAN-1111', 'STAN-2111', 'STAN-3111', 'STAN-4111'];
       before(() => {
         //Mock handler will ensure that they are grouped in two's
@@ -209,10 +209,15 @@ describe('Block Processing', () => {
 
       it('should autofill all replicate numbers consecutively based on original samples of source labware', () => {
         //they are randomly generated so we can't check the exact value
-        cy.findAllByTestId('replicate-number').eq(0).should('not.have.value', '').and('be.disabled');
-        cy.findAllByTestId('replicate-number').eq(1).should('not.have.value', '').and('be.disabled');
-        cy.findAllByTestId('replicate-number').eq(2).should('not.have.value', '').and('be.disabled');
-        cy.findAllByTestId('replicate-number').eq(3).should('not.have.value', '').and('be.disabled');
+        cy.findAllByTestId('replicate-number')
+          .should('have.length', 4)
+          .then(($inputs) => {
+            // Wait for all to be populated first
+            cy.wrap($inputs.eq(0)).should('not.have.value', '').and('be.disabled');
+            cy.wrap($inputs.eq(1)).should('not.have.value', '').and('be.disabled');
+            cy.wrap($inputs.eq(2)).should('not.have.value', '').and('be.disabled');
+            cy.wrap($inputs.eq(3)).should('not.have.value', '').and('be.disabled');
+          });
       });
     });
     context('when adding multiple labware with same source labware', () => {
