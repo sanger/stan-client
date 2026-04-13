@@ -164,7 +164,7 @@ describe('Block Processing', () => {
         cy.findAllByLabelText('Barcode').last().type('Barcode1').blur();
       });
       it('should display an error message', () => {
-        cy.findByText('Barcode should be in the format with two letters followed by 8 numbers').should('be.visible');
+        cy.findByText('Barcode should be two letters followed by 8 numbers').should('be.visible');
       });
       after(() => {
         cy.findByText('Delete Layout').click();
