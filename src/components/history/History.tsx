@@ -164,6 +164,19 @@ export default function History(props: HistoryProps) {
                 </StyledLink>
               </li>
             );
+          } else if (props.row.original.eventType?.toLowerCase() === 'imaging qc') {
+            details.push(
+              <WhiteButton>
+                <a
+                  className="focus:outline-hidden"
+                  download={`imaging_log.xlsx`}
+                  href={`/imageqc?id=${props.row.original.eventId}&type=xlsx`}
+                >
+                  <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
+                  Download Imaging Logs
+                </a>
+              </WhiteButton>
+            );
           }
           return <ul>{details}</ul>;
         }
