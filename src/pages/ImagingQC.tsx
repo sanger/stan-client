@@ -23,6 +23,9 @@ import { useCollection } from '../lib/hooks/useCollection';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { fromPromise } from 'xstate';
+import DownloadIcon from '../components/icons/DownloadIcon';
+import WhiteButton from '../components/buttons/WhiteButton';
+import JSZip from 'jszip';
 
 type StainingQCProps = {
   info: GetStainingQcInfoQuery;
@@ -98,7 +101,7 @@ export default function ImagingQC({ info }: StainingQCProps) {
   }, [stanCore]);
   const [current, send] = useMachine(formMachine);
 
-  const { serverError } = current.context;
+  const { serverError, submissionResult } = current.context;
   const onAddLabware = useCallback(
     (labware: LabwareFlaggedFieldsFragment) => {
       labwareResults.append(buildLabwareResult(labware));
@@ -114,6 +117,26 @@ export default function ImagingQC({ info }: StainingQCProps) {
   );
 
   const blueButtonDisabled = labwareResults.items.length <= 0 || workNumber === '' || qcType === '';
+
+  const handleDownloadAllImagingLogs = async () => {
+    const zip = new JSZip();
+    const operations = submissionResult?.recordStainResult.operations ?? [];
+    await Promise.all(
+      operations.map(async (operation) => {
+        const response = await fetch(`/imageqc?id=${operation.id}&type=xlsx`);
+        const blob = await response.blob();
+        zip.file(`imaging_log_${operation.id}.xlsx`, blob);
+      })
+    );
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(zipBlob);
+    link.download = 'imaging_logs.zip';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  };
   return (
     <AppShell>
       <AppShell.Header>
@@ -208,7 +231,16 @@ export default function ImagingQC({ info }: StainingQCProps) {
           </div>
         </div>
 
-        <OperationCompleteModal show={current.matches('submitted')} message={`${qcType} complete`}>
+        <OperationCompleteModal
+          show={current.matches('submitted')}
+          message={`${qcType} complete`}
+          additionalButtons={
+            <WhiteButton onClick={handleDownloadAllImagingLogs}>
+              <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
+              Download Imaging Logs
+            </WhiteButton>
+          }
+        >
           <p>
             If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the Home
             screen.
