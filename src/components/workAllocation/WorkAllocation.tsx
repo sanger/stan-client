@@ -521,6 +521,39 @@ export default function WorkAllocation() {
                   )}
                 </div>
                 <div className="md:flex-grow">
+                  <FormikInput
+                    type={'number'}
+                    label="Xenium study ID"
+                    name="xeniumStudyId"
+                    value={values.xeniumStudyId}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                      const ssId = Number(e.currentTarget.value);
+                      stanCore
+                        .GetDnapStudy({ ssId: ssId })
+                        .then((study) => {
+                          if (study && study.dnapStudy) {
+                            setFieldValue('xeniumStudyName', study.dnapStudy.name);
+                          } else {
+                            setFieldValue('xeniumStudyName', 'undefined');
+                          }
+                        })
+                        .catch((e) => {
+                          setFieldValue('xeniumStudyName', 'undefined');
+                        });
+                      setFieldValue('xeniumStudyId', e.currentTarget.value);
+                    }}
+                  />
+                  {values.xeniumStudyName && values.xeniumStudyId && (
+                    <div className="flex-row whitespace-nowrap space-x-2 p-0">
+                      {values.xeniumStudyName === 'undefined' ? (
+                        <Pill color="pink">Unknown Sequencescape study id</Pill>
+                      ) : (
+                        <Pill color="blue">{values.xeniumStudyName}</Pill>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="md:flex-grow">
                   <CustomReactSelect
                     label="Faculty lead"
                     name="facultyLead"
