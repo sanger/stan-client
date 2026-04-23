@@ -81,6 +81,16 @@ export type WorkAllocationFormValues = {
   isRnD: boolean;
 
   facultyLead: string;
+
+  /**
+   * Sequencescape study ID — typically used for samples not going through sequencing
+   */
+  xeniumStudyId?: string;
+
+  /**
+   * Sequencescape study name corresponding to xeniumStudyId
+   */
+  xeniumStudyName?: string;
 };
 
 type WorkAllocationEvent =

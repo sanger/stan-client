@@ -1407,6 +1407,7 @@ export type MutationCreateWorkArgs = {
   ssStudyId?: InputMaybe<Scalars['Int']['input']>;
   workRequester: Scalars['String']['input'];
   workType: Scalars['String']['input'];
+  xeniumStudyId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -4308,6 +4309,8 @@ export type Work = {
   workRequester?: Maybe<ReleaseRecipient>;
   /** The type of work: what does it entail? */
   workType: WorkType;
+  /** The xenium study for this work, if any. */
+  xeniumStudy?: Maybe<DnapStudy>;
 };
 
 /** The things that have happened for a particular work, as requested by a user. */
@@ -4700,7 +4703,8 @@ export type CreateWorkMutationVariables = Exact<{
   numOriginalSamples?: InputMaybe<Scalars['Int']['input']>;
   omeroProject?: InputMaybe<Scalars['String']['input']>;
   ssStudyId?: InputMaybe<Scalars['Int']['input']>;
-  facultyLead?: InputMaybe<Scalars['String']['input']>;
+  xeniumStudyId?: InputMaybe<Scalars['Int']['input']>;
+  facultyLead: Scalars['String']['input'];
 }>;
 
 
@@ -6707,7 +6711,7 @@ ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
 ${TissueFieldsFragmentDoc}`;
 export const CreateWorkDocument = gql`
-    mutation CreateWork($prefix: String!, $workType: String!, $workRequester: String!, $project: String!, $program: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int, $numOriginalSamples: Int, $omeroProject: String, $ssStudyId: Int, $facultyLead: String!) {
+    mutation CreateWork($prefix: String!, $workType: String!, $workRequester: String!, $project: String!, $program: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int, $numOriginalSamples: Int, $omeroProject: String, $ssStudyId: Int, $xeniumStudyId: Int, $facultyLead: String!) {
   createWork(
     prefix: $prefix
     workType: $workType
@@ -6720,6 +6724,7 @@ export const CreateWorkDocument = gql`
     numOriginalSamples: $numOriginalSamples
     omeroProject: $omeroProject
     ssStudyId: $ssStudyId
+    xeniumStudyId: $xeniumStudyId
     facultyLead: $facultyLead
   ) {
     ...WorkFields
