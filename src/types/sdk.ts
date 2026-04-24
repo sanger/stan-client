@@ -4700,7 +4700,7 @@ export type CreateWorkMutationVariables = Exact<{
   numOriginalSamples?: InputMaybe<Scalars['Int']['input']>;
   omeroProject?: InputMaybe<Scalars['String']['input']>;
   ssStudyId?: InputMaybe<Scalars['Int']['input']>;
-  facultyLead?: InputMaybe<Scalars['String']['input']>;
+  facultyLead: Scalars['String']['input'];
 }>;
 
 
