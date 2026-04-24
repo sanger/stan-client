@@ -1,11 +1,8 @@
 import {
   GetBlockProcessingInfoQuery,
-  InputMaybe,
   LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   PerformTissueBlockMutation,
-  Scalars,
-  TissueBlockContent,
   TissueBlockRequest
 } from '../../../types/sdk';
 import { useMachine } from '@xstate/react';
@@ -39,21 +36,17 @@ import { fromPromise } from 'xstate';
 /**
  * Used as Formik's values
  */
-
-type TissueBlockContentForm = TissueBlockContent & {
-  isEditReplicateDisabled?: boolean;
+export type BlockFormValue = {
+  sourceBarcode: string;
+  labwareType: string;
+  replicateNumber: string;
+  commentId?: number;
+  preBarcode?: string;
+  sourceSampleId: number;
 };
-
-type TissueBlockLabwareForm = {
-  contents: Array<TissueBlockContentForm>;
-  labwareType: Scalars['String']['input'];
-  preBarcode?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type BlockFormData = {
   workNumber: string;
-  //Plan cid for key
-  plans: Map<string, TissueBlockLabwareForm>;
+  plans: BlockFormValue[];
   discardSources?: { sourceBarcode: string; discard: boolean }[];
 };
 
@@ -76,7 +69,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
       actors: {
         submitForm: fromPromise(({ input }) => {
           if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
-          console.log('submitForm', input);
           return stanCore.PerformTissueBlock({
             request: input.event.values
           });
@@ -95,6 +87,9 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   const [selectedLabwareType, setSelectedLabwareType] = React.useState<string>(LabwareTypeName.TUBE);
   const [numLabware, setNumLabware] = React.useState<number>(1);
 
+  /**To keep the mapping between source selected and the plan. Key is source labware barcode and value is unique id for a plan created**/
+  const [planToSourceMap, setPlanToSourceMap] = React.useState(new Map<string, string>());
+
   /**
    * Limit the labware types the user can Section on to.
    */
@@ -104,6 +99,24 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
       ? blockProcessingInfo.labwareTypes.filter((lw) => allowedLabwareTypeNames.includes(lw.name as LabwareTypeName))
       : [];
   }, [processingInfo, processingInfoLoaderData]);
+
+  /**A source is selected for a plan, so update the mapping state between source and plan**/
+  const notifySourceSelection = React.useCallback(
+    (cid: string, sourceBarcode: string) => {
+      if (planToSourceMap.has(cid) && planToSourceMap.get(cid) === sourceBarcode) {
+        return;
+      }
+      setPlanToSourceMap((prev) => {
+        const map = new Map<string, string>();
+        Array.from(prev.entries()).forEach(([key, value]) => {
+          map.set(key, value);
+        });
+        map.set(cid, sourceBarcode);
+        return map;
+      });
+    },
+    [planToSourceMap]
+  );
 
   /** Display created Labware plans**/
   const buildPlanLayouts = React.useCallback(
@@ -130,6 +143,8 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
         planWithKeys,
         (planWithKey) => planWithKey.plan!.labwareType.name
       );
+
+      let rowIndx: number = 0;
       return Object.keys(layoutPlanGroupedByType).length > 0 ? (
         <div className={'flex flex-col py-10 gap-y-20'}>
           {allowedLabwareTypeNames.map((labwareType) => {
@@ -139,6 +154,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                 <div className={'flex flex-col'} data-testid={`divSection-${labwareType}`} key={labwareType}>
                   <Heading className={'mb-8'} level={2}>{`${labwareType.toString()}s`}</Heading>
                   {labwarePlans.map((lwPlan, indx) => {
+                    rowIndx++;
                     return (
                       <BlockProcessingLabwarePlan
                         key={lwPlan.cid}
@@ -148,11 +164,13 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                         sourceLabware={sourceLabware}
                         sampleColors={sampleColors}
                         onDelete={deleteAction}
+                        rowIndex={rowIndx - 1}
                         ref={
                           labwareType === selectedLabwareType && indx === labwarePlans.length - numLabware
                             ? scrollRef
                             : undefined
                         }
+                        notifySourceSelection={notifySourceSelection}
                       />
                     );
                   })}
@@ -165,7 +183,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
         <></>
       );
     },
-    [processingInfo, selectedLabwareType, numLabware]
+    [processingInfo, selectedLabwareType, numLabware, notifySourceSelection]
   );
 
   /**
@@ -201,7 +219,30 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   function buildValidationSchema(): Yup.AnyObjectSchema {
     return Yup.object().shape({
       workNumber: Yup.string().required('SGP Number is required'),
-      plans: Yup.mixed<Map<string, TissueBlockLabwareForm>>().required(),
+      plans: Yup.array()
+        .of(
+          Yup.object().shape({
+            sourceBarcode: Yup.string().required().min(1),
+            replicateNumber: Yup.string().required('Replicate number is required'),
+            commentId: Yup.number().optional(),
+            labwareType: Yup.string()
+              .required()
+              .oneOf(allowedLabwareTypes.map((type) => type.name)),
+            preBarcode: Yup.string().when('labwareType', (labwareType, schema) => {
+              const val = labwareType[0] as unknown as string;
+              return val === LabwareTypeName.PRE_BARCODED_TUBE
+                ? Yup.string()
+                    .required('Barcode is required')
+                    .matches(
+                      /[a-zA-Z]{2}\d{8}/,
+                      'Barcode should be in the format with two letters followed by 8 numbers'
+                    )
+                : schema;
+            })
+          })
+        )
+        .required()
+        .min(1),
       discardSources: Yup.array()
         .of(
           Yup.object().shape({
@@ -217,14 +258,20 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   const buildTissueBlockRequest = (formData: BlockFormData): TissueBlockRequest => {
     return {
       workNumber: formData.workNumber,
-      labware: [
-        ...formData.plans.values().map((labware) => ({
-          ...labware,
-          contents: labware.contents.map(({ isEditReplicateDisabled, ...tissueBlockLabwareProps }) => ({
-            ...tissueBlockLabwareProps
-          }))
-        }))
-      ],
+      labware: formData.plans.map((plan) => ({
+        labwareType: plan.labwareType,
+        preBarcode: plan.preBarcode,
+        contents: [
+          {
+            sourceBarcode: plan.sourceBarcode,
+            commentId: plan.commentId,
+            replicate: plan.replicateNumber,
+            // Todo - temporary set to the first sample but to update within x1499-1a client
+            addresses: ['A1'],
+            sourceSampleId: plan.sourceSampleId
+          }
+        ]
+      })),
       discardSourceBarcodes: formData.discardSources?.filter((ds) => ds.discard).map((ds) => ds.sourceBarcode)
     };
   };
@@ -286,7 +333,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
           <Formik<BlockFormData>
             initialValues={{
               workNumber: '',
-              plans: new Map()
+              plans: []
             }}
             validationSchema={buildValidationSchema}
             onSubmit={async (values) => {
@@ -296,7 +343,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
               });
             }}
           >
-            {({ setFieldValue, values, isValid }) => (
+            {({ setFieldValue, values }) => (
               <Form>
                 <motion.div variants={variants.fadeInWithLift} className="space-y-10">
                   <motion.div variants={variants.fadeInWithLift}>
@@ -323,14 +370,13 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                   {serverError && (
                     <Warning message={'Failed to perform block labware generation'} error={serverError} />
                   )}
-
-                  <motion.div variants={variants.fadeInWithLift} className={'sm:flex mt-4 sm:flex-row justify-end'}>
-                    <ButtonBar>
-                      <BlueButton type={'submit'} disabled={!isValid}>
-                        Save
-                      </BlueButton>
-                    </ButtonBar>
-                  </motion.div>
+                  {values.plans.length > 0 && (
+                    <motion.div variants={variants.fadeInWithLift} className={'sm:flex mt-4 sm:flex-row justify-end'}>
+                      <ButtonBar>
+                        <BlueButton type={'submit'}>Save</BlueButton>
+                      </ButtonBar>
+                    </motion.div>
+                  )}
                 </motion.div>
               </Form>
             )}
