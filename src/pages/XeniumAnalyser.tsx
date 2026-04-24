@@ -40,7 +40,7 @@ import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
 import { findUploadedFiles } from '../lib/services/fileService';
-import { sectionGroupsBySample } from '../lib/helpers/labwareHelper';
+import { compareAddresses, firstAddress, sectionGroupsBySample } from '../lib/helpers/labwareHelper';
 import Label from '../components/forms/Label';
 import PinkButton from '../components/buttons/PinkButton';
 import Modal, { ModalBody, ModalFooter } from '../components/Modal';
@@ -117,16 +117,28 @@ type BarcodeDisplayerProps = {
 
 export const reIndexAndRenameRegions = (regions: Region[], runName: string, barcode: string): Array<Region> => {
   let index = 0;
-  return regions.map((region) => {
-    const roi: string =
-      region.sectionGroups.length === 1 && region.sectionGroups[0].source.tissue?.externalName
-        ? region.sectionGroups[0].source.tissue.externalName
-        : [barcode, runName, `Region${index++ + 1}`].filter(Boolean).join('_');
-    return {
-      ...region,
-      roi: roi
-    };
-  });
+  return (
+    [...regions]
+      // Sort section groups within each region and sort regions — in one pass
+      .map((reg) => ({
+        ...reg,
+        sectionGroups: [...reg.sectionGroups].sort((a, b) =>
+          compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses))
+        )
+      }))
+      // Sort regions by their first section group's first address
+      .sort((a, b) =>
+        compareAddresses(firstAddress(a.sectionGroups[0].addresses), firstAddress(b.sectionGroups[0].addresses))
+      )
+      // Rename in the same final pass
+      .map((region) => ({
+        ...region,
+        roi:
+          region.sectionGroups.length === 1 && region.sectionGroups[0].source.tissue?.externalName
+            ? region.sectionGroups[0].source.tissue.externalName
+            : [barcode, runName, `Region${++index}`].filter(Boolean).join('_')
+      }))
+  );
 };
 
 const LabwareAnalyserTable = (labwareForm: AnalyserLabwareForm) => {
