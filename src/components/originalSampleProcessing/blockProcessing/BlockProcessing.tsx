@@ -210,17 +210,21 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
               type="number"
               className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
               onChange={(e) => setSelectedLabwareNumColumns(Number(e.currentTarget.value))}
-              value={selectedLabwareNumColumns}
+              // value={selectedLabwareNumColumns}
+              value={10}
               data-testid={'selectedLabwareNumColumns'}
-              max={4}
+              max={10}
+              disabled={true}
             />
             <input
               type="number"
               className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
               onChange={(e) => setSelectedLabwareNumRows(Number(e.currentTarget.value))}
-              value={selectedLabwareNumRows}
+              // value={selectedLabwareNumRows}
+              value={10}
               data-testid={'selectedLabwareNumRows'}
               max={10}
+              disabled={true}
             />
           </div>
         )}
@@ -258,7 +262,14 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   const buildTissueBlockRequest = (formData: BlockFormData): TissueBlockRequest => {
     return {
       workNumber: formData.workNumber,
-      labware: [...formData.plans.values()],
+      labware: [
+        ...formData.plans.values().map((labware) => ({
+          ...labware,
+          contents: labware.contents.map(({ isEditReplicateDisabled, ...tissueBlockLabwareProps }) => ({
+            ...tissueBlockLabwareProps
+          }))
+        }))
+      ],
       discardSourceBarcodes: formData.discardSources?.filter((ds) => ds.discard).map((ds) => ds.sourceBarcode)
     };
   };
