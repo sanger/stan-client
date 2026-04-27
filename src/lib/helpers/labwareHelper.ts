@@ -279,20 +279,7 @@ export const sectionGroupsBySample = (
       group.addresses.add(slot.address);
     });
   });
-
-  // Group by tissue external name to ensure sections from the same tissue are together in the final ordering
-  const grouped = Object.values(sectionGroups).reduce<Record<string, PlannedSectionDetails[]>>((acc, section) => {
-    const key = section.source.tissue?.donor.donorName ?? '';
-    (acc[key] ??= []).push(section);
-    return acc;
-  }, {});
-
-  // Flatten and index while sorted the section by address
   const result: Record<number, PlannedSectionDetails> = {};
-  for (const group of Object.values(grouped)) {
-    const sorted = group.sort((a, b) => compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses)));
-    sorted.map((sec, index) => (result[index++] = sec));
-  }
-
+  Object.values(sectionGroups).map((section, index) => (result[index] = section));
   return result;
 };
