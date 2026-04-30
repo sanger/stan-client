@@ -230,6 +230,18 @@ export const extractLabwareFromFlagged = (flagged: LabwareFlaggedFieldsFragment[
   return flagged.map(({ flagged, ...rest }) => rest as LabwareFieldsFragment);
 };
 
+export const compareAddresses = (a: string, b: string): number => {
+  const rowA = a.charCodeAt(0);
+  const rowB = b.charCodeAt(0);
+  if (rowA !== rowB) return rowA - rowB;
+  return parseInt(a.slice(1)) - parseInt(b.slice(1));
+};
+
+// Get the "first" address from a Set for sorting purposes
+export const firstAddress = (addresses: Set<string>): string => {
+  return [...addresses].sort(compareAddresses)[0] ?? '';
+};
+
 /**
  * Groups labware slots by sample and section number, then returns the groups
  * ordered by section number and re-indexed with sequential numeric keys.
@@ -267,23 +279,7 @@ export const sectionGroupsBySample = (
       group.addresses.add(slot.address);
     });
   });
-
-  // Group by tissue external name to ensure sections from the same tissue are together in the final ordering
-  const grouped = Object.values(sectionGroups).reduce<Record<string, PlannedSectionDetails[]>>((acc, section) => {
-    const key = section.source.tissue?.donor.donorName ?? '';
-    (acc[key] ??= []).push(section);
-    return acc;
-  }, {});
-
-  // Flatten and index
   const result: Record<number, PlannedSectionDetails> = {};
-  let index = 0;
-
-  for (const group of Object.values(grouped)) {
-    for (const section of group) {
-      result[index++] = section;
-    }
-  }
-
+  Object.values(sectionGroups).map((section, index) => (result[index] = section));
   return result;
 };
