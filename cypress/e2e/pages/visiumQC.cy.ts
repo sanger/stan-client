@@ -267,10 +267,10 @@ describe('Visium QC Page', () => {
 
     context('When user scans in a 96 well plate ', () => {
       before(() => {
-        cy.get('#labwareScanInput').type('STAN-5100{enter}');
+        cy.get('#labwareScanInput').type('STAN-811EA{enter}');
       });
       it('displays the labware layout  on the page', () => {
-        cy.findByText('STAN-5100').should('be.visible');
+        cy.findByText('STAN-811EA').should('be.visible');
       });
 
       it('display slots having samples as highlighted', () => {
@@ -314,7 +314,7 @@ describe('Visium QC Page', () => {
         });
         cy.reload();
         selectOption('qcType', 'Amplification');
-        cy.get('#labwareScanInput').type('STAN-5100{enter}');
+        cy.get('#labwareScanInput').type('STAN-811EA{enter}');
       });
       it('displays error message', () => {
         cy.findByText('No Cq values associated with the labware slots').should('be.visible');
@@ -332,7 +332,7 @@ describe('Visium QC Page', () => {
       before(() => {
         cy.reload();
         selectOption('qcType', 'Amplification');
-        cy.get('#labwareScanInput').type('STAN-5100{enter}');
+        cy.get('#labwareScanInput').type('STAN-811EA{enter}');
         cy.findByTestId('all-Cycles').type('3');
       });
       it('Save button should be disabled when there is no SGP number', () => {
