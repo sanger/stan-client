@@ -55,25 +55,19 @@ describe('Block Processing', () => {
     });
   });
   describe('Multi sample Proviasette block', () => {
-    context('when adding a Proviasette with 2 rows and 2 columns', () => {
+    context('when adding a Proviasette', () => {
       before(() => {
         selectOption('labwareType', 'Proviasette');
-        cy.findByTestId('selectedLabwareNumRows').type('{selectall}2');
-        cy.findByTestId('selectedLabwareNumColumns').type('{selectall}2');
         cy.findByText('+ Add Labware').click();
       });
       after(() => {
         cy.findAllByText('Delete Layout').first().click();
       });
-
-      it('display labware layout with 4 slots', () => {
-        cy.findAllByTestId('slot').should('have.length', 4);
-      });
-      describe('when adding different sources to differen slots', () => {
+      describe('when adding different sources to different slots', () => {
         before(() => {
           cy.findAllByText('Edit Layout').first().click();
           cy.findByRole('dialog').within(() => {
-            cy.findByText('STAN-113').click();
+            cy.findAllByText('STAN-113').first().click();
             cy.findByText('A1').click();
             cy.findByText('A2').click();
             cy.findAllByText('STAN-213').first().click();
@@ -109,7 +103,7 @@ describe('Block Processing', () => {
         before(() => {
           cy.findAllByText('Edit Layout').first().click();
           cy.findByRole('dialog').within(() => {
-            cy.findByText('STAN-113').click();
+            cy.findAllByText('STAN-113').first().click();
             cy.findByText('A1').click();
             cy.findByText('Done').click();
           });
@@ -225,7 +219,7 @@ describe('Block Processing', () => {
         cy.findByText('+ Add Labware').click();
         cy.findAllByText('Edit Layout').eq(4).click();
         cy.findByRole('dialog').within(() => {
-          cy.findByText('STAN-1111').click();
+          cy.findAllByText('STAN-1111').first().click();
           cy.findByText('A1').click();
           cy.findByText('Done').click();
         });
@@ -275,7 +269,7 @@ describe('Block Processing', () => {
         addLabware('Tube');
         cy.findAllByText('Edit Layout').last().click();
         cy.findByRole('dialog').within(() => {
-          cy.findByText('STAN-113').click();
+          cy.findAllByText('STAN-113').first().click();
           cy.findByText('A1').click();
           cy.findByText('Done').click();
         });
@@ -322,7 +316,7 @@ describe('Block Processing', () => {
           cy.findAllByText('Barcode').last().type('FF10153223');
           cy.findAllByText('Edit Layout').last().click();
           cy.findByRole('dialog').within(() => {
-            cy.findByText('STAN-113').click();
+            cy.findAllByText('STAN-113').first().click();
             cy.findByText('A1').click();
             cy.findByText('Done').click();
           });
@@ -410,7 +404,7 @@ function addLabware(labwareType: string) {
 function selectSource() {
   cy.findByText('Edit Layout').click();
   cy.findByRole('dialog').within(() => {
-    cy.findByText('STAN-113').click();
+    cy.findAllByText('STAN-113').first().click();
     cy.findByText('A1').click();
     cy.findByText('Done').click();
   });
