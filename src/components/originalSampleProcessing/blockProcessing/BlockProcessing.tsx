@@ -68,10 +68,6 @@ type BlockProcessingParams = {
   readonly processingInfo?: GetBlockProcessingInfoQuery;
 };
 
-const isMultiSampleBlockLabware = (labwareTypeName: LabwareTypeName) => {
-  return [LabwareTypeName.PROVIASETTE, LabwareTypeName.CASSETTE].includes(labwareTypeName);
-};
-
 export default function BlockProcessing({ processingInfo }: BlockProcessingParams) {
   const processingInfoLoaderData = useLoaderData() as GetBlockProcessingInfoQuery;
 
@@ -97,8 +93,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
 
   const [selectedLabwareType, setSelectedLabwareType] = React.useState<string>(LabwareTypeName.TUBE);
   const [numLabware, setNumLabware] = React.useState<number>(1);
-  const [selectedLabwareNumColumns, setSelectedLabwareNumColumns] = React.useState<number>(1);
-  const [selectedLabwareNumRows, setSelectedLabwareNumRows] = React.useState<number>(1);
 
   /**
    * Limit the labware types the user can Section on to.
@@ -178,63 +172,27 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
    */
   const buildPlanCreationSettings = React.useCallback(() => {
     return (
-      <div className={'text-center text-sm'}>
-        <div className="grid grid-cols-2 gap-x-4">
-          <div className="text-gray-500">Number of labware</div>
-          <div className="text-gray-500">Labware type</div>
-          <input
-            type="number"
-            className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
-            onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
-            value={numLabware}
-            data-testid={'numLabware'}
-            min={1}
-          />
-          <CustomReactSelect
-            className="block text-left"
-            handleChange={(val) => {
-              setSelectedLabwareType((val as OptionType).value);
-              setSelectedLabwareNumColumns(1);
-              setSelectedLabwareNumRows(1);
-            }}
-            dataTestId={'labwareType'}
-            value={selectedLabwareType}
-            options={selectOptionValues(allowedLabwareTypes, 'name', 'name')}
-          />
-        </div>
-        {isMultiSampleBlockLabware(selectedLabwareType as LabwareTypeName) && (
-          <div className="grid grid-cols-2 gap-x-4 mt-2">
-            <div className="text-gray-500">Number of columns</div>
-            <div className="text-gray-500">Number of rows</div>
-            <input
-              type="number"
-              className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
-              onChange={(e) => setSelectedLabwareNumColumns(Number(e.currentTarget.value))}
-              value={selectedLabwareNumColumns}
-              data-testid={'selectedLabwareNumColumns'}
-              max={4}
-            />
-            <input
-              type="number"
-              className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
-              onChange={(e) => setSelectedLabwareNumRows(Number(e.currentTarget.value))}
-              value={selectedLabwareNumRows}
-              data-testid={'selectedLabwareNumRows'}
-              max={10}
-            />
-          </div>
-        )}
+      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-center text-sm">
+        <div className="text-gray-500">Labware type</div>
+        <div className="text-gray-500">Number of labware</div>
+        <CustomReactSelect
+          className="block text-left"
+          handleChange={(val) => setSelectedLabwareType((val as OptionType).value)}
+          dataTestId={'labwareType'}
+          value={selectedLabwareType}
+          options={selectOptionValues(allowedLabwareTypes, 'name', 'name')}
+        />
+        <input
+          type="number"
+          className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
+          onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
+          value={numLabware}
+          data-testid={'numLabware'}
+          min={1}
+        />
       </div>
     );
-  }, [
-    selectedLabwareType,
-    setSelectedLabwareType,
-    numLabware,
-    setNumLabware,
-    allowedLabwareTypes,
-    selectedLabwareNumColumns,
-    selectedLabwareNumRows
-  ]);
+  }, [selectedLabwareType, setSelectedLabwareType, numLabware, setNumLabware, allowedLabwareTypes]);
 
   /**
    * Builds a yup validator for the labware plan form
@@ -258,7 +216,14 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   const buildTissueBlockRequest = (formData: BlockFormData): TissueBlockRequest => {
     return {
       workNumber: formData.workNumber,
-      labware: [...formData.plans.values()],
+      labware: [
+        ...formData.plans.values().map((labware) => ({
+          ...labware,
+          contents: labware.contents.map(({ isEditReplicateDisabled, ...tissueBlockLabwareProps }) => ({
+            ...tissueBlockLabwareProps
+          }))
+        }))
+      ],
       discardSourceBarcodes: formData.discardSources?.filter((ds) => ds.discard).map((ds) => ds.sourceBarcode)
     };
   };
@@ -353,8 +318,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                       columns.replicate()
                     ]}
                     buildPlanCreationSettings={buildPlanCreationSettings}
-                    selectedLabwareNumColumns={selectedLabwareNumColumns}
-                    selectedLabwareNumRows={selectedLabwareNumRows}
                   />
                   {serverError && (
                     <Warning message={'Failed to perform block labware generation'} error={serverError} />
