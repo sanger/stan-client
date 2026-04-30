@@ -7,6 +7,7 @@ import {
   UpdateWorkOmeroProjectMutation,
   UpdateWorkPriorityMutation,
   UpdateWorkStatusMutation,
+  UpdateWorkXeniumStudyMutation,
   WorkStatus,
   WorkWithCommentFieldsFragment
 } from '../../types/sdk';
@@ -61,6 +62,7 @@ export type WorkRowEvent =
   | { type: 'UPDATE_PRIORITY'; priority: string | undefined }
   | { type: 'UPDATE_OMERO_PROJECT'; omeroProject: string | undefined }
   | { type: 'UPDATE_DNAP_PROJECT'; ssStudyId: number }
+  | { type: 'UPDATE_XENIUM_STUDY_ID'; ssStudyId: number }
   | { type: 'xstate.done.actor.updateWorkStatus'; output: UpdateWorkStatusMutation }
   | { type: 'xstate.done.actor.updateWorkNumBlocks'; output: UpdateWorkNumBlocksMutation }
   | { type: 'xstate.done.actor.updateWorkNumSlides'; output: UpdateWorkNumSlidesMutation }
@@ -68,6 +70,8 @@ export type WorkRowEvent =
   | { type: 'xstate.done.actor.updateWorkOmeroProject'; output: UpdateWorkOmeroProjectMutation }
   | { type: 'xstate.done.actor.updateWorkDnapProject'; output: UpdateWorkDnapStudyMutation }
   | { type: 'xstate.error.actor.updateWorkDnapProject'; error: ClientError }
+  | { type: 'xstate.done.actor.updateWorkXeniumStudyId'; output: UpdateWorkXeniumStudyMutation }
+  | { type: 'xstate.error.actor.updateWorkXeniumStudyId'; error: ClientError }
   | { type: 'xstate.done.actor.updateWorkNumOriginalSamples'; output: UpdateWorkNumOriginalSamplesMutation };
 
 type CreateWorkRowMachineParams = Pick<WorkRowMachineContext, 'workWithComment'>;
@@ -105,7 +109,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
             UPDATE_OMERO_PROJECT: 'updateOmeroProject',
-            UPDATE_DNAP_PROJECT: 'updateDnapProject'
+            UPDATE_DNAP_PROJECT: 'updateDnapProject',
+            UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
           }
         },
         active: {
@@ -120,7 +125,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
             UPDATE_OMERO_PROJECT: 'updateOmeroProject',
-            UPDATE_DNAP_PROJECT: 'updateDnapProject'
+            UPDATE_DNAP_PROJECT: 'updateDnapProject',
+            UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
           }
         },
         paused: {
@@ -135,7 +141,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
             UPDATE_OMERO_PROJECT: 'updateOmeroProject',
-            UPDATE_DNAP_PROJECT: 'updateDnapProject'
+            UPDATE_DNAP_PROJECT: 'updateDnapProject',
+            UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
           }
         },
         completed: {
@@ -278,6 +285,32 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
               actions: 'assignServerError'
             }
           }
+        },
+        updateWorkXeniumStudyId: {
+          invoke: {
+            src: fromPromise(({ input }) => {
+              if (input) return stanCore.UpdateWorkXeniumStudy(input);
+              return Promise.reject();
+            }),
+            input: ({ context, event }) => {
+              if ('ssStudyId' in event) {
+                return {
+                  workNumber: context.workWithComment.work.workNumber,
+                  ssStudyId: event.ssStudyId
+                };
+              }
+              return undefined;
+            },
+            id: 'updateWorkXeniumStudyId',
+            onDone: {
+              actions: 'assignWorkXeniumStudyId',
+              target: 'deciding'
+            },
+            onError: {
+              target: 'deciding',
+              actions: 'assignServerError'
+            }
+          }
         }
       }
     },
@@ -330,12 +363,25 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             draft.isInvokeActorDone = true;
           });
         }),
+        assignWorkXeniumStudyId: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateWorkXeniumStudyId') return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkXeniumStudy;
+            draft.serverSuccess =
+              'Xenium study successfully updated to ' + event.output.updateWorkXeniumStudy.dnapStudy!.name;
+            draft.isInvokeActorDone = true;
+          });
+        }),
         toggleEditMode: assign(({ context, event }) => {
           return { ...context, editModeEnabled: !context.editModeEnabled };
         }),
         assignServerError: assign(({ context, event }) => {
-          if (event.type !== 'xstate.error.actor.updateWorkDnapProject') return context;
-          return { ...context, serverErrors: castDraft(event.error) };
+          if (
+            event.type === 'xstate.error.actor.updateWorkDnapProject' ||
+            event.type === 'xstate.error.actor.updateWorkXeniumStudyId'
+          )
+            return { ...context, serverErrors: castDraft(event.error) };
+          return context;
         })
       }
     }
