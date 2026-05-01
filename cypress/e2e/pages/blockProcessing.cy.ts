@@ -321,8 +321,8 @@ describe('Block Processing', () => {
             cy.findByText('Done').click();
           });
 
-          selectSGPNumber('SGP1008');
-          cy.findByRole('button', { name: /Save/i }).click();
+          selectSGPNumber('SGP1008'); //sabrine
+          cy.findByRole('button', { name: /Save/i }).scrollIntoView().click();
         });
         it('displays Block labware generation', () => {
           cy.findByText('Block labware generation complete').should('be.visible');
