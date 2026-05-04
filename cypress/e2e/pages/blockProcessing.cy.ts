@@ -203,15 +203,15 @@ describe('Block Processing', () => {
 
       it('should autofill all replicate numbers consecutively based on original samples of source labware', () => {
         //they are randomly generated so we can't check the exact value
-        cy.findAllByTestId('replicate-number')
-          .should('have.length', 4)
-          .then(($inputs) => {
-            // Wait for all to be populated first
-            cy.wrap($inputs.eq(0)).should('not.have.value', '').and('be.disabled');
-            cy.wrap($inputs.eq(1)).should('not.have.value', '').and('be.disabled');
-            cy.wrap($inputs.eq(2)).should('not.have.value', '').and('be.disabled');
-            cy.wrap($inputs.eq(3)).should('not.have.value', '').and('be.disabled');
-          });
+        cy.findAllByTestId('replicate-number').should('have.length', 4);
+
+        [(0, 1, 2, 3)].forEach((index) => {
+          cy.findAllByTestId('replicate-number').eq(index).should('not.have.value', '');
+        });
+
+        [0, 1, 2, 3].forEach((index) => {
+          cy.findAllByTestId('replicate-number').eq(index).and('be.disabled');
+        });
       });
     });
     context('when adding multiple labware with same source labware', () => {
@@ -322,7 +322,10 @@ describe('Block Processing', () => {
           });
 
           selectSGPNumber('SGP1008');
-          cy.findByRole('button', { name: /Save/i }).scrollIntoView().click();
+          // Wait for the mock to be ready before clicking
+          cy.wrap(null).then(() => {
+            cy.findByRole('button', { name: /Save/i }).click();
+          });
         });
         it('displays Block labware generation', () => {
           cy.findByText('Block labware generation complete').should('be.visible');
@@ -378,7 +381,11 @@ describe('Block Processing', () => {
             )
           );
         });
-        cy.findByRole('button', { name: /Save/i }).click();
+        // Wait for the mock to be ready before clicking
+        cy.wrap(null).then(() => {
+          cy.findByRole('button', { name: /Save/i }).click();
+        });
+        // cy.findByRole('button', { name: /Save/i }).click();
       });
 
       it('shows the errors', () => {
