@@ -184,7 +184,7 @@ describe('Block Processing', () => {
       cy.visit('/lab/original_sample_processing?type=block');
     });
     context('when adding grouped labware for replicate number based on original samples', () => {
-      const sources = ['STAN-1111', 'STAN-2111', 'STAN-3111', 'STAN-4111'];
+      const sources = ['STAN-1111', 'STAN-5111', 'STAN-3111', 'STAN-4111'];
       before(() => {
         //Mock handler will ensure that they are grouped in two's
         sources.forEach((barcode) => {
@@ -309,6 +309,7 @@ describe('Block Processing', () => {
               )
             );
           });
+          selectSGPNumber('SGP1008');
           scanInput('STAN-113');
           addLabware('Tube');
           selectSource();
@@ -321,11 +322,7 @@ describe('Block Processing', () => {
             cy.findByText('Done').click();
           });
 
-          selectSGPNumber('SGP1008');
-          // Wait for the mock to be ready before clicking
-          cy.wrap(null).then(() => {
-            cy.findByRole('button', { name: /Save/i }).click();
-          });
+          cy.findByRole('button', { name: /Save/i }).click();
         });
         it('displays Block labware generation', () => {
           cy.findByText('Block labware generation complete').should('be.visible');
@@ -381,11 +378,7 @@ describe('Block Processing', () => {
             )
           );
         });
-        // Wait for the mock to be ready before clicking
-        cy.wrap(null).then(() => {
-          cy.findByRole('button', { name: /Save/i }).click();
-        });
-        // cy.findByRole('button', { name: /Save/i }).click();
+        cy.findByRole('button', { name: /Save/i }).click();
       });
 
       it('shows the errors', () => {
