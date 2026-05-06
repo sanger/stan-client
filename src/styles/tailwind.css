@@ -11,6 +11,15 @@
   }
 }
 
+.grid-cols-9 {
+  @apply grid-cols-9;
+}
+.grid-cols-10 {
+  @apply grid-cols-10;
+}
+.grid-cols-11 {
+  @apply grid-cols-11;
+}
 .grid-cols-12 {
   @apply grid-cols-12;
 }

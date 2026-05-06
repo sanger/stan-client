@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, LabwareTypeFieldsFragment } from '../../types/sdk';
 import { uniqueId } from 'lodash';
 import BlueButton from '../buttons/BlueButton';
-import { NewFlaggedLabwareLayout } from '../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
 import { castDraft, produce } from '../../dependencies/immer';
-import { unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
+import { multiSampleBlockLabwareFactory, unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
 import LabwareScanTable from '../labwareScanPanel/LabwareScanPanel';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
 import { buildSampleColors } from '../../lib/helpers/labwareHelper';
@@ -64,6 +64,15 @@ type PlannerProps<M> = {
    * removed.
    */
   onPlanChanged?: (props: PlanChangedProps<M>) => void;
+
+  /**
+   * Only available for multiple sample labware types, the user can define the block number of row on the fly, default to 1
+   */
+  selectedLabwareNumRows?: number;
+  /**
+   * Only available for multiple sample labware types, the user can define the block number of columns on the fly, default to 1
+   */
+  selectedLabwareNumColumns?: number;
 };
 
 /**
@@ -119,7 +128,7 @@ type Action<M> =
   | { type: 'SET_SOURCE_LABWARE'; labware: Array<LabwareFlaggedFieldsFragment> }
   | {
       type: 'ADD_LABWARE_PLAN';
-      labwareType: LabwareTypeFieldsFragment;
+      labwareLayout: NewFlaggedLabwareLayout;
       numLabwareAdd: number;
       sectionThickness: number;
     }
@@ -139,14 +148,7 @@ function reducer<M>(state: PlannerState<M>, action: Action<M>): PlannerState<M> 
       case 'ADD_LABWARE_PLAN': {
         for (let indx = 0; indx < action.numLabwareAdd; indx++) {
           draft.labwarePlans.set(uniqueId('labware_plan_'), {
-            labware: unregisteredLabwareFactory.build(
-              {},
-              {
-                associations: {
-                  labwareType: action.labwareType
-                }
-              }
-            ) as NewFlaggedLabwareLayout,
+            labware: action.labwareLayout,
             sectionThickness: action.sectionThickness
           });
         }
@@ -177,6 +179,8 @@ function reducer<M>(state: PlannerState<M>, action: Action<M>): PlannerState<M> 
 export default function Planner<M>({
   selectedLabwareType,
   numPlansToCreate,
+  selectedLabwareNumColumns,
+  selectedLabwareNumRows,
   onPlanChanged,
   columns,
   singleSourceAllowed,
@@ -214,21 +218,46 @@ export default function Planner<M>({
     [dispatch]
   );
 
+  const selectedLabwareLayout = useMemo(() => {
+    if (!selectedLabwareType) {
+      return;
+    }
+    if (
+      selectedLabwareNumColumns &&
+      selectedLabwareNumRows &&
+      (selectedLabwareNumColumns > 1 || selectedLabwareNumRows > 1)
+    ) {
+      return multiSampleBlockLabwareFactory(
+        selectedLabwareType.name as LabwareTypeName,
+        selectedLabwareNumColumns,
+        selectedLabwareNumRows
+      ).build() as NewFlaggedLabwareLayout;
+    }
+    return unregisteredLabwareFactory.build(
+      {},
+      {
+        associations: {
+          labwareType: selectedLabwareType
+        }
+      }
+    ) as NewFlaggedLabwareLayout;
+  }, [selectedLabwareNumColumns, selectedLabwareNumRows, selectedLabwareType]);
+
   /**
    * Handler for when the "Add Labware" button is clicked
    */
   const onAddLabwareClick = useCallback(() => {
-    if (!selectedLabwareType) {
+    if (!selectedLabwareLayout) {
       return;
     }
     dispatch({
       type: 'ADD_LABWARE_PLAN',
-      labwareType: selectedLabwareType,
+      labwareLayout: selectedLabwareLayout,
       numLabwareAdd: numPlansToCreate ?? 1,
       sectionThickness: sectionThickness ?? 0.5
     });
     scrollToRef();
-  }, [selectedLabwareType, numPlansToCreate, dispatch, scrollToRef, sectionThickness]);
+  }, [selectedLabwareLayout, numPlansToCreate, dispatch, scrollToRef, sectionThickness]);
 
   /**
    * Handler for the onDeleteButtonClick event of a LabwarePlan

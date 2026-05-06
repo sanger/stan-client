@@ -24,6 +24,8 @@ import { isSlotFilled } from '../lib/helpers/slotHelper';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { fromPromise } from 'xstate';
 import { useLocation } from 'react-router-dom';
+import DownloadIcon from '../components/icons/DownloadIcon';
+import WhiteButton from '../components/buttons/WhiteButton';
 
 type StainingQCProps = {
   info: GetStainingQcInfoQuery;
@@ -102,7 +104,7 @@ export default function ImagingQC({ info }: StainingQCProps) {
   }, [stanCore]);
   const [current, send] = useMachine(formMachine);
 
-  const { serverError } = current.context;
+  const { serverError, submissionResult } = current.context;
   const onAddLabware = useCallback(
     (labware: LabwareFlaggedFieldsFragment) => {
       labwareResults.append(buildLabwareResult(labware));
@@ -118,6 +120,12 @@ export default function ImagingQC({ info }: StainingQCProps) {
   );
 
   const blueButtonDisabled = labwareResults.items.length <= 0 || workNumber === '' || qcType === '';
+
+  const downloadImagingLogsLink = React.useMemo(() => {
+    const operations = submissionResult?.recordStainResult.operations ?? [];
+    const params: string = operations.map((operation) => `id=${operation.id}`).join('&');
+    return `/imageqc?${params}&type=xlsx`;
+  }, [submissionResult?.recordStainResult]);
   return (
     <AppShell>
       <AppShell.Header>
@@ -213,7 +221,18 @@ export default function ImagingQC({ info }: StainingQCProps) {
           </div>
         </div>
 
-        <OperationCompleteModal show={current.matches('submitted')} message={`${qcType} complete`}>
+        <OperationCompleteModal
+          show={current.matches('submitted')}
+          message={`${qcType} complete`}
+          additionalButtons={
+            <WhiteButton>
+              <a className="focus:outline-hidden" download={`imaging_log.xlsx`} href={downloadImagingLogsLink}>
+                <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
+                Download Imaging Logs
+              </a>
+            </WhiteButton>
+          }
+        >
           <p>
             If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the Home
             screen.

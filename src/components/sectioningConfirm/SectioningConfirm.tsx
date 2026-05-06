@@ -56,14 +56,8 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
   }, []);
   const [current, send, service] = useMachine(sectioningMachine);
 
-  const {
-    sourceLabware,
-    layoutPlansByLabwareType,
-    requestError,
-    confirmSectionResultLabwares,
-    sectionNumberMode,
-    workNumber
-  } = current.context;
+  const { sourceLabware, layoutPlans, requestError, confirmSectionResultLabwares, sectionNumberMode, workNumber } =
+    current.context;
 
   /**
    * Call the {@code onConfirmed} callback when machine reaches the {@code confirmed} state
@@ -158,8 +152,8 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
 
   const sectionNumberEnabled = () => {
     return (
-      Object.entries(layoutPlansByLabwareType).filter(
-        ([labwareTypeName, _]) => labwareTypeName !== LabwareTypeName.FETAL_WASTE_CONTAINER
+      layoutPlans.filter(
+        (layoutPlan) => layoutPlan.destinationLabware.labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER
       ).length !== 0
     );
   };
@@ -182,7 +176,7 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
           <PlanFinder initialPlans={initialPlans} onChange={handlePlanChange}>
             {({ removePlanByBarcode }) => (
               <div className="mt-8 space-y-12">
-                {Object.keys(layoutPlansByLabwareType).length > 0 && (
+                {layoutPlans.length > 0 && (
                   <>
                     <div className="space-y-4">
                       <Heading level={3}>Source Labware</Heading>
@@ -217,69 +211,58 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
                 )}
                 <div className="space-y-4">
                   {/* Always show fetal waste first (if there are any) */}
-                  {layoutPlansByLabwareType?.[LabwareTypeName.FETAL_WASTE_CONTAINER] && (
-                    <div key={LabwareTypeName.FETAL_WASTE_CONTAINER} className="space-y-4">
-                      <Heading level={3}>{LabwareTypeName.FETAL_WASTE_CONTAINER}</Heading>
-                      {layoutPlansByLabwareType?.[LabwareTypeName.FETAL_WASTE_CONTAINER].map((layoutPlan) => (
-                        <ConfirmLabware
-                          onChange={handleConfirmChange}
-                          removePlan={removePlanByBarcode}
-                          key={layoutPlan.destinationLabware.barcode}
-                          originalLayoutPlan={layoutPlan}
-                          comments={comments}
-                          mode={sectionNumberMode}
-                          sectionNumberEnabled={false}
-                          workNumber={workNumber}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Always show tubes first (if there are any) */}
-                  {layoutPlansByLabwareType?.[LabwareTypeName.TUBE] && (
-                    <div key={LabwareTypeName.TUBE} className="space-y-4">
-                      <Heading level={3}>{LabwareTypeName.TUBE}</Heading>
-                      <ConfirmTubes
-                        onChange={handleConfirmChange}
-                        onSectionUpdate={handleSectionUpdate}
-                        onSectionNumberChange={handleSectionNumberChange}
-                        onSectionThicknessChange={handleSectionThicknessChange}
-                        layoutPlans={layoutPlansByLabwareType[LabwareTypeName.TUBE]}
-                        comments={comments}
-                        mode={sectionNumberMode}
-                        workNumber={workNumber}
-                      />
-                    </div>
-                  )}
-
-                  {/* Filter out tubes as they've been shown above */}
-                  {Object.entries(layoutPlansByLabwareType)
-                    .filter(
-                      ([labwareTypeName, _]) =>
-                        labwareTypeName !== LabwareTypeName.TUBE &&
-                        labwareTypeName !== LabwareTypeName.FETAL_WASTE_CONTAINER
-                    )
-                    .map(([labwareTypeName, lps]) => {
+                  {layoutPlans.map((layoutPlan, index) => {
+                    if (layoutPlan.destinationLabware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER) {
                       return (
-                        <div key={labwareTypeName} className="space-y-4">
-                          <Heading level={3}>{labwareTypeName}</Heading>
-
-                          {lps.map((layoutPlan) => (
-                            <ConfirmLabware
-                              onChange={handleConfirmChange}
-                              removePlan={removePlanByBarcode}
-                              key={layoutPlan.destinationLabware.barcode}
-                              originalLayoutPlan={layoutPlan}
-                              comments={comments}
-                              mode={sectionNumberMode}
-                              onSectionNumberChange={handleSectionNumberChange}
-                              onSectionThicknessChange={handleSectionThicknessChange}
-                              workNumber={workNumber}
-                            />
-                          ))}
+                        <div key={`layout-plan-${index}`} className="space-y-4">
+                          <Heading level={3}>{LabwareTypeName.FETAL_WASTE_CONTAINER}</Heading>
+                          <ConfirmLabware
+                            onChange={handleConfirmChange}
+                            removePlan={removePlanByBarcode}
+                            key={layoutPlan.destinationLabware.barcode}
+                            originalLayoutPlan={layoutPlan}
+                            comments={comments}
+                            mode={sectionNumberMode}
+                            sectionNumberEnabled={false}
+                            workNumber={workNumber}
+                          />
                         </div>
                       );
-                    })}
+                    } else if (layoutPlan.destinationLabware.labwareType.name === LabwareTypeName.TUBE) {
+                      return (
+                        <div key={`layout-plan-${index}`} className="space-y-4">
+                          <Heading level={3}>{LabwareTypeName.TUBE}</Heading>
+                          <ConfirmTubes
+                            onChange={handleConfirmChange}
+                            onSectionUpdate={handleSectionUpdate}
+                            onSectionNumberChange={handleSectionNumberChange}
+                            onSectionThicknessChange={handleSectionThicknessChange}
+                            layoutPlans={[layoutPlan]}
+                            comments={comments}
+                            mode={sectionNumberMode}
+                            workNumber={workNumber}
+                          />
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div key={`layout-plan-${index}`} className="space-y-4">
+                          <Heading level={3}>{layoutPlan.destinationLabware.labwareType.name}</Heading>
+                          <ConfirmLabware
+                            onChange={handleConfirmChange}
+                            removePlan={removePlanByBarcode}
+                            key={layoutPlan.destinationLabware.barcode}
+                            originalLayoutPlan={layoutPlan}
+                            comments={comments}
+                            mode={sectionNumberMode}
+                            onSectionNumberChange={handleSectionNumberChange}
+                            onSectionThicknessChange={handleSectionThicknessChange}
+                            workNumber={workNumber}
+                          />
+                        </div>
+                      );
+                    }
+                  })}
                   {requestError && (
                     <div>
                       <Warning
@@ -288,8 +271,7 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
                       />
                     </div>
                   )}
-
-                  {Object.keys(layoutPlansByLabwareType).length > 0 && (
+                  {layoutPlans.length > 0 && (
                     <div className="flex flex-row items-center justify-end">
                       <PinkButton
                         disabled={!current.matches({ ready: 'valid' })}

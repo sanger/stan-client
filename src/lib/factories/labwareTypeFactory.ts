@@ -3,7 +3,7 @@ import { LabwareType } from '../../types/sdk';
 import labelTypeFactory from './labelTypeFactory';
 import { LabwareTypeName } from '../../types/stan';
 
-const labwareTypeFactory = Factory.define<LabwareType>(({ sequence, params }) => ({
+export const labwareTypeFactory = Factory.define<LabwareType>(({ sequence, params }) => ({
   __typename: 'LabwareType',
   name: `Labware Type ${sequence}`,
   numRows: 1,

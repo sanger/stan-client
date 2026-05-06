@@ -10,6 +10,7 @@ mutation CreateWork(
   $numOriginalSamples: Int
   $omeroProject: String
   $ssStudyId: Int
+  $xeniumStudyId: Int
   $facultyLead: String!
 ) {
   createWork(
@@ -24,6 +25,7 @@ mutation CreateWork(
     numOriginalSamples: $numOriginalSamples
     omeroProject: $omeroProject
     ssStudyId: $ssStudyId
+    xeniumStudyId: $xeniumStudyId
     facultyLead: $facultyLead
   ) {
     ...WorkFields

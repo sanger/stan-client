@@ -22,6 +22,9 @@ fragment WorkFields on Work {
   dnapStudy {
     ...DnapStudyFields
   }
+  xeniumStudy {
+    ...DnapStudyFields
+  }
   facultyLead {
     ...ReleaseDestinationFields
   }

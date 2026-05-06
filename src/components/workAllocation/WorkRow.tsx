@@ -58,6 +58,11 @@ type WorkRowProps = {
   onWorkFieldUpdate: (index: number, work: WorkWithCommentFieldsFragment) => void;
 };
 
+export enum Studies {
+  DNAP_STUDY = 'dnapStudy',
+  XENIUM_STUDY = 'xeniumStudy'
+}
+
 /**
  * Component for displaying information about Work in a table row, as well as the ability
  * to edit its status
@@ -175,11 +180,18 @@ export default function WorkRow({
   );
 
   const handleUpdateWorkStudyId = useCallback(
-    (ssStudyId: number) => {
-      send({
-        type: 'UPDATE_DNAP_PROJECT',
-        ssStudyId
-      });
+    (ssStudyId: number, studyType: Studies.XENIUM_STUDY | Studies.DNAP_STUDY) => {
+      if (studyType === Studies.DNAP_STUDY) {
+        send({
+          type: 'UPDATE_DNAP_PROJECT',
+          ssStudyId
+        });
+      } else if (studyType === Studies.XENIUM_STUDY) {
+        send({
+          type: 'UPDATE_XENIUM_STUDY_ID',
+          ssStudyId
+        });
+      }
     },
     [send]
   );
@@ -216,18 +228,22 @@ export default function WorkRow({
     );
   };
 
-  const renderWorkDnapProjectField = (workNumber: string, dnapStudy: DnapStudy | undefined) => {
+  const renderWorkSsStudyField = (
+    workNumber: string,
+    ssStudy: DnapStudy | undefined,
+    studyType: Studies.XENIUM_STUDY | Studies.DNAP_STUDY
+  ) => {
     return (
       <div className="grid grid-flow-row auto-rows-max">
         <Input
-          data-testid={`${workNumber}-DnapStudy`}
+          data-testid={`${workNumber}-${studyType}`}
           type="number"
           onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-            handleUpdateWorkStudyId(Number(e.currentTarget.value));
+            handleUpdateWorkStudyId(Number(e.currentTarget.value), studyType);
           }}
-          defaultValue={dnapStudy && dnapStudy.ssId}
+          defaultValue={ssStudy && ssStudy.ssId}
         />
-        {dnapStudy && <Pill color={'blue'}>{dnapStudy.name}</Pill>}
+        {ssStudy && <Pill color={'blue'}>{ssStudy.name}</Pill>}
       </div>
     );
   };
@@ -344,7 +360,12 @@ export default function WorkRow({
       <TableCell>{work.workRequester?.username}</TableCell>
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
-      <TableCell colSpan={2}>{renderWorkDnapProjectField(work.workNumber, work.dnapStudy ?? undefined)}</TableCell>
+      <TableCell colSpan={2}>
+        {renderWorkSsStudyField(work.workNumber, work.dnapStudy ?? undefined, Studies.DNAP_STUDY)}
+      </TableCell>
+      <TableCell colSpan={2}>
+        {renderWorkSsStudyField(work.workNumber, work.xeniumStudy ?? undefined, Studies.XENIUM_STUDY)}
+      </TableCell>
       <TableCell>{work.program.name}</TableCell>
       <TableCell>{work.facultyLead?.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
