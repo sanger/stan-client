@@ -28,7 +28,7 @@ export const sampleFactory = Factory.define<Sample>(({ sequence, params, associa
 export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(({ params, associations }) => ({
   __typename: 'Tissue',
   externalName: params.externalName ?? `${faker.person.lastName()}${faker.string.numeric()}`,
-  replicate: params.replicate ?? String(_.random(10)),
+  replicate: params.replicate ?? String(_.random(1, 10)),
   spatialLocation: associations.spatialLocation ?? spatialLocationFactory.build(),
   donor: associations.donor ?? donorFactory.build(),
   hmdmc: associations.hmdmc ?? hmdmcFactory.build(),

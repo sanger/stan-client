@@ -44,7 +44,7 @@ type TissueBlockContentForm = TissueBlockContent & {
   isEditReplicateDisabled?: boolean;
 };
 
-type TissueBlockLabwareForm = {
+export type TissueBlockLabwareForm = {
   contents: Array<TissueBlockContentForm>;
   labwareType: Scalars['String']['input'];
   preBarcode?: InputMaybe<Scalars['String']['input']>;
@@ -295,7 +295,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
               });
             }}
           >
-            {({ setFieldValue, values, isValid }) => (
+            {({ setFieldValue, isValid }) => (
               <Form>
                 <motion.div variants={variants.fadeInWithLift} className="space-y-10">
                   <motion.div variants={variants.fadeInWithLift}>

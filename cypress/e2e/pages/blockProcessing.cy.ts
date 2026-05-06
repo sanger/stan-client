@@ -184,7 +184,7 @@ describe('Block Processing', () => {
       cy.visit('/lab/original_sample_processing?type=block');
     });
     context('when adding grouped labware for replicate number based on original samples', () => {
-      const sources = ['STAN-1111', 'STAN-5111', 'STAN-3111', 'STAN-4111'];
+      const sources = ['STAN-1111', 'STAN-2111', 'STAN-3111', 'STAN-4111'];
       before(() => {
         //Mock handler will ensure that they are grouped in two's
         sources.forEach((barcode) => {
@@ -343,12 +343,13 @@ describe('Block Processing', () => {
       });
 
       context('Printing labels', () => {
-        before(() => {
-          printLabels();
-        });
-
         it('shows a success message for print', () => {
-          cy.findByText(/Tube Printer successfully printed/).should('exist');
+          cy.findByLabelText('printers').select('Tube Printer');
+          cy.findByText('Print Labels')
+            .click()
+            .then(() => {
+              cy.findByText(/Tube Printer successfully printed/).should('exist');
+            });
         });
       });
     });
@@ -378,12 +379,15 @@ describe('Block Processing', () => {
             )
           );
         });
-        cy.findByRole('button', { name: /Save/i }).click();
       });
 
       it('shows the errors', () => {
-        cy.findByText('This thing went wrong').should('be.visible');
-        cy.findByText('This other thing went wrong').should('be.visible');
+        cy.findByRole('button', { name: /Save/i })
+          .click()
+          .then(() => {
+            cy.findByText('This thing went wrong').should('be.visible');
+            cy.findByText('This other thing went wrong').should('be.visible');
+          });
       });
     });
   });
@@ -408,9 +412,4 @@ function selectSource() {
     cy.findByText('A1').click();
     cy.findByText('Done').click();
   });
-}
-
-function printLabels() {
-  cy.findByLabelText('printers').select('Tube Printer');
-  cy.findByText('Print Labels').click();
 }
