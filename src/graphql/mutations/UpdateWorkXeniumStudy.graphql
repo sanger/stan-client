@@ -1,0 +1,5 @@
+mutation UpdateWorkXeniumStudy($workNumber: String!, $ssStudyId: Int) {
+  updateWorkXeniumStudy(workNumber: $workNumber, ssStudyId: $ssStudyId) {
+    ...WorkFields
+  }
+}
