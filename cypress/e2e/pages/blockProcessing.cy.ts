@@ -72,7 +72,7 @@ describe('Block Processing', () => {
             cy.findByText('A2').click();
             cy.findAllByText('STAN-213').first().click();
             cy.findByText('B1').click();
-            cy.findByText('Done').click();
+            cy.findByText('Done').click().wait(500);
           });
         });
         it('adds a source row for each selected source', () => {
@@ -105,7 +105,7 @@ describe('Block Processing', () => {
           cy.findByRole('dialog').within(() => {
             cy.findAllByText('STAN-113').first().click();
             cy.findByText('A1').click();
-            cy.findByText('Done').click();
+            cy.findByText('Done').click().wait(500);
           });
         });
         it('should display STAN-113', () => {
@@ -196,22 +196,22 @@ describe('Block Processing', () => {
           cy.findByRole('dialog').within(() => {
             cy.findAllByText(barcode).first().click();
             cy.findByText('A1').click();
-            cy.findByText('Done').click();
+            cy.findByText('Done').click().wait(500);
           });
         });
       });
 
       it('should autofill all replicate numbers consecutively based on original samples of source labware', () => {
         //they are randomly generated so we can't check the exact value
-        cy.findAllByTestId('replicate-number').should('have.length', 4);
-
-        [(0, 1, 2, 3)].forEach((index) => {
-          cy.findAllByTestId('replicate-number').eq(index).should('not.have.value', '');
-        });
-
-        [0, 1, 2, 3].forEach((index) => {
-          cy.findAllByTestId('replicate-number').eq(index).and('be.disabled');
-        });
+        cy.findAllByTestId('replicate-number')
+          .should('have.length', 4)
+          .then(($inputs) => {
+            // Wait for all to be populated first
+            cy.wrap($inputs.eq(0)).should('not.have.value', '').and('be.disabled');
+            cy.wrap($inputs.eq(1)).should('not.have.value', '').and('be.disabled');
+            cy.wrap($inputs.eq(2)).should('not.have.value', '').and('be.disabled');
+            cy.wrap($inputs.eq(3)).should('not.have.value', '').and('be.disabled');
+          });
       });
     });
     context('when adding multiple labware with same source labware', () => {
@@ -221,7 +221,7 @@ describe('Block Processing', () => {
         cy.findByRole('dialog').within(() => {
           cy.findAllByText('STAN-1111').first().click();
           cy.findByText('A1').click();
-          cy.findByText('Done').click();
+          cy.findByText('Done').click().wait(500);
         });
       });
       it('should autofill all replicate numbers so that it continues the sequence of source labware', () => {
@@ -240,7 +240,7 @@ describe('Block Processing', () => {
         cy.findByRole('dialog').within(() => {
           cy.findAllByText('STAN-5555').eq(0).click();
           cy.findByText('A1').click();
-          cy.findByText('Done').click();
+          cy.findByText('Done').click().wait(500);
         });
       });
       it('replicate number field should be empty and enabled', () => {
@@ -271,7 +271,7 @@ describe('Block Processing', () => {
         cy.findByRole('dialog').within(() => {
           cy.findAllByText('STAN-113').first().click();
           cy.findByText('A1').click();
-          cy.findByText('Done').click();
+          cy.findByText('Done').click().wait(500);
         });
         selectOption('workNumber', '');
         selectOption('comments', '');
@@ -319,10 +319,10 @@ describe('Block Processing', () => {
           cy.findByRole('dialog').within(() => {
             cy.findAllByText('STAN-113').first().click();
             cy.findByText('A1').click();
-            cy.findByText('Done').click();
+            cy.findByText('Done').click().wait(500);
           });
 
-          cy.findByRole('button', { name: /Save/i }).click();
+          cy.findByRole('button', { name: /Save/i }).click().wait(500);
         });
         it('displays Block labware generation', () => {
           cy.findByText('Block labware generation complete').should('be.visible');
@@ -343,13 +343,12 @@ describe('Block Processing', () => {
       });
 
       context('Printing labels', () => {
+        before(() => {
+          printLabels();
+        });
+
         it('shows a success message for print', () => {
-          cy.findByLabelText('printers').select('Tube Printer');
-          cy.findByText('Print Labels')
-            .click()
-            .then(() => {
-              cy.findByText(/Tube Printer successfully printed/).should('exist');
-            });
+          cy.findByText(/Tube Printer successfully printed/).should('exist');
         });
       });
     });
@@ -379,15 +378,12 @@ describe('Block Processing', () => {
             )
           );
         });
+        cy.findByRole('button', { name: /Save/i }).click();
       });
 
       it('shows the errors', () => {
-        cy.findByRole('button', { name: /Save/i })
-          .click()
-          .then(() => {
-            cy.findByText('This thing went wrong').should('be.visible');
-            cy.findByText('This other thing went wrong').should('be.visible');
-          });
+        cy.findByText('This thing went wrong').should('be.visible');
+        cy.findByText('This other thing went wrong').should('be.visible');
       });
     });
   });
@@ -410,6 +406,11 @@ function selectSource() {
   cy.findByRole('dialog').within(() => {
     cy.findAllByText('STAN-113').first().click();
     cy.findByText('A1').click();
-    cy.findByText('Done').click();
+    cy.findByText('Done').click().wait(500);
   });
+}
+
+function printLabels() {
+  cy.findByLabelText('printers').select('Tube Printer');
+  cy.findByText('Print Labels').click();
 }
