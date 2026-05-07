@@ -204,7 +204,10 @@ describe('Block Processing', () => {
     context('When fields not filled in', () => {
       it('Shows error for SGP Number', () => {
         selectOption('workNumber', '');
-
+        // blur from the work number without selecting
+        cy.findByTestId('workNumber').within(() => {
+          cy.findByRole('combobox').blur();
+        });
         cy.findByText('SGP number is required').should('be.visible');
       });
     });
