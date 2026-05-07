@@ -68,4 +68,7 @@ query GetConfiguration {
   proteinPanels(includeDisabled: true) {
     ...ProteinPanelFields
   }
+  treatmentTypes(includeDisabled: true) {
+    ...TreatmentTypeFields
+  }
 }

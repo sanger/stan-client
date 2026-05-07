@@ -1,0 +1,5 @@
+mutation SetTreatmentTypeEnabled($name: String!, $enabled: Boolean!) {
+  setTreatmentTypeEnabled(name: $name, enabled: $enabled) {
+    ...TreatmentTypeFields
+  }
+}
