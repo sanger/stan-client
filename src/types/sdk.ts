@@ -968,6 +968,8 @@ export type Mutation = {
   addSpecies: Species;
   /** Add a new tissue type. */
   addTissueType: TissueType;
+  /** Add a new treatment type. */
+  addTreatmentType: TreatmentType;
   /** Create a new user for the application. */
   addUser: User;
   /** Create a new work type. */
@@ -1100,6 +1102,8 @@ export type Mutation = {
   setSolutionEnabled: Solution;
   /** Enable or disable a species. */
   setSpeciesEnabled: Species;
+  /** Enable or disable a treatment type. */
+  setTreatmentTypeEnabled: TreatmentType;
   /** Set the user role (privileges) for a user. */
   setUserRole: User;
   /** Enable or disable a work type. */
@@ -1138,6 +1142,8 @@ export type Mutation = {
   updateWorkPriority: Work;
   /** Update the status of an existing work. */
   updateWorkStatus: WorkWithComment;
+  /** Updates the treatment types of a work. */
+  updateWorkTreatmentTypes?: Maybe<Work>;
   /** Update the Xenium study of a work. */
   updateWorkXeniumStudy: Work;
   /** Record Visium Analysis. */
@@ -1342,6 +1348,15 @@ export type MutationAddTissueTypeArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
+export type MutationAddTreatmentTypeArgs = {
+  name: Scalars['String']['input'];
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
 export type MutationAddUserArgs = {
   username: Scalars['String']['input'];
 };
@@ -1407,6 +1422,7 @@ export type MutationCreateWorkArgs = {
   program: Scalars['String']['input'];
   project: Scalars['String']['input'];
   ssStudyId?: InputMaybe<Scalars['Int']['input']>;
+  treatmentTypes?: InputMaybe<Array<Scalars['String']['input']>>;
   workRequester: Scalars['String']['input'];
   workType: Scalars['String']['input'];
   xeniumStudyId?: InputMaybe<Scalars['Int']['input']>;
@@ -1963,6 +1979,16 @@ export type MutationSetSpeciesEnabledArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
+export type MutationSetTreatmentTypeEnabledArgs = {
+  enabled: Scalars['Boolean']['input'];
+  name: Scalars['String']['input'];
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
 export type MutationSetUserRoleArgs = {
   role: UserRole;
   username: Scalars['String']['input'];
@@ -2123,6 +2149,16 @@ export type MutationUpdateWorkPriorityArgs = {
 export type MutationUpdateWorkStatusArgs = {
   commentId?: InputMaybe<Scalars['Int']['input']>;
   status: WorkStatus;
+  workNumber: Scalars['String']['input'];
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationUpdateWorkTreatmentTypesArgs = {
+  treatmentTypes: Array<Scalars['String']['input']>;
   workNumber: Scalars['String']['input'];
 };
 
@@ -2699,6 +2735,8 @@ export type Query = {
   suggestedWorkForLabware: SuggestedWorkResponse;
   /** Get all the tissue types available. */
   tissueTypes: Array<TissueType>;
+  /** Get treatment types that are enabled, or all including disabled. */
+  treatmentTypes: Array<TreatmentType>;
   /** Get the current logged in user. */
   user?: Maybe<User>;
   /** Get all the users that are enabled, or get all including those that are disabled. */
@@ -3296,6 +3334,15 @@ export type QuerySuggestedWorkForLabwareArgs = {
  * These typically require no user privilege.
  */
 export type QueryTissueTypesArgs = {
+  includeDisabled?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+/**
+ * Get information from the application.
+ * These typically require no user privilege.
+ */
+export type QueryTreatmentTypesArgs = {
   includeDisabled?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -4192,6 +4239,13 @@ export type TissueType = {
   spatialLocations: Array<SpatialLocation>;
 };
 
+/** A treatment type. */
+export type TreatmentType = {
+  __typename?: 'TreatmentType';
+  enabled: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+};
+
 /** The details of a previously released item of labware to receive back into the application. */
 export type UnreleaseLabware = {
   /** The barcode of the labware. */
@@ -4315,6 +4369,8 @@ export type Work = {
   project: Project;
   /** The current status of the work. */
   status: WorkStatus;
+  /** The treatment types for this work, if any. */
+  treatmentTypes: Array<TreatmentType>;
   /** The unique (generated) string identifying this work. */
   workNumber: Scalars['String']['output'];
   /** The name of the person requesting the work.(Note sure how to deal with this as the existing work will all be null but future work we want it mandatory?) */
