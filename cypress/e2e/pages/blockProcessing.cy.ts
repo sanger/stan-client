@@ -35,16 +35,16 @@ describe('Block Processing', () => {
   });
   describe('Source labware table', () => {
     context('when destination labware is added', () => {
-      it(' disables scan labware input', () => {
+      before(() => {
         cy.findByText('+ Add Labware').click({ force: true });
+      });
+      it(' disables scan labware input', () => {
         cy.get('#labwareScanInput').should('be.disabled');
       });
 
-      context('when destination labware becomes empty again', () => {
-        it('re-enables scan labware input', () => {
-          cy.findByText('Delete Layout').click({ force: true });
-          cy.get('#labwareScanInput').should('not.be.disabled');
-        });
+      it('re-enables scan labware input', () => {
+        cy.findByText('Delete Layout').click({ force: true });
+        cy.get('#labwareScanInput').should('not.be.disabled');
       });
     });
   });
@@ -58,10 +58,12 @@ describe('Block Processing', () => {
           addLabware('Proviasette', '1');
           editLayout(0, ['STAN-113', 'STAN-213'], ['A1', 'B1']);
 
-          cy.findByTestId('planned-source-table').within(() => {
-            cy.findByText('STAN-113').should('exist');
-            cy.findByText('STAN-213').should('exist');
-          });
+          cy.findAllByTestId('planned-source-table')
+            .first()
+            .within(() => {
+              cy.findByText('STAN-113').should('exist');
+              cy.findByText('STAN-213').should('exist');
+            });
         });
       });
     });

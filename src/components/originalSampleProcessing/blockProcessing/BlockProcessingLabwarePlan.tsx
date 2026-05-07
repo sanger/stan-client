@@ -106,12 +106,10 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
       plans: Map<string, TissueBlockLabwareForm>,
       sourceSampleId: number
     ) => {
-      return plans
-        .values()
+      return Array.from(plans.values())
         .flatMap((plan) => plan.contents)
         .filter((content) => content.sourceSampleId === sourceSampleId)
-        .map((content) => (content.replicate ? parseInt(content.replicate) : 0))
-        .toArray();
+        .map((content) => (content.replicate ? parseInt(content.replicate) : 0));
     };
 
     /**

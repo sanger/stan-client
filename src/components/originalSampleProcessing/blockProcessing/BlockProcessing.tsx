@@ -217,7 +217,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
     return {
       workNumber: formData.workNumber,
       labware: [
-        ...formData.plans.values().map((labware) => ({
+        ...Array.from(formData.plans.values()).map((labware) => ({
           ...labware,
           contents: labware.contents.map(({ isEditReplicateDisabled, ...tissueBlockLabwareProps }) => ({
             ...tissueBlockLabwareProps
