@@ -187,14 +187,16 @@ describe('Block Processing', () => {
   });
   describe('Leaving page', () => {
     context('when I try and leave the page', () => {
+      after(() => {
+        cy.findByRole('button', { name: /Cancel/i }).click();
+      });
       it('shows a confirm box', () => {
+        cy.findByText('Search').click();
         cy.on('window:confirm', (str) => {
           expect(str).to.equal('You have unsaved changes. Are you sure you want to leave?');
           // Returning false cancels the event
           return false;
         });
-
-        cy.findByText('Search').click();
       });
     });
   });
