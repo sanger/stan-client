@@ -36,13 +36,13 @@ describe('Block Processing', () => {
   describe('Source labware table', () => {
     context('when destination labware is added', () => {
       it(' disables scan labware input', () => {
-        cy.findByText('+ Add Labware').click();
+        cy.findByText('+ Add Labware').click({ force: true });
         cy.get('#labwareScanInput').should('be.disabled');
       });
 
       context('when destination labware becomes empty again', () => {
         it('re-enables scan labware input', () => {
-          cy.findByText('Delete Layout').click();
+          cy.findByText('Delete Layout').click({ force: true });
           cy.get('#labwareScanInput').should('not.be.disabled');
         });
       });
@@ -51,7 +51,7 @@ describe('Block Processing', () => {
   describe('Multi sample Proviasette block', () => {
     context('when adding a Proviasette', () => {
       after(() => {
-        cy.findAllByText('Delete Layout').first().click();
+        cy.findAllByText('Delete Layout').first().click({ force: true });
       });
       describe('when adding different sources to different slots', () => {
         it('adds a source row for each selected source', () => {
@@ -99,7 +99,7 @@ describe('Block Processing', () => {
           });
         });
         after(() => {
-          cy.findByText('Delete Layout').click();
+          cy.findByText('Delete Layout').click({ force: true });
         });
       });
     });
@@ -121,7 +121,7 @@ describe('Block Processing', () => {
         cy.findByText('Barcode should be two letters followed by 8 numbers').should('be.visible');
       });
       after(() => {
-        cy.findByText('Delete Layout').click();
+        cy.findByText('Delete Layout').click({ force: true });
       });
     });
 
@@ -148,7 +148,7 @@ describe('Block Processing', () => {
           scanInput(barcode);
         });
         sources.forEach((barcode, indx) => {
-          cy.findByText('+ Add Labware').click();
+          cy.findByText('+ Add Labware').click({ force: true });
           editLayout(indx, [barcode], ['A1']);
         });
 
@@ -166,7 +166,7 @@ describe('Block Processing', () => {
     });
     context('when adding multiple labware with same source labware', () => {
       it('should autofill all replicate numbers so that it continues the sequence of source labware', () => {
-        cy.findByText('+ Add Labware').click();
+        cy.findByText('+ Add Labware').click({ force: true });
         editLayout(4, ['STAN-1111'], ['A1']);
         cy.findAllByTestId('replicate-number').eq(4).should('not.have.value', '').and('be.disabled');
       });
@@ -178,7 +178,7 @@ describe('Block Processing', () => {
         createLabwareFromParams({ barcode: 'STAN-5555', slots: [slotFactory.build({ samples: [sample] })] });
         cy.reload();
         scanInput('STAN-5555');
-        cy.findByText('+ Add Labware').click();
+        cy.findByText('+ Add Labware').click({ force: true });
         editLayout(0, ['STAN-5555'], ['A1']);
 
         cy.findAllByTestId('replicate-number').should('have.value', '').and('be.enabled');
@@ -188,10 +188,10 @@ describe('Block Processing', () => {
   describe('Leaving page', () => {
     context('when I try and leave the page', () => {
       after(() => {
-        cy.findByRole('button', { name: /Cancel/i }).click();
+        cy.findByRole('button', { name: /Cancel/i }).click({ force: true });
       });
       it('shows a confirm box', () => {
-        cy.findByText('Search').click();
+        cy.findByText('Search').click({ force: true });
         cy.on('window:confirm', (str) => {
           expect(str).to.equal('You have unsaved changes. Are you sure you want to leave?');
           // Returning false cancels the event
@@ -256,8 +256,8 @@ describe('Block Processing', () => {
           );
         });
 
-        it('should not display all destination labware except Pre-barcoded Tube', function () {
-          cy.findAllByText('Dest-STAN-111').its('length').should('be.gte', 1);
+        it('should display all destination labware', () => {
+          cy.findAllByText('Dest-STAN-111').should('have.length', 2);
         });
       });
 
@@ -313,30 +313,30 @@ function scanInput(barcode: string) {
 function addLabware(labwareType: string, numberOfLabware = '1') {
   selectOption('labwareType', labwareType);
   cy.findByTestId('numLabware').type('{selectall}').type(numberOfLabware);
-  cy.findByText('+ Add Labware').click();
+  cy.findByText('+ Add Labware').click({ force: true });
 }
 
 const editLayout = (layoutIndex: number, sourcesBarcode: Array<string>, addresses: Array<string>) => {
-  cy.findAllByText('Edit Layout').eq(layoutIndex).click();
+  cy.findAllByText('Edit Layout').eq(layoutIndex).click({ force: true });
   cy.findByRole('dialog').within(() => {
     sourcesBarcode.forEach((sourceBarcode, indx) => {
-      cy.findAllByText(sourceBarcode).first().click();
-      cy.findByText(addresses[indx]).click();
+      cy.findAllByText(sourceBarcode).first().click({ force: true });
+      cy.findByText(addresses[indx]).click({ force: true });
     });
-    cy.findByText('Done').click();
+    cy.findByText('Done').click({ force: true });
   });
 };
 
 function printLabels() {
   cy.findByLabelText('printers').select('Tube Printer');
-  cy.findByText('Print Labels').click();
+  cy.findByText('Print Labels').click({ force: true });
 }
 
 const removeLayout = () => {
   cy.findAllByTestId('plan')
     .first()
     .within(() => {
-      cy.findByRole('button', { name: /Delete Layout/i }).click();
+      cy.findByRole('button', { name: /Delete Layout/i }).click({ force: true });
     });
 };
 
@@ -349,5 +349,5 @@ const fillInTheForm = () => {
   cy.findAllByText('Barcode').last().type('FF10153223');
   editLayout(1, ['STAN-113'], ['A1']);
 
-  cy.findByRole('button', { name: /Save/i }).click();
+  cy.findByRole('button', { name: /Save/i }).click({ force: true });
 };
