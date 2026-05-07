@@ -81,7 +81,7 @@ describe('Block Processing', () => {
       context('when editing a layout', () => {
         it('should display STAN-113', () => {
           editLayout(0, ['STAN-113'], ['A1']);
-
+          cy.wait(5000);
           cy.findAllByTestId('planned-source-table')
             .first()
             .within(() => {
