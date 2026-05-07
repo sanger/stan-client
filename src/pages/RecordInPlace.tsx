@@ -20,7 +20,7 @@ import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { Column } from 'react-table';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { fromPromise } from 'xstate';
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate } from 'react-router-dom';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
@@ -223,17 +223,24 @@ export default function RecordInPlace({
                   message={'Operation Complete'}
                   additionalButtons={
                     displayStoreOption && values.labware.length > 0 ? (
-                      <WhiteButton
-                        type="button"
-                        style={{ marginLeft: 'auto' }}
-                        className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
-                        onClick={() => {
-                          createSessionStorageForLabwareAwaiting(values.labware);
-                          navigate('/store');
-                        }}
-                      >
-                        Store
-                      </WhiteButton>
+                      <>
+                        <Link to="/lab/imaging_qc" state={{ labware: values.labware }}>
+                          <WhiteButton type="button" className="w-full text-base md:ml-3 sm:ml-3 sm:w-auto sm:text:sm">
+                            Imaging QC
+                          </WhiteButton>
+                        </Link>
+                        <WhiteButton
+                          type="button"
+                          style={{ marginLeft: 'auto' }}
+                          className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                          onClick={() => {
+                            createSessionStorageForLabwareAwaiting(values.labware);
+                            navigate('/store');
+                          }}
+                        >
+                          Store
+                        </WhiteButton>
+                      </>
                     ) : (
                       <></>
                     )
