@@ -302,7 +302,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
                 omeroProject,
                 facultyLead,
                 ssStudyId: ssStudyId ? Number(ssStudyId) : null,
-                xeniumStudyId: ssStudyId ? Number(xeniumStudyId) : null
+                xeniumStudyId: xeniumStudyId ? Number(xeniumStudyId) : null
               });
             }),
             input: ({ event }) => {
