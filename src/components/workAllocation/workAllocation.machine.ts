@@ -400,8 +400,9 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
               workType.name
             } - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
               omeroProject ? `, Omero project ${omeroProject.name}` : ''
-            }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''}, 
-            ${xeniumStudy ? `, Xenium study name '${xeniumStudy.name}'` : ''}, program ${program.name} 
+            }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''}${
+              xeniumStudy ? `, Xenium study name '${xeniumStudy.name}'` : ''
+            }, program ${program.name} 
             ${facultyLead ? `and faculty lead ${facultyLead.name}` : ''}
              using cost code ${costCode.code} with the work requester ${workRequester?.username}`;
           });
