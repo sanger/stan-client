@@ -31,7 +31,6 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          spec: cypress/e2e/pages/blockProcessing.cy.ts
           install-command: yarn --frozen-lockfile --silent
           build: yarn build
           start: npx serve -s build -p 3000
