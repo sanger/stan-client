@@ -370,6 +370,19 @@ export default function WorkRow({
       <TableCell>{work.facultyLead?.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>
+        {work.treatmentTypes && work.treatmentTypes.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {work.treatmentTypes.map((tt) => (
+              <Pill key={tt.name} color={tt.enabled ? 'blue' : 'pink'}>
+                {tt.name}
+              </Pill>
+            ))}
+          </div>
+        ) : (
+          <span className="text-gray-400">None</span>
+        )}
+      </TableCell>
+      <TableCell>
         {isEditEnabledForStatus(work.status) &&
           renderWorkNumValueField(work.workNumber, work.numBlocks ?? undefined, 'block')}
       </TableCell>
