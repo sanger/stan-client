@@ -14,8 +14,8 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import "./commands";
-import { worker } from "../../src/mocks/mswSetup";
+import './commands';
+import { worker } from '../../src/mocks/mswSetup';
 
 //There is a known issue from @testing-library/cypress v9.0 onwards that causes any find* command
 //fails when is first to run in a test context
@@ -29,9 +29,17 @@ before(async () => {
   await worker.start();
 });
 
-afterEach(() => {
-    worker.resetHandlers();
+
+afterEach(function () {
+  // Take full page screenshot on failure for better debugging
+  if (this.currentTest?.state === 'failed') {
+    cy.screenshot(this.currentTest.fullTitle(), {
+      capture: 'fullPage'
+    });
+  }
+  worker.resetHandlers();
 });
+
 
 after(() => {
   worker.resetHandlers()

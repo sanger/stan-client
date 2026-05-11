@@ -22,8 +22,8 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
   [LabwareTypeName.PROVIASETTE]: labwareTypeFactory.params({
     __typename: 'LabwareType',
     name: LabwareTypeName.PROVIASETTE,
-    numRows: 1,
-    numColumns: 1,
+    numRows: 10,
+    numColumns: 10,
     labelType: labelTypeFactory.build({ name: `${LabwareTypeName.PROVIASETTE} Label` })
   }),
   [LabwareTypeName.VISIUM_TO]: labwareTypeFactory.params({
@@ -50,8 +50,8 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
   [LabwareTypeName.CASSETTE]: labwareTypeFactory.params({
     __typename: 'LabwareType',
     name: LabwareTypeName.CASSETTE,
-    numRows: 1,
-    numColumns: 1,
+    numRows: 10,
+    numColumns: 10,
     labelType: labelTypeFactory.build({ name: `${LabwareTypeName.CASSETTE} Label` })
   }),
   [LabwareTypeName.XENIUM]: labwareTypeFactory.params({

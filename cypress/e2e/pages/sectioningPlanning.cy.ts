@@ -461,7 +461,7 @@ function createLabware() {
   cy.findByText('+ Add Labware').click();
   cy.findByText('Edit Layout').click();
   cy.findByRole('dialog').within(() => {
-    cy.findByText('STAN-113').click();
+    cy.findAllByText('STAN-113').first().click();
     cy.findByText('A1').click();
     cy.findByText('Done').click();
   });
