@@ -651,6 +651,7 @@ export default function WorkAllocation() {
                       <TableHeader colSpan={2} sortProps={getTableSortProps('Xenium Study ID')}>
                         Xenium Study ID
                       </TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Treatment Types')}>Treatment Types</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Faculty lead')}>Faculty lead</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
