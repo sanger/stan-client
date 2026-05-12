@@ -52,6 +52,7 @@ export default function Configuration() {
     'Species',
     'Solutions',
     'Tissue Types',
+    'Treatment Types',
     'Users',
     'Work Types'
   ];
@@ -655,6 +656,29 @@ export default function Configuration() {
               name: 'No spatial information',
               code: 0
             }
+          }}
+        />
+      </div>,
+      /**Treatment Types**/
+      <div data-testid="config">
+        <Heading level={2}>Treatment Types</Heading>
+        <p className="mt-3 mb-6 text-lg" />
+        <EntityManager
+          initialEntities={configuration.treatmentTypes}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
+          onChangeValue={(entity, value) => {
+            const enabled = typeof value === 'boolean' ? value : false;
+            return stanCore
+              .SetTreatmentTypeEnabled({
+                enabled,
+                name: entity.name
+              })
+              .then((res) => res.setTreatmentTypeEnabled);
+          }}
+          onCreate={(name) => stanCore.AddTreatmentType({ name }).then((res) => res.addTreatmentType)}
+          valueFieldComponentInfo={{
+            type: 'CHECKBOX'
           }}
         />
       </div>,
