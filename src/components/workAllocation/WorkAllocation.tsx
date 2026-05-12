@@ -43,7 +43,8 @@ const initialValues: WorkAllocationFormValues = {
   numOriginalSamples: undefined,
   ssStudyId: '',
   studyName: undefined,
-  facultyLead: ''
+  facultyLead: '',
+  treatmentTypes: []
 };
 export const MAX_NUM_BLOCKANDSLIDES = 200;
 
@@ -66,7 +67,8 @@ const tableColumnFieldInfo = [
   { key: 'Number of Blocks', path: ['work', 'numBlocks'] },
   { key: 'Number of Slides', path: ['work', 'numSlides'] },
   { key: 'Number of Original samples', path: ['work', 'numOriginalSamples'] },
-  { key: 'Status', path: ['work', 'status'] }
+  { key: 'Status', path: ['work', 'status'] },
+  { key: 'Treatment Types', path: ['work', 'treatmentTypes'] }
 ];
 
 /**
@@ -111,8 +113,15 @@ export default function WorkAllocation() {
     facultyLeads,
     requestError,
     successMessage,
-    allocatedWorkNumber
+    allocatedWorkNumber,
+    treatmentTypes
   } = current.context;
+
+  const treatmentTypeOptions = selectOptionValues(
+    (treatmentTypes || []).filter((t) => t.enabled),
+    'name',
+    'name'
+  );
 
   /**Hook to sort table*/
   const { sortedTableData, sort, sortConfig } = useTableSort<WorkWithCommentFieldsFragment>(workWithComments, {
@@ -133,7 +142,12 @@ export default function WorkAllocation() {
       },
       entries: workWithComments.map((data) => {
         return tableColumnFieldInfo.map((columnInfo) => {
-          return String(getPropertyValue(data, columnInfo.path));
+          const value = getPropertyValue(data, columnInfo.path);
+          // If the value is an array (e.g., treatmentTypes), join as comma-separated string
+          if (Array.isArray(value)) {
+            return value.join(', ');
+          }
+          return String(value);
         });
       })
     };
@@ -221,6 +235,11 @@ export default function WorkAllocation() {
       .oneOf(omeroProjects.map((cc) => cc.name))
       .optional()
       .label('Omero Project'),
+    // Validate that selected treatment types are valid or empty array
+    treatmentTypes: Yup.array()
+      .of(Yup.string().oneOf(treatmentTypeOptions.map((t) => t.value)))
+      .required()
+      .label('Treatment Types'),
     ssStudyId: Yup.string().label('DNAP study ID').optional(),
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
@@ -562,6 +581,19 @@ export default function WorkAllocation() {
                     options={selectOptionValues(facultyLeads, 'name', 'name')}
                   />
                 </div>
+                <div className="md:flex-grow">
+                  <CustomReactSelect
+                    label="Treatment Types"
+                    name="treatmentTypes"
+                    dataTestId="treatmentTypes"
+                    isMulti={true}
+                    options={treatmentTypeOptions}
+                    value={treatmentTypeOptions.filter((opt) => (values.treatmentTypes || []).includes(opt.value))}
+                    onChange={(selected) =>
+                      setFieldValue('treatmentTypes', Array.isArray(selected) ? selected.map((opt) => opt.value) : [])
+                    }
+                  />
+                </div>
               </div>
 
               <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
@@ -651,7 +683,6 @@ export default function WorkAllocation() {
                       <TableHeader colSpan={2} sortProps={getTableSortProps('Xenium Study ID')}>
                         Xenium Study ID
                       </TableHeader>
-                      <TableHeader sortProps={getTableSortProps('Treatment Types')}>Treatment Types</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Faculty lead')}>Faculty lead</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
@@ -660,6 +691,7 @@ export default function WorkAllocation() {
                       <TableHeader sortProps={getTableSortProps('Number of Original Samples')}>
                         Number of Original Samples
                       </TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Treatment Types')}>Treatment Types</TableHeader>
                     </tr>
                   </TableHead>
                   <TableBody>
