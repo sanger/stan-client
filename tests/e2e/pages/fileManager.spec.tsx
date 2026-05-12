@@ -257,8 +257,8 @@ describe('On load', () => {
         renderFileManagerComponent(true);
       });
       it('should display the url with selected work number', async () => {
-        await waitFor(async () => {
-          await selectSGPNumber('SGP1008');
+        await selectSGPNumber('SGP1008');
+        await waitFor(() => {
           expect(navigateMock).toHaveBeenCalledWith('/file_manager?workNumber=SGP1008');
         });
       });
