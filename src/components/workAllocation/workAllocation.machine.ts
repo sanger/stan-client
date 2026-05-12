@@ -14,7 +14,8 @@ import {
   UserRole,
   WorkStatus,
   WorkTypeFieldsFragment,
-  WorkWithCommentFieldsFragment
+  WorkWithCommentFieldsFragment,
+  TreatmentTypeFieldsFragment
 } from '../../types/sdk';
 import { stanCore } from '../../lib/sdk';
 import { WorkAllocationUrlParams } from './WorkAllocation';
@@ -91,6 +92,11 @@ export type WorkAllocationFormValues = {
    * Sequencescape study name corresponding to xeniumStudyId
    */
   xeniumStudyName?: string;
+
+  /**
+   * Treatment types for this Work (multi-select)
+   */
+  treatmentTypes: string[];
 };
 
 type WorkAllocationEvent =
@@ -175,6 +181,11 @@ type WorkAllocationContext = {
   facultyLeads: Array<ReleaseDestinationFieldsFragment>;
 
   /**
+   * List of enabled Treatment Types
+   */
+  treatmentTypes: Array<TreatmentTypeFieldsFragment>;
+
+  /**
    * Notification to show to the user when something good happens
    */
   successMessage?: string;
@@ -231,6 +242,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
         omeroProjects: [],
         availableComments: [],
         facultyLeads: [],
+        treatmentTypes: [],
         urlParams
       },
       initial: 'loading',
@@ -286,7 +298,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
                 numSlides,
                 numOriginalSamples,
                 ssStudyId,
-                facultyLead
+                facultyLead,
+                treatmentTypes
               } = input.values;
               return stanCore.CreateWork({
                 workType,
@@ -300,7 +313,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
                 numOriginalSamples,
                 omeroProject,
                 facultyLead,
-                ssStudyId: ssStudyId ? Number(ssStudyId) : null
+                ssStudyId: ssStudyId ? Number(ssStudyId) : null,
+                treatmentTypes
               });
             }),
             input: ({ event }) => {
@@ -334,7 +348,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             workTypes,
             costCodes,
             releaseRecipients,
-            releaseDestinations
+            releaseDestinations,
+            treatmentTypes
           } = workAllocation;
           if (currentUser.user && currentUser.user.role === UserRole.Enduser) {
             releaseRecipients.push({
@@ -353,7 +368,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             workTypes,
             costCodes,
             workRequesters: releaseRecipients,
-            facultyLeads: releaseDestinations
+            facultyLeads: releaseDestinations,
+            treatmentTypes: treatmentTypes
           };
         }),
 
@@ -381,7 +397,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             numOriginalSamples,
             omeroProject,
             dnapStudy,
-            facultyLead
+            facultyLead,
+            treatmentTypes
           } = event.output.createWork;
           const blockSlideSampleMsg = [
             numBlocks ? `${numBlocks} blocks` : undefined,
@@ -391,15 +408,18 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             .filter((msg) => msg)
             .join(' and ');
 
+          const treatmentTypesMsg =
+            treatmentTypes.length > 0 ? `, treatment types: ${treatmentTypes.map((t) => t.name).join(', ')}` : '';
+
           return produce(context, (draft) => {
             draft.allocatedWorkNumber = workNumber;
             draft.successMessage = `Assigned ${workNumber} (${
               workType.name
             } - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
               omeroProject ? `, Omero project ${omeroProject.name}` : ''
-            }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''}, program ${program.name} 
-            ${facultyLead ? `and faculty lead ${facultyLead.name}` : ''}
-             using cost code ${costCode.code} with the work requester ${workRequester?.username}`;
+            }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''}, program ${program.name}${
+              facultyLead ? ` and faculty lead ${facultyLead.name}` : ''
+            } using cost code ${costCode.code} with the work requester ${workRequester?.username}${treatmentTypesMsg}`;
           });
         }),
 
