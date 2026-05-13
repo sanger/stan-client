@@ -333,7 +333,7 @@ describe('Visium QC Page', () => {
         cy.reload();
         selectOption('qcType', 'Amplification');
         cy.get('#labwareScanInput').type('STAN-5100{enter}');
-        cy.findByTestId('all-Cycles').type('3');
+        cy.findByTestId('all-Cycles').clear().type('3');
       });
       it('Save button should be disabled when there is no SGP number', () => {
         selectSGPNumber('');
@@ -341,7 +341,7 @@ describe('Visium QC Page', () => {
       });
       it('shows a success message', () => {
         selectSGPNumber('SGP1008');
-        cy.findByTestId('all-Cycles').type('4');
+        cy.findByTestId('all-Cycles').clear().type('4');
         cy.findByRole('button', { name: /Save/i }).should('not.be.disabled').click();
         cy.findByText('Amplification complete').should('be.visible');
       });
