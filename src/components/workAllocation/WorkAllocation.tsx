@@ -59,6 +59,7 @@ const tableColumnFieldInfo = [
   { key: 'Priority', path: ['work', 'priority'] },
   { key: 'SGP Number', path: ['work', 'workNumber'] },
   { key: 'Work Type', path: ['work', 'workType', 'name'] },
+  { key: 'Treatment Types', path: ['work', 'treatmentTypes', 'name'] },
   { key: 'Work Requester', path: ['work', 'workRequester', 'username'] },
   { key: 'Project', path: ['work', 'project', 'name'] },
   { key: 'Omero Project', path: ['work', 'omeroProject', 'name'] },
@@ -67,8 +68,7 @@ const tableColumnFieldInfo = [
   { key: 'Number of Blocks', path: ['work', 'numBlocks'] },
   { key: 'Number of Slides', path: ['work', 'numSlides'] },
   { key: 'Number of Original samples', path: ['work', 'numOriginalSamples'] },
-  { key: 'Status', path: ['work', 'status'] },
-  { key: 'Treatment Types', path: ['work', 'treatmentTypes', 'name'] }
+  { key: 'Status', path: ['work', 'status'] }
 ];
 
 /**
@@ -210,6 +210,11 @@ export default function WorkAllocation() {
       .oneOf(workTypes.map((wt) => wt.name))
       .required()
       .label('Work Type'),
+    // Validate that selected treatment types are valid or empty array
+    treatmentTypes: Yup.array()
+      .of(Yup.string().oneOf(treatmentTypeOptions.map((t) => t.value)))
+      .required()
+      .label('Treatment Types'),
     workRequester: Yup.string()
       .oneOf(workRequesters.map((wr) => wr.username))
       .required()
@@ -234,11 +239,6 @@ export default function WorkAllocation() {
       .oneOf(omeroProjects.map((cc) => cc.name))
       .optional()
       .label('Omero Project'),
-    // Validate that selected treatment types are valid or empty array
-    treatmentTypes: Yup.array()
-      .of(Yup.string().oneOf(treatmentTypeOptions.map((t) => t.value)))
-      .required()
-      .label('Treatment Types'),
     ssStudyId: Yup.string().label('DNAP study ID').optional(),
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
@@ -678,6 +678,7 @@ export default function WorkAllocation() {
                       <TableHeader />
                       <TableHeader sortProps={getTableSortProps('SGP Number')}>SGP Number</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Treatment Types')}>Treatment Types</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Project')}>
                         Project (cost code description)
@@ -697,7 +698,6 @@ export default function WorkAllocation() {
                       <TableHeader sortProps={getTableSortProps('Number of Original Samples')}>
                         Number of Original Samples
                       </TableHeader>
-                      <TableHeader sortProps={getTableSortProps('Treatment Types')}>Treatment Types</TableHeader>
                     </tr>
                   </TableHead>
                   <TableBody>
