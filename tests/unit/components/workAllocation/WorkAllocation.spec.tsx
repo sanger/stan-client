@@ -2,32 +2,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
 import WorkAllocation from '../../../../src/components/workAllocation/WorkAllocation';
+import { mockCreateObjectURL } from '../../testUtils/mockCreateObjectURL';
 
 // Mock URL.createObjectURL for jsdom environment
-let originalCreateObjectURL: typeof global.URL.createObjectURL | undefined;
-let originalRevokeObjectURL: typeof global.URL.revokeObjectURL | undefined;
-beforeAll(() => {
-  originalCreateObjectURL = global.URL.createObjectURL;
-  global.URL.createObjectURL = jest.fn(() => 'mock-url');
-  originalRevokeObjectURL = global.URL.revokeObjectURL;
-  global.URL.revokeObjectURL = jest.fn();
-});
-
-// Restore original functions after tests
-afterAll(() => {
-  if (originalCreateObjectURL) {
-    global.URL.createObjectURL = originalCreateObjectURL;
-  } else {
-    // @ts-expect-error: createObjectURL may not exist
-    delete global.URL.createObjectURL;
-  }
-  if (originalRevokeObjectURL) {
-    global.URL.revokeObjectURL = originalRevokeObjectURL;
-  } else {
-    // @ts-expect-error: revokeObjectURL may not exist
-    delete global.URL.revokeObjectURL;
-  }
-});
+mockCreateObjectURL();
 
 // Mock dependencies as needed (e.g., xstate, react-router, etc.)
 jest.mock('react-router-dom', () => ({
