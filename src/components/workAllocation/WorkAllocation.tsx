@@ -68,7 +68,7 @@ const tableColumnFieldInfo = [
   { key: 'Number of Slides', path: ['work', 'numSlides'] },
   { key: 'Number of Original samples', path: ['work', 'numOriginalSamples'] },
   { key: 'Status', path: ['work', 'status'] },
-  { key: 'Treatment Types', path: ['work', 'treatmentTypes'] }
+  { key: 'Treatment Types', path: ['work', 'treatmentTypes', 'name'] }
 ];
 
 /**
@@ -142,11 +142,10 @@ export default function WorkAllocation() {
       },
       entries: workWithComments.map((data) => {
         return tableColumnFieldInfo.map((columnInfo) => {
-          const value = getPropertyValue(data, columnInfo.path);
-          // If the value is an array (e.g., treatmentTypes), join as comma-separated string
-          if (Array.isArray(value)) {
-            return value.join(', ');
+          if (columnInfo.key === 'Treatment Types') {
+            return data.work.treatmentTypes.map((t) => t.name).join(', ');
           }
+          const value = getPropertyValue(data, columnInfo.path);
           return String(value);
         });
       })
