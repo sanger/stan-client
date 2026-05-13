@@ -409,17 +409,17 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             .join(' and ');
 
           const treatmentTypesMsg =
-            treatmentTypes.length > 0 ? `, treatment types: ${treatmentTypes.map((t) => t.name).join(', ')}` : '';
+            treatmentTypes.length > 0 ? `, treatment types ${treatmentTypes.map((t) => t.name).join(', ')}` : '';
 
           return produce(context, (draft) => {
             draft.allocatedWorkNumber = workNumber;
             draft.successMessage = `Assigned ${workNumber} (${
               workType.name
-            } - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
+            }${treatmentTypesMsg} - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
               omeroProject ? `, Omero project ${omeroProject.name}` : ''
             }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''}, program ${program.name}${
               facultyLead ? ` and faculty lead ${facultyLead.name}` : ''
-            } using cost code ${costCode.code} with the work requester ${workRequester?.username}${treatmentTypesMsg}`;
+            } using cost code ${costCode.code} with the work requester ${workRequester?.username}`;
           });
         }),
 
