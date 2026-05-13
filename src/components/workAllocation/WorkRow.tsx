@@ -357,6 +357,18 @@ export default function WorkRow({
       </TableCell>
       <TableCell>{work.workNumber}</TableCell>
       <TableCell>{work.workType.name}</TableCell>
+      <TableCell>
+        {work.treatmentTypes.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {work.treatmentTypes.map((tt) => (
+              <Pill key={tt.name} color={tt.enabled ? 'blue' : 'pink'}>
+                {tt.name}
+              </Pill>
+            ))}
+          </div>
+        )}
+      </TableCell>
+
       <TableCell>{work.workRequester?.username}</TableCell>
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
@@ -380,17 +392,6 @@ export default function WorkRow({
       <TableCell>
         {isEditEnabledForStatus(work.status) &&
           renderWorkNumValueField(work.workNumber, work.numOriginalSamples ?? undefined, 'originalSamples')}
-      </TableCell>
-      <TableCell>
-        {work.treatmentTypes.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {work.treatmentTypes.map((tt) => (
-              <Pill key={tt.name} color={tt.enabled ? 'blue' : 'pink'}>
-                {tt.name}
-              </Pill>
-            ))}
-          </div>
-        )}
       </TableCell>
     </tr>
   );
