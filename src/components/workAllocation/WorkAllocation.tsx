@@ -320,6 +320,23 @@ export default function WorkAllocation() {
 
                   <div className="md:flex-grow">
                     <CustomReactSelect
+                      label="Treatment Types"
+                      name="treatmentTypes"
+                      dataTestId="treatmentTypes"
+                      isMulti={true}
+                      options={treatmentTypeOptions}
+                      value={values.treatmentTypes}
+                      onChange={(selected) => {
+                        setFieldValue(
+                          'treatmentTypes',
+                          Array.isArray(selected) ? selected.map((opt) => opt.value) : []
+                        );
+                      }}
+                    />
+                  </div>
+
+                  <div className="md:flex-grow">
+                    <CustomReactSelect
                       label="Work Requester"
                       name="workRequester"
                       dataTestId="workRequester"
@@ -580,22 +597,6 @@ export default function WorkAllocation() {
                       emptyOption={true}
                       dataTestId={'facultyLead'}
                       options={selectOptionValues(facultyLeads, 'name', 'name')}
-                    />
-                  </div>
-                  <div className="md:flex-grow">
-                    <CustomReactSelect
-                      label="Treatment Types"
-                      name="treatmentTypes"
-                      dataTestId="treatmentTypes"
-                      isMulti={true}
-                      options={treatmentTypeOptions}
-                      value={values.treatmentTypes}
-                      onChange={(selected) => {
-                        setFieldValue(
-                          'treatmentTypes',
-                          Array.isArray(selected) ? selected.map((opt) => opt.value) : []
-                        );
-                      }}
                     />
                   </div>
                 </div>
