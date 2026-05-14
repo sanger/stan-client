@@ -219,7 +219,7 @@ describe('Xenium Analyser', () => {
     selectOption('STAN-3111-position', 'Left');
     for (let indx = 0; indx < 4; indx++) {
       cy.findByTestId(`STAN-3111-${indx}-roi`).clear().type('123456789').blur();
-      cy.findByTestId('closeBarcodeDisplayer').click();
+      cy.findByTestId('closeBarcodeDisplayer').should('be.visible').click();
     }
   }
 });
