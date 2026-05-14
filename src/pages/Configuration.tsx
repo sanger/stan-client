@@ -22,11 +22,12 @@ import { alphaNumericSortDefault } from '../types/stan';
 import BlueButton from '../components/buttons/BlueButton';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
 import Success from '../components/notifications/Success';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useRevalidator } from 'react-router-dom';
 import ComposedEntityManager from '../components/entityManager/ComposedEntityManager';
 
 export default function Configuration() {
   const configuration = useLoaderData() as GetConfigurationQuery;
+  const revalidator = useRevalidator();
   const stanCore = useContext(StanCoreContext);
   const groupedComments = groupBy(configuration.comments, 'category');
   const groupedEquipments = groupBy(configuration.equipments, 'category');
@@ -674,7 +675,15 @@ export default function Configuration() {
                 enabled,
                 name: entity.name
               })
-              .then((res) => res.setTreatmentTypeEnabled);
+              .then((res) => {
+                // revalidate route loader so the configuration page sees server-side updates
+                try {
+                  revalidator.revalidate();
+                } catch (e) {
+                  // noop - revalidator may not be available in all contexts
+                }
+                return res.setTreatmentTypeEnabled;
+              });
           }}
           onCreate={(name) => stanCore.AddTreatmentType({ name }).then((res) => res.addTreatmentType)}
           valueFieldComponentInfo={{

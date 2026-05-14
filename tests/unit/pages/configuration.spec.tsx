@@ -39,7 +39,8 @@ const mockConfiguration = {
 // Mock useLoaderData to return our mock configuration
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useLoaderData: () => mockConfiguration
+  useLoaderData: () => mockConfiguration,
+  useRevalidator: () => ({ revalidate: jest.fn() })
 }));
 
 describe('Configuration page - Treatment Types', () => {
