@@ -739,6 +739,7 @@ export default function Configuration() {
     configuration,
     groupedEquipments,
     stanCore,
+    revalidator,
     handleRefreshReprojectedEntries,
     loading,
     dnapStudies,
