@@ -2,14 +2,14 @@ import { selectOption, selectSGPNumber, shouldDisplaySelectedValue } from '../sh
 import {
   FindFlaggedLabwareQuery,
   FindFlaggedLabwareQueryVariables,
+  FindIfOpExistsQuery,
+  FindIfOpExistsQueryVariables,
   LabwareState,
   ReloadSlotCopyQuery,
   ReloadSlotCopyQueryVariables,
   SlideCosting,
   SlotCopyMutation,
-  SlotCopyMutationVariables,
-  FindIfOpExistsQuery,
-  FindIfOpExistsQueryVariables
+  SlotCopyMutationVariables
 } from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
 import { LabwareTypeName } from '../../../src/types/stan';
@@ -188,7 +188,9 @@ describe('CytAssist Page', () => {
       });
     });
     it('should display Invalid format error message', () => {
-      cy.findByText('Invalid format for this labware type').should('be.visible');
+      cy.contains(`Invalid format for ${LabwareTypeName.VISIUM_LP_CYTASSIST_XL}. Example: V42A20-3752023-10-20`).should(
+        'be.visible'
+      );
     });
   });
   context('When external id is entered in correct format', () => {
@@ -222,7 +224,9 @@ describe('CytAssist Page', () => {
       selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_HD);
     });
     it('should validate the external barcode ', () => {
-      cy.contains('Invalid format for VISIUM LP CYTASSIST').should('be.visible');
+      cy.contains(`Invalid format for ${LabwareTypeName.VISIUM_LP_CYTASSIST_HD}. Example: H1-9D8VN2V`).should(
+        'be.visible'
+      );
     });
     it('clears out all the mapping ', () => {
       cy.findByTestId('STAN-3100').within(() => {

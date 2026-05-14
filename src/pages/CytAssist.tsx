@@ -95,7 +95,7 @@ const validationSchema = () => {
             .required('Required field')
             .matches(
               /[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}/,
-              `Invalid format for ${labwareType}. Example: H1-9D8VN2V`
+              `Invalid format for ${labwareType}. Example: V42A20-3752023-10-20V42A20-3752023-10-20`
             );
     }),
     lpNumber: Yup.string().oneOf(LP_NUMBERS).required('Required field'),
