@@ -45,7 +45,7 @@ describe('Visium QC Page', () => {
   describe('On Visium QCType as Slide Processing', () => {
     context('When user scans in a slide ', () => {
       before(() => {
-        cy.get('#labwareScanInput').type('STAN-811EA{enter}');
+        cy.get('#labwareScanInput').clear().type('STAN-811EA{enter}');
       });
       it('shows it on the page', () => {
         cy.findByText('STAN-811EA').should('be.visible');
@@ -71,7 +71,7 @@ describe('Visium QC Page', () => {
     context('costing field check', () => {
       context('when user enters a labware which has already assigned a costing', () => {
         before(() => {
-          cy.get('#labwareScanInput').type('STAN-2101{enter}');
+          cy.get('#labwareScanInput').clear().type('STAN-2101{enter}');
         });
         it('disables Slide costing drop down', () => {
           shouldBeDisabled('slide-costing');
@@ -85,7 +85,7 @@ describe('Visium QC Page', () => {
       });
       context('when user enters a labware with invalid barcode', () => {
         before(() => {
-          cy.get('#labwareScanInput').type('aaa{enter}');
+          cy.get('#labwareScanInput').clear().type('aaa{enter}');
         });
         it('shows barcode not found message', () => {
           cy.findByText('Invalid barcode: aaa').should('be.visible');
@@ -153,7 +153,7 @@ describe('Visium QC Page', () => {
         context('When slide costing field is empty, all other fields are valid', () => {
           before(() => {
             cy.reload();
-            cy.get('#labwareScanInput').type('STAN-811EA{enter}');
+            cy.get('#labwareScanInput').clear().type('STAN-811EA{enter}');
             selectOption('slide-costing', '');
             selectSGPNumber('SGP1008');
             cy.findByTestId('formInput').type('123456');
@@ -235,7 +235,7 @@ describe('Visium QC Page', () => {
         });
 
         it('shows an error', () => {
-          cy.get('#labwareScanInput').type('STAN-2100{enter}');
+          cy.get('#labwareScanInput').clear().type('STAN-2100{enter}');
           selectOption('slide-costing', 'SGP');
           selectSGPNumber('SGP1008');
           selectOption('slide-costing', 'Faculty');
@@ -249,7 +249,7 @@ describe('Visium QC Page', () => {
       before(() => {
         cy.reload();
         cy.get('#labwareScanInput').clear().type('STAN-811EA{enter}');
-        cy.get('#labwareScanInput').type('STAN-811FA{enter}');
+        cy.get('#labwareScanInput').clear().type('STAN-811FA{enter}');
       });
       it('should display both labwares', () => {
         cy.findAllByTestId('passFailComments').should('have.length', 2);
@@ -267,7 +267,7 @@ describe('Visium QC Page', () => {
 
     context('When user scans in a 96 well plate ', () => {
       before(() => {
-        cy.get('#labwareScanInput').type('STAN-811EA{enter}');
+        cy.get('#labwareScanInput').clear().type('STAN-811EA{enter}');
       });
       it('displays the labware layout  on the page', () => {
         cy.findByText('STAN-811EA').should('be.visible');
@@ -314,7 +314,7 @@ describe('Visium QC Page', () => {
         });
         cy.reload();
         selectOption('qcType', 'Amplification');
-        cy.get('#labwareScanInput').type('STAN-811EA{enter}');
+        cy.get('#labwareScanInput').clear().type('STAN-811EA{enter}');
       });
       it('displays error message', () => {
         cy.findByText('No Cq values associated with the labware slots').should('be.visible');
@@ -332,8 +332,18 @@ describe('Visium QC Page', () => {
       before(() => {
         cy.reload();
         selectOption('qcType', 'Amplification');
-        cy.get('#labwareScanInput').type('STAN-5100{enter}');
+        cy.get('#labwareScanInput').clear().type('STAN-5100{enter}');
         cy.findByTestId('all-Cycles').clear().type('3');
+        // Alias the RecordVisiumQC GraphQL mutation so we can wait for it
+        cy.intercept('POST', '/graphql', (req) => {
+          try {
+            if (req.body && req.body.operationName === 'RecordVisiumQC') {
+              req.alias = 'recordVisium';
+            }
+          } catch (e) {
+            // noop
+          }
+        });
       });
       it('Save button should be disabled when there is no SGP number', () => {
         selectSGPNumber('');
@@ -343,7 +353,9 @@ describe('Visium QC Page', () => {
         selectSGPNumber('SGP1008');
         cy.findByTestId('all-Cycles').clear().type('4');
         cy.findByRole('button', { name: /Save/i }).should('not.be.disabled').click();
-        cy.findByText('Amplification complete').should('be.visible');
+        // wait for the GraphQL mutation to complete, then assert toast
+        cy.wait('@recordVisium');
+        cy.findByText(/Amplification\s*complete/i, { timeout: 30000 }).should('be.visible');
       });
     });
   });
@@ -356,7 +368,7 @@ describe('Visium QC Page', () => {
     });
     context('On load', () => {
       before(() => {
-        cy.get('#labwareScanInput').type('STAN-811EA{enter}');
+        cy.get('#labwareScanInput').clear().type('STAN-811EA{enter}');
       });
       it('shows measurementType dropdown with no option selected', () => {
         shouldDisplaySelectedValue('measurementType', '');
@@ -396,7 +408,7 @@ describe('Visium QC Page', () => {
     });
     context('When user scans in a slide ', () => {
       before(() => {
-        cy.get('#labwareScanInput').type('STAN-2100{enter}');
+        cy.get('#labwareScanInput').clear().type('STAN-2100{enter}');
       });
       it('shows it on the page', () => {
         cy.findByText('STAN-2100').should('be.visible');
@@ -480,7 +492,7 @@ describe('Visium QC Page', () => {
           });
           selectSGPNumber('SGP1008');
           selectOption('qcType', 'SPRI clean up');
-          cy.get('#labwareScanInput').type('STAN-811EA{enter}');
+          cy.get('#labwareScanInput').clear().type('STAN-811EA{enter}');
           selectOptionForMultiple('comment', 'Beads cracked during drying step', 0);
           saveButton().click();
         });
@@ -492,7 +504,7 @@ describe('Visium QC Page', () => {
     context('When user scans in a 96 well plate ', () => {
       before(() => {
         cy.findByTestId('removeButton').click();
-        cy.get('#labwareScanInput').type('STAN-410{enter}');
+        cy.get('#labwareScanInput').clear().type('STAN-410{enter}');
       });
       it('shows it on the page', () => {
         cy.findByText('STAN-410').should('be.visible');
@@ -572,7 +584,7 @@ describe('Visium QC Page', () => {
           });
           selectSGPNumber('SGP1008');
           selectOption('qcType', 'SPRI clean up');
-          cy.get('#labwareScanInput').type('STAN-811EA{enter}');
+          cy.get('#labwareScanInput').clear().type('STAN-811EA{enter}');
           selectOptionForMultiple('comment', 'Beads cracked during drying step', 0);
           saveButton().click();
         });
@@ -587,7 +599,7 @@ describe('Visium QC Page', () => {
     before(() => {
       cy.visit('/lab/visium_qc');
       selectOption('qcType', 'qPCR results');
-      cy.get('#labwareScanInput').type('STAN-811EA{enter}');
+      cy.get('#labwareScanInput').clear().type('STAN-811EA{enter}');
     });
 
     context('When a user enters a global CQ value', () => {
@@ -642,7 +654,7 @@ describe('Visium QC Page', () => {
           cy.reload();
           selectSGPNumber('SGP1008');
           selectOption('qcType', 'qPCR results');
-          cy.get('#labwareScanInput').type('STAN-811EA{enter}');
+          cy.get('#labwareScanInput').clear().type('STAN-811EA{enter}');
           cy.findByTestId('all-Cq value').type('5');
           cy.findByRole('button', { name: /Save/i }).click();
         });
