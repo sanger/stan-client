@@ -288,6 +288,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             src: fromPromise(({ input }) => {
               const {
                 workType,
+                treatmentTypes,
                 workRequester,
                 project,
                 program,
@@ -298,11 +299,12 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
                 numSlides,
                 numOriginalSamples,
                 ssStudyId,
-                facultyLead,
-                treatmentTypes
+                xeniumStudyId,
+                facultyLead
               } = input.values;
               return stanCore.CreateWork({
                 workType,
+                treatmentTypes,
                 workRequester,
                 project,
                 program,
@@ -314,7 +316,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
                 omeroProject,
                 facultyLead,
                 ssStudyId: ssStudyId ? Number(ssStudyId) : null,
-                treatmentTypes
+                xeniumStudyId: xeniumStudyId ? Number(xeniumStudyId) : null
               });
             }),
             input: ({ event }) => {
@@ -389,6 +391,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             workNumber,
             workRequester,
             workType,
+            treatmentTypes,
             project,
             program,
             costCode,
@@ -397,8 +400,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             numOriginalSamples,
             omeroProject,
             dnapStudy,
-            facultyLead,
-            treatmentTypes
+            xeniumStudy,
+            facultyLead
           } = event.output.createWork;
           const blockSlideSampleMsg = [
             numBlocks ? `${numBlocks} blocks` : undefined,
@@ -417,7 +420,9 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
               workType.name
             }${treatmentTypesMsg} - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
               omeroProject ? `, Omero project ${omeroProject.name}` : ''
-            }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''}, program ${program.name}${
+            }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''}${
+              xeniumStudy ? `, Xenium study name '${xeniumStudy.name}'` : ''
+            }, program ${program.name}${
               facultyLead ? ` and faculty lead ${facultyLead.name}` : ''
             } using cost code ${costCode.code} with the work requester ${workRequester?.username}`;
           });
