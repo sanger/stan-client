@@ -4,6 +4,14 @@ import React from 'react';
 import WorkAllocation from '../../../../src/components/workAllocation/WorkAllocation';
 import { mockCreateObjectURL } from '../../testUtils/mockCreateObjectURL';
 
+// Test the Treatment Types field in the WorkAllocation form, including
+// enabled/disabled options, selecting/unselecting options, displaying
+// selected options as chips in the UI, and submitting the form with the
+// selected treatment types to see the success message.
+
+// Use shared URL.createObjectURL mock util for jsdom
+mockCreateObjectURL();
+
 // Mock URL.createObjectURL for jsdom environment
 mockCreateObjectURL();
 

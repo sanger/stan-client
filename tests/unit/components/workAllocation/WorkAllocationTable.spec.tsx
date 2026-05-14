@@ -5,6 +5,10 @@ import WorkAllocation from '../../../../src/components/workAllocation/WorkAlloca
 import { mockCreateObjectURL } from '../../testUtils/mockCreateObjectURL';
 import * as AuthContext from '../../../../src/context/AuthContext';
 
+// Test the presence and order of the Treatment Types header in the
+// WorkAllocation table, and the rendering of treatment type pills with
+// correct colours in the table rows.
+
 // Use shared URL.createObjectURL mock util for jsdom
 mockCreateObjectURL();
 

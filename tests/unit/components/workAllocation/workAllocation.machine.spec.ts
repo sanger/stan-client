@@ -2,6 +2,8 @@ import { interpret, waitFor } from 'xstate';
 import createWorkAllocationMachine from '../../../../src/components/workAllocation/workAllocation.machine';
 import { WorkStatus } from '../../../../src/types/sdk';
 
+// Test the success message after creating work in the machine.
+
 // Mock stanCore used by the machine
 jest.mock('../../../../src/lib/sdk', () => {
   return {
