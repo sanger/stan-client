@@ -335,18 +335,8 @@ describe('Visium QC Page', () => {
       before(() => {
         cy.reload();
         selectOption('qcType', 'Amplification');
-        cy.get('#labwareScanInput').clear().type('STAN-5100{enter}');
+        cy.get('#labwareScanInput').clear().type('STAN-811EA{enter}');
         cy.findByTestId('all-Cycles').clear().type('3');
-        // Alias the RecordVisiumQC GraphQL mutation so we can wait for it
-        cy.intercept('POST', '/graphql', (req) => {
-          try {
-            if (req.body && req.body.operationName === 'RecordVisiumQC') {
-              req.alias = 'recordVisium';
-            }
-          } catch (e) {
-            // noop
-          }
-        });
       });
       it('Save button should be disabled when there is no SGP number', () => {
         selectSGPNumber('');
@@ -356,8 +346,6 @@ describe('Visium QC Page', () => {
         selectSGPNumber('SGP1008');
         cy.findByTestId('all-Cycles').clear().type('4');
         cy.findByRole('button', { name: /Save/i }).should('not.be.disabled').click();
-        // wait for the GraphQL mutation to complete, then assert toast
-        cy.wait('@recordVisium');
         cy.findByText(/Amplification\s*complete/i, { timeout: 30000 }).should('be.visible');
       });
     });
