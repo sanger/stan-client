@@ -117,8 +117,10 @@ describe('Visium QC Page', () => {
         });
       });
       it('has all comment dropdowns enabled', () => {
-        getAllSelect('comment').forEach((elem: any) => {
-          cy.wrap(elem).should('be.enabled');
+        cy.findAllByTestId('comment').each(($elem) => {
+          cy.wrap($elem).within(() => {
+            cy.findByRole('combobox').should('be.enabled');
+          });
         });
       });
     });
@@ -135,8 +137,10 @@ describe('Visium QC Page', () => {
         });
       });
       it('enables all the comment dropdowns', () => {
-        getAllSelect('comment').forEach((elem: any) => {
-          cy.wrap(elem).should('be.enabled');
+        cy.findAllByTestId('comment').each(($elem) => {
+          cy.wrap($elem).within(() => {
+            cy.findByRole('combobox').should('be.enabled');
+          });
         });
       });
     });
