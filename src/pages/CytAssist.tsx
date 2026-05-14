@@ -73,12 +73,20 @@ const isCytAssistThreePointLabware = (labwareType: string) => {
   );
 };
 
+const isVisiumLpCytAssistHdLabware = (labwareType: string) => {
+  return (
+    labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD ||
+    labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_11 ||
+    labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_6_5 ||
+    labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_3_11
+  );
+};
+
 const validationSchema = () => {
   return Yup.object().shape({
     labwareType: Yup.string().required('Required field'),
     preBarcode: Yup.string().when('labwareType', (labwareType, schema) => {
-      const val = labwareType[0] as unknown as string;
-      return val === LabwareTypeName.VISIUM_LP_CYTASSIST_HD
+      return isVisiumLpCytAssistHdLabware(labwareType[0] as unknown as string)
         ? Yup.string()
             .required('Required field')
             .matches(/[A-Z0-9]{2}-[A-Z0-9]{7}/, 'Invalid format for a labware type of VISIUM_LP_CYTASSIST_HD')
