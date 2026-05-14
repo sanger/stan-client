@@ -15,9 +15,8 @@ jobs:
     name: Run cypress tests
     runs-on: ubuntu-latest
     container:
-      image: cypress/browsers:node18.12.0-chrome106-ff106
-
-      options: --user 1001
+      image: cypress/browsers:node-22.15.0-chrome-136.0.7103.92-1-ff-138.0.1-edge-136.0.3240.50-1
+      options: --ipc=host
     steps:
       - uses: actions/checkout@v4
         name: Checkout
