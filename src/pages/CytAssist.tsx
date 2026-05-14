@@ -73,7 +73,7 @@ const isCytAssistThreePointLabware = (labwareType: string) => {
   );
 };
 
-const isVisiumLpCytAssistHdLabware = (labwareType: string) => {
+export const isVisiumLpCytAssistHdLabware = (labwareType: string) => {
   return (
     labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD ||
     labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD_11 ||
@@ -86,13 +86,17 @@ const validationSchema = () => {
   return Yup.object().shape({
     labwareType: Yup.string().required('Required field'),
     preBarcode: Yup.string().when('labwareType', (labwareType, schema) => {
-      return isVisiumLpCytAssistHdLabware(labwareType[0] as unknown as string)
+      const lt = labwareType[0] as unknown as string;
+      return isVisiumLpCytAssistHdLabware(lt)
         ? Yup.string()
             .required('Required field')
-            .matches(/[A-Z0-9]{2}-[A-Z0-9]{7}/, 'Invalid format for a labware type of VISIUM_LP_CYTASSIST_HD')
+            .matches(/[A-Z0-9]{2}-[A-Z0-9]{7}/, `Invalid format for ${labwareType}. Example: H1-9D8VN2V`)
         : Yup.string()
             .required('Required field')
-            .matches(/[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}/, 'Invalid format for this labware type');
+            .matches(
+              /[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}/,
+              `Invalid format for ${labwareType}. Example: H1-9D8VN2V`
+            );
     }),
     lpNumber: Yup.string().oneOf(LP_NUMBERS).required('Required field'),
     costing: Yup.string().required('Required field'),
