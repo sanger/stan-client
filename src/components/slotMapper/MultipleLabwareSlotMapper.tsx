@@ -26,7 +26,7 @@ import WhiteButton from '../buttons/WhiteButton';
 import SlotMapperTable, { SlotMapperTableProps } from './SlotMapperTable';
 import Warning from '../notifications/Warning';
 import { useFormikContext } from 'formik';
-import { CytAssistOutputLabwareForm } from '../../pages/CytAssist';
+import { CytAssistOutputLabwareForm, isVisiumLpCytAssistHdLabware } from '../../pages/CytAssist';
 import { flaggedLabwareLayout } from '../../lib/factories/labwareFactory';
 import { eventBus } from '../../eventBus';
 import { SavedDraft } from '../../lib/machines/slotCopy/slotCopyMachine';
@@ -47,17 +47,17 @@ type SelectedSlot = {
 type SlotPassFail = Map<string, Set<SlotPassFailFieldsFragment>>; // key labware barcode, failedSlots array of failed slots
 
 const validatePreBarcode = (preBarcode: string, labwareType: string) => {
-  if (labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST_HD) {
+  if (isVisiumLpCytAssistHdLabware(labwareType)) {
     const isValid = /^[A-Z0-9]{2}-[A-Z0-9]{7}$/.test(preBarcode);
     return {
       valid: isValid,
-      errorMessage: isValid ? undefined : 'Invalid format for VISIUM LP CYTASSIST HD. Example: H1-9D8VN2V'
+      errorMessage: isValid ? undefined : `Invalid format for ${labwareType}. Example: H1-9D8VN2V`
     };
   }
   const isValid = /^[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}$/.test(preBarcode);
   return {
     valid: isValid,
-    errorMessage: isValid ? undefined : 'Invalid format. Example: V42A20-3752023-10-20'
+    errorMessage: isValid ? undefined : `Invalid format for ${labwareType}. Example: V42A20-3752023-10-20`
   };
 };
 
