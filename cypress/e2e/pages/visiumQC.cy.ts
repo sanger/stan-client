@@ -11,7 +11,6 @@ import {
 } from '../../../src/types/sdk';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 import {
-  getAllSelect,
   selectOption,
   selectOptionForMultiple,
   selectSGPNumber,
