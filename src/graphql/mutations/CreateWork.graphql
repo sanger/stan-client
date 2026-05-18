@@ -11,6 +11,7 @@ mutation CreateWork(
   $omeroProject: String
   $ssStudyId: Int
   $xeniumStudyId: Int
+  $treatmentTypes: [String!]
   $facultyLead: String!
 ) {
   createWork(
@@ -26,6 +27,7 @@ mutation CreateWork(
     omeroProject: $omeroProject
     ssStudyId: $ssStudyId
     xeniumStudyId: $xeniumStudyId
+    treatmentTypes: $treatmentTypes
     facultyLead: $facultyLead
   ) {
     ...WorkFields

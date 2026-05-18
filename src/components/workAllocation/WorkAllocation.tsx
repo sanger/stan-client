@@ -43,7 +43,8 @@ const initialValues: WorkAllocationFormValues = {
   numOriginalSamples: undefined,
   ssStudyId: '',
   studyName: undefined,
-  facultyLead: ''
+  facultyLead: '',
+  treatmentTypes: []
 };
 export const MAX_NUM_BLOCKANDSLIDES = 200;
 
@@ -58,6 +59,7 @@ const tableColumnFieldInfo = [
   { key: 'Priority', path: ['work', 'priority'] },
   { key: 'SGP Number', path: ['work', 'workNumber'] },
   { key: 'Work Type', path: ['work', 'workType', 'name'] },
+  { key: 'Treatment Types', path: ['work', 'treatmentTypes', 'name'] },
   { key: 'Work Requester', path: ['work', 'workRequester', 'username'] },
   { key: 'Project', path: ['work', 'project', 'name'] },
   { key: 'Omero Project', path: ['work', 'omeroProject', 'name'] },
@@ -111,8 +113,15 @@ export default function WorkAllocation() {
     facultyLeads,
     requestError,
     successMessage,
-    allocatedWorkNumber
+    allocatedWorkNumber,
+    treatmentTypes
   } = current.context;
+
+  const treatmentTypeOptions = selectOptionValues(
+    (treatmentTypes || []).filter((t) => t.enabled),
+    'name',
+    'name'
+  );
 
   /**Hook to sort table*/
   const { sortedTableData, sort, sortConfig } = useTableSort<WorkWithCommentFieldsFragment>(workWithComments, {
@@ -133,7 +142,11 @@ export default function WorkAllocation() {
       },
       entries: workWithComments.map((data) => {
         return tableColumnFieldInfo.map((columnInfo) => {
-          return String(getPropertyValue(data, columnInfo.path));
+          if (columnInfo.key === 'Treatment Types') {
+            return data.work.treatmentTypes.map((t) => t.name).join(', ');
+          }
+          const value = getPropertyValue(data, columnInfo.path);
+          return String(value);
         });
       })
     };
@@ -197,6 +210,11 @@ export default function WorkAllocation() {
       .oneOf(workTypes.map((wt) => wt.name))
       .required()
       .label('Work Type'),
+    // Validate that selected treatment types are valid or empty array
+    treatmentTypes: Yup.array()
+      .of(Yup.string().oneOf(treatmentTypeOptions.map((t) => t.value)))
+      .required()
+      .label('Treatment Types'),
     workRequester: Yup.string()
       .oneOf(workRequesters.map((wr) => wr.username))
       .required()
@@ -285,293 +303,313 @@ export default function WorkAllocation() {
           validateOnBlur={true}
           validateOnChange={false}
         >
-          {({ setFieldValue, values }) => (
-            <Form>
-              <div className=" md:grid md:grid-cols-3 md:px-10 sm:flex sm:flex-row md:justify-center md:items-start md:gap-y-4 md:gap-x-8">
-                <div className="md:flex-grow">
-                  <CustomReactSelect
-                    label="Work Type"
-                    name="workType"
-                    emptyOption={true}
-                    dataTestId={'workType'}
-                    options={selectOptionValues(workTypes, 'name', 'name')}
-                  />
-                </div>
-
-                <div className="md:flex-grow">
-                  <CustomReactSelect
-                    label="Work Requester"
-                    name="workRequester"
-                    dataTestId="workRequester"
-                    emptyOption={true}
-                    options={selectOptionValues(workRequesters, 'username', 'username', true, {
-                      sort: true,
-                      alphaFirst: true
-                    })}
-                  />
-                </div>
-                {addNewProjectCodeCode && isComponentVisible ? (
-                  <AddNewConfigOption
-                    mainDivRef={ref}
-                    inputRef={addNewConfigOptionInputRef}
-                    returnedDataObject="addProject"
-                    onSubmit={(value: string) => {
-                      return stanCore.AddProject({ name: value });
-                    }}
-                    onCancel={() => {
-                      setAddNewProjectCodeCode(false);
-                    }}
-                    onSuccess={(object) => {
-                      const name = object.name;
-                      send({
-                        type: 'ADD_NEWLY_CREATED_PROJECT',
-                        project: projectFactory.build({ name: name })
-                      });
-                      setFieldValue('project', name);
-                    }}
-                    onFinish={() => {
-                      setAddNewProjectCodeCode(false);
-                    }}
-                    configLabel="Add New Project"
-                    configName="project"
-                  />
-                ) : (
+          {({ setFieldValue, values }) => {
+            // ...existing code...
+            return (
+              <Form>
+                <div className=" md:grid md:grid-cols-3 md:px-10 sm:flex sm:flex-row md:justify-center md:items-start md:gap-y-4 md:gap-x-8">
                   <div className="md:flex-grow">
                     <CustomReactSelect
-                      label="Project (cost code description)"
-                      name="project"
-                      dataTestId="project"
+                      label="Work Type"
+                      name="workType"
                       emptyOption={true}
-                      options={selectOptionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
-                      value={values.project}
-                      addButton={{
-                        dataTestId: 'addNewProject-btn',
-                        onClick: () => {
-                          setAddNewProjectCodeCode(true);
-                          setIsComponentVisible(true);
-                        },
-                        className: 'mt-4'
+                      dataTestId={'workType'}
+                      options={selectOptionValues(workTypes, 'name', 'name')}
+                    />
+                  </div>
+
+                  <div className="md:flex-grow">
+                    <CustomReactSelect
+                      label="Treatment Types"
+                      name="treatmentTypes"
+                      dataTestId="treatmentTypes"
+                      isMulti={true}
+                      options={treatmentTypeOptions}
+                      value={values.treatmentTypes}
+                      onChange={(selected) => {
+                        setFieldValue(
+                          'treatmentTypes',
+                          Array.isArray(selected) ? selected.map((opt) => opt.value) : []
+                        );
                       }}
                     />
                   </div>
-                )}
-                {addNewOmeroProject && isComponentVisible ? (
-                  <AddNewConfigOption
-                    mainDivRef={ref}
-                    inputRef={addNewConfigOptionInputRef}
-                    returnedDataObject="addOmeroProject"
-                    onSubmit={(value: string) => {
-                      return stanCore.AddOmeroProject({ name: value });
-                    }}
-                    onCancel={() => {
-                      setAddNewOmeroProject(false);
-                    }}
-                    onSuccess={async (object) => {
-                      const name = object.name;
-                      send({
-                        type: 'ADD_NEWLY_CREATED_OMERO_PROJECT',
-                        project: omeroProjectFactory.build({ name: name })
-                      });
-                      await setFieldValue('omeroProject', name);
-                    }}
-                    onFinish={() => {
-                      setAddNewOmeroProject(false);
-                    }}
-                    configLabel="Add New Omero Project"
-                    configName="Omero Project"
-                  />
-                ) : (
+
                   <div className="md:flex-grow">
                     <CustomReactSelect
-                      label="Omero Project"
-                      name="omeroProject"
-                      dataTestId="omeroProject"
+                      label="Work Requester"
+                      name="workRequester"
+                      dataTestId="workRequester"
                       emptyOption={true}
-                      options={selectOptionValues(omeroProjects, 'name', 'name', true, {
+                      options={selectOptionValues(workRequesters, 'username', 'username', true, {
                         sort: true,
                         alphaFirst: true
                       })}
-                      value={values.omeroProject}
-                      addButton={{
-                        dataTestId: 'addNewOmeroProject-btn',
-                        onClick: () => {
-                          setAddNewOmeroProject(true);
-                          setIsComponentVisible(true);
-                        },
-                        className: 'mt-4'
-                      }}
                     />
                   </div>
-                )}
+                  {addNewProjectCodeCode && isComponentVisible ? (
+                    <AddNewConfigOption
+                      mainDivRef={ref}
+                      inputRef={addNewConfigOptionInputRef}
+                      returnedDataObject="addProject"
+                      onSubmit={(value: string) => {
+                        return stanCore.AddProject({ name: value });
+                      }}
+                      onCancel={() => {
+                        setAddNewProjectCodeCode(false);
+                      }}
+                      onSuccess={(object) => {
+                        const name = object.name;
+                        send({
+                          type: 'ADD_NEWLY_CREATED_PROJECT',
+                          project: projectFactory.build({ name: name })
+                        });
+                        setFieldValue('project', name);
+                      }}
+                      onFinish={() => {
+                        setAddNewProjectCodeCode(false);
+                      }}
+                      configLabel="Add New Project"
+                      configName="project"
+                    />
+                  ) : (
+                    <div className="md:flex-grow">
+                      <CustomReactSelect
+                        label="Project (cost code description)"
+                        name="project"
+                        dataTestId="project"
+                        emptyOption={true}
+                        options={selectOptionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
+                        value={values.project}
+                        addButton={{
+                          dataTestId: 'addNewProject-btn',
+                          onClick: () => {
+                            setAddNewProjectCodeCode(true);
+                            setIsComponentVisible(true);
+                          },
+                          className: 'mt-4'
+                        }}
+                      />
+                    </div>
+                  )}
+                  {addNewOmeroProject && isComponentVisible ? (
+                    <AddNewConfigOption
+                      mainDivRef={ref}
+                      inputRef={addNewConfigOptionInputRef}
+                      returnedDataObject="addOmeroProject"
+                      onSubmit={(value: string) => {
+                        return stanCore.AddOmeroProject({ name: value });
+                      }}
+                      onCancel={() => {
+                        setAddNewOmeroProject(false);
+                      }}
+                      onSuccess={async (object) => {
+                        const name = object.name;
+                        send({
+                          type: 'ADD_NEWLY_CREATED_OMERO_PROJECT',
+                          project: omeroProjectFactory.build({ name: name })
+                        });
+                        await setFieldValue('omeroProject', name);
+                      }}
+                      onFinish={() => {
+                        setAddNewOmeroProject(false);
+                      }}
+                      configLabel="Add New Omero Project"
+                      configName="Omero Project"
+                    />
+                  ) : (
+                    <div className="md:flex-grow">
+                      <CustomReactSelect
+                        label="Omero Project"
+                        name="omeroProject"
+                        dataTestId="omeroProject"
+                        emptyOption={true}
+                        options={selectOptionValues(omeroProjects, 'name', 'name', true, {
+                          sort: true,
+                          alphaFirst: true
+                        })}
+                        value={values.omeroProject}
+                        addButton={{
+                          dataTestId: 'addNewOmeroProject-btn',
+                          onClick: () => {
+                            setAddNewOmeroProject(true);
+                            setIsComponentVisible(true);
+                          },
+                          className: 'mt-4'
+                        }}
+                      />
+                    </div>
+                  )}
 
-                <div className="md:flex-grow">
-                  <CustomReactSelect
-                    label="Program"
-                    name="program"
-                    dataTestId="program"
-                    emptyOption={true}
-                    options={selectOptionValues(programs, 'name', 'name')}
-                  />
-                </div>
-
-                {addNewCostCode && isComponentVisible ? (
-                  <AddNewConfigOption
-                    mainDivRef={ref}
-                    inputRef={addNewConfigOptionInputRef}
-                    returnedDataObject="addCostCode"
-                    onSubmit={(value: string) => {
-                      return stanCore.AddCostCode({ code: value });
-                    }}
-                    onCancel={() => {
-                      setAddNewCostCode(false);
-                    }}
-                    onSuccess={(object) => {
-                      const code = object.code;
-                      send({
-                        type: 'ADD_NEWLY_CREATED_COST_CODE',
-                        costCode: costCodeFactory.build({ code: code })
-                      });
-                      setFieldValue('costCode', code);
-                    }}
-                    onFinish={() => {
-                      setAddNewCostCode(false);
-                    }}
-                    configLabel="Add New Cost Code"
-                    configName="costCode"
-                  />
-                ) : (
                   <div className="md:flex-grow">
                     <CustomReactSelect
-                      label="Cost Code"
-                      name="costCode"
-                      dataTestId="costCode"
+                      label="Program"
+                      name="program"
+                      dataTestId="program"
                       emptyOption={true}
-                      options={selectOptionValues(costCodes, 'code', 'code')}
-                      value={values.costCode}
-                      addButton={{
-                        dataTestId: 'addNewCostCode-btn',
-                        onClick: () => {
-                          setAddNewCostCode(true);
-                          setIsComponentVisible(true);
-                        },
-                        className: 'mt-4'
-                      }}
+                      options={selectOptionValues(programs, 'name', 'name')}
                     />
                   </div>
-                )}
 
-                <div className="md:flex-grow">
-                  <FormikInput
-                    label={'Number of original samples'}
-                    name={'numOriginalSamples'}
-                    type={'number'}
-                    maxLength={MAX_NUM_BLOCKANDSLIDES}
-                    min={0}
-                  />
-                </div>
-                <div className="md:flex-grow">
-                  <FormikInput
-                    label={'Number of blocks'}
-                    name={'numBlocks'}
-                    type={'number'}
-                    maxLength={MAX_NUM_BLOCKANDSLIDES}
-                    min={0}
-                  />
-                </div>
-                <div className="md:flex-grow">
-                  <FormikInput
-                    label={'Number of slides'}
-                    name={'numSlides'}
-                    type={'number'}
-                    maxLength={MAX_NUM_BLOCKANDSLIDES}
-                    min={0}
-                  />
-                </div>
-                <div className="md:flex-grow">
-                  <FormikInput
-                    type={'number'}
-                    label="DNAP study ID"
-                    name="ssStudyId"
-                    value={values.ssStudyId}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      const ssId = Number(e.currentTarget.value);
-                      stanCore
-                        .GetDnapStudy({ ssId: ssId })
-                        .then((study) => {
-                          if (study && study.dnapStudy) {
-                            setFieldValue('studyName', study.dnapStudy.name);
-                          } else {
+                  {addNewCostCode && isComponentVisible ? (
+                    <AddNewConfigOption
+                      mainDivRef={ref}
+                      inputRef={addNewConfigOptionInputRef}
+                      returnedDataObject="addCostCode"
+                      onSubmit={(value: string) => {
+                        return stanCore.AddCostCode({ code: value });
+                      }}
+                      onCancel={() => {
+                        setAddNewCostCode(false);
+                      }}
+                      onSuccess={(object) => {
+                        const code = object.code;
+                        send({
+                          type: 'ADD_NEWLY_CREATED_COST_CODE',
+                          costCode: costCodeFactory.build({ code: code })
+                        });
+                        setFieldValue('costCode', code);
+                      }}
+                      onFinish={() => {
+                        setAddNewCostCode(false);
+                      }}
+                      configLabel="Add New Cost Code"
+                      configName="costCode"
+                    />
+                  ) : (
+                    <div className="md:flex-grow">
+                      <CustomReactSelect
+                        label="Cost Code"
+                        name="costCode"
+                        dataTestId="costCode"
+                        emptyOption={true}
+                        options={selectOptionValues(costCodes, 'code', 'code')}
+                        value={values.costCode}
+                        addButton={{
+                          dataTestId: 'addNewCostCode-btn',
+                          onClick: () => {
+                            setAddNewCostCode(true);
+                            setIsComponentVisible(true);
+                          },
+                          className: 'mt-4'
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="md:flex-grow">
+                    <FormikInput
+                      label={'Number of original samples'}
+                      name={'numOriginalSamples'}
+                      type={'number'}
+                      maxLength={MAX_NUM_BLOCKANDSLIDES}
+                      min={0}
+                    />
+                  </div>
+                  <div className="md:flex-grow">
+                    <FormikInput
+                      label={'Number of blocks'}
+                      name={'numBlocks'}
+                      type={'number'}
+                      maxLength={MAX_NUM_BLOCKANDSLIDES}
+                      min={0}
+                    />
+                  </div>
+                  <div className="md:flex-grow">
+                    <FormikInput
+                      label={'Number of slides'}
+                      name={'numSlides'}
+                      type={'number'}
+                      maxLength={MAX_NUM_BLOCKANDSLIDES}
+                      min={0}
+                    />
+                  </div>
+                  <div className="md:flex-grow">
+                    <FormikInput
+                      type={'number'}
+                      label="DNAP study ID"
+                      name="ssStudyId"
+                      value={values.ssStudyId}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                        const ssId = Number(e.currentTarget.value);
+                        stanCore
+                          .GetDnapStudy({ ssId: ssId })
+                          .then((study) => {
+                            if (study && study.dnapStudy) {
+                              setFieldValue('studyName', study.dnapStudy.name);
+                            } else {
+                              setFieldValue('studyName', 'undefined');
+                            }
+                          })
+                          .catch((e) => {
                             setFieldValue('studyName', 'undefined');
-                          }
-                        })
-                        .catch((e) => {
-                          setFieldValue('studyName', 'undefined');
-                        });
-                      setFieldValue('ssStudyId', e.currentTarget.value);
-                    }}
-                  />
-                  {values.studyName && values.ssStudyId && (
-                    <div className="flex-row whitespace-nowrap space-x-2 p-0">
-                      {values.studyName === 'undefined' ? (
-                        <Pill color="pink">Unknown Sequencescape study id</Pill>
-                      ) : (
-                        <Pill color="blue">{values.studyName}</Pill>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="md:flex-grow">
-                  <FormikInput
-                    type={'number'}
-                    label="Xenium study ID"
-                    name="xeniumStudyId"
-                    value={values.xeniumStudyId}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      const ssId = Number(e.currentTarget.value);
-                      stanCore
-                        .GetDnapStudy({ ssId: ssId })
-                        .then((study) => {
-                          if (study && study.dnapStudy) {
-                            setFieldValue('xeniumStudyName', study.dnapStudy.name);
-                          } else {
+                          });
+                        setFieldValue('ssStudyId', e.currentTarget.value);
+                      }}
+                    />
+                    {values.studyName && values.ssStudyId && (
+                      <div className="flex-row whitespace-nowrap space-x-2 p-0">
+                        {values.studyName === 'undefined' ? (
+                          <Pill color="pink">Unknown Sequencescape study id</Pill>
+                        ) : (
+                          <Pill color="blue">{values.studyName}</Pill>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="md:flex-grow">
+                    <FormikInput
+                      type={'number'}
+                      label="Xenium study ID"
+                      name="xeniumStudyId"
+                      value={values.xeniumStudyId}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                        const ssId = Number(e.currentTarget.value);
+                        stanCore
+                          .GetDnapStudy({ ssId: ssId })
+                          .then((study) => {
+                            if (study && study.dnapStudy) {
+                              setFieldValue('xeniumStudyName', study.dnapStudy.name);
+                            } else {
+                              setFieldValue('xeniumStudyName', 'undefined');
+                            }
+                          })
+                          .catch((e) => {
                             setFieldValue('xeniumStudyName', 'undefined');
-                          }
-                        })
-                        .catch((e) => {
-                          setFieldValue('xeniumStudyName', 'undefined');
-                        });
-                      setFieldValue('xeniumStudyId', e.currentTarget.value);
-                    }}
-                  />
-                  {values.xeniumStudyName && values.xeniumStudyId && (
-                    <div className="flex-row whitespace-nowrap space-x-2 p-0">
-                      {values.xeniumStudyName === 'undefined' ? (
-                        <Pill color="pink">Unknown Sequencescape study id</Pill>
-                      ) : (
-                        <Pill color="blue">{values.xeniumStudyName}</Pill>
-                      )}
-                    </div>
-                  )}
+                          });
+                        setFieldValue('xeniumStudyId', e.currentTarget.value);
+                      }}
+                    />
+                    {values.xeniumStudyName && values.xeniumStudyId && (
+                      <div className="flex-row whitespace-nowrap space-x-2 p-0">
+                        {values.xeniumStudyName === 'undefined' ? (
+                          <Pill color="pink">Unknown Sequencescape study id</Pill>
+                        ) : (
+                          <Pill color="blue">{values.xeniumStudyName}</Pill>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="md:flex-grow">
+                    <CustomReactSelect
+                      label="Faculty lead"
+                      name="facultyLead"
+                      emptyOption={true}
+                      dataTestId={'facultyLead'}
+                      options={selectOptionValues(facultyLeads, 'name', 'name')}
+                    />
+                  </div>
                 </div>
-                <div className="md:flex-grow">
-                  <CustomReactSelect
-                    label="Faculty lead"
-                    name="facultyLead"
-                    emptyOption={true}
-                    dataTestId={'facultyLead'}
-                    options={selectOptionValues(facultyLeads, 'name', 'name')}
-                  />
-                </div>
-              </div>
 
-              <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
-                <FormikInput label={'R&D?'} name={'isRnD'} type={'checkbox'} />
-                <BlueButton disabled={current.matches('allocating') || submitted} type="submit">
-                  Submit
-                </BlueButton>
-              </div>
-            </Form>
-          )}
+                <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
+                  <FormikInput label={'R&D?'} name={'isRnD'} type={'checkbox'} />
+                  <BlueButton disabled={current.matches('allocating') || submitted} type="submit">
+                    Submit
+                  </BlueButton>
+                </div>
+              </Form>
+            );
+          }}
         </Formik>
       </div>
       <Authenticated role={UserRole.Normal}>
@@ -640,6 +678,7 @@ export default function WorkAllocation() {
                       <TableHeader />
                       <TableHeader sortProps={getTableSortProps('SGP Number')}>SGP Number</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Treatment Types')}>Treatment Types</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Project')}>
                         Project (cost code description)

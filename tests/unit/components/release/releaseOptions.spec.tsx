@@ -15,41 +15,37 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('ReleaseOptions', () => {
-  it('renders page with release options', () => {
+  it('renders page with release options', async () => {
     act(() => {
       const router = createMemoryRouter([{ path: '/releaseOptions', element: <ReleaseOptions /> }], {
         initialEntries: ['/releaseOptions?id=123']
       });
       render(<RouterProvider router={router} />);
     });
-    waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText('Release File Options')).toBeInTheDocument();
       expect(screen.getAllByRole('checkbox').length).toBe(3);
-      expect(screen.getByText('Option 1')).toBeInTheDocument();
-      expect(screen.getByText('Option 2')).toBeInTheDocument();
-      expect(screen.getByText('Option 3')).toBeInTheDocument();
-      ['Option 1', 'Option 2', 'Option 3'].forEach((option, indx) => {
+      const optionLabels = ['Histology', 'Sample Processing', 'Xenium'];
+      optionLabels.forEach((option, indx) => {
         expect(screen.getByText(option)).toBeInTheDocument();
         const optionCheckBox = screen.getAllByRole('checkbox')[indx];
         expect(optionCheckBox).not.toBeChecked();
       });
     });
   });
-  it('On initial loading release options are selected based on query params', () => {
+  it('On initial loading release options are selected based on query params', async () => {
     act(() => {
       const router = createMemoryRouter([{ path: '/releaseOptions', element: <ReleaseOptions /> }], {
-        initialEntries: ['/releaseOptions?id=123&groups=option_1,option_2&type=xlsx']
+        initialEntries: ['/releaseOptions?id=123&groups=histology,sample_processing&type=xlsx']
       });
       render(<RouterProvider router={router} />);
     });
-    waitFor(() => {
-      ['Option 1', 'Option 2'].forEach((option, indx) => {
-        const optionCheckBox = screen.getAllByRole('checkbox')[indx];
-        expect(optionCheckBox).toBeChecked();
-      });
-      const option3 = screen.getAllByRole('checkbox')[2];
-      expect(option3).not.toBeChecked();
-
+    await waitFor(() => {
+      // The first two checkboxes (Histology, Sample Processing) should be checked, the third (Xenium) should not
+      const checkboxes = screen.getAllByRole('checkbox');
+      expect(checkboxes[0]).toBeChecked(); // Histology
+      expect(checkboxes[1]).toBeChecked(); // Sample Processing
+      expect(checkboxes[2]).not.toBeChecked(); // Xenium
       expect(screen.getByTestId('excel-file')).toBeChecked();
     });
   });
@@ -79,18 +75,15 @@ describe('ReleaseOptions', () => {
   });
   it('calls navigate function with updated url when user deselects release options', async () => {
     const router = createMemoryRouter([{ path: '/releaseOptions', element: <ReleaseOptions /> }], {
-      initialEntries: ['/releaseOptions?id=123&groups=option_1,option_2&type=xlsx']
+      initialEntries: ['/releaseOptions?id=123&groups=histology,sample_processing&type=xlsx']
     });
     render(<RouterProvider router={router} />);
     await waitFor(() => {
       const option1 = screen.getAllByRole('checkbox')[0];
       fireEvent.click(option1);
     });
-    expect(navigateFunction).toHaveBeenLastCalledWith(
-      '/releaseOptions?id=123&groups=option_1,option_2,histology&type=xlsx',
-      {
-        replace: true
-      }
-    );
+    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=sample_processing&type=xlsx', {
+      replace: true
+    });
   });
 });

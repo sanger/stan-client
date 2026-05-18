@@ -21,6 +21,7 @@ import bioRiskRepository from '../repositories/bioRiskRepository';
 import tissueTypeRepository from '../repositories/tissueTypeRepository';
 import cellClassRepository from '../repositories/cellClassRepository';
 import proteinPanelRepository from '../repositories/proteinPanelRepository';
+import treatmentTypeRepository from '../repositories/treatmentTypeRepository';
 
 const configurationHandlers = [
   graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>('GetConfiguration', () => {
@@ -48,7 +49,8 @@ const configurationHandlers = [
         bioRisks: bioRiskRepository.findAll(),
         tissueTypes: tissueTypeRepository.findAll(),
         cellClasses: cellClassRepository.findAll(),
-        proteinPanels: proteinPanelRepository.findAll()
+        proteinPanels: proteinPanelRepository.findAll(),
+        treatmentTypes: treatmentTypeRepository.findAll()
       }
     });
   })

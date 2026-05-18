@@ -29,7 +29,7 @@ describe('Xenium Analyser', () => {
       });
     });
     it('should display a warning message', () => {
-      cy.get('#labwareScanInput').type('STAN-3111{enter}');
+      cy.get('#labwareScanInput').clear().type('STAN-3111{enter}');
       cy.findByText('No probe hybridisation recorded for STAN-3111').should('be.visible');
       cy.findByText('Analyser Details').should('not.exist');
     });
@@ -39,7 +39,7 @@ describe('Xenium Analyser', () => {
   });
   describe('When a labware is scanned', () => {
     before(() => {
-      cy.get('#labwareScanInput').type('STAN-3111{enter}');
+      cy.get('#labwareScanInput').clear().type('STAN-3111{enter}');
     });
     it('shows labware table', () => {
       cy.findAllByRole('table').eq(0).should('have.length.above', 0);
@@ -140,7 +140,7 @@ describe('Xenium Analyser', () => {
   });
   describe('When  two labware are scanned ', () => {
     before(() => {
-      cy.get('#labwareScanInput').type('STAN-3112{enter}'); //scan second labware
+      cy.get('#labwareScanInput').clear().type('STAN-3112{enter}'); //scan second labware
     });
     it('should display Analyser Details for STAN-3112', () => {
       cy.findAllByRole('table').eq(1).contains('STAN-3112');
@@ -169,7 +169,7 @@ describe('Xenium Analyser', () => {
 
   describe('On save', () => {
     before(() => {
-      cy.get('#labwareScanInput').type('STAN-3111{enter}');
+      cy.get('#labwareScanInput').clear().type('STAN-3111{enter}');
       fillInForm();
     });
     context('When there is a server error', () => {
@@ -219,7 +219,7 @@ describe('Xenium Analyser', () => {
     selectOption('STAN-3111-position', 'Left');
     for (let indx = 0; indx < 4; indx++) {
       cy.findByTestId(`STAN-3111-${indx}-roi`).clear().type('123456789').blur();
-      cy.findByTestId('closeBarcodeDisplayer').click();
+      cy.findByTestId('closeBarcodeDisplayer').should('be.visible').click();
     }
   }
 });

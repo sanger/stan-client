@@ -1,0 +1,5 @@
+mutation AddTreatmentType($name: String!) {
+  addTreatmentType(name: $name) {
+    ...TreatmentTypeFields
+  }
+}
