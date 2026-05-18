@@ -149,12 +149,8 @@ describe('WorkAllocation table headers', () => {
     expect(row).not.toBeNull();
 
     // treatment type pills rendered in the treatment cell
-    // find pill spans anywhere in the row
-    const allSpans = row!.querySelectorAll('span');
-    const pillSpans = Array.from(allSpans).filter((p) => {
-      const cls = (p.className || '').toString();
-      return cls.includes('bg-sdb-300') || cls.includes('bg-sp');
-    });
+    // Use data-testid for reliable selection
+    const pillSpans = within(row!).getAllByTestId('treatment-type-pill');
     expect(pillSpans.length).toBe(2);
 
     // ensure one pill has the blue class and one has the pink class
