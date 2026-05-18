@@ -361,7 +361,7 @@ export default function WorkRow({
         {work.treatmentTypes.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {work.treatmentTypes.map((tt) => (
-              <Pill key={tt.name} color={tt.enabled ? 'blue' : 'pink'}>
+              <Pill key={tt.name} color={tt.enabled ? 'blue' : 'pink'} dataTestId="treatment-type-pill">
                 {tt.name}
               </Pill>
             ))}
