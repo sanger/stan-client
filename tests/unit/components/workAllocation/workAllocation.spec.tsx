@@ -12,9 +12,6 @@ import { mockCreateObjectURL } from '../../testUtils/mockCreateObjectURL';
 // Use shared URL.createObjectURL mock util for jsdom
 mockCreateObjectURL();
 
-// Mock URL.createObjectURL for jsdom environment
-mockCreateObjectURL();
-
 // Mock dependencies as needed (e.g., xstate, react-router, etc.)
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
