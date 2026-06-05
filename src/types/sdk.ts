@@ -1122,6 +1122,8 @@ export type Mutation = {
   unrelease: OperationResult;
   /** Remove a specified item from storage. */
   unstoreBarcode?: Maybe<UnstoredItem>;
+  /** Remove specified items from storage. */
+  unstoreBarcodes: Scalars['Int']['output'];
   /** Updates the cytassist overview table. Useful for testing. */
   updateCytassistOverview: Scalars['Boolean']['output'];
   /** Updates Stan's internal list of Dnap Studies, and returns the enabled ones. */
@@ -2069,6 +2071,15 @@ export type MutationUnreleaseArgs = {
  */
 export type MutationUnstoreBarcodeArgs = {
   barcode: Scalars['String']['input'];
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationUnstoreBarcodesArgs = {
+  barcodes: Array<Scalars['String']['input']>;
 };
 
 
