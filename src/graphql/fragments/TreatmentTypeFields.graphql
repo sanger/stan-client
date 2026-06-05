@@ -1,0 +1,4 @@
+fragment TreatmentTypeFields on TreatmentType {
+  name
+  enabled
+}

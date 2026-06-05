@@ -1,0 +1,5 @@
+mutation UpdateWorkTreatmentTypes($workNumber: String!, $treatmentTypes: [String!]!) {
+  updateWorkTreatmentTypes(workNumber: $workNumber, treatmentTypes: $treatmentTypes) {
+    ...WorkFields
+  }
+}

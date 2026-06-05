@@ -1,13 +1,14 @@
 import React from 'react';
 import classNames from 'classnames';
 
-interface PillProps {
+type PillProps = {
   color: 'pink' | 'blue';
   children: React.ReactNode;
   className?: string;
-}
+  dataTestId?: string;
+};
 
-const Pill = ({ color, children, className }: PillProps) => {
+const Pill = ({ color, children, className, dataTestId }: PillProps) => {
   const spanClassName = classNames(
     {
       'bg-sp text-gray-100': color === 'pink',
@@ -17,7 +18,11 @@ const Pill = ({ color, children, className }: PillProps) => {
     className
   );
 
-  return <span className={spanClassName}>{children}</span>;
+  return (
+    <span className={spanClassName} data-testid={dataTestId}>
+      {children}
+    </span>
+  );
 };
 
 export default Pill;

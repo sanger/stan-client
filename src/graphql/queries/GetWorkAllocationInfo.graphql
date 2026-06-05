@@ -29,4 +29,7 @@ query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatu
   releaseDestinations(includeDisabled: false) {
     ...ReleaseDestinationFields
   }
+  treatmentTypes(includeDisabled: false) {
+    ...TreatmentTypeFields
+  }
 }

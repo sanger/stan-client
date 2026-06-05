@@ -79,6 +79,7 @@ const workHandlers = [
                 : undefined
             };
           }),
+          treatmentTypes: [],
           workTypes: workTypeRepository.findAll().filter(isEnabled),
           releaseRecipients: releaseRecipientRepository.findAll().filter(isEnabled),
           dnapStudies: dnapStudyRepository.findAll().filter(isEnabled),

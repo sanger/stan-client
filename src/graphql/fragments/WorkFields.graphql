@@ -32,4 +32,7 @@ fragment WorkFields on Work {
   numSlides
   numOriginalSamples
   priority
+  treatmentTypes {
+    ...TreatmentTypeFields
+  }
 }

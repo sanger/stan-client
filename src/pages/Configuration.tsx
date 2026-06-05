@@ -22,11 +22,12 @@ import { alphaNumericSortDefault } from '../types/stan';
 import BlueButton from '../components/buttons/BlueButton';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
 import Success from '../components/notifications/Success';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useRevalidator } from 'react-router-dom';
 import ComposedEntityManager from '../components/entityManager/ComposedEntityManager';
 
 export default function Configuration() {
   const configuration = useLoaderData() as GetConfigurationQuery;
+  const revalidator = useRevalidator();
   const stanCore = useContext(StanCoreContext);
   const groupedComments = groupBy(configuration.comments, 'category');
   const groupedEquipments = groupBy(configuration.equipments, 'category');
@@ -52,6 +53,7 @@ export default function Configuration() {
     'Species',
     'Solutions',
     'Tissue Types',
+    'Treatment Types',
     'Users',
     'Work Types'
   ];
@@ -658,6 +660,37 @@ export default function Configuration() {
           }}
         />
       </div>,
+      /**Treatment Types**/
+      <div data-testid="config">
+        <Heading level={2}>Treatment Types</Heading>
+        <p className="mt-3 mb-6 text-lg" />
+        <EntityManager
+          initialEntities={configuration.treatmentTypes}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
+          onChangeValue={(entity, value) => {
+            const enabled = typeof value === 'boolean' ? value : false;
+            return stanCore
+              .SetTreatmentTypeEnabled({
+                enabled,
+                name: entity.name
+              })
+              .then((res) => {
+                // revalidate route loader so the configuration page sees server-side updates
+                try {
+                  revalidator.revalidate();
+                } catch (e) {
+                  // noop - revalidator may not be available in all contexts
+                }
+                return res.setTreatmentTypeEnabled;
+              });
+          }}
+          onCreate={(name) => stanCore.AddTreatmentType({ name }).then((res) => res.addTreatmentType)}
+          valueFieldComponentInfo={{
+            type: 'CHECKBOX'
+          }}
+        />
+      </div>,
       /**Users**/
       <div data-testid="config">
         <Heading level={2}>Users</Heading>
@@ -706,6 +739,7 @@ export default function Configuration() {
     configuration,
     groupedEquipments,
     stanCore,
+    revalidator,
     handleRefreshReprojectedEntries,
     loading,
     dnapStudies,
