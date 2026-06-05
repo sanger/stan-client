@@ -48,7 +48,13 @@ describe('Xenium Analyser', () => {
     });
     context('when a region of interest is set', () => {
       before(() => {
-        cy.findByTestId('STAN-3111-1-roi').clear().type('123456789').blur();
+        // Dismiss any open react-select/menu overlays before typing in.
+        cy.get('body').click(0, 0);
+        cy.findByTestId('STAN-3111-1-roi')
+          .scrollIntoView()
+          .clear({ force: true })
+          .type('123456789', { force: true })
+          .blur();
       });
       after(() => {
         cy.findByTestId('closeBarcodeDisplayer').click();
@@ -218,7 +224,13 @@ describe('Xenium Analyser', () => {
     selectOption('STAN-3111-workNumber', 'SGP1008');
     selectOption('STAN-3111-position', 'Left');
     for (let indx = 0; indx < 4; indx++) {
-      cy.findByTestId(`STAN-3111-${indx}-roi`).clear().type('123456789').blur();
+      // Dismiss any open react-select/menu overlays before typing in.
+      cy.get('body').click(0, 0);
+      cy.findByTestId(`STAN-3111-${indx}-roi`)
+        .scrollIntoView()
+        .clear({ force: true })
+        .type('123456789', { force: true })
+        .blur();
       cy.findByTestId('closeBarcodeDisplayer').should('be.visible').click();
     }
   }
