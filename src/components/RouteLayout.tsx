@@ -493,6 +493,52 @@ const RouteLayout = () => {
           />
         </Route>
         <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/cryopreserve"
+            loader={async () => {
+              const recordInPlaceInfo = await stanCore.GetRecordInPlaceInfo({ category: 'scanner' });
+              return recordInPlaceInfo.equipments;
+            }}
+            element={
+              <RecordInPlace
+                title={'Cryopreserve'}
+                operationType={'Cryopreserve'}
+                columns={[
+                  columns.barcode(),
+                  columns.donorId(),
+                  columns.labwareType(),
+                  columns.externalName(),
+                  columns.bioState()
+                ]}
+                displayStoreOption={true}
+              />
+            }
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/thaw"
+            loader={async () => {
+              const recordInPlaceInfo = await stanCore.GetRecordInPlaceInfo({ category: 'scanner' });
+              return recordInPlaceInfo.equipments;
+            }}
+            element={
+              <RecordInPlace
+                title={'Thaw'}
+                operationType={'Thaw'}
+                columns={[
+                  columns.barcode(),
+                  columns.donorId(),
+                  columns.labwareType(),
+                  columns.externalName(),
+                  columns.bioState()
+                ]}
+                displayStoreOption={true}
+              />
+            }
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
           <Route path="/admin/cleanout" element={<CleanOut />} />
         </Route>
         <Route element={<AuthLayout />}>
