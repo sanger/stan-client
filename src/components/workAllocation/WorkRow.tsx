@@ -4,6 +4,7 @@ import {
   CommentFieldsFragment,
   DnapStudy,
   OmeroProjectFieldsFragment,
+  TreatmentTypeFieldsFragment,
   WorkStatus,
   WorkWithCommentFieldsFragment
 } from '../../types/sdk';
@@ -23,6 +24,7 @@ import warningToast from '../notifications/WarningToast';
 import { toast } from 'react-toastify';
 import { AnyMachineSnapshot } from 'xstate';
 import { extractServerErrors } from '../../types/stan';
+import Modal, { ModalBody, ModalFooter, ModalHeader } from '../Modal';
 
 /**
  * The type of values for the edit form
@@ -54,6 +56,11 @@ type WorkRowProps = {
    */
   availableOmeroProjects: Array<OmeroProjectFieldsFragment>;
 
+  /**
+   * Available treatment types for editing this Work row.
+   */
+  availableTreatmentTypes: Array<TreatmentTypeFieldsFragment>;
+
   rowIndex: number;
   onWorkFieldUpdate: (index: number, work: WorkWithCommentFieldsFragment) => void;
 };
@@ -71,6 +78,7 @@ export default function WorkRow({
   initialWork,
   availableComments,
   availableOmeroProjects,
+  availableTreatmentTypes,
   rowIndex,
   onWorkFieldUpdate
 }: WorkRowProps) {
@@ -85,6 +93,8 @@ export default function WorkRow({
     serverErrors,
     serverSuccess
   } = current.context;
+  const [isTreatmentTypesModalOpen, setIsTreatmentTypesModalOpen] = React.useState(false);
+  const [selectedTreatmentTypes, setSelectedTreatmentTypes] = React.useState<string[]>([]);
 
   /**Notify the changes in work fields*/
   React.useEffect(() => {
@@ -132,7 +142,8 @@ export default function WorkRow({
       e !== 'UPDATE_PRIORITY' &&
       e !== 'UPDATE_NUM_ORIGINAL_SAMPLES' &&
       e !== 'UPDATE_OMERO_PROJECT' &&
-      e !== 'UPDATE_DNAP_PROJECT'
+      e !== 'UPDATE_DNAP_PROJECT' &&
+      e !== 'UPDATE_TREATMENT_TYPES'
   );
 
   /**
@@ -228,6 +239,62 @@ export default function WorkRow({
     );
   };
 
+  const editableTreatmentTypeOptions = React.useMemo(() => {
+    const selectedTypeNames = new Set(work.treatmentTypes.map((t) => t.name));
+    return selectOptionValues(
+      availableTreatmentTypes.filter((tt) => tt.enabled || selectedTypeNames.has(tt.name)),
+      'name',
+      'name'
+    );
+  }, [availableTreatmentTypes, work.treatmentTypes]);
+
+  const modalTreatmentTypeOptions = React.useMemo(() => {
+    // Get all enabled types from parent
+    const enabledTypes = availableTreatmentTypes.filter((tt) => tt.enabled);
+    // Always include currently-selected types (even if disabled) directly from work object
+    // This ensures disabled-but-selected types remain visible and removable
+    const currentlySelectedTypes = work.treatmentTypes;
+    // Merge and de-duplicate by name
+    const combined = Array.from(
+      new Map([...enabledTypes, ...currentlySelectedTypes].map((tt) => [tt.name, tt])).values()
+    );
+    return selectOptionValues(combined, 'name', 'name');
+  }, [availableTreatmentTypes, work.treatmentTypes]);
+
+  const renderWorkTreatmentTypesField = (workNumber: string, treatmentTypeNames: string[]) => {
+    return (
+      <div className="space-y-2">
+        {treatmentTypeNames.length > 0 && (
+          <div className="flex flex-col items-start gap-1">
+            {work.treatmentTypes.map((tt) => (
+              <Pill
+                key={tt.name}
+                color={tt.enabled ? 'blue' : 'pink'}
+                dataTestId="treatment-type-pill"
+                className="whitespace-nowrap"
+              >
+                {tt.name}
+              </Pill>
+            ))}
+          </div>
+        )}
+        {isEditEnabledForStatus(work.status) && (
+          <button
+            type="button"
+            data-testid={`${workNumber}-edit-treatment-types`}
+            className="text-sm text-sdb underline"
+            onClick={() => {
+              setSelectedTreatmentTypes(treatmentTypeNames);
+              setIsTreatmentTypesModalOpen(true);
+            }}
+          >
+            Edit
+          </button>
+        )}
+      </div>
+    );
+  };
+
   const renderWorkSsStudyField = (
     workNumber: string,
     ssStudy: DnapStudy | undefined,
@@ -265,135 +332,172 @@ export default function WorkRow({
     return status !== WorkStatus.Failed && status !== WorkStatus.Completed && status !== WorkStatus.Withdrawn;
   };
   return (
-    <tr>
-      <TableCell>
-        {
-          /**Once workrequest is failed or completed then priority need to be cleared**/
-          isEditEnabledForStatus(work.status) ? (
-            <Formik initialValues={{ priority: work.priority ?? '' }} onSubmit={() => {}}>
-              {({ setFieldValue }) => {
-                return (
-                  <Form>
-                    <FormikInput
-                      style={{ width: '100%' }}
-                      label={''}
-                      name={'priority'}
-                      data-testid={`${work.workNumber}-priority`}
-                      className={`border-0 border-gray-100`}
-                      onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                        const priority = e.currentTarget.value.toUpperCase();
-                        setFieldValue('priority', priority);
-                        if (validateWorkPriority(priority).length === 0) {
-                          send({
-                            type: 'UPDATE_PRIORITY',
-                            priority: e.currentTarget.value.toUpperCase()
-                          });
-                        }
-                      }}
-                      validate={validateWorkPriority}
-                    />
-                  </Form>
-                );
-              }}
-            </Formik>
-          ) : (
-            <div />
-          )
-        }
-      </TableCell>
-      {!editModeEnabled && (
+    <>
+      <tr>
         <TableCell>
-          <div className="uppercase">{work.status}</div>
-          {comment && <div className="font-medium">{comment}</div>}
+          {
+            /**Once workrequest is failed or completed then priority need to be cleared**/
+            isEditEnabledForStatus(work.status) ? (
+              <Formik initialValues={{ priority: work.priority ?? '' }} onSubmit={() => {}}>
+                {({ setFieldValue }) => {
+                  return (
+                    <Form>
+                      <FormikInput
+                        style={{ width: '100%' }}
+                        label={''}
+                        name={'priority'}
+                        data-testid={`${work.workNumber}-priority`}
+                        className={`border-0 border-gray-100`}
+                        onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                          const priority = e.currentTarget.value.toUpperCase();
+                          setFieldValue('priority', priority);
+                          if (validateWorkPriority(priority).length === 0) {
+                            send({
+                              type: 'UPDATE_PRIORITY',
+                              priority: e.currentTarget.value.toUpperCase()
+                            });
+                          }
+                        }}
+                        validate={validateWorkPriority}
+                      />
+                    </Form>
+                  );
+                }}
+              </Formik>
+            ) : (
+              <div />
+            )
+          }
         </TableCell>
-      )}
-      <TableCell colSpan={showEditButton ? 1 : 2}>
-        {showEditButton && (
-          <PinkButton action={'tertiary'} onClick={() => send({ type: 'EDIT' })}>
-            Edit Status
-          </PinkButton>
+        {!editModeEnabled && (
+          <TableCell>
+            <div className="uppercase">{work.status}</div>
+            {comment && <div className="font-medium">{comment}</div>}
+          </TableCell>
         )}
-        {editModeEnabled && (
-          <Formik<FormValues> initialValues={initialValues} onSubmit={onFormSubmit}>
-            {({ values }) => (
-              <Form>
-                <div className="space-y-4">
-                  <CustomReactSelect
-                    isDisabled={current.matches('updating')}
-                    name={'type'}
-                    dataTestId={'status'}
-                    label={'New Status'}
-                    options={nextStatuses.map((nextStatus) => {
-                      return { label: capitalize(nextStatus), value: nextStatus };
-                    })}
-                  />
-
-                  {requiresComment(values.type) && (
+        <TableCell colSpan={showEditButton ? 1 : 2}>
+          {showEditButton && (
+            <PinkButton action={'tertiary'} onClick={() => send({ type: 'EDIT' })}>
+              Edit Status
+            </PinkButton>
+          )}
+          {editModeEnabled && (
+            <Formik<FormValues> initialValues={initialValues} onSubmit={onFormSubmit}>
+              {({ values }) => (
+                <Form>
+                  <div className="space-y-4">
                     <CustomReactSelect
                       isDisabled={current.matches('updating')}
-                      dataTestId={'comment'}
-                      name={'commentId'}
-                      label={'Comment'}
-                      options={selectOptionValues(availableComments, 'text', 'id')}
+                      name={'type'}
+                      dataTestId={'status'}
+                      label={'New Status'}
+                      options={nextStatuses.map((nextStatus) => {
+                        return { label: capitalize(nextStatus), value: nextStatus };
+                      })}
                     />
-                  )}
-                  <div className="flex flex-row items-center justify-end space-x-2">
-                    <WhiteButton
-                      type="button"
-                      disabled={current.matches('updating')}
-                      onClick={() => send({ type: 'EDIT' })}
-                    >
-                      Cancel
-                    </WhiteButton>
-                    <BlueButton type="submit" disabled={current.matches('updating')}>
-                      Save
-                    </BlueButton>
-                  </div>
-                </div>
-              </Form>
-            )}
-          </Formik>
-        )}
-      </TableCell>
-      <TableCell>{work.workNumber}</TableCell>
-      <TableCell>{work.workType.name}</TableCell>
-      <TableCell>
-        {work.treatmentTypes.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {work.treatmentTypes.map((tt) => (
-              <Pill key={tt.name} color={tt.enabled ? 'blue' : 'pink'} dataTestId="treatment-type-pill">
-                {tt.name}
-              </Pill>
-            ))}
-          </div>
-        )}
-      </TableCell>
 
-      <TableCell>{work.workRequester?.username}</TableCell>
-      <TableCell>{work.project.name}</TableCell>
-      <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
-      <TableCell colSpan={2}>
-        {renderWorkSsStudyField(work.workNumber, work.dnapStudy ?? undefined, Studies.DNAP_STUDY)}
-      </TableCell>
-      <TableCell colSpan={2}>
-        {renderWorkSsStudyField(work.workNumber, work.xeniumStudy ?? undefined, Studies.XENIUM_STUDY)}
-      </TableCell>
-      <TableCell>{work.program.name}</TableCell>
-      <TableCell>{work.facultyLead?.name}</TableCell>
-      <TableCell>{work.costCode.code}</TableCell>
-      <TableCell>
-        {isEditEnabledForStatus(work.status) &&
-          renderWorkNumValueField(work.workNumber, work.numBlocks ?? undefined, 'block')}
-      </TableCell>
-      <TableCell>
-        {isEditEnabledForStatus(work.status) &&
-          renderWorkNumValueField(work.workNumber, work.numSlides ?? undefined, 'slide')}
-      </TableCell>
-      <TableCell>
-        {isEditEnabledForStatus(work.status) &&
-          renderWorkNumValueField(work.workNumber, work.numOriginalSamples ?? undefined, 'originalSamples')}
-      </TableCell>
-    </tr>
+                    {requiresComment(values.type) && (
+                      <CustomReactSelect
+                        isDisabled={current.matches('updating')}
+                        dataTestId={'comment'}
+                        name={'commentId'}
+                        label={'Comment'}
+                        options={selectOptionValues(availableComments, 'text', 'id')}
+                      />
+                    )}
+                    <div className="flex flex-row items-center justify-end space-x-2">
+                      <WhiteButton
+                        type="button"
+                        disabled={current.matches('updating')}
+                        onClick={() => send({ type: 'EDIT' })}
+                      >
+                        Cancel
+                      </WhiteButton>
+                      <BlueButton type="submit" disabled={current.matches('updating')}>
+                        Save
+                      </BlueButton>
+                    </div>
+                  </div>
+                </Form>
+              )}
+            </Formik>
+          )}
+        </TableCell>
+        <TableCell>{work.workNumber}</TableCell>
+        <TableCell>{work.workType.name}</TableCell>
+        <TableCell>
+          {renderWorkTreatmentTypesField(
+            work.workNumber,
+            work.treatmentTypes.map((tt) => tt.name)
+          )}
+        </TableCell>
+
+        <TableCell>{work.workRequester?.username}</TableCell>
+        <TableCell>{work.project.name}</TableCell>
+        <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
+        <TableCell colSpan={2}>
+          {renderWorkSsStudyField(work.workNumber, work.dnapStudy ?? undefined, Studies.DNAP_STUDY)}
+        </TableCell>
+        <TableCell colSpan={2}>
+          {renderWorkSsStudyField(work.workNumber, work.xeniumStudy ?? undefined, Studies.XENIUM_STUDY)}
+        </TableCell>
+        <TableCell>{work.program.name}</TableCell>
+        <TableCell>{work.facultyLead?.name}</TableCell>
+        <TableCell>{work.costCode.code}</TableCell>
+        <TableCell>
+          {isEditEnabledForStatus(work.status) &&
+            renderWorkNumValueField(work.workNumber, work.numBlocks ?? undefined, 'block')}
+        </TableCell>
+        <TableCell>
+          {isEditEnabledForStatus(work.status) &&
+            renderWorkNumValueField(work.workNumber, work.numSlides ?? undefined, 'slide')}
+        </TableCell>
+        <TableCell>
+          {isEditEnabledForStatus(work.status) &&
+            renderWorkNumValueField(work.workNumber, work.numOriginalSamples ?? undefined, 'originalSamples')}
+        </TableCell>
+      </tr>
+      <Modal show={isTreatmentTypesModalOpen}>
+        <ModalHeader>Edit Treatment Types</ModalHeader>
+        <ModalBody>
+          <CustomReactSelect
+            dataTestId={`${work.workNumber}-treatmentTypes`}
+            isMulti={true}
+            menuPosition={'fixed'}
+            menuPlacement={'auto'}
+            menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
+            styles={{
+              menuPortal: (base) => ({ ...base, zIndex: 60 })
+            }}
+            value={selectedTreatmentTypes}
+            options={modalTreatmentTypeOptions}
+            handleChange={(value) => {
+              const selected = Array.isArray(value) ? value.map((v) => v.label) : [];
+              setSelectedTreatmentTypes(selected);
+            }}
+          />
+        </ModalBody>
+        <ModalFooter>
+          <BlueButton
+            className="sm:ml-3"
+            type="button"
+            disabled={current.matches('editTreatmentTypes')}
+            onClick={() => {
+              send({
+                type: 'UPDATE_TREATMENT_TYPES',
+                treatmentTypes: selectedTreatmentTypes
+              });
+              setIsTreatmentTypesModalOpen(false);
+            }}
+          >
+            Save
+          </BlueButton>
+          <WhiteButton className="sm:ml-3 mt-1" type="button" onClick={() => setIsTreatmentTypesModalOpen(false)}>
+            Cancel
+          </WhiteButton>
+        </ModalFooter>
+      </Modal>
+    </>
   );
 }
 
