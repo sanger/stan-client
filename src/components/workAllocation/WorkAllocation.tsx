@@ -706,6 +706,7 @@ export default function WorkAllocation() {
                         initialWork={workWithComment}
                         availableComments={availableComments}
                         availableOmeroProjects={omeroProjects}
+                        availableTreatmentTypes={treatmentTypes}
                         key={workWithComment.work.workNumber}
                         rowIndex={index}
                         onWorkFieldUpdate={onWorkUpdate}
