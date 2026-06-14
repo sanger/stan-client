@@ -43,6 +43,14 @@ export type AddExternalIdRequest = {
   labwareBarcode: Scalars['String']['input'];
 };
 
+/** Request to assign external names to tissues at particular positions in labware. */
+export type AddExternalIdsRequest = {
+  /** The slot addresses and new external names. */
+  addressNames: Array<AddressExternalName>;
+  /** The barcode of the labware containing the tissue */
+  labwareBarcode: Scalars['String']['input'];
+};
+
 /** Request to add spatial locations to an existing tissue type. */
 export type AddSpatialLocationsRequest = {
   /** The name of an existing tissue type. */
@@ -75,6 +83,14 @@ export type AddressCommentInput = {
   address: Scalars['Address']['input'];
   /** The id of a comment in the database. */
   commentId: Scalars['Int']['input'];
+};
+
+/** A link between a slot address and an external name. */
+export type AddressExternalName = {
+  /** A slot address. */
+  address: Scalars['Address']['input'];
+  /** An external name. */
+  externalName: Scalars['String']['input'];
 };
 
 /** Permeabilisation data about a particular slot address. */
@@ -700,6 +716,8 @@ export type Labware = {
   discarded: Scalars['Boolean']['output'];
   /** The external barcode of this labware, as input by the user. */
   externalBarcode?: Maybe<Scalars['String']['output']>;
+  /** Is this labware frozen? */
+  frozen: Scalars['Boolean']['output'];
   /** The unique id of this labware. */
   id: Scalars['Int']['output'];
   /** The type of labware. */
@@ -731,6 +749,8 @@ export type LabwareFlagged = {
   flagPriority?: Maybe<FlagPriority>;
   /** Is there a labware flag applicable to this labware? */
   flagged: Scalars['Boolean']['output'];
+  /** Is this labware frozen? */
+  frozen: Scalars['Boolean']['output'];
   /** The unique id of this labware. */
   id: Scalars['Int']['output'];
   /** The type of labware. */
@@ -811,7 +831,9 @@ export enum LabwareState {
   /** The labware has been destroyed for a specific reason. */
   Destroyed = 'destroyed',
   /** The labware has been used but may still be stored. */
-  Used = 'used'
+  Used = 'used',
+  /** The labware is frozen. */
+  Frozen = 'frozen'
 }
 
 /** A type of labware, such as slides and tubes. */
@@ -940,6 +962,8 @@ export type Mutation = {
   addEquipment: Equipment;
   /** Record an operation adding a external ID to a sample. */
   addExternalID: OperationResult;
+  /** Record an op adding external names to tissues in a particular piece of labware. */
+  addExternalIds: OperationResult;
   /** Create a new fixative that can be selected when registering tissue. */
   addFixative: Fixative;
   /** Create a new HMDMC that can be used when registering new tissue. */
@@ -1215,6 +1239,15 @@ export type MutationAddEquipmentArgs = {
  */
 export type MutationAddExternalIdArgs = {
   request: AddExternalIdRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationAddExternalIdsArgs = {
+  request: AddExternalIdsRequest;
 };
 
 
