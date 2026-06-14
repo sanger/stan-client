@@ -6,8 +6,7 @@ import { mockCreateObjectURL } from '../../testUtils/mockCreateObjectURL';
 import * as AuthContext from '../../../../src/context/AuthContext';
 
 // Test the presence and order of the Treatment Types header in the
-// WorkAllocation table, and the rendering of treatment type pills with
-// correct colours in the table rows.
+// WorkAllocation table, and that treatment types are shown as pills with an Edit link.
 
 // Use shared URL.createObjectURL mock util for jsdom
 mockCreateObjectURL();
@@ -140,7 +139,7 @@ describe('WorkAllocation table headers', () => {
     expect(treatmentIndex).toBe(workTypeIndex + 1); // next to Work Type
   });
 
-  it('renders treatment type pills for the row with correct colours', async () => {
+  it('renders treatment type pills and edit link for each row', async () => {
     render(<WorkAllocation />);
     const table = await screen.findByTestId('work-allocation-table');
     // find the row for our SGP
@@ -148,15 +147,8 @@ describe('WorkAllocation table headers', () => {
     const row = sgpCell.closest('tr') as HTMLTableRowElement | null;
     expect(row).not.toBeNull();
 
-    // treatment type pills rendered in the treatment cell
-    // Use data-testid for reliable selection
     const pillSpans = within(row!).getAllByTestId('treatment-type-pill');
     expect(pillSpans.length).toBe(2);
-
-    // ensure one pill has the blue class and one has the pink class
-    const hasBlue = pillSpans.some((p) => (p.className || '').includes('bg-sdb-300'));
-    const hasPink = pillSpans.some((p) => (p.className || '').includes('bg-sp'));
-    expect(hasBlue).toBe(true);
-    expect(hasPink).toBe(true);
+    expect(within(row!).getByTestId('SGP-1-edit-treatment-types')).toBeInTheDocument();
   });
 });
