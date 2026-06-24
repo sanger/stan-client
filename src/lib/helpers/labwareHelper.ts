@@ -157,10 +157,10 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
 
 /**
  * Returns true if a piece of labware is usable; false otherwise.
- * Frozen labware is not usable. Only Empty and Active states are usable.
+ * Only Empty and Active states are usable.
  */
-export function isLabwareUsable(labware: Pick<Labware, 'state' | 'frozen'>): boolean {
-  return !labware.frozen && [LabwareState.Empty, LabwareState.Active].includes(labware.state);
+export function isLabwareUsable(labware: Pick<Labware, 'state'>): boolean {
+  return [LabwareState.Empty, LabwareState.Active].includes(labware.state);
 }
 
 /**
