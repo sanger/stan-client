@@ -121,4 +121,21 @@ describe('RecordInPlace completion buttons', () => {
     expect(screen.getByRole('button', { name: 'Imaging QC' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Store' })).toBeInTheDocument();
   });
+
+  it('for thaw flow, hides Imaging QC and keeps Store when displayImagingQcOption is false', () => {
+    render(
+      <BrowserRouter>
+        <RecordInPlace
+          title={'Thaw'}
+          operationType={'Thaw'}
+          columns={[]}
+          displayStoreOption={true}
+          displayImagingQcOption={false}
+        />
+      </BrowserRouter>
+    );
+
+    expect(screen.queryByRole('button', { name: 'Imaging QC' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Store' })).toBeInTheDocument();
+  });
 });
