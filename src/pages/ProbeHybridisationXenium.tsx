@@ -181,6 +181,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                     <FieldArray name={'labware'}>
                       {(helpers) => (
                         <LabwareScanner
+                          rejectFrozen
                           onChange={(labware) => {
                             labware.forEach((lw) => {
                               /**If Labware scanned not already displayed, add to probe list**/

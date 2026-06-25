@@ -345,7 +345,12 @@ export default function VisiumQC() {
                   <Heading level={2}>Labware</Heading>
                   <p>Please scan in any labware you wish to QC.</p>
                   <div key={`labware-scanner-${labwareLimit}`}>
-                    <LabwareScanner limit={labwareLimit} enableFlaggedLabwareCheck checkForCleanedOutAddresses>
+                    <LabwareScanner
+                      limit={labwareLimit}
+                      enableFlaggedLabwareCheck
+                      checkForCleanedOutAddresses
+                      rejectFrozen
+                    >
                       {({ labwares, removeLabware, cleanedOutAddresses }) => {
                         switch (values.qcType) {
                           case QCType.SLIDE_PROCESSING:

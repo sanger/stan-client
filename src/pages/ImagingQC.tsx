@@ -173,6 +173,7 @@ export default function ImagingQC({ info }: StainingQCProps) {
               onRemove={onRemoveLabware}
               enableFlaggedLabwareCheck
               checkForCleanedOutAddresses
+              rejectFrozen
             >
               {({ labwares, removeLabware, cleanedOutAddresses }) =>
                 labwares.map(

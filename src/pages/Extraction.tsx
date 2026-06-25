@@ -186,6 +186,7 @@ function Extraction() {
               locked={scannerLocked}
               labwareCheckFunction={validateLabware}
               enableFlaggedLabwareCheck
+              rejectFrozen
             >
               <LabwareScanPanel columns={columns} />
             </LabwareScanner>

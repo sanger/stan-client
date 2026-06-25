@@ -136,6 +136,7 @@ export default function VisiumPerm() {
                   <FieldArray name={'permData'}>
                     {({ push, remove }) => (
                       <LabwareScanner
+                        rejectFrozen
                         onAdd={(labware) => {
                           setFieldValue('barcode', labware.barcode);
                           labware.slots.forEach((slot) =>
@@ -268,6 +269,7 @@ function VisiumPermForm() {
           <p>Please scan in the tube you wish to assign as a control tube.</p>
           <div className="flex flex-row" />
           <LabwareScanner
+            rejectFrozen
             onAdd={(labware) => {
               setControlTube(extractLabwareFromFlagged([labware])[0]);
             }}
