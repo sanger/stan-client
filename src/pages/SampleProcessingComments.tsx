@@ -150,6 +150,7 @@ const SampleProcessingComments: React.FC = () => {
                             setFieldValue('labware', updatedLabware);
                           }}
                           enableFlaggedLabwareCheck
+                          rejectFrozen
                         >
                           {values.labware.length === 0 && <FormikErrorMessage name={'labware'} />}
                           <motion.div variants={variants.fadeInWithLift}>
