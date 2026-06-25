@@ -159,6 +159,7 @@ const FlagLabware = () => {
                             labware: values.labware.concat(lw)
                           })
                         }
+                        rejectFrozen={false}
                         enableFlaggedLabwareCheck
                         labwareCheckFunction={checkRelatedFlags}
                       >

@@ -88,6 +88,7 @@ const Destroy: React.FC = () => {
                             labwares.map((lw) => lw.barcode)
                           )
                         }
+                        rejectFrozen={false}
                         locked={formLocked}
                       >
                         <LabwareScanPanel
