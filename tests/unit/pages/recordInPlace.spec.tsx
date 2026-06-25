@@ -8,6 +8,7 @@ import { LabwareState } from '../../../src/types/sdk';
 const mockSend = jest.fn();
 const mockNavigate = jest.fn();
 const mockUseLoaderData = jest.fn().mockReturnValue([]);
+const mockLabwareScanner = jest.fn();
 const mockLabware = [
   {
     __typename: 'Labware',
@@ -66,7 +67,10 @@ jest.mock('formik', () => ({
 
 jest.mock('../../../src/components/labwareScanner/LabwareScanner', () => ({
   __esModule: true,
-  default: ({ children }: any) => <div data-testid="mock-labware-scanner">{children}</div>
+  default: (props: any) => {
+    mockLabwareScanner(props);
+    return <div data-testid="mock-labware-scanner">{props.children}</div>;
+  }
 }));
 
 jest.mock('../../../src/components/labwareScanPanel/LabwareScanPanel', () => ({
@@ -92,6 +96,7 @@ jest.mock('../../../src/components/forms/CustomReactSelect', () => ({
 describe('RecordInPlace completion buttons', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    mockLabwareScanner.mockClear();
   });
 
   const setup = (displayImagingQcOption: boolean) => {
@@ -122,7 +127,7 @@ describe('RecordInPlace completion buttons', () => {
     expect(screen.getByRole('button', { name: 'Store' })).toBeInTheDocument();
   });
 
-  it('for thaw flow, hides Imaging QC and keeps Store when displayImagingQcOption is false', () => {
+  it('after thaw is saved, completion modal shows only Store button', () => {
     render(
       <BrowserRouter>
         <RecordInPlace
@@ -137,5 +142,35 @@ describe('RecordInPlace completion buttons', () => {
 
     expect(screen.queryByRole('button', { name: 'Imaging QC' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Store' })).toBeInTheDocument();
+  });
+
+  it('rejects frozen labware for non-Thaw operations', () => {
+    setup(false);
+
+    const lastCall = mockLabwareScanner.mock.calls[mockLabwareScanner.mock.calls.length - 1][0];
+    const frozenLabware = { state: LabwareState.Frozen };
+    const result = lastCall.labwareCheckFunction([], frozenLabware);
+
+    expect(result).toEqual(['Frozen labware can only be scanned for Thaw operation.']);
+  });
+
+  it('allows frozen labware for Thaw operation', () => {
+    render(
+      <BrowserRouter>
+        <RecordInPlace
+          title={'Thaw'}
+          operationType={'Thaw'}
+          columns={[]}
+          displayStoreOption={true}
+          displayImagingQcOption={false}
+        />
+      </BrowserRouter>
+    );
+
+    const lastCall = mockLabwareScanner.mock.calls[mockLabwareScanner.mock.calls.length - 1][0];
+    const frozenLabware = { state: LabwareState.Frozen };
+    const result = lastCall.labwareCheckFunction([], frozenLabware);
+
+    expect(result).toEqual([]);
   });
 });
