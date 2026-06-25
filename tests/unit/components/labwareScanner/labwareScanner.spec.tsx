@@ -3,12 +3,15 @@ import LabwareScanner, { useLabwareContext } from '../../../../src/components/la
 import { getById, scanLabware } from '../../../generic/utilities';
 import React from 'react';
 import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
-import { LabwareFlaggedFieldsFragment } from '../../../../src/types/sdk';
+import { LabwareFlaggedFieldsFragment, LabwareState } from '../../../../src/types/sdk';
 import '@testing-library/jest-dom';
 import LabwareScanTable from '../../../../src/components/labwareScanPanel/LabwareScanPanel';
 import columns from '../../../../src/components/dataTableColumns/labwareColumns';
 import { MemoryRouter } from 'react-router';
 import { enableMapSet } from 'immer';
+import { server } from '../../../../src/mocks/server';
+import { graphql, HttpResponse } from 'msw';
+import { createFlaggedLabware } from '../../../../src/mocks/handlers/flagLabwareHandlers';
 
 beforeEach(() => {
   enableMapSet();
@@ -173,6 +176,68 @@ describe('LabwareScannaer', () => {
           expect(getByRole('link')).toHaveTextContent('STAN-3100');
         });
       });
+    });
+  });
+});
+
+describe('LabwareScanner rejectFrozen', () => {
+  it('shows frozen error when rejectFrozen=true and frozen labware is scanned', async () => {
+    server.use(
+      graphql.query('FindFlaggedLabware', () =>
+        HttpResponse.json({
+          data: {
+            labwareFlagged: {
+              ...createFlaggedLabware('STAN-3000'),
+              state: LabwareState.Frozen
+            }
+          }
+        })
+      )
+    );
+
+    render(
+      <MemoryRouter>
+        <LabwareScanner rejectFrozen enableFlaggedLabwareCheck>
+          <div />
+        </LabwareScanner>
+      </MemoryRouter>
+    );
+
+    await scanLabware('STAN-3000');
+
+    await waitFor(() => {
+      expect(screen.getByText('This labware is frozen and cannot be used for this operation.')).toBeInTheDocument();
+    });
+  });
+
+  it('allows frozen labware when rejectFrozen is not set', async () => {
+    server.use(
+      graphql.query('FindFlaggedLabware', () =>
+        HttpResponse.json({
+          data: {
+            labwareFlagged: {
+              ...createFlaggedLabware('STAN-3000'),
+              state: LabwareState.Frozen
+            }
+          }
+        })
+      )
+    );
+
+    render(
+      <MemoryRouter>
+        <LabwareScanner enableFlaggedLabwareCheck>
+          <div />
+        </LabwareScanner>
+      </MemoryRouter>
+    );
+
+    await scanLabware('STAN-3000');
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText('This labware is frozen and cannot be used for this operation.')
+      ).not.toBeInTheDocument();
     });
   });
 });
