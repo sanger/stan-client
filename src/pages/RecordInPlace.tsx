@@ -1,13 +1,6 @@
 import React from 'react';
 import AppShell from '../components/AppShell';
-import {
-  EquipmentFieldsFragment,
-  InPlaceOpRequest,
-  LabwareFieldsFragment,
-  LabwareFlaggedFieldsFragment,
-  LabwareState,
-  RecordInPlaceMutation
-} from '../types/sdk';
+import { EquipmentFieldsFragment, InPlaceOpRequest, LabwareFieldsFragment, RecordInPlaceMutation } from '../types/sdk';
 import { Form, Formik } from 'formik';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
 import { motion } from '../dependencies/motion';
@@ -75,16 +68,6 @@ export default function RecordInPlace({
   displayImagingQcOption = false
 }: RecordInPlaceProps) {
   const navigate = useNavigate();
-
-  const rejectFrozenLabwareForNonThaw = React.useCallback(
-    (_labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): string[] => {
-      if (operationType !== 'Thaw' && foundLabware.state === LabwareState.Frozen) {
-        return ['Frozen labware can only be scanned for Thaw operation.'];
-      }
-      return [];
-    },
-    [operationType]
-  );
 
   // The equipment available for this operation
   const equipments = useLoaderData() as EquipmentFieldsFragment[];
@@ -175,7 +158,7 @@ export default function RecordInPlace({
                           onChange={(labwareFlagged) =>
                             setFieldValue('labware', extractLabwareFromFlagged(labwareFlagged))
                           }
-                          labwareCheckFunction={rejectFrozenLabwareForNonThaw}
+                          rejectFrozen={operationType !== 'Thaw'}
                           locked={current.matches('submitted')}
                           enableFlaggedLabwareCheck
                         >

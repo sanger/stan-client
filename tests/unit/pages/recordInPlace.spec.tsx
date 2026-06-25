@@ -155,10 +155,7 @@ describe('RecordInPlace completion buttons', () => {
     setup(false);
 
     const lastCall = mockLabwareScanner.mock.calls[mockLabwareScanner.mock.calls.length - 1][0];
-    const frozenLabware = { state: LabwareState.Frozen };
-    const result = lastCall.labwareCheckFunction([], frozenLabware);
-
-    expect(result).toEqual(['Frozen labware can only be scanned for Thaw operation.']);
+    expect(lastCall.rejectFrozen).toBe(true);
   });
 
   it('allows frozen labware for Thaw operation', () => {
@@ -175,9 +172,6 @@ describe('RecordInPlace completion buttons', () => {
     );
 
     const lastCall = mockLabwareScanner.mock.calls[mockLabwareScanner.mock.calls.length - 1][0];
-    const frozenLabware = { state: LabwareState.Frozen };
-    const result = lastCall.labwareCheckFunction([], frozenLabware);
-
-    expect(result).toEqual([]);
+    expect(lastCall.rejectFrozen).toBe(false);
   });
 });
