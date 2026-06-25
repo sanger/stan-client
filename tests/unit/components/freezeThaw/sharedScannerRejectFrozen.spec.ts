@@ -7,8 +7,10 @@ const fileHasRejectFrozenOnScanner = (relativePath: string): boolean => {
   return /<LabwareScanner[\s\S]*?rejectFrozen/.test(content);
 };
 
-const fileOmitsRejectFrozenOnScanner = (relativePath: string): boolean => {
-  return !fileHasRejectFrozenOnScanner(relativePath);
+const fileHasExplicitAllowFrozenOnScanner = (relativePath: string): boolean => {
+  const fullPath = path.resolve(process.cwd(), relativePath);
+  const content = fs.readFileSync(fullPath, 'utf8');
+  return /<LabwareScanner[\s\S]*?rejectFrozen=\{false\}/.test(content);
 };
 
 describe('shared scanner frozen blocking wiring', () => {
@@ -56,7 +58,7 @@ describe('shared scanner frozen blocking wiring', () => {
     expect(fileHasRejectFrozenOnScanner('src/pages/XeniumAnalyser.tsx')).toBe(true);
   });
 
-  it('CleanOut omits rejectFrozen', () => {
-    expect(fileOmitsRejectFrozenOnScanner('src/pages/CleanOut.tsx')).toBe(true);
+  it('CleanOut explicitly allows frozen labware', () => {
+    expect(fileHasExplicitAllowFrozenOnScanner('src/pages/CleanOut.tsx')).toBe(true);
   });
 });
