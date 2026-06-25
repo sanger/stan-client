@@ -80,6 +80,7 @@ export const SegmentationQc = ({ comments }: CellSegmentationPageProps) => {
           });
         }}
         enableFlaggedLabwareCheck
+        rejectFrozen
       >
         {({ labwares, removeLabware }) => {
           return (

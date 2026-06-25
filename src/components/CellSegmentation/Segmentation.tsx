@@ -95,6 +95,7 @@ export const Segmentation = ({ comments, proteinPanels }: CellSegmentationDataLo
           });
         }}
         enableFlaggedLabwareCheck
+        rejectFrozen
       >
         {({ labwares, removeLabware }) => {
           return (

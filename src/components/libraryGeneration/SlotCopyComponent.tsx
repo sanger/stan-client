@@ -136,6 +136,7 @@ export const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPane
               limit={1}
               labwareCheckFunction={validateLabware}
               enableFlaggedLabwareCheck
+              rejectFrozen
               locked={labware?.labware.barcode !== undefined}
               checkForCleanedOutAddresses
             >

@@ -163,6 +163,7 @@ const DualIndexPlateComponent = ({
                   })
                 }
                 locked={destLabware !== undefined}
+                rejectFrozen
                 checkForCleanedOutAddresses
               ></LabwareScanner>
               <MutedText>Add destination labware using the scan input above</MutedText>
