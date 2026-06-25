@@ -120,6 +120,13 @@ describe('RecordInPlace completion buttons', () => {
     expect(screen.getByRole('button', { name: 'Store' })).toBeInTheDocument();
   });
 
+  it('does not render Equipment section when no equipment is loaded', () => {
+    setup(false);
+
+    expect(screen.queryByRole('heading', { name: 'Equipment' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mock-custom-select')).not.toBeInTheDocument();
+  });
+
   it('shows Imaging QC and Store when displayImagingQcOption is true', () => {
     setup(true);
 
