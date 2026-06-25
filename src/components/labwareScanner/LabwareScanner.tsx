@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
-import { LabwareFlaggedFieldsFragment } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment, LabwareState } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import { createLabwareMachine } from '../../lib/machines/labware/labwareMachine';
 import ScanInput from '../scanInput/ScanInput';
@@ -73,6 +73,11 @@ export type LabwareScannerProps = {
    * The initial map of cleaned out addresses linked to the initial labwares list
    */
   initCleanedOutAddresses?: Map<number, string[]>;
+
+  /**
+   * When true, frozen labware will be rejected at scan time with an error message.
+   */
+  rejectFrozen?: boolean;
 };
 
 export default function LabwareScanner({
@@ -87,8 +92,21 @@ export default function LabwareScanner({
   enableLocationScanner,
   enableFlaggedLabwareCheck = false,
   checkForCleanedOutAddresses = false,
-  initCleanedOutAddresses = new Map<number, string[]>()
+  initCleanedOutAddresses = new Map<number, string[]>(),
+  rejectFrozen = false
 }: LabwareScannerProps) {
+  const composedLabwareCheck = React.useCallback(
+    async (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): Promise<string[]> => {
+      if (rejectFrozen && foundLabware.state === LabwareState.Frozen) {
+        return ['This labware is frozen and cannot be used for this operation.'];
+      }
+      if (labwareCheckFunction) {
+        return labwareCheckFunction(labwares, foundLabware);
+      }
+      return [];
+    },
+    [rejectFrozen, labwareCheckFunction]
+  );
   const slicedInitialLabware = React.useMemo(() => {
     if (!initialLabwares) return [];
     if (limit && initialLabwares.length > limit) {
@@ -118,7 +136,7 @@ export default function LabwareScanner({
   const [current, send, service] = useMachine(labwareMachine, {
     input: {
       labwares: slicedInitialLabware,
-      foundLabwareCheck: labwareCheckFunction,
+      foundLabwareCheck: composedLabwareCheck,
       limit,
       enableFlaggedLabwareCheck,
       currentBarcode: '',
