@@ -536,6 +536,7 @@ const RouteLayout = () => {
                   columns.bioState()
                 ]}
                 displayStoreOption={true}
+                displayImagingQcOption={false}
               />
             }
           />
