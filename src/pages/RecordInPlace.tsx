@@ -72,7 +72,7 @@ export default function RecordInPlace({
   columns,
   description,
   displayStoreOption,
-  displayImagingQcOption = true
+  displayImagingQcOption = false
 }: RecordInPlaceProps) {
   const navigate = useNavigate();
 
