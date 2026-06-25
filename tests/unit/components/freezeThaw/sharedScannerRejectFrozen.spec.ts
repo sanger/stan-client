@@ -7,6 +7,10 @@ const fileHasRejectFrozenOnScanner = (relativePath: string): boolean => {
   return /<LabwareScanner[\s\S]*?rejectFrozen/.test(content);
 };
 
+const fileOmitsRejectFrozenOnScanner = (relativePath: string): boolean => {
+  return !fileHasRejectFrozenOnScanner(relativePath);
+};
+
 describe('shared scanner frozen blocking wiring', () => {
   it('Segmentation passes rejectFrozen', () => {
     expect(fileHasRejectFrozenOnScanner('src/components/CellSegmentation/Segmentation.tsx')).toBe(true);
@@ -38,5 +42,21 @@ describe('shared scanner frozen blocking wiring', () => {
 
   it('DualIndexPlateComponent passes rejectFrozen', () => {
     expect(fileHasRejectFrozenOnScanner('src/components/libraryGeneration/DualIndexPlateComponent.tsx')).toBe(true);
+  });
+
+  it('SampleProcessingComments passes rejectFrozen', () => {
+    expect(fileHasRejectFrozenOnScanner('src/pages/SampleProcessingComments.tsx')).toBe(true);
+  });
+
+  it('Unrelease passes rejectFrozen', () => {
+    expect(fileHasRejectFrozenOnScanner('src/pages/Unrelease.tsx')).toBe(true);
+  });
+
+  it('XeniumAnalyser passes rejectFrozen', () => {
+    expect(fileHasRejectFrozenOnScanner('src/pages/XeniumAnalyser.tsx')).toBe(true);
+  });
+
+  it('CleanOut omits rejectFrozen', () => {
+    expect(fileOmitsRejectFrozenOnScanner('src/pages/CleanOut.tsx')).toBe(true);
   });
 });
