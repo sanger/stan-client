@@ -496,10 +496,8 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/cryopreserve"
-            loader={async () => {
-              const recordInPlaceInfo = await stanCore.GetRecordInPlaceInfo({ category: 'scanner' });
-              return recordInPlaceInfo.equipments;
-            }}
+            // Freeze operation does not require equipment selection.
+            loader={async () => []}
             element={
               <RecordInPlace
                 title={'Cryopreserve'}
@@ -520,10 +518,8 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/thaw"
-            loader={async () => {
-              const recordInPlaceInfo = await stanCore.GetRecordInPlaceInfo({ category: 'scanner' });
-              return recordInPlaceInfo.equipments;
-            }}
+            // Thaw operation does not require equipment selection.
+            loader={async () => []}
             element={
               <RecordInPlace
                 title={'Thaw'}
