@@ -95,18 +95,24 @@ export default function LabwareScanner({
   initCleanedOutAddresses = new Map<number, string[]>(),
   rejectFrozen = false
 }: LabwareScannerProps) {
-  const composedLabwareCheck = React.useCallback(
-    async (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): Promise<string[]> => {
-      if (rejectFrozen && foundLabware.state === LabwareState.Frozen) {
+  /**
+   * When `rejectFrozen` is enabled, wrap the caller-supplied check with the frozen-labware guard.
+   * Otherwise pass the original function reference straight through so the machine keeps its
+   * existing short-circuit behaviour for the common case (no extra async tick, no new identity
+   * on every parent render).
+   */
+  const composedLabwareCheck = React.useMemo(() => {
+    if (!rejectFrozen) return labwareCheckFunction;
+    return async (
+      labwares: LabwareFlaggedFieldsFragment[],
+      foundLabware: LabwareFlaggedFieldsFragment
+    ): Promise<string[]> => {
+      if (foundLabware.frozen || foundLabware.state === LabwareState.Frozen) {
         return ['This labware is frozen and cannot be used for this operation.'];
       }
-      if (labwareCheckFunction) {
-        return labwareCheckFunction(labwares, foundLabware);
-      }
-      return [];
-    },
-    [rejectFrozen, labwareCheckFunction]
-  );
+      return labwareCheckFunction ? labwareCheckFunction(labwares, foundLabware) : [];
+    };
+  }, [rejectFrozen, labwareCheckFunction]);
   const slicedInitialLabware = React.useMemo(() => {
     if (!initialLabwares) return [];
     if (limit && initialLabwares.length > limit) {
