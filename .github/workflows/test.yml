@@ -9,6 +9,12 @@ on:
   pull_request:
     branches: [devel]
 
+# Cancel in-progress runs on the same PR when a new push arrives.
+# On pushes to devel, queue runs instead of cancelling so each commit gets a status.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build:
     if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip tests]')
