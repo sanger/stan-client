@@ -33,7 +33,7 @@ jobs:
         with:
           install-command: yarn --frozen-lockfile --silent
           build: yarn build
-          start: npx serve -s build -p 3000
+          start: npx serve -s build -p 3000 --no-request-logging
           wait-on: "http://localhost:3000"
           config: baseUrl=http://localhost:3000
           browser: chrome
