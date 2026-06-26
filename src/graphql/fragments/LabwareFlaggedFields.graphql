@@ -8,6 +8,7 @@ fragment LabwareFlaggedFields on LabwareFlagged {
   flagged
   flagPriority
   state
+  frozen
   created
   labwareType {
     ...LabwareTypeFields
