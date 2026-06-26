@@ -4,7 +4,7 @@ import cypressSplit from 'cypress-split';
 export default defineConfig({
   video: false,
   defaultCommandTimeout: 15000,
-  retries: 2,
+  retries: { runMode: 1, openMode: 0 },
   numTestsKeptInMemory: 0,
   experimentalMemoryManagement: true,
   e2e: {
