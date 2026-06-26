@@ -31,7 +31,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           install-command: yarn --frozen-lockfile --silent
-          build: yarn build
+          build: REACT_APP_MOCK_API=msw yarn build
           start: npx serve -s build -p 3000
           wait-on: "http://localhost:3000"
           config: baseUrl=http://localhost:3000
