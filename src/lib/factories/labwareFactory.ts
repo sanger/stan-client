@@ -57,7 +57,8 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
       discarded: params.discarded ?? params.barcode?.length === 11,
       released: params.released ?? false,
       created: params.created ?? new Date().toISOString(),
-      state: params.state ?? LabwareState.Active
+      state: params.state ?? LabwareState.Active,
+      frozen: params.frozen ?? false
     };
   }
 );

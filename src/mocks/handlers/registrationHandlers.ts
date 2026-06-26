@@ -135,6 +135,7 @@ const registrationHandlers = [
                 discarded: false,
                 destroyed: false,
                 state: LabwareState.Active,
+                frozen: false,
                 created: new Date().toISOString(),
                 labwareType: {
                   name: 'Proviasette',
