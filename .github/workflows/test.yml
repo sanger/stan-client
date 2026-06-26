@@ -10,14 +10,41 @@ on:
     branches: [devel]
 
 jobs:
+  build:
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip tests]')
+    name: Build app for cypress
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn --frozen-lockfile --silent
+      - name: Build
+        run: yarn build
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: build
+          path: build
+          retention-days: 1
+
   cypress:
     if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip tests]')
-    name: Run cypress tests
+    name: Run cypress tests (${{ matrix.containers }}/4)
+    needs: build
     runs-on: ubuntu-latest
     container:
       image: cypress/browsers:node18.12.0-chrome106-ff106
 
       options: --user 1001
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v7
         name: Checkout
@@ -28,11 +55,18 @@ jobs:
           cache: 'yarn'
       - name: Install dependencies
         run:  yarn install
+      - name: Download build artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: build
+          path: build
       - name: Cypress run
         uses: cypress-io/github-action@v6
+        env:
+          SPLIT: ${{ strategy.job-total }}
+          SPLIT_INDEX: ${{ strategy.job-index }}
         with:
-          install-command: yarn --frozen-lockfile --silent
-          build: yarn build
+          install: false
           start: npx serve -s build -p 3000 --no-request-logging
           wait-on: "http://localhost:3000"
           config: baseUrl=http://localhost:3000
@@ -42,7 +76,7 @@ jobs:
         if: failure()
         with:
           overwrite: true
-          name: cypress-screenshots
+          name: cypress-screenshots-${{ matrix.containers }}
           path: cypress/screenshots
 
   jest:
