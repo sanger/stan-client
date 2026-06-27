@@ -29,6 +29,16 @@ jobs:
           cache: 'yarn'
       - name: Install dependencies
         run: yarn --frozen-lockfile --silent
+      - name: Tar node_modules
+        run: tar -cf node_modules.tar node_modules
+      - name: Upload node_modules artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: node_modules
+          path: node_modules.tar
+          retention-days: 1
+          compression-level: 0
+          include-hidden-files: true
       - name: Build
         run: yarn build
       - name: Upload build artifact
@@ -53,13 +63,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         name: Checkout
-      - name: Setup node
-        uses: actions/setup-node@v6
+      - name: Download node_modules artifact
+        uses: actions/download-artifact@v5
         with:
-          node-version-file: '.nvmrc'
-          cache: 'yarn'
-      - name: Install dependencies
-        run:  yarn install
+          name: node_modules
+      - name: Extract node_modules
+        run: tar -xf node_modules.tar && rm node_modules.tar
       - name: Download build artifact
         uses: actions/download-artifact@v5
         with:
