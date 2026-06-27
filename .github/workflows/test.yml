@@ -28,19 +28,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'yarn'
       - name: Install dependencies
-        env:
-          CYPRESS_CACHE_FOLDER: ${{ github.workspace }}/node_modules/.cypress-cache
         run: yarn --frozen-lockfile --silent
-      - name: Tar node_modules
-        run: tar -cf node_modules.tar node_modules
-      - name: Upload node_modules artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: node_modules
-          path: node_modules.tar
-          retention-days: 1
-          compression-level: 0
-          include-hidden-files: true
       - name: Build
         run: yarn build
       - name: Upload build artifact
@@ -65,12 +53,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         name: Checkout
-      - name: Download node_modules artifact
-        uses: actions/download-artifact@v5
+      - name: Setup node
+        uses: actions/setup-node@v6
         with:
-          name: node_modules
-      - name: Extract node_modules
-        run: tar -xf node_modules.tar && rm node_modules.tar
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+      - name: Install dependencies
+        run:  yarn install
       - name: Download build artifact
         uses: actions/download-artifact@v5
         with:
@@ -81,7 +70,6 @@ jobs:
         env:
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
-          CYPRESS_CACHE_FOLDER: ${{ github.workspace }}/node_modules/.cypress-cache
         with:
           install: false
           start: npx serve -s build -p 3000 --no-request-logging
