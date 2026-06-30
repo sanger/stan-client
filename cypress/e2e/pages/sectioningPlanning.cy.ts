@@ -424,7 +424,7 @@ describe('Sectioning Planning', () => {
       });
 
       it('shows a success message', () => {
-        cy.findByText(/Tube Printer successfully printed/).should('exist');
+        cy.findByText(/SuperFrost Plus slide Printer Printer Printer successfully printed/).should('exist');
       });
     });
 
@@ -449,7 +449,7 @@ describe('Sectioning Planning', () => {
       });
 
       it('shows an error message', () => {
-        cy.findByText(/Tube Printer failed to print/).should('exist');
+        cy.findByText(/SuperFrost Plus slide Printer Printer failed to print/).should('exist');
       });
     });
   });
@@ -457,7 +457,7 @@ describe('Sectioning Planning', () => {
 
 function createLabware() {
   cy.get('#labwareScanInput').type('STAN-113{enter}');
-  selectOption('labware-type', 'Tube');
+  selectOption('labware-type', 'SuperFrost Plus slide');
   cy.findByText('+ Add Labware').click();
   cy.findByText('Edit Layout').click();
   cy.findByRole('dialog').within(() => {
@@ -466,10 +466,11 @@ function createLabware() {
     cy.findByText('Done').click();
   });
   cy.findByTestId('section-thickness').eq(0).clear().type('5');
+  cy.findByTestId('sectioning-order').type('1');
   cy.findByText('Create Labware').click();
 }
 
 function printLabels() {
-  cy.findByLabelText('printers').select('Tube Printer');
+  cy.findByLabelText('printers').select('SuperFrost Plus slide Printer');
   cy.findByText('Print Labels').click();
 }

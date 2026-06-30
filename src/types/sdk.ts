@@ -43,6 +43,14 @@ export type AddExternalIdRequest = {
   labwareBarcode: Scalars['String']['input'];
 };
 
+/** Request to assign external names to tissues at particular positions in labware. */
+export type AddExternalIdsRequest = {
+  /** The slot addresses and new external names. */
+  addressNames: Array<AddressExternalName>;
+  /** The barcode of the labware containing the tissue */
+  labwareBarcode: Scalars['String']['input'];
+};
+
 /** Request to add spatial locations to an existing tissue type. */
 export type AddSpatialLocationsRequest = {
   /** The name of an existing tissue type. */
@@ -75,6 +83,14 @@ export type AddressCommentInput = {
   address: Scalars['Address']['input'];
   /** The id of a comment in the database. */
   commentId: Scalars['Int']['input'];
+};
+
+/** A link between a slot address and an external name. */
+export type AddressExternalName = {
+  /** A slot address. */
+  address: Scalars['Address']['input'];
+  /** An external name. */
+  externalName: Scalars['String']['input'];
 };
 
 /** Permeabilisation data about a particular slot address. */
@@ -940,6 +956,8 @@ export type Mutation = {
   addEquipment: Equipment;
   /** Record an operation adding a external ID to a sample. */
   addExternalID: OperationResult;
+  /** Record an op adding external names to tissues in a particular piece of labware. */
+  addExternalIds: OperationResult;
   /** Create a new fixative that can be selected when registering tissue. */
   addFixative: Fixative;
   /** Create a new HMDMC that can be used when registering new tissue. */
@@ -1215,6 +1233,15 @@ export type MutationAddEquipmentArgs = {
  */
 export type MutationAddExternalIdArgs = {
   request: AddExternalIdRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationAddExternalIdsArgs = {
+  request: AddExternalIdsRequest;
 };
 
 
@@ -2311,6 +2338,8 @@ export type OriginalSampleData = {
   labwareType: Scalars['String']['input'];
   /** The life stage of the donor. */
   lifeStage?: InputMaybe<LifeStage>;
+  /** The pot number used to distinguish pots in a request. */
+  potNumber?: InputMaybe<Scalars['Int']['input']>;
   /** The string to use for the replicate number of the tissue (optional). */
   replicateNumber?: InputMaybe<Scalars['String']['input']>;
   /** The date the original sample was collected, if known. */
@@ -2381,6 +2410,8 @@ export type PlanAction = {
   sample: Sample;
   /** The planned thickness of the sample, if any. */
   sampleThickness?: Maybe<Scalars['String']['output']>;
+  /** An indicator for the order sections are taken from their block. */
+  sectioningOrder?: Maybe<Scalars['Int']['output']>;
   /** The source slot that contains the sample. */
   source: Slot;
 };
@@ -2423,6 +2454,8 @@ export type PlanRequestAction = {
   sampleId: Scalars['Int']['input'];
   /** The thickness (if specified) of the new sample. */
   sampleThickness?: InputMaybe<Scalars['String']['input']>;
+  /** An indicator for the order sections are taken from their block. */
+  sectioningOrder: Scalars['Int']['input'];
   /** The source of the sample (describing a slot in some existing labware). */
   source: PlanRequestSource;
 };
@@ -4525,7 +4558,7 @@ export type OmeroProjectFieldsFragment = { __typename?: 'OmeroProject', name: st
 
 export type OperationFieldsFragment = { __typename?: 'Operation', id: number, performed: string, operationType: { __typename?: 'OperationType', name: string }, actions: Array<{ __typename?: 'Action', operationId: number, source: { __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, destination: { __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, sample: { __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } } }>, user: { __typename?: 'User', username: string, role: UserRole } };
 
-export type PlanActionFieldsFragment = { __typename?: 'PlanAction', newSection?: string | null, sampleThickness?: string | null, sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } };
+export type PlanActionFieldsFragment = { __typename?: 'PlanAction', newSection?: string | null, sampleThickness?: string | null, sectioningOrder?: number | null, sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } };
 
 export type PrinterFieldsFragment = { __typename?: 'Printer', name: string, labelTypes: Array<{ __typename?: 'LabelType', name: string }> };
 
@@ -4873,7 +4906,7 @@ export type PlanMutationVariables = Exact<{
 }>;
 
 
-export type PlanMutation = { __typename?: 'Mutation', plan: { __typename?: 'PlanResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'PlanOperation', operationType?: { __typename?: 'OperationType', name: string } | null, planActions: Array<{ __typename?: 'PlanAction', newSection?: string | null, sampleThickness?: string | null, sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } }> }> } };
+export type PlanMutation = { __typename?: 'Mutation', plan: { __typename?: 'PlanResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'PlanOperation', operationType?: { __typename?: 'OperationType', name: string } | null, planActions: Array<{ __typename?: 'PlanAction', newSection?: string | null, sampleThickness?: string | null, sectioningOrder?: number | null, sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } }> }> } };
 
 export type PrintMutationVariables = Exact<{
   barcodes: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -5568,7 +5601,7 @@ export type FindPlanDataQueryVariables = Exact<{
 }>;
 
 
-export type FindPlanDataQuery = { __typename?: 'Query', planData: { __typename?: 'PlanData', groups: Array<Array<string>>, sources: Array<{ __typename?: 'LabwareFlagged', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, flagged: boolean, flagPriority?: FlagPriority | null, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, destination: { __typename?: 'LabwareFlagged', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, flagged: boolean, flagPriority?: FlagPriority | null, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }, plan: { __typename?: 'PlanOperation', operationType?: { __typename?: 'OperationType', name: string } | null, planActions: Array<{ __typename?: 'PlanAction', newSection?: string | null, sampleThickness?: string | null, sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } }> } } };
+export type FindPlanDataQuery = { __typename?: 'Query', planData: { __typename?: 'PlanData', groups: Array<Array<string>>, sources: Array<{ __typename?: 'LabwareFlagged', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, flagged: boolean, flagPriority?: FlagPriority | null, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, destination: { __typename?: 'LabwareFlagged', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, flagged: boolean, flagPriority?: FlagPriority | null, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }, plan: { __typename?: 'PlanOperation', operationType?: { __typename?: 'OperationType', name: string } | null, planActions: Array<{ __typename?: 'PlanAction', newSection?: string | null, sampleThickness?: string | null, sectioningOrder?: number | null, sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } }> } } };
 
 export type FindReagentPlateQueryVariables = Exact<{
   barcode: Scalars['String']['input'];
@@ -6275,6 +6308,7 @@ export const PlanActionFieldsFragmentDoc = gql`
     fragment PlanActionFields on PlanAction {
   newSection
   sampleThickness
+  sectioningOrder
   sample {
     id
   }
