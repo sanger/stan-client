@@ -424,7 +424,7 @@ describe('Sectioning Planning', () => {
       });
 
       it('shows a success message', () => {
-        cy.findByText(/SuperFrost Plus slide Printer Printer Printer successfully printed/).should('exist');
+        cy.findByText(/SuperFrost Plus slide Printer successfully printed/).should('exist');
       });
     });
 
@@ -449,7 +449,7 @@ describe('Sectioning Planning', () => {
       });
 
       it('shows an error message', () => {
-        cy.findByText(/SuperFrost Plus slide Printer Printer failed to print/).should('exist');
+        cy.findByText(/SuperFrost Plus slide Printer failed to print/).should('exist');
       });
     });
   });
