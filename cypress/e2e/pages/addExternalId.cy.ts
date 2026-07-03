@@ -33,9 +33,7 @@ describe('Add External ID page', () => {
 
   context('when form is submitted with valid inputs', () => {
     before(() => {
-      cy.get('#labwareScanInput').type('STAN-011{enter}');
-      cy.findAllByTestId(`addressNames[0].externalName`).type('ExternalID1');
-      cy.findByRole('button', { name: 'Submit' }).click();
+      fillInTheForm();
     });
 
     it('displays a success message', () => {
@@ -71,6 +69,6 @@ describe('Add External ID page', () => {
 
 const fillInTheForm = () => {
   cy.get('#labwareScanInput').type('STAN-011{enter}');
-  cy.findAllByTestId(`addressNames[0].externalName`).type('ExternalID1');
+  cy.get("input[name='addressNames[0].externalName']").type('ExternalID1');
   cy.findByRole('button', { name: 'Submit' }).click();
 };
