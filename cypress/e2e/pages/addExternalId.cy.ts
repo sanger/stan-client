@@ -4,12 +4,6 @@ import { HttpResponse } from 'msw';
 describe('Add External ID page', () => {
   before(() => {
     cy.visit('/lab/add_external_id');
-    /* TODO: For further integration testing on this page:
-            - Need a method of simulating setting a users clipboard
-            - The currently available methods only work when the cypress window is in focus
-            - e.g we stub the navigator class called from addExternalId
-                onBeforeLoad(win) { win.navigator.clipboard.readText = () => { return Promise.resolve("Hello") }
-        */
   });
 
   context('when form is submitted without filling in any fields', () => {
