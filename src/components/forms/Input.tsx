@@ -40,7 +40,7 @@ const FormikInput = ({
         <Label name={label} displayTag={displayTag} info={info} className={'whitespace-nowrap'}>
           <Field
             type={type}
-            data-testid={label}
+            data-testid={label.trim().length > 0 ? label : name}
             className={inputClassNames}
             name={name}
             onKeyDown={preventEnterKeyDefault ? onPreventEnterKeyDefault : undefined}

@@ -43,6 +43,14 @@ export type AddExternalIdRequest = {
   labwareBarcode: Scalars['String']['input'];
 };
 
+/** Request to assign external names to tissues at particular positions in labware. */
+export type AddExternalIdsRequest = {
+  /** The slot addresses and new external names. */
+  addressNames: Array<AddressExternalName>;
+  /** The barcode of the labware containing the tissue */
+  labwareBarcode: Scalars['String']['input'];
+};
+
 /** Request to add spatial locations to an existing tissue type. */
 export type AddSpatialLocationsRequest = {
   /** The name of an existing tissue type. */
@@ -75,6 +83,14 @@ export type AddressCommentInput = {
   address: Scalars['Address']['input'];
   /** The id of a comment in the database. */
   commentId: Scalars['Int']['input'];
+};
+
+/** A link between a slot address and an external name. */
+export type AddressExternalName = {
+  /** A slot address. */
+  address: Scalars['Address']['input'];
+  /** An external name. */
+  externalName: Scalars['String']['input'];
 };
 
 /** Permeabilisation data about a particular slot address. */
@@ -940,6 +956,8 @@ export type Mutation = {
   addEquipment: Equipment;
   /** Record an operation adding a external ID to a sample. */
   addExternalID: OperationResult;
+  /** Record an op adding external names to tissues in a particular piece of labware. */
+  addExternalIds: OperationResult;
   /** Create a new fixative that can be selected when registering tissue. */
   addFixative: Fixative;
   /** Create a new HMDMC that can be used when registering new tissue. */
@@ -1215,6 +1233,15 @@ export type MutationAddEquipmentArgs = {
  */
 export type MutationAddExternalIdArgs = {
   request: AddExternalIdRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationAddExternalIdsArgs = {
+  request: AddExternalIdsRequest;
 };
 
 
@@ -2311,6 +2338,8 @@ export type OriginalSampleData = {
   labwareType: Scalars['String']['input'];
   /** The life stage of the donor. */
   lifeStage?: InputMaybe<LifeStage>;
+  /** The pot number used to distinguish pots in a request. */
+  potNumber?: InputMaybe<Scalars['Int']['input']>;
   /** The string to use for the replicate number of the tissue (optional). */
   replicateNumber?: InputMaybe<Scalars['String']['input']>;
   /** The date the original sample was collected, if known. */
@@ -4637,6 +4666,13 @@ export type AddExternalIdMutationVariables = Exact<{
 
 export type AddExternalIdMutation = { __typename?: 'Mutation', addExternalID: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
 
+export type AddExternalIdsMutationVariables = Exact<{
+  request: AddExternalIdsRequest;
+}>;
+
+
+export type AddExternalIdsMutation = { __typename?: 'Mutation', addExternalIds: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
+
 export type AddFixativeMutationVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
@@ -6624,6 +6660,21 @@ export const AddEquipmentDocument = gql`
 export const AddExternalIdDocument = gql`
     mutation AddExternalID($request: AddExternalIDRequest!) {
   addExternalID(request: $request) {
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    `;
+export const AddExternalIdsDocument = gql`
+    mutation AddExternalIds($request: AddExternalIdsRequest!) {
+  addExternalIds(request: $request) {
     operations {
       operationType {
         name
@@ -8833,6 +8884,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     AddExternalID(variables: AddExternalIdMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<AddExternalIdMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddExternalIdMutation>(AddExternalIdDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddExternalID', 'mutation', variables);
+    },
+    AddExternalIds(variables: AddExternalIdsMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<AddExternalIdsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AddExternalIdsMutation>(AddExternalIdsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddExternalIds', 'mutation', variables);
     },
     AddFixative(variables: AddFixativeMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<AddFixativeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddFixativeMutation>(AddFixativeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddFixative', 'mutation', variables);

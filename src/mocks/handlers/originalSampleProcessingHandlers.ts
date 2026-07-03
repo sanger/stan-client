@@ -1,5 +1,7 @@
 import { graphql, HttpResponse } from 'msw';
 import {
+  AddExternalIdsMutation,
+  AddExternalIdsMutationVariables,
   GetBlockProcessingInfoQuery,
   GetBlockProcessingInfoQueryVariables,
   GetNextReplicateNumberQuery,
@@ -126,7 +128,10 @@ const originalSampleProcessingHandlers = [
         }
       });
     }
-  )
+  ),
+  graphql.mutation<AddExternalIdsMutation, AddExternalIdsMutationVariables>('AddExternalIds', () => {
+    return HttpResponse.json({ data: { addExternalIds: { operations: [] } } }, { status: 200 });
+  })
 ];
 
 export default originalSampleProcessingHandlers;
