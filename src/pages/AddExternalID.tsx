@@ -106,16 +106,24 @@ export default function AddExternalID() {
                   <Heading level={3}>Labware</Heading>
                   <LabwareScanner
                     limit={1}
-                    onAdd={async (labware) => {
-                      await setValues({
-                        labwareBarcode: labware.barcode,
-                        addressNames: labware.slots
-                          .filter((slot) => isSlotFilled(slot) && !hasMultipleSamples(slot))
-                          .map((slot) => ({
-                            address: slot.address,
-                            externalName: ''
-                          }))
-                      });
+                    labwareCheckFunction={async (labwares, foundLabware) => {
+                      const addressNames = foundLabware.slots
+                        .filter((slot) => isSlotFilled(slot) && !hasMultipleSamples(slot))
+                        .map((slot) => ({
+                          address: slot.address,
+                          externalName: ''
+                        }));
+                      if (addressNames.length == 0) {
+                        return [
+                          `${foundLabware.barcode} is invalid because it either has no filled slots or contains multiple samples in its filled slots.`
+                        ];
+                      } else {
+                        await setValues({
+                          labwareBarcode: foundLabware.barcode,
+                          addressNames
+                        });
+                        return [];
+                      }
                     }}
                     onRemove={async () => {
                       await setValues({
