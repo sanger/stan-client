@@ -18,7 +18,7 @@ import { stanCore } from '../lib/sdk';
 import { AddExternalIdsMutation, AddExternalIdsRequest, AddressExternalName } from '../types/sdk';
 import { fromPromise } from 'xstate';
 import { CellProps, Column } from 'react-table';
-import { isSlotFilled } from '../lib/helpers/slotHelper';
+import { hasMultipleSamples, isSlotFilled } from '../lib/helpers/slotHelper';
 import DataTable from '../components/DataTable';
 import FormikInput from '../components/forms/Input';
 
@@ -110,7 +110,7 @@ export default function AddExternalID() {
                       await setValues({
                         labwareBarcode: labware.barcode,
                         addressNames: labware.slots
-                          .filter((slot) => isSlotFilled(slot))
+                          .filter((slot) => isSlotFilled(slot) && !hasMultipleSamples(slot))
                           .map((slot) => ({
                             address: slot.address,
                             externalName: ''
