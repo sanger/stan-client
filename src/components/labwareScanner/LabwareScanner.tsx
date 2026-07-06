@@ -76,7 +76,7 @@ export type LabwareScannerProps = {
   initCleanedOutAddresses?: Map<number, string[]>;
 
   /**
-   * When true, frozen labware will be rejected at scan time with an error message.
+   * Defaults to true. When true, frozen labware will be rejected at scan time with an error message.
    */
   rejectFrozen?: boolean;
 };
@@ -94,7 +94,7 @@ export default function LabwareScanner({
   enableFlaggedLabwareCheck = false,
   checkForCleanedOutAddresses = false,
   initCleanedOutAddresses = new Map<number, string[]>(),
-  rejectFrozen = false
+  rejectFrozen = true
 }: LabwareScannerProps) {
   /**
    * When `rejectFrozen` is enabled, wrap the caller-supplied check with the frozen-labware guard.

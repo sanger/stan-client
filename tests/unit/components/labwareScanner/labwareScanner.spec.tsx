@@ -210,7 +210,7 @@ describe('LabwareScanner rejectFrozen', () => {
     });
   });
 
-  it('allows frozen labware when rejectFrozen is not set', async () => {
+  it('rejects frozen labware when rejectFrozen is not set', async () => {
     server.use(
       graphql.query('FindFlaggedLabware', () =>
         HttpResponse.json({
@@ -235,9 +235,7 @@ describe('LabwareScanner rejectFrozen', () => {
     await scanLabware('STAN-3000');
 
     await waitFor(() => {
-      expect(
-        screen.queryByText('This labware is frozen and cannot be used for this operation.')
-      ).not.toBeInTheDocument();
+      expect(screen.getByText('This labware is frozen and cannot be used for this operation.')).toBeInTheDocument();
     });
   });
 });
