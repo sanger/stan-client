@@ -15,19 +15,16 @@ describe('Xenium Analyser', () => {
   });
   describe('when scanning labware which has not recorded probe hybridisation', () => {
     before(() => {
-      // FindLatestOperationQuery should return null
-      cy.window().then((win) => {
-        win.msw.worker.use(
-          win.msw.graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>(
-            'FindLatestOperation',
-            () => {
-              return HttpResponse.json({
-                data: {
-                  findLatestOp: null
-                }
-              });
-            }
-          )
+      //FindLatestOperationQuery should return null
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', () => {
+            return HttpResponse.json({
+              data: {
+                findLatestOp: null
+              }
+            });
+          })
         );
       });
     });
@@ -37,9 +34,6 @@ describe('Xenium Analyser', () => {
       cy.findByText('Analyser Details').should('not.exist');
     });
     after(() => {
-      cy.window().then((win) => {
-        win.msw.worker.resetHandlers();
-      });
       cy.findByTestId('removeButton').click();
     });
   });
@@ -84,9 +78,9 @@ describe('Xenium Analyser', () => {
       });
       context('when an SGP number with no previously uploaded file is selected', () => {
         before(() => {
-          cy.window().then((win) => {
-            win.msw.worker.use(
-              win.msw.graphql.query<FindFilesQuery, FindFilesQueryVariables>('FindFiles', () => {
+          cy.msw().then(({ worker, graphql }) => {
+            worker.use(
+              graphql.query<FindFilesQuery, FindFilesQueryVariables>('FindFiles', () => {
                 return HttpResponse.json({ data: { listFiles: [] } }, { status: 200 });
               })
             );
@@ -187,9 +181,9 @@ describe('Xenium Analyser', () => {
     });
     context('When there is a server error', () => {
       before(() => {
-        cy.window().then((win) => {
-          win.msw.worker.use(
-            win.msw.graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>('RecordAnalyser', () => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>('RecordAnalyser', () => {
               return HttpResponse.json({
                 errors: [
                   {
@@ -212,9 +206,6 @@ describe('Xenium Analyser', () => {
     });
     context('When there is no server error', () => {
       before(() => {
-        cy.window().then((win) => {
-          win.msw.worker.resetHandlers();
-        });
         cy.findByRole('button', { name: 'Save' }).click();
       });
 
