@@ -15,25 +15,31 @@ describe('Xenium Analyser', () => {
   });
   describe('when scanning labware which has not recorded probe hybridisation', () => {
     before(() => {
-      //FindLatestOperationQuery should return null
-      cy.msw().then(({ worker, graphql }) => {
-        worker.use(
-          graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', () => {
-            return HttpResponse.json({
-              data: {
-                findLatestOp: null
-              }
-            });
-          })
+      // FindLatestOperationQuery should return null
+      cy.window().then((win) => {
+        win.msw.worker.use(
+          win.msw.graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>(
+            'FindLatestOperation',
+            () => {
+              return HttpResponse.json({
+                data: {
+                  findLatestOp: null
+                }
+              });
+            }
+          )
         );
       });
     });
     it('should display a warning message', () => {
       cy.get('#labwareScanInput').clear().type('STAN-3111{enter}');
-      cy.findByText('No probe hybridisation recorded for STAN-3111').should('be.visible');
+      cy.findByTextContent('No probe hybridisation recorded for STAN-3111').should('be.visible');
       cy.findByText('Analyser Details').should('not.exist');
     });
     after(() => {
+      cy.window().then((win) => {
+        win.msw.worker.resetHandlers();
+      });
       cy.findByTestId('removeButton').click();
     });
   });
@@ -78,13 +84,14 @@ describe('Xenium Analyser', () => {
       });
       context('when an SGP number with no previously uploaded file is selected', () => {
         before(() => {
-          cy.msw().then(({ worker, graphql }) => {
-            worker.use(
-              graphql.query<FindFilesQuery, FindFilesQueryVariables>('FindFiles', () => {
+          cy.window().then((win) => {
+            win.msw.worker.use(
+              win.msw.graphql.query<FindFilesQuery, FindFilesQueryVariables>('FindFiles', () => {
                 return HttpResponse.json({ data: { listFiles: [] } }, { status: 200 });
               })
             );
           });
+          selectOption('STAN-3111-workNumber', '');
           selectOption('STAN-3111-workNumber', 'SGP1009');
         });
         it('hides the SGP folder link', () => {
@@ -180,9 +187,9 @@ describe('Xenium Analyser', () => {
     });
     context('When there is a server error', () => {
       before(() => {
-        cy.msw().then(({ worker, graphql }) => {
-          worker.use(
-            graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>('RecordAnalyser', () => {
+        cy.window().then((win) => {
+          win.msw.worker.use(
+            win.msw.graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>('RecordAnalyser', () => {
               return HttpResponse.json({
                 errors: [
                   {
@@ -200,11 +207,14 @@ describe('Xenium Analyser', () => {
         cy.findByRole('button', { name: 'Save' }).click();
       });
       it('shows an error', () => {
-        cy.findByText('Labware is discarded: [STAN-3111]').should('be.visible');
+        cy.findByTextContent('Labware is discarded: [STAN-3111]').should('be.visible');
       });
     });
     context('When there is no server error', () => {
       before(() => {
+        cy.window().then((win) => {
+          win.msw.worker.resetHandlers();
+        });
         cy.findByRole('button', { name: 'Save' }).click();
       });
 
