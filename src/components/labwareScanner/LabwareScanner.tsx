@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
-import { LabwareFlaggedFieldsFragment, LabwareState } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import { createLabwareMachine } from '../../lib/machines/labware/labwareMachine';
 import ScanInput from '../scanInput/ScanInput';
@@ -7,6 +7,7 @@ import Success from '../notifications/Success';
 import Warning from '../notifications/Warning';
 import { isFunction } from 'lodash';
 import * as Yup from 'yup';
+import { isFrozenLabware } from '../../lib/helpers/labwareHelper';
 
 export type LabwareScannerProps = {
   /**
@@ -107,7 +108,7 @@ export default function LabwareScanner({
       labwares: LabwareFlaggedFieldsFragment[],
       foundLabware: LabwareFlaggedFieldsFragment
     ): Promise<string[]> => {
-      if (foundLabware.frozen || foundLabware.state === LabwareState.Frozen) {
+      if (isFrozenLabware(foundLabware)) {
         return ['This labware is frozen and cannot be used for this operation.'];
       }
       return labwareCheckFunction ? labwareCheckFunction(labwares, foundLabware) : [];

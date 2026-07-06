@@ -165,6 +165,13 @@ export function isLabwareUsable(labware: Pick<Labware, 'state'>): boolean {
 }
 
 /**
+ * Returns true if labware is frozen, supporting both state and frozen fields.
+ */
+export function isFrozenLabware(labware: Pick<Labware, 'state' | 'frozen'>): boolean {
+  return labware.frozen || labware.state === LabwareState.Frozen;
+}
+
+/**
  * Determines whether a piece of labware has one slot which contains a block
  * e.g. a non-empty Proviasette
  * @param labware the labware to check
