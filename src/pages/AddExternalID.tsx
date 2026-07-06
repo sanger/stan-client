@@ -113,7 +113,7 @@ export default function AddExternalID() {
                           address: slot.address,
                           externalName: ''
                         }));
-                      if (addressNames.length == 0) {
+                      if (addressNames.length === 0) {
                         return [
                           `${foundLabware.barcode} is invalid because it either has no filled slots or contains multiple samples in its filled slots.`
                         ];
