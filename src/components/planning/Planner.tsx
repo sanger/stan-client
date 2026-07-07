@@ -2,8 +2,9 @@ import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, LabwareTypeFieldsFragment } from '../../types/sdk';
 import { uniqueId } from 'lodash';
 import BlueButton from '../buttons/BlueButton';
-import { NewFlaggedLabwareLayout } from '../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
 import { castDraft, produce } from '../../dependencies/immer';
+import { multiSampleBlockLabwareFactory, unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
 import LabwareScanTable from '../labwareScanPanel/LabwareScanPanel';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
 import { buildSampleColors } from '../../lib/helpers/labwareHelper';
@@ -13,7 +14,7 @@ import Warning from '../notifications/Warning';
 import { Column } from 'react-table';
 import labwareScanTableColumns from '../dataTableColumns/labwareColumns';
 import { useScrollToRef } from '../../lib/hooks';
-import { unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
+import { isMultiSampleBlockLabware } from '../originalSampleProcessing/blockProcessing/BlockProcessing';
 
 /**
  * The props passed to the Planner component
@@ -64,6 +65,15 @@ type PlannerProps<M> = {
    * removed.
    */
   onPlanChanged?: (props: PlanChangedProps<M>) => void;
+
+  /**
+   * Only available for multiple sample labware types, the user can define the block number of row on the fly, default to 1
+   */
+  selectedLabwareNumRows?: number;
+  /**
+   * Only available for multiple sample labware types, the user can define the block number of columns on the fly, default to 1
+   */
+  selectedLabwareNumColumns?: number;
 };
 
 /**
@@ -170,6 +180,8 @@ function reducer<M>(state: PlannerState<M>, action: Action<M>): PlannerState<M> 
 export default function Planner<M>({
   selectedLabwareType,
   numPlansToCreate,
+  selectedLabwareNumColumns,
+  selectedLabwareNumRows,
   onPlanChanged,
   columns,
   singleSourceAllowed,
@@ -211,6 +223,13 @@ export default function Planner<M>({
     if (!selectedLabwareType) {
       return;
     }
+    if (isMultiSampleBlockLabware(selectedLabwareType.name as LabwareTypeName)) {
+      return multiSampleBlockLabwareFactory(
+        selectedLabwareType.name as LabwareTypeName,
+        selectedLabwareNumColumns!,
+        selectedLabwareNumRows!
+      ).build() as NewFlaggedLabwareLayout;
+    }
     return unregisteredLabwareFactory.build(
       {},
       {
@@ -219,7 +238,7 @@ export default function Planner<M>({
         }
       }
     ) as NewFlaggedLabwareLayout;
-  }, [selectedLabwareType]);
+  }, [selectedLabwareNumColumns, selectedLabwareNumRows, selectedLabwareType]);
 
   /**
    * Handler for when the "Add Labware" button is clicked

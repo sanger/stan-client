@@ -67,6 +67,24 @@ describe('Block Processing', () => {
         });
       });
     });
+    context('when adding a Cassette with different layout dimensions', () => {
+      const numCols = 4;
+      const numRows = 3;
+      before(() => {
+        selectOption('labwareType', 'Cassette');
+        cy.findByTestId('selectedLabwareNumColumns').type('{selectall}').type(numCols.toString());
+        cy.findByTestId('selectedLabwareNumRows').type('{selectall}').type(numRows.toString());
+        cy.findByText('+ Add Labware').click();
+      });
+      after(() => {
+        cy.findAllByText('Delete Layout').first().click();
+      });
+      describe('it displays labware layout accordingly', () => {
+        it('adds a source row for each selected source', () => {
+          cy.findAllByTestId('slot').should('have.length', numCols * numRows);
+        });
+      });
+    });
   });
   describe('Adding multiple labware', () => {
     it('should display two Tubes', () => {

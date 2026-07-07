@@ -10,6 +10,8 @@ fragment LabwareFlaggedFields on LabwareFlagged {
   state
   frozen
   created
+  numRows
+  numColumns
   labwareType {
     ...LabwareTypeFields
   }
