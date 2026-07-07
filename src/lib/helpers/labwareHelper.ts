@@ -101,6 +101,8 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
     released: labware.released,
     created: labware.created,
     state: labware.state,
+    numRows: labware.numRows ?? labware.labwareType.numRows,
+    numColumns: labware.numColumns ?? labware.labwareType.numColumns,
     labwareType: {
       __typename: 'LabwareType',
       name: labware.labwareType.name,

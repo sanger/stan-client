@@ -51,6 +51,8 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
       labwareType: associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build(),
       id: params.id ?? -1,
       barcode: params.barcode ?? null,
+      numColumns: params.numColumns ?? 1,
+      numRows: params.numRows ?? 1,
       externalBarcode: params.externalBarcode ?? 'EXTERN-BARCODE',
       slots: associations.slots ?? [],
       destroyed: params.destroyed ?? params.barcode?.length === 12,
@@ -76,6 +78,8 @@ export default labwareFactory;
 
 export const multiSampleBlockLabwareFactory = (blockTypeName: LabwareTypeName, numColumns: number, numRows: number) => {
   return unregisteredLabwareFactory.associations({
+    numColumns,
+    numRows,
     labwareType: labwareTypeFactory
       .params({
         name: blockTypeName,

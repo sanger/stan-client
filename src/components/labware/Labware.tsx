@@ -216,11 +216,7 @@ const Labware = ({
   const { selectedAddresses } = current.context;
 
   const selectedAddressesRef = React.useRef<Set<string>>();
-  const {
-    labwareType: { numRows, numColumns },
-    slots,
-    barcode
-  } = labware;
+  const { slots, barcode, numRows, numColumns } = labware;
 
   const isFlagged = useMemo(() => {
     return (labware as LabwareFlaggedFieldsFragment).flagged;
