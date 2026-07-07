@@ -46,13 +46,14 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
         });
       }
     });
+    const labwareType = associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build();
     return {
       __typename: 'Labware',
-      labwareType: associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build(),
+      labwareType,
       id: params.id ?? -1,
       barcode: params.barcode ?? null,
-      numColumns: params.numColumns ?? 1,
-      numRows: params.numRows ?? 1,
+      numColumns: params.numColumns ?? labwareType.numColumns,
+      numRows: params.numRows ?? labwareType.numRows,
       externalBarcode: params.externalBarcode ?? 'EXTERN-BARCODE',
       slots: associations.slots ?? [],
       destroyed: params.destroyed ?? params.barcode?.length === 12,

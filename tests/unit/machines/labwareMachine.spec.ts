@@ -215,6 +215,8 @@ describe('labwareMachine', () => {
                 destroyed: false,
                 discarded: false,
                 released: false,
+                numRows: 1,
+                numColumns: 1,
                 created: new Date().toISOString(),
                 state: LabwareState.Active,
                 __typename: 'Labware',
