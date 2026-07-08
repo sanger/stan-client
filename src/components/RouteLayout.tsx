@@ -500,6 +500,7 @@ const RouteLayout = () => {
             loader={async () => []}
             element={
               <RecordInPlace
+                key="cryopreserve"
                 title={'Cryopreserve'}
                 operationType={'Cryopreserve'}
                 columns={[
@@ -522,6 +523,7 @@ const RouteLayout = () => {
             loader={async () => []}
             element={
               <RecordInPlace
+                key="thaw"
                 title={'Thaw'}
                 operationType={'Thaw'}
                 columns={[

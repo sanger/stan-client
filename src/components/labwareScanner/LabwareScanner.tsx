@@ -172,15 +172,13 @@ export default function LabwareScanner({
    * After transition into the "idle" state, focus the scan input
    */
   const inputRef = useRef<HTMLInputElement>(null);
-  const previousLabwareLengthRef = useRef(service.getSnapshot().context.labwares.length);
-  const prevCleanedOutAddressesLengthRef = useRef(service.getSnapshot().context.cleanedOutAddresses.size);
+  const previousLabwareLength = service.getSnapshot().context.labwares.length;
+  const prevCleanedOutAddressesLength = service.getSnapshot().context.cleanedOutAddresses.size;
   useEffect(() => {
     const subscription = service.subscribe((observer) => {
       if (observer.matches('idle') && !observer.context.locationScan) {
         inputRef.current?.focus();
       }
-      const previousLabwareLength = previousLabwareLengthRef.current;
-      const prevCleanedOutAddressesLength = prevCleanedOutAddressesLengthRef.current;
       const currentLabwareLength = observer.context.labwares.length;
       const curCleanedOutAddressesLength = observer.context.cleanedOutAddresses.size;
       const labwares = observer.context.labwares;
@@ -203,12 +201,20 @@ export default function LabwareScanner({
             onRemove?.(observer.context.removedLabware.labware, observer.context.removedLabware.index);
         }
       }
-
-      previousLabwareLengthRef.current = currentLabwareLength;
-      prevCleanedOutAddressesLengthRef.current = curCleanedOutAddressesLength;
     });
     return subscription.unsubscribe;
-  }, [service, onChange, onAdd, onRemove, labwares, removedLabware, cleanedOutAddresses, checkForCleanedOutAddresses]);
+  }, [
+    service,
+    onChange,
+    onAdd,
+    onRemove,
+    labwares,
+    removedLabware,
+    previousLabwareLength,
+    cleanedOutAddresses,
+    prevCleanedOutAddressesLength,
+    checkForCleanedOutAddresses
+  ]);
 
   useEffect(() => {
     send(locked ? { type: 'LOCK' } : { type: 'UNLOCK' });

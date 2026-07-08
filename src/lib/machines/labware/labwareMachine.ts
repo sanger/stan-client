@@ -58,7 +58,7 @@ export interface LabwareContext {
    * @param foundLabware the new labware to be entered
    * @return a list of any problems identified
    */
-  composedLabwareCheck: (
+  foundLabwareCheck?: (
     labwares: LabwareFlaggedFieldsFragment[],
     foundLabware: LabwareFlaggedFieldsFragment
   ) => string[] | Promise<string[]>;

@@ -129,7 +129,7 @@ const labwareHandlers = [
   ),
 
   graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', () => {
-    return HttpResponse.json({ data: { findLatestOp: { id: 1 } } });
+    return HttpResponse.json({ data: { findLatestOp: null } });
   })
 ];
 
