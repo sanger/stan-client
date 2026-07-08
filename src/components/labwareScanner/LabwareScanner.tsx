@@ -102,18 +102,18 @@ export default function LabwareScanner({
    * existing short-circuit behaviour for the common case (no extra async tick, no new identity
    * on every parent render).
    */
-  const composedLabwareCheck = React.useMemo(() => {
-    if (!rejectFrozen) return labwareCheckFunction;
-    return async (
-      labwares: LabwareFlaggedFieldsFragment[],
-      foundLabware: LabwareFlaggedFieldsFragment
-    ): Promise<string[]> => {
-      if (isFrozenLabware(foundLabware)) {
-        return ['This labware is frozen and cannot be used for this operation.'];
-      }
+  const composedLabwareCheck = (
+    labwares: LabwareFlaggedFieldsFragment[],
+    foundLabware: LabwareFlaggedFieldsFragment
+  ) => {
+    if (!rejectFrozen) {
       return labwareCheckFunction ? labwareCheckFunction(labwares, foundLabware) : [];
-    };
-  }, [rejectFrozen, labwareCheckFunction]);
+    }
+    if (isFrozenLabware(foundLabware)) {
+      return ['This labware is frozen and cannot be used for this operation.'];
+    }
+    return labwareCheckFunction ? labwareCheckFunction(labwares, foundLabware) : [];
+  };
   const slicedInitialLabware = React.useMemo(() => {
     if (!initialLabwares) return [];
     if (limit && initialLabwares.length > limit) {
@@ -143,7 +143,7 @@ export default function LabwareScanner({
   const [current, send, service] = useMachine(labwareMachine, {
     input: {
       labwares: slicedInitialLabware,
-      foundLabwareCheck: composedLabwareCheck,
+      composedLabwareCheck,
       limit,
       enableFlaggedLabwareCheck,
       currentBarcode: '',
