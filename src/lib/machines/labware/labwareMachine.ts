@@ -58,7 +58,7 @@ export interface LabwareContext {
    * @param foundLabware the new labware to be entered
    * @return a list of any problems identified
    */
-  foundLabwareCheck?: (
+  composedLabwareCheck: (
     labwares: LabwareFlaggedFieldsFragment[],
     foundLabware: LabwareFlaggedFieldsFragment
   ) => string[] | Promise<string[]>;
@@ -373,9 +373,7 @@ export const createLabwareMachine = () => {
               return new Promise(async (resolve, reject) => {
                 const problems = resolveStringArrayPromise(
                   input.foundLabware
-                    ? input.foundLabwareCheck
-                      ? await input.foundLabwareCheck(input.labwares, input.foundLabware)
-                      : []
+                    ? await input.foundLabwareCheck(input.labwares, input.foundLabware)
                     : ['Labware not loaded.']
                 );
                 if (problems.length === 0) {
@@ -388,7 +386,7 @@ export const createLabwareMachine = () => {
             input: ({ context }) => ({
               labwares: context.labwares,
               foundLabware: context.foundLabware,
-              foundLabwareCheck: context.foundLabwareCheck
+              foundLabwareCheck: context.composedLabwareCheck
             }),
             onDone: {
               target: 'gettingCleanedOutAddress',
@@ -537,12 +535,10 @@ export const createLabwareMachine = () => {
                  If validation is success, add that labware to the list of labwares, otherwise add the error message
                  for failure*/
               problem = resolveStringArrayPromise(
-                context.foundLabwareCheck
-                  ? context.foundLabwareCheck(
-                      convertLabwareToFlaggedLabware(event.output.labwareInLocation),
-                      convertLabwareToFlaggedLabware([labware])[0]
-                    )
-                  : []
+                context.composedLabwareCheck(
+                  convertLabwareToFlaggedLabware(event.output.labwareInLocation),
+                  convertLabwareToFlaggedLabware([labware])[0]
+                )
               );
             }
             if (problem.length !== 0) {
