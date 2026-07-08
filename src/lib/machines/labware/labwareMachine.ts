@@ -10,7 +10,7 @@ import {
 import { extractServerErrors } from '../../../types/stan';
 import { stanCore } from '../../sdk';
 import { ClientError } from 'graphql-request';
-import { convertLabwareToFlaggedLabware } from '../../helpers/labwareHelper';
+import { convertLabwareToFlaggedLabware, isFrozenLabware } from '../../helpers/labwareHelper';
 import { produce } from '../../../dependencies/immer';
 import { findIndex } from 'lodash';
 
@@ -105,6 +105,8 @@ export interface LabwareContext {
    * Used to prevent re-initialization of these values.
    */
   areInitialsSet?: boolean;
+
+  rejectFrozen: boolean;
 }
 
 /**
@@ -372,9 +374,7 @@ export const createLabwareMachine = () => {
             src: fromPromise(({ input }) => {
               return new Promise(async (resolve, reject) => {
                 const problems = resolveStringArrayPromise(
-                  input.foundLabware
-                    ? await input.foundLabwareCheck(input.labwares, input.foundLabware)
-                    : ['Labware not loaded.']
+                  validateFoundLabware(input.rejectFrozen, input.foundLabware, input.labwares, input.foundLabwareCheck)
                 );
                 if (problems.length === 0) {
                   resolve(input.foundLabware);
@@ -384,9 +384,10 @@ export const createLabwareMachine = () => {
               });
             }),
             input: ({ context }) => ({
+              rejectFrozen: context.rejectFrozen,
               labwares: context.labwares,
               foundLabware: context.foundLabware,
-              foundLabwareCheck: context.composedLabwareCheck
+              foundLabwareCheck: context.foundLabwareCheck
             }),
             onDone: {
               target: 'gettingCleanedOutAddress',
@@ -534,10 +535,14 @@ export const createLabwareMachine = () => {
               /*Validate all the labwares in the location using the validation function passed.
                  If validation is success, add that labware to the list of labwares, otherwise add the error message
                  for failure*/
-              problem = resolveStringArrayPromise(
-                context.composedLabwareCheck(
-                  convertLabwareToFlaggedLabware(event.output.labwareInLocation),
-                  convertLabwareToFlaggedLabware([labware])[0]
+              problem.push(
+                ...resolveStringArrayPromise(
+                  validateFoundLabware(
+                    context.rejectFrozen,
+                    convertLabwareToFlaggedLabware([labware])[0],
+                    convertLabwareToFlaggedLabware(event.output.labwareInLocation),
+                    context.foundLabwareCheck
+                  )
                 )
               );
             }
@@ -597,4 +602,20 @@ const alreadyScannedBarcodeError = (barcode: string) => {
 const handleFindError = (error: ClientError) => {
   let errors = extractServerErrors(error);
   return errors?.message;
+};
+
+const validateFoundLabware = (
+  rejectFrozen: boolean,
+  foundLabware: LabwareFlaggedFieldsFragment,
+  labwares: LabwareFlaggedFieldsFragment[],
+  labwareCheckFunction?: (
+    labwares: LabwareFlaggedFieldsFragment[],
+    foundLabware: LabwareFlaggedFieldsFragment
+  ) => string[] | Promise<string[]>
+) => {
+  if (!foundLabware) return ['Labware not loaded.'];
+  if (rejectFrozen && isFrozenLabware(foundLabware))
+    return [`Labware ${foundLabware.barcode} is frozen and cannot be used for this operation.`];
+  if (labwareCheckFunction) return labwareCheckFunction(labwares, foundLabware);
+  return [];
 };

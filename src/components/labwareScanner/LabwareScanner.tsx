@@ -7,7 +7,6 @@ import Success from '../notifications/Success';
 import Warning from '../notifications/Warning';
 import { isFunction } from 'lodash';
 import * as Yup from 'yup';
-import { isFrozenLabware } from '../../lib/helpers/labwareHelper';
 
 export type LabwareScannerProps = {
   /**
@@ -96,23 +95,6 @@ export default function LabwareScanner({
   initCleanedOutAddresses = new Map<number, string[]>(),
   rejectFrozen = true
 }: LabwareScannerProps) {
-  /**
-   * When `rejectFrozen` is enabled, wrap the caller-supplied check with the frozen-labware guard.
-   * Otherwise pass the original function reference straight through so the machine keeps its
-   * existing short-circuit behaviour for the common case (no extra async tick, no new identity
-   * on every parent render).
-   */
-  const composedLabwareCheck = (
-    labwares: LabwareFlaggedFieldsFragment[],
-    foundLabware: LabwareFlaggedFieldsFragment
-  ) => {
-    if (!rejectFrozen) return labwareCheckFunction ? labwareCheckFunction(labwares, foundLabware) : [];
-    if (isFrozenLabware(foundLabware)) {
-      return ['This labware is frozen and cannot be used for this operation.'];
-    }
-    return labwareCheckFunction ? labwareCheckFunction(labwares, foundLabware) : [];
-  };
-
   const slicedInitialLabware = React.useMemo(() => {
     if (!initialLabwares) return [];
     if (limit && initialLabwares.length > limit) {
@@ -142,7 +124,7 @@ export default function LabwareScanner({
   const [current, send, service] = useMachine(labwareMachine, {
     input: {
       labwares: slicedInitialLabware,
-      composedLabwareCheck,
+      foundLabwareCheck: labwareCheckFunction,
       limit,
       enableFlaggedLabwareCheck,
       currentBarcode: '',
@@ -154,7 +136,8 @@ export default function LabwareScanner({
       locationScan: false,
       checkForCleanedOutAddresses,
       cleanedOutAddresses: slicedInitialCleanedOutAddresses,
-      areInitialsSet: false
+      areInitialsSet: false,
+      rejectFrozen
     }
   });
 
