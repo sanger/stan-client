@@ -594,7 +594,6 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
             onChange={onLabwareScannerChange}
             limit={inputLabwareLimit}
             enableFlaggedLabwareCheck
-            rejectFrozen
             checkForCleanedOutAddresses
             initialLabwares={inputLabware}
             labwareCheckFunction={ensureLabwareReadyForProcessing}

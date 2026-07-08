@@ -243,7 +243,6 @@ const XeniumMetrics = () => {
                 <LabwareScanner
                   limit={1}
                   enableFlaggedLabwareCheck
-                  rejectFrozen
                   labwareCheckFunction={(
                     labwares: LabwareFlaggedFieldsFragment[],
                     foundLabware: LabwareFlaggedFieldsFragment

@@ -78,7 +78,6 @@ export default function AddExternalID() {
                     <Heading level={3}>Labware</Heading>
                     <LabwareScanner
                       limit={1}
-                      rejectFrozen
                       onAdd={(labware) => {
                         setFieldValue('labwareBarcode', labware.barcode);
                       }}

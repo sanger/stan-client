@@ -217,7 +217,6 @@ const XeniumQC = () => {
                   <FieldArray name={'labware'}>
                     {({ push }) => (
                       <LabwareScanner
-                        rejectFrozen
                         onAdd={(addedLw) => {
                           const index = values.labware.findIndex((lw) => lw.barcode === addedLw.barcode);
                           if (index < 0) {

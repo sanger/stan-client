@@ -122,7 +122,6 @@ export default function Unrelease() {
                   initialLabwares={initialLabware.current}
                   onAdd={(lw) => helpers.push({ ...lw, blockHighestSection: blockHighestSection(lw) })}
                   onRemove={(labware, index) => helpers.remove(index)}
-                  rejectFrozen
                 >
                   <LabwareScanPanel
                     columns={[

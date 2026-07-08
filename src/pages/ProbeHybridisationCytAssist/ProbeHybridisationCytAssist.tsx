@@ -200,7 +200,6 @@ const ProbeHybridisationCytAssist: React.FC = () => {
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
                     <Heading level={3}>Labware</Heading>
                     <LabwareScanner
-                      rejectFrozen
                       onAdd={async (lw) =>
                         await setValues((prev) => {
                           return {

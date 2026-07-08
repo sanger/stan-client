@@ -236,7 +236,6 @@ export default function ProbeHybridisationQC() {
                   <LabwareScanner
                     checkForCleanedOutAddresses
                     enableFlaggedLabwareCheck
-                    rejectFrozen
                     labwareCheckFunction={(labwares, foundLabware) => {
                       return fetchProbeHybSlots(foundLabware, setValues);
                     }}

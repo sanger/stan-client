@@ -412,7 +412,6 @@ const XeniumAnalyser = () => {
                         });
                       }}
                       enableFlaggedLabwareCheck
-                      rejectFrozen
                     >
                       {({ removeLabware }) =>
                         values.labware.map((labwareForm) => (

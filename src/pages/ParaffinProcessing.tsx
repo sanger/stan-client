@@ -132,7 +132,6 @@ const ParaffinProcessing: React.FC = () => {
                             )
                           }
                           enableFlaggedLabwareCheck
-                          rejectFrozen
                         >
                           <LabwareScanTable
                             columns={[

@@ -128,7 +128,6 @@ export const Reactivate = () => {
                       <Heading level={3}>Labware</Heading>
                       <MutedText>Please scan in the labware you wish to reactivate.</MutedText>
                       <LabwareScanner
-                        rejectFrozen
                         onAdd={async (lw) => {
                           const lwToReactivate = { barcode: lw.barcode, commentId: undefined };
                           await setValues((prev) => {

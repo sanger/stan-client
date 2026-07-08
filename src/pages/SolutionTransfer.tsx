@@ -138,7 +138,6 @@ const SolutionTransfer: React.FC = () => {
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                         <Heading level={3}>Labware</Heading>
                         <LabwareScanner
-                          rejectFrozen
                           /***
                          Handlers to update the form data whenever labware list changes
                         ***/

@@ -670,7 +670,6 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
             onChange={onLabwareScannerChange}
             limit={inputLabwareLimit}
             enableFlaggedLabwareCheck
-            rejectFrozen
             checkForCleanedOutAddresses
             initCleanedOutAddresses={current.context.cleanedOutInputAddresses}
           >

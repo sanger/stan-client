@@ -109,7 +109,6 @@ const OrientationQC = () => {
                         }}
                         locked={current.matches('submitted')}
                         labwareCheckFunction={blockLabwareCheck}
-                        rejectFrozen
                         limit={1}
                         enableFlaggedLabwareCheck
                       >
