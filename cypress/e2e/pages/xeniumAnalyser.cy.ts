@@ -85,7 +85,6 @@ describe('Xenium Analyser', () => {
               })
             );
           });
-          selectOption('STAN-3111-workNumber', '');
           selectOption('STAN-3111-workNumber', 'SGP1009');
         });
         it('hides the SGP folder link', () => {
