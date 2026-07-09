@@ -206,7 +206,9 @@ describe('LabwareScanner rejectFrozen', () => {
     await scanLabware('STAN-3000');
 
     await waitFor(() => {
-      expect(screen.getByText('This labware is frozen and cannot be used for this operation.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Labware STAN-3000 is frozen and cannot be used for this operation.')
+      ).toBeInTheDocument();
     });
   });
 
@@ -235,7 +237,9 @@ describe('LabwareScanner rejectFrozen', () => {
     await scanLabware('STAN-3000');
 
     await waitFor(() => {
-      expect(screen.getByText('This labware is frozen and cannot be used for this operation.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Labware STAN-3000 is frozen and cannot be used for this operation.')
+      ).toBeInTheDocument();
     });
   });
 });
