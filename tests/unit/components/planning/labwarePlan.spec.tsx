@@ -22,16 +22,7 @@ describe('On Mount', () => {
       });
       waitFor(() => {
         expectDisplayNumberOfLabwareAndSectionThicknessInputs();
-      });
-    });
-  });
-  describe('When the output labware type set to 4 SLOTS', () => {
-    it('displays Number of labware, Sectioning Thickness', () => {
-      act(() => {
-        renderLabwarePlan(LabwareTypeName.SUPER_FROST_PLUS_SLIDE);
-      });
-      waitFor(() => {
-        expectDisplayNumberOfLabwareAndSectionThicknessInputs();
+        expectSectioningOrderToBeDisabled();
       });
     });
   });
@@ -42,6 +33,7 @@ describe('On Mount', () => {
       });
       waitFor(() => {
         expectDisplayNumberOfLabwareAndSectionThicknessInputs();
+        expectSectioningOrderToBeEnabled();
       });
     });
   });
@@ -55,6 +47,7 @@ describe('On Mount', () => {
         expect(screen.queryByTestId('formInput')).toBeNull();
         expect(screen.queryByTestId('slide-costing')).toBeNull();
         expect(screen.queryByTestId('Number of Labware')).toBeNull();
+        expect(screen.queryByTestId('sectioning-order')).toBeNull();
       });
     });
   });
@@ -65,6 +58,7 @@ describe('On Mount', () => {
     it('displays Number of labware, Sectioning Thickness, LOT number and Slide Costing', () => {
       waitFor(() => {
         expectDisplayNumberOfLabwareSectionThicknessLotNumberAndSlideCosting();
+        expectSectioningOrderToBeEnabled();
       });
     });
   });
@@ -75,6 +69,7 @@ describe('On Mount', () => {
       });
       waitFor(() => {
         expectDisplayNumberOfLabwareSectionThicknessLotNumberAndSlideCosting();
+        expectSectioningOrderToBeEnabled();
       });
     });
   });
@@ -85,6 +80,7 @@ describe('On Mount', () => {
       });
       waitFor(() => {
         expectDisplayNumberOfLabwareSectionThicknessLotNumberAndSlideCosting();
+        expectSectioningOrderToBeEnabled();
       });
     });
   });
@@ -96,6 +92,7 @@ describe('On Mount', () => {
       });
       waitFor(() => {
         expectDisplayNumberOfLabwareSectionThicknessLotNumberAndSlideCosting();
+        expectSectioningOrderToBeEnabled();
       });
     });
   });
@@ -251,6 +248,13 @@ const expectDisplayNumberOfLabwareAndSectionThicknessInputs = () => {
   expect(screen.getByTestId('Section Thickness')).toHaveValue(3);
   expect(screen.queryByTestId('formInput')).toBeNull();
   expect(screen.queryByTestId('slide-costing')).toBeNull();
+};
+
+const expectSectioningOrderToBeEnabled = () => {
+  expect(screen.getByTestId('sectioning-order')).toBeEnabled();
+};
+const expectSectioningOrderToBeDisabled = () => {
+  expect(screen.getByTestId('sectioning-order')).toBeDisabled();
 };
 
 const expectDisplayNumberOfLabwareSectionThicknessLotNumberAndSlideCosting = () => {

@@ -472,9 +472,14 @@ function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, 
     let newSectionNum = 0;
     if (startNumbers && startNumbers.has(plan.source.labware.barcode) && incrementFill) {
       //Get the highest section number of the source labware for this section
-      newSectionNum = startNumbers.get(plan.source.labware.barcode)! + 1;
-      //Store the current highest section number so that it will be incremental for next section
-      startNumbers.set(plan.source.labware.barcode, newSectionNum);
+      const highestSectionNumber = startNumbers.get(plan.source.labware.barcode)!;
+      if (plan.sectioningOrder) {
+        newSectionNum = highestSectionNumber + plan.sectioningOrder;
+      } else {
+        newSectionNum = highestSectionNumber + 1;
+        //Store the current highest section number so that it will be incremental for next section
+        startNumbers.set(plan.source.labware.barcode, newSectionNum);
+      }
     }
     plan.source.newSection = String(newSectionNum);
     //Mutate the layoutPlan so that the child will be notified of this change and the changes will be rendered
@@ -522,7 +527,8 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
         const sectionGroupId = group.length === 1 ? group[0] : index.toString();
         plannedActions[sectionGroupId] = {
           addresses: new Set(group),
-          source
+          source,
+          sectioningOrder: planned.sectioningOrder ?? undefined
         };
       }
     });

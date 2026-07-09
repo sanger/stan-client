@@ -33,6 +33,7 @@ export interface LayoutPlan {
 export type PlannedSectionDetails = {
   addresses: Set<Address>;
   source: Source;
+  sectioningOrder?: number;
 };
 
 export interface Source {

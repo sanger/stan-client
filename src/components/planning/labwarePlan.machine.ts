@@ -287,7 +287,8 @@ function buildPlanRequestLabware({
         source: {
           barcode: sectionDetail.source.labware.barcode,
           address: sectionDetail.source.address
-        }
+        },
+        sectioningOrder: sectionDetail.sectioningOrder ?? 0
       };
     })
   };
