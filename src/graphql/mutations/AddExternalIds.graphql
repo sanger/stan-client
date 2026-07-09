@@ -1,0 +1,13 @@
+mutation AddExternalIds($request: AddExternalIdsRequest!) {
+  addExternalIds(request: $request) {
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}

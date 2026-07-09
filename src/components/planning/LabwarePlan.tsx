@@ -244,8 +244,9 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
                     {outputLabware.labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER && (
                       <div className="p-4 space-y-2 space-x-2 bg-gray-100">
-                        <div className={'grid grid-cols-2 py-2 text-gray-500 text-center'}>
-                          <div>Section address(es)</div>
+                        <div className={'grid grid-cols-3 py-2 text-gray-500'}>
+                          <div>Section Address(es)</div>
+                          <div>Sectioning Order By Source</div>
                           <div>Section Thickness</div>
                         </div>
                         <div className={'flex flex-col space-y-4'}>
@@ -255,15 +256,34 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                             </MutedText>
                           )}
                           {Object.keys(current.context.layoutPlan.plannedActions).map((sectionGroupId) => (
-                            <div key={sectionGroupId} className="grid grid-cols-2 text-center">
+                            <div key={sectionGroupId} className="grid grid-cols-3 text-center">
                               <span className="font-medium text-gray-800 tracking-wide" data-testid="section-addresses">
                                 {Array.from(current.context.layoutPlan.plannedActions[sectionGroupId].addresses).join(
                                   ', '
                                 )}
                               </span>
                               <FormikInput
-                                className="focus:ring-sdb-100 focus:border-sdb-100 block h-8 bg-white border border-gray-300 rounded-md
-                                  disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-300 mx-auto w-24 text-center"
+                                className="focus:ring-sdb-100 h-8 bg-white border border-gray-300 rounded-md w-24 disabled:opacity-75 disabled:cursor-not-allowed"
+                                label={''}
+                                disabled={
+                                  current.matches('printing') ||
+                                  current.matches('done') ||
+                                  outputLabware.labwareType.name === LabwareTypeName.TUBE
+                                }
+                                name={`plannedActions[${sectionGroupId}].sectioningOrder`}
+                                data-testid={`sectioning-order`}
+                                type="number"
+                                onFocus={() => {
+                                  setHighlightedSlots(
+                                    current.context.layoutPlan.plannedActions[sectionGroupId].addresses
+                                  );
+                                }}
+                                onBlur={() => {
+                                  setHighlightedSlots(new Set());
+                                }}
+                              />
+                              <FormikInput
+                                className="focus:ring-sdb-100 h-8 bg-white border border-gray-300 rounded-md w-24 disabled:opacity-75 disabled:cursor-not-allowed"
                                 label={''}
                                 disabled={current.matches('printing') || current.matches('done')}
                                 name={`plannedActions[${sectionGroupId}].source.sampleThickness`}

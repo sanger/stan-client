@@ -34,7 +34,10 @@ const xeniumHandlers = [
       {
         data: {
           analyserScanData: {
-            workNumbers: ['SGP1008'],
+            workNumberXeniumStudyIds: [
+              { workNumber: 'SGP1008', xeniumStudyId: 1 },
+              { workNumber: 'SGP1009', xeniumStudyId: 2 }
+            ],
             probes: [
               faker.string.alphanumeric({ length: { min: 5, max: 8 } }),
               faker.string.alphanumeric({ length: { min: 5, max: 8 } })

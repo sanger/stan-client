@@ -153,6 +153,7 @@ const LabwareAnalyserTable = (labwareForm: AnalyserLabwareForm) => {
           <TableHeader>External Name</TableHeader>
           <TableHeader>Bio State</TableHeader>
           <TableHeader>Work Numbers</TableHeader>
+          <TableHeader>Xenium Study Ids</TableHeader>
           <TableHeader>Probes</TableHeader>
           <TableHeader>Cell Segmentation Recorded</TableHeader>
         </tr>
@@ -171,7 +172,16 @@ const LabwareAnalyserTable = (labwareForm: AnalyserLabwareForm) => {
             {joinUnique(samples.map((sample) => sample.bioState.name))}
           </TableCell>
           <TableCell className="break-words align-top">
-            {labwareForm.analyserScanData?.workNumbers.join(', ')}
+            {labwareForm.analyserScanData?.workNumberXeniumStudyIds
+              .map((data) => data.workNumber)
+              .filter((workNumber, index, self) => index === self.findIndex((w) => w === workNumber))
+              .join(', ')}
+          </TableCell>
+          <TableCell className="break-words align-top">
+            {labwareForm.analyserScanData?.workNumberXeniumStudyIds
+              .map((data) => data.xeniumStudyId)
+              ?.filter((xeniumStudyId, index, self) => index === self.findIndex((studyId) => studyId === xeniumStudyId))
+              .join(', ')}
           </TableCell>
           <TableCell className="break-words align-top">{labwareForm.analyserScanData?.probes.join(', ')}</TableCell>
           <TableCell className="break-words align-top">
