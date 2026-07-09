@@ -172,8 +172,8 @@ export type AnalyserScanData = {
   cellSegmentationRecorded: Scalars['Boolean']['output'];
   /** The names of probes recorded on the labware. */
   probes: Array<Scalars['String']['output']>;
-  /** The work numbers linked to the labware. */
-  workNumbers: Array<Scalars['String']['output']>;
+  /** The work numbers and xenium study ids linked to the labware. */
+  workNumberXeniumStudyIds: Array<WorkNumberXeniumStudyId>;
 };
 
 /** Biological risk assessment number. */
@@ -4421,6 +4421,15 @@ export type Work = {
   xeniumStudy?: Maybe<DnapStudy>;
 };
 
+/** A work number and a possible xenium study sequencescape id. */
+export type WorkNumberXeniumStudyId = {
+  __typename?: 'WorkNumberXeniumStudyId';
+  /** A work number. */
+  workNumber: Scalars['String']['output'];
+  /** The sequencescape ID of a xenium study, if the work is linked to one. */
+  xeniumStudyId?: Maybe<Scalars['Int']['output']>;
+};
+
 /** The things that have happened for a particular work, as requested by a user. */
 export type WorkProgress = {
   __typename?: 'WorkProgress';
@@ -4506,7 +4515,7 @@ export type ActionFieldsFragment = { __typename?: 'Action', operationId: number,
 
 export type AddressPermDataFieldsFragment = { __typename?: 'AddressPermData', address: string, controlType?: ControlType | null, seconds?: number | null, selected: boolean };
 
-export type AnalyserScanDataFieldsFragment = { __typename?: 'AnalyserScanData', workNumbers: Array<string>, probes: Array<string>, cellSegmentationRecorded: boolean };
+export type AnalyserScanDataFieldsFragment = { __typename?: 'AnalyserScanData', probes: Array<string>, cellSegmentationRecorded: boolean, workNumberXeniumStudyIds: Array<{ __typename?: 'WorkNumberXeniumStudyId', workNumber: string, xeniumStudyId?: number | null }> };
 
 export type BioRiskFieldsFragment = { __typename?: 'BioRisk', code: string, enabled: boolean };
 
@@ -5669,7 +5678,7 @@ export type GetAnalyserScanDataQueryVariables = Exact<{
 }>;
 
 
-export type GetAnalyserScanDataQuery = { __typename?: 'Query', analyserScanData: { __typename?: 'AnalyserScanData', workNumbers: Array<string>, probes: Array<string>, cellSegmentationRecorded: boolean } };
+export type GetAnalyserScanDataQuery = { __typename?: 'Query', analyserScanData: { __typename?: 'AnalyserScanData', probes: Array<string>, cellSegmentationRecorded: boolean, workNumberXeniumStudyIds: Array<{ __typename?: 'WorkNumberXeniumStudyId', workNumber: string, xeniumStudyId?: number | null }> } };
 
 export type GetBioRisksQueryVariables = Exact<{
   includeDisabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -6007,7 +6016,10 @@ export const AddressPermDataFieldsFragmentDoc = gql`
     `;
 export const AnalyserScanDataFieldsFragmentDoc = gql`
     fragment AnalyserScanDataFields on AnalyserScanData {
-  workNumbers
+  workNumberXeniumStudyIds {
+    workNumber
+    xeniumStudyId
+  }
   probes
   cellSegmentationRecorded
 }

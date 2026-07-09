@@ -1,5 +1,8 @@
 fragment AnalyserScanDataFields on AnalyserScanData {
-  workNumbers
+  workNumberXeniumStudyIds {
+    workNumber
+    xeniumStudyId
+  }
   probes
   cellSegmentationRecorded
 }
