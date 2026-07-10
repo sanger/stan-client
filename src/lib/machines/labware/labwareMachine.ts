@@ -14,18 +14,6 @@ import { convertLabwareToFlaggedLabware, isFrozenLabware } from '../../helpers/l
 import { produce } from '../../../dependencies/immer';
 import { findIndex } from 'lodash';
 
-const resolveStringArrayPromise = (data: string[] | Promise<string[]>): string[] => {
-  let resolvedData: string[] = [];
-  if (!Array.isArray(data)) {
-    data.then((resolved) => {
-      resolvedData = resolved;
-    });
-  } else {
-    resolvedData = data;
-  }
-  return resolvedData;
-};
-
 export interface LabwareContext {
   /**
    * The current barcode we're working with
@@ -373,8 +361,8 @@ export const createLabwareMachine = () => {
             id: 'validateFoundLabware',
             src: fromPromise(({ input }) => {
               return new Promise(async (resolve, reject) => {
-                const problems = resolveStringArrayPromise(
-                  validateFoundLabware(input.rejectFrozen, input.foundLabware, input.labwares, input.foundLabwareCheck)
+                const problems = await Promise.resolve(
+                  isLabwareValid(input.rejectFrozen, input.foundLabware, input.labwares, input.foundLabwareCheck)
                 );
                 if (problems.length === 0) {
                   resolve(input.foundLabware);
@@ -526,7 +514,7 @@ export const createLabwareMachine = () => {
           );
 
           //Validate all labwares in the location
-          event.output.labwareInLocation.forEach((labware) => {
+          event.output.labwareInLocation.forEach(async (labware) => {
             //check whether this labware is already scanned, if not add to labware list, otherwise update error message
             let problem: string[] = [];
             if (context.labwares.find((ctxLabware) => ctxLabware.barcode === labware.barcode)) {
@@ -536,14 +524,14 @@ export const createLabwareMachine = () => {
                  If validation is success, add that labware to the list of labwares, otherwise add the error message
                  for failure*/
               problem.push(
-                ...resolveStringArrayPromise(
-                  validateFoundLabware(
+                ...(await Promise.resolve(
+                  isLabwareValid(
                     context.rejectFrozen,
                     convertLabwareToFlaggedLabware([labware])[0],
                     convertLabwareToFlaggedLabware(event.output.labwareInLocation),
                     context.foundLabwareCheck
                   )
-                )
+                ))
               );
             }
             if (problem.length !== 0) {
@@ -604,7 +592,7 @@ const handleFindError = (error: ClientError) => {
   return errors?.message;
 };
 
-const validateFoundLabware = (
+const isLabwareValid = (
   rejectFrozen: boolean,
   foundLabware: LabwareFlaggedFieldsFragment,
   labwares: LabwareFlaggedFieldsFragment[],
@@ -616,6 +604,8 @@ const validateFoundLabware = (
   if (!foundLabware) return ['Labware not loaded.'];
   if (rejectFrozen && isFrozenLabware(foundLabware))
     return [`Labware ${foundLabware.barcode} is frozen and cannot be used for this operation.`];
-  if (labwareCheckFunction) return labwareCheckFunction(labwares, foundLabware);
+  if (labwareCheckFunction) {
+    return labwareCheckFunction(labwares, foundLabware);
+  }
   return [];
 };

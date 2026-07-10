@@ -197,7 +197,7 @@ describe('LabwareScanner rejectFrozen', () => {
 
     render(
       <MemoryRouter>
-        <LabwareScanner rejectFrozen enableFlaggedLabwareCheck>
+        <LabwareScanner enableFlaggedLabwareCheck>
           <div />
         </LabwareScanner>
       </MemoryRouter>
