@@ -513,8 +513,8 @@ export const createLabwareMachine = () => {
             (labware) => context.labwares.findIndex((ctxLabware) => ctxLabware.barcode === labware.barcode) === -1
           );
 
-          //Validate all labwares in the location
-          event.output.labwareInLocation.forEach(async (labware) => {
+          // Validate all labwares in the location.
+          event.output.labwareInLocation.forEach((labware) => {
             //check whether this labware is already scanned, if not add to labware list, otherwise update error message
             let problem: string[] = [];
             if (context.labwares.find((ctxLabware) => ctxLabware.barcode === labware.barcode)) {
@@ -523,16 +523,15 @@ export const createLabwareMachine = () => {
               /*Validate all the labwares in the location using the validation function passed.
                  If validation is success, add that labware to the list of labwares, otherwise add the error message
                  for failure*/
-              problem.push(
-                ...(await Promise.resolve(
-                  isLabwareValid(
-                    context.rejectFrozen,
-                    convertLabwareToFlaggedLabware([labware])[0],
-                    convertLabwareToFlaggedLabware(event.output.labwareInLocation),
-                    context.foundLabwareCheck
-                  )
-                ))
+              const validationResult = isLabwareValid(
+                context.rejectFrozen,
+                convertLabwareToFlaggedLabware([labware])[0],
+                convertLabwareToFlaggedLabware(event.output.labwareInLocation),
+                context.foundLabwareCheck
               );
+              if (Array.isArray(validationResult)) {
+                problem.push(...validationResult);
+              }
             }
             if (problem.length !== 0) {
               problems.push(problem.join('\n'));
