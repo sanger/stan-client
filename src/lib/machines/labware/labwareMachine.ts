@@ -300,7 +300,9 @@ export const createLabwareMachine = () => {
               //If it is location barcode then transition to 'searchingLocation' otherwise to 'searching'
               {
                 target: 'searching',
-                guard: ({ context }) => context.locationScan === false
+                guard: ({ context }) => {
+                  return context.locationScan === false;
+                }
               },
               {
                 target: 'searchingLocation'
@@ -359,17 +361,17 @@ export const createLabwareMachine = () => {
         validatingFoundLabware: {
           invoke: {
             id: 'validateFoundLabware',
-            src: fromPromise(({ input }) => {
-              return new Promise(async (resolve, reject) => {
-                const problems = await Promise.resolve(
-                  isLabwareValid(input.rejectFrozen, input.foundLabware, input.labwares, input.foundLabwareCheck)
-                );
-                if (problems.length === 0) {
-                  resolve(input.foundLabware);
-                } else {
-                  reject(problems);
-                }
-              });
+            src: fromPromise(async ({ input }) => {
+              const problems = await isLabwareValid(
+                input.rejectFrozen,
+                input.foundLabware,
+                input.labwares,
+                input.foundLabwareCheck
+              );
+              if (problems.length > 0) {
+                return Promise.reject(problems);
+              }
+              return input.foundLabware;
             }),
             input: ({ context }) => ({
               rejectFrozen: context.rejectFrozen,
@@ -514,29 +516,29 @@ export const createLabwareMachine = () => {
           );
 
           //Validate all labwares in the location
-          event.output.labwareInLocation.forEach(async (labware) => {
+          event.output.labwareInLocation.forEach((labware) => {
             //check whether this labware is already scanned, if not add to labware list, otherwise update error message
-            let problem: string[] = [];
             if (context.labwares.find((ctxLabware) => ctxLabware.barcode === labware.barcode)) {
-              problem.push(alreadyScannedBarcodeError(labware.barcode));
+              problems.push(alreadyScannedBarcodeError(labware.barcode));
             } else {
               /*Validate all the labwares in the location using the validation function passed.
                  If validation is success, add that labware to the list of labwares, otherwise add the error message
                  for failure*/
-              problem.push(
-                ...(await Promise.resolve(
-                  isLabwareValid(
-                    context.rejectFrozen,
-                    convertLabwareToFlaggedLabware([labware])[0],
-                    convertLabwareToFlaggedLabware(event.output.labwareInLocation),
-                    context.foundLabwareCheck
-                  )
-                ))
+              const labwareIssues = isLabwareValid(
+                context.rejectFrozen,
+                convertLabwareToFlaggedLabware([labware])[0],
+                convertLabwareToFlaggedLabware(event.output.labwareInLocation),
+                context.foundLabwareCheck
               );
+              if (Array.isArray(labwareIssues)) {
+                problems.push(...labwareIssues);
+              } else {
+                labwareIssues.then((resolvedLabwareIssues) => {
+                  problems.push(...resolvedLabwareIssues);
+                });
+              }
             }
-            if (problem.length !== 0) {
-              problems.push(problem.join('\n'));
-            } else {
+            if (problems.length === 0) {
               context.labwares = [...context.labwares, convertLabwareToFlaggedLabware([labware])[0]];
             }
           });
@@ -600,12 +602,9 @@ const isLabwareValid = (
     labwares: LabwareFlaggedFieldsFragment[],
     foundLabware: LabwareFlaggedFieldsFragment
   ) => string[] | Promise<string[]>
-) => {
+): Array<string> | Promise<string[]> => {
   if (!foundLabware) return ['Labware not loaded.'];
   if (rejectFrozen && isFrozenLabware(foundLabware))
     return [`Labware ${foundLabware.barcode} is frozen and cannot be used for this operation.`];
-  if (labwareCheckFunction) {
-    return labwareCheckFunction(labwares, foundLabware);
-  }
-  return [];
+  return labwareCheckFunction ? labwareCheckFunction(labwares, foundLabware) : [];
 };
