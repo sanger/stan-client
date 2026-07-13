@@ -536,14 +536,11 @@ export const createLabwareMachine = () => {
                   resolvedLabwareIssues = resolved;
                 });
               }
-              if (resolvedLabwareIssues.length === 0) {
-                context.labwares = [...context.labwares, convertLabwareToFlaggedLabware([labware])[0]];
-              } else {
+              if (resolvedLabwareIssues.length > 0) {
                 problems.push(resolvedLabwareIssues.join('\n'));
+              } else {
+                context.labwares = [...context.labwares, convertLabwareToFlaggedLabware([labware])[0]];
               }
-            }
-            if (problems.length === 0) {
-              context.labwares = [...context.labwares, convertLabwareToFlaggedLabware([labware])[0]];
             }
           });
           if (problems.length > 0) {
