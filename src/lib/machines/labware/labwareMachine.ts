@@ -528,12 +528,18 @@ export const createLabwareMachine = () => {
                 convertLabwareToFlaggedLabware(event.output.labwareInLocation),
                 context.foundLabwareCheck
               );
+              let resolvedLabwareIssues: string[] = [];
               if (Array.isArray(labwareIssues)) {
-                problems.push(...labwareIssues);
+                resolvedLabwareIssues = labwareIssues;
               } else {
-                labwareIssues.then((resolvedLabwareIssues) => {
-                  problems.push(...resolvedLabwareIssues);
+                labwareIssues.then((resolved) => {
+                  resolvedLabwareIssues = resolved;
                 });
+              }
+              if (resolvedLabwareIssues.length === 0) {
+                context.labwares = [...context.labwares, convertLabwareToFlaggedLabware([labware])[0]];
+              } else {
+                problems.push(resolvedLabwareIssues.join('\n'));
               }
             }
             if (problems.length === 0) {
