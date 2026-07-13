@@ -300,9 +300,7 @@ export const createLabwareMachine = () => {
               //If it is location barcode then transition to 'searchingLocation' otherwise to 'searching'
               {
                 target: 'searching',
-                guard: ({ context }) => {
-                  return context.locationScan === false;
-                }
+                guard: ({ context }) => context.locationScan === false
               },
               {
                 target: 'searchingLocation'
