@@ -30,7 +30,7 @@ describe('Xenium Analyser', () => {
     });
     it('should display a warning message', () => {
       cy.get('#labwareScanInput').clear().type('STAN-3111{enter}');
-      cy.findByText('No probe hybridisation recorded for STAN-3111').should('be.visible');
+      cy.findByTextContent('No probe hybridisation recorded for STAN-3111').should('be.visible');
       cy.findByText('Analyser Details').should('not.exist');
     });
     after(() => {
@@ -200,7 +200,7 @@ describe('Xenium Analyser', () => {
         cy.findByRole('button', { name: 'Save' }).click();
       });
       it('shows an error', () => {
-        cy.findByText('Labware is discarded: [STAN-3111]').should('be.visible');
+        cy.findByTextContent('Labware is discarded: [STAN-3111]').should('be.visible');
       });
     });
     context('When there is no server error', () => {

@@ -92,6 +92,7 @@ const CleanOut: React.FC = () => {
                     <MutedText> Please scan in the labware you wish to clean.</MutedText>
                     <LabwareScanner
                       enableFlaggedLabwareCheck
+                      rejectFrozen={false}
                       limit={1}
                       onAdd={async (labware) => {
                         await setFieldValue('barcode', labware.barcode);

@@ -50,6 +50,11 @@ type RecordInPlaceProps = {
    * Display the store option for the labware after the successful completion of operation
    */
   displayStoreOption?: boolean;
+
+  /**
+   * Display the Imaging QC option for the labware after the successful completion of operation
+   */
+  displayImagingQcOption?: boolean;
 };
 
 type RecordInPlaceForm = Omit<InPlaceOpRequest, 'barcodes'> & { labware: LabwareFieldsFragment[] };
@@ -59,7 +64,8 @@ export default function RecordInPlace({
   operationType,
   columns,
   description,
-  displayStoreOption
+  displayStoreOption,
+  displayImagingQcOption = false
 }: RecordInPlaceProps) {
   const navigate = useNavigate();
 
@@ -152,6 +158,7 @@ export default function RecordInPlace({
                           onChange={(labwareFlagged) =>
                             setFieldValue('labware', extractLabwareFromFlagged(labwareFlagged))
                           }
+                          rejectFrozen={operationType !== 'Thaw'}
                           locked={current.matches('submitted')}
                           enableFlaggedLabwareCheck
                         >
@@ -224,11 +231,16 @@ export default function RecordInPlace({
                   additionalButtons={
                     displayStoreOption && values.labware.length > 0 ? (
                       <>
-                        <Link to="/lab/imaging_qc" state={{ labware: values.labware }}>
-                          <WhiteButton type="button" className="w-full text-base md:ml-3 sm:ml-3 sm:w-auto sm:text:sm">
-                            Imaging QC
-                          </WhiteButton>
-                        </Link>
+                        {displayImagingQcOption && (
+                          <Link to="/lab/imaging_qc" state={{ labware: values.labware }}>
+                            <WhiteButton
+                              type="button"
+                              className="w-full text-base md:ml-3 sm:ml-3 sm:w-auto sm:text:sm"
+                            >
+                              Imaging QC
+                            </WhiteButton>
+                          </Link>
+                        )}
                         <WhiteButton
                           type="button"
                           style={{ marginLeft: 'auto' }}

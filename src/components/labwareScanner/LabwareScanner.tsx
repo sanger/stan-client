@@ -73,6 +73,11 @@ export type LabwareScannerProps = {
    * The initial map of cleaned out addresses linked to the initial labwares list
    */
   initCleanedOutAddresses?: Map<number, string[]>;
+
+  /**
+   * Defaults to true. When true, frozen labware will be rejected at scan time with an error message.
+   */
+  rejectFrozen?: boolean;
 };
 
 export default function LabwareScanner({
@@ -87,7 +92,8 @@ export default function LabwareScanner({
   enableLocationScanner,
   enableFlaggedLabwareCheck = false,
   checkForCleanedOutAddresses = false,
-  initCleanedOutAddresses = new Map<number, string[]>()
+  initCleanedOutAddresses = new Map<number, string[]>(),
+  rejectFrozen = true
 }: LabwareScannerProps) {
   const slicedInitialLabware = React.useMemo(() => {
     if (!initialLabwares) return [];
@@ -130,7 +136,8 @@ export default function LabwareScanner({
       locationScan: false,
       checkForCleanedOutAddresses,
       cleanedOutAddresses: slicedInitialCleanedOutAddresses,
-      areInitialsSet: false
+      areInitialsSet: false,
+      rejectFrozen
     }
   });
 
@@ -148,13 +155,15 @@ export default function LabwareScanner({
    * After transition into the "idle" state, focus the scan input
    */
   const inputRef = useRef<HTMLInputElement>(null);
-  const previousLabwareLength = service.getSnapshot().context.labwares.length;
-  const prevCleanedOutAddressesLength = service.getSnapshot().context.cleanedOutAddresses.size;
+  const previousLabwareLengthRef = useRef(service.getSnapshot().context.labwares.length);
+  const prevCleanedOutAddressesLengthRef = useRef(service.getSnapshot().context.cleanedOutAddresses.size);
   useEffect(() => {
     const subscription = service.subscribe((observer) => {
       if (observer.matches('idle') && !observer.context.locationScan) {
         inputRef.current?.focus();
       }
+      const previousLabwareLength = previousLabwareLengthRef.current;
+      const prevCleanedOutAddressesLength = prevCleanedOutAddressesLengthRef.current;
       const currentLabwareLength = observer.context.labwares.length;
       const curCleanedOutAddressesLength = observer.context.cleanedOutAddresses.size;
       const labwares = observer.context.labwares;
@@ -177,20 +186,12 @@ export default function LabwareScanner({
             onRemove?.(observer.context.removedLabware.labware, observer.context.removedLabware.index);
         }
       }
+
+      previousLabwareLengthRef.current = currentLabwareLength;
+      prevCleanedOutAddressesLengthRef.current = curCleanedOutAddressesLength;
     });
     return subscription.unsubscribe;
-  }, [
-    service,
-    onChange,
-    onAdd,
-    onRemove,
-    labwares,
-    removedLabware,
-    previousLabwareLength,
-    cleanedOutAddresses,
-    prevCleanedOutAddressesLength,
-    checkForCleanedOutAddresses
-  ]);
+  }, [service, onChange, onAdd, onRemove, labwares, removedLabware, cleanedOutAddresses, checkForCleanedOutAddresses]);
 
   useEffect(() => {
     send(locked ? { type: 'LOCK' } : { type: 'UNLOCK' });

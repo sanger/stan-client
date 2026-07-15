@@ -6,6 +6,7 @@ fragment LabwareFields on Labware {
   discarded
   released
   state
+  frozen
   created
   labwareType {
     ...LabwareTypeFields

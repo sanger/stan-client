@@ -401,6 +401,7 @@ const RouteLayout = () => {
                   columns.bioState()
                 ]}
                 displayStoreOption={true}
+                displayImagingQcOption={true}
               />
             }
           />
@@ -488,6 +489,52 @@ const RouteLayout = () => {
                   columns.replicate()
                 ]}
                 description={" to change bio state of all scanned labware to 'Fetal Waste'"}
+              />
+            }
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/cryopreserve"
+            // Freeze operation does not require equipment selection.
+            loader={async () => []}
+            element={
+              <RecordInPlace
+                key="cryopreserve"
+                title={'Cryopreserve'}
+                operationType={'Cryopreserve'}
+                columns={[
+                  columns.barcode(),
+                  columns.donorId(),
+                  columns.labwareType(),
+                  columns.externalName(),
+                  columns.bioState()
+                ]}
+                displayStoreOption={true}
+                displayImagingQcOption={false}
+              />
+            }
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/thaw"
+            // Thaw operation does not require equipment selection.
+            loader={async () => []}
+            element={
+              <RecordInPlace
+                key="thaw"
+                title={'Thaw'}
+                operationType={'Thaw'}
+                columns={[
+                  columns.barcode(),
+                  columns.donorId(),
+                  columns.labwareType(),
+                  columns.externalName(),
+                  columns.bioState()
+                ]}
+                displayStoreOption={true}
+                displayImagingQcOption={false}
               />
             }
           />

@@ -311,6 +311,7 @@ function Release() {
                             }}
                             locked={formLocked}
                             labwareCheckFunction={labwareStateCheck}
+                            rejectFrozen={false}
                             enableLocationScanner={true}
                           >
                             {values.releaseLabware.length > 0 && (

@@ -155,6 +155,24 @@ function AppShell({ children }: AppShellParams) {
                     description={'Convert bio state to Fetal Waste.'}
                   />
                   <Menu
+                    caption={'Freeze / Thaw'}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Record freeze and thaw operations'}
+                  >
+                    <NavLinkMenuItem
+                      caption={'Cryopreserve'}
+                      path="/lab/cryopreserve"
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Record cryopreservation of labware.'}
+                    />
+                    <NavLinkMenuItem
+                      caption={'Thaw'}
+                      path="/lab/thaw"
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Record thawing of frozen labware.'}
+                    />
+                  </Menu>
+                  <Menu
                     caption={'RNA'}
                     icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                     description={'Recording RNA extraction and analysis'}
@@ -506,6 +524,11 @@ function AppShell({ children }: AppShellParams) {
                       <StanMobileNavLink to="/lab/sectioning/confirm">Confirmation</StanMobileNavLink>
                     </div>
                     <StanMobileNavLink to="/lab/fetal_waste">Fetal Waste</StanMobileNavLink>
+                    <h4 className="px-3 pt-2 text-sm font-normal mt-2 ml-2 text-sp-600">Freeze / Thaw</h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
+                      <StanMobileNavLink to="/lab/cryopreserve">Cryopreserve</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/thaw">Thaw</StanMobileNavLink>
+                    </div>
 
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">RNA</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">

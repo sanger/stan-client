@@ -102,6 +102,7 @@ export const ReassignRequestNumber = () => {
                         onChange={async (labware) => {
                           await setFieldValue('labware', labware);
                         }}
+                        rejectFrozen={false}
                         enableFlaggedLabwareCheck
                       >
                         <LabwareScanPanel

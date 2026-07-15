@@ -273,16 +273,18 @@ export default function History(props: HistoryProps) {
                   <div className={'flex flex-col mt-4 justify-center'} data-testid="history">
                     <Table>
                       <TableBody>
-                        <TableCell className={'flex flex-col justify-center  p-2'}>
-                          {uniqueWorkNumbers.map((workNumber, indx) => (
-                            <StyledLink
-                              data-testid={`styled-link-${workNumber}`}
-                              key={workNumber}
-                              to={fileUploadUrlPath(workNumber)}
-                              className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
-                            >{`Files for ${workNumber}`}</StyledLink>
-                          ))}
-                        </TableCell>
+                        <tr>
+                          <TableCell className={'flex flex-col justify-center  p-2'}>
+                            {uniqueWorkNumbers.map((workNumber, indx) => (
+                              <StyledLink
+                                data-testid={`styled-link-${workNumber}`}
+                                key={workNumber}
+                                to={fileUploadUrlPath(workNumber)}
+                                className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
+                              >{`Files for ${workNumber}`}</StyledLink>
+                            ))}
+                          </TableCell>
+                        </tr>
                       </TableBody>
                     </Table>
                   </div>
@@ -301,13 +303,15 @@ export default function History(props: HistoryProps) {
                 <div className={'flex flex-col mt-4 justify-center'} data-testid="flagged-labware">
                   <Table>
                     <TableBody>
-                      <TableCell className={'flex flex-col items-center p-2'}>
-                        {history.flaggedBarcodes.map((flagBarcode, index1) => {
-                          return flagBarcode.barcodes.map((barcode, index2) =>
-                            FlaggedBarcodeLink(barcode, flagBarcode.priority, `${index1}-${index2}`)
-                          );
-                        })}
-                      </TableCell>
+                      <tr>
+                        <TableCell className={'flex flex-col items-center p-2'}>
+                          {history.flaggedBarcodes.map((flagBarcode, index1) => {
+                            return flagBarcode.barcodes.map((barcode, index2) =>
+                              FlaggedBarcodeLink(barcode, flagBarcode.priority, `${index1}-${index2}`)
+                            );
+                          })}
+                        </TableCell>
+                      </tr>
                     </TableBody>
                   </Table>
                 </div>
