@@ -27,6 +27,7 @@ const historyTableEntries: HistoryTableEntry[] = [
     sampleID: 1,
     donorName: 'Donor 1',
     externalName: 'External 1',
+    externalBarcode: 'External barcode 1',
     sectionNumber: '1',
     eventType: 'Event 1',
     biologicalState: 'Tissue',
@@ -50,6 +51,7 @@ function displaysHistoryTable() {
     'Labware Type',
     'Donor ID',
     'External ID',
+    'External Barcode',
     'Section Number',
     'Address',
     'Section Position',
@@ -70,12 +72,13 @@ function displaysHistoryTable() {
   expect(tableDiv!.querySelectorAll('tbody td')[6].textContent).toBe('Slide');
   expect(tableDiv!.querySelectorAll('tbody td')[7].textContent).toBe('Donor 1');
   expect(tableDiv!.querySelectorAll('tbody td')[8].textContent).toBe('External 1');
-  expect(tableDiv!.querySelectorAll('tbody td')[9].textContent).toBe('1');
-  expect(tableDiv!.querySelectorAll('tbody td')[10].textContent).toBe('A1');
-  expect(tableDiv!.querySelectorAll('tbody td')[11].textContent).toBe('2');
-  expect(tableDiv!.querySelectorAll('tbody td')[12].textContent).toBe('Tissue');
-  expect(tableDiv!.querySelectorAll('tbody td')[13].textContent).toBe('ACTIVE');
-  expect(tableDiv!.querySelectorAll('tbody td')[14].textContent).toBe('A1: PassFoo:Fail');
+  expect(tableDiv!.querySelectorAll('tbody td')[9].textContent).toBe('External barcode 1');
+  expect(tableDiv!.querySelectorAll('tbody td')[10].textContent).toBe('1');
+  expect(tableDiv!.querySelectorAll('tbody td')[11].textContent).toBe('A1');
+  expect(tableDiv!.querySelectorAll('tbody td')[12].textContent).toBe('2');
+  expect(tableDiv!.querySelectorAll('tbody td')[13].textContent).toBe('Tissue');
+  expect(tableDiv!.querySelectorAll('tbody td')[14].textContent).toBe('ACTIVE');
+  expect(tableDiv!.querySelectorAll('tbody td')[15].textContent).toBe('A1: PassFoo:Fail');
 }
 
 describe('History Page', () => {
