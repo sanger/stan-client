@@ -48,11 +48,11 @@ export default function AddExternalID() {
   function buildValidationSchema(): Yup.AnyObjectSchema {
     return Yup.object().shape({
       labwareBarcode: Yup.string().required('A labware must be scanned in'),
-      addressNames: Yup.array()
+      sectionExternalNames: Yup.array()
         .of(
           Yup.object().shape({
-            address: Yup.string(),
-            externalId: Yup.string()
+            addresses: Yup.array(),
+            externalName: Yup.string()
           })
         )
         .min(1, 'At least one external id must be provided')
@@ -89,25 +89,30 @@ export default function AddExternalID() {
             sectionExternalNames: [],
             labwareBarcode: ''
           }}
-          onSubmit={async (values) => {
-            send({
-              type: 'SUBMIT_FORM',
-              values: {
-                labwareBarcode: values.labwareBarcode,
-                addressNames: values.sectionExternalNames
-                  .filter((section) => section.externalName && section.externalName.trim() !== '')
-                  .flatMap((section) =>
-                    section.addresses.flatMap((address) => ({
-                      address: address,
-                      externalName: section.externalName
-                    }))
-                  )
-              }
-            });
+          onSubmit={async (values, { setFieldError }) => {
+            const addressNames = values.sectionExternalNames
+              .filter((section) => section.externalName && section.externalName.trim() !== '')
+              .flatMap((section) =>
+                section.addresses.flatMap((address) => ({
+                  address: address,
+                  externalName: section.externalName
+                }))
+              );
+            if (addressNames.length > 0) {
+              send({
+                type: 'SUBMIT_FORM',
+                values: {
+                  labwareBarcode: values.labwareBarcode,
+                  addressNames
+                }
+              });
+            } else {
+              setFieldError('sectionExternalNames', 'At least one external id must be provided');
+            }
           }}
           validationSchema={buildValidationSchema()}
         >
-          {({ setValues, values }) => (
+          {({ setValues, values, setFieldError }) => (
             <Form>
               <div className="grid grid-cols-11 gap-4 mt-4 p-3 bg-gray-100 rounded-md">
                 <motion.div
@@ -173,7 +178,7 @@ export default function AddExternalID() {
                       fixedHeader={true}
                       cellClassName="whitespace-normal"
                     />
-                    <FormikErrorMessage name={'addressNames'} />
+                    <FormikErrorMessage name={'sectionExternalNames'} />
                   </motion.div>
                 </motion.div>
 
