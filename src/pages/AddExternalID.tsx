@@ -15,12 +15,22 @@ import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { stanCore } from '../lib/sdk';
-import { AddExternalIdsMutation, AddExternalIdsRequest, AddressExternalName } from '../types/sdk';
+import { AddExternalIdsMutation, AddExternalIdsRequest } from '../types/sdk';
 import { fromPromise } from 'xstate';
 import { CellProps, Column } from 'react-table';
-import { hasMultipleSamples, isSlotFilled } from '../lib/helpers/slotHelper';
 import DataTable from '../components/DataTable';
 import FormikInput from '../components/forms/Input';
+import { sectionGroupsBySample } from '../lib/helpers/labwareHelper';
+
+type SectionsExternalName = {
+  addresses: Array<string>;
+  externalName: string;
+};
+
+type AddExternalIdsRequestForm = {
+  sectionExternalNames: Array<SectionsExternalName>;
+  labwareBarcode: string;
+};
 
 export default function AddExternalID() {
   const formMachine = React.useMemo(() => {
@@ -38,11 +48,11 @@ export default function AddExternalID() {
   function buildValidationSchema(): Yup.AnyObjectSchema {
     return Yup.object().shape({
       labwareBarcode: Yup.string().required('A labware must be scanned in'),
-      addressNames: Yup.array()
+      sectionExternalNames: Yup.array()
         .of(
           Yup.object().shape({
-            address: Yup.string(),
-            externalId: Yup.string()
+            addresses: Yup.array(),
+            externalName: Yup.string()
           })
         )
         .min(1, 'At least one external id must be provided')
@@ -51,17 +61,17 @@ export default function AddExternalID() {
 
   const serverError = current.context.serverError;
 
-  const externalIdsTableColumns: Column<AddressExternalName>[] = React.useMemo(
+  const externalIdsTableColumns: Column<SectionsExternalName>[] = React.useMemo(
     () => [
       {
-        Header: 'Address',
-        accessor: (slot: AddressExternalName) => slot.address
+        Header: 'Addresses',
+        accessor: (section: SectionsExternalName) => section.addresses?.join(', ')
       },
       {
         Header: 'External Id',
-        accessor: (slot: AddressExternalName) => slot.externalName,
-        Cell: (props: CellProps<AddressExternalName>) => {
-          return <FormikInput label={''} name={`addressNames[${props.row.index}].externalName`} />;
+        accessor: (section: SectionsExternalName) => section.externalName,
+        Cell: (props: CellProps<SectionsExternalName>) => {
+          return <FormikInput label={''} name={`sectionExternalNames[${props.row.index}].externalName`} />;
         }
       }
     ],
@@ -74,25 +84,35 @@ export default function AddExternalID() {
         <AppShell.Title>Add External ID</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
-        <Formik<AddExternalIdsRequest>
+        <Formik<AddExternalIdsRequestForm>
           initialValues={{
-            addressNames: [],
+            sectionExternalNames: [],
             labwareBarcode: ''
           }}
-          onSubmit={async (values) => {
-            send({
-              type: 'SUBMIT_FORM',
-              values: {
-                labwareBarcode: values.labwareBarcode,
-                addressNames: values.addressNames.filter(
-                  (addressName) => addressName.externalName && addressName.externalName.trim() !== ''
-                )
-              }
-            });
+          onSubmit={async (values, { setFieldError }) => {
+            const addressNames = values.sectionExternalNames
+              .filter((section) => section.externalName && section.externalName.trim() !== '')
+              .flatMap((section) =>
+                section.addresses.flatMap((address) => ({
+                  address: address,
+                  externalName: section.externalName
+                }))
+              );
+            if (addressNames.length > 0) {
+              send({
+                type: 'SUBMIT_FORM',
+                values: {
+                  labwareBarcode: values.labwareBarcode,
+                  addressNames
+                }
+              });
+            } else {
+              setFieldError('sectionExternalNames', 'At least one external id must be provided');
+            }
           }}
           validationSchema={buildValidationSchema()}
         >
-          {({ setValues, values }) => (
+          {({ setValues, values, setFieldError }) => (
             <Form>
               <div className="grid grid-cols-11 gap-4 mt-4 p-3 bg-gray-100 rounded-md">
                 <motion.div
@@ -107,20 +127,21 @@ export default function AddExternalID() {
                   <LabwareScanner
                     limit={1}
                     labwareCheckFunction={async (labwares, foundLabware) => {
-                      const addressNames = foundLabware.slots
-                        .filter((slot) => isSlotFilled(slot) && !hasMultipleSamples(slot))
-                        .map((slot) => ({
-                          address: slot.address,
+                      const sectionExternalNames = Object.values(sectionGroupsBySample(foundLabware)).map(
+                        (section) => ({
+                          addresses: Array.from(section.addresses),
                           externalName: ''
-                        }));
-                      if (addressNames.length === 0) {
+                        })
+                      );
+
+                      if (sectionExternalNames.length === 0) {
                         return [
                           `${foundLabware.barcode} is invalid because it either has no filled slots or contains multiple samples in its filled slots.`
                         ];
                       } else {
                         await setValues({
                           labwareBarcode: foundLabware.barcode,
-                          addressNames
+                          sectionExternalNames
                         });
                         return [];
                       }
@@ -128,7 +149,7 @@ export default function AddExternalID() {
                     onRemove={async () => {
                       await setValues({
                         labwareBarcode: '',
-                        addressNames: []
+                        sectionExternalNames: []
                       });
                     }}
                     enableFlaggedLabwareCheck
@@ -153,11 +174,11 @@ export default function AddExternalID() {
                   <motion.div>
                     <DataTable
                       columns={externalIdsTableColumns}
-                      data={values.addressNames}
+                      data={values.sectionExternalNames}
                       fixedHeader={true}
                       cellClassName="whitespace-normal"
                     />
-                    <FormikErrorMessage name={'addressNames'} />
+                    <FormikErrorMessage name={'sectionExternalNames'} />
                   </motion.div>
                 </motion.div>
 
