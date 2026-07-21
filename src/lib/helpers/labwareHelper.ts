@@ -172,14 +172,19 @@ export function isFrozenLabware(labware: Pick<Labware, 'state' | 'frozen'>): boo
 }
 
 /**
- * Determines whether a piece of labware has one slot which contains a block
- * e.g. a non-empty Proviasette
  * @param labware the labware to check
- * @return the highest section within a slot if labware has one slot with a block inside; undefined otherwise
+ * Returns the highest section number found across all samples in all slots of the given labware.
+ *
+ * Iterates through each slot's samples, collects their `blockHighestSection` values,
+ * filters out any `undefined` or `null` entries, and returns the maximum.
+ *
  */
 export function blockHighestSection(labware: Pick<LabwareFieldsFragment, 'slots'>): number | undefined | null {
-  return labware.slots.flatMap((slot) => slot.samples).find((sample) => sample.blockHighestSection)
-    ?.blockHighestSection;
+  const highestSections = labware.slots
+    .flatMap((slot) => slot.samples)
+    .map((sample) => sample.blockHighestSection)
+    .filter((highestSection): highestSection is number => highestSection !== undefined && highestSection !== null);
+  return highestSections.length > 0 ? Math.max(...highestSections) : undefined;
 }
 
 /**

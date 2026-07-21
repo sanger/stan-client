@@ -521,7 +521,8 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
           sampleId: planned.source.samples[0].id, // we only support single sample sources for sectioning,
           newSection: '',
           sampleThickness: planned.sampleThickness?.toString(),
-          labware: plan.planData.sources.find((lw) => lw.id === planned.source.labwareId)!
+          labware: plan.planData.sources.find((lw) => lw.id === planned.source.labwareId)!,
+          tissue: planned.source.samples[0].tissue
         };
         sources.push(source);
         const sectionGroupId = group.length === 1 ? group[0] : index.toString();

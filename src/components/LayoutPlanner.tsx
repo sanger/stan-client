@@ -2,12 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { isEqual } from 'lodash';
 import Labware, { LabwareImperativeRef } from './labware/Labware';
 import { LayoutContext, LayoutEvents } from '../lib/machines/layout';
-import {
-  removeSourceFromSlotDest,
-  selectDestination,
-  selectSource,
-  setAllDestinations
-} from '../lib/machines/layout/layoutEvents';
+import { removeSourceFromSlotDest, selectDestination, selectSource } from '../lib/machines/layout/layoutEvents';
 import { buildSlotColor, buildSlotText } from '../pages/sectioning';
 import { ActorRef, MachineSnapshot } from 'xstate';
 import { Position } from '../lib/helpers';
@@ -92,16 +87,14 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
                   onClick={() => {
                     actor.send(selectSource(source));
                   }}
-                  onDoubleClick={() => {
-                    actor.send(setAllDestinations(source));
-                  }}
                   className={`${
                     isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'
                   } ${layoutPlan.sampleColors.get(
                     source.sampleId
-                  )} inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
+                  )} text-center inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
                 >
-                  {source.labware.barcode}
+                  <p>{source.labware.barcode}</p>
+                  <p>{source.tissue?.externalName}</p>
                 </span>
               </div>
             ))}

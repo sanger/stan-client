@@ -129,7 +129,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       </div>
       <div
         data-testid={`div-slide-${labware.barcode}`}
-        className={`${sectionNumberEnabled && 'md:grid md:grid-cols-2'}`}
+        className={`${sectionNumberEnabled && 'md:grid md:grid-cols-3'}`}
       >
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
@@ -141,11 +141,12 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
           />
         </div>
         {sectionNumberEnabled && (
-          <div className="p-4 space-y-2 space-x-2 bg-gray-100">
+          <div className="p-4 space-y-2 space-x-2 col-span-2 bg-gray-100">
             <Heading level={3} showBorder={false}>
               Comments
             </Heading>
-            <div className={'grid grid-cols-4 gap-x-1 py-2 text-gray-500 text-center'}>
+            <div className={'grid grid-cols-5 gap-x-1 py-2 text-gray-500 text-center'}>
+              <div>External ID</div>
               <div>Section number</div>
               <div>Address(es)</div>
               <div>Section Thickness</div>

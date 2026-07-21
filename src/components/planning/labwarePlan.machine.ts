@@ -5,6 +5,7 @@ import { LayoutPlan, PlannedSectionDetails } from '../../lib/machines/layout/lay
 import { stanCore } from '../../lib/sdk';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 import { PlanMutationWithGroups } from '../../pages/sectioning/Plan';
+import { convertLabwareTypeToSourceType } from './LabwarePlan';
 
 //region Events
 type CreateLabwareEvent = {
@@ -45,6 +46,13 @@ type AssignSelectedSectionId = {
   sectionId: number;
 };
 
+type UpdateSources = {
+  type: 'UPDATE_SOURCES';
+  sources: Array<LabwareFlaggedFieldsFragment>;
+  sampleColors: Map<number, string>;
+  sectionThickness: number;
+};
+
 type LabwarePlanEvent =
   | { type: 'EDIT_LAYOUT' }
   | { type: 'CANCEL_EDIT_LAYOUT' }
@@ -55,7 +63,8 @@ type LabwarePlanEvent =
   | PlanSectionRejectEvent
   | AssignLayoutPlanEvent
   | CancelEditLayout
-  | AssignSelectedSectionId;
+  | AssignSelectedSectionId
+  | UpdateSources;
 //endregion Events
 
 /**
@@ -120,6 +129,9 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
               on: {
                 CREATE_LABWARE: {
                   target: '#labwarePlan.creating'
+                },
+                UPDATE_SOURCES: {
+                  actions: 'updateSources'
                 }
               }
             },
@@ -127,15 +139,25 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
               on: {
                 CREATE_LABWARE: {
                   target: '#labwarePlan.creating'
+                },
+                UPDATE_SOURCES: {
+                  actions: 'updateSources'
                 }
               }
             },
-            invalid: {}
+            invalid: {
+              on: {
+                UPDATE_SOURCES: {
+                  actions: 'updateSources'
+                }
+              }
+            }
           },
           on: {
             EDIT_LAYOUT: 'editingLayout'
           }
         },
+
         editingLayout: {
           id: 'layoutMachine',
           entry: [
@@ -146,6 +168,9 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
             })
           ],
           on: {
+            UPDATE_SOURCES: {
+              actions: 'updateSources'
+            },
             ASSIGN_LAYOUT_PLAN: {
               actions: 'assignLayoutPlan',
               target: 'validatingLayout'
@@ -206,6 +231,20 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
     },
     {
       actions: {
+        updateSources: assign(({ spawn, context, event }) => {
+          if (event.type !== 'UPDATE_SOURCES') {
+            return context;
+          }
+          // layoutPlan;
+          const sources = convertLabwareTypeToSourceType(event.sources, event.sectionThickness.toString());
+          const layoutPlan = { ...context.layoutPlan, sources, sampleColors: event.sampleColors };
+          // Forward the updated layoutPlan to the spawned layoutMachine (if it exists)
+          if (context.layoutMachine) {
+            context.layoutMachine.send({ type: 'UPDATE_LAYOUT_PLAN', layoutPlan });
+          }
+
+          return { ...context, layoutPlan };
+        }),
         assignLayoutPlan: assign(({ context, event }) => {
           if (event.type !== 'ASSIGN_LAYOUT_PLAN') {
             return context;

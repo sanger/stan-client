@@ -71,10 +71,6 @@ export const createLayoutMachine = (layoutPlan: LayoutPlan, possibleActions?: La
               target: `${State.SOURCE_DEST_MODE}.${State.SOURCE_SELECTED}`,
               actions: Actions.ASSIGN_SELECTED
             },
-
-            SET_ALL_DESTINATIONS: {
-              actions: Actions.ASSIGN_DESTINATION_ACTIONS
-            },
             ADD_SECTION_GROUP: {
               actions: Actions.ADD_SECTION_GROUP
             },

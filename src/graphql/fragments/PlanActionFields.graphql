@@ -10,6 +10,9 @@ fragment PlanActionFields on PlanAction {
     labwareId
     samples {
       id
+      tissue {
+        ...TissueFields
+      }
     }
   }
   destination {

@@ -4,16 +4,15 @@ import { uniqueId } from 'lodash';
 import BlueButton from '../buttons/BlueButton';
 import { NewFlaggedLabwareLayout } from '../../types/stan';
 import { castDraft, produce } from '../../dependencies/immer';
-import LabwareScanTable from '../labwareScanPanel/LabwareScanPanel';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
 import { buildSampleColors } from '../../lib/helpers/labwareHelper';
 import Heading from '../Heading';
 import { getNumberOfDaysBetween } from '../../lib/helpers';
 import Warning from '../notifications/Warning';
 import { Column } from 'react-table';
-import labwareScanTableColumns from '../dataTableColumns/labwareColumns';
 import { useScrollToRef } from '../../lib/hooks';
 import { unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
+import { SourceTable } from './SourceTable';
 
 /**
  * The props passed to the Planner component
@@ -47,7 +46,7 @@ type PlannerProps<M> = {
     confirmAction?: (cid: string, plan: M) => void,
     scrollRef?: React.MutableRefObject<HTMLDivElement | null>
   ) => JSX.Element;
-  columns: Column<LabwareFieldsFragment>[];
+  columns?: Column<LabwareFieldsFragment>[];
 
   /**
    * Callback to render the component to display configuration setting to add a labware plan.
@@ -97,11 +96,6 @@ type PlannerState<M> = {
   completedPlans: Map<string, M>;
 
   /**
-   * Tracks whether the Labware Scanner should allow more labware to be scanned in
-   */
-  isLabwareScannerLocked: boolean;
-
-  /**
    * Tracks whether the "Add Labware" button is currently disabled
    */
   isAddLabwareButtonDisabled: boolean;
@@ -111,7 +105,6 @@ const initialState = {
   sourceLabware: [],
   labwarePlans: new Map(),
   completedPlans: new Map(),
-  isLabwareScannerLocked: false,
   isAddLabwareButtonDisabled: true
 };
 
@@ -143,15 +136,11 @@ function reducer<M>(state: PlannerState<M>, action: Action<M>): PlannerState<M> 
             sectionThickness: action.sectionThickness
           });
         }
-        // As soon as there are any plans present, stop the user from adding
-        // any more source labware
-        draft.isLabwareScannerLocked = true;
         break;
       }
 
       case 'REMOVE_LABWARE_PLAN':
         draft.labwarePlans.delete(action.cid);
-        draft.isLabwareScannerLocked = draft.labwarePlans.size > 0 || draft.completedPlans.size > 0;
         break;
 
       case 'PLAN_COMPLETE':
@@ -171,7 +160,6 @@ export default function Planner<M>({
   selectedLabwareType,
   numPlansToCreate,
   onPlanChanged,
-  columns,
   singleSourceAllowed,
   buildPlanLayouts,
   buildPlanCreationSettings,
@@ -287,11 +275,11 @@ export default function Planner<M>({
     <div className="space-y-10">
       <Heading level={3}>Source Labware</Heading>
       <LabwareScanner
-        locked={state.isLabwareScannerLocked || (singleSourceAllowed && state.sourceLabware.length === 1)}
+        locked={singleSourceAllowed && state.sourceLabware.length === 1}
         onChange={onLabwareScannerChange}
         enableFlaggedLabwareCheck
       >
-        <LabwareScanTable columns={[labwareScanTableColumns.color(sampleColors), ...columns]} />
+        <SourceTable sourceLabware={state.sourceLabware} />
       </LabwareScanner>
       {fetalSampleWarningLabware.length > 0 && (
         <Warning
