@@ -75,14 +75,17 @@ describe('Sectioning Confirmation', () => {
       cy.get('[type="radio"]').first().should('be.checked');
     });
     it('should auto fill section numbers starting from highest section number', () => {
-      let sectionNumber = 0;
-      cy.findByRole('table')
-        .find('td')
-        .eq(1)
-        .then((col) => {
-          sectionNumber = Number(col.text());
+      let sectionNumbers: number[] = [];
+      cy.findAllByTestId('block-highest-section')
+        .each((div) => {
+          sectionNumbers.push(Number(div.text().trim()));
+        })
+        .then(() => {
+          const sectionNumber = Math.max(...sectionNumbers);
+          cy.findAllByTestId('section-number').each((elem) =>
+            cy.wrap(elem).should('have.value', sectionNumber + 1 + '')
+          );
         });
-      cy.findAllByTestId('section-number').each((elem) => cy.wrap(elem).should('have.value', sectionNumber + 1 + ''));
     });
 
     it('disables all section number fields', () => {
@@ -362,11 +365,11 @@ function saveButton() {
   return cy.findByRole('button', { name: /Save/i });
 }
 
-const readHighestSectionNumber = () => {
-  cy.findByRole('table')
-    .find('td')
-    .eq(1)
-    .then((col) => {
-      highestSectionNumber = Number(col.text());
-    });
-};
+// const readHighestSectionNumber = () => {
+//   cy.findByRole('table')
+//     .find('td')
+//     .eq(1)
+//     .then((col) => {
+//       highestSectionNumber = Number(col.text());
+//     });
+// };

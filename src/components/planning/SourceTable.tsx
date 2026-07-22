@@ -25,8 +25,9 @@ export const SourceTable = ({ sourceLabware }: { sourceLabware: Array<LabwareFla
     return extractSourceSamplesFromLabware(sourceLabware);
   }, [sourceLabware]);
 
+  if (sourceLabware.length === 0) return <></>;
   return (
-    <div className="bg-gray-100  text-center border-gray-500 border-b">
+    <div data-testid="source-table" className="bg-gray-100  text-center border-gray-500 border-b">
       <div className="grid grid-cols-4 gap-x-1 py-2 font-medium text-gray-600 tracking-wide  border-gray-500 border-b">
         <div>Barcode</div>
         <div>External ID</div>
@@ -42,7 +43,7 @@ export const SourceTable = ({ sourceLabware }: { sourceLabware: Array<LabwareFla
             <div>{index === 0 ? barcode : ''}</div>
             <div>{sample.tissue.externalName}</div>
             <div>{sample.tissue.replicate}</div>
-            <div>{sample.blockHighestSection}</div>
+            <div data-testid="block-highest-section">{sample.blockHighestSection}</div>
           </div>
         ))
       )}

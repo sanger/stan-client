@@ -75,8 +75,8 @@ describe('Sectioning Planning', () => {
         cy.findByText('+ Add Labware').click();
       });
 
-      it('becomes disabled', () => {
-        cy.get('#labwareScanInput').should('be.disabled');
+      it('stays enabled', () => {
+        cy.get('#labwareScanInput').should('be.enabled');
       });
 
       context('when destination labware becomes empty again', () => {

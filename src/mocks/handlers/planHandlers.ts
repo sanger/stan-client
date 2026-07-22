@@ -6,8 +6,7 @@ import {
   FindPlanDataQueryVariables,
   Labware,
   PlanMutation,
-  PlanMutationVariables,
-  SlotFieldsFragment
+  PlanMutationVariables
 } from '../../types/sdk';
 import { labwareTypeInstances, labwareTypes } from '../../lib/factories/labwareTypeFactory';
 import labwareFactory from '../../lib/factories/labwareFactory';
@@ -15,6 +14,7 @@ import { uniqueId } from 'lodash';
 import { LabwareTypeName } from '../../types/stan';
 import { generateLabwareIdFromBarcode } from './labwareHandlers';
 import { buildFlaggedLabwareFragment } from './flagLabwareHandlers';
+import { tissueFactory } from '../../lib/factories/sampleFactory';
 
 const planHandlers = [
   graphql.mutation<PlanMutation, PlanMutationVariables>('Plan', ({ variables }) => {
@@ -48,8 +48,7 @@ const planHandlers = [
                   samples: [
                     {
                       id: planAction.sampleId,
-                      tissue: labware.slots.find((slot: SlotFieldsFragment) => slot.address === planAction.addresses[0])
-                        ?.samples[0]?.tissue
+                      tissue: tissueFactory.build()
                     }
                   ]
                 },

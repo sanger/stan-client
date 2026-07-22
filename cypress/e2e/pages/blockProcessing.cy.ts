@@ -38,13 +38,8 @@ describe('Block Processing', () => {
       before(() => {
         cy.findByText('+ Add Labware').click();
       });
-      it(' disables scan labware input', () => {
-        cy.get('#labwareScanInput').should('be.disabled');
-      });
-
-      it('re-enables scan labware input', () => {
-        cy.findByText('Delete Layout').click();
-        cy.get('#labwareScanInput').should('not.be.disabled');
+      it(' keeps the scan labware input enabled', () => {
+        cy.get('#labwareScanInput').should('be.enabled');
       });
     });
   });
