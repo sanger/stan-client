@@ -50,6 +50,8 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
       __typename: 'Labware',
       labwareType: associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build(),
       id: params.id ?? -1,
+      numRows: associations.labwareType?.numRows ?? 1,
+      numColumns: associations.labwareType?.numColumns ?? 1,
       barcode: params.barcode ?? null,
       externalBarcode: params.externalBarcode ?? 'EXTERN-BARCODE',
       slots: associations.slots ?? [],
