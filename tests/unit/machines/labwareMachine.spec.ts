@@ -218,6 +218,8 @@ describe('labwareMachine', () => {
                 discarded: false,
                 released: false,
                 frozen: false,
+                numRows: 1,
+                numColumns: 1,
                 created: new Date().toISOString(),
                 state: LabwareState.Active,
                 __typename: 'Labware',

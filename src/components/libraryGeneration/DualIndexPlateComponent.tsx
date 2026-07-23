@@ -13,7 +13,6 @@ import {
   ReagentTransferContext,
   ReagentTransferEvent
 } from '../../lib/machines/reagentTransfer/reagentTransferMachine';
-import { PLATE_TYPES } from '../../pages/DualIndexPlate';
 import labwareFactory from '../../lib/factories/labwareFactory';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../types/stan';
@@ -29,6 +28,8 @@ type DualIndexPlateParams = {
   outputSlotCopies?: Array<OutputSlotCopyData>;
   destinationCleanedOutAddresses?: string[];
 };
+
+export const PLATE_TYPES = ['Dual Index TT Set A', 'Dual Index TS Set A'];
 
 const DualIndexPlateComponent = ({
   current,

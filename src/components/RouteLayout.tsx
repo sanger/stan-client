@@ -33,7 +33,6 @@ import { plateFactory } from '../lib/factories/labwareFactory';
 import VisiumQC from '../pages/VisiumQC';
 import VisiumPerm from '../pages/VisiumPerm';
 import VisiumAnalysis from '../pages/VisiumAnalysis';
-import DualIndexPlate from '../pages/DualIndexPlate';
 import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
 import XeniumAnalyser from '../pages/XeniumAnalyser';
 import CytAssist from '../pages/CytAssist';
@@ -259,9 +258,6 @@ const RouteLayout = () => {
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/lab/visium_analysis" element={<VisiumAnalysis />} />
-        </Route>
-        <Route element={<AuthLayout />}>
-          <Route path="/lab/dual_index_plate" element={<DualIndexPlate />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
