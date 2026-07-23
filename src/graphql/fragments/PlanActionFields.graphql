@@ -1,6 +1,7 @@
 fragment PlanActionFields on PlanAction {
   newSection
   sampleThickness
+  sectioningOrder
   sample {
     id
   }

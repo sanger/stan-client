@@ -10,21 +10,9 @@ import {
 import { extractServerErrors } from '../../../types/stan';
 import { stanCore } from '../../sdk';
 import { ClientError } from 'graphql-request';
-import { convertLabwareToFlaggedLabware } from '../../helpers/labwareHelper';
+import { convertLabwareToFlaggedLabware, isFrozenLabware } from '../../helpers/labwareHelper';
 import { produce } from '../../../dependencies/immer';
 import { findIndex } from 'lodash';
-
-const resolveStringArrayPromise = (data: string[] | Promise<string[]>): string[] => {
-  let resolvedData: string[] = [];
-  if (!Array.isArray(data)) {
-    data.then((resolved) => {
-      resolvedData = resolved;
-    });
-  } else {
-    resolvedData = data;
-  }
-  return resolvedData;
-};
 
 export interface LabwareContext {
   /**
@@ -105,6 +93,8 @@ export interface LabwareContext {
    * Used to prevent re-initialization of these values.
    */
   areInitialsSet?: boolean;
+
+  rejectFrozen: boolean;
 }
 
 /**
@@ -369,23 +359,20 @@ export const createLabwareMachine = () => {
         validatingFoundLabware: {
           invoke: {
             id: 'validateFoundLabware',
-            src: fromPromise(({ input }) => {
-              return new Promise(async (resolve, reject) => {
-                const problems = resolveStringArrayPromise(
-                  input.foundLabware
-                    ? input.foundLabwareCheck
-                      ? await input.foundLabwareCheck(input.labwares, input.foundLabware)
-                      : []
-                    : ['Labware not loaded.']
-                );
-                if (problems.length === 0) {
-                  resolve(input.foundLabware);
-                } else {
-                  reject(problems);
-                }
-              });
+            src: fromPromise(async ({ input }) => {
+              const problems = await isLabwareValid(
+                input.rejectFrozen,
+                input.foundLabware,
+                input.labwares,
+                input.foundLabwareCheck
+              );
+              if (problems.length > 0) {
+                return Promise.reject(problems);
+              }
+              return input.foundLabware;
             }),
             input: ({ context }) => ({
+              rejectFrozen: context.rejectFrozen,
               labwares: context.labwares,
               foundLabware: context.foundLabware,
               foundLabwareCheck: context.foundLabwareCheck
@@ -529,26 +516,31 @@ export const createLabwareMachine = () => {
           //Validate all labwares in the location
           event.output.labwareInLocation.forEach((labware) => {
             //check whether this labware is already scanned, if not add to labware list, otherwise update error message
-            let problem: string[] = [];
             if (context.labwares.find((ctxLabware) => ctxLabware.barcode === labware.barcode)) {
-              problem.push(alreadyScannedBarcodeError(labware.barcode));
+              problems.push(alreadyScannedBarcodeError(labware.barcode));
             } else {
               /*Validate all the labwares in the location using the validation function passed.
                  If validation is success, add that labware to the list of labwares, otherwise add the error message
                  for failure*/
-              problem = resolveStringArrayPromise(
+              const labwareIssues = isLabwareValid(
+                context.rejectFrozen,
+                convertLabwareToFlaggedLabware([labware])[0],
+                convertLabwareToFlaggedLabware(event.output.labwareInLocation),
                 context.foundLabwareCheck
-                  ? context.foundLabwareCheck(
-                      convertLabwareToFlaggedLabware(event.output.labwareInLocation),
-                      convertLabwareToFlaggedLabware([labware])[0]
-                    )
-                  : []
               );
-            }
-            if (problem.length !== 0) {
-              problems.push(problem.join('\n'));
-            } else {
-              context.labwares = [...context.labwares, convertLabwareToFlaggedLabware([labware])[0]];
+              let resolvedLabwareIssues: string[] = [];
+              if (Array.isArray(labwareIssues)) {
+                resolvedLabwareIssues = labwareIssues;
+              } else {
+                labwareIssues.then((resolved) => {
+                  resolvedLabwareIssues = resolved;
+                });
+              }
+              if (resolvedLabwareIssues.length > 0) {
+                problems.push(resolvedLabwareIssues.join('\n'));
+              } else {
+                context.labwares = [...context.labwares, convertLabwareToFlaggedLabware([labware])[0]];
+              }
             }
           });
           if (problems.length > 0) {
@@ -601,4 +593,19 @@ const alreadyScannedBarcodeError = (barcode: string) => {
 const handleFindError = (error: ClientError) => {
   let errors = extractServerErrors(error);
   return errors?.message;
+};
+
+const isLabwareValid = (
+  rejectFrozen: boolean,
+  foundLabware: LabwareFlaggedFieldsFragment,
+  labwares: LabwareFlaggedFieldsFragment[],
+  labwareCheckFunction?: (
+    labwares: LabwareFlaggedFieldsFragment[],
+    foundLabware: LabwareFlaggedFieldsFragment
+  ) => string[] | Promise<string[]>
+): Array<string> | Promise<string[]> => {
+  if (!foundLabware) return ['Labware not loaded.'];
+  if (rejectFrozen && isFrozenLabware(foundLabware))
+    return [`Labware ${foundLabware.barcode} is frozen and cannot be used for this operation.`];
+  return labwareCheckFunction ? labwareCheckFunction(labwares, foundLabware) : [];
 };

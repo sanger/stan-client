@@ -541,8 +541,11 @@ const MultipleLabwareSlotMapper: React.FC<SlotMapperProps> = ({
 
   const ensureLabwareReadyForProcessing = useCallback(
     async (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): Promise<string[]> => {
+      if (foundLabware.state !== LabwareState.Active) {
+        return [`Labware is not active: [ ${foundLabware.barcode}]`];
+      }
       await areProbHybOpsPerformed(foundLabware.barcode);
-      return foundLabware.state !== LabwareState.Active ? [`Labware is not active: [ ${foundLabware.barcode}]`] : [];
+      return [];
     },
     [areProbHybOpsPerformed]
   );

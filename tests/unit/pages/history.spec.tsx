@@ -49,7 +49,7 @@ jest.mock('"../../../../src/lib/hooks/useDownload', () => ({
 }));
 const navigateMock = jest.fn();
 require('react-router-dom').useLocation = jest.fn();
-require('react-router-dom').useNavigate = navigateMock;
+require('react-router-dom').useNavigate = jest.fn(() => navigateMock);
 
 jest.mock('../../../src/lib/sdk', () => ({
   ...jest.requireActual('../../../src/lib/sdk'),
@@ -161,7 +161,9 @@ describe('On load', () => {
     });
     it('will submit action on barcode search', async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Search' }));
-      expect(navigateMock).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(navigateMock).toHaveBeenCalled();
+      });
     });
   });
 });

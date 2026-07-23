@@ -101,6 +101,9 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
     released: labware.released,
     created: labware.created,
     state: labware.state,
+    numRows: labware.numRows ?? labware.labwareType.numRows,
+    numColumns: labware.numColumns ?? labware.labwareType.numColumns,
+    frozen: labware.frozen ?? false,
     labwareType: {
       __typename: 'LabwareType',
       name: labware.labwareType.name,
@@ -157,9 +160,17 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
 
 /**
  * Returns true if a piece of labware is usable; false otherwise.
+ * Only Empty and Active states are usable.
  */
 export function isLabwareUsable(labware: Pick<Labware, 'state'>): boolean {
   return [LabwareState.Empty, LabwareState.Active].includes(labware.state);
+}
+
+/**
+ * Returns true if labware is frozen, supporting both state and frozen fields.
+ */
+export function isFrozenLabware(labware: Pick<Labware, 'state' | 'frozen'>): boolean {
+  return labware.frozen || labware.state === LabwareState.Frozen;
 }
 
 /**

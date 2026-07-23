@@ -8,7 +8,10 @@ fragment LabwareFlaggedFields on LabwareFlagged {
   flagged
   flagPriority
   state
+  frozen
   created
+  numRows
+  numColumns
   labwareType {
     ...LabwareTypeFields
   }

@@ -1,6 +1,6 @@
 {
   "name": "client",
-  "version": "4.2.0",
+  "version": "4.4.1",
   "private": true,
   "proxy": "http://localhost:8080/",
   "dependencies": {
@@ -118,6 +118,7 @@
     "babel-plugin-polyfill-corejs2": "^0.4.6",
     "cypress": "^14.1.0",
     "cypress-intellij-reporter": "^0.0.7",
+    "cypress-split": "^1.24.0",
     "eslint-config-prettier": "10.0.1",
     "fishery": "^2.2.2",
     "identity-obj-proxy": "^3.0.0",
