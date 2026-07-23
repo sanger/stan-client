@@ -38,6 +38,7 @@ describe('Block Processing', () => {
       before(() => {
         cy.findByText('+ Add Labware').click();
       });
+      //clearing out layout after finishing test, so does not interfere with the next tests (number of plans)
       after(() => {
         cy.findAllByText('Delete Layout').first().click();
       });
