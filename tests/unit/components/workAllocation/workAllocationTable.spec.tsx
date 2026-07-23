@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
 import WorkAllocation from '../../../../src/components/workAllocation/WorkAllocation';
@@ -150,5 +150,35 @@ describe('WorkAllocation table headers', () => {
     const pillSpans = within(row!).getAllByTestId('treatment-type-pill');
     expect(pillSpans.length).toBe(2);
     expect(within(row!).getByTestId('SGP-1-edit-treatment-types')).toBeInTheDocument();
+  });
+});
+
+describe('WorkAllocation - inline treatment types editing', () => {
+  async function getRow() {
+    render(<WorkAllocation />);
+    const table = await screen.findByTestId('work-allocation-table');
+    const sgpCell = within(table).getByText('SGP-1');
+    return sgpCell.closest('tr') as HTMLTableRowElement;
+  }
+
+  it('shows multi-select and Save/Cancel when Edit is clicked', async () => {
+    const row = await getRow();
+
+    fireEvent.click(within(row).getByTestId('SGP-1-edit-treatment-types'));
+
+    expect(within(row).queryByTestId('SGP-1-edit-treatment-types')).not.toBeInTheDocument();
+    expect(within(row).getByTestId('SGP-1-treatmentTypes')).toBeInTheDocument();
+    expect(within(row).getByRole('button', { name: /save/i })).toBeInTheDocument();
+    expect(within(row).getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+  });
+
+  it('restores the Edit link when Cancel is clicked', async () => {
+    const row = await getRow();
+
+    fireEvent.click(within(row).getByTestId('SGP-1-edit-treatment-types'));
+    fireEvent.click(within(row).getByRole('button', { name: /cancel/i }));
+
+    expect(within(row).getByTestId('SGP-1-edit-treatment-types')).toBeInTheDocument();
+    expect(within(row).queryByTestId('SGP-1-treatmentTypes')).not.toBeInTheDocument();
   });
 });
