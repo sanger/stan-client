@@ -157,13 +157,15 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
           const updatedPlan = {
             ...plan,
             contents: Array.from(planContents.values()),
-            labwareType: outputLabware.labwareType.name
+            labwareType: outputLabware.labwareType.name,
+            numColumns: outputLabware.labwareType.numColumns,
+            numRows: outputLabware.labwareType.numRows
           };
           return { ...prev, plans: new Map(prev.plans).set(cid, updatedPlan) };
         });
       });
       return () => subscription.unsubscribe();
-    }, [setValues, values, layoutPlan.plannedActions, cid, actor, outputLabware.labwareType.name]);
+    }, [setValues, values, layoutPlan.plannedActions, cid, actor, outputLabware.labwareType]);
 
     return (
       <motion.div
@@ -234,11 +236,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                           <TableCell>{tissueContent.sourceBarcode}</TableCell>
                           <TableCell>
                             <FormikInput
-                              validateField={(number: number) => {
-                                if (number === 0) return 'Replicate number is required';
-                                return '';
-                              }}
-                              name={`replicateNumber`}
+                              name={'replicateNumber'}
                               data-testid="replicate-number"
                               type={'number'}
                               label={''}

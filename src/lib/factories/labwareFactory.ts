@@ -46,13 +46,16 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
         });
       }
     });
+    const labwareType = associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build();
     return {
       __typename: 'Labware',
-      labwareType: associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build(),
+      labwareType,
       id: params.id ?? -1,
       numRows: associations.labwareType?.numRows ?? 1,
       numColumns: associations.labwareType?.numColumns ?? 1,
       barcode: params.barcode ?? null,
+      numColumns: params.numColumns ?? labwareType.numColumns,
+      numRows: params.numRows ?? labwareType.numRows,
       externalBarcode: params.externalBarcode ?? 'EXTERN-BARCODE',
       slots: associations.slots ?? [],
       destroyed: params.destroyed ?? params.barcode?.length === 12,
@@ -79,6 +82,8 @@ export default labwareFactory;
 
 export const multiSampleBlockLabwareFactory = (blockTypeName: LabwareTypeName, numColumns: number, numRows: number) => {
   return unregisteredLabwareFactory.associations({
+    numColumns,
+    numRows,
     labwareType: labwareTypeFactory
       .params({
         name: blockTypeName,
