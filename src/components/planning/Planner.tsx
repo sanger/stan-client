@@ -5,7 +5,6 @@ import BlueButton from '../buttons/BlueButton';
 import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
 import { castDraft, produce } from '../../dependencies/immer';
 import { multiSampleBlockLabwareFactory, unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
-import LabwareScanTable from '../labwareScanPanel/LabwareScanPanel';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
 import { buildSampleColors } from '../../lib/helpers/labwareHelper';
 import Heading from '../Heading';

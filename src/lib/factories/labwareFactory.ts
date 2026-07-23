@@ -54,8 +54,6 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
       numRows: associations.labwareType?.numRows ?? 1,
       numColumns: associations.labwareType?.numColumns ?? 1,
       barcode: params.barcode ?? null,
-      numColumns: params.numColumns ?? labwareType.numColumns,
-      numRows: params.numRows ?? labwareType.numRows,
       externalBarcode: params.externalBarcode ?? 'EXTERN-BARCODE',
       slots: associations.slots ?? [],
       destroyed: params.destroyed ?? params.barcode?.length === 12,
