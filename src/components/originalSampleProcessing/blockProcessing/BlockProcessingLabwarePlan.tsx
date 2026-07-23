@@ -1,4 +1,4 @@
-import { GetBlockProcessingInfoQuery, LabwareFlaggedFieldsFragment, TissueBlockContent } from '../../../types/sdk';
+import { GetBlockProcessingInfoQuery, LabwareFlaggedFieldsFragment } from '../../../types/sdk';
 import React from 'react';
 import { useMachine } from '@xstate/react';
 import { motion } from '../../../dependencies/motion';
@@ -16,10 +16,11 @@ import { useFormikContext } from 'formik';
 import Warning from '../../notifications/Warning';
 import FormikInput from '../../forms/Input';
 import { createLabwarePlanMachine } from '../../planning/labwarePlan.machine';
-import { BlockFormData, TissueBlockLabwareForm } from './BlockProcessing';
+import { BlockFormData, TissueBlockContentForm, TissueBlockLabwareForm } from './BlockProcessing';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 import { selectOptionValues } from '../../forms';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../Table';
+import { convertLabwareTypeToSourceType } from '../../planning/LabwarePlan';
 
 type BlockProcessingLabwarePlanProps = {
   /**
@@ -58,18 +59,7 @@ function buildInitialLayoutPlan(
   outputLabware: NewFlaggedLabwareLayout
 ) {
   return {
-    sources: sourceLabware.flatMap((lw) =>
-      lw.slots.flatMap((slot) =>
-        slot.samples.flatMap((sample) => {
-          return {
-            sampleId: sample.id,
-            labware: lw,
-            newSection: '',
-            address: slot.address
-          };
-        })
-      )
-    ),
+    sources: convertLabwareTypeToSourceType(sourceLabware),
     sampleColors,
     destinationLabware: outputLabware,
     plannedActions: {}
@@ -120,9 +110,10 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
     React.useEffect(() => {
       const subscription = actor.subscribe((state) => {
         if (!state.context.layoutPlan.plannedActions) return;
-        const planContents: Map<string, TissueBlockContent> = new Map();
+        const planContents: Map<string, TissueBlockContentForm> = new Map();
         Object.values(state.context.layoutPlan.plannedActions).forEach((plannedAction) => {
           const sourceBarcode = plannedAction.source.labware.barcode;
+          const planActionKey = `${plannedAction.source.labware.barcode}-${plannedAction.source.tissue?.externalName}`;
           let planReplicateNumber = plannedAction.source.replicateNumber
             ? parseInt(plannedAction.source.replicateNumber)
             : undefined;
@@ -141,14 +132,16 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
             addresses: Array.from(plannedAction.addresses),
             sourceBarcode,
             replicate: planReplicateNumber?.toString(),
+            externalId: plannedAction.source.tissue?.externalName ?? '',
             sourceSampleId: plannedAction.source.sampleId,
-            isEditReplicateDisabled:
-              plannedAction.source.replicateNumber && parseInt(plannedAction.source.replicateNumber) > 0
+            isEditReplicateDisabled: plannedAction.source.replicateNumber
+              ? parseInt(plannedAction.source.replicateNumber) > 0
+              : undefined
           };
 
-          const existing = planContents.get(sourceBarcode);
+          const existing = planContents.get(planActionKey);
           planContents.set(
-            sourceBarcode,
+            planActionKey,
             existing ? { ...existing, addresses: [...existing.addresses, ...entry.addresses] } : entry
           );
         });
@@ -225,6 +218,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                   <TableHead>
                     <tr>
                       <TableHeader>Source Barcode</TableHeader>
+                      <TableHeader>External Id</TableHeader>
                       <TableHeader>Replicate Number</TableHeader>
                       <TableHeader>Labware generation comments</TableHeader>
                     </tr>
@@ -234,6 +228,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                       values.plans.get(cid)?.contents?.map((tissueContent, index) => (
                         <tr key={`${tissueContent.sourceBarcode}-${index}`}>
                           <TableCell>{tissueContent.sourceBarcode}</TableCell>
+                          <TableCell>{tissueContent.externalId}</TableCell>
                           <TableCell>
                             <FormikInput
                               name={'replicateNumber'}
