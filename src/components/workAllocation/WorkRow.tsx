@@ -24,7 +24,6 @@ import warningToast from '../notifications/WarningToast';
 import { toast } from 'react-toastify';
 import { AnyMachineSnapshot } from 'xstate';
 import { extractServerErrors } from '../../types/stan';
-import Modal, { ModalBody, ModalFooter, ModalHeader } from '../Modal';
 
 /**
  * The type of values for the edit form
@@ -93,7 +92,7 @@ export default function WorkRow({
     serverErrors,
     serverSuccess
   } = current.context;
-  const [isTreatmentTypesModalOpen, setIsTreatmentTypesModalOpen] = React.useState(false);
+  const [isEditingTreatmentTypes, setIsEditingTreatmentTypes] = React.useState(false);
   const [selectedTreatmentTypes, setSelectedTreatmentTypes] = React.useState<string[]>([]);
 
   /**Notify the changes in work fields*/
@@ -248,19 +247,6 @@ export default function WorkRow({
     );
   }, [availableTreatmentTypes, work.treatmentTypes]);
 
-  const modalTreatmentTypeOptions = React.useMemo(() => {
-    // Get all enabled types from parent
-    const enabledTypes = availableTreatmentTypes.filter((tt) => tt.enabled);
-    // Always include currently-selected types (even if disabled) directly from work object
-    // This ensures disabled-but-selected types remain visible and removable
-    const currentlySelectedTypes = work.treatmentTypes;
-    // Merge and de-duplicate by name
-    const combined = Array.from(
-      new Map([...enabledTypes, ...currentlySelectedTypes].map((tt) => [tt.name, tt])).values()
-    );
-    return selectOptionValues(combined, 'name', 'name');
-  }, [availableTreatmentTypes, work.treatmentTypes]);
-
   const renderWorkTreatmentTypesField = (workNumber: string, treatmentTypeNames: string[]) => {
     return (
       <div className="space-y-2">
@@ -278,19 +264,57 @@ export default function WorkRow({
             ))}
           </div>
         )}
-        {isEditEnabledForStatus(work.status) && (
-          <button
-            type="button"
-            data-testid={`${workNumber}-edit-treatment-types`}
-            className="text-sm text-sdb underline"
-            onClick={() => {
-              setSelectedTreatmentTypes(treatmentTypeNames);
-              setIsTreatmentTypesModalOpen(true);
-            }}
-          >
-            Edit
-          </button>
-        )}
+        {isEditEnabledForStatus(work.status) &&
+          (isEditingTreatmentTypes ? (
+            <div className="space-y-2">
+              <CustomReactSelect
+                dataTestId={`${workNumber}-treatmentTypes`}
+                isMulti={true}
+                menuPosition={'fixed'}
+                menuPlacement={'auto'}
+                menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
+                styles={{
+                  menuPortal: (base) => ({ ...base, zIndex: 60 })
+                }}
+                value={selectedTreatmentTypes}
+                options={editableTreatmentTypeOptions}
+                handleChange={(value) => {
+                  const selected = Array.isArray(value) ? value.map((v) => v.label) : [];
+                  setSelectedTreatmentTypes(selected);
+                }}
+              />
+              <div className="flex flex-row items-center space-x-2">
+                <BlueButton
+                  type="button"
+                  disabled={current.matches('editTreatmentTypes')}
+                  onClick={() => {
+                    send({
+                      type: 'UPDATE_TREATMENT_TYPES',
+                      treatmentTypes: selectedTreatmentTypes
+                    });
+                    setIsEditingTreatmentTypes(false);
+                  }}
+                >
+                  Save
+                </BlueButton>
+                <WhiteButton type="button" onClick={() => setIsEditingTreatmentTypes(false)}>
+                  Cancel
+                </WhiteButton>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              data-testid={`${workNumber}-edit-treatment-types`}
+              className="text-sm text-sdb underline"
+              onClick={() => {
+                setSelectedTreatmentTypes(treatmentTypeNames);
+                setIsEditingTreatmentTypes(true);
+              }}
+            >
+              Edit
+            </button>
+          ))}
       </div>
     );
   };
@@ -457,46 +481,6 @@ export default function WorkRow({
             renderWorkNumValueField(work.workNumber, work.numOriginalSamples ?? undefined, 'originalSamples')}
         </TableCell>
       </tr>
-      <Modal show={isTreatmentTypesModalOpen}>
-        <ModalHeader>Edit Treatment Types</ModalHeader>
-        <ModalBody>
-          <CustomReactSelect
-            dataTestId={`${work.workNumber}-treatmentTypes`}
-            isMulti={true}
-            menuPosition={'fixed'}
-            menuPlacement={'auto'}
-            menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
-            styles={{
-              menuPortal: (base) => ({ ...base, zIndex: 60 })
-            }}
-            value={selectedTreatmentTypes}
-            options={modalTreatmentTypeOptions}
-            handleChange={(value) => {
-              const selected = Array.isArray(value) ? value.map((v) => v.label) : [];
-              setSelectedTreatmentTypes(selected);
-            }}
-          />
-        </ModalBody>
-        <ModalFooter>
-          <BlueButton
-            className="sm:ml-3"
-            type="button"
-            disabled={current.matches('editTreatmentTypes')}
-            onClick={() => {
-              send({
-                type: 'UPDATE_TREATMENT_TYPES',
-                treatmentTypes: selectedTreatmentTypes
-              });
-              setIsTreatmentTypesModalOpen(false);
-            }}
-          >
-            Save
-          </BlueButton>
-          <WhiteButton className="sm:ml-3 mt-1" type="button" onClick={() => setIsTreatmentTypesModalOpen(false)}>
-            Cancel
-          </WhiteButton>
-        </ModalFooter>
-      </Modal>
     </>
   );
 }
