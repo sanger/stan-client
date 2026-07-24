@@ -238,13 +238,19 @@ export default function WorkRow({
     );
   };
 
+  /**
+   * Options for the treatment type multi-select when editing.
+   * Includes all enabled treatment types plus any disabled treatment types
+   * that are already assigned to this work (so the user can remove them).
+   * Disabled types not on this work are excluded — they cannot be added.
+   */
   const editableTreatmentTypeOptions = React.useMemo(() => {
-    const selectedTypeNames = new Set(work.treatmentTypes.map((t) => t.name));
-    return selectOptionValues(
-      availableTreatmentTypes.filter((tt) => tt.enabled || selectedTypeNames.has(tt.name)),
-      'name',
-      'name'
-    );
+    const enabledOptions = availableTreatmentTypes.map((tt) => ({ value: tt.name, label: tt.name }));
+    const enabledNames = new Set(enabledOptions.map((o) => o.value));
+    const disabledOnWork = work.treatmentTypes
+      .filter((tt) => !tt.enabled && !enabledNames.has(tt.name))
+      .map((tt) => ({ value: tt.name, label: tt.name }));
+    return [...enabledOptions, ...disabledOnWork];
   }, [availableTreatmentTypes, work.treatmentTypes]);
 
   const renderWorkTreatmentTypesField = (workNumber: string, treatmentTypeNames: string[]) => {
@@ -266,10 +272,12 @@ export default function WorkRow({
         )}
         {isEditEnabledForStatus(work.status) &&
           (isEditingTreatmentTypes ? (
-            <div className="space-y-2">
+            <div className="space-y-4">
               <CustomReactSelect
                 dataTestId={`${workNumber}-treatmentTypes`}
+                className="min-w-[13rem] max-w-[33vw]"
                 isMulti={true}
+                label={'Treatment Types'}
                 menuPosition={'fixed'}
                 menuPlacement={'auto'}
                 menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
@@ -283,7 +291,10 @@ export default function WorkRow({
                   setSelectedTreatmentTypes(selected);
                 }}
               />
-              <div className="flex flex-row items-center space-x-2">
+              <div className="flex flex-row items-center justify-end space-x-2">
+                <WhiteButton type="button" onClick={() => setIsEditingTreatmentTypes(false)}>
+                  Cancel
+                </WhiteButton>
                 <BlueButton
                   type="button"
                   disabled={current.matches('editTreatmentTypes')}
@@ -297,23 +308,20 @@ export default function WorkRow({
                 >
                   Save
                 </BlueButton>
-                <WhiteButton type="button" onClick={() => setIsEditingTreatmentTypes(false)}>
-                  Cancel
-                </WhiteButton>
               </div>
             </div>
           ) : (
-            <button
+            <PinkButton
+              action={'tertiary'}
               type="button"
               data-testid={`${workNumber}-edit-treatment-types`}
-              className="text-sm text-sdb underline"
               onClick={() => {
                 setSelectedTreatmentTypes(treatmentTypeNames);
                 setIsEditingTreatmentTypes(true);
               }}
             >
               Edit
-            </button>
+            </PinkButton>
           ))}
       </div>
     );
