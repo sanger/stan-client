@@ -256,7 +256,7 @@ export default function WorkRow({
   const renderWorkTreatmentTypesField = (workNumber: string, treatmentTypeNames: string[]) => {
     return (
       <div className="space-y-2">
-        {treatmentTypeNames.length > 0 && (
+        {!isEditingTreatmentTypes && treatmentTypeNames.length > 0 && (
           <div className="flex flex-col items-start gap-1">
             {work.treatmentTypes.map((tt) => (
               <Pill
