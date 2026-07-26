@@ -6,6 +6,7 @@ import { stanCore } from '../../lib/sdk';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 import { PlanMutationWithGroups } from '../../pages/sectioning/Plan';
 import { convertLabwareTypeToSourceType } from './LabwarePlan';
+import { backgroundColorClassNames } from '../../lib/helpers';
 
 //region Events
 type CreateLabwareEvent = {
@@ -231,19 +232,66 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
     },
     {
       actions: {
-        updateSources: assign(({ spawn, context, event }) => {
+        updateSources: assign(({ context, event }) => {
           if (event.type !== 'UPDATE_SOURCES') {
             return context;
           }
-          // layoutPlan;
           const sources = convertLabwareTypeToSourceType(event.sources, event.sectionThickness.toString());
-          const layoutPlan = { ...context.layoutPlan, sources, sampleColors: event.sampleColors };
-          // Forward the updated layoutPlan to the spawned layoutMachine (if it exists)
-          if (context.layoutMachine) {
-            context.layoutMachine.send({ type: 'UPDATE_LAYOUT_PLAN', layoutPlan });
+
+          const oldSources = context.layoutPlan.sources;
+
+          const addedSources = [
+            ...new Set(sources.filter((source) => !oldSources.some((s) => s.sampleId === source.sampleId)))
+          ];
+          // When the user adds a new source,
+          // check the used sample colors and assign an unused one to the newly added source samples.
+          // Added sources should be included in both the existing plans and the new ones.
+          if (addedSources.length > 0) {
+            const colors = backgroundColorClassNames();
+            const sampleColors = new Map(context.layoutPlan.sampleColors);
+            const usedColors = new Set(sampleColors.values());
+            addedSources.forEach((source) => {
+              if (!sampleColors.has(source.sampleId)) {
+                let next = colors.next().value;
+                while (next && usedColors.has(next)) {
+                  next = colors.next().value;
+                }
+                if (next) {
+                  sampleColors.set(source.sampleId, next);
+                  usedColors.add(next);
+                }
+              }
+            });
+
+            const layoutPlan = {
+              ...context.layoutPlan,
+              sources,
+              sampleColors
+            };
+            // Forward the updated layoutPlan to the spawned layoutMachine (if it exists)
+            if (context.layoutMachine) {
+              context.layoutMachine.send({ type: 'UPDATE_LAYOUT_PLAN', layoutPlan });
+            }
+
+            return { ...context, layoutPlan };
           }
 
-          return { ...context, layoutPlan };
+          // When the user deletes a source, keep it available in existing plans
+          // but prevent it from being added to new slots.
+          // Deleted sources should not appear in new plans.
+          const deletedSources = [
+            ...new Set(oldSources.filter((source) => !sources.some((s) => s.sampleId === source.sampleId)))
+          ];
+
+          if (deletedSources.length > 0) {
+            const layoutPlan = {
+              ...context.layoutPlan,
+              sources
+            };
+
+            return { ...context, layoutPlan };
+          }
+          return context;
         }),
         assignLayoutPlan: assign(({ context, event }) => {
           if (event.type !== 'ASSIGN_LAYOUT_PLAN') {
