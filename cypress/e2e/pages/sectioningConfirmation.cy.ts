@@ -364,12 +364,3 @@ function findPlanByBarcode(barcode: string) {
 function saveButton() {
   return cy.findByRole('button', { name: /Save/i });
 }
-
-// const readHighestSectionNumber = () => {
-//   cy.findByRole('table')
-//     .find('td')
-//     .eq(1)
-//     .then((col) => {
-//       highestSectionNumber = Number(col.text());
-//     });
-// };

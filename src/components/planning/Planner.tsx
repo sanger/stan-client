@@ -91,6 +91,17 @@ export type PlanChangedProps<M> = {
 
 type PlannerState<M> = {
   /**
+   * All labware scanned by the user, including labware that has been removed from
+   * the source labware list.
+   *
+   * Keeping track of all scanned labware can improve the application's performance
+   * by avoiding unnecessary Core API calls to retrieve labware that was previously
+   * used in a plan. For example, when complete a plan (finish planning and create the labware) and then
+   * delete a source used in that labware, a users can remove source labware at any time,
+   * so retaining the scanned labware avoids fetching it again when moving to the confirm page.
+   */
+  allScannedLabware: Array<LabwareFlaggedFieldsFragment>;
+  /**
    * Labware scanned in by the user
    */
   sourceLabware: Array<LabwareFlaggedFieldsFragment>;
@@ -112,6 +123,7 @@ type PlannerState<M> = {
 };
 
 const initialState = {
+  allScannedLabware: [],
   sourceLabware: [],
   labwarePlans: new Map(),
   completedPlans: new Map(),
@@ -119,6 +131,7 @@ const initialState = {
 };
 
 type Action<M> =
+  | { type: 'ADD_SOURCE_LABWARE'; labware: LabwareFlaggedFieldsFragment }
   | { type: 'SET_SOURCE_LABWARE'; labware: Array<LabwareFlaggedFieldsFragment> }
   | {
       type: 'ADD_LABWARE_PLAN';
@@ -134,6 +147,9 @@ const FETAL_STORAGE_WEEKS = 12;
 function reducer<M>(state: PlannerState<M>, action: Action<M>): PlannerState<M> {
   return produce(state, (draft) => {
     switch (action.type) {
+      case 'ADD_SOURCE_LABWARE':
+        draft.allScannedLabware.push(action.labware);
+        break;
       case 'SET_SOURCE_LABWARE':
         draft.sourceLabware = action.labware;
         draft.isAddLabwareButtonDisabled = action.labware.length === 0;
@@ -192,17 +208,26 @@ export default function Planner<M>({
     }
     onPlanChanged({
       completedPlans: Array.from(state.completedPlans.values()) as M[],
-      sourceLabware: state.sourceLabware,
+      //This is used to pass data from the sectioning planning to confirm page
+      // We need to pass all the scanned labware in case of one used source is been deleted
+      sourceLabware: state.allScannedLabware,
       numberOfPlans: state.labwarePlans.size,
       layoutPlans: state.labwarePlans
     });
-  }, [state.labwarePlans, state.completedPlans, state.sourceLabware, onPlanChanged]);
+  }, [state.labwarePlans, state.completedPlans, state.allScannedLabware, onPlanChanged]);
   /**
    * Handler for LabwareScanner's onChange event
    */
   const onLabwareScannerChange = useCallback(
     (labware: Array<LabwareFlaggedFieldsFragment>) => {
       dispatch({ type: 'SET_SOURCE_LABWARE', labware: labware });
+    },
+    [dispatch]
+  );
+
+  const onAddLabware = useCallback(
+    (labware: LabwareFlaggedFieldsFragment) => {
+      dispatch({ type: 'ADD_SOURCE_LABWARE', labware: labware });
     },
     [dispatch]
   );
@@ -296,9 +321,12 @@ export default function Planner<M>({
       <LabwareScanner
         locked={singleSourceAllowed && state.sourceLabware.length === 1}
         onChange={onLabwareScannerChange}
+        onAdd={onAddLabware}
         enableFlaggedLabwareCheck
       >
-        <SourceTable sourceLabware={state.sourceLabware} />
+        {({ removeLabware }) => (
+          <SourceTable sourceLabware={state.sourceLabware} removeLabwareCallBack={removeLabware} />
+        )}
       </LabwareScanner>
       {fetalSampleWarningLabware.length > 0 && (
         <Warning

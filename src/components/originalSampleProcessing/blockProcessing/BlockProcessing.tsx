@@ -40,9 +40,9 @@ import { fromPromise } from 'xstate';
  * Used as Formik's values
  */
 
-type TissueBlockContentForm = TissueBlockContent & {
+export type TissueBlockContentForm = TissueBlockContent & {
   isEditReplicateDisabled?: boolean;
-};
+} & { externalId: string };
 
 export type TissueBlockLabwareForm = {
   contents: Array<TissueBlockContentForm>;
@@ -261,7 +261,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
       labware: [
         ...Array.from(formData.plans.values()).map((labware) => ({
           ...labware,
-          contents: labware.contents.map(({ isEditReplicateDisabled, ...tissueBlockLabwareProps }) => ({
+          contents: labware.contents.map(({ isEditReplicateDisabled, externalId, ...tissueBlockLabwareProps }) => ({
             ...tissueBlockLabwareProps
           }))
         }))
