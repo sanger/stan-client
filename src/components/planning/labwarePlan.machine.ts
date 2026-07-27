@@ -50,8 +50,8 @@ type AssignSelectedSectionId = {
 type UpdateSources = {
   type: 'UPDATE_SOURCES';
   sources: Array<LabwareFlaggedFieldsFragment>;
-  sampleColors: Map<number, string>;
-  sectionThickness: number;
+  sampleColors?: Map<number, string>;
+  sectionThickness?: number;
 };
 
 type LabwarePlanEvent =
@@ -236,7 +236,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           if (event.type !== 'UPDATE_SOURCES') {
             return context;
           }
-          const sources = convertLabwareTypeToSourceType(event.sources, event.sectionThickness.toString());
+          const sources = convertLabwareTypeToSourceType(event.sources, event.sectionThickness?.toString());
 
           const oldSources = context.layoutPlan.sources;
 
