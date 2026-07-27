@@ -149,7 +149,9 @@ describe('WorkAllocation table headers', () => {
 
     const pillSpans = within(row!).getAllByTestId('treatment-type-pill');
     expect(pillSpans.length).toBe(2);
-    expect(within(row!).getByTestId('SGP-1-edit-treatment-types')).toBeInTheDocument();
+    const editBtn = within(row!).getByTestId('SGP-1-edit-treatment-types');
+    expect(editBtn).toBeInTheDocument();
+    expect(editBtn).toHaveTextContent('Edit Treatment Types');
   });
 });
 
