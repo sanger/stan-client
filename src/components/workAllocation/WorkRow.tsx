@@ -320,7 +320,7 @@ export default function WorkRow({
                 setIsEditingTreatmentTypes(true);
               }}
             >
-              Edit
+              Edit Treatment Types
             </PinkButton>
           ))}
       </div>
