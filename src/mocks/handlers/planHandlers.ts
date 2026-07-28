@@ -14,6 +14,7 @@ import { uniqueId } from 'lodash';
 import { LabwareTypeName } from '../../types/stan';
 import { generateLabwareIdFromBarcode } from './labwareHandlers';
 import { buildFlaggedLabwareFragment } from './flagLabwareHandlers';
+import { tissueFactory } from '../../lib/factories/sampleFactory';
 
 const planHandlers = [
   graphql.mutation<PlanMutation, PlanMutationVariables>('Plan', ({ variables }) => {
@@ -46,7 +47,8 @@ const planHandlers = [
                   labwareId: labware.id,
                   samples: [
                     {
-                      id: planAction.sampleId
+                      id: planAction.sampleId,
+                      tissue: tissueFactory.build()
                     }
                   ]
                 },
@@ -135,7 +137,8 @@ export function findPlanData(sourceLabware: Labware, destinationLabware: Labware
               samples: [
                 {
                   __typename: 'Sample',
-                  id: sourceLabware.slots[0].samples[0].id
+                  id: sourceLabware.slots[0].samples[0].id,
+                  tissue: sourceLabware.slots[0].samples[0].tissue
                 }
               ],
               labwareId: sourceLabware.id

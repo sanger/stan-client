@@ -38,13 +38,12 @@ describe('Block Processing', () => {
       before(() => {
         cy.findByText('+ Add Labware').click();
       });
-      it(' disables scan labware input', () => {
-        cy.get('#labwareScanInput').should('be.disabled');
+      //clearing out layout after finishing test, so does not interfere with the next tests (number of plans)
+      after(() => {
+        cy.findAllByText('Delete Layout').first().click();
       });
-
-      it('re-enables scan labware input', () => {
-        cy.findByText('Delete Layout').click();
-        cy.get('#labwareScanInput').should('not.be.disabled');
+      it('keeps the scan labware input enabled', () => {
+        cy.get('#labwareScanInput').should('be.enabled');
       });
     });
   });

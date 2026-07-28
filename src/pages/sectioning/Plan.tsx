@@ -13,7 +13,6 @@ import ButtonBar from '../../components/ButtonBar';
 import { Link, useLoaderData } from 'react-router-dom';
 import { useConfirmLeave } from '../../lib/hooks';
 import LabwarePlan from '../../components/planning/LabwarePlan';
-import labwareScanTableColumns from '../../components/dataTableColumns/labwareColumns';
 import Planner, { PlanChangedProps } from '../../components/planning/Planner';
 import { selectOptionValues } from '../../components/forms';
 import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
@@ -146,13 +145,6 @@ function Plan() {
             onPlanChanged={handlePlanChange}
             buildPlanCreationSettings={buildPlanCreationSettings}
             buildPlanLayouts={buildPlanLayouts}
-            columns={[
-              labwareScanTableColumns.barcode(),
-              labwareScanTableColumns.donorId(),
-              labwareScanTableColumns.tissueType(),
-              labwareScanTableColumns.spatialLocation(),
-              labwareScanTableColumns.replicate()
-            ]}
           />
         </div>
       </AppShell.Main>

@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { PlanFinder } from '../planFinder/PlanFinder';
 import Heading from '../Heading';
-import columns from '../dataTableColumns/labwareColumns';
 import { LabwareTypeName } from '../../types/stan';
 import ConfirmTubes from './ConfirmTubes';
 import ConfirmLabware from './ConfirmLabware';
@@ -10,8 +9,7 @@ import {
   CommentFieldsFragment,
   ConfirmSectionLabware,
   FindPlanDataQuery,
-  LabwareFieldsFragment,
-  LabwareFlaggedFieldsFragment
+  LabwareFieldsFragment
 } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import { createSectioningConfirmMachine } from './sectioningConfirm.machine';
@@ -21,8 +19,7 @@ import RadioGroup, { RadioButtonInput } from '../forms/RadioGroup';
 import { objectKeys } from '../../lib/helpers';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
 import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
-import DataTable from '../DataTable';
-import { Column } from 'react-table';
+import { SourceTable } from '../planning/SourceTable';
 
 type SectioningConfirmProps = {
   /**
@@ -58,7 +55,6 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
 
   const { sourceLabware, layoutPlans, requestError, confirmSectionResultLabwares, sectionNumberMode, workNumber } =
     current.context;
-
   /**
    * Call the {@code onConfirmed} callback when machine reaches the {@code confirmed} state
    */
@@ -180,13 +176,7 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
                   <>
                     <div className="space-y-4">
                       <Heading level={3}>Source Labware</Heading>
-                      <DataTable
-                        columns={[
-                          columns.flaggedBarcode(),
-                          columns.highestSectionForSlot() as Column<LabwareFlaggedFieldsFragment>
-                        ]}
-                        data={sourceLabware}
-                      />
+                      <SourceTable sourceLabware={sourceLabware} />
                     </div>
 
                     <div className={'sm:justify-between'}>

@@ -5,15 +5,14 @@ import BlueButton from '../buttons/BlueButton';
 import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
 import { castDraft, produce } from '../../dependencies/immer';
 import { multiSampleBlockLabwareFactory, unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
-import LabwareScanTable from '../labwareScanPanel/LabwareScanPanel';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
 import { buildSampleColors } from '../../lib/helpers/labwareHelper';
 import Heading from '../Heading';
 import { getNumberOfDaysBetween } from '../../lib/helpers';
 import Warning from '../notifications/Warning';
 import { Column } from 'react-table';
-import labwareScanTableColumns from '../dataTableColumns/labwareColumns';
 import { useScrollToRef } from '../../lib/hooks';
+import { SourceTable } from './SourceTable';
 import { isMultiSampleBlockLabware } from '../originalSampleProcessing/blockProcessing/BlockProcessing';
 
 /**
@@ -48,7 +47,7 @@ type PlannerProps<M> = {
     confirmAction?: (cid: string, plan: M) => void,
     scrollRef?: React.MutableRefObject<HTMLDivElement | null>
   ) => JSX.Element;
-  columns: Column<LabwareFieldsFragment>[];
+  columns?: Column<LabwareFieldsFragment>[];
 
   /**
    * Callback to render the component to display configuration setting to add a labware plan.
@@ -92,6 +91,17 @@ export type PlanChangedProps<M> = {
 
 type PlannerState<M> = {
   /**
+   * All labware scanned by the user, including labware that has been removed from
+   * the source labware list.
+   *
+   * Keeping track of all scanned labware can improve the application's performance
+   * by avoiding unnecessary Core API calls to retrieve labware that was previously
+   * used in a plan. For example, when complete a plan (finish planning and create the labware) and then
+   * delete a source used in that labware, a users can remove source labware at any time,
+   * so retaining the scanned labware avoids fetching it again when moving to the confirm page.
+   */
+  allScannedLabware: Array<LabwareFlaggedFieldsFragment>;
+  /**
    * Labware scanned in by the user
    */
   sourceLabware: Array<LabwareFlaggedFieldsFragment>;
@@ -107,25 +117,21 @@ type PlannerState<M> = {
   completedPlans: Map<string, M>;
 
   /**
-   * Tracks whether the Labware Scanner should allow more labware to be scanned in
-   */
-  isLabwareScannerLocked: boolean;
-
-  /**
    * Tracks whether the "Add Labware" button is currently disabled
    */
   isAddLabwareButtonDisabled: boolean;
 };
 
 const initialState = {
+  allScannedLabware: [],
   sourceLabware: [],
   labwarePlans: new Map(),
   completedPlans: new Map(),
-  isLabwareScannerLocked: false,
   isAddLabwareButtonDisabled: true
 };
 
 type Action<M> =
+  | { type: 'ADD_SOURCE_LABWARE'; labware: LabwareFlaggedFieldsFragment }
   | { type: 'SET_SOURCE_LABWARE'; labware: Array<LabwareFlaggedFieldsFragment> }
   | {
       type: 'ADD_LABWARE_PLAN';
@@ -141,6 +147,9 @@ const FETAL_STORAGE_WEEKS = 12;
 function reducer<M>(state: PlannerState<M>, action: Action<M>): PlannerState<M> {
   return produce(state, (draft) => {
     switch (action.type) {
+      case 'ADD_SOURCE_LABWARE':
+        draft.allScannedLabware.push(action.labware);
+        break;
       case 'SET_SOURCE_LABWARE':
         draft.sourceLabware = action.labware;
         draft.isAddLabwareButtonDisabled = action.labware.length === 0;
@@ -153,15 +162,11 @@ function reducer<M>(state: PlannerState<M>, action: Action<M>): PlannerState<M> 
             sectionThickness: action.sectionThickness
           });
         }
-        // As soon as there are any plans present, stop the user from adding
-        // any more source labware
-        draft.isLabwareScannerLocked = true;
         break;
       }
 
       case 'REMOVE_LABWARE_PLAN':
         draft.labwarePlans.delete(action.cid);
-        draft.isLabwareScannerLocked = draft.labwarePlans.size > 0 || draft.completedPlans.size > 0;
         break;
 
       case 'PLAN_COMPLETE':
@@ -183,7 +188,6 @@ export default function Planner<M>({
   selectedLabwareNumColumns,
   selectedLabwareNumRows,
   onPlanChanged,
-  columns,
   singleSourceAllowed,
   buildPlanLayouts,
   buildPlanCreationSettings,
@@ -204,17 +208,26 @@ export default function Planner<M>({
     }
     onPlanChanged({
       completedPlans: Array.from(state.completedPlans.values()) as M[],
-      sourceLabware: state.sourceLabware,
+      //This is used to pass data from the sectioning planning to confirm page
+      // We need to pass all the scanned labware in case of one used source is been deleted
+      sourceLabware: state.allScannedLabware,
       numberOfPlans: state.labwarePlans.size,
       layoutPlans: state.labwarePlans
     });
-  }, [state.labwarePlans, state.completedPlans, state.sourceLabware, onPlanChanged]);
+  }, [state.labwarePlans, state.completedPlans, state.allScannedLabware, onPlanChanged]);
   /**
    * Handler for LabwareScanner's onChange event
    */
   const onLabwareScannerChange = useCallback(
     (labware: Array<LabwareFlaggedFieldsFragment>) => {
       dispatch({ type: 'SET_SOURCE_LABWARE', labware: labware });
+    },
+    [dispatch]
+  );
+
+  const onAddLabware = useCallback(
+    (labware: LabwareFlaggedFieldsFragment) => {
+      dispatch({ type: 'ADD_SOURCE_LABWARE', labware: labware });
     },
     [dispatch]
   );
@@ -306,11 +319,14 @@ export default function Planner<M>({
     <div className="space-y-10">
       <Heading level={3}>Source Labware</Heading>
       <LabwareScanner
-        locked={state.isLabwareScannerLocked || (singleSourceAllowed && state.sourceLabware.length === 1)}
+        locked={singleSourceAllowed && state.sourceLabware.length === 1}
         onChange={onLabwareScannerChange}
+        onAdd={onAddLabware}
         enableFlaggedLabwareCheck
       >
-        <LabwareScanTable columns={[labwareScanTableColumns.color(sampleColors), ...columns]} />
+        {({ removeLabware }) => (
+          <SourceTable sourceLabware={state.sourceLabware} removeLabwareCallBack={removeLabware} />
+        )}
       </LabwareScanner>
       {fetalSampleWarningLabware.length > 0 && (
         <Warning

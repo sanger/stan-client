@@ -360,11 +360,19 @@ export function createSectioningConfirmMachine() {
         }),
 
         assignSourceLabware: assign(({ context }) => {
+          //As this is controls the source table in the UI, and the planning page is passing all the scanned labware
+          //even the deleted ones, we need to filter by the ones that are been actually used.
+          const usedSourceLabwareIds = [
+            ...new Set(
+              context.plans.flatMap((plan) => plan.planData.plan.planActions.flatMap((pa) => pa.source.labwareId))
+            )
+          ];
           return produce(context, (draft) => {
             draft.sourceLabware = _(draft.plans)
               .flatMap((plan) => plan.planData.sources)
               .uniqBy((source) => source.barcode)
-              .value();
+              .value()
+              .filter((source) => usedSourceLabwareIds.includes(source.id));
 
             //Set all highest section numbers for all source labware
             draft.sourceLabware.forEach((sourceLabware) => {
@@ -521,7 +529,8 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
           sampleId: planned.source.samples[0].id, // we only support single sample sources for sectioning,
           newSection: '',
           sampleThickness: planned.sampleThickness?.toString(),
-          labware: plan.planData.sources.find((lw) => lw.id === planned.source.labwareId)!
+          labware: plan.planData.sources.find((lw) => lw.id === planned.source.labwareId)!,
+          tissue: planned.source.samples[0].tissue
         };
         sources.push(source);
         const sectionGroupId = group.length === 1 ? group[0] : index.toString();

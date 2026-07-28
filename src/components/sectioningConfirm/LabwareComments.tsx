@@ -35,9 +35,15 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
   return (
     <div className="flex flex-row items-start justify-start gap-x-2">
       <div className="flex flex-col">
-        <div className={'grid grid-cols-4 gap-x-1 gap-y-2'}>
+        <div className={'grid grid-cols-5 gap-x-1 gap-y-2'}>
           {sectionNumberDisplay !== SectionNumberSetting.HIDE && (
             <>
+              <Input
+                type="text"
+                data-testid={'external-name'}
+                value={sectionDetail.source.tissue?.externalName ?? ''}
+                disabled={true}
+              />
               <Input
                 type="text"
                 data-testid={'section-number'}

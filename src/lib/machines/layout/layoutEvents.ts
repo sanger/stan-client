@@ -12,18 +12,6 @@ export function selectSource(source: Source): SelectSourceEvent {
   };
 }
 
-export type SetAllDestinationsEvent = {
-  type: 'SET_ALL_DESTINATIONS';
-  source: Source;
-};
-
-export function setAllDestinations(source: Source): SetAllDestinationsEvent {
-  return {
-    type: 'SET_ALL_DESTINATIONS',
-    source
-  };
-}
-
 export type SelectDestinationEvent = {
   type: 'SELECT_DESTINATION';
   address: Address;
@@ -87,7 +75,6 @@ type ResetErrorMessageEvent = { type: 'RESET_ERROR_MESSAGE' };
 export type LayoutEvents =
   | SelectSourceEvent
   | SelectDestinationEvent
-  | SetAllDestinationsEvent
   | RequestLayoutPlanEvent
   | CancelEvent
   | DoneEvent

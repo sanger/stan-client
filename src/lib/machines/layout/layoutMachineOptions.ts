@@ -140,20 +140,6 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
         );
       });
     }),
-
-    [Actions.ASSIGN_DESTINATION_ACTIONS]: assign(({ context, event }) => {
-      if (event.type !== 'SET_ALL_DESTINATIONS') {
-        return context;
-      }
-      return produce(context, (draft) => {
-        draft.layoutPlan.destinationLabware.slots.forEach((slot) => {
-          draft.layoutPlan.plannedActions[slot.address] = {
-            addresses: new Set([slot.address]),
-            source: event.source
-          };
-        });
-      });
-    }),
     [Actions.SEND_LAYOUT_TO_PARENT]: sendParent(({ context }) => {
       return {
         type: 'ASSIGN_LAYOUT_PLAN',

@@ -28,8 +28,9 @@ import FormikSelect from '../forms/Select';
 import { Position, SECTION_GROUPS_BG_COLORS, slideCostingOptions } from '../../lib/helpers';
 import { FormikErrorMessage, selectOptionValues } from '../forms';
 import MutedText from '../MutedText';
-import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
+import { PlannedSectionDetails, Source } from '../../lib/machines/layout/layoutContext';
 import { PlanMutationWithGroups } from '../../pages/sectioning/Plan';
+import { uniqBy } from 'lodash';
 
 type LabwarePlanProps = {
   /**
@@ -94,6 +95,16 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
       return subscription.unsubscribe;
     }, [service, onComplete, cid]);
+    useEffect(() => {
+      if (current.context.layoutPlan.sources.length !== sourceLabware.length) {
+        send({
+          type: 'UPDATE_SOURCES',
+          sources: sourceLabware,
+          sampleColors,
+          sectionThickness
+        });
+      }
+    }, [sourceLabware, sampleColors, send, current.context.layoutPlan.sources.length, sectionThickness]);
 
     const { handleOnPrint, handleOnPrintError, handleOnPrinterChange, printResult, currentPrinter } = usePrinters();
 
@@ -541,6 +552,27 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
 /**
  * Builds the initial layout for this plan.
  */
+
+export const convertLabwareTypeToSourceType = (
+  labware: Array<LabwareFlaggedFieldsFragment>,
+  globalSectionThickness?: string
+): Array<Source> => {
+  const sources = labware.flatMap((lw) => {
+    return lw.slots.flatMap((slot) => {
+      return slot.samples.flatMap((sample) => {
+        return {
+          sampleId: sample.id,
+          labware: lw,
+          newSection: '',
+          address: slot.address,
+          sampleThickness: globalSectionThickness,
+          tissue: sample.tissue
+        };
+      });
+    });
+  });
+  return uniqBy(sources, (source: Source) => `${source.labware.barcode}-${source.tissue?.externalName}`);
+};
 export function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
@@ -548,19 +580,7 @@ export function buildInitialLayoutPlan(
   globalSectionThickness?: string
 ) {
   return {
-    sources: sourceLabware.flatMap((lw) => {
-      return lw.slots.flatMap((slot) => {
-        return slot.samples.flatMap((sample) => {
-          return {
-            sampleId: sample.id,
-            labware: lw,
-            newSection: '',
-            address: slot.address,
-            sampleThickness: globalSectionThickness
-          };
-        });
-      });
-    }),
+    sources: convertLabwareTypeToSourceType(sourceLabware, globalSectionThickness),
     sampleColors,
     destinationLabware: outputLabware,
     plannedActions: {} as Record<string, PlannedSectionDetails>
