@@ -67,6 +67,7 @@ export const NormalReactSelect = ({
   fixedWidth,
   addButton,
   preventEnterKeyDefault = true,
+  styles: customStyles,
   ...props
 }: CustomReactSelectProps) => {
   const onChangeValue = React.useCallback(
@@ -122,6 +123,7 @@ export const NormalReactSelect = ({
           components={{ Option, IndicatorSeparator: () => null }}
           {...props}
           styles={{
+            ...customStyles,
             container: (css) => (fixedWidth ? { ...css, width: fixedWidth + 'px' } : { ...css }),
             control: (baseStyles, state) => ({
               ...baseStyles,

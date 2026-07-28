@@ -7,6 +7,7 @@ import {
   UpdateWorkOmeroProjectMutation,
   UpdateWorkPriorityMutation,
   UpdateWorkStatusMutation,
+  UpdateWorkTreatmentTypesMutation,
   UpdateWorkXeniumStudyMutation,
   WorkStatus,
   WorkWithCommentFieldsFragment
@@ -61,6 +62,7 @@ export type WorkRowEvent =
     }
   | { type: 'UPDATE_PRIORITY'; priority: string | undefined }
   | { type: 'UPDATE_OMERO_PROJECT'; omeroProject: string | undefined }
+  | { type: 'UPDATE_TREATMENT_TYPES'; treatmentTypes: string[] }
   | { type: 'UPDATE_DNAP_PROJECT'; ssStudyId: number }
   | { type: 'UPDATE_XENIUM_STUDY_ID'; ssStudyId: number }
   | { type: 'xstate.done.actor.updateWorkStatus'; output: UpdateWorkStatusMutation }
@@ -68,6 +70,7 @@ export type WorkRowEvent =
   | { type: 'xstate.done.actor.updateWorkNumSlides'; output: UpdateWorkNumSlidesMutation }
   | { type: 'xstate.done.actor.updateWorkPriority'; output: UpdateWorkPriorityMutation }
   | { type: 'xstate.done.actor.updateWorkOmeroProject'; output: UpdateWorkOmeroProjectMutation }
+  | { type: 'xstate.done.actor.updateWorkTreatmentTypes'; output: UpdateWorkTreatmentTypesMutation }
   | { type: 'xstate.done.actor.updateWorkDnapProject'; output: UpdateWorkDnapStudyMutation }
   | { type: 'xstate.error.actor.updateWorkDnapProject'; error: ClientError }
   | { type: 'xstate.done.actor.updateWorkXeniumStudyId'; output: UpdateWorkXeniumStudyMutation }
@@ -109,6 +112,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
             UPDATE_OMERO_PROJECT: 'updateOmeroProject',
+            UPDATE_TREATMENT_TYPES: 'editTreatmentTypes',
             UPDATE_DNAP_PROJECT: 'updateDnapProject',
             UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
           }
@@ -125,6 +129,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
             UPDATE_OMERO_PROJECT: 'updateOmeroProject',
+            UPDATE_TREATMENT_TYPES: 'editTreatmentTypes',
             UPDATE_DNAP_PROJECT: 'updateDnapProject',
             UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
           }
@@ -141,6 +146,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
             UPDATE_OMERO_PROJECT: 'updateOmeroProject',
+            UPDATE_TREATMENT_TYPES: 'editTreatmentTypes',
             UPDATE_DNAP_PROJECT: 'updateDnapProject',
             UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
           }
@@ -260,6 +266,21 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             onError: { target: 'deciding' }
           }
         },
+        editTreatmentTypes: {
+          invoke: {
+            src: fromPromise(({ input }) => stanCore.UpdateWorkTreatmentTypes(input)),
+            input: ({ context, event }) => ({
+              workNumber: context.workWithComment.work.workNumber,
+              treatmentTypes: 'treatmentTypes' in event ? event.treatmentTypes : []
+            }),
+            id: 'updateWorkTreatmentTypes',
+            onDone: {
+              actions: 'assignWorkTreatmentTypes',
+              target: 'deciding'
+            },
+            onError: { target: 'deciding' }
+          }
+        },
         updateDnapProject: {
           invoke: {
             src: fromPromise(({ input }) => {
@@ -352,6 +373,15 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
           return produce(context, (draft) => {
             draft.workWithComment.work = event.output.updateWorkOmeroProject;
             draft.isInvokeActorDone = true;
+          });
+        }),
+        assignWorkTreatmentTypes: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateWorkTreatmentTypes') return context;
+          return produce(context, (draft) => {
+            if (event.output.updateWorkTreatmentTypes) {
+              draft.workWithComment.work = event.output.updateWorkTreatmentTypes;
+              draft.isInvokeActorDone = true;
+            }
           });
         }),
         assignWorkDnapProject: assign(({ context, event }) => {

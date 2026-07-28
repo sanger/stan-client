@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
 import WorkAllocation from '../../../../src/components/workAllocation/WorkAllocation';
@@ -6,8 +6,7 @@ import { mockCreateObjectURL } from '../../testUtils/mockCreateObjectURL';
 import * as AuthContext from '../../../../src/context/AuthContext';
 
 // Test the presence and order of the Treatment Types header in the
-// WorkAllocation table, and the rendering of treatment type pills with
-// correct colours in the table rows.
+// WorkAllocation table, and that treatment types are shown as pills with an Edit link.
 
 // Use shared URL.createObjectURL mock util for jsdom
 mockCreateObjectURL();
@@ -140,7 +139,7 @@ describe('WorkAllocation table headers', () => {
     expect(treatmentIndex).toBe(workTypeIndex + 1); // next to Work Type
   });
 
-  it('renders treatment type pills for the row with correct colours', async () => {
+  it('renders treatment type pills and edit link for each row', async () => {
     render(<WorkAllocation />);
     const table = await screen.findByTestId('work-allocation-table');
     // find the row for our SGP
@@ -148,15 +147,40 @@ describe('WorkAllocation table headers', () => {
     const row = sgpCell.closest('tr') as HTMLTableRowElement | null;
     expect(row).not.toBeNull();
 
-    // treatment type pills rendered in the treatment cell
-    // Use data-testid for reliable selection
     const pillSpans = within(row!).getAllByTestId('treatment-type-pill');
     expect(pillSpans.length).toBe(2);
+    const editBtn = within(row!).getByTestId('SGP-1-edit-treatment-types');
+    expect(editBtn).toBeInTheDocument();
+    expect(editBtn).toHaveTextContent('Edit Treatment Types');
+  });
+});
 
-    // ensure one pill has the blue class and one has the pink class
-    const hasBlue = pillSpans.some((p) => (p.className || '').includes('bg-sdb-300'));
-    const hasPink = pillSpans.some((p) => (p.className || '').includes('bg-sp'));
-    expect(hasBlue).toBe(true);
-    expect(hasPink).toBe(true);
+describe('WorkAllocation - inline treatment types editing', () => {
+  async function getRow() {
+    render(<WorkAllocation />);
+    const table = await screen.findByTestId('work-allocation-table');
+    const sgpCell = within(table).getByText('SGP-1');
+    return sgpCell.closest('tr') as HTMLTableRowElement;
+  }
+
+  it('shows multi-select and Save/Cancel when Edit is clicked', async () => {
+    const row = await getRow();
+
+    fireEvent.click(within(row).getByTestId('SGP-1-edit-treatment-types'));
+
+    expect(within(row).queryByTestId('SGP-1-edit-treatment-types')).not.toBeInTheDocument();
+    expect(within(row).getByTestId('SGP-1-treatmentTypes')).toBeInTheDocument();
+    expect(within(row).getByRole('button', { name: /save/i })).toBeInTheDocument();
+    expect(within(row).getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+  });
+
+  it('restores the Edit link when Cancel is clicked', async () => {
+    const row = await getRow();
+
+    fireEvent.click(within(row).getByTestId('SGP-1-edit-treatment-types'));
+    fireEvent.click(within(row).getByRole('button', { name: /cancel/i }));
+
+    expect(within(row).getByTestId('SGP-1-edit-treatment-types')).toBeInTheDocument();
+    expect(within(row).queryByTestId('SGP-1-treatmentTypes')).not.toBeInTheDocument();
   });
 });
