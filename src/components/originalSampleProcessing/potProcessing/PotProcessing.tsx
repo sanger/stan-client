@@ -345,13 +345,6 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
                     numPlansToCreate={numLabware}
                     onPlanChanged={() => {}}
                     buildPlanLayouts={buildPlanLayouts}
-                    columns={[
-                      columns.barcode(),
-                      columns.donorId(),
-                      columns.tissueType(),
-                      columns.spatialLocation(),
-                      columns.replicate()
-                    ]}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                     singleSourceAllowed={true}
                   />
