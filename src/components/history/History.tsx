@@ -122,6 +122,10 @@ export default function History(props: HistoryProps) {
         accessor: 'externalName'
       },
       {
+        Header: 'External Barcode',
+        accessor: 'externalBarcode'
+      },
+      {
         Header: 'Section Number',
         accessor: 'sectionNumber'
       },

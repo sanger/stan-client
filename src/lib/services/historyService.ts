@@ -46,6 +46,7 @@ export const buildHistoryEntries = (history: HistoryFieldsFragment): Array<Histo
       sampleID: entry.sampleId,
       donorName: sample?.tissue?.donor?.donorName ?? undefined,
       externalName: sample?.tissue?.externalName ?? undefined,
+      externalBarcode: destinationLabware.externalBarcode ?? undefined,
       sectionNumber: sample?.section ?? undefined,
       eventType: entry.type,
       biologicalState: sample?.bioState?.name ?? undefined,
