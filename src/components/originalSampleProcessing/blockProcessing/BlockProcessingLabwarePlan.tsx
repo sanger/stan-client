@@ -83,14 +83,6 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
     const { requestError, layoutPlan } = current.context;
     const { layoutMachine } = current.context;
     const { setFieldValue, values, setValues } = useFormikContext<BlockFormData>();
-    /**
-     * Fill all form fields that need to be auto-filled
-     */
-    React.useEffect(() => {
-      sourceLabware.forEach((source, indx) => {
-        setFieldValue(`discardSources.${indx}.sourceBarcode`, source.barcode);
-      });
-    }, [setFieldValue, sourceLabware]);
 
     //Updating the sources in the layout plan if the source labware changes. This is to ensure that the layout plan is always
     // in sync with the scanned/removed source labware.

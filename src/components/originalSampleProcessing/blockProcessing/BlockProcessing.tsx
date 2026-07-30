@@ -1,7 +1,6 @@
 import {
   GetBlockProcessingInfoQuery,
   InputMaybe,
-  LabwareFieldsFragment,
   LabwareFlaggedFieldsFragment,
   PerformTissueBlockMutation,
   Scalars,
@@ -11,7 +10,7 @@ import {
 import { useMachine } from '@xstate/react';
 import ButtonBar from '../../ButtonBar';
 import BlueButton from '../../buttons/BlueButton';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../../types/stan';
 import columns from '../../dataTableColumns/labwareColumns';
 import * as Yup from 'yup';
@@ -29,12 +28,13 @@ import { motion } from '../../../dependencies/motion';
 import { selectOptionValues } from '../../forms';
 import ProcessingSuccess from '../ProcessingSuccess';
 import { useConfirmLeave } from '../../../lib/hooks';
-import { Row } from 'react-table';
 import FormikInput from '../../forms/Input';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 import PromptOnLeave from '../../notifications/PromptOnLeave';
 import { useLoaderData } from 'react-router-dom';
 import { fromPromise } from 'xstate';
+import { SampleDataTableRow } from '../../dataTableColumns/sampleColumns';
+import { Row } from 'react-table';
 
 /**
  * Used as Formik's values
@@ -56,7 +56,8 @@ export type BlockFormData = {
   workNumber: string;
   //Plan cid for key
   plans: Map<string, TissueBlockLabwareForm>;
-  discardSources?: { sourceBarcode: string; discard: boolean }[];
+  // key is the source labware barcode
+  discardSources?: Record<string, boolean>;
 };
 
 const allowedLabwareTypeNames: Array<LabwareTypeName> = [
@@ -243,14 +244,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
     return Yup.object().shape({
       workNumber: Yup.string().required('SGP Number is required'),
       plans: Yup.mixed<Map<string, TissueBlockLabwareForm>>().required(),
-      discardSources: Yup.array()
-        .of(
-          Yup.object().shape({
-            sourceBarcode: Yup.string().optional(),
-            discard: Yup.boolean().optional()
-          })
-        )
-        .optional()
+      discardSources: Yup.mixed().optional()
     });
   }
 
@@ -266,31 +260,19 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
           }))
         }))
       ],
-      discardSourceBarcodes: formData.discardSources?.filter((ds) => ds.discard).map((ds) => ds.sourceBarcode)
+      discardSourceBarcodes: formData.discardSources
+        ? Object.entries(formData.discardSources)
+            .filter(([, discard]) => discard)
+            .map(([sourceBarcode]) => sourceBarcode)
+        : []
     };
   };
 
-  const discardSourceColumn = React.useMemo(() => {
+  const discardSourceColumn = useMemo(() => {
     return {
-      Header: 'Discard Source',
-      id: 'discard_source',
-      Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
-        return (
-          <>
-            <FormikInput
-              name={`discardSources.${row.index}.sourceBarcode`}
-              label={''}
-              type={'hidden'}
-              value={row.original.barcode}
-            />
-            <FormikInput
-              label={''}
-              className={'content-center align-middle justify-center'}
-              name={`discardSources.${row.index}.discard`}
-              type={'checkbox'}
-            />
-          </>
-        );
+      header: 'Discard Source',
+      cell: ({ row }: { row: Row<SampleDataTableRow> }) => {
+        return <FormikInput label={''} name={`discardSources.${row.original.barcode}`} type={'checkbox'} />;
       }
     };
   }, []);
@@ -351,14 +333,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                     selectedLabwareType={allowedLabwareTypes.find((lt) => lt.name === selectedLabwareType)}
                     numPlansToCreate={numLabware}
                     buildPlanLayouts={buildPlanLayouts}
-                    columns={[
-                      columns.barcode(),
-                      discardSourceColumn,
-                      columns.donorId(),
-                      columns.tissueType(),
-                      columns.spatialLocation(),
-                      columns.replicate()
-                    ]}
+                    columns={[discardSourceColumn]}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                     selectedLabwareNumColumns={selectedLabwareNumColumns}
                     selectedLabwareNumRows={selectedLabwareNumRows}

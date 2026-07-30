@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
-import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, LabwareTypeFieldsFragment } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment, LabwareTypeFieldsFragment } from '../../types/sdk';
 import { uniqueId } from 'lodash';
 import BlueButton from '../buttons/BlueButton';
 import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
@@ -10,9 +10,8 @@ import { buildSampleColors } from '../../lib/helpers/labwareHelper';
 import Heading from '../Heading';
 import { getNumberOfDaysBetween } from '../../lib/helpers';
 import Warning from '../notifications/Warning';
-import { Column } from 'react-table';
 import { useScrollToRef } from '../../lib/hooks';
-import { SourceTable } from './SourceTable';
+import { ExtraColumnType, SourceTable } from './SourceTable';
 import { isMultiSampleBlockLabware } from '../originalSampleProcessing/blockProcessing/BlockProcessing';
 
 /**
@@ -47,7 +46,9 @@ type PlannerProps<M> = {
     confirmAction?: (cid: string, plan: M) => void,
     scrollRef?: React.MutableRefObject<HTMLDivElement | null>
   ) => JSX.Element;
-  columns?: Column<LabwareFieldsFragment>[];
+
+  // Holds extra column to the SourceTable component required for the different views
+  columns?: Array<ExtraColumnType>;
 
   /**
    * Callback to render the component to display configuration setting to add a labware plan.
@@ -191,7 +192,8 @@ export default function Planner<M>({
   singleSourceAllowed,
   buildPlanLayouts,
   buildPlanCreationSettings,
-  sectionThickness
+  sectionThickness,
+  columns
 }: PlannerProps<M>) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -325,7 +327,11 @@ export default function Planner<M>({
         enableFlaggedLabwareCheck
       >
         {({ removeLabware }) => (
-          <SourceTable sourceLabware={state.sourceLabware} removeLabwareCallBack={removeLabware} />
+          <SourceTable
+            sourceLabware={state.sourceLabware}
+            removeLabwareCallBack={removeLabware}
+            extraColumns={columns}
+          />
         )}
       </LabwareScanner>
       {fetalSampleWarningLabware.length > 0 && (
