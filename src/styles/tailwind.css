@@ -11,6 +11,9 @@
   }
 }
 
+.grid-cols-8 {
+  @apply grid-cols-8;
+}
 .grid-cols-9 {
   @apply grid-cols-9;
 }
