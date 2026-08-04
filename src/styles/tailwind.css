@@ -26,6 +26,12 @@
 .grid-cols-12 {
   @apply grid-cols-12;
 }
+.grid-cols-13 {
+  @apply grid-cols-13;
+}
+.grid-cols-14 {
+  @apply grid-cols-14;
+}
 
 .grid-cols-location-2 {
   @apply grid-cols-location-2;
