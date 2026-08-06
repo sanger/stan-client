@@ -132,10 +132,9 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
       }
       return produce(context, (draft) => {
         const selected = draft.selectedSlots;
-        const existingSection = draft.layoutPlan.plannedActions.find((pa) => pa.sectionGroupId === event.sectionId);
 
         if (selected && selected.size > 0) {
-          let referenceSource: Source | undefined = existingSection?.source;
+          let referenceSource: Source | undefined;
 
           for (const address of selected) {
             const planned = sectionGroupForDestinationAddress(draft.layoutPlan.plannedActions, address);
@@ -156,11 +155,14 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
             }
           }
 
-          // --- Remove address that used to be assigned to a different plan so to assign to a new plan ----------------------------------
           for (const plannedAction of draft.layoutPlan.plannedActions) {
+            // --- Remove address that used to be assigned to a different plan so to assign to a new plan ----------------------------------
             for (const slotAddress of selected) {
               plannedAction.addresses.delete(slotAddress);
             }
+            // unassign the section group if it was previously assigned to this section group
+            plannedAction.sectionGroupId =
+              plannedAction.sectionGroupId === event.sectionId ? undefined : plannedAction.sectionGroupId;
           }
           draft.layoutPlan.plannedActions = draft.layoutPlan.plannedActions.filter(
             (planned) => planned.addresses.size > 0
@@ -174,6 +176,8 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
           });
           draft.selectedSlots = undefined;
         }
+        console.log('layout action updated ');
+        console.log(draft.layoutPlan.plannedActions);
       });
     }),
     [Actions.REMOVE_SECTION_GROUP]: assign(({ context, event }) => {

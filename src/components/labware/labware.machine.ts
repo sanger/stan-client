@@ -3,6 +3,7 @@ import { LabwareMachineContext, LabwareMachineEvent, LabwareMachineSchema } from
 import { emptySlots, filledSlots, findSlotByAddress, isSlotEmpty, isSlotFilled } from '../../lib/helpers/slotHelper';
 import { sortDownRight } from '../../lib/helpers/labwareHelper';
 import { SlotFieldsFragment } from '../../types/sdk';
+import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
 
 function createLabwareMachine() {
   return createMachine(
@@ -19,7 +20,8 @@ function createLabwareMachine() {
         selectedAddresses: input.selectedAddresses ?? new Set<string>(),
         lastSelectedAddress: input.lastSelectedAddress ?? null,
         selectionMode: input.selectionMode ?? 'single',
-        selectable: input.selectable ?? 'none'
+        selectable: input.selectable ?? 'none',
+        sectionGroups: input.sectionGroups
       }),
       on: {
         RESET_SELECTED: {
@@ -131,9 +133,10 @@ function createLabwareMachine() {
 
         deselectSlot: assign(({ context, event }) => {
           if ('address' in event) {
+            const selectedSectionAddresses = sectionGroupAddresses(event.address, context.sectionGroups);
             return {
               ...context,
-              selectedAddresses: new Set([...context.selectedAddresses].filter((a) => a !== event.address))
+              selectedAddresses: new Set([...context.selectedAddresses].filter((a) => !selectedSectionAddresses.has(a)))
             };
           }
           return context;
@@ -145,9 +148,12 @@ function createLabwareMachine() {
 
         selectSlot: assign(({ context, event }) => {
           if ('address' in event) {
+            const selectedSectionAddresses = sectionGroupAddresses(event.address, context.sectionGroups);
+            const selectedAddresses = new Set(context.selectedAddresses);
+            selectedSectionAddresses.forEach((address) => selectedAddresses.add(address));
             return {
               ...context,
-              selectedAddresses: new Set([...context.selectedAddresses]).add(event.address)
+              selectedAddresses
             };
           }
           return context;
@@ -334,3 +340,8 @@ const multiCtrlSelectSlotHandler = [
     actions: ['selectSlot']
   }
 ];
+
+const sectionGroupAddresses = (address: string, sectionGroups: Array<PlannedSectionDetails>) => {
+  const sectionGroup = sectionGroups.find((group) => group.addresses.has(address));
+  return sectionGroup ? sectionGroup.addresses : new Set([address]);
+};

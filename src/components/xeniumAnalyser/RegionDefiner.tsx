@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from 'react';
-import Labware from '../labwarePerSection/Labware';
+import Labware, { LabwareImperativeRef } from '../labware/Labware';
 import { FormikErrors, useFormikContext } from 'formik';
 import { GridDirection, REGION_BORDER_COLORS } from '../../lib/helpers';
 import Heading from '../Heading';
@@ -9,7 +9,6 @@ import {
   reIndexAndRenameRegions,
   XeniumAnalyserFormValues
 } from '../../pages/XeniumAnalyser';
-import { LabwareImperativeRef } from '../labware/Labware';
 import warningToast from '../notifications/WarningToast';
 import { toast } from 'react-toastify';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';

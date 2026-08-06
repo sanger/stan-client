@@ -1,4 +1,5 @@
 import { Maybe, SlotFieldsFragment } from '../../types/sdk';
+import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
 
 export type SelectionMode = 'single' | 'multi';
 export type Selectable = 'none' | 'any' | 'non_empty' | 'empty';
@@ -9,6 +10,7 @@ export interface LabwareMachineContext {
   lastSelectedAddress: Maybe<string>;
   selectionMode: SelectionMode;
   selectable: Selectable;
+  sectionGroups: Array<PlannedSectionDetails>;
 }
 
 export interface LabwareMachineSchema {
