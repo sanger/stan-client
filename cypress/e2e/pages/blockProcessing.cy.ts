@@ -161,7 +161,7 @@ describe('Block Processing', () => {
     context('when adding grouped labware for replicate number based on original samples', () => {
       it('should autofill all replicate numbers consecutively based on original samples of source labware', () => {
         //Mock handler will ensure that they are grouped in two's
-        const sources = ['STAN-1111', 'STAN-2111', 'STAN-3111', 'STAN-4111'];
+        const sources = ['STAN-1132', 'STAN-1133', 'STAN-1134', 'STAN-1135'];
         sources.forEach((barcode) => {
           scanInput(barcode);
         });
@@ -185,7 +185,7 @@ describe('Block Processing', () => {
     context('when adding multiple labware with same source labware', () => {
       it('should autofill all replicate numbers so that it continues the sequence of source labware', () => {
         cy.findByText('+ Add Labware').click();
-        editLayout(4, ['STAN-1111'], ['A1']);
+        editLayout(4, ['STAN-1132'], ['A1']);
         cy.findAllByTestId('replicate-number').eq(4).should('not.have.value', '').and('be.disabled');
       });
     });
