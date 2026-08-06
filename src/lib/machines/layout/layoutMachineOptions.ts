@@ -1,6 +1,6 @@
 import { LayoutContext, PlannedSectionDetails, Source } from './layoutContext';
 import { isEqual } from 'lodash';
-import { isTube } from '../../helpers/labwareHelper';
+import { compareAddresses, firstAddress, isTube } from '../../helpers/labwareHelper';
 import { assign, InternalMachineImplementations, sendParent } from 'xstate';
 import { LayoutEvents } from './layoutEvents';
 import { produce } from 'immer';
@@ -95,6 +95,9 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
             source: selectedSource
           });
         }
+        draft.layoutPlan.plannedActions.sort((a, b) =>
+          compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses))
+        );
       });
     }),
 
@@ -176,8 +179,9 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
           });
           draft.selectedSlots = undefined;
         }
-        console.log('layout action updated ');
-        console.log(draft.layoutPlan.plannedActions);
+        draft.layoutPlan.plannedActions.sort((a, b) =>
+          compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses))
+        );
       });
     }),
     [Actions.REMOVE_SECTION_GROUP]: assign(({ context, event }) => {

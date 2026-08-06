@@ -211,7 +211,6 @@ export const createConfirmLabwareMachine = (
           }
           return produce(context, (draft) => {
             draft.layoutPlan.plannedActions.forEach((planned) => {
-              // draft.addressToCommentMap.set(key, Number(event.commentIds[0]));
               planned.source.commentIds = event.commentIds.map((commentID) => Number(commentID));
             });
             draft.commentsForAllSections = event.commentIds;

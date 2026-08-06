@@ -1,4 +1,12 @@
+// This is a duplication of the original labware.types component with
+// modifications to support per-section labware operations.
+// When a slot belonging to a section is clicked, the entire section is highlighted,
+// and all operations are performed at the section level.
+// Once the per-section labware feature is verified, stable, and integrated
+// into the other operations, this component will replace the original labware.types.
+
 import { Maybe, SlotFieldsFragment } from '../../types/sdk';
+import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
 
 export type SelectionMode = 'single' | 'multi';
 export type Selectable = 'none' | 'any' | 'non_empty' | 'empty';
@@ -9,6 +17,7 @@ export interface LabwareMachineContext {
   lastSelectedAddress: Maybe<string>;
   selectionMode: SelectionMode;
   selectable: Selectable;
+  sectionGroups: Array<PlannedSectionDetails>;
 }
 
 export interface LabwareMachineSchema {

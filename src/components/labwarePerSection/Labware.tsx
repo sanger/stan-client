@@ -1,28 +1,37 @@
+// This is a duplication of the original Labware.tsx component with
+// modifications to support per-section labware operations.
+// When a slot belonging to a section is clicked, the entire section is highlighted,
+// and all operations are performed at the section level.
+// Once the per-section labware feature is verified, stable, and integrated
+// into the other operations, this component will replace the original Labware.tsx.
+
 import React, { useCallback, useEffect, useImperativeHandle, useMemo } from 'react';
 import classNames from 'classnames';
-import { Slot } from './Slot';
+import { Slot } from '../labware/Slot';
 import {
   buildAddresses,
   GridDirection,
   isSameArray,
   LabwareDirection,
   Position,
+  REGION_BORDER_COLORS,
   SECTION_GROUPS_BG_COLORS
 } from '../../lib/helpers';
 import _ from 'lodash';
-import { FlagPriority, LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
+import { FlagPriority, LabwareFieldsFragment, LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
 import createLabwareMachine from './labware.machine';
 import { Selectable, SelectionMode } from './labware.types';
 import { NewFlaggedLabwareLayout, NewLabwareLayout } from '../../types/stan';
 import { useMachine } from '@xstate/react';
 import * as slotHelper from '../../lib/helpers/slotHelper';
-import SlotColumnInfo from './SlotColumnInfo';
+import SlotColumnInfo from '../labware/SlotColumnInfo';
 import { Link } from 'react-router-dom';
 import FlagIcon from '../icons/FlagIcon';
 import BarcodeIcon from '../icons/BarcodeIcon';
 import BubleChatIcon from '../icons/BubleChatIcon';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
 import { sectionGroupsBySample } from '../../lib/helpers/labwareHelper';
+import { Region } from '../../pages/XeniumAnalyser';
 
 export interface LabwareProps {
   /**
@@ -163,6 +172,8 @@ export interface LabwareProps {
    * Each key represents a section name or ID, and the value is an array of addresses belonging to that section.
    */
   sectionGroups?: Array<PlannedSectionDetails>;
+
+  regions?: Array<Region>;
 }
 
 export type LabwareImperativeRef = {
@@ -199,7 +210,8 @@ const Labware = ({
   highlightedSlots,
   labwareDirection,
   labwareRefCallback,
-  sectionGroups
+  sectionGroups,
+  regions
 }: React.PropsWithChildren<LabwareProps>) => {
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine();
@@ -210,7 +222,8 @@ const Labware = ({
       selectable,
       slots: labware.slots,
       selectedAddresses: new Set<string>(),
-      lastSelectedAddress: null
+      lastSelectedAddress: null,
+      sectionGroups: sectionGroups ?? sectionGroupsBySample(labware as LabwareFieldsFragment)
     }
   });
   const { selectedAddresses } = current.context;
@@ -299,10 +312,14 @@ const Labware = ({
 
   const slotByAddress = _.keyBy(slots, 'address');
 
+  sectionGroups = React.useMemo(() => {
+    return sectionGroups ?? sectionGroupsBySample(labware as LabwareFieldsFragment);
+  }, [labware, sectionGroups]);
+
   const internalOnClick = React.useCallback(
     (address: string, slot: SlotFieldsFragment) => {
       onSlotClick?.(address, slot);
-      send({ type: 'SELECT_SLOT', address });
+      send({ type: 'SELECT_SLOT', address: address });
     },
     [onSlotClick, send]
   );
@@ -387,16 +404,12 @@ const Labware = ({
 
   const slotSectionBgColor = (): Record<string, string> => {
     const result: Record<string, string> = {};
-
-    if (!sectionGroups) {
-      sectionGroups = sectionGroupsBySample(labware as LabwareFlaggedFieldsFragment);
-    }
     if (!sectionGroups) return result;
     sectionGroups
       .filter((sectionDetails) => sectionDetails.addresses.size > 1)
       .forEach((sectionDetails, sectionIndex) => {
         sectionDetails.addresses.forEach((address) => {
-          result[address] = SECTION_GROUPS_BG_COLORS[sectionDetails.sectionGroupId ?? sectionIndex];
+          result[address] = SECTION_GROUPS_BG_COLORS[Number(sectionDetails.sectionGroupId ?? sectionIndex)];
         });
       });
     return result;
@@ -409,6 +422,23 @@ const Labware = ({
     return { size: 'size-20', parentDivSize: 'size-21', textSize: 'text-xs' };
   }, [numColumns, numRows]);
 
+  const slotRegionBorderColor = useMemo((): Record<string, string> => {
+    const result: Record<string, string> = {};
+    if (!regions) return result;
+    regions.forEach((region) => {
+      if (region.sectionGroups.length <= 1) return;
+      region.sectionGroups.flatMap((sectionGroups) =>
+        sectionGroups.addresses.forEach((address) => {
+          result[address] = REGION_BORDER_COLORS[region.colorIndexNumber!];
+        })
+      );
+    });
+    return result;
+  }, [regions]);
+
+  const regionWrapperClass = (address: string) =>
+    slotRegionBorderColor[address] ? `rounded-lg border-2 ${slotRegionBorderColor[address]}` : '';
+
   return (
     <div className={'flex flex-row'} data-testid={`labware-${labware.barcode ?? ''}`}>
       {slotColumns.length > 0 && slotBuilder && (
@@ -419,31 +449,35 @@ const Labware = ({
         <div className={gridClasses}>
           {buildAddresses({ numColumns, numRows }, gridDirection).map((address, i) => {
             return (
-              <div
-                key={address}
-                className={`p-1 rounded-lg ${slotSectionBgColor()[address]} ${slotSizeProps.parentDivSize}`}
-              >
-                <Slot
-                  address={address}
-                  slot={slotByAddress[address]}
-                  slotSizeProps={slotSizeProps}
-                  onClick={internalOnClick}
-                  onCtrlClick={onCtrlClick}
-                  onShiftClick={onShiftClick}
-                  onMouseEnter={onSlotMouseEnter}
-                  onMouseLeave={onSlotMouseLeave}
-                  text={slotText}
-                  secondaryText={slotSecondaryText}
-                  color={_slotColor}
-                  selected={selectedAddresses?.has(address) || (highlightedSlots?.has(address) ?? false)}
-                  isCleanedOut={cleanedOutAddresses?.includes(address)}
-                />
+              <div key={address} className={regionWrapperClass(address)} data-testid={`slot-wrapper-${address}`}>
+                <div
+                  key={address}
+                  className={`p-1 rounded-lg ${slotSectionBgColor()[address]} ${slotSizeProps.parentDivSize}`}
+                >
+                  <Slot
+                    address={address}
+                    slot={slotByAddress[address]}
+                    slotSizeProps={slotSizeProps}
+                    onClick={internalOnClick}
+                    onCtrlClick={onCtrlClick}
+                    onShiftClick={onShiftClick}
+                    onMouseEnter={onSlotMouseEnter}
+                    onMouseLeave={onSlotMouseLeave}
+                    text={slotText}
+                    secondaryText={slotSecondaryText}
+                    color={_slotColor}
+                    selected={selectedAddresses?.has(address) || (highlightedSlots?.has(address) ?? false)}
+                    isCleanedOut={cleanedOutAddresses?.includes(address)}
+                  />
+                </div>
               </div>
             );
           })}
         </div>
+
         {(!barcodeInfoPosition || isBarcodeInfoAtTheBottom || isBarcodeInfoAtTheRightSide) && BarcodeInformation()}
       </div>
+
       {slotColumns.length > 1 && slotBuilder && (
         <SlotColumnInfo slotColumn={slotColumns[1]} slotBuilder={slotBuilder} numRows={numRows} alignRight={true} />
       )}

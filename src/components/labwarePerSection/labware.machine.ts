@@ -1,8 +1,16 @@
+// This is a duplication of the original labware.machine component with
+// modifications to support per-section labware operations.
+// When a slot belonging to a section is clicked, the entire section is highlighted,
+// and all operations are performed at the section level.
+// Once the per-section labware feature is verified, stable, and integrated
+// into the other operations, this component will replace the original labware.machine.
+
 import { assign, createMachine, enqueueActions } from 'xstate';
 import { LabwareMachineContext, LabwareMachineEvent, LabwareMachineSchema } from './labware.types';
 import { emptySlots, filledSlots, findSlotByAddress, isSlotEmpty, isSlotFilled } from '../../lib/helpers/slotHelper';
 import { sortDownRight } from '../../lib/helpers/labwareHelper';
 import { SlotFieldsFragment } from '../../types/sdk';
+import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
 
 function createLabwareMachine() {
   return createMachine(
@@ -19,7 +27,8 @@ function createLabwareMachine() {
         selectedAddresses: input.selectedAddresses ?? new Set<string>(),
         lastSelectedAddress: input.lastSelectedAddress ?? null,
         selectionMode: input.selectionMode ?? 'single',
-        selectable: input.selectable ?? 'none'
+        selectable: input.selectable ?? 'none',
+        sectionGroups: input.sectionGroups
       }),
       on: {
         RESET_SELECTED: {
@@ -131,9 +140,10 @@ function createLabwareMachine() {
 
         deselectSlot: assign(({ context, event }) => {
           if ('address' in event) {
+            const selectedSectionAddresses = sectionGroupAddresses(event.address, context.sectionGroups);
             return {
               ...context,
-              selectedAddresses: new Set([...context.selectedAddresses].filter((a) => a !== event.address))
+              selectedAddresses: new Set([...context.selectedAddresses].filter((a) => !selectedSectionAddresses.has(a)))
             };
           }
           return context;
@@ -145,9 +155,12 @@ function createLabwareMachine() {
 
         selectSlot: assign(({ context, event }) => {
           if ('address' in event) {
+            const selectedSectionAddresses = sectionGroupAddresses(event.address, context.sectionGroups);
+            const selectedAddresses = new Set(context.selectedAddresses);
+            selectedSectionAddresses.forEach((address) => selectedAddresses.add(address));
             return {
               ...context,
-              selectedAddresses: new Set([...context.selectedAddresses]).add(event.address)
+              selectedAddresses
             };
           }
           return context;
@@ -334,3 +347,8 @@ const multiCtrlSelectSlotHandler = [
     actions: ['selectSlot']
   }
 ];
+
+const sectionGroupAddresses = (address: string, sectionGroups: Array<PlannedSectionDetails>) => {
+  const sectionGroup = sectionGroups.find((group) => group.addresses.has(address));
+  return sectionGroup ? sectionGroup.addresses : new Set([address]);
+};
