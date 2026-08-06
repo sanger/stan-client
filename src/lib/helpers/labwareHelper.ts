@@ -277,7 +277,7 @@ export const firstAddress = (addresses: Set<string>): string => {
  */
 export const sectionGroupsBySample = (
   labware: LabwareFieldsFragment | LabwareFlaggedFieldsFragment
-): Record<string, PlannedSectionDetails> => {
+): Array<PlannedSectionDetails> => {
   const sectionGroups: Record<string, PlannedSectionDetails> = {};
   labware.slots.forEach((slot) => {
     slot.samples.forEach((sample) => {
@@ -295,7 +295,5 @@ export const sectionGroupsBySample = (
       group.addresses.add(slot.address);
     });
   });
-  const result: Record<number, PlannedSectionDetails> = {};
-  Object.values(sectionGroups).map((section, index) => (result[index] = section));
-  return result;
+  return Object.values(sectionGroups).map((section, index) => ({ ...section, sectionGroupId: index }));
 };

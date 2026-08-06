@@ -13,7 +13,6 @@ import Warning from '../../notifications/Warning';
 import { createLabwarePlanMachine } from '../../planning/labwarePlan.machine';
 import { PotFormData } from './PotProcessing';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
-import { PlannedSectionDetails } from '../../../lib/machines/layout/layoutContext';
 
 type PotProcessingLabwarePlanProps = {
   /**
@@ -76,8 +75,8 @@ function buildInitialLayoutPlan(
     destinationLabware: outputLabware,
     plannedActions:
       sourceLabware.length > 0
-        ? {
-            A1: {
+        ? [
+            {
               source: {
                 sampleId: sourceLabware[0].slots[0].samples[0].id,
                 labware: sourceLabware[0],
@@ -85,8 +84,8 @@ function buildInitialLayoutPlan(
               },
               addresses: new Set(['A1'])
             }
-          }
-        : ({} as Record<string, PlannedSectionDetails>)
+          ]
+        : []
   };
 }
 

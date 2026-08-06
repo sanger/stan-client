@@ -83,7 +83,7 @@ type SectioningConfirmEvent =
   | {
       type: 'UPDATE_SECTION_NUMBER';
       layoutPlan: LayoutPlan;
-      sectionGroupId: string;
+      sectionGroupId: number;
       sectionNumber: string;
     }
   | {
@@ -102,7 +102,7 @@ type SectioningConfirmEvent =
   | {
       type: 'UPDATE_SECTION_THICKNESS';
       layoutPlan: LayoutPlan;
-      sectionGroupId: string;
+      sectionGroupId: number;
       sectionThickness: string;
     };
 
@@ -319,11 +319,11 @@ export function createSectioningConfirmMachine() {
               (plan) => plan.destinationLabware.barcode === event.layoutPlan.destinationLabware.barcode!
             );
             if (planInContext) {
-              const sectionGroupId = Object.keys(planInContext.plannedActions).find(
-                (sectionGroupId) => sectionGroupId === event.sectionGroupId
+              const plannedSection = planInContext.plannedActions.find(
+                (sectionDetails) => sectionDetails.sectionGroupId === event.sectionGroupId
               );
-              if (sectionGroupId) {
-                planInContext.plannedActions[sectionGroupId].source.newSection = event.sectionNumber;
+              if (plannedSection) {
+                plannedSection.source.newSection = event.sectionNumber;
               }
             }
           });
@@ -337,7 +337,11 @@ export function createSectioningConfirmMachine() {
               (plan) => plan.destinationLabware.barcode === event.layoutPlan.destinationLabware.barcode!
             );
             if (planInContext) {
-              planInContext.plannedActions[event.sectionGroupId].source.sampleThickness = event.sectionThickness;
+              const plannedAction = planInContext.plannedActions.find(
+                (planned) => planned.sectionGroupId === event.sectionGroupId
+              );
+
+              if (plannedAction) plannedAction.source.sampleThickness = event.sectionThickness;
             }
           });
         }),
@@ -476,7 +480,7 @@ function fillInSectionNumbersInLayoutPlan(
 }
 function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, startNumbers?: Map<string, number>) {
   /**Get slots column wise to fill the section numbers**/
-  Object.entries(layoutPlan.plannedActions).forEach(([sectionGroupId, plan]) => {
+  layoutPlan.plannedActions.forEach((plan, planIndex) => {
     let newSectionNum = 0;
     if (startNumbers && startNumbers.has(plan.source.labware.barcode) && incrementFill) {
       //Get the highest section number of the source labware for this section
@@ -491,7 +495,7 @@ function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, 
     }
     plan.source.newSection = String(newSectionNum);
     //Mutate the layoutPlan so that the child will be notified of this change and the changes will be rendered
-    layoutPlan.plannedActions[sectionGroupId] = { ...plan };
+    layoutPlan.plannedActions[planIndex] = { ...plan };
   });
 }
 
@@ -516,13 +520,10 @@ export const findPlanActionByDestinationAddress = (
  */
 function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array<LabwareFlaggedFieldsFragment>) {
   const sampleColors = buildSampleColors(sourceLabwares);
-
-  // For each layoutPlan build a LayoutPlan
-  const layoutPlans: Array<LayoutPlan> = plans.map((plan) => {
-    const plannedActions = {} as Record<string, PlannedSectionDetails>;
+  const layoutPlans: Array<LayoutPlan> = plans.map((plan, planIndex) => {
+    const plannedActions: Array<PlannedSectionDetails> = [];
     const sources: Array<Source> = [];
-
-    plan.planData.groups.forEach((group, index) => {
+    plan.planData.groups.forEach((group, groupIndex) => {
       const planned = findPlanActionByDestinationAddress(plan.planData.plan.planActions, group[0]);
       if (planned) {
         const source: Source = {
@@ -533,12 +534,12 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
           tissue: planned.source.samples[0].tissue
         };
         sources.push(source);
-        const sectionGroupId = group.length === 1 ? group[0] : index.toString();
-        plannedActions[sectionGroupId] = {
+        plannedActions.push({
+          sectionGroupId: planIndex + groupIndex,
           addresses: new Set(group),
           source,
           sectioningOrder: planned.sectioningOrder ?? undefined
-        };
+        });
       }
     });
     return {

@@ -57,7 +57,7 @@ export function done(): DoneEvent {
 
 type AddSectionGroupEvent = {
   type: 'ADD_SECTION_GROUP';
-  sectionId: string;
+  sectionId: number;
 };
 
 type RemoveSectionGroupEvent = {

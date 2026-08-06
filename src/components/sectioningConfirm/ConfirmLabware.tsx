@@ -59,9 +59,9 @@ interface ConfirmLabwareProps {
    * @param slotAddress - Address of the slot in which the section belongs
    * @param sectionNumber - New section number
    */
-  onSectionNumberChange?: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: string) => void;
+  onSectionNumberChange?: (layoutPlan: LayoutPlan, sectionGroupId: number, sectionNumber: string) => void;
 
-  onSectionThicknessChange?: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionThickness: string) => void;
+  onSectionThicknessChange?: (layoutPlan: LayoutPlan, sectionGroupId: number, sectionThickness: string) => void;
 }
 
 const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
@@ -154,10 +154,10 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             </div>
             <div className="w-full space-y-4">
               <div data-testid="labware-comments" className={'flex flex-col space-y-4'}>
-                {Object.keys(layoutPlan.plannedActions).map((sectionGroupId) => (
+                {layoutPlan.plannedActions.map((sectionDetails, sectionIndex) => (
                   <LabwareComments
-                    key={sectionGroupId}
-                    sectionGroupId={sectionGroupId}
+                    key={sectionIndex}
+                    sectionGroupId={sectionDetails.sectionGroupId!}
                     disabledComment={current.matches('done')}
                     sectionNumberDisplay={
                       labware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER
@@ -171,7 +171,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                     onCommentChange={(commentIds) => {
                       send({
                         type: 'SET_COMMENTS_FOR_SECTION',
-                        sectionGroupId,
+                        sectionGroupId: sectionDetails.sectionGroupId!,
                         commentIds
                       });
                     }}
@@ -179,7 +179,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                       onSectionThicknessChange && onSectionThicknessChange(layoutPlan, sectionGroupId, thickness);
                       send({
                         type: 'UPDATE_SECTION_THICKNESS',
-                        sectionGroupId,
+                        sectionGroupId: sectionDetails.sectionGroupId!,
                         thickness
                       });
                     }}
@@ -188,7 +188,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                       onSectionNumberChange && onSectionNumberChange(layoutPlan, sectionGroupId, sectionNumber);
                       send({
                         type: 'UPDATE_SECTION_NUMBER',
-                        sectionGroupId,
+                        sectionGroupId: sectionDetails.sectionGroupId!,
                         sectionNumber
                       });
                     }}

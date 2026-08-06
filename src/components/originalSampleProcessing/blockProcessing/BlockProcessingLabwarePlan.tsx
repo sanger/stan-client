@@ -62,7 +62,7 @@ function buildInitialLayoutPlan(
     sources: convertLabwareTypeToSourceType(sourceLabware),
     sampleColors,
     destinationLabware: outputLabware,
-    plannedActions: {}
+    plannedActions: []
   };
 }
 

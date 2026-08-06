@@ -11,14 +11,14 @@ export enum SectionNumberSetting {
   HIDE
 }
 interface LabwareCommentsProps {
-  sectionGroupId: string;
+  sectionGroupId: number;
   layoutPlan: LayoutPlan;
   comments: Array<Comment>;
   disabledComment?: boolean;
   sectionNumberDisplay?: SectionNumberSetting;
   onCommentChange: (commentIds: string[]) => void;
-  onSectionNumberChange: (sectionGroupId: string, sectionNumber: string) => void;
-  onSectionThicknessChange: (sectionGroupId: string, thickness: string) => void;
+  onSectionNumberChange: (sectionGroupId: number, sectionNumber: string) => void;
+  onSectionThicknessChange: (sectionGroupId: number, thickness: string) => void;
 }
 
 const LabwareComments: React.FC<LabwareCommentsProps> = ({
