@@ -83,7 +83,6 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
     const { requestError, layoutPlan } = current.context;
     const { layoutMachine } = current.context;
     const { setFieldValue, values, setValues } = useFormikContext<BlockFormData>();
-
     //Updating the sources in the layout plan if the source labware changes. This is to ensure that the layout plan is always
     // in sync with the scanned/removed source labware.
     React.useEffect(() => {
@@ -119,7 +118,9 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
           const planActionKey = `${plannedAction.source.labware.barcode}-${plannedAction.source.tissue?.externalName}`;
           let planReplicateNumber = plannedAction.source.replicateNumber
             ? parseInt(plannedAction.source.replicateNumber)
-            : undefined;
+            : plannedAction.source.tissue?.replicate
+              ? parseInt(plannedAction.source.tissue?.replicate)
+              : undefined;
           if (planReplicateNumber) {
             const previousReplicateNumber = previousReplicateNumberForTheSameSource(
               values.plans,
@@ -137,8 +138,8 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
             replicate: planReplicateNumber?.toString(),
             externalId: plannedAction.source.tissue?.externalName ?? '',
             sourceSampleId: plannedAction.source.sampleId,
-            isEditReplicateDisabled: plannedAction.source.replicateNumber
-              ? parseInt(plannedAction.source.replicateNumber) > 0
+            isEditReplicateDisabled: plannedAction.source.tissue?.replicate
+              ? parseInt(plannedAction.source.tissue?.replicate) > 0
               : undefined
           };
 
