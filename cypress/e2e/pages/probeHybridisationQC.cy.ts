@@ -30,7 +30,7 @@ describe('Probe Hybridisation QC', () => {
   });
   describe('When a labware is scanned', () => {
     before(() => {
-      cy.get('#labwareScanInput').type('STAN-3111{enter}');
+      cy.get('#labwareScanInput').type('STAN-5111{enter}');
     });
 
     it('sets only slots with prob hybridisation performed on them ', () => {

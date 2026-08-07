@@ -29,8 +29,8 @@ describe('Xenium Analyser', () => {
       });
     });
     it('should display a warning message', () => {
-      cy.get('#labwareScanInput').clear().type('STAN-3111{enter}');
-      cy.findByTextContent('No probe hybridisation recorded for STAN-3111').should('be.visible');
+      cy.get('#labwareScanInput').clear().type('STAN-0611{enter}');
+      cy.findByTextContent('No probe hybridisation recorded for STAN-0611').should('be.visible');
       cy.findByText('Analyser Details').should('not.exist');
     });
     after(() => {
@@ -39,18 +39,18 @@ describe('Xenium Analyser', () => {
   });
   describe('When a labware is scanned', () => {
     before(() => {
-      cy.get('#labwareScanInput').clear().type('STAN-3111{enter}');
+      cy.get('#labwareScanInput').clear().type('STAN-0611{enter}');
     });
     it('shows labware table', () => {
       cy.findAllByRole('table').eq(0).should('have.length.above', 0);
       //Table should display barcode of labware scanned
-      cy.findAllByRole('table').contains('td', 'STAN-3111');
+      cy.findAllByRole('table').contains('td', 'STAN-0611');
     });
     context('when a region of interest is set', () => {
       before(() => {
         // Dismiss any open react-select/menu overlays before typing in.
         cy.get('body').click(0, 0);
-        cy.findByTestId('STAN-3111-1-roi')
+        cy.findByTestId('STAN-0611-1-roi')
           .scrollIntoView()
           .clear({ force: true })
           .type('123456789', { force: true })
@@ -70,7 +70,7 @@ describe('Xenium Analyser', () => {
     describe('When a SGP number is set', () => {
       context('when a SGP number with previously uploaded file is selected', () => {
         before(() => {
-          selectOption('STAN-3111-workNumber', 'SGP1009');
+          selectOption('STAN-0611-workNumber', 'SGP1009');
         });
         it('displays a link to the SGP folder link ', () => {
           cy.findByTestId('sgp-folder-link').should('exist');
@@ -85,7 +85,7 @@ describe('Xenium Analyser', () => {
               })
             );
           });
-          selectOption('STAN-3111-workNumber', 'SGP1009');
+          selectOption('STAN-0611-workNumber', 'SGP1009');
         });
         it('hides the SGP folder link', () => {
           cy.findByTestId('sgp-folder-link').should('not.exist');
@@ -111,15 +111,15 @@ describe('Xenium Analyser', () => {
           cy.findByText('Done').click();
         });
         it('adds a region border with the same selected color on the the selected slots', () => {
-          cy.findByTestId('labware-STAN-3111').within(() => {
+          cy.findByTestId('labware-STAN-0611').within(() => {
             cy.get('div.border-black').should('have.length', 2);
           });
         });
         it('updates the regions table accordingly', () => {
-          cy.findByTestId('STAN-3111-regions-table').get('tbody tr').should('have.length', 4);
+          cy.findByTestId('STAN-0611-regions-table').get('tbody tr').should('have.length', 40);
         });
         it('updates the region name accordingly', () => {
-          cy.findByText('STAN-3111_Region1').should('be.visible');
+          cy.findByText('STAN-0611_Region1').should('be.visible');
         });
       });
 
@@ -131,28 +131,28 @@ describe('Xenium Analyser', () => {
           cy.findByText('Done').click();
         });
         it('removes the region border from the slots of that region', () => {
-          cy.findByTestId('labware-STAN-3111').within(() => {
+          cy.findByTestId('labware-STAN-0611').within(() => {
             cy.get('div.border-black').should('have.length', 0);
           });
         });
         it('updates the regions table accordingly', () => {
-          cy.findByTestId('STAN-3111-regions-table').get('tbody tr').should('have.length', 5);
+          cy.findByTestId('STAN-0611-regions-table').get('tbody tr').should('have.length', 41);
         });
         it('renames the region of interest with the sample external id', () => {
-          cy.findByText('STAN-3111_Region1').should('not.exist');
+          cy.findByText('STAN-0611_Region1').should('not.exist');
         });
       });
     });
   });
   describe('When  two labware are scanned ', () => {
     before(() => {
-      cy.get('#labwareScanInput').clear().type('STAN-3112{enter}'); //scan second labware
+      cy.get('#labwareScanInput').clear().type('STAN-0612{enter}'); //scan second labware
     });
-    it('should display Analyser Details for STAN-3112', () => {
-      cy.findAllByRole('table').eq(1).contains('STAN-3112');
-      cy.findByTestId('STAN-3112-workNumber').should('exist');
-      cy.findByTestId('STAN-3112-position').should('exist');
-      cy.findByTestId('STAN-3112-regions-table').should('exist');
+    it('should display Analyser Details for STAN-0612', () => {
+      cy.findAllByRole('table').eq(1).contains('STAN-0612');
+      cy.findByTestId('STAN-0612-workNumber').should('exist');
+      cy.findByTestId('STAN-0612-position').should('exist');
+      cy.findByTestId('STAN-0612-regions-table').should('exist');
     });
     it('should disable any further labware scanning', () => {
       cy.get('#labwareScanInput').should('be.disabled');
@@ -162,11 +162,11 @@ describe('Xenium Analyser', () => {
     before(() => {
       cy.findAllByTestId('removeButton').eq(1).click();
     });
-    it('should only display Analyser Details for STAN-3111', () => {
-      cy.findByText('STAN-3112').should('not.exist');
-      cy.findByTestId('STAN-3112-workNumber').should('not.exist');
-      cy.findByTestId('STAN-3112-position').should('not.exist');
-      cy.findByTestId('STAN-3112-regions-table').should('not.exist');
+    it('should only display Analyser Details for STAN-0611', () => {
+      cy.findByText('STAN-0612').should('not.exist');
+      cy.findByTestId('STAN-0612-workNumber').should('not.exist');
+      cy.findByTestId('STAN-0612-position').should('not.exist');
+      cy.findByTestId('STAN-0612-regions-table').should('not.exist');
     });
     it('should enable labware scanning', () => {
       cy.get('#labwareScanInput').should('be.enabled');
@@ -175,7 +175,7 @@ describe('Xenium Analyser', () => {
 
   describe('On save', () => {
     before(() => {
-      cy.get('#labwareScanInput').clear().type('STAN-3111{enter}');
+      cy.get('#labwareScanInput').clear().type('STAN-0611{enter}');
       fillInForm();
     });
     context('When there is a server error', () => {
@@ -188,7 +188,7 @@ describe('Xenium Analyser', () => {
                   {
                     message: 'Exception while fetching data (/CytAssist) : The operation could not be validated.',
                     extensions: {
-                      problems: ['Labware is discarded: [STAN-3111]']
+                      problems: ['Labware is discarded: [STAN-0611]']
                     }
                   }
                 ]
@@ -200,7 +200,7 @@ describe('Xenium Analyser', () => {
         cy.findByRole('button', { name: 'Save' }).click();
       });
       it('shows an error', () => {
-        cy.findByTextContent('Labware is discarded: [STAN-3111]').should('be.visible');
+        cy.findByTextContent('Labware is discarded: [STAN-0611]').should('be.visible');
       });
     });
     context('When there is no server error', () => {
@@ -221,12 +221,12 @@ describe('Xenium Analyser', () => {
     cy.findByTestId('lotNumberA').clear().type('Lot123').blur();
     cy.findByTestId('lotNumberB').clear().type('Lot456').blur();
     selectOption('equipmentId', 'Xenium 1');
-    selectOption('STAN-3111-workNumber', 'SGP1008');
-    selectOption('STAN-3111-position', 'Left');
+    selectOption('STAN-0611-workNumber', 'SGP1008');
+    selectOption('STAN-0611-position', 'Left');
     for (let indx = 0; indx < 4; indx++) {
       // Dismiss any open react-select/menu overlays before typing in.
       cy.get('body').click(0, 0);
-      cy.findByTestId(`STAN-3111-${indx}-roi`)
+      cy.findByTestId(`STAN-0611-${indx}-roi`)
         .scrollIntoView()
         .clear({ force: true })
         .type('123456789', { force: true })

@@ -24,8 +24,8 @@ describe('Block Processing', () => {
 
     context('when source labware is loaded', () => {
       before(() => {
-        scanInput('STAN-113');
-        scanInput('STAN-213');
+        scanInput('STAN-111');
+        scanInput('STAN-211');
       });
 
       it('Add labware button is enabled', () => {
@@ -55,13 +55,13 @@ describe('Block Processing', () => {
       describe('when adding different sources to different slots', () => {
         it('adds a source row for each selected source', () => {
           addLabware('Proviasette', '1');
-          editLayout(0, ['STAN-113', 'STAN-213'], ['A1', 'B1']);
+          editLayout(0, ['STAN-111', 'STAN-211'], ['A1', 'B1']);
 
           cy.findAllByTestId('planned-source-table')
             .first()
             .within(() => {
-              cy.findByText('STAN-113').should('exist');
-              cy.findByText('STAN-213').should('exist');
+              cy.findByText('STAN-111').should('exist');
+              cy.findByText('STAN-211').should('exist');
             });
         });
       });
@@ -98,12 +98,12 @@ describe('Block Processing', () => {
   describe('Labware Layout', () => {
     context('when labware layout is added', () => {
       context('when editing a layout', () => {
-        it('should display STAN-113', () => {
-          editLayout(0, ['STAN-113'], ['A1']);
+        it('should display STAN-111', () => {
+          editLayout(0, ['STAN-111'], ['A1']);
           cy.findAllByTestId('planned-source-table')
             .first()
             .within(() => {
-              cy.findByText('STAN-113').should('exist');
+              cy.findByText('STAN-111').should('exist');
             });
         });
       });
@@ -161,7 +161,7 @@ describe('Block Processing', () => {
     context('when adding grouped labware for replicate number based on original samples', () => {
       it('should autofill all replicate numbers consecutively based on original samples of source labware', () => {
         //Mock handler will ensure that they are grouped in two's
-        const sources = ['STAN-1132', 'STAN-1133', 'STAN-1134', 'STAN-1135'];
+        const sources = ['STAN-1112', 'STAN-1113', 'STAN-1114', 'STAN-1115'];
         sources.forEach((barcode) => {
           scanInput(barcode);
         });
@@ -185,7 +185,7 @@ describe('Block Processing', () => {
     context('when adding multiple labware with same source labware', () => {
       it('should autofill all replicate numbers so that it continues the sequence of source labware', () => {
         cy.findByText('+ Add Labware').click();
-        editLayout(4, ['STAN-1132'], ['A1']);
+        editLayout(4, ['STAN-1112'], ['A1']);
         cy.findAllByTestId('replicate-number').eq(4).should('not.have.value', '').and('be.disabled');
       });
     });
@@ -360,12 +360,12 @@ const removeLayout = () => {
 
 const fillInTheForm = () => {
   selectSGPNumber('SGP1008');
-  scanInput('STAN-113');
+  scanInput('STAN-111');
   addLabware('Tube');
-  editLayout(0, ['STAN-113'], ['A1']);
+  editLayout(0, ['STAN-111'], ['A1']);
   addLabware('Prebarcoded tube');
   cy.findAllByText('Barcode').last().type('FF10153223');
-  editLayout(1, ['STAN-113'], ['A1']);
+  editLayout(1, ['STAN-111'], ['A1']);
 
   cy.findByRole('button', { name: /Save/i }).click();
 };
