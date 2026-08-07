@@ -19,12 +19,12 @@ describe('CytAssist Probe Hybridisation', () => {
   });
   describe('When a labware is scanned', () => {
     before(() => {
-      cy.get('#labwareScanInput').type('STAN-1400{enter}');
+      cy.get('#labwareScanInput').type('STAN-1410{enter}');
     });
     it('shows labware table', () => {
       cy.findAllByRole('table').should('have.length.above', 0);
       //Table should display barcode of labware scanned
-      cy.findAllByRole('table').contains('td', 'STAN-1400');
+      cy.findAllByRole('table').contains('td', 'STAN-1410');
     });
     it('updates start time field', () => {
       cy.findByTestId('performed').should('contain.value', new Date().toISOString().split('T')[0]);
@@ -172,7 +172,7 @@ describe('CytAssist Probe Hybridisation', () => {
   describe('Addresses field', () => {
     describe('When selecting from the labware', () => {
       before(() => {
-        cy.findByTestId('STAN-1400').within(() => {
+        cy.findByTestId('STAN-1410').within(() => {
           cy.findByText('A1').click();
         });
       });
@@ -187,7 +187,7 @@ describe('CytAssist Probe Hybridisation', () => {
       });
 
       it('highlights the labware slots accordingly', () => {
-        cy.findByTestId('STAN-1400').within(() => {
+        cy.findByTestId('STAN-1410').within(() => {
           cy.findAllByTestId('slot').get('.ring-pink-600').should('have.length', 2);
         });
       });
@@ -207,7 +207,7 @@ describe('CytAssist Probe Hybridisation', () => {
                       message:
                         'Exception while fetching data (/probe_hybridisation_cytassist) : The operation could not be validated.',
                       extensions: {
-                        problems: ['Labware is discarded: [STAN-1400]']
+                        problems: ['Labware is discarded: [STAN-1410]']
                       }
                     }
                   ]
@@ -219,7 +219,7 @@ describe('CytAssist Probe Hybridisation', () => {
         fillInTheForm();
       });
       it('shows an error', () => {
-        cy.findByText('Labware is discarded: [STAN-1400]').should('be.visible');
+        cy.findByText('Labware is discarded: [STAN-1410]').should('be.visible');
       });
     });
     context('On success', () => {
@@ -235,7 +235,7 @@ describe('CytAssist Probe Hybridisation', () => {
 
 const fillInTheForm = () => {
   cy.reload();
-  cy.get('#labwareScanInput').type('STAN-1400{enter}');
+  cy.get('#labwareScanInput').type('STAN-1410{enter}');
   selectOption('labware.0.workNumber', 'SGP1008');
   selectOption('labware.0.customPanel', 'Custom spike 1');
   selectOption('labware.0.probes.0.panel', 'CytAssist APT gene expression panel');
