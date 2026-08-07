@@ -30,17 +30,17 @@ const savedSlotCopy: SlotCopyLoad = {
   sources: [],
   contents: [
     {
-      sourceBarcode: 'STAN-3100',
+      sourceBarcode: 'STAN-1400',
       sourceAddress: 'A1',
       destinationAddress: 'A1'
     },
     {
-      sourceBarcode: 'STAN-3100',
+      sourceBarcode: 'STAN-1400',
       sourceAddress: 'B1',
       destinationAddress: 'A1'
     },
     {
-      sourceBarcode: 'STAN-3200',
+      sourceBarcode: 'STAN-1410',
       sourceAddress: 'A2',
       destinationAddress: 'D1'
     }

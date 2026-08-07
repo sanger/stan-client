@@ -55,12 +55,12 @@ describe('CytAssist Page', () => {
           })
         );
       });
-      cy.get('#labwareScanInput').type('STAN-3100{enter}');
+      cy.get('#labwareScanInput').type('STAN-1400{enter}');
     });
     it('should display a warning message', () => {
       cy.contains(
         '.Toastify__toast-body',
-        "Labware STAN-3100 is missing the following operations (not required for 3'): 'Probe hybridisation Cytassist' , 'Probe hybridisation QC'"
+        "Labware STAN-1400 is missing the following operations (not required for 3'): 'Probe hybridisation Cytassist' , 'Probe hybridisation QC'"
       );
     });
     after(() => {
@@ -114,18 +114,18 @@ describe('CytAssist Page', () => {
 
   context('scanned input labware are displayed within the same view', () => {
     before(() => {
-      cy.get('#labwareScanInput').type('STAN-3100{enter}');
-      cy.get('#labwareScanInput').type('STAN-3200{enter}');
+      cy.get('#labwareScanInput').type('STAN-1400{enter}');
+      cy.get('#labwareScanInput').type('STAN-1410{enter}');
     });
 
     it('shows it on the page', () => {
-      cy.findByText('STAN-3100').should('be.visible');
-      cy.findByText('STAN-3200').should('be.visible');
+      cy.findByText('STAN-1400').should('be.visible');
+      cy.findByText('STAN-1410').should('be.visible');
     });
     context('When user selects some source slots', () => {
       before(() => {
         cy.findByTestId('copyMode-One to one').click();
-        cy.findByTestId('STAN-3100').within(() => {
+        cy.findByTestId('STAN-1400').within(() => {
           cy.findByText('A1').click();
           cy.findByText('B1').click({ shiftKey: true });
         });
@@ -166,15 +166,15 @@ describe('CytAssist Page', () => {
     });
     context('multi select from different source labware is forbidden', () => {
       before(() => {
-        cy.findByTestId('STAN-3100').within(() => {
+        cy.findByTestId('STAN-1400').within(() => {
           cy.findByText('B1').click();
         });
-        cy.findByTestId('STAN-3200').within(() => {
+        cy.findByTestId('STAN-1410').within(() => {
           cy.findByText('A1').click({ shiftKey: true });
         });
       });
       it('unselect the previously selected slots', () => {
-        cy.findByTestId('STAN-3100').within(() => {
+        cy.findByTestId('STAN-1400').within(() => {
           cy.findByText('B1').should('not.have.class', 'ring');
         });
       });
@@ -229,7 +229,7 @@ describe('CytAssist Page', () => {
       );
     });
     it('clears out all the mapping ', () => {
-      cy.findByTestId('STAN-3100').within(() => {
+      cy.findByTestId('STAN-1400').within(() => {
         cy.findAllByTestId('slot').each((slot) => cy.wrap(slot).should('not.have.class', 'ring'));
       });
     });
@@ -457,8 +457,8 @@ describe('CytAssist Page', () => {
         shouldDisplaySelectedValue('output-labware-type', 'CytAssist 6.5');
       });
       it('displays the source labware properly', () => {
-        cy.findByText('STAN-3100').should('be.visible');
-        cy.findByText('STAN-3200').should('be.visible');
+        cy.findByText('STAN-1400').should('be.visible');
+        cy.findByText('STAN-1410').should('be.visible');
       });
       it('displays the output labware properly', () => {
         cy.findByTestId('cytassist-labware').within(() => {
@@ -617,7 +617,7 @@ function saveDraftButton() {
 }
 
 function mapSlots() {
-  cy.findByTestId('STAN-3100').within(() => {
+  cy.findByTestId('STAN-1400').within(() => {
     cy.findByText('A1').click();
     cy.findByText('B1').click({ shiftKey: true });
   });
@@ -625,7 +625,7 @@ function mapSlots() {
     cy.findByText('A1').click();
   });
 
-  cy.findByTestId('STAN-3200').within(() => {
+  cy.findByTestId('STAN-1410').within(() => {
     cy.findByText('C1').click();
     cy.findByText('D1').click({ cmdKey: true });
   });
@@ -683,7 +683,7 @@ const fillForm = () => {
   cy.findByTestId('external-barcode').within(() => {
     cy.findByRole('textbox').wait(500).clear().type('H1-9D8VN2V{enter}').blur();
   });
-  cy.get('#labwareScanInput').type('STAN-3100{enter}').wait(500);
+  cy.get('#labwareScanInput').type('STAN-1400{enter}').wait(500);
   cy.get('#inputLabwares').within(() => {
     cy.findByText('A1').wait(500).click();
   });
