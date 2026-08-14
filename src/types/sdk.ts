@@ -3516,6 +3516,8 @@ export type ReactivateLabware = {
 export type ReagentPlate = {
   __typename?: 'ReagentPlate';
   barcode: Scalars['String']['output'];
+  numColumns: Scalars['Int']['output'];
+  numRows: Scalars['Int']['output'];
   plateType?: Maybe<Scalars['String']['output']>;
   slots: Array<ReagentSlot>;
 };
@@ -5642,7 +5644,7 @@ export type FindReagentPlateQueryVariables = Exact<{
 }>;
 
 
-export type FindReagentPlateQuery = { __typename?: 'Query', reagentPlate?: { __typename?: 'ReagentPlate', barcode: string, plateType?: string | null, slots: Array<{ __typename?: 'ReagentSlot', address: string, used: boolean }> } | null };
+export type FindReagentPlateQuery = { __typename?: 'Query', reagentPlate?: { __typename?: 'ReagentPlate', numRows: number, numColumns: number, barcode: string, plateType?: string | null, slots: Array<{ __typename?: 'ReagentSlot', address: string, used: boolean }> } | null };
 
 export type FindSamplePositionsQueryVariables = Exact<{
   labwareBarcode: Scalars['String']['input'];
@@ -8205,6 +8207,8 @@ ${PlanActionFieldsFragmentDoc}`;
 export const FindReagentPlateDocument = gql`
     query FindReagentPlate($barcode: String!) {
   reagentPlate(barcode: $barcode) {
+    numRows
+    numColumns
     barcode
     slots {
       ...ReagentSlotFields
