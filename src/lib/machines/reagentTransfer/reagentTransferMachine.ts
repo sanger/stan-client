@@ -10,8 +10,9 @@ import {
   ReagentTransfer,
   RecordReagentTransferMutation
 } from '../../../types/sdk';
-import { OperationTypeName } from '../../../types/stan';
+import { LabwareTypeName, OperationTypeName } from '../../../types/stan';
 import { stanCore } from '../../sdk';
+import { labwareTypeInstances } from '../../factories/labwareTypeFactory';
 
 /**
  * Context for SlotCopy Machine
@@ -275,11 +276,19 @@ export const reagentTransferMachine = createMachine(
         if (event.type !== 'xstate.done.actor.findReagentPlate' || context.sourceBarcode === undefined) return context;
         context.sourceReagentPlate = event.output.reagentPlate
           ? {
-              barcode: event.output.reagentPlate.barcode,
-              slots: event.output.reagentPlate.slots ?? [],
-              plateType: event.output.reagentPlate.plateType
+              ...event.output.reagentPlate,
+              slots: event.output.reagentPlate.slots ?? []
             }
-          : { barcode: context.sourceBarcode, slots: [] };
+          : (() => {
+              const dualIndexPlate = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.DUAL_INDEX_PLATE);
+              return {
+                barcode: context.sourceBarcode,
+                slots: [],
+                numColumns: dualIndexPlate?.numColumns,
+                numRows: dualIndexPlate?.numRows
+              };
+            })();
+
         if (event.output.reagentPlate && event.output.reagentPlate.plateType) {
           context.plateType = event.output.reagentPlate.plateType;
           context.serverMessage = event.output.reagentPlate.plateType + ' type is already assigned to this plate.';

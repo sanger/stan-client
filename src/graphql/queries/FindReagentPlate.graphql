@@ -1,5 +1,7 @@
 query FindReagentPlate($barcode: String!) {
   reagentPlate(barcode: $barcode) {
+    numRows
+    numColumns
     barcode
     slots {
       ...ReagentSlotFields
