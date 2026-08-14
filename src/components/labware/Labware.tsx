@@ -13,7 +13,7 @@ import _ from 'lodash';
 import { FlagPriority, LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
 import createLabwareMachine from './labware.machine';
 import { Selectable, SelectionMode } from './labware.types';
-import { NewFlaggedLabwareLayout, NewLabwareLayout } from '../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout, NewLabwareLayout } from '../../types/stan';
 import { useMachine } from '@xstate/react';
 import * as slotHelper from '../../lib/helpers/slotHelper';
 import SlotColumnInfo from './SlotColumnInfo';
@@ -23,6 +23,7 @@ import BarcodeIcon from '../icons/BarcodeIcon';
 import BubleChatIcon from '../icons/BubleChatIcon';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
 import { sectionGroupsBySample } from '../../lib/helpers/labwareHelper';
+import { isMultiSampleBlockLabware } from '../originalSampleProcessing/blockProcessing/BlockProcessing';
 
 export interface LabwareProps {
   /**
@@ -216,7 +217,14 @@ const Labware = ({
   const { selectedAddresses } = current.context;
 
   const selectedAddressesRef = React.useRef<Set<string>>();
-  const { slots, barcode, numRows, numColumns } = labware;
+  const { slots, barcode } = labware;
+
+  const { numRows, numColumns } = useMemo(() => {
+    if (isMultiSampleBlockLabware(labware.labwareType.name as LabwareTypeName)) {
+      return { numRows: labware.numRows, numColumns: labware.numColumns };
+    }
+    return { numRows: labware.labwareType.numRows, numColumns: labware.labwareType.numColumns };
+  }, [labware]);
 
   const isFlagged = useMemo(() => {
     return (labware as LabwareFlaggedFieldsFragment).flagged;
