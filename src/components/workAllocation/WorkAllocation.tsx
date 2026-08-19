@@ -208,6 +208,7 @@ export default function WorkAllocation() {
   const validationSchema = Yup.object().shape({
     workTypes: Yup.array()
       .of(Yup.string().oneOf(workTypes.map((wt) => wt.name)))
+      .min(1)
       .required()
       .label('Work Type'),
     // Validate that selected treatment types are valid or empty array
