@@ -35,6 +35,7 @@ import { useLoaderData } from 'react-router-dom';
 import { fromPromise } from 'xstate';
 import { SampleDataTableRow } from '../../dataTableColumns/sampleColumns';
 import { Row } from 'react-table';
+import { ExtraColumnType } from '../../planning/SourceTable';
 
 /**
  * Used as Formik's values
@@ -268,12 +269,16 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
     };
   };
 
-  const discardSourceColumn = useMemo(() => {
-    return {
+  const sourceTableColumnsConfig = useMemo(() => {
+    const discardSourceColumn: ExtraColumnType = {
       header: 'Discard Source',
       cell: ({ row }: { row: Row<SampleDataTableRow> }) => {
         return <FormikInput label={''} name={`discardSources.${row.original.barcode}`} type={'checkbox'} />;
       }
+    };
+    return {
+      extraColumns: [discardSourceColumn],
+      showLastKnownSectionNumberColumn: false
     };
   }, []);
 
@@ -333,7 +338,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                     selectedLabwareType={allowedLabwareTypes.find((lt) => lt.name === selectedLabwareType)}
                     numPlansToCreate={numLabware}
                     buildPlanLayouts={buildPlanLayouts}
-                    columns={[discardSourceColumn]}
+                    sourceTableConfig={sourceTableColumnsConfig}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                     selectedLabwareNumColumns={selectedLabwareNumColumns}
                     selectedLabwareNumRows={selectedLabwareNumRows}

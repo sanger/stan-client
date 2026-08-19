@@ -30,6 +30,7 @@ import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 import PromptOnLeave from '../../notifications/PromptOnLeave';
 import { useLoaderData } from 'react-router-dom';
 import { fromPromise } from 'xstate';
+import { SourceTableColumnsConfig } from '../../planning/SourceTable';
 
 /**
  * Used as Formik's values
@@ -300,6 +301,10 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
     );
   };
 
+  const sourceTableColumnsConfig: SourceTableColumnsConfig = {
+    showLastKnownSectionNumberColumn: false
+  };
+
   return (
     <>
       <motion.div
@@ -347,6 +352,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
                     buildPlanLayouts={buildPlanLayouts}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                     singleSourceAllowed={true}
+                    sourceTableConfig={sourceTableColumnsConfig}
                   />
 
                   {serverError && <Warning message={'Failed to perform pot labware generation'} error={serverError} />}
