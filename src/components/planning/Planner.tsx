@@ -11,7 +11,7 @@ import Heading from '../Heading';
 import { getNumberOfDaysBetween } from '../../lib/helpers';
 import Warning from '../notifications/Warning';
 import { useScrollToRef } from '../../lib/hooks';
-import { ExtraColumnType, SourceTable } from './SourceTable';
+import { SourceTable, SourceTableColumnsConfig } from './SourceTable';
 import { isMultiSampleBlockLabware } from '../originalSampleProcessing/blockProcessing/BlockProcessing';
 
 /**
@@ -47,8 +47,8 @@ type PlannerProps<M> = {
     scrollRef?: React.MutableRefObject<HTMLDivElement | null>
   ) => JSX.Element;
 
-  // Holds extra column to the SourceTable component required for the different views
-  columns?: Array<ExtraColumnType>;
+  // Holds columns config of the SourceTable component as requires different columns for different pages
+  sourceTableConfig?: SourceTableColumnsConfig;
 
   /**
    * Callback to render the component to display configuration setting to add a labware plan.
@@ -193,7 +193,7 @@ export default function Planner<M>({
   buildPlanLayouts,
   buildPlanCreationSettings,
   sectionThickness,
-  columns
+  sourceTableConfig
 }: PlannerProps<M>) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -329,8 +329,10 @@ export default function Planner<M>({
         {({ removeLabware }) => (
           <SourceTable
             sourceLabware={state.sourceLabware}
-            removeLabwareCallBack={removeLabware}
-            extraColumns={columns}
+            columnTableConfig={{
+              ...sourceTableConfig,
+              removeLabwareCallBack: removeLabware
+            }}
           />
         )}
       </LabwareScanner>

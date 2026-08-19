@@ -27,24 +27,32 @@ export type ExtraColumnType = {
   cell: ({ row }: { row: Row<SampleDataTableRow> }) => JSX.Element;
 };
 
-type SourceTableProps = {
-  sourceLabware: Array<LabwareFlaggedFieldsFragment>;
-  removeLabwareCallBack?: (barcode: string) => void;
+export type SourceTableColumnsConfig = {
   extraColumns?: Array<ExtraColumnType>;
+  showLastKnownSectionNumberColumn?: boolean;
+  removeLabwareCallBack?: (barcode: string) => void;
 };
 
-export const SourceTable = ({ sourceLabware, removeLabwareCallBack, extraColumns }: SourceTableProps) => {
+type SourceTableProps = {
+  sourceLabware: Array<LabwareFlaggedFieldsFragment>;
+  columnTableConfig?: SourceTableColumnsConfig;
+};
+
+export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTableProps) => {
+  const { showLastKnownSectionNumberColumn = true, extraColumns, removeLabwareCallBack } = columnTableConfig;
+
   const sources = React.useMemo(() => {
     return extractSourceSamplesFromLabware(sourceLabware);
   }, [sourceLabware]);
 
   const gridColsNumber = React.useMemo(() => {
-    const fixedColNumber = 5;
+    const fixedColNumber = 3; // Barcode, External ID, Replicate
     let gridColsNumber = fixedColNumber;
     if (removeLabwareCallBack) gridColsNumber = fixedColNumber + 1;
-    if (extraColumns) gridColsNumber = fixedColNumber + extraColumns.length;
+    if (extraColumns) gridColsNumber = gridColsNumber + extraColumns.length;
+    if (showLastKnownSectionNumberColumn) gridColsNumber = gridColsNumber + 1;
     return gridColsNumber;
-  }, [removeLabwareCallBack, extraColumns]);
+  }, [showLastKnownSectionNumberColumn, extraColumns, removeLabwareCallBack]);
 
   if (sourceLabware.length === 0) return null;
 
@@ -57,7 +65,7 @@ export const SourceTable = ({ sourceLabware, removeLabwareCallBack, extraColumns
         <div>Barcode</div>
         <div>External ID</div>
         <div>Replicate</div>
-        <div>Last Known Section Number</div>
+        {showLastKnownSectionNumberColumn && <div>Last Known Section Number</div>}
         {extraColumns && extraColumns.map((col, index) => <div key={`header-${index}`}>{col.header}</div>)}
         <div></div>
       </div>
@@ -70,7 +78,9 @@ export const SourceTable = ({ sourceLabware, removeLabwareCallBack, extraColumns
             <div>{index === 0 ? barcode : ''}</div>
             <div>{sample.tissue.externalName}</div>
             <div>{sample.tissue.replicate}</div>
-            <div data-testid="block-highest-section">{sample.blockHighestSection}</div>
+            {showLastKnownSectionNumberColumn && (
+              <div data-testid="block-highest-section">{sample.blockHighestSection}</div>
+            )}
             {extraColumns &&
               index === 0 &&
               extraColumns.map((col, idx) => (
