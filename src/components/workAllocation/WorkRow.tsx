@@ -346,17 +346,19 @@ export default function WorkRow({
                 {workType.name}
               </Pill>
             ))}
-            <PinkButton
-              action={'tertiary'}
-              type="button"
-              data-testid={`${workNumber}-edit-work-types`}
-              onClick={() => {
-                setSelectedWorkTypes(workTypes);
-                setIsEditingWorkTypes(true);
-              }}
-            >
-              Edit Work Types
-            </PinkButton>
+            {isEditEnabledForStatus(work.status) && (
+              <PinkButton
+                action={'tertiary'}
+                type="button"
+                data-testid={`${workNumber}-edit-work-types`}
+                onClick={() => {
+                  setSelectedWorkTypes(workTypes);
+                  setIsEditingWorkTypes(true);
+                }}
+              >
+                Edit Work Types
+              </PinkButton>
+            )}
           </div>
         )}
         {isEditEnabledForStatus(work.status) && isEditingWorkTypes && (

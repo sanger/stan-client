@@ -1177,9 +1177,9 @@ export type Mutation = {
   /** Update the status of an existing work. */
   updateWorkStatus: WorkWithComment;
   /** Updates the treatment types of a work. */
-  updateWorkTreatmentTypes?: Maybe<Work>;
-  /** Updates the work types of a work. */
-  updateWorkTypes?: Maybe<Work>;
+  updateWorkTreatmentTypes: Work;
+  /** Update the work types of a work. */
+  updateWorkWorkTypes: Work;
   /** Update the Xenium study of a work. */
   updateWorkXeniumStudy: Work;
   /** Record Visium Analysis. */
@@ -2221,7 +2221,7 @@ export type MutationUpdateWorkTreatmentTypesArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
-export type MutationUpdateWorkTypesArgs = {
+export type MutationUpdateWorkWorkTypesArgs = {
   workNumber: Scalars['String']['input'];
   workTypes: Array<Scalars['String']['input']>;
 };
@@ -5460,7 +5460,7 @@ export type UpdateWorkTreatmentTypesMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkTreatmentTypesMutation = { __typename?: 'Mutation', updateWorkTreatmentTypes?: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } | null };
+export type UpdateWorkTreatmentTypesMutation = { __typename?: 'Mutation', updateWorkTreatmentTypes: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type UpdateWorkTypesMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
@@ -5468,7 +5468,7 @@ export type UpdateWorkTypesMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkTypesMutation = { __typename?: 'Mutation', updateWorkTypes?: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } | null };
+export type UpdateWorkTypesMutation = { __typename?: 'Mutation', updateWorkWorkTypes: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type UpdateWorkXeniumStudyMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
@@ -7862,7 +7862,7 @@ ${ReleaseDestinationFieldsFragmentDoc}
 ${TreatmentTypeFieldsFragmentDoc}`;
 export const UpdateWorkTypesDocument = gql`
     mutation UpdateWorkTypes($workNumber: String!, $workTypes: [String!]!) {
-  updateWorkTypes(workNumber: $workNumber, workTypes: $workTypes) {
+  updateWorkWorkTypes(workNumber: $workNumber, workTypes: $workTypes) {
     ...WorkFields
   }
 }

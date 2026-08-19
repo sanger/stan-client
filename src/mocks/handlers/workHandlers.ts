@@ -332,7 +332,7 @@ const workHandlers = [
       return HttpResponse.json({ errors: [{ message: `No work types provided` }] }, { status: 400 });
     }
     work.workTypes = workTypes;
-    return HttpResponse.json({ data: { updateWorkTypes: work } }, { status: 200 });
+    return HttpResponse.json({ data: { updateWorkWorkTypes: work } }, { status: 200 });
   })
 ];
 

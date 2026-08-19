@@ -58,7 +58,7 @@ export type WorkAllocationUrlParams = {
 const tableColumnFieldInfo = [
   { key: 'Priority', path: ['work', 'priority'] },
   { key: 'SGP Number', path: ['work', 'workNumber'] },
-  { key: 'Work Type', path: ['work', 'workType', 'name'] },
+  { key: 'Work Types', path: ['work', 'workTypes', 'name'] },
   { key: 'Treatment Types', path: ['work', 'treatmentTypes', 'name'] },
   { key: 'Work Requester', path: ['work', 'workRequester', 'username'] },
   { key: 'Project', path: ['work', 'project', 'name'] },
@@ -144,6 +144,9 @@ export default function WorkAllocation() {
         return tableColumnFieldInfo.map((columnInfo) => {
           if (columnInfo.key === 'Treatment Types') {
             return data.work.treatmentTypes.map((t) => t.name).join(', ');
+          }
+          if (columnInfo.key === 'Work Types') {
+            return data.work.workTypes.map((t) => t.name).join(', ');
           }
           const value = getPropertyValue(data, columnInfo.path);
           return String(value);

@@ -409,8 +409,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         assignWorkTypes: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkTypes') return context;
           return produce(context, (draft) => {
-            if (event.output.updateWorkTypes) {
-              draft.workWithComment.work = event.output.updateWorkTypes;
+            if (event.output.updateWorkWorkTypes) {
+              draft.workWithComment.work = event.output.updateWorkWorkTypes;
               draft.isInvokeActorDone = true;
             }
           });
