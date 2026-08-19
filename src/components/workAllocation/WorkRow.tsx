@@ -6,6 +6,7 @@ import {
   OmeroProjectFieldsFragment,
   TreatmentTypeFieldsFragment,
   WorkStatus,
+  WorkTypeFieldsFragment,
   WorkWithCommentFieldsFragment
 } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
@@ -60,6 +61,11 @@ type WorkRowProps = {
    */
   availableTreatmentTypes: Array<TreatmentTypeFieldsFragment>;
 
+  /**
+   * Available work types for editing this Work row.
+   */
+  availableWorkTypes: Array<WorkTypeFieldsFragment>;
+
   rowIndex: number;
   onWorkFieldUpdate: (index: number, work: WorkWithCommentFieldsFragment) => void;
 };
@@ -78,6 +84,7 @@ export default function WorkRow({
   availableComments,
   availableOmeroProjects,
   availableTreatmentTypes,
+  availableWorkTypes,
   rowIndex,
   onWorkFieldUpdate
 }: WorkRowProps) {
@@ -94,6 +101,8 @@ export default function WorkRow({
   } = current.context;
   const [isEditingTreatmentTypes, setIsEditingTreatmentTypes] = React.useState(false);
   const [selectedTreatmentTypes, setSelectedTreatmentTypes] = React.useState<string[]>([]);
+  const [isEditingWorkTypes, setIsEditingWorkTypes] = React.useState(false);
+  const [selectedWorkTypes, setSelectedWorkTypes] = React.useState<string[]>([]);
 
   /**Notify the changes in work fields*/
   React.useEffect(() => {
@@ -327,6 +336,73 @@ export default function WorkRow({
     );
   };
 
+  const renderWorkTypesField = (workNumber: string, workTypes: string[]) => {
+    return (
+      <div className="space-y-2">
+        {!isEditingWorkTypes && (
+          <div className="flex flex-col items-start gap-1">
+            {work.workTypes.map((workType) => (
+              <Pill key={workType.name} className="whitespace-nowrap" color="blue">
+                {workType.name}
+              </Pill>
+            ))}
+            <PinkButton
+              action={'tertiary'}
+              type="button"
+              data-testid={`${workNumber}-edit-work-types`}
+              onClick={() => {
+                setSelectedWorkTypes(workTypes);
+                setIsEditingWorkTypes(true);
+              }}
+            >
+              Edit Work Types
+            </PinkButton>
+          </div>
+        )}
+        {isEditEnabledForStatus(work.status) && isEditingWorkTypes && (
+          <div className="space-y-4">
+            <CustomReactSelect
+              dataTestId={`${workNumber}-workTypes`}
+              className="min-w-[13rem] max-w-[33vw]"
+              isMulti={true}
+              label={'Work Types'}
+              menuPosition={'fixed'}
+              menuPlacement={'auto'}
+              menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
+              styles={{
+                menuPortal: (base) => ({ ...base, zIndex: 60 })
+              }}
+              value={selectedWorkTypes}
+              options={selectOptionValues(availableWorkTypes, 'name', 'name')}
+              handleChange={(value) => {
+                const selected = Array.isArray(value) ? value.map((v) => v.label) : [];
+                setSelectedWorkTypes(selected);
+              }}
+            />
+            <div className="flex flex-row items-center justify-end space-x-2">
+              <WhiteButton type="button" onClick={() => setIsEditingWorkTypes(false)}>
+                Cancel
+              </WhiteButton>
+              <BlueButton
+                type="button"
+                disabled={current.matches('updateWorkTypes')} //sabrine need to disable editing when the work is started
+                onClick={() => {
+                  send({
+                    type: 'UPDATE_WORK_TYPES',
+                    workTypes: selectedWorkTypes
+                  });
+                  setIsEditingWorkTypes(false);
+                }}
+              >
+                Save
+              </BlueButton>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderWorkSsStudyField = (
     workNumber: string,
     ssStudy: DnapStudy | undefined,
@@ -456,7 +532,12 @@ export default function WorkRow({
           )}
         </TableCell>
         <TableCell>{work.workNumber}</TableCell>
-        <TableCell>{work.workType.name}</TableCell>
+        <TableCell>
+          {renderWorkTypesField(
+            work.workNumber,
+            work.workTypes.map((workType) => workType.name)
+          )}
+        </TableCell>
         <TableCell>
           {renderWorkTreatmentTypesField(
             work.workNumber,

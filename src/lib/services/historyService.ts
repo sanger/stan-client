@@ -72,7 +72,9 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Histo
     (historyProps.workNumber || historyProps.barcode || historyProps.donorName || historyProps.externalName)
   ) {
     result = await stanCore.FindHistoryGraph({
-      ...omit(historyProps, ['resultFormat']),
+      ...omit(historyProps, ['resultFormat', 'donorName', 'externalName']),
+      donorName: historyProps.donorName?.split(','),
+      externalName: historyProps.externalName?.split(','),
       zoom: historyProps.zoom || 1,
       fontSize: historyProps.fontSize || 16
     });

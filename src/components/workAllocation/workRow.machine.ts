@@ -8,6 +8,7 @@ import {
   UpdateWorkPriorityMutation,
   UpdateWorkStatusMutation,
   UpdateWorkTreatmentTypesMutation,
+  UpdateWorkTypesMutation,
   UpdateWorkXeniumStudyMutation,
   WorkStatus,
   WorkWithCommentFieldsFragment
@@ -63,6 +64,7 @@ export type WorkRowEvent =
   | { type: 'UPDATE_PRIORITY'; priority: string | undefined }
   | { type: 'UPDATE_OMERO_PROJECT'; omeroProject: string | undefined }
   | { type: 'UPDATE_TREATMENT_TYPES'; treatmentTypes: string[] }
+  | { type: 'UPDATE_WORK_TYPES'; workTypes: string[] }
   | { type: 'UPDATE_DNAP_PROJECT'; ssStudyId: number }
   | { type: 'UPDATE_XENIUM_STUDY_ID'; ssStudyId: number }
   | { type: 'xstate.done.actor.updateWorkStatus'; output: UpdateWorkStatusMutation }
@@ -71,11 +73,13 @@ export type WorkRowEvent =
   | { type: 'xstate.done.actor.updateWorkPriority'; output: UpdateWorkPriorityMutation }
   | { type: 'xstate.done.actor.updateWorkOmeroProject'; output: UpdateWorkOmeroProjectMutation }
   | { type: 'xstate.done.actor.updateWorkTreatmentTypes'; output: UpdateWorkTreatmentTypesMutation }
+  | { type: 'xstate.done.actor.updateWorkTypes'; output: UpdateWorkTypesMutation }
   | { type: 'xstate.done.actor.updateWorkDnapProject'; output: UpdateWorkDnapStudyMutation }
   | { type: 'xstate.error.actor.updateWorkDnapProject'; error: ClientError }
   | { type: 'xstate.done.actor.updateWorkXeniumStudyId'; output: UpdateWorkXeniumStudyMutation }
   | { type: 'xstate.error.actor.updateWorkXeniumStudyId'; error: ClientError }
-  | { type: 'xstate.done.actor.updateWorkNumOriginalSamples'; output: UpdateWorkNumOriginalSamplesMutation };
+  | { type: 'xstate.done.actor.updateWorkNumOriginalSamples'; output: UpdateWorkNumOriginalSamplesMutation }
+  | { type: 'xstate.error.actor.updateWorkTypes'; error: ClientError };
 
 type CreateWorkRowMachineParams = Pick<WorkRowMachineContext, 'workWithComment'>;
 
@@ -113,6 +117,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_PRIORITY: 'editPriority',
             UPDATE_OMERO_PROJECT: 'updateOmeroProject',
             UPDATE_TREATMENT_TYPES: 'editTreatmentTypes',
+            UPDATE_WORK_TYPES: 'updateWorkTypes',
             UPDATE_DNAP_PROJECT: 'updateDnapProject',
             UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
           }
@@ -130,6 +135,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_PRIORITY: 'editPriority',
             UPDATE_OMERO_PROJECT: 'updateOmeroProject',
             UPDATE_TREATMENT_TYPES: 'editTreatmentTypes',
+            UPDATE_WORK_TYPES: 'updateWorkTypes',
             UPDATE_DNAP_PROJECT: 'updateDnapProject',
             UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
           }
@@ -147,6 +153,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_PRIORITY: 'editPriority',
             UPDATE_OMERO_PROJECT: 'updateOmeroProject',
             UPDATE_TREATMENT_TYPES: 'editTreatmentTypes',
+            UPDATE_WORK_TYPES: 'updateWorkTypes',
             UPDATE_DNAP_PROJECT: 'updateDnapProject',
             UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
           }
@@ -281,6 +288,21 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             onError: { target: 'deciding' }
           }
         },
+        updateWorkTypes: {
+          invoke: {
+            src: fromPromise(({ input }) => stanCore.UpdateWorkTypes(input)),
+            input: ({ context, event }) => ({
+              workNumber: context.workWithComment.work.workNumber,
+              workTypes: 'workTypes' in event ? event.workTypes : []
+            }),
+            id: 'updateWorkTypes',
+            onDone: {
+              actions: 'assignWorkTypes',
+              target: 'deciding'
+            },
+            onError: { target: 'deciding' }
+          }
+        },
         updateDnapProject: {
           invoke: {
             src: fromPromise(({ input }) => {
@@ -384,6 +406,15 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             }
           });
         }),
+        assignWorkTypes: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateWorkTypes') return context;
+          return produce(context, (draft) => {
+            if (event.output.updateWorkTypes) {
+              draft.workWithComment.work = event.output.updateWorkTypes;
+              draft.isInvokeActorDone = true;
+            }
+          });
+        }),
         assignWorkDnapProject: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkDnapProject') return context;
           return produce(context, (draft) => {
@@ -408,7 +439,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         assignServerError: assign(({ context, event }) => {
           if (
             event.type === 'xstate.error.actor.updateWorkDnapProject' ||
-            event.type === 'xstate.error.actor.updateWorkXeniumStudyId'
+            event.type === 'xstate.error.actor.updateWorkXeniumStudyId' ||
+            event.type === 'xstate.error.actor.updateWorkTypes'
           )
             return { ...context, serverErrors: castDraft(event.error) };
           return context;

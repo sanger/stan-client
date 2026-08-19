@@ -11,11 +11,11 @@ import {
   ProjectFieldsFragment,
   ReleaseDestinationFieldsFragment,
   ReleaseRecipientFieldsFragment,
+  TreatmentTypeFieldsFragment,
   UserRole,
   WorkStatus,
   WorkTypeFieldsFragment,
-  WorkWithCommentFieldsFragment,
-  TreatmentTypeFieldsFragment
+  WorkWithCommentFieldsFragment
 } from '../../types/sdk';
 import { stanCore } from '../../lib/sdk';
 import { WorkAllocationUrlParams } from './WorkAllocation';
@@ -26,7 +26,7 @@ export type WorkAllocationFormValues = {
   /**
    * The Work Type for this Work
    */
-  workType: string;
+  workTypes: Array<string>;
 
   /**
    * The Work Requester for this Work
@@ -210,7 +210,7 @@ type CreateWorkAllocationMachineParams = {
   urlParams: WorkAllocationUrlParams;
 };
 
-const getWorkAllocationInfo = ({ input }: { input: { status: WorkStatus } }) =>
+const getWorkAllocationInfo = ({ input }: { input: { status: Array<WorkStatus> } }) =>
   stanCore.GetWorkAllocationInfo({
     commentCategory: 'Work status',
     workStatuses: input.status
@@ -218,7 +218,7 @@ const getWorkAllocationInfo = ({ input }: { input: { status: WorkStatus } }) =>
 
 const getCurrentUser = () => stanCore.CurrentUser();
 
-const fetchWorkAllocationAndCurrentUser = ({ input }: { input: { status: WorkStatus } }) =>
+const fetchWorkAllocationAndCurrentUser = ({ input }: { input: { status: Array<WorkStatus> } }) =>
   Promise.all([getWorkAllocationInfo({ input }), getCurrentUser()]).then(([workAllocationInfo, currentUser]) => {
     return { workAllocation: workAllocationInfo, currentUser };
   });
@@ -287,7 +287,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             id: 'allocateWork',
             src: fromPromise(({ input }) => {
               const {
-                workType,
+                workTypes,
                 treatmentTypes,
                 workRequester,
                 project,
@@ -303,7 +303,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
                 facultyLead
               } = input.values;
               return stanCore.CreateWork({
-                workType,
+                workTypes,
                 treatmentTypes,
                 workRequester,
                 project,
@@ -390,7 +390,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           const {
             workNumber,
             workRequester,
-            workType,
+            workTypes,
             treatmentTypes,
             project,
             program,
@@ -416,9 +416,11 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
 
           return produce(context, (draft) => {
             draft.allocatedWorkNumber = workNumber;
-            draft.successMessage = `Assigned ${workNumber} (${
-              workType.name
-            }${treatmentTypesMsg} - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
+            draft.successMessage = `Assigned ${workNumber} (${workTypes
+              .map((type) => type.name)
+              .join(
+                ', '
+              )}${treatmentTypesMsg} - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
               omeroProject ? `, Omero project ${omeroProject.name}` : ''
             }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''}${
               xeniumStudy ? `, Xenium study name '${xeniumStudy.name}'` : ''

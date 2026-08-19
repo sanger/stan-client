@@ -1,0 +1,5 @@
+mutation UpdateWorkTypes($workNumber: String!, $workTypes: [String!]!) {
+  updateWorkTypes(workNumber: $workNumber, workTypes: $workTypes) {
+    ...WorkFields
+  }
+}
