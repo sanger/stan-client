@@ -56,6 +56,7 @@ describe('Search Service', () => {
         labwareType: labware1.labwareType.name,
         workNumbers: [workNumber1],
         externalId: sample10.tissue.externalName,
+        externalBarcode: labware1.externalBarcode,
         donorId: sample10.tissue.donor.donorName,
         tissueType: sample10.tissue.spatialLocation.tissueType.name,
         location: {
@@ -74,6 +75,7 @@ describe('Search Service', () => {
         labwareType: labware2.labwareType.name,
         workNumbers: [workNumber2],
         externalId: sample11.tissue.externalName,
+        externalBarcode: labware2.externalBarcode,
         donorId: sample11.tissue.donor.donorName,
         tissueType: sample11.tissue.spatialLocation.tissueType.name,
         location: null,
@@ -88,6 +90,7 @@ describe('Search Service', () => {
         labwareType: labware3.labwareType.name,
         workNumbers: [workNumber1, workNumber2],
         externalId: sample12.tissue.externalName,
+        externalBarcode: labware3.externalBarcode,
         donorId: sample12.tissue.donor.donorName,
         tissueType: sample12.tissue.spatialLocation.tissueType.name,
         location: {
@@ -106,6 +109,7 @@ describe('Search Service', () => {
         labwareType: labware2.labwareType.name,
         workNumbers: [],
         externalId: sample13.tissue.externalName,
+        externalBarcode: labware2.externalBarcode,
         donorId: sample13.tissue.donor.donorName,
         tissueType: sample13.tissue.spatialLocation.tissueType.name,
         location: null,
@@ -120,6 +124,7 @@ describe('Search Service', () => {
         labwareType: labware1.labwareType.name,
         workNumbers: [],
         externalId: sample14.tissue.externalName,
+        externalBarcode: labware1.externalBarcode,
         donorId: sample14.tissue.donor.donorName,
         tissueType: sample14.tissue.spatialLocation.tissueType.name,
         location: {

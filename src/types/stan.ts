@@ -144,6 +144,7 @@ export type SearchResultTableEntry = {
   labwareType: string;
   workNumbers: Array<Maybe<string>>;
   externalId?: Maybe<string>;
+  externalBarcode?: Maybe<string>;
   donorId: string;
   tissueType: string;
   location: Maybe<SearchResultTableEntryLocation>;

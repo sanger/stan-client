@@ -518,6 +518,10 @@ const columns: Column<SearchResultTableEntry>[] = [
     accessor: 'externalId'
   },
   {
+    Header: 'External Barcode',
+    accessor: 'externalBarcode'
+  },
+  {
     Header: 'Donor ID',
     accessor: 'donorId'
   },
