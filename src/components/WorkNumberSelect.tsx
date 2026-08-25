@@ -183,12 +183,16 @@ export default function WorkNumberSelect({
         preventEnterKeyDefault={preventEnterKeyDefault}
       />
       {!name && error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
-      <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
+      <div className={'flex flex-row flex-wrap whitespace-normal gap-2 py-2 w-full max-w-full overflow-hidden'}>
         {currentSelectedWork && currentSelectedWork.project?.length > 0 && (
-          <Pill color={'pink'}>{currentSelectedWork.project}</Pill>
+          <Pill color={'pink'} className={'truncate max-w-full'}>
+            {currentSelectedWork.project}
+          </Pill>
         )}
         {currentSelectedWork && currentSelectedWork.workRequester?.length > 0 && (
-          <Pill color={'pink'}>{currentSelectedWork.workRequester}</Pill>
+          <Pill color={'pink'} className={'truncate max-w-full'}>
+            {currentSelectedWork.workRequester}
+          </Pill>
         )}
       </div>
     </div>
