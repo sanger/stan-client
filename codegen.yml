@@ -7,6 +7,7 @@ config:
     Timestamp: string
     Date: string
   sort: true
+  arrayInputCoercion: false
 
 generates:
   src/types/sdk.ts:

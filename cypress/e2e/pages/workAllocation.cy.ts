@@ -23,7 +23,7 @@ describe('Work Allocation', () => {
         });
 
         it('says the work type is required', () => {
-          cy.findByText('Work Type is a required field').should('exist');
+          cy.findByText('Work Type field must have at least 1 items').should('exist');
         });
 
         it('says the work type is required', () => {

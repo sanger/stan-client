@@ -78,14 +78,7 @@ const RouteLayout = () => {
         <Route path="/locations" element={<Store />} />
         <Route path="/store" element={<Store />} />
         <Route path="/login" element={<Login />} />
-        <Route
-          path="/"
-          loader={async () => {
-            const workProgress = await stanCore.GetWorkProgressInputs();
-            return workProgress;
-          }}
-          element={<WorkProgress />}
-        />
+        <Route path="/" loader={async () => await stanCore.GetWorkProgressInputs()} element={<WorkProgress />} />
         <Route
           path={'/search'}
           loader={async () => {

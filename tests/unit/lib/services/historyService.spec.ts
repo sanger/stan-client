@@ -89,7 +89,7 @@ describe('historyService.ts', () => {
         { donorName: 'Donor1' },
         { eventType: 'Event1' },
         { workNumber: 'SGP1008' },
-        { donorName: 'Donor1,Donor2' },
+        { donorName: 'Donor1, Donor2' },
         { externalName: 'Ext1' },
         { externalName: 'Ext1,Ext2' },
         {
@@ -103,9 +103,10 @@ describe('historyService.ts', () => {
       test.each(testProps)('returns results when request has %p', async (props) => {
         const results = await findHistory(props);
         expectSuccesResult(results.history.entries);
-        let expectedProps: FindHistoryQueryVariables = props;
+        const { donorName, externalName, ...otherProps } = props;
+        let expectedProps: FindHistoryQueryVariables = { ...otherProps };
         if (props.donorName) {
-          expectedProps = { ...props, donorName: props.donorName.split(',') };
+          expectedProps = { ...expectedProps, donorName: props.donorName.split(',') };
         }
         if (props.externalName) {
           expectedProps = { ...expectedProps, externalName: props.externalName.split(',') };

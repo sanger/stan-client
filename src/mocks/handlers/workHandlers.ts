@@ -30,7 +30,10 @@ import {
   UpdateWorkPriorityMutationVariables,
   UpdateWorkStatusMutation,
   UpdateWorkStatusMutationVariables,
-  WorkStatus
+  UpdateWorkTypesMutation,
+  UpdateWorkTypesMutationVariables,
+  WorkStatus,
+  WorkTypeFieldsFragment
 } from '../../types/sdk';
 import costCodeRepository from '../repositories/costCodeRepository';
 import projectRepository from '../repositories/projectRepository';
@@ -39,6 +42,7 @@ import workRepository from '../repositories/workRepository';
 import workFactory from '../../lib/factories/workFactory';
 import { isEnabled } from '../../lib/helpers';
 import workTypeRepository from '../repositories/workTypeRepository';
+import WorkTypeRepository from '../repositories/workTypeRepository';
 import { sample } from 'lodash';
 import releaseRecipientRepository from '../repositories/releaseRecipientRepository';
 import programRepository from '../repositories/programRepository';
@@ -125,7 +129,9 @@ const workHandlers = [
   }),
 
   graphql.mutation<CreateWorkMutation, CreateWorkMutationVariables>('CreateWork', ({ variables }) => {
-    const workType = workTypeRepository.find('name', variables.workType);
+    const workTypes = variables.workTypes
+      .map((workTypeName: string) => workTypeRepository.find('name', workTypeName))
+      .filter((workType): workType is NonNullable<typeof workType> => workType != null);
     const costCode = costCodeRepository.find('code', variables.costCode);
     const project = projectRepository.find('name', variables.project);
     const program = programRepository.find('name', variables.program) ?? undefined;
@@ -138,8 +144,11 @@ const workHandlers = [
       : undefined;
     const workRequester = releaseRecipientRepository.find('username', variables.workRequester);
 
-    if (!workType) {
-      return HttpResponse.json({ errors: [{ message: `Work type ${variables.workType} not found` }] }, { status: 404 });
+    if (!workTypes || workTypes.length === 0) {
+      return HttpResponse.json(
+        { errors: [{ message: `Work type ${variables.workTypes} not found` }] },
+        { status: 404 }
+      );
     }
 
     if (!costCode) {
@@ -164,7 +173,7 @@ const workHandlers = [
         numOriginalSamples: variables.numOriginalSamples
       },
       {
-        associations: { workType, costCode, project, program, workRequester, omeroProject, dnapStudy, facultyLead },
+        associations: { workTypes, costCode, project, program, workRequester, omeroProject, dnapStudy, facultyLead },
         transient: { isRnD: variables.prefix === 'R&D' }
       }
     );
@@ -303,7 +312,28 @@ const workHandlers = [
     () => {
       return HttpResponse.json({ data: { suggestedLabwareForWork: labwareFactory.buildList(2) } });
     }
-  )
+  ),
+  graphql.mutation<UpdateWorkTypesMutation, UpdateWorkTypesMutationVariables>('UpdateWorkTypes', ({ variables }) => {
+    const work = workRepository.find('workNumber', variables.workNumber);
+    if (!work) {
+      return HttpResponse.json({ errors: [{ message: `Work ${variables.workNumber} not found` }] }, { status: 404 });
+    }
+    const workTypes: Array<WorkTypeFieldsFragment> = [];
+    if (variables.workTypes && variables.workTypes.length > 0) {
+      variables.workTypes.forEach((workTypeName: string) => {
+        const workType = WorkTypeRepository.find('name', workTypeName);
+        if (!workType) {
+          return HttpResponse.json({ errors: [{ message: `Unknown work type ${workTypeName}` }] }, { status: 404 });
+        } else {
+          workTypes.push(workType);
+        }
+      });
+    } else {
+      return HttpResponse.json({ errors: [{ message: `No work types provided` }] }, { status: 400 });
+    }
+    work.workTypes = workTypes;
+    return HttpResponse.json({ data: { updateWorkWorkTypes: work } }, { status: 200 });
+  })
 ];
 
 export default workHandlers;

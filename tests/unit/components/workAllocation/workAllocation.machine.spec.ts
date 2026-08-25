@@ -24,7 +24,7 @@ jest.mock('../../../../src/lib/sdk', () => {
       CreateWork: jest.fn().mockResolvedValue({
         createWork: {
           workNumber: 'SGP999',
-          workType: { name: 'Type A' },
+          workTypes: [{ name: 'Type A' }],
           project: { name: 'Project A' },
           program: { name: 'Program A' },
           costCode: { code: 'CC1' },
@@ -54,7 +54,7 @@ describe('workAllocation machine - assignSuccessMessage', () => {
     service.send({
       type: 'ALLOCATE_WORK',
       values: {
-        workType: 'Type A',
+        workTypes: ['Type A'],
         workRequester: 'user1',
         project: 'Project A',
         program: 'Program A',

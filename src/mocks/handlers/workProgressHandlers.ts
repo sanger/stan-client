@@ -72,8 +72,10 @@ const workProgressHandlers = [
     let filteredWorks = [...works];
     if (workTypes) {
       filteredWorks = Array.isArray(workTypes)
-        ? works.filter((work) => workTypes.some((workType) => workType === work.workType.name))
-        : works.filter((work) => work.workType.name === workTypes);
+        ? works.filter((work) =>
+            workTypes.some((workType) => work.workTypes.map((type) => type.name).includes(workType))
+          )
+        : works.filter((work) => work.workTypes.map((type) => type.name).join(',') === workTypes);
     }
     if (statuses) {
       filteredWorks = Array.isArray(statuses)

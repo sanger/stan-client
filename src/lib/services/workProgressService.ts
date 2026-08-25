@@ -11,7 +11,7 @@ import { Column } from 'react-table';
 export type WorkProgressResultTableEntry = {
   priority: string | undefined;
   workNumber: string;
-  workType: string;
+  workTypes: string;
   project: string;
   omeroProject: string;
   program: string;
@@ -117,7 +117,7 @@ export class WorkProgressService
       return {
         priority: entry.work.priority ?? undefined,
         workNumber: entry.work.workNumber,
-        workType: entry.work.workType.name,
+        workTypes: entry.work.workTypes.map((workType) => workType.name).join(', '),
         project: entry.work.project.name,
         omeroProject: entry.work.omeroProject ? entry.work.omeroProject.name : '',
         program: entry.work.program.name,
