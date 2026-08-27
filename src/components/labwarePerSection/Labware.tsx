@@ -409,7 +409,7 @@ const Labware = ({
       .filter(([, sectionDetails]) => sectionDetails.addresses.size > 1)
       .forEach(([groupId, sectionDetails]) => {
         sectionDetails.addresses.forEach((address) => {
-          result[address] = SECTION_GROUPS_BG_COLORS[Number(groupId)];
+          result[address] = SECTION_GROUPS_BG_COLORS[Number(groupId.replace('section-group-', ''))];
         });
       });
     return result;
