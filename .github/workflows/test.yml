@@ -7,7 +7,7 @@ on:
   push:
     branches: [devel]
   pull_request:
-    branches: [devel]
+    branches: [devel, master]
 
 # Cancel in-progress runs on the same PR when a new push arrives.
 # On pushes to devel, queue runs instead of cancelling so each commit gets a status.
