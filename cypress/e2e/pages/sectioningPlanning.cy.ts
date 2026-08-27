@@ -217,9 +217,10 @@ describe('Sectioning Planning', () => {
         cy.findAllByTestId('section-addresses')
           .should('have.length', 3)
           .then((sectionAddresses) => {
-            cy.wrap(sectionAddresses.eq(0)).should('have.text', 'A1, B1');
-            cy.wrap(sectionAddresses.eq(1)).should('have.text', 'B2, C2');
-            cy.wrap(sectionAddresses.eq(2)).should('have.text', 'D2');
+            throw new Error(`SECTION ADDRESSES: ${JSON.stringify(sectionAddresses)}`);
+            // cy.wrap(sectionAddresses.eq(0)).should('have.text', 'A1, B1');
+            // cy.wrap(sectionAddresses.eq(1)).should('have.text', 'B2, C2');
+            // cy.wrap(sectionAddresses.eq(2)).should('have.text', 'D2');
           });
       });
 
