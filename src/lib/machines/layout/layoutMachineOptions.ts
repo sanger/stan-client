@@ -58,7 +58,7 @@ const sectionGroupIdForDestinationAddress = (
   return null;
 };
 
-const sectionGroupKey = (sectionId: number): string => `section-group-${sectionId}`;
+const sectionGroupKey = (sectionId: string | number): string => `section-group-${sectionId}`;
 
 const deleteDestinationAddressFromGroup = (
   plannedActions: Record<string, PlannedSectionDetails>,
