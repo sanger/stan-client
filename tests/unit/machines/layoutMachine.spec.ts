@@ -2,6 +2,8 @@ import { createActor } from 'xstate';
 import { enableMapSet } from 'immer';
 import { createLayoutMachine } from '../../../src/lib/machines/layout/layoutMachine';
 import { LayoutPlan, Source } from '../../../src/lib/machines/layout/layoutContext';
+import { createSectioningConfirmMachine } from '../../../src/components/sectioningConfirm/sectioningConfirm.machine';
+import { FindPlanDataQuery } from '../../../src/types/sdk';
 
 describe('layoutMachine', () => {
   beforeEach(() => {
@@ -36,6 +38,42 @@ describe('layoutMachine', () => {
       ['B2'],
       ['D2'],
       ['F2']
+    ]);
+  });
+
+  it('uses the received group order for automatic section numbering', () => {
+    const sourceLabware = {
+      id: 1,
+      barcode: 'STAN-1',
+      slots: [{ samples: [{ blockHighestSection: 0 }] }]
+    };
+    const plan = {
+      planData: {
+        sources: [sourceLabware],
+        destination: { barcode: 'STAN-2', labwareType: { name: 'SLIDE' } },
+        groups: [['B2'], ['D2'], ['F2']],
+        plan: {
+          planActions: ['B2', 'D2', 'F2'].map((address) => ({
+            source: { labwareId: 1, samples: [{ id: 1, tissue: {} }] },
+            destination: { address },
+            sampleThickness: 5
+          }))
+        }
+      }
+    } as unknown as FindPlanDataQuery;
+    const actor = createActor(createSectioningConfirmMachine()).start();
+
+    actor.send({ type: 'UPDATE_PLANS', plans: [plan] });
+
+    expect(
+      Object.values(actor.getSnapshot().context.layoutPlans[0].plannedActions).map((planned) => ({
+        address: Array.from(planned.addresses)[0],
+        section: planned.source.newSection
+      }))
+    ).toEqual([
+      { address: 'B2', section: '1' },
+      { address: 'D2', section: '2' },
+      { address: 'F2', section: '3' }
     ]);
   });
 });
