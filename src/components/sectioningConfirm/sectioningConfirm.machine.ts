@@ -533,7 +533,7 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
           tissue: planned.source.samples[0].tissue
         };
         sources.push(source);
-        const sectionGroupId = group.length === 1 ? group[0] : index.toString();
+        const sectionGroupId = group.length === 1 ? group[0] : `section-group-${index}`;
         plannedActions[sectionGroupId] = {
           addresses: new Set(group),
           source,
