@@ -58,6 +58,8 @@ const sectionGroupIdForDestinationAddress = (
   return null;
 };
 
+const sectionGroupKey = (sectionId: number): string => `section-group-${sectionId}`;
+
 const deleteDestinationAddressFromGroup = (
   plannedActions: Record<string, PlannedSectionDetails>,
   address: string
@@ -156,6 +158,7 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
         return context;
       }
       return produce(context, (draft) => {
+        const sectionGroupId = sectionGroupKey(event.sectionId);
         const selected = draft.selectedSlots;
         // User has selected slots --------------------------------------
         if (selected && selected.size > 0) {
@@ -196,7 +199,7 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
             }
           }
           // --- Remove address that used to be assigned to the same section group --------------------------------------
-          const previousSection = draft.layoutPlan.plannedActions[event.sectionId];
+          const previousSection = draft.layoutPlan.plannedActions[sectionGroupId];
           if (previousSection) {
             previousSection.addresses.forEach((address) => {
               draft.layoutPlan.plannedActions[address] = {
@@ -206,7 +209,7 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
             });
           }
           // --- Apply the new section group ----------------------------------------
-          draft.layoutPlan.plannedActions[event.sectionId] = {
+          draft.layoutPlan.plannedActions[sectionGroupId] = {
             addresses: new Set(selected),
             source: { ...referenceSource! }
           };
@@ -219,9 +222,10 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
         return context;
       }
       return produce(context, (draft) => {
-        if (draft.layoutPlan.plannedActions[event.sectionId]) {
-          const { addresses, source } = draft.layoutPlan.plannedActions[event.sectionId];
-          delete draft.layoutPlan.plannedActions[event.sectionId];
+        const sectionGroupId = sectionGroupKey(event.sectionId);
+        if (draft.layoutPlan.plannedActions[sectionGroupId]) {
+          const { addresses, source } = draft.layoutPlan.plannedActions[sectionGroupId];
+          delete draft.layoutPlan.plannedActions[sectionGroupId];
           for (const address of addresses) {
             draft.layoutPlan.plannedActions[address] = {
               addresses: new Set([address]),
