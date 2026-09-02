@@ -1,6 +1,6 @@
 mutation CreateWork(
   $prefix: String!
-  $workType: String!
+  $workTypes: [String!]!
   $workRequester: String!
   $project: String!
   $program: String!
@@ -16,7 +16,7 @@ mutation CreateWork(
 ) {
   createWork(
     prefix: $prefix
-    workType: $workType
+    workTypes: $workTypes
     workRequester: $workRequester
     project: $project
     program: $program

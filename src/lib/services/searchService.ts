@@ -64,6 +64,7 @@ export class SearchService implements SearchServiceInterface<FormFindRequest, Se
         labwareType: labware.labwareType.name,
         workNumbers: entry.workNumbers ?? [],
         externalId: sample.tissue.externalName ?? '',
+        externalBarcode: labware.externalBarcode ?? '',
         donorId: sample.tissue.donor.donorName,
         tissueType: sample.tissue.spatialLocation.tissueType.name,
         location:

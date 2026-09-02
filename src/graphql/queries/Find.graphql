@@ -31,6 +31,7 @@ query Find($request: FindRequest!) {
     labware {
       id
       barcode
+      externalBarcode
       created
       labwareType {
         name

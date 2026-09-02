@@ -25,6 +25,7 @@ import { useDownload } from '../lib/hooks/useDownload';
 import Heading from '../components/Heading';
 import { useAuth } from '../context/AuthContext';
 import TopScrollingBar from '../components/TopScrollingBar';
+
 /**
  * Data structure to keep the data associated with this component
  */
@@ -360,8 +361,8 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     }
   },
   {
-    Header: 'Work Type',
-    accessor: 'workType'
+    Header: 'Work Types',
+    accessor: 'workTypes'
   },
   {
     Header: 'Project',

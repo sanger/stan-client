@@ -92,6 +92,7 @@ describe('searchService.ts', () => {
           labwareType: findResult.labware[0].labwareType.name,
           workNumbers: findResult.entries[0].workNumbers,
           externalId: findResult.samples[0].tissue.externalName,
+          externalBarcode: findResult.labware[0].externalBarcode,
           donorId: findResult.samples[0].tissue.donor.donorName,
           tissueType: findResult.samples[0].tissue.spatialLocation.tissueType.name,
           location:

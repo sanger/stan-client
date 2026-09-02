@@ -1,4 +1,4 @@
-import { render, screen, within, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
 import WorkAllocation from '../../../../src/components/workAllocation/WorkAllocation';
@@ -24,7 +24,7 @@ jest.mock('@xstate/react', () => ({
             workWithComment: {
               work: {
                 workNumber: 'SGP-1',
-                workType: { name: 'Work Type' },
+                workTypes: [{ name: 'Work Type' }],
                 treatmentTypes: [
                   { name: 'Fixed frozen', enabled: true },
                   { name: 'Paxgene ', enabled: false }
@@ -61,7 +61,7 @@ jest.mock('@xstate/react', () => ({
             {
               work: {
                 workNumber: 'SGP-1',
-                workType: { name: 'Work Type' },
+                workTypes: [{ name: 'Work Type' }],
                 treatmentTypes: [
                   { name: 'Type A', enabled: true },
                   { name: 'Type B', enabled: false }
@@ -131,7 +131,7 @@ describe('WorkAllocation table headers', () => {
     const table = await screen.findByTestId('work-allocation-table');
     const scoped = within(table);
     const headers = scoped.getAllByRole('columnheader').map((h) => (h.textContent || '').trim());
-    const workTypeIndex = headers.findIndex((t) => t === 'Work Type');
+    const workTypeIndex = headers.findIndex((t) => t === 'Work Types');
     const treatmentIndex = headers.findIndex((t) => t === 'Treatment Types');
 
     expect(workTypeIndex).toBeGreaterThanOrEqual(0); // exists

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
 import WorkAllocation from '../../../../src/components/workAllocation/WorkAllocation';
@@ -72,7 +72,7 @@ async function selectTreatmentType(label: string) {
 
 // Helper to fill the required form fields shared across tests
 async function fillRequiredFields() {
-  fireEvent.change(screen.getByLabelText('Work Type'), { target: { value: 'Type A' } });
+  fireEvent.change(screen.getByLabelText('Work Types'), { target: { value: 'Type A' } });
   fireEvent.change(screen.getByLabelText('Work Requester'), { target: { value: 'user1' } });
   fireEvent.change(screen.getByLabelText('Project (cost code description)'), { target: { value: 'Project A' } });
   fireEvent.change(screen.getByLabelText('Program'), { target: { value: 'Program A' } });

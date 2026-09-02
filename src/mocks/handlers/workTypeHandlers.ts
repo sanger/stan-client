@@ -40,7 +40,9 @@ const workTypeHandlers = [
 
   graphql.query<GetWorkTypesQuery, GetWorkTypesQueryVariables>('GetWorkTypes', () => {
     return HttpResponse.json({
-      data: { workTypes: workTypeRepository.findAll().concat(workRepository.findAll().map((work) => work.workType)) }
+      data: {
+        workTypes: workTypeRepository.findAll().concat(workRepository.findAll().flatMap((work) => work.workTypes))
+      }
     });
   })
 ];

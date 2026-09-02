@@ -80,7 +80,9 @@ const DualIndexPlateComponent = ({
     }
     const plate = labwareFactory.build({
       labwareType: labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.DUAL_INDEX_PLATE),
-      barcode: sourceReagentPlate.barcode
+      barcode: sourceReagentPlate.barcode,
+      numColumns: sourceReagentPlate.numColumns,
+      numRows: sourceReagentPlate.numRows
     });
     plate.barcode = sourceReagentPlate.barcode;
     if (sourceReagentPlate.slots) {

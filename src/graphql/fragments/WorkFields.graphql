@@ -13,7 +13,7 @@ fragment WorkFields on Work {
   costCode {
     ...CostCodeFields
   }
-  workType {
+  workTypes {
     ...WorkTypeFields
   }
   omeroProject {

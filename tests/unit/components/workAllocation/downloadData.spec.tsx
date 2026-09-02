@@ -23,7 +23,7 @@ jest.mock('@xstate/react', () => ({
             workWithComment: {
               work: {
                 workNumber: 'SGP-1',
-                workType: { name: 'Work Type' },
+                workTypes: [{ name: 'Work Type' }],
                 treatmentTypes: [
                   { name: 'Type A', enabled: true },
                   { name: 'Type B', enabled: false }
@@ -50,7 +50,7 @@ jest.mock('@xstate/react', () => ({
             {
               work: {
                 workNumber: 'SGP-1',
-                workType: { name: 'Work Type' },
+                workTypes: [{ name: 'Work Type' }],
                 treatmentTypes: [
                   { name: 'Type A', enabled: true },
                   { name: 'Type B', enabled: false }
@@ -123,7 +123,7 @@ describe('WorkAllocation spreadsheet downloadData', () => {
     render(<WorkAllocation />);
     const table = await screen.findByTestId('work-allocation-table');
     const headers = Array.from(table.querySelectorAll('th')).map((h) => (h.textContent || '').trim());
-    const workTypeIndex = headers.findIndex((t) => t === 'Work Type');
+    const workTypeIndex = headers.findIndex((t) => t === 'Work Types');
     const treatmentIndex = headers.findIndex((t) => t === 'Treatment Types');
 
     expect(workTypeIndex).toBeGreaterThanOrEqual(0); // exists

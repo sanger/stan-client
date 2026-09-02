@@ -13,7 +13,7 @@ const workSeeds: Array<WorkFieldsFragment> = [
   workFactory.build({ status: WorkStatus.Active }),
   workFactory.build({ status: WorkStatus.Active }),
   workFactory.build({ status: WorkStatus.Active }),
-  workFactory.build({ workType: { name: 'Work Type 1', enabled: true } })
+  workFactory.build({ workTypes: [{ name: 'Work Type 1', enabled: true }] })
 ];
 
 const workRepository = createSessionStorageRepository('WORK', 'workNumber', workSeeds);

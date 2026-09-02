@@ -16,7 +16,7 @@ import { useFormikContext } from 'formik';
 import Warning from '../../notifications/Warning';
 import FormikInput from '../../forms/Input';
 import { createLabwarePlanMachine } from '../../planning/labwarePlan.machine';
-import { BlockFormData, TissueBlockContentForm, TissueBlockLabwareForm } from './BlockProcessing';
+import { BlockFormData, TissueBlockContentForm } from './BlockProcessing';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 import { selectOptionValues } from '../../forms';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../Table';
@@ -94,16 +94,6 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
       }
     }, [sourceLabware, send, layoutPlan.sources.length]);
 
-    const previousReplicateNumberForTheSameSource = (
-      plans: Map<string, TissueBlockLabwareForm>,
-      sourceSampleId: number
-    ) => {
-      return Array.from(plans.values())
-        .flatMap((plan) => plan.contents)
-        .filter((content) => content.sourceSampleId === sourceSampleId)
-        .map((content) => (content.replicate ? parseInt(content.replicate) : 0));
-    };
-
     /**
      * Fill source barcode in form data
      * and
@@ -116,31 +106,16 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
         Object.values(state.context.layoutPlan.plannedActions).forEach((plannedAction) => {
           const sourceBarcode = plannedAction.source.labware.barcode;
           const planActionKey = `${plannedAction.source.labware.barcode}-${plannedAction.source.tissue?.externalName}`;
-          let planReplicateNumber = plannedAction.source.replicateNumber
-            ? parseInt(plannedAction.source.replicateNumber)
-            : plannedAction.source.tissue?.replicate
-              ? parseInt(plannedAction.source.tissue?.replicate)
-              : undefined;
-          if (planReplicateNumber) {
-            const previousReplicateNumber = previousReplicateNumberForTheSameSource(
-              values.plans,
-              plannedAction.source.sampleId
-            );
-            if (previousReplicateNumber.length > 0) {
-              let maxReplicateNumberUsedForTheSample = Math.max(...previousReplicateNumber, 0);
-              planReplicateNumber =
-                maxReplicateNumberUsedForTheSample > 0 ? maxReplicateNumberUsedForTheSample + 1 : undefined;
-            }
-          }
+          let planReplicateNumber = plannedAction.source.tissue?.replicate
+            ? parseInt(plannedAction.source.tissue.replicate)
+            : undefined;
           const entry = {
             addresses: Array.from(plannedAction.addresses),
             sourceBarcode,
             replicate: planReplicateNumber?.toString(),
             externalId: plannedAction.source.tissue?.externalName ?? '',
             sourceSampleId: plannedAction.source.sampleId,
-            isEditReplicateDisabled: plannedAction.source.tissue?.replicate
-              ? parseInt(plannedAction.source.tissue?.replicate) > 0
-              : undefined
+            isEditReplicateDisabled: !!planReplicateNumber
           };
 
           const existing = planContents.get(planActionKey);
