@@ -17,8 +17,8 @@ interface LabwareCommentsProps {
   disabledComment?: boolean;
   sectionNumberDisplay?: SectionNumberSetting;
   onCommentChange: (commentIds: string[]) => void;
-  onSectionNumberChange: (sectionGroupId: number, sectionNumber: string) => void;
-  onSectionThicknessChange: (sectionGroupId: number, thickness: string) => void;
+  onSectionNumberChange: (addresses: Set<string>, sectionNumber: string) => void;
+  onSectionThicknessChange: (addresses: Set<string>, thickness: string) => void;
 }
 
 const LabwareComments: React.FC<LabwareCommentsProps> = ({
@@ -50,7 +50,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
                 value={sectionDetail.source.newSection}
                 min={1}
                 disabled={sectionNumberDisplay === SectionNumberSetting.DISABLE}
-                onChange={(e) => onSectionNumberChange(sectionGroupId, e.target.value)}
+                onChange={(e) => onSectionNumberChange(sectionDetail.addresses, e.target.value)}
               />
               <Input
                 type="text"
@@ -66,7 +66,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
                 min={0.5}
                 step={0.5}
                 onChange={(e) => {
-                  onSectionThicknessChange(sectionGroupId, e.target.value);
+                  onSectionThicknessChange(sectionDetail.addresses, e.target.value);
                 }}
               />
               <div className={'flex flex-col'}>

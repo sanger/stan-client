@@ -80,7 +80,7 @@ type ToggleCancelEvent = { type: 'TOGGLE_CANCEL' };
 
 type UpdateSectionNumberEvent = {
   type: 'UPDATE_SECTION_NUMBER';
-  sectionGroupId: number;
+  addresses: Set<string>;
   sectionNumber: string;
 };
 export type CommitConfirmationEvent = {
@@ -101,7 +101,7 @@ type AssignSectionWorkNumber = {
 type UpdateSectionThicknessEvent = {
   type: 'UPDATE_SECTION_THICKNESS';
   thickness: string;
-  sectionGroupId: number;
+  addresses: Set<string>;
 };
 
 export type ConfirmLabwareEvent =
@@ -129,6 +129,17 @@ const findPlannedActionBySectionGroupId = (
   sectionGroupId: number
 ): PlannedSectionDetails | undefined => {
   return plannedActions.find((plannedSection) => plannedSection.sectionGroupId === sectionGroupId);
+};
+
+export const findPlannedActionBySlotAddresses = (
+  plannedActions: Array<PlannedSectionDetails>,
+  slotAddress: Set<string>
+): PlannedSectionDetails | undefined => {
+  return plannedActions.find(
+    (plannedSection) =>
+      plannedSection.addresses.size === slotAddress.size &&
+      [...plannedSection.addresses].every((address) => slotAddress.has(address))
+  );
 };
 /**
  * ConfirmLabware Machine
@@ -230,11 +241,7 @@ export const createConfirmLabwareMachine = (
             return context;
           }
           return produce(context, (draft) => {
-            const plannedAction = findPlannedActionBySectionGroupId(
-              draft.layoutPlan.plannedActions,
-              event.sectionGroupId
-            );
-
+            const plannedAction = findPlannedActionBySlotAddresses(draft.layoutPlan.plannedActions, event.addresses);
             if (plannedAction) {
               plannedAction.source.newSection = event.sectionNumber;
             }
@@ -245,10 +252,7 @@ export const createConfirmLabwareMachine = (
             return context;
           }
           return produce(context, (draft) => {
-            const plannedAction = findPlannedActionBySectionGroupId(
-              draft.layoutPlan.plannedActions,
-              event.sectionGroupId
-            );
+            const plannedAction = findPlannedActionBySlotAddresses(draft.layoutPlan.plannedActions, event.addresses);
             if (plannedAction) plannedAction.source.sampleThickness = event.thickness;
           });
         }),

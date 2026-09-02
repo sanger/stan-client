@@ -123,11 +123,11 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
   );
 
   const handleSectionNumberChange = useCallback(
-    (layoutPlan: LayoutPlan, sectionGroupId: number, sectionNumber: string) => {
+    (layoutPlan: LayoutPlan, addresses: Set<string>, sectionNumber: string) => {
       send({
         type: 'UPDATE_SECTION_NUMBER',
         layoutPlan,
-        sectionGroupId,
+        addresses,
         sectionNumber
       });
     },
@@ -135,11 +135,11 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
   );
 
   const handleSectionThicknessChange = useCallback(
-    (layoutPlan: LayoutPlan, sectionGroupId: number, sectionThickness: string) => {
+    (layoutPlan: LayoutPlan, addresses: Set<string>, sectionThickness: string) => {
       send({
         type: 'UPDATE_SECTION_THICKNESS',
         layoutPlan,
-        sectionGroupId,
+        addresses,
         sectionThickness
       });
     },

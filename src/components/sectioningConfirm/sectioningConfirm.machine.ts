@@ -16,6 +16,7 @@ import { ClientError } from 'graphql-request';
 import { produce } from '../../dependencies/immer';
 import { SectionNumberMode } from './SectioningConfirm';
 import { blockHighestSection, buildSampleColors } from '../../lib/helpers/labwareHelper';
+import { findPlannedActionBySlotAddresses } from './confirmLabware.machine';
 
 type SectioningConfirmContext = {
   /**
@@ -83,7 +84,7 @@ type SectioningConfirmEvent =
   | {
       type: 'UPDATE_SECTION_NUMBER';
       layoutPlan: LayoutPlan;
-      sectionGroupId: number;
+      addresses: Set<string>;
       sectionNumber: string;
     }
   | {
@@ -102,7 +103,7 @@ type SectioningConfirmEvent =
   | {
       type: 'UPDATE_SECTION_THICKNESS';
       layoutPlan: LayoutPlan;
-      sectionGroupId: number;
+      addresses: Set<string>;
       sectionThickness: string;
     };
 
@@ -319,9 +320,7 @@ export function createSectioningConfirmMachine() {
               (plan) => plan.destinationLabware.barcode === event.layoutPlan.destinationLabware.barcode!
             );
             if (planInContext) {
-              const plannedSection = planInContext.plannedActions.find(
-                (sectionDetails) => sectionDetails.sectionGroupId === event.sectionGroupId
-              );
+              const plannedSection = findPlannedActionBySlotAddresses(planInContext.plannedActions, event.addresses);
               if (plannedSection) {
                 plannedSection.source.newSection = event.sectionNumber;
               }
@@ -337,9 +336,7 @@ export function createSectioningConfirmMachine() {
               (plan) => plan.destinationLabware.barcode === event.layoutPlan.destinationLabware.barcode!
             );
             if (planInContext) {
-              const plannedAction = planInContext.plannedActions.find(
-                (planned) => planned.sectionGroupId === event.sectionGroupId
-              );
+              const plannedAction = findPlannedActionBySlotAddresses(planInContext.plannedActions, event.addresses);
 
               if (plannedAction) plannedAction.source.sampleThickness = event.sectionThickness;
             }
@@ -520,10 +517,11 @@ export const findPlanActionByDestinationAddress = (
  */
 function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array<LabwareFlaggedFieldsFragment>) {
   const sampleColors = buildSampleColors(sourceLabwares);
-  const layoutPlans: Array<LayoutPlan> = plans.map((plan, planIndex) => {
+  const layoutPlans: Array<LayoutPlan> = plans.map((plan) => {
     const plannedActions: Array<PlannedSectionDetails> = [];
     const sources: Array<Source> = [];
-    plan.planData.groups.forEach((group, groupIndex) => {
+    let sectionGroupId = 1;
+    plan.planData.groups.forEach((group) => {
       const planned = findPlanActionByDestinationAddress(plan.planData.plan.planActions, group[0]);
       if (planned) {
         const source: Source = {
@@ -535,7 +533,7 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
         };
         sources.push(source);
         plannedActions.push({
-          sectionGroupId: planIndex + groupIndex,
+          sectionGroupId: sectionGroupId++,
           addresses: new Set(group),
           source,
           sectioningOrder: planned.sectioningOrder ?? undefined
