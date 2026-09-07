@@ -34,7 +34,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
         {values.labware.map((probeLw, lwIndex) => (
           <tr key={probeLw.labware.barcode}>
             <TableCell>{probeLw.labware.barcode}</TableCell>
-            <TableCell>
+            <TableCell className={'max-w-[175px]'}>
               <WorkNumberSelect
                 name={`labware.${lwIndex}.workNumber`}
                 dataTestId={`${probeLw.labware.barcode}-workNumber`}
@@ -53,14 +53,14 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                 emptyOption={true}
               />
             </TableCell>
-            <TableCell>
+            <TableCell className={'max-w-[175px]'}>
               <FormikInput
                 label=""
                 data-testid={`labware.${lwIndex}.reagentLot`}
                 name={`labware.${lwIndex}.reagentLot`}
               />
             </TableCell>
-            <TableCell>
+            <TableCell className={'max-w-[175px]'}>
               <FormikInput
                 label=""
                 data-testid={`labware.${lwIndex}.cassetteLot`}

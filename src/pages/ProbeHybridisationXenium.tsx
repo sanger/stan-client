@@ -222,81 +222,82 @@ const ProbeHybridisationXenium: React.FC = () => {
                           <motion.div variants={variants.fadeInWithLift} className="space-y-4 p-2 pr-5">
                             <Heading level={3}>Apply to all</Heading>
 
-                            <div className={'flex flex-col mt-4'}>
-                              <div className={'w-full border-2 border-gray-100 mb-4'} />
-                              <div className={'flex flex-row gap-x-6'}>
-                                <div className={'basis-1/4'}>
-                                  <WorkNumberSelect
-                                    label={'SGP Number'}
-                                    name={'workNumberAll'}
-                                    dataTestId={'workNumberAll'}
-                                    onWorkNumberChange={async (workNumber) => {
-                                      await setValues((prev) => {
-                                        return {
-                                          ...prev,
-                                          workNumberAll: workNumber,
-                                          labware: prev.labware.map((lw) => ({
-                                            ...lw,
-                                            workNumber
-                                          }))
-                                        };
-                                      });
+                            <div className={'w-full border-2 border-gray-100 m-4'}>
+                              <div className={'grid grid-cols-2'}>
+                                <div className={'grid grid-cols-2 gap-x-6 mr-6'}>
+                                  <div>
+                                    <WorkNumberSelect
+                                      label={'SGP Number'}
+                                      name={'workNumberAll'}
+                                      dataTestId={'workNumberAll'}
+                                      onWorkNumberChange={async (workNumber) => {
+                                        await setValues((prev) => {
+                                          return {
+                                            ...prev,
+                                            workNumberAll: workNumber,
+                                            labware: prev.labware.map((lw) => ({
+                                              ...lw,
+                                              workNumber
+                                            }))
+                                          };
+                                        });
+                                      }}
+                                      requiredField={false}
+                                    />
+                                  </div>
+                                  <div className={'basis-1/4'}>
+                                    <CustomReactSelect
+                                      isMulti={false}
+                                      label={'Kit Costing'}
+                                      name={'costingAll'}
+                                      value={'costingAll'}
+                                      handleChange={async (val) => {
+                                        const kitCosting = (val as OptionType).label as SlideCosting;
+                                        await setValues((prev) => {
+                                          return {
+                                            ...prev,
+                                            costingAll: kitCosting,
+                                            labware: prev.labware.map((lw) => ({
+                                              ...lw,
+                                              kitCosting
+                                            }))
+                                          };
+                                        });
+                                      }}
+                                      emptyOption={true}
+                                      dataTestId="costingAll"
+                                      options={selectOptionValues(slideCostingOptions, 'label', 'value')}
+                                    />
+                                  </div>
+                                  <FormikInput
+                                    label={'Sample Prep Reagent Lot'}
+                                    name={'samplePrepReagentLot'}
+                                    onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                      await setValues((prev) => ({
+                                        ...prev,
+                                        reagentLot: e.target.value,
+                                        labware: prev.labware.map((lw) => ({
+                                          ...lw,
+                                          reagentLot: e.target.value
+                                        }))
+                                      }));
                                     }}
-                                    requiredField={false}
+                                  />
+                                  <FormikInput
+                                    label={'Cassette Lot'}
+                                    name={'cassetteLot'}
+                                    onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                      await setValues((prev) => ({
+                                        ...prev,
+                                        cassetteLot: e.target.value,
+                                        labware: prev.labware.map((lw) => ({
+                                          ...lw,
+                                          cassetteLot: e.target.value
+                                        }))
+                                      }));
+                                    }}
                                   />
                                 </div>
-                                <div className={'basis-1/4'}>
-                                  <CustomReactSelect
-                                    isMulti={false}
-                                    label={'Kit Costing'}
-                                    name={'costingAll'}
-                                    value={'costingAll'}
-                                    handleChange={async (val) => {
-                                      const kitCosting = (val as OptionType).label as SlideCosting;
-                                      await setValues((prev) => {
-                                        return {
-                                          ...prev,
-                                          costingAll: kitCosting,
-                                          labware: prev.labware.map((lw) => ({
-                                            ...lw,
-                                            kitCosting
-                                          }))
-                                        };
-                                      });
-                                    }}
-                                    emptyOption={true}
-                                    dataTestId="costingAll"
-                                    options={selectOptionValues(slideCostingOptions, 'label', 'value')}
-                                  />
-                                </div>
-                                <FormikInput
-                                  label={'Sample Prep Reagent Lot'}
-                                  name={'samplePrepReagentLot'}
-                                  onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                                    await setValues((prev) => ({
-                                      ...prev,
-                                      reagentLot: e.target.value,
-                                      labware: prev.labware.map((lw) => ({
-                                        ...lw,
-                                        reagentLot: e.target.value
-                                      }))
-                                    }));
-                                  }}
-                                />
-                                <FormikInput
-                                  label={'Cassette Lot'}
-                                  name={'cassetteLot'}
-                                  onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                                    await setValues((prev) => ({
-                                      ...prev,
-                                      cassetteLot: e.target.value,
-                                      labware: prev.labware.map((lw) => ({
-                                        ...lw,
-                                        cassetteLot: e.target.value
-                                      }))
-                                    }));
-                                  }}
-                                />
                                 <ProbeAddPanel probePanels={probePanelInfo.probePanels} />
                               </div>
                             </div>
