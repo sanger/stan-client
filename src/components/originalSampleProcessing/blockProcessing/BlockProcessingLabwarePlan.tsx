@@ -56,13 +56,15 @@ type BlockProcessingLabwarePlanProps = {
 function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
-  outputLabware: NewFlaggedLabwareLayout
+  outputLabware: NewFlaggedLabwareLayout,
+  operationType?: string
 ) {
   return {
     sources: convertLabwareTypeToSourceType(sourceLabware),
     sampleColors,
     destinationLabware: outputLabware,
-    plannedActions: []
+    plannedActions: [],
+    operationType
   };
 }
 

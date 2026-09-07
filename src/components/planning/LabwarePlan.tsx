@@ -66,6 +66,13 @@ type LabwarePlanProps = {
   onComplete: (cid: string, planResult: PlanMutationWithGroups) => void;
 };
 
+// For the `Section` operation on tube labware, planning is done at labware level.
+// The full source labware is transferred, so all samples in that source are included.
+// Helper to determine whether planning should be by labware instead of by sample.
+export const isPlanningByLabware = (labwareType: LabwareType, operationType?: string): boolean => {
+  return isTube(labwareType) && operationType !== undefined && operationType === 'Section';
+};
+
 const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
   (
     {
@@ -82,9 +89,9 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
   ) => {
     const labwarePlanMachine = React.useMemo(() => {
       return createLabwarePlanMachine(
-        buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware, sectionThickness.toString())
+        buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware, operationType, sectionThickness.toString())
       );
-    }, [sourceLabware, sampleColors, outputLabware, sectionThickness]);
+    }, [sourceLabware, sampleColors, outputLabware, sectionThickness, operationType]);
     const [current, send, service] = useMachine(labwarePlanMachine);
 
     useEffect(() => {
@@ -608,15 +615,17 @@ export function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
   outputLabware: NewFlaggedLabwareLayout,
+  operationType: string,
   globalSectionThickness?: string
 ) {
-  const sources = isTube(outputLabware.labwareType)
+  const sources = isPlanningByLabware(outputLabware.labwareType, operationType)
     ? convertLabwareTypeToSourceType(sourceLabware, globalSectionThickness, SourceUniqueBy.LABWARE)
     : convertLabwareTypeToSourceType(sourceLabware, globalSectionThickness);
   return {
     sources,
     sampleColors,
     destinationLabware: outputLabware,
-    plannedActions: []
+    plannedActions: [],
+    operationType
   };
 }

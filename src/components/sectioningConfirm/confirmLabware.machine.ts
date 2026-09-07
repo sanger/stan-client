@@ -124,7 +124,7 @@ function buildConfirmSection(destinationAddresses: Array<string>, source: Source
   };
 }
 
-const findPlannedActionBySectionGroupId = (
+export const findPlannedActionBySectionGroupId = (
   plannedActions: Array<PlannedSectionDetails>,
   sectionGroupId: number
 ): PlannedSectionDetails | undefined => {
@@ -134,8 +134,9 @@ const findPlannedActionBySectionGroupId = (
 export const findPlannedActionBySlotAddresses = (
   plannedActions: Array<PlannedSectionDetails>,
   slotAddress: Set<string>
-): PlannedSectionDetails | undefined => {
-  return plannedActions.find(
+): Array<PlannedSectionDetails> => {
+  //return an array as address/section can have an multiple plannedActions
+  return plannedActions.filter(
     (plannedSection) =>
       plannedSection.addresses.size === slotAddress.size &&
       [...plannedSection.addresses].every((address) => slotAddress.has(address))
@@ -241,10 +242,8 @@ export const createConfirmLabwareMachine = (
             return context;
           }
           return produce(context, (draft) => {
-            const plannedAction = findPlannedActionBySlotAddresses(draft.layoutPlan.plannedActions, event.addresses);
-            if (plannedAction) {
-              plannedAction.source.newSection = event.sectionNumber;
-            }
+            const plannedActions = findPlannedActionBySlotAddresses(draft.layoutPlan.plannedActions, event.addresses);
+            plannedActions.map((pa) => (pa.source.newSection = event.sectionNumber));
           });
         }),
         updateSectionThickness: assign(({ context, event }) => {
@@ -252,8 +251,8 @@ export const createConfirmLabwareMachine = (
             return context;
           }
           return produce(context, (draft) => {
-            const plannedAction = findPlannedActionBySlotAddresses(draft.layoutPlan.plannedActions, event.addresses);
-            if (plannedAction) plannedAction.source.sampleThickness = event.thickness;
+            const plannedActions = findPlannedActionBySlotAddresses(draft.layoutPlan.plannedActions, event.addresses);
+            plannedActions.map((pa) => (pa.source.sampleThickness = event.thickness));
           });
         }),
         commitConfirmation: assign(({ context }) => {

@@ -4,6 +4,7 @@ import { Comment } from '../../types/sdk';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
 import { Input } from '../forms/Input';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { findPlannedActionBySectionGroupId } from './confirmLabware.machine';
 
 export enum SectionNumberSetting {
   NORMAL,
@@ -31,7 +32,8 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
   disabledComment = false,
   onSectionThicknessChange
 }) => {
-  const sectionDetail = layoutPlan.plannedActions[sectionGroupId];
+  const sectionDetail = findPlannedActionBySectionGroupId(layoutPlan.plannedActions, sectionGroupId);
+  if (!sectionDetail) return null;
   return (
     <div className="flex flex-row items-start justify-start gap-x-2">
       <div className="flex flex-col">
@@ -71,7 +73,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
               />
               <div className={'flex flex-col'}>
                 <CustomReactSelect
-                  value={layoutPlan.plannedActions[sectionGroupId].source.commentIds?.map((comment) => comment + '')}
+                  value={sectionDetail.source.commentIds?.map((comment) => comment + '')}
                   isDisabled={disabledComment}
                   handleChange={(options) => {
                     const optionsValues = Array.isArray(options)

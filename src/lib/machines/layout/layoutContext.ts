@@ -28,6 +28,8 @@ export interface LayoutPlan {
   // For tube sectioning, the user selects the source per labware (not per sample),
   // therefore all samples within the selected labware must be assigned to tube actions.
   plannedActions: Array<PlannedSectionDetails>;
+
+  operationType?: string;
 }
 
 export type PlannedSectionDetails = {

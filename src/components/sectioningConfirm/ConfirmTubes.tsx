@@ -20,8 +20,8 @@ interface ConfirmTubesProps {
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
   onSectionUpdate: (layoutPlan: LayoutPlan) => void;
-  onSectionNumberChange: (layoutPlan: LayoutPlan, sectionGroupId: number, sectionNumber: string) => void;
-  onSectionThicknessChange: (layoutPlan: LayoutPlan, sectionGroupId: number, sectionThickness: string) => void;
+  onSectionNumberChange: (layoutPlan: LayoutPlan, addresses: Set<string>, sectionNumber: string) => void;
+  onSectionThicknessChange: (layoutPlan: LayoutPlan, addresses: Set<string>, sectionThickness: string) => void;
   mode: SectionNumberMode;
   workNumber: string;
 }
@@ -84,8 +84,8 @@ interface TubeRowProps {
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
   onSectionUpdate: (layoutPlan: LayoutPlan) => void;
-  onSectionNumberChange: (layoutPlan: LayoutPlan, sectionGroupId: number, sectionNumber: string) => void;
-  onSectionThicknessChange: (layoutPlan: LayoutPlan, sectionGroupId: number, sectionThickness: string) => void;
+  onSectionNumberChange: (layoutPlan: LayoutPlan, addresses: Set<string>, sectionNumber: string) => void;
+  onSectionThicknessChange: (layoutPlan: LayoutPlan, addresses: Set<string>, sectionThickness: string) => void;
   mode: SectionNumberMode;
   workNumber: string;
 }
@@ -145,12 +145,12 @@ const TubeRow: React.FC<TubeRowProps> = ({
 
   /***Update section numbers and thickness **/
   const handleOnChange = useCallback(
-    (sectionGroupId: number, sectionNumber: string) => {
+    (addresses: Set<string>, sectionNumber: string) => {
       /**Notify parent, so as to modify section number in original layout**/
-      onSectionNumberChange(layoutPlan, sectionGroupId, sectionNumber);
+      onSectionNumberChange(layoutPlan, addresses, sectionNumber);
       send({
         type: 'UPDATE_SECTION_NUMBER',
-        sectionGroupId,
+        addresses,
         sectionNumber
       });
     },
@@ -158,12 +158,12 @@ const TubeRow: React.FC<TubeRowProps> = ({
   );
 
   const handleSectionThicknessOnChange = useCallback(
-    (sectionGroupId: number, sectionThickness: string) => {
-      onSectionThicknessChange(layoutPlan, sectionGroupId, sectionThickness);
+    (addresses: Set<string>, sectionThickness: string) => {
+      onSectionThicknessChange(layoutPlan, addresses, sectionThickness);
       send({
         type: 'UPDATE_SECTION_THICKNESS',
         thickness: sectionThickness,
-        sectionGroupId
+        addresses
       });
     },
     [send, layoutPlan, onSectionThicknessChange]
@@ -231,7 +231,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
               min={0.5}
               step={0.5}
               onClick={(e) => e.stopPropagation()}
-              onChange={(e) => handleSectionThicknessOnChange(0, e.target.value)}
+              onChange={(e) => handleSectionThicknessOnChange(new Set<string>(['A1']), e.target.value)}
             />
           </div>
         </TableCell>
@@ -245,7 +245,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
               disabled={cancelled || mode === SectionNumberMode.Auto}
               // So the row click handler doesn't get triggered
               onClick={(e) => e.stopPropagation()}
-              onChange={(e) => handleOnChange(0, e.target.value)}
+              onChange={(e) => handleOnChange(new Set<string>(['A1']), e.target.value)}
             />
           </div>
         </TableCell>

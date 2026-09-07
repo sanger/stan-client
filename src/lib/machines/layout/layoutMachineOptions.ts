@@ -1,11 +1,11 @@
 import { LayoutContext, PlannedSectionDetails, Source } from './layoutContext';
 import { isEqual } from 'lodash';
-import { compareAddresses, firstAddress, isTube } from '../../helpers/labwareHelper';
+import { compareAddresses, firstAddress } from '../../helpers/labwareHelper';
 import { assign, InternalMachineImplementations, sendParent } from 'xstate';
 import { LayoutEvents } from './layoutEvents';
 import { produce } from 'immer';
 import { LayoutSchema } from './layoutStates';
-import { convertLabwareTypeToSourceType } from '../../../components/planning/LabwarePlan';
+import { convertLabwareTypeToSourceType, isPlanningByLabware } from '../../../components/planning/LabwarePlan';
 import { LabwareFlaggedFieldsFragment } from '../../../types/sdk';
 
 export const layoutMachineKey = 'layoutMachine';
@@ -78,7 +78,7 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
         // within the selected labware to the plan.
         const selectedSource: Source = Object.assign({}, draft.selected);
         const selectedDestinationLabware = draft.layoutPlan.destinationLabware;
-        if (isTube(selectedDestinationLabware.labwareType)) {
+        if (isPlanningByLabware(selectedDestinationLabware.labwareType, draft.layoutPlan.operationType)) {
           const sources = convertLabwareTypeToSourceType(
             [selectedSource.labware as LabwareFlaggedFieldsFragment],
             selectedSource.sampleThickness

@@ -5,7 +5,7 @@ import { LayoutPlan, PlannedSectionDetails } from '../../lib/machines/layout/lay
 import { stanCore } from '../../lib/sdk';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 import { PlanMutationWithGroups } from '../../pages/sectioning/Plan';
-import { convertLabwareTypeToSourceType, SourceUniqueBy } from './LabwarePlan';
+import { convertLabwareTypeToSourceType, isPlanningByLabware, SourceUniqueBy } from './LabwarePlan';
 import { backgroundColorClassNames } from '../../lib/helpers';
 
 //region Events
@@ -237,11 +237,12 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
             return context;
           }
 
-          const isTube = context.layoutPlan.destinationLabware.labwareType.name === LabwareTypeName.TUBE;
           const sources = convertLabwareTypeToSourceType(
             event.sources,
             event.sectionThickness?.toString(),
-            isTube ? SourceUniqueBy.LABWARE : SourceUniqueBy.SAMPLE
+            isPlanningByLabware(context.layoutPlan.destinationLabware.labwareType, context.layoutPlan.operationType)
+              ? SourceUniqueBy.LABWARE
+              : SourceUniqueBy.SAMPLE
           );
 
           const oldSources = context.layoutPlan.sources;
