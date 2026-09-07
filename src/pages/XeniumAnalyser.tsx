@@ -710,6 +710,7 @@ const XeniumAnalyser = () => {
                               </ModalBody>
                               <ModalFooter>
                                 <BlueButton
+                                  type="button"
                                   className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
                                   onClick={async () => {
                                     await setFieldValue('activeRegionDefinerLabwareIndex', -1);
