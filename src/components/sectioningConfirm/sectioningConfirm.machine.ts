@@ -16,6 +16,7 @@ import { ClientError } from 'graphql-request';
 import { produce } from '../../dependencies/immer';
 import { SectionNumberMode } from './SectioningConfirm';
 import { blockHighestSection, buildSampleColors } from '../../lib/helpers/labwareHelper';
+import { findPlannedActionBySlotAddresses } from './confirmLabware.machine';
 
 type SectioningConfirmContext = {
   /**
@@ -83,7 +84,7 @@ type SectioningConfirmEvent =
   | {
       type: 'UPDATE_SECTION_NUMBER';
       layoutPlan: LayoutPlan;
-      sectionGroupId: string;
+      addresses: Set<string>;
       sectionNumber: string;
     }
   | {
@@ -102,7 +103,7 @@ type SectioningConfirmEvent =
   | {
       type: 'UPDATE_SECTION_THICKNESS';
       layoutPlan: LayoutPlan;
-      sectionGroupId: string;
+      addresses: Set<string>;
       sectionThickness: string;
     };
 
@@ -319,12 +320,8 @@ export function createSectioningConfirmMachine() {
               (plan) => plan.destinationLabware.barcode === event.layoutPlan.destinationLabware.barcode!
             );
             if (planInContext) {
-              const sectionGroupId = Object.keys(planInContext.plannedActions).find(
-                (sectionGroupId) => sectionGroupId === event.sectionGroupId
-              );
-              if (sectionGroupId) {
-                planInContext.plannedActions[sectionGroupId].source.newSection = event.sectionNumber;
-              }
+              const plannedActions = findPlannedActionBySlotAddresses(planInContext.plannedActions, event.addresses);
+              plannedActions.map((pa) => (pa.source.newSection = event.sectionNumber));
             }
           });
         }),
@@ -337,7 +334,8 @@ export function createSectioningConfirmMachine() {
               (plan) => plan.destinationLabware.barcode === event.layoutPlan.destinationLabware.barcode!
             );
             if (planInContext) {
-              planInContext.plannedActions[event.sectionGroupId].source.sampleThickness = event.sectionThickness;
+              const plannedActions = findPlannedActionBySlotAddresses(planInContext.plannedActions, event.addresses);
+              plannedActions.map((pa) => (pa.source.sampleThickness = event.sectionThickness));
             }
           });
         }),
@@ -476,7 +474,7 @@ function fillInSectionNumbersInLayoutPlan(
 }
 function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, startNumbers?: Map<string, number>) {
   /**Get slots column wise to fill the section numbers**/
-  Object.entries(layoutPlan.plannedActions).forEach(([sectionGroupId, plan]) => {
+  layoutPlan.plannedActions.forEach((plan, planIndex) => {
     let newSectionNum = 0;
     if (startNumbers && startNumbers.has(plan.source.labware.barcode) && incrementFill) {
       //Get the highest section number of the source labware for this section
@@ -491,7 +489,7 @@ function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, 
     }
     plan.source.newSection = String(newSectionNum);
     //Mutate the layoutPlan so that the child will be notified of this change and the changes will be rendered
-    layoutPlan.plannedActions[sectionGroupId] = { ...plan };
+    layoutPlan.plannedActions[planIndex] = { ...plan };
   });
 }
 
@@ -499,14 +497,14 @@ function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, 
  * Finds the planned action whose destination address matches the given address.
  *
  * @param plannedActions - The list of planned actions to search through.
- * @param address - The destination slot address to match.
+ * @param groupAddresses - The destination slot address to match.
  * @returns The matching PlanAction if found, otherwise undefined.
  */
-export const findPlanActionByDestinationAddress = (
+const findPlanActionByDestinationAddress = (
   plannedActions: Array<PlanActionFieldsFragment>,
-  address: string
+  groupAddresses: Array<string>
 ) => {
-  return plannedActions.find((pa) => pa.destination.address === address);
+  return plannedActions.filter((pa) => groupAddresses.includes(pa.destination.address));
 };
 /**
  * Convert the structure that comes back from core into lists of {@link LayoutPlan LayoutPlans}
@@ -516,36 +514,35 @@ export const findPlanActionByDestinationAddress = (
  */
 function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array<LabwareFlaggedFieldsFragment>) {
   const sampleColors = buildSampleColors(sourceLabwares);
-
-  // For each layoutPlan build a LayoutPlan
   const layoutPlans: Array<LayoutPlan> = plans.map((plan) => {
-    const plannedActions = {} as Record<string, PlannedSectionDetails>;
+    const plannedSectionGroups: Record<string, PlannedSectionDetails> = {};
     const sources: Array<Source> = [];
-
-    plan.planData.groups.forEach((group, index) => {
-      const planned = findPlanActionByDestinationAddress(plan.planData.plan.planActions, group[0]);
-      if (planned) {
-        const source: Source = {
+    let sectionGroupId = 1;
+    plan.planData.groups.forEach((group) => {
+      const plannedActions = findPlanActionByDestinationAddress(plan.planData.plan.planActions, group);
+      plannedActions.forEach((planned) => {
+        let source: Source = {
           sampleId: planned.source.samples[0].id, // we only support single sample sources for sectioning,
-          newSection: '',
+          newSection: planned.newSection ?? '',
           sampleThickness: planned.sampleThickness?.toString(),
           labware: plan.planData.sources.find((lw) => lw.id === planned.source.labwareId)!,
           tissue: planned.source.samples[0].tissue
         };
         sources.push(source);
-        const sectionGroupId = group.length === 1 ? group[0] : index.toString();
-        plannedActions[sectionGroupId] = {
-          addresses: new Set(group),
+        const key = `${planned.source.samples[0].id}-${planned.sectioningOrder}`;
+        plannedSectionGroups[key] ??= {
+          addresses: new Set<string>(group),
           source,
-          sectioningOrder: planned.sectioningOrder ?? undefined
+          sectionGroupId: sectionGroupId++
         };
-      }
+      });
     });
     return {
       destinationLabware: plan.planData.destination,
       sampleColors,
       sources: sources,
-      plannedActions: plannedActions
+      plannedActions: Object.values(plannedSectionGroups),
+      operationType: 'sectioning'
     };
   });
   return layoutPlans;

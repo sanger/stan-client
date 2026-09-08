@@ -30,7 +30,7 @@ describe('Transfer Page', () => {
     describe('when scanning the labware, before selecting the destination labware', () => {
       before(() => {
         cy.get('#inputLabwares').within((elem) => {
-          cy.wrap(elem).get('#labwareScanInput').wait(1000).clear().type('STAN-3111{enter}');
+          cy.wrap(elem).get('#labwareScanInput').wait(1000).clear().type('STAN-0511B{enter}');
         });
       });
       it('shows the scanned labware', () => {
@@ -78,16 +78,16 @@ describe('Transfer Page', () => {
       cy.visit('/lab/transfer');
       cy.findByTestId('Scan Labware').click();
       cy.findByTestId('dest-scanner').within((elem) => {
-        cy.wrap(elem).get('#labwareScanInput').type('STAN-3112{enter}');
+        cy.wrap(elem).get('#labwareScanInput').type('STAN-0511B{enter}');
       });
     });
     it('should display scanned output labware', () => {
-      cy.findByText('STAN-3112').should('be.visible');
+      cy.findByText('STAN-0511B').should('be.visible');
       cy.findByTestId('removeButton').should('exist');
       cy.findByText('Bio State').should('be.visible');
     });
     it('should display filled slots in output labware as disabled', () => {
-      cy.findByTestId('labware-STAN-3112').within(() => {
+      cy.findByTestId('labware-STAN-0511B').within(() => {
         cy.findAllByTestId('slot')
           .eq(0)
           .should('have.class', 'bg-gray-300 ring-0 ring-offset-0 text-gray-300 border-0 border-gray-300');
@@ -95,7 +95,7 @@ describe('Transfer Page', () => {
     });
     it('removes a destination well plate on removeButton click', () => {
       cy.findByTestId('removeButton').click();
-      cy.findByText('STAN-3112').should('not.exist');
+      cy.findByText('STAN-0511B').should('not.exist');
       cy.findByTestId('removeButton').should('not.exist');
     });
   });
@@ -131,10 +131,10 @@ describe('Transfer Page', () => {
       cy.visit('/lab/transfer');
       cy.findByTestId('Scan Labware').click();
       cy.get('#inputLabwares').within((elem) => {
-        cy.wrap(elem).get('#labwareScanInput').wait(1000).clear().type('STAN-3111{enter}');
+        cy.wrap(elem).get('#labwareScanInput').wait(1000).clear().type('STAN-0511B{enter}');
       });
       cy.findByTestId('dest-scanner').within((elem) => {
-        cy.wrap(elem).get('#labwareScanInput').wait(1000).clear().type('STAN-3000{enter}');
+        cy.wrap(elem).get('#labwareScanInput').wait(1000).clear().type('STAN-0502B{enter}');
       });
     });
     it('should allow transfer to an empty slot', () => {
@@ -166,19 +166,19 @@ describe('Transfer Page', () => {
       });
 
       it('when user scans slides shows it on the page', () => {
-        cy.get('#labwareScanInput').type('STAN-3100{enter}');
-        cy.findByText('STAN-3100').should('be.visible');
+        cy.get('#labwareScanInput').type('STAN-0511B{enter}');
+        cy.findByText('STAN-0511B').should('be.visible');
       });
       it('keeps the Save button disabled', () => {
         saveButton().should('be.disabled');
       });
       it('updates page when user scans multipe slides', () => {
-        cy.get('#labwareScanInput').type('STAN-3200{enter}');
-        cy.get('#labwareScanInput').type('STAN-3300{enter}');
+        cy.get('#labwareScanInput').type('STAN-0512B{enter}');
+        cy.get('#labwareScanInput').type('STAN-0513B{enter}');
         cy.contains('3 of 3').should('be.visible');
       });
       it('shows the last added labware', () => {
-        cy.findByText('STAN-3300').should('be.visible');
+        cy.findByText('STAN-0513B').should('be.visible');
       });
       it('displays previously entered labware state values', () => {
         selectOption('input-labware-state', 'used');
@@ -224,7 +224,7 @@ describe('Transfer Page', () => {
       before(() => {
         cy.visit('/lab/transfer');
         cy.get('[type="radio"][name="96 well plate"]').check();
-        cy.get('#labwareScanInput').type('STAN-9975B{enter}');
+        cy.get('#labwareScanInput').type('STAN-0515B{enter}');
       });
       it('display the notification to user about failed slots', () => {
         cy.get('#inputLabwares').within(() => {
@@ -242,7 +242,7 @@ describe('Transfer Page', () => {
         cy.visit('/lab/transfer');
         selectSGPNumber('SGP1008');
         cy.get('[type="radio"][name="96 well plate"]').check();
-        cy.get('#labwareScanInput').type('STAN-9975B{enter}');
+        cy.get('#labwareScanInput').type('STAN-0515B{enter}');
         cy.findByTestId('copyMode-One to many').click({ force: true });
         selectOption('bioState', 'Probes pre-clean');
         cy.get('#inputLabwares').within(async () => {
@@ -274,7 +274,7 @@ describe('Transfer Page', () => {
         cy.visit('/lab/transfer');
         selectSGPNumber('SGP1008');
         cy.get('[type="radio"][name="96 well plate"]').check();
-        cy.get('#labwareScanInput').type('STAN-9975B{enter}');
+        cy.get('#labwareScanInput').type('STAN-0515B{enter}');
         cy.findByTestId('bioState').scrollIntoView();
         selectOption('bioState', 'Probes pre-clean');
         cy.findByTestId('copyMode-Many to one').click({ force: true });
@@ -290,7 +290,7 @@ describe('Transfer Page', () => {
         cy.findByTestId('copyMode-Many to one').should('be.checked');
       });
       it('displays the table with A2, B2 slots mapped to D1', () => {
-        cy.findByText('Slot mapping for STAN-9975B').should('be.visible');
+        cy.findByText('Slot mapping for STAN-0515B').should('be.visible');
         cy.findByRole('table').contains('td', 'A2');
         cy.findByRole('table').contains('td', 'B2');
         cy.findByRole('table').contains('td', 'D1');
@@ -399,7 +399,7 @@ function saveSlotForLabwareWithNoPerm() {
         return HttpResponse.json({
           data: {
             visiumPermData: {
-              labware: createLabware('STAN-3200'),
+              labware: createLabware('STAN-0515B'),
               addressPermData: [],
               samplePositionResults: []
             }
@@ -409,7 +409,7 @@ function saveSlotForLabwareWithNoPerm() {
     );
   });
   cy.get('[type="radio"][name="96 well plate"]').check();
-  cy.get('#labwareScanInput').type('STAN-3200{enter}');
+  cy.get('#labwareScanInput').type('STAN-0511B{enter}');
   cy.get('#inputLabwares').within(() => {
     cy.findByText('A1').click();
     cy.findByText('D1').click({ shiftKey: true });

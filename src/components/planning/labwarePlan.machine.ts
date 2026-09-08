@@ -5,7 +5,7 @@ import { LayoutPlan, PlannedSectionDetails } from '../../lib/machines/layout/lay
 import { stanCore } from '../../lib/sdk';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 import { PlanMutationWithGroups } from '../../pages/sectioning/Plan';
-import { convertLabwareTypeToSourceType } from './LabwarePlan';
+import { convertLabwareTypeToSourceType, isPlanningByLabware, SourceUniqueBy } from './LabwarePlan';
 import { backgroundColorClassNames } from '../../lib/helpers';
 
 //region Events
@@ -15,7 +15,7 @@ type CreateLabwareEvent = {
   lotNumber?: string;
   costing?: SlideCosting;
   operationType: string;
-  plannedActions: Record<string, PlannedSectionDetails>;
+  plannedActions: Array<PlannedSectionDetails>;
 };
 
 type UpdateLayoutPlanEvent = {
@@ -236,7 +236,14 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           if (event.type !== 'UPDATE_SOURCES') {
             return context;
           }
-          const sources = convertLabwareTypeToSourceType(event.sources, event.sectionThickness?.toString());
+
+          const sources = convertLabwareTypeToSourceType(
+            event.sources,
+            event.sectionThickness?.toString(),
+            isPlanningByLabware(context.layoutPlan.destinationLabware.labwareType, context.layoutPlan.operationType)
+              ? SourceUniqueBy.LABWARE
+              : SourceUniqueBy.SAMPLE
+          );
 
           const oldSources = context.layoutPlan.sources;
 
@@ -305,7 +312,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           }
           return {
             ...context,
-            layoutPlan: { ...context.layoutPlan, plannedActions: {} as Record<string, PlannedSectionDetails> }
+            layoutPlan: { ...context.layoutPlan, plannedActions: [] }
           };
         }),
 
@@ -314,7 +321,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
             return context;
           }
           context.layoutPlan.destinationLabware = event.output.plan.labware[0] as LabwareFlaggedFieldsFragment;
-          const groups: Array<Array<string>> = Object.values(context.layoutPlan.plannedActions).map((planned) =>
+          const groups: Array<Array<string>> = context.layoutPlan.plannedActions.map((planned) =>
             Array.from(planned.addresses)
           );
 
@@ -339,14 +346,14 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
         isVisiumLP: ({ context }) =>
           context.layoutPlan.destinationLabware.labwareType.name === LabwareTypeName.VISIUM_LP,
 
-        isLayoutValid: ({ context }) => Object.keys(context.layoutPlan.plannedActions).length > 0
+        isLayoutValid: ({ context }) => context.layoutPlan.plannedActions.length > 0
       }
     }
   );
 
 type BuildPlanRequestLabwareParams = {
   destinationLabwareTypeName: string;
-  plannedActions: Record<string, PlannedSectionDetails>;
+  plannedActions: Array<PlannedSectionDetails>;
   barcode?: string;
   lotNumber?: string;
   costing?: SlideCosting;
@@ -365,8 +372,7 @@ function buildPlanRequestLabware({
     lotNumber,
     costing,
 
-    actions: Object.keys(plannedActions).map((sectionGroupId) => {
-      const sectionDetail = plannedActions[sectionGroupId];
+    actions: plannedActions.map((sectionDetail) => {
       return {
         addresses: Array.from(sectionDetail.addresses),
         sampleThickness: sectionDetail.source.sampleThickness,

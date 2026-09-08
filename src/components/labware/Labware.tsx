@@ -162,7 +162,7 @@ export interface LabwareProps {
    * Optional mapping of section groups.
    * Each key represents a section name or ID, and the value is an array of addresses belonging to that section.
    */
-  sectionGroups?: Record<string, PlannedSectionDetails>;
+  sectionGroups?: Array<PlannedSectionDetails>;
 }
 
 export type LabwareImperativeRef = {
@@ -392,11 +392,11 @@ const Labware = ({
       sectionGroups = sectionGroupsBySample(labware as LabwareFlaggedFieldsFragment);
     }
     if (!sectionGroups) return result;
-    Object.entries(sectionGroups)
-      .filter(([, sectionDetails]) => sectionDetails.addresses.size > 1)
-      .forEach(([groupId, sectionDetails]) => {
+    sectionGroups
+      .filter((sectionDetails) => sectionDetails.addresses.size > 1)
+      .forEach((sectionDetails, sectionIndex) => {
         sectionDetails.addresses.forEach((address) => {
-          result[address] = SECTION_GROUPS_BG_COLORS[Number(groupId)];
+          result[address] = SECTION_GROUPS_BG_COLORS[sectionDetails.sectionGroupId ?? sectionIndex];
         });
       });
     return result;

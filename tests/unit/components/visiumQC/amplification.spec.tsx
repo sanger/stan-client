@@ -20,7 +20,7 @@ const FormikProps = {
 
 const mockedRemoveLabwareFct = jest.fn();
 const renderAmplification = () => {
-  const labware: LabwareFlaggedFieldsFragment = createFlaggedLabware('STAN-2134');
+  const labware: LabwareFlaggedFieldsFragment = createFlaggedLabware('STAN-2884');
   const initialProps: CDNAProps = {
     slotMeasurements: undefined,
     labware: labware,

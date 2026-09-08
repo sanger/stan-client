@@ -1,20 +1,19 @@
 import { LayoutContext, PlannedSectionDetails, Source } from './layoutContext';
 import { isEqual } from 'lodash';
-import { tissue } from '../../helpers/labwareHelper';
-import { LabwareFieldsFragment } from '../../../types/sdk';
+import { compareAddresses, firstAddress } from '../../helpers/labwareHelper';
 import { assign, InternalMachineImplementations, sendParent } from 'xstate';
 import { LayoutEvents } from './layoutEvents';
 import { produce } from 'immer';
 import { LayoutSchema } from './layoutStates';
+import { convertLabwareTypeToSourceType, isPlanningByLabware } from '../../../components/planning/LabwarePlan';
+import { LabwareFlaggedFieldsFragment } from '../../../types/sdk';
 
 export const layoutMachineKey = 'layoutMachine';
 
 export enum Actions {
   ASSIGN_SELECTED = 'layoutMachine.assignSelected',
-  DELETE_DESTINATION_ACTION = 'layoutMachine.deleteDestinationAction',
   ASSIGN_DESTINATION = 'layoutMachine.assignDestination',
   REMOVE_PLANNED_ACTION = 'layoutMachine.removePlannedAction',
-  ASSIGN_DESTINATION_ACTIONS = 'layoutMachine.assignDestinationActions',
   ADD_SOURCE_TO_SLOT_DEST = 'layoutMachine.addSourceToSlotDest',
   REMOVE_SOURCE_FROM_SLOT_DEST = 'layoutMachine.removeSourceFromSlotDest',
   SEND_LAYOUT_TO_PARENT = 'layoutMachine.sendLayoutToParent',
@@ -37,48 +36,8 @@ type LayoutMachineImplementation = {
   emitted: any;
 };
 
-const sectionGroupIdForDestinationAddress = (
-  plannedActions: Record<string, PlannedSectionDetails>,
-  address: string
-) => {
-  // CASE 1 — The "address" is actually the key of a sectionGroup
-  if (plannedActions[address]) {
-    return address;
-  }
-
-  // CASE 2 — Look inside each sectionGroup to find the address in .addresses
-  for (const sectionGroupId of Object.keys(plannedActions)) {
-    const addresses = plannedActions[sectionGroupId].addresses;
-
-    if (addresses.has(address)) {
-      return sectionGroupId;
-    }
-  }
-
-  return null;
-};
-
-const deleteDestinationAddressFromGroup = (
-  plannedActions: Record<string, PlannedSectionDetails>,
-  address: string
-): Record<string, PlannedSectionDetails> => {
-  const sectionGroupId = sectionGroupIdForDestinationAddress(plannedActions, address);
-
-  if (sectionGroupId) {
-    // CASE 1 — The "address" is actually the key of a sectionGroup
-    if (sectionGroupId === address) {
-      delete plannedActions[sectionGroupId];
-      return plannedActions;
-    }
-    // CASE 2 — The "address" is inside a sectionGroup
-    const addresses = plannedActions[sectionGroupId].addresses;
-    // If removing the address leaves the group empty → delete the whole sectionGroup
-    addresses.delete(address);
-    if (addresses.size === 0) {
-      delete plannedActions[sectionGroupId];
-    }
-  }
-  return plannedActions;
+const sectionGroupForDestinationAddress = (plannedActions: Array<PlannedSectionDetails>, address: string) => {
+  return plannedActions.find((plan) => plan.addresses.has(address));
 };
 
 export const machineOptions: InternalMachineImplementations<LayoutMachineImplementation> = {
@@ -90,42 +49,55 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
       return { ...context, selected: isEqual(context.selected, event.source) ? null : event.source };
     }),
 
-    [Actions.DELETE_DESTINATION_ACTION]: assign(({ context, event }) => {
-      if (event.type !== 'SELECT_DESTINATION') {
-        return context;
-      }
-      return produce(context, (draft) => {
-        draft.layoutPlan.plannedActions = deleteDestinationAddressFromGroup(
-          draft.layoutPlan.plannedActions,
-          event.address
-        );
-      });
-    }),
-
     [Actions.ASSIGN_DESTINATION]: assign(({ context, event }) => {
       if (event.type !== 'SELECT_DESTINATION') {
         return context;
       }
-
       return produce(context, (draft) => {
-        const plannedActions = draft.layoutPlan.plannedActions;
+        // In a sectioning plan for tubes, the user assigns a labware to a slot, unlike other labware types,
+        // where the user assigns a sample to a slot. Therefore, we need to explicitly add all samples
+        // within the selected labware to the plan.
+        const slotPreviousSampleIds: Array<number> = [];
+        draft.layoutPlan.plannedActions.forEach((pa) => {
+          if (pa.addresses.has(event.address)) {
+            pa.addresses.delete(event.address);
+            slotPreviousSampleIds.push(pa.source.sampleId);
+          }
+        });
+        // From the UI, the user can only assign one source to a slot.
+        // Therefore, if the user assigns a new source to a slot that already has a source assigned,
+        // we remove the previous source from that slot.
 
-        if (
-          !context.selected ||
-          (plannedActions[event.address] && context.selected.sampleId === plannedActions[event.address].source.sampleId)
-        ) {
-          draft.layoutPlan.plannedActions = deleteDestinationAddressFromGroup(
-            draft.layoutPlan.plannedActions,
-            event.address
-          );
-        } else {
-          const action: Source = Object.assign({}, draft.selected);
-          action.replicateNumber = tissue(Object.assign({}, action.labware as LabwareFieldsFragment))?.replicate ?? '';
-          draft.layoutPlan.plannedActions[event.address] = {
-            addresses: new Set([event.address]),
-            source: action
-          };
+        draft.layoutPlan.plannedActions = draft.layoutPlan.plannedActions.filter((pa) => pa.addresses.size > 0);
+
+        if (!context.selected || slotPreviousSampleIds.includes(context.selected.sampleId)) {
+          return;
         }
+        // In a sectioning plan for tubes, the user assigns a labware to a slot, unlike other labware types,
+        // where the user assigns a sample to a slot. Therefore, we need to explicitly add all samples
+        // within the selected labware to the plan.
+        const selectedSource: Source = Object.assign({}, draft.selected);
+        const selectedDestinationLabware = draft.layoutPlan.destinationLabware;
+        if (isPlanningByLabware(selectedDestinationLabware.labwareType, draft.layoutPlan.operationType)) {
+          const sources = convertLabwareTypeToSourceType(
+            [selectedSource.labware as LabwareFlaggedFieldsFragment],
+            selectedSource.sampleThickness
+          );
+          sources.forEach((source) => {
+            draft.layoutPlan.plannedActions.push({
+              addresses: new Set([event.address]),
+              source
+            });
+          });
+        } else {
+          draft.layoutPlan.plannedActions.push({
+            addresses: new Set([event.address]),
+            source: selectedSource
+          });
+        }
+        draft.layoutPlan.plannedActions.sort((a, b) =>
+          compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses))
+        );
       });
     }),
 
@@ -133,11 +105,17 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
       if (event.type !== 'SELECT_DESTINATION') {
         return context;
       }
+
       return produce(context, (draft) => {
-        draft.layoutPlan.plannedActions = deleteDestinationAddressFromGroup(
-          draft.layoutPlan.plannedActions,
-          event.address
-        );
+        const plannedSection = sectionGroupForDestinationAddress(draft.layoutPlan.plannedActions, event.address);
+        if (plannedSection) {
+          const addresses = plannedSection.addresses;
+          // If removing the address leaves the group empty → delete the whole sectionGroup
+          addresses.delete(event.address);
+          if (addresses.size === 0) {
+            draft.layoutPlan.plannedActions = draft.layoutPlan.plannedActions.filter((plan) => plan.addresses.size > 0);
+          }
+        }
       });
     }),
     [Actions.SEND_LAYOUT_TO_PARENT]: sendParent(({ context }) => {
@@ -157,20 +135,17 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
       }
       return produce(context, (draft) => {
         const selected = draft.selectedSlots;
-        // User has selected slots --------------------------------------
+
         if (selected && selected.size > 0) {
           let referenceSource: Source | undefined;
 
           for (const address of selected) {
-            const addressSectionGroupId = sectionGroupIdForDestinationAddress(draft.layoutPlan.plannedActions, address);
-            const planned = addressSectionGroupId && draft.layoutPlan.plannedActions[addressSectionGroupId];
-
+            const planned = sectionGroupForDestinationAddress(draft.layoutPlan.plannedActions, address);
             if (!planned) {
               draft.errorMessage = `Cannot assign an empty slot to a section. Please assign a source to slot ${address} first.`;
               return;
             }
-
-            const source = planned.source; // compare first item only
+            const source = planned.source; // compare against the first item
 
             if (!referenceSource) {
               referenceSource = source;
@@ -181,37 +156,32 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
               draft.errorMessage = `Cannot group slots from different sources: slot ${address} has a different source than others.`;
               return;
             }
-            if (draft.errorMessage?.length === 0) delete draft.layoutPlan.plannedActions[address];
           }
 
-          if (draft.errorMessage) return;
-          for (const sectionGroupId of Object.keys(draft.layoutPlan.plannedActions)) {
-            const group = draft.layoutPlan.plannedActions[sectionGroupId];
-
+          for (const plannedAction of draft.layoutPlan.plannedActions) {
+            // --- Remove address that used to be assigned to a different plan so to assign to a new plan ----------------------------------
             for (const slotAddress of selected) {
-              group.addresses.delete(slotAddress);
+              plannedAction.addresses.delete(slotAddress);
             }
-            if (group.addresses.size === 0) {
-              delete draft.layoutPlan.plannedActions[sectionGroupId];
-            }
+            // unassign the section group if it was previously assigned to this section group
+            plannedAction.sectionGroupId =
+              plannedAction.sectionGroupId === event.sectionId ? undefined : plannedAction.sectionGroupId;
           }
-          // --- Remove address that used to be assigned to the same section group --------------------------------------
-          const previousSection = draft.layoutPlan.plannedActions[event.sectionId];
-          if (previousSection) {
-            previousSection.addresses.forEach((address) => {
-              draft.layoutPlan.plannedActions[address] = {
-                addresses: new Set([address]),
-                source: { ...previousSection.source }
-              };
-            });
-          }
+          draft.layoutPlan.plannedActions = draft.layoutPlan.plannedActions.filter(
+            (planned) => planned.addresses.size > 0
+          );
+
           // --- Apply the new section group ----------------------------------------
-          draft.layoutPlan.plannedActions[event.sectionId] = {
+          draft.layoutPlan.plannedActions.push({
             addresses: new Set(selected),
+            sectionGroupId: event.sectionId,
             source: { ...referenceSource! }
-          };
+          });
           draft.selectedSlots = undefined;
         }
+        draft.layoutPlan.plannedActions.sort((a, b) =>
+          compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses))
+        );
       });
     }),
     [Actions.REMOVE_SECTION_GROUP]: assign(({ context, event }) => {
@@ -219,16 +189,23 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
         return context;
       }
       return produce(context, (draft) => {
-        if (draft.layoutPlan.plannedActions[event.sectionId]) {
-          const { addresses, source } = draft.layoutPlan.plannedActions[event.sectionId];
-          delete draft.layoutPlan.plannedActions[event.sectionId];
-          for (const address of addresses) {
-            draft.layoutPlan.plannedActions[address] = {
-              addresses: new Set([address]),
-              source: source
-            };
-          }
+        if (event.sectionId === undefined) {
+          draft.errorMessage = 'Select a section color before removing a section.';
+          return;
         }
+        const sectionToRemove = draft.layoutPlan.plannedActions.find((plan) => plan.sectionGroupId === event.sectionId);
+        if (!sectionToRemove) {
+          draft.errorMessage = 'No section is assigned to the selected color.';
+          return;
+        }
+
+        const remaining = draft.layoutPlan.plannedActions.filter((plan) => plan.sectionGroupId !== event.sectionId);
+        const { addresses, ...sectionDetails } = sectionToRemove;
+        for (const address of addresses) {
+          remaining.push({ addresses: new Set([address]), ...sectionDetails });
+        }
+
+        draft.layoutPlan.plannedActions = remaining;
       });
     }),
     [Actions.ASSIGN_SELECTED_SLOTS]: assign(({ context, event }) => {

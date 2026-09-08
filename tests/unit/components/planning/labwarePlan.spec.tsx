@@ -114,7 +114,8 @@ describe('When all the fields are correctly field', () => {
         buildInitialLayoutPlan(
           [buildFlaggedLabware(LabwareTypeName.TUBE)],
           sampleColors,
-          buildFlaggedLabware(LabwareTypeName.TUBE, 'STAN-124')
+          buildFlaggedLabware(LabwareTypeName.TUBE, 'STAN-124'),
+          'plan'
         )
       );
       const service = createActor(machine).start();

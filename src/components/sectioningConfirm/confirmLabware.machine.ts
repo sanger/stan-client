@@ -7,7 +7,7 @@ import {
   ConfirmSectionLabware,
   Maybe
 } from '../../types/sdk';
-import { LayoutPlan, Source } from '../../lib/machines/layout/layoutContext';
+import { LayoutPlan, PlannedSectionDetails, Source } from '../../lib/machines/layout/layoutContext';
 import { cloneDeep } from 'lodash';
 import { NewFlaggedLabwareLayout } from '../../types/stan';
 import { produce } from '../../dependencies/immer';
@@ -67,7 +67,7 @@ export interface ConfirmLabwareContext {
 
 type SetCommentsForSectionEvent = {
   type: 'SET_COMMENTS_FOR_SECTION';
-  sectionGroupId: string;
+  sectionGroupId: number;
   commentIds: string[];
 };
 
@@ -80,7 +80,7 @@ type ToggleCancelEvent = { type: 'TOGGLE_CANCEL' };
 
 type UpdateSectionNumberEvent = {
   type: 'UPDATE_SECTION_NUMBER';
-  sectionGroupId: string;
+  addresses: Set<string>;
   sectionNumber: string;
 };
 export type CommitConfirmationEvent = {
@@ -101,7 +101,7 @@ type AssignSectionWorkNumber = {
 type UpdateSectionThicknessEvent = {
   type: 'UPDATE_SECTION_THICKNESS';
   thickness: string;
-  sectionGroupId: string;
+  addresses: Set<string>;
 };
 
 export type ConfirmLabwareEvent =
@@ -123,6 +123,25 @@ function buildConfirmSection(destinationAddresses: Array<string>, source: Source
     commentIds: source.commentIds
   };
 }
+
+export const findPlannedActionBySectionGroupId = (
+  plannedActions: Array<PlannedSectionDetails>,
+  sectionGroupId: number
+): PlannedSectionDetails | undefined => {
+  return plannedActions.find((plannedSection) => plannedSection.sectionGroupId === sectionGroupId);
+};
+
+export const findPlannedActionBySlotAddresses = (
+  plannedActions: Array<PlannedSectionDetails>,
+  slotAddress: Set<string>
+): Array<PlannedSectionDetails> => {
+  //return an array as address/section can have an multiple plannedActions
+  return plannedActions.filter(
+    (plannedSection) =>
+      plannedSection.addresses.size === slotAddress.size &&
+      [...plannedSection.addresses].every((address) => slotAddress.has(address))
+  );
+};
 /**
  * ConfirmLabware Machine
  */
@@ -189,9 +208,10 @@ export const createConfirmLabwareMachine = (
             return context;
           }
           return produce(context, (draft) => {
-            draft.layoutPlan.plannedActions[event.sectionGroupId].source.commentIds = event.commentIds.map(
-              (commentID) => Number(commentID)
-            );
+            const planned = findPlannedActionBySectionGroupId(draft.layoutPlan.plannedActions, event.sectionGroupId);
+            if (planned) {
+              planned.source.commentIds = event.commentIds.map((commentID) => Number(commentID));
+            }
           });
         }),
         /**
@@ -202,8 +222,7 @@ export const createConfirmLabwareMachine = (
             return context;
           }
           return produce(context, (draft) => {
-            Object.values(draft.layoutPlan.plannedActions).forEach((planned) => {
-              // draft.addressToCommentMap.set(key, Number(event.commentIds[0]));
+            draft.layoutPlan.plannedActions.forEach((planned) => {
               planned.source.commentIds = event.commentIds.map((commentID) => Number(commentID));
             });
             draft.commentsForAllSections = event.commentIds;
@@ -223,11 +242,8 @@ export const createConfirmLabwareMachine = (
             return context;
           }
           return produce(context, (draft) => {
-            const plannedAction = draft.layoutPlan.plannedActions[event.sectionGroupId];
-
-            if (plannedAction) {
-              plannedAction.source.newSection = event.sectionNumber;
-            }
+            const plannedActions = findPlannedActionBySlotAddresses(draft.layoutPlan.plannedActions, event.addresses);
+            plannedActions.map((pa) => (pa.source.newSection = event.sectionNumber));
           });
         }),
         updateSectionThickness: assign(({ context, event }) => {
@@ -235,16 +251,17 @@ export const createConfirmLabwareMachine = (
             return context;
           }
           return produce(context, (draft) => {
-            draft.layoutPlan.plannedActions[event.sectionGroupId].source.sampleThickness = event.thickness;
+            const plannedActions = findPlannedActionBySlotAddresses(draft.layoutPlan.plannedActions, event.addresses);
+            plannedActions.map((pa) => (pa.source.sampleThickness = event.thickness));
           });
         }),
         commitConfirmation: assign(({ context }) => {
           const confirmSections: Array<ConfirmSection> = [];
-          Object.values(context.layoutPlan.plannedActions).forEach((plannedAction) => {
+          context.layoutPlan.plannedActions.forEach((plannedAction) => {
             confirmSections.push(buildConfirmSection(Array.from(plannedAction.addresses), plannedAction.source));
           });
           let addressComments: AddressCommentInput[] = [];
-          Object.values(context.layoutPlan.plannedActions).forEach((planned) => {
+          context.layoutPlan.plannedActions.forEach((planned) => {
             planned.addresses.forEach((address) => {
               planned.source.commentIds?.forEach((commentId) => {
                 addressComments.push({ address, commentId });
@@ -256,7 +273,7 @@ export const createConfirmLabwareMachine = (
             barcode: context.labware.barcode!,
             cancelled: context.cancelled,
             confirmSections: context.cancelled ? undefined : confirmSections,
-            addressComments: []
+            addressComments
           };
           return { ...context, workNumber, confirmSectionLabware };
         }),

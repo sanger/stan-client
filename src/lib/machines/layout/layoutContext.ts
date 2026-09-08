@@ -23,16 +23,19 @@ export interface LayoutPlan {
    */
   sampleColors: Map<number, string>;
 
-  /**
-   * Map of destination slot friendly address to planned source
-   */
-  //Map<Address, Array<Source>>;
-  plannedActions: Record<string, PlannedSectionDetails>;
+  // An array of planned actions. Although the UI currently allows only one
+  // source per slot, we now need to support multiple actions per plan.
+  // For tube sectioning, the user selects the source per labware (not per sample),
+  // therefore all samples within the selected labware must be assigned to tube actions.
+  plannedActions: Array<PlannedSectionDetails>;
+
+  operationType?: string;
 }
 
 export type PlannedSectionDetails = {
   addresses: Set<Address>;
   source: Source;
+  sectionGroupId?: number;
   sectioningOrder?: number;
 };
 

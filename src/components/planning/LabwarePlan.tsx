@@ -31,6 +31,7 @@ import MutedText from '../MutedText';
 import { PlannedSectionDetails, Source } from '../../lib/machines/layout/layoutContext';
 import { PlanMutationWithGroups } from '../../pages/sectioning/Plan';
 import { uniqBy } from 'lodash';
+import { isTube } from '../../lib/helpers/labwareHelper';
 
 type LabwarePlanProps = {
   /**
@@ -65,6 +66,13 @@ type LabwarePlanProps = {
   onComplete: (cid: string, planResult: PlanMutationWithGroups) => void;
 };
 
+// For the `Section` operation on tube labware, planning is done at labware level.
+// The full source labware is transferred, so all samples in that source are included.
+// Helper to determine whether planning should be by labware instead of by sample.
+export const isPlanningByLabware = (labwareType: LabwareType, operationType?: string): boolean => {
+  return isTube(labwareType) && operationType !== undefined && operationType === 'Section';
+};
+
 const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
   (
     {
@@ -81,9 +89,9 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
   ) => {
     const labwarePlanMachine = React.useMemo(() => {
       return createLabwarePlanMachine(
-        buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware, sectionThickness.toString())
+        buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware, operationType, sectionThickness.toString())
       );
-    }, [sourceLabware, sampleColors, outputLabware, sectionThickness]);
+    }, [sourceLabware, sampleColors, outputLabware, sectionThickness, operationType]);
     const [current, send, service] = useMachine(labwarePlanMachine);
 
     useEffect(() => {
@@ -114,7 +122,6 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
     const removeSectionGroup = useCallback(() => {
       layoutMachine &&
-        selectedSectionId &&
         layoutMachine.send({
           type: 'REMOVE_SECTION_GROUP',
           sectionId: selectedSectionId
@@ -182,7 +189,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
             send({ type: 'CREATE_LABWARE', ...newValues });
           }}
         >
-          {({ isValid, validateForm, setFieldValue }) => (
+          {({ isValid, validateForm, setFieldValue, setValues }) => (
             <Form>
               <div className="md:grid md:grid-cols-2">
                 <div className="py-4 flex flex-col items-center justify-between space-y-8">
@@ -261,17 +268,18 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                           <div>Section Thickness</div>
                         </div>
                         <div className={'flex flex-col space-y-4'}>
-                          {Object.keys(current.context.layoutPlan.plannedActions).length === 0 && (
+                          {current.context.layoutPlan.plannedActions.length === 0 && (
                             <MutedText>
                               Please transfer samples to the slot before entering the section thickness.
                             </MutedText>
                           )}
-                          {Object.keys(current.context.layoutPlan.plannedActions).map((sectionGroupId) => (
-                            <div key={sectionGroupId} className="grid grid-cols-3 text-center">
+                          {(isTube(outputLabware.labwareType)
+                            ? current.context.layoutPlan.plannedActions.slice(0, 1)
+                            : current.context.layoutPlan.plannedActions
+                          ).map((sectionDetails, index) => (
+                            <div key={index} className="grid grid-cols-3 text-center">
                               <span className="font-medium text-gray-800 tracking-wide" data-testid="section-addresses">
-                                {Array.from(current.context.layoutPlan.plannedActions[sectionGroupId].addresses).join(
-                                  ', '
-                                )}
+                                {Array.from(sectionDetails.addresses).join(', ')}
                               </span>
                               <FormikInput
                                 className="focus:ring-sdb-100 h-8 bg-white border border-gray-300 rounded-md w-24 disabled:opacity-75 disabled:cursor-not-allowed"
@@ -279,15 +287,13 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                                 disabled={
                                   current.matches('printing') ||
                                   current.matches('done') ||
-                                  outputLabware.labwareType.name === LabwareTypeName.TUBE
+                                  isTube(outputLabware.labwareType)
                                 }
-                                name={`plannedActions[${sectionGroupId}].sectioningOrder`}
+                                name={`plannedActions[${index}].sectioningOrder`}
                                 data-testid={`sectioning-order`}
                                 type="number"
                                 onFocus={() => {
-                                  setHighlightedSlots(
-                                    current.context.layoutPlan.plannedActions[sectionGroupId].addresses
-                                  );
+                                  setHighlightedSlots(sectionDetails.addresses);
                                 }}
                                 onBlur={() => {
                                   setHighlightedSlots(new Set());
@@ -297,15 +303,29 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                                 className="focus:ring-sdb-100 h-8 bg-white border border-gray-300 rounded-md w-24 disabled:opacity-75 disabled:cursor-not-allowed"
                                 label={''}
                                 disabled={current.matches('printing') || current.matches('done')}
-                                name={`plannedActions[${sectionGroupId}].source.sampleThickness`}
+                                name={`plannedActions[${index}].source.sampleThickness`}
                                 data-testid={`section-thickness`}
                                 type="number"
                                 min={0.5}
                                 step={0.5}
+                                onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                  if (isTube(outputLabware.labwareType)) {
+                                    await setValues((prev) => {
+                                      const plannedActions = prev.plannedActions.map((planned) => ({
+                                        ...planned,
+                                        source: { ...planned.source, sampleThickness: e.target.value }
+                                      }));
+                                      return { ...prev, plannedActions };
+                                    });
+                                  } else {
+                                    await setFieldValue(
+                                      `plannedActions[${index}].source.sampleThickness`,
+                                      e.target.value
+                                    );
+                                  }
+                                }}
                                 onFocus={() => {
-                                  setHighlightedSlots(
-                                    current.context.layoutPlan.plannedActions[sectionGroupId].addresses
-                                  );
+                                  setHighlightedSlots(sectionDetails.addresses);
                                 }}
                                 onBlur={() => {
                                   setHighlightedSlots(new Set());
@@ -459,7 +479,7 @@ type FormValues = {
    */
   costing?: SlideCosting;
 
-  plannedActions: Record<string, PlannedSectionDetails>;
+  plannedActions: Array<PlannedSectionDetails>;
 };
 
 /**
@@ -468,7 +488,7 @@ type FormValues = {
 function buildInitialValues(
   operationType: string,
   labwareLayout: NewFlaggedLabwareLayout,
-  plannedActions: Record<string, PlannedSectionDetails>
+  plannedActions: Array<PlannedSectionDetails>
 ): FormValues {
   let formValues: FormValues = {
     operationType,
@@ -495,7 +515,7 @@ function buildInitialValues(
  */
 function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
   type FormShape = {
-    plannedActions?: Yup.ObjectSchema<any>;
+    plannedActions?: Yup.AnySchema;
     barcode?: Yup.StringSchema;
     lotNumber?: Yup.StringSchema;
     costing?: Yup.StringSchema;
@@ -510,14 +530,18 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
       .matches(/^\d{7}$/, 'Xenium barcode should be a 7-digit number');
   }
   if (labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER) {
-    formShape.plannedActions = Yup.object()
-      .shape(
-        {} as Record<string, Yup.ObjectSchema<any>> // allows dynamic keys
+    formShape.plannedActions = Yup.array()
+      .of(
+        Yup.object({
+          source: Yup.object({
+            sampleThickness: Yup.string()
+          })
+        })
       )
+      .min(1, 'Section thickness must have at least one entry')
       .test('at-least-one-sampleThickness', 'Section thickness must have at least one entry', (plannedActions) => {
         if (!plannedActions) return false; // required
-
-        return Object.values(plannedActions).some(
+        return plannedActions.some(
           (section) =>
             section?.source?.sampleThickness !== undefined &&
             section?.source?.sampleThickness !== null &&
@@ -553,9 +577,21 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
  * Builds the initial layout for this plan.
  */
 
+export enum SourceUniqueBy {
+  LABWARE = 'labware',
+  SAMPLE = 'sample'
+}
+
+// Controls how sources are shown in the layout edit modal.
+// Default behavior is to show sources by sample, which supports blocks
+// containing multiple samples. In this mode, the UI shows the labware barcode
+// and sample external name.
+// For tube labware, sources are shown by labware because transferring a
+// source labware to a tube implies transferring all samples in that labware.
 export const convertLabwareTypeToSourceType = (
   labware: Array<LabwareFlaggedFieldsFragment>,
-  globalSectionThickness?: string
+  globalSectionThickness?: string,
+  uniqueBy: SourceUniqueBy = SourceUniqueBy.SAMPLE
 ): Array<Source> => {
   const sources = labware.flatMap((lw) => {
     return lw.slots.flatMap((slot) => {
@@ -566,23 +602,30 @@ export const convertLabwareTypeToSourceType = (
           newSection: '',
           address: slot.address,
           sampleThickness: globalSectionThickness,
-          tissue: sample.tissue
+          // Do not assign tissue for tube labware, as the Tube layout edit pop-up should not display the source external name.
+          tissue: uniqueBy === SourceUniqueBy.SAMPLE ? sample.tissue : undefined
         };
       });
     });
   });
+  if (uniqueBy === SourceUniqueBy.LABWARE) return uniqBy(sources, (source: Source) => `${source.labware.barcode}`);
   return uniqBy(sources, (source: Source) => `${source.labware.barcode}-${source.tissue?.externalName}`);
 };
 export function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
   outputLabware: NewFlaggedLabwareLayout,
+  operationType: string,
   globalSectionThickness?: string
 ) {
+  const sources = isPlanningByLabware(outputLabware.labwareType, operationType)
+    ? convertLabwareTypeToSourceType(sourceLabware, globalSectionThickness, SourceUniqueBy.LABWARE)
+    : convertLabwareTypeToSourceType(sourceLabware, globalSectionThickness);
   return {
-    sources: convertLabwareTypeToSourceType(sourceLabware, globalSectionThickness),
+    sources,
     sampleColors,
     destinationLabware: outputLabware,
-    plannedActions: {} as Record<string, PlannedSectionDetails>
+    plannedActions: [],
+    operationType
   };
 }

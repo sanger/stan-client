@@ -17,7 +17,7 @@ export interface LabwareMachineContext {
   lastSelectedAddress: Maybe<string>;
   selectionMode: SelectionMode;
   selectable: Selectable;
-  sectionGroups: Record<string, PlannedSectionDetails>;
+  sectionGroups: Array<PlannedSectionDetails>;
 }
 
 export interface LabwareMachineSchema {

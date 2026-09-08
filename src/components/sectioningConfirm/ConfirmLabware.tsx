@@ -56,12 +56,12 @@ interface ConfirmLabwareProps {
   /**
    * Callback on section number changes
    * @param layoutPlan - Plan changed
-   * @param slotAddress - Address of the slot in which the section belongs
+   * @param addresses - The slots address belonging to the section to update the section number
    * @param sectionNumber - New section number
    */
-  onSectionNumberChange?: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionNumber: string) => void;
+  onSectionNumberChange?: (layoutPlan: LayoutPlan, addresses: Set<string>, sectionNumber: string) => void;
 
-  onSectionThicknessChange?: (layoutPlan: LayoutPlan, sectionGroupId: string, sectionThickness: string) => void;
+  onSectionThicknessChange?: (layoutPlan: LayoutPlan, addresses: Set<string>, sectionThickness: string) => void;
 }
 
 const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
@@ -154,10 +154,10 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             </div>
             <div className="w-full space-y-4">
               <div data-testid="labware-comments" className={'flex flex-col space-y-4'}>
-                {Object.keys(layoutPlan.plannedActions).map((sectionGroupId) => (
+                {layoutPlan.plannedActions.map((sectionDetails, sectionIndex) => (
                   <LabwareComments
-                    key={sectionGroupId}
-                    sectionGroupId={sectionGroupId}
+                    key={sectionIndex}
+                    sectionGroupId={sectionDetails.sectionGroupId!}
                     disabledComment={current.matches('done')}
                     sectionNumberDisplay={
                       labware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER
@@ -171,24 +171,24 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                     onCommentChange={(commentIds) => {
                       send({
                         type: 'SET_COMMENTS_FOR_SECTION',
-                        sectionGroupId,
+                        sectionGroupId: sectionDetails.sectionGroupId!,
                         commentIds
                       });
                     }}
-                    onSectionThicknessChange={(sectionGroupId, thickness) => {
-                      onSectionThicknessChange && onSectionThicknessChange(layoutPlan, sectionGroupId, thickness);
+                    onSectionThicknessChange={(addresses, thickness) => {
+                      onSectionThicknessChange && onSectionThicknessChange(layoutPlan, addresses, thickness);
                       send({
                         type: 'UPDATE_SECTION_THICKNESS',
-                        sectionGroupId,
+                        addresses: sectionDetails.addresses,
                         thickness
                       });
                     }}
-                    onSectionNumberChange={(sectionGroupId, sectionNumber) => {
+                    onSectionNumberChange={(addresses, sectionNumber) => {
                       /**Notify parent, so as to modify section number in original layout*/
-                      onSectionNumberChange && onSectionNumberChange(layoutPlan, sectionGroupId, sectionNumber);
+                      onSectionNumberChange && onSectionNumberChange(layoutPlan, addresses, sectionNumber);
                       send({
                         type: 'UPDATE_SECTION_NUMBER',
-                        sectionGroupId,
+                        addresses: sectionDetails.addresses,
                         sectionNumber
                       });
                     }}

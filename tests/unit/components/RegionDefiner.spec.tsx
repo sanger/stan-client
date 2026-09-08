@@ -23,7 +23,7 @@ type renderingOptions = {
   regions?: Array<Region>;
 };
 
-const labware = createFlaggedLabware('STAN-6426');
+const labware = createFlaggedLabware('STAN-6116');
 
 const labwareAnalyser = ({
   selectedAddresses,

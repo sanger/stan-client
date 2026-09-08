@@ -4,6 +4,7 @@ import { Comment } from '../../types/sdk';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
 import { Input } from '../forms/Input';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { findPlannedActionBySectionGroupId } from './confirmLabware.machine';
 
 export enum SectionNumberSetting {
   NORMAL,
@@ -11,14 +12,14 @@ export enum SectionNumberSetting {
   HIDE
 }
 interface LabwareCommentsProps {
-  sectionGroupId: string;
+  sectionGroupId: number;
   layoutPlan: LayoutPlan;
   comments: Array<Comment>;
   disabledComment?: boolean;
   sectionNumberDisplay?: SectionNumberSetting;
   onCommentChange: (commentIds: string[]) => void;
-  onSectionNumberChange: (sectionGroupId: string, sectionNumber: string) => void;
-  onSectionThicknessChange: (sectionGroupId: string, thickness: string) => void;
+  onSectionNumberChange: (addresses: Set<string>, sectionNumber: string) => void;
+  onSectionThicknessChange: (addresses: Set<string>, thickness: string) => void;
 }
 
 const LabwareComments: React.FC<LabwareCommentsProps> = ({
@@ -31,7 +32,8 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
   disabledComment = false,
   onSectionThicknessChange
 }) => {
-  const sectionDetail = layoutPlan.plannedActions[sectionGroupId];
+  const sectionDetail = findPlannedActionBySectionGroupId(layoutPlan.plannedActions, sectionGroupId);
+  if (!sectionDetail) return null;
   return (
     <div className="flex flex-row items-start justify-start gap-x-2">
       <div className="flex flex-col">
@@ -50,7 +52,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
                 value={sectionDetail.source.newSection}
                 min={1}
                 disabled={sectionNumberDisplay === SectionNumberSetting.DISABLE}
-                onChange={(e) => onSectionNumberChange(sectionGroupId, e.target.value)}
+                onChange={(e) => onSectionNumberChange(sectionDetail.addresses, e.target.value)}
               />
               <Input
                 type="text"
@@ -66,12 +68,12 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
                 min={0.5}
                 step={0.5}
                 onChange={(e) => {
-                  onSectionThicknessChange(sectionGroupId, e.target.value);
+                  onSectionThicknessChange(sectionDetail.addresses, e.target.value);
                 }}
               />
               <div className={'flex flex-col'}>
                 <CustomReactSelect
-                  value={layoutPlan.plannedActions[sectionGroupId].source.commentIds?.map((comment) => comment + '')}
+                  value={sectionDetail.source.commentIds?.map((comment) => comment + '')}
                   isDisabled={disabledComment}
                   handleChange={(options) => {
                     const optionsValues = Array.isArray(options)

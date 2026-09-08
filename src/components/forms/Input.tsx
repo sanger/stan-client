@@ -5,7 +5,7 @@ import { FormikErrorMessage, onPreventEnterKeyDefault } from './index';
 import classNames from 'classnames';
 
 const defaultInputClassNames =
-  'ring-sdb-100 focus:border-sdb-100 rounded-md disabled:opacity-75 disabled:cursor-not-allowed';
+  'ring-sdb-100 focus:border-sdb-100 rounded-md disabled:opacity-75 disabled:cursor-not-allowed border border-gray-300';
 
 interface FormikInputProps {
   label: string;
@@ -29,7 +29,7 @@ const FormikInput = ({
 }: FormikInputProps) => {
   const inputClassNames = classNames(
     {
-      'bg-white block border border-gray-300 w-full disabled:bg-gray-200': type !== 'checkbox',
+      'bg-white block  w-full disabled:bg-gray-200': type !== 'checkbox',
       'h-10': type !== 'checkbox' && type !== 'textarea',
       "h-8 w-8 border border-gray-500 appearance-none checked:before:content-['✔'] checked:before:text-white checked:before:flex checked:before:items-center checked:before:justify-center":
         type === 'checkbox'

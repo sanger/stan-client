@@ -348,7 +348,7 @@ const multiCtrlSelectSlotHandler = [
   }
 ];
 
-const sectionGroupAddresses = (address: string, sectionGroups: Record<string, PlannedSectionDetails>) => {
-  const sectionGroup = Object.values(sectionGroups).find((group) => group.addresses.has(address));
+const sectionGroupAddresses = (address: string, sectionGroups: Array<PlannedSectionDetails>) => {
+  const sectionGroup = sectionGroups.find((group) => group.addresses.has(address));
   return sectionGroup ? sectionGroup.addresses : new Set([address]);
 };

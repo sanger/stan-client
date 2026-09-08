@@ -56,13 +56,15 @@ type BlockProcessingLabwarePlanProps = {
 function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
-  outputLabware: NewFlaggedLabwareLayout
+  outputLabware: NewFlaggedLabwareLayout,
+  operationType?: string
 ) {
   return {
     sources: convertLabwareTypeToSourceType(sourceLabware),
     sampleColors,
     destinationLabware: outputLabware,
-    plannedActions: {}
+    plannedActions: [],
+    operationType
   };
 }
 
@@ -83,7 +85,6 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
     const { requestError, layoutPlan } = current.context;
     const { layoutMachine } = current.context;
     const { setFieldValue, values, setValues } = useFormikContext<BlockFormData>();
-
     //Updating the sources in the layout plan if the source labware changes. This is to ensure that the layout plan is always
     // in sync with the scanned/removed source labware.
     React.useEffect(() => {
