@@ -131,6 +131,7 @@ export function findPlanData(sourceLabware: Labware, destinationLabware: Labware
         planActions: [
           {
             __typename: 'PlanAction',
+            sectioningOrder: 3,
             source: {
               __typename: 'Slot',
               address: 'A1',

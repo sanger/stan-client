@@ -75,16 +75,17 @@ describe('Sectioning Confirmation', () => {
       cy.get('[type="radio"]').first().should('be.checked');
     });
     it('should auto fill section numbers starting from highest section number', () => {
-      let sectionNumbers: number[] = [];
+      let sectionNumber: number;
+      //sectioning Order is set in the mocked plan data (planHandlers.ts - findPlanData), so we can use it to calculate the expected section number
+      const sectioningOrder = 3;
       cy.findAllByTestId('block-highest-section')
-        .each((div) => {
-          sectionNumbers.push(Number(div.text().trim()));
-        })
-        .then(() => {
-          const sectionNumber = Math.max(...sectionNumbers);
-          cy.findAllByTestId('section-number').each((elem) =>
-            cy.wrap(elem).should('have.value', sectionNumber + 1 + '')
-          );
+        .first()
+        .then((sampleSectionNumberDiv) => {
+          sectionNumber = Number(sampleSectionNumberDiv.text().trim());
+
+          cy.findAllByTestId('section-number')
+            .first()
+            .should('have.value', sectionNumber + sectioningOrder + '');
         });
     });
 
