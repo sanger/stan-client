@@ -439,7 +439,7 @@ export function createSectioningConfirmMachine() {
  * The filling rules are
  * 1) If fill mode is 'Manual' all sections will be filled with zeros
  * 2) If the fill mode is 'AUTO',all section numbers will be filled with numbers incrementally starting from
- *    the highest section number (stored in highestSectionMap mapped to it's source labware barcode in highestSectionMap)
+ *    the highest section number (stored in highestSectionMap mapped to it's  the source sample id barcode in highestSectionMap)
  * 3) First the Tubes will be numbered, followed by other labware in the order they are kept in the list.
  * 4) For slides, the numbering will be column-wise for example: proceed down first column, then down second etc
  * 5) Tubes, if cancelled will be filled with 0, if cancelled, even in 'Auto' mode.
@@ -447,7 +447,7 @@ export function createSectioningConfirmMachine() {
  * @param fillMode 'Auto' or 'Manual'
  * @param layoutPlanMap List of layoutPlans
  * @param highestSectionNumberMap  Highest section number for each source labware.
- *                                 Key is the source labware barcode and value is highest section number
+ *                                 Key is the source sample id and value is the highest section number
  *                                 For 'Auto' the numbering starts from this value
  * @param cancelledBarcodes Barcodes corresponding to cancelled layout
  */
