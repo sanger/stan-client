@@ -15,7 +15,7 @@ import { LabwareTypeName } from '../../types/stan';
 import { ClientError } from 'graphql-request';
 import { produce } from '../../dependencies/immer';
 import { SectionNumberMode } from './SectioningConfirm';
-import { blockHighestSection, buildSampleColors } from '../../lib/helpers/labwareHelper';
+import { buildSampleColors } from '../../lib/helpers/labwareHelper';
 import { findPlannedActionBySlotAddresses } from './confirmLabware.machine';
 
 type SectioningConfirmContext = {
@@ -56,9 +56,9 @@ type SectioningConfirmContext = {
   sectionNumberMode: SectionNumberMode;
 
   /**
-   * Map to store the highest section numbers for each source labware. Key is the source labware barcode
+   * Map to store the highest section numbers for each source sample. Key is the source sample id
    */
-  highestSectionNumbers: Map<string, number>;
+  highestSectionNumbers: Map<number, number>;
 
   /**
    * Possible errors returned from stan core after a confirmSection request
@@ -373,9 +373,19 @@ export function createSectioningConfirmMachine() {
               .filter((source) => usedSourceLabwareIds.includes(source.id));
 
             //Set all highest section numbers for all source labware
-            draft.sourceLabware.forEach((sourceLabware) => {
-              draft.highestSectionNumbers.set(sourceLabware.barcode, blockHighestSection(sourceLabware) ?? 0);
-            });
+            draft.plans
+              .flatMap((plan) => plan.planData.sources)
+              .flatMap((labware) => labware.slots)
+              .flatMap((slot) => slot.samples)
+              .forEach((sample) => {
+                const highestSection = sample.blockHighestSection;
+                if (highestSection !== undefined && highestSection !== null) {
+                  const existing = draft.highestSectionNumbers.get(sample.id);
+                  if (existing === undefined || highestSection > existing) {
+                    draft.highestSectionNumbers.set(sample.id, highestSection);
+                  }
+                }
+              });
           });
         }),
 
@@ -429,7 +439,7 @@ export function createSectioningConfirmMachine() {
  * The filling rules are
  * 1) If fill mode is 'Manual' all sections will be filled with zeros
  * 2) If the fill mode is 'AUTO',all section numbers will be filled with numbers incrementally starting from
- *    the highest section number (stored in highestSectionMap mapped to it's source labware barcode in highestSectionMap)
+ *    the highest section number (stored in highestSectionMap mapped to it's  the source sample id barcode in highestSectionMap)
  * 3) First the Tubes will be numbered, followed by other labware in the order they are kept in the list.
  * 4) For slides, the numbering will be column-wise for example: proceed down first column, then down second etc
  * 5) Tubes, if cancelled will be filled with 0, if cancelled, even in 'Auto' mode.
@@ -437,19 +447,19 @@ export function createSectioningConfirmMachine() {
  * @param fillMode 'Auto' or 'Manual'
  * @param layoutPlanMap List of layoutPlans
  * @param highestSectionNumberMap  Highest section number for each source labware.
- *                                 Key is the source labware barcode and value is highest section number
+ *                                 Key is the source sample id and value is the highest section number
  *                                 For 'Auto' the numbering starts from this value
  * @param cancelledBarcodes Barcodes corresponding to cancelled layout
  */
 function fillInSectionNumbersInLayoutPlan(
   fillMode: SectionNumberMode,
   layoutPlans: Array<LayoutPlan>,
-  highestSectionNumberMap: Map<string, number>,
+  highestSectionNumberMap: Map<number, number>,
   cancelledBarcodes: Array<string>
 ) {
   /**Auto filling of section numbers**/
   if (fillMode === SectionNumberMode.Auto) {
-    let lastSectionNumbers: Map<string, number> = new Map();
+    let lastSectionNumbers: Map<number, number> = new Map();
     //copy all highest section numbers, so as to avoid changing context values
     Array.from(highestSectionNumberMap.entries()).map(([key, val]) => lastSectionNumbers.set(key, val));
     /**First fill in section numbers for TUBES**/
@@ -472,19 +482,19 @@ function fillInSectionNumbersInLayoutPlan(
     });
   }
 }
-function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, startNumbers?: Map<string, number>) {
+function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, startNumbers?: Map<number, number>) {
   /**Get slots column wise to fill the section numbers**/
   layoutPlan.plannedActions.forEach((plan, planIndex) => {
     let newSectionNum = 0;
-    if (startNumbers && startNumbers.has(plan.source.labware.barcode) && incrementFill) {
+    if (startNumbers && startNumbers.has(plan.source.sampleId) && incrementFill) {
       //Get the highest section number of the source labware for this section
-      const highestSectionNumber = startNumbers.get(plan.source.labware.barcode)!;
+      const highestSectionNumber = startNumbers.get(plan.source.sampleId)!;
       if (plan.sectioningOrder) {
         newSectionNum = highestSectionNumber + plan.sectioningOrder;
       } else {
         newSectionNum = highestSectionNumber + 1;
         //Store the current highest section number so that it will be incremental for next section
-        startNumbers.set(plan.source.labware.barcode, newSectionNum);
+        startNumbers.set(plan.source.sampleId, newSectionNum);
       }
     }
     plan.source.newSection = String(newSectionNum);
@@ -531,6 +541,7 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
         sources.push(source);
         const key = `${planned.source.samples[0].id}-${planned.sectioningOrder}`;
         plannedSectionGroups[key] ??= {
+          sectioningOrder: planned.sectioningOrder ?? undefined,
           addresses: new Set<string>(group),
           source,
           sectionGroupId: sectionGroupId++
