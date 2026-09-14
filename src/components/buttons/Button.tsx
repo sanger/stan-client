@@ -12,7 +12,7 @@ export interface ButtonProps
 /**
  * Not to be used in the UI. Here to provide some good defaults for building other buttons.
  */
-const Button = ({ children, disabled, className, loading, miniButton, ...rest }: ButtonProps) => {
+const Button = ({ children, disabled, className, loading, miniButton, type = 'button', ...rest }: ButtonProps) => {
   const width = miniButton ? 'w-20' : 'xs:mt-0 xs:w-auto';
   const buttonClasses = classNames(
     `sm:text-sm inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium focus:outline-hidden focus:ring-2 focus:ring-offset-2`,
@@ -24,7 +24,7 @@ const Button = ({ children, disabled, className, loading, miniButton, ...rest }:
   );
 
   return (
-    <button {...rest} disabled={disabled} className={buttonClasses}>
+    <button {...rest} disabled={disabled} className={buttonClasses} type={type}>
       {children}
       {loading && (
         <span className="ml-3 -mr-1">
