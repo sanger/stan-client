@@ -176,6 +176,12 @@ export type AnalyserScanData = {
   workNumberXeniumStudyIds: Array<WorkNumberXeniumStudyId>;
 };
 
+/** A barcode and a sample id. */
+export type BarcodeSampleId = {
+  barcode: Scalars['String']['input'];
+  sampleId: Scalars['Int']['input'];
+};
+
 /** Biological risk assessment number. */
 export type BioRisk = {
   __typename?: 'BioRisk';
@@ -4299,6 +4305,8 @@ export type TissueBlockRequest = {
   discardSourceBarcodes?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The labware (blocks) being created by this request. */
   labware: Array<TissueBlockLabware>;
+  /** Which samples need to be removed from the source labware? */
+  removedSourceSampleIds?: InputMaybe<Array<BarcodeSampleId>>;
   /** The work number associated with this request. */
   workNumber?: InputMaybe<Scalars['String']['input']>;
 };
