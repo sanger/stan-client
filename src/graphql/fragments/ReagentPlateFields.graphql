@@ -3,5 +3,7 @@ fragment ReagentPlateFields on ReagentPlate {
   slots {
     ...ReagentSlotFields
   }
+  numRows
+  numColumns
   plateType
 }

@@ -65,6 +65,7 @@ import XeniumMetrics from '../pages/XeniumMetrics';
 import { ReviseWorkNumber } from '../pages/ReviseWorkNumber/ReviseWorkNumber';
 import { ReassignRequestNumber } from '../pages/ReassignRequestNumber';
 import ProbeHybridisationCytAssist from '../pages/ProbeHybridisationCytAssist/ProbeHybridisationCytAssist';
+import { Visium3LibraryConstruction } from '../pages/LibraryConstruction/Visium3LibraryConstruction';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -346,6 +347,9 @@ const RouteLayout = () => {
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/lab/libraryGeneration" element={<LibraryAmpAndGeneration />} />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/lab/libraryConstruction" element={<Visium3LibraryConstruction />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route

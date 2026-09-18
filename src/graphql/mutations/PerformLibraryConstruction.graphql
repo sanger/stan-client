@@ -1,0 +1,7 @@
+mutation PerformLibraryConstruction($request: [LibraryConRequest!]!) {
+  libraryCon(request: $request) {
+    operations {
+      id
+    }
+  }
+}
