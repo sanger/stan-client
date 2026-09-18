@@ -864,6 +864,20 @@ export type LabwareWithSlotCommentsRequest = {
   barcode: Scalars['String']['input'];
 };
 
+/** A request to record dual index and amplification ops. */
+export type LibraryConRequest = {
+  /** The barcode of the labware. */
+  labwareBarcode: Scalars['String']['input'];
+  /** The type of reagent plate involved. */
+  reagentPlateType?: InputMaybe<Scalars['String']['input']>;
+  /** The transfers from aliquot slots to destination slots. */
+  reagentTransfers: Array<ReagentTransfer>;
+  /** The measurement to record on slots in the destination. */
+  slotMeasurements: Array<SlotMeasurementRequest>;
+  /** The work number to associate with these operations. */
+  workNumber: Scalars['String']['input'];
+};
+
 /** A request to record transfer, dual index and amplification ops. */
 export type LibraryPrepRequest = {
   /** The one destination labware for this request, and the description of what is transferred into it. */
@@ -1024,6 +1038,8 @@ export type Mutation = {
   extract: OperationResult;
   /** Flag labware. */
   flagLabware: OperationResult;
+  /** Perform library con request. */
+  libraryCon: OperationResult;
   /** Perform library prep request. */
   libraryPrep: OperationResult;
   /** Log in with the given credentials. */
@@ -1507,6 +1523,15 @@ export type MutationExtractArgs = {
  */
 export type MutationFlagLabwareArgs = {
   request: FlagLabwareRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationLibraryConArgs = {
+  request: Array<LibraryConRequest>;
 };
 
 
@@ -4611,7 +4636,7 @@ export type ProjectFieldsFragment = { __typename?: 'Project', name: string, enab
 
 export type ProteinPanelFieldsFragment = { __typename?: 'ProteinPanel', name: string, enabled: boolean };
 
-export type ReagentPlateFieldsFragment = { __typename?: 'ReagentPlate', barcode: string, plateType?: string | null, slots: Array<{ __typename?: 'ReagentSlot', address: string, used: boolean }> };
+export type ReagentPlateFieldsFragment = { __typename?: 'ReagentPlate', barcode: string, numRows: number, numColumns: number, plateType?: string | null, slots: Array<{ __typename?: 'ReagentSlot', address: string, used: boolean }> };
 
 export type ReagentSlotFieldsFragment = { __typename?: 'ReagentSlot', address: string, used: boolean };
 
@@ -4920,6 +4945,13 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type LogoutMutation = { __typename?: 'Mutation', logout?: string | null };
+
+export type PerformLibraryConstructionMutationVariables = Exact<{
+  request: Array<LibraryConRequest>;
+}>;
+
+
+export type PerformLibraryConstructionMutation = { __typename?: 'Mutation', libraryCon: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
 
 export type PerformParaffinProcessingMutationVariables = Exact<{
   request: ParaffinProcessingRequest;
@@ -6426,6 +6458,8 @@ export const ReagentPlateFieldsFragmentDoc = gql`
   slots {
     ...ReagentSlotFields
   }
+  numRows
+  numColumns
   plateType
 }
     `;
@@ -7063,6 +7097,15 @@ export const LoginDocument = gql`
 export const LogoutDocument = gql`
     mutation Logout {
   logout
+}
+    `;
+export const PerformLibraryConstructionDocument = gql`
+    mutation PerformLibraryConstruction($request: [LibraryConRequest!]!) {
+  libraryCon(request: $request) {
+    operations {
+      id
+    }
+  }
 }
     `;
 export const PerformParaffinProcessingDocument = gql`
@@ -9053,6 +9096,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     Logout(variables?: LogoutMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<LogoutMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<LogoutMutation>(LogoutDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Logout', 'mutation', variables);
+    },
+    PerformLibraryConstruction(variables: PerformLibraryConstructionMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<PerformLibraryConstructionMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PerformLibraryConstructionMutation>(PerformLibraryConstructionDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformLibraryConstruction', 'mutation', variables);
     },
     PerformParaffinProcessing(variables: PerformParaffinProcessingMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<PerformParaffinProcessingMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PerformParaffinProcessingMutation>(PerformParaffinProcessingDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformParaffinProcessing', 'mutation', variables);

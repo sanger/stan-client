@@ -49,12 +49,12 @@ export function isSlotEmpty(slot: SlotFieldsFragment): boolean {
  * Predicate for checking if a slot is filled i.e. does it contain any samples?
  */
 export function isSlotFilled(slot: SlotFieldsFragment): boolean {
-  return !isSlotEmpty(slot);
+  return slot && !isSlotEmpty(slot);
 }
 
 /**
  * Predicate for checking if a slot has multiple samples.
  */
 export function hasMultipleSamples(slot: SlotFieldsFragment): boolean {
-  return slot.samples.length > 1;
+  return slot && slot.samples.length > 1;
 }

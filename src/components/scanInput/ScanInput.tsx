@@ -28,13 +28,15 @@ interface ScanInputProps
    * If name given , display a Formik input otherwise normal
    */
   name?: string;
+
+  dataTestId?: string;
 }
 
 /**
  * Input that will call the onScan callback on both `tab` or `enter` (one of which hopefully is what a barcode scanner has setup as its terminal character).
  */
 const ScanInput = React.forwardRef<HTMLInputElement, ScanInputProps>(
-  ({ label, name, type = 'text', onScan, allowEmptyValue = false, ...inputProps }, ref) => {
+  ({ label, name, type = 'text', onScan, allowEmptyValue = false, dataTestId, ...inputProps }, ref) => {
     const inputClassNames = classNames(
       {
         'rounded-r-md': !inputProps?.disabled,
@@ -81,7 +83,7 @@ const ScanInput = React.forwardRef<HTMLInputElement, ScanInputProps>(
               type={type}
               onKeyDown={onKeyDownHandler}
               className={inputClassNames}
-              data-testid={'input'}
+              data-testid={dataTestId ?? 'input'}
             />
           )}
           {inputProps?.disabled && (
