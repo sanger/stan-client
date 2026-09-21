@@ -1,12 +1,12 @@
 import { LayoutContext, PlannedSectionDetails, Source } from './layoutContext';
 import { isEqual } from 'lodash';
-import { compareAddresses, firstAddress } from '../../helpers/labwareHelper';
 import { assign, InternalMachineImplementations, sendParent } from 'xstate';
 import { LayoutEvents } from './layoutEvents';
 import { produce } from 'immer';
 import { LayoutSchema } from './layoutStates';
 import { convertLabwareTypeToSourceType, isPlanningByLabware } from '../../../components/planning/LabwarePlan';
 import { LabwareFlaggedFieldsFragment } from '../../../types/sdk';
+import { alphaNumericSortDefault } from '../../../types/stan';
 
 export const layoutMachineKey = 'layoutMachine';
 
@@ -91,12 +91,12 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
           });
         } else {
           draft.layoutPlan.plannedActions.push({
-            addresses: new Set([event.address]),
+            addresses: new Set([event.address].sort(alphaNumericSortDefault)),
             source: selectedSource
           });
         }
         draft.layoutPlan.plannedActions.sort((a, b) =>
-          compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses))
+          alphaNumericSortDefault([...a.addresses][0], [...b.addresses][0])
         );
       });
     }),
@@ -173,14 +173,14 @@ export const machineOptions: InternalMachineImplementations<LayoutMachineImpleme
 
           // --- Apply the new section group ----------------------------------------
           draft.layoutPlan.plannedActions.push({
-            addresses: new Set(selected),
+            addresses: new Set([...selected].sort(alphaNumericSortDefault)),
             sectionGroupId: event.sectionId,
             source: { ...referenceSource! }
           });
           draft.selectedSlots = undefined;
         }
         draft.layoutPlan.plannedActions.sort((a, b) =>
-          compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses))
+          alphaNumericSortDefault([...a.addresses][0], [...b.addresses][0])
         );
       });
     }),
