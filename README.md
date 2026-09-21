@@ -20,6 +20,17 @@ In order for `graphql-codegen` to generate TypeScript types to match the GraphQL
 
     GRAPHQL_SCHEMA_PATH=/path/to/schema.graphqls
 
+## Usage
+
+For the most common development workflows:
+
+- `yarn start` runs the application locally against the configured API.
+- `yarn start:msw` runs the application locally with mocked API responses.
+- `yarn test:unit` runs the Jest unit test suite in the `/tests` directory.
+- `yarn test` runs the Cypress end-to-end test suite.
+- `yarn lint` checks the TypeScript and React source files with ESLint.
+- `yarn build` creates a production build of the application.
+
 ## Front-end Architecture
 The architecture of the front-end is split into 3 layers:
 
