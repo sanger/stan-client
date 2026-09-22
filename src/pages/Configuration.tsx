@@ -398,29 +398,6 @@ export default function Configuration() {
         </div>
       </div>,
 
-      /**Projects**/
-      <div data-testid="config">
-        <Heading level={2}>Projects</Heading>
-        <p className="mt-3 mb-6 text-lg" />
-        <EntityManager
-          initialEntities={configuration.projects}
-          displayKeyColumnName={'name'}
-          valueColumnName={'enabled'}
-          onChangeValue={(entity, value) => {
-            const enabled = typeof value === 'boolean' ? value : false;
-            return stanCore
-              .SetProjectEnabled({
-                enabled,
-                name: entity.name
-              })
-              .then((res) => res.setProjectEnabled);
-          }}
-          onCreate={(name) => stanCore.AddProject({ name }).then((res) => res.addProject)}
-          valueFieldComponentInfo={{
-            type: 'CHECKBOX'
-          }}
-        />
-      </div>,
       /**Programs**/
       <div data-testid="config">
         <Heading level={2}>Programs</Heading>
@@ -439,6 +416,30 @@ export default function Configuration() {
               .then((res) => res.setProgramEnabled);
           }}
           onCreate={(name) => stanCore.AddProgram({ name }).then((res) => res.addProgram)}
+          valueFieldComponentInfo={{
+            type: 'CHECKBOX'
+          }}
+        />
+      </div>,
+
+      /**Projects**/
+      <div data-testid="config">
+        <Heading level={2}>Projects</Heading>
+        <p className="mt-3 mb-6 text-lg" />
+        <EntityManager
+          initialEntities={configuration.projects}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
+          onChangeValue={(entity, value) => {
+            const enabled = typeof value === 'boolean' ? value : false;
+            return stanCore
+              .SetProjectEnabled({
+                enabled,
+                name: entity.name
+              })
+              .then((res) => res.setProjectEnabled);
+          }}
+          onCreate={(name) => stanCore.AddProject({ name }).then((res) => res.addProject)}
           valueFieldComponentInfo={{
             type: 'CHECKBOX'
           }}
