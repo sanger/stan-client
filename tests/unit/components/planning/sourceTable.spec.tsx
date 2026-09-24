@@ -105,4 +105,25 @@ describe('SourceTable', () => {
       );
     });
   });
+
+  describe('when labware can be unscanned', () => {
+    it('shows an Unscan column with a button on the first row of each labware', () => {
+      renderSourceTable([]);
+      expect(screen.getByText('Unscan')).toBeInTheDocument();
+      expect(screen.getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual([
+        'Unscan STAN-100',
+        'Unscan STAN-200'
+      ]);
+    });
+  });
+
+  describe('when labware cannot be unscanned', () => {
+    it('shows no Unscan column', () => {
+      render(<SourceTable sourceLabware={sourceLabware} />);
+      expect(screen.queryByText('Unscan')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
+      const [header, ...rows] = Array.from(screen.getByTestId('source-table').children);
+      rows.forEach((row) => expect(row.children).toHaveLength(header.children.length));
+    });
+  });
 });
