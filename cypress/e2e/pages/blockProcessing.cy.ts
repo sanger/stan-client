@@ -236,7 +236,7 @@ describe('Block Processing', () => {
         scanPotSources();
       });
 
-      it('disables Discard Source and Remove Sample', () => {
+      it('disables Discard Labware and Remove Sample', () => {
         cy.findByTestId('discard-source-STAN-3100').should('be.disabled');
         [31001, 31002, 31003].forEach((sampleId) =>
           cy.findByTestId(`remove-sample-STAN-3100-${sampleId}`).should('be.disabled')
@@ -254,7 +254,7 @@ describe('Block Processing', () => {
         planBlocksFromPot();
       });
 
-      it('enables Discard Source for that source only', () => {
+      it('enables Discard Labware for that source only', () => {
         cy.findByTestId('discard-source-STAN-3100').should('be.enabled');
         cy.findByTestId('discard-source-STAN-3200').should('be.disabled');
       });
