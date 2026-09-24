@@ -96,6 +96,8 @@ export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTab
                   <RemoveButton
                     type={'button'}
                     aria-label={`Unscan ${barcode}`}
+                    // Unscanning does not remove the labware's samples from layouts already using them
+                    title={`Unscan ${barcode}. Layouts already using it keep its samples.`}
                     onClick={() => removeLabwareCallBack(barcode)}
                   />
                 ) : (
