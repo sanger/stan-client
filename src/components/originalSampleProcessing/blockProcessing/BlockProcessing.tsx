@@ -17,7 +17,7 @@ import columns from '../../dataTableColumns/labwareColumns';
 import * as Yup from 'yup';
 import { Form, Formik, useFormikContext } from 'formik';
 import BlockProcessingLabwarePlan from './BlockProcessingLabwarePlan';
-import { Dictionary, groupBy } from 'lodash';
+import { Dictionary, groupBy, isEqual, mapValues } from 'lodash';
 import Heading from '../../Heading';
 import Planner from '../../planning/Planner';
 import createFormMachine from '../../../lib/machines/form/formMachine';
@@ -85,12 +85,19 @@ const isSourceSampleUsed = (plans: Map<string, TissueBlockLabwareForm>, barcode:
     (plan) => plan.contents?.some((content) => content.sourceBarcode === barcode && content.sourceSampleId === sampleId)
   );
 
+/** Is any sample of the given source labware used to make a block in any of the plans? */
+const isSourceLabwareUsed = (plans: Map<string, TissueBlockLabwareForm>, barcode: string) =>
+  Array.from(plans.values()).some((plan) => plan.contents?.some((content) => content.sourceBarcode === barcode));
+
 /**Reformat form data as mutation input**/
 export const buildTissueBlockRequest = (formData: BlockFormData): TissueBlockRequest => {
-  const discardSources = formData.discardSources ?? {};
-  // Removing samples from a discarded source is ignored by core, and core rejects samples not used in the request
+  // Core rejects discarding labware, or removing samples, that are not used as sources in the request
+  const discardSourceBarcodes = Object.entries(formData.discardSources ?? {})
+    .filter(([barcode, discard]) => discard && isSourceLabwareUsed(formData.plans, barcode))
+    .map(([barcode]) => barcode);
+  // Removing samples from a discarded source is ignored by core
   const removedSourceSampleIds: BarcodeSampleId[] = Object.entries(formData.removedSamples ?? {})
-    .filter(([barcode]) => !discardSources[barcode])
+    .filter(([barcode]) => !discardSourceBarcodes.includes(barcode))
     .flatMap(([barcode, sampleIds]) =>
       sampleIds
         .filter((sampleId) => isSourceSampleUsed(formData.plans, barcode, sampleId))
@@ -106,17 +113,82 @@ export const buildTissueBlockRequest = (formData: BlockFormData): TissueBlockReq
         }))
       }))
     ],
-    discardSourceBarcodes: Object.entries(discardSources)
-      .filter(([, discard]) => discard)
-      .map(([sourceBarcode]) => sourceBarcode),
+    discardSourceBarcodes,
     removedSourceSampleIds
   };
 };
 
-/** Discarding a source labware clears any samples selected for removal from it */
+type SourceChanges = Pick<BlockFormData, 'discardSources' | 'removedSamples'>;
+
+/** Drops discards and removals of sources that are no longer used to make a block */
+export const pruneUnusedSourceChanges = ({ discardSources, removedSamples, plans }: BlockFormData): SourceChanges => ({
+  discardSources: mapValues(discardSources ?? {}, (discard, barcode) => discard && isSourceLabwareUsed(plans, barcode)),
+  removedSamples: mapValues(removedSamples ?? {}, (sampleIds, barcode) =>
+    sampleIds.filter((sampleId) => isSourceSampleUsed(plans, barcode, sampleId))
+  )
+});
+
+/** Describes the changes to source labware that saving will request */
+export const describeSourceChanges = (formData: BlockFormData): string[] => {
+  const { discardSourceBarcodes, removedSourceSampleIds } = buildTissueBlockRequest(formData);
+  const externalIds = new Map<string, string>();
+  formData.plans.forEach(
+    (plan) =>
+      plan.contents?.forEach((content) =>
+        externalIds.set(`${content.sourceBarcode}:${content.sourceSampleId}`, content.externalId)
+      )
+  );
+  const discards = (discardSourceBarcodes ?? []).map((barcode) => `Labware ${barcode} will be discarded`);
+  const removals = Object.entries(groupBy(removedSourceSampleIds ?? [], (removed) => removed.barcode)).map(
+    ([barcode, removed]) =>
+      `${removed.length === 1 ? 'Sample' : 'Samples'} ${removed
+        .map(({ sampleId }) => externalIds.get(`${barcode}:${sampleId}`) || `id ${sampleId}`)
+        .join(', ')} will be removed from labware ${barcode}`
+  );
+  return [...discards, ...removals];
+};
+
+/** Keeps discards and removals in step with the plans, e.g. when a layout is edited or deleted */
+const PruneUnusedSourceChanges = () => {
+  const { values, setValues } = useFormikContext<BlockFormData>();
+  React.useEffect(() => {
+    // Plans may be mutated in place (e.g. deleting a layout), so check on any change of values
+    const current: SourceChanges = {
+      discardSources: values.discardSources ?? {},
+      removedSamples: values.removedSamples ?? {}
+    };
+    if (!isEqual(pruneUnusedSourceChanges(values), current)) {
+      setValues((prev) => ({ ...prev, ...pruneUnusedSourceChanges(prev) }));
+    }
+  }, [values, setValues]);
+  return null;
+};
+
+const SourceChangesNotice = () => {
+  const { values } = useFormikContext<BlockFormData>();
+  const changes = describeSourceChanges(values);
+  if (changes.length === 0) return null;
+  return (
+    <div data-testid="source-changes">
+      <Warning message={'On save, the source labware will change:'}>
+        <ul className="list-disc list-inside">
+          {changes.map((change) => (
+            <li key={change}>{change}</li>
+          ))}
+        </ul>
+      </Warning>
+    </div>
+  );
+};
+
+/**
+ * A source labware can only be discarded once it is used to make a block.
+ * Discarding it clears any samples selected for removal from it.
+ */
 const DiscardSourceCell = ({ row }: { row: Row<SampleDataTableRow> }) => {
   const { values, setFieldValue } = useFormikContext<BlockFormData>();
   const barcode = row.original.barcode!;
+  const disabled = !isSourceLabwareUsed(values.plans, barcode);
   return (
     <FormikInput
       label={''}
@@ -124,6 +196,8 @@ const DiscardSourceCell = ({ row }: { row: Row<SampleDataTableRow> }) => {
       type={'checkbox'}
       aria-label={`Discard ${barcode}`}
       data-testid={`discard-source-${barcode}`}
+      disabled={disabled}
+      checked={!disabled && !!values.discardSources?.[barcode]}
       onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
         const discard = e.target.checked;
         await setFieldValue('discardSources', { ...values.discardSources, [barcode]: discard });
@@ -416,6 +490,8 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                   {serverError && (
                     <Warning message={'Failed to perform block labware generation'} error={serverError} />
                   )}
+                  <PruneUnusedSourceChanges />
+                  <SourceChangesNotice />
 
                   <motion.div variants={variants.fadeInWithLift} className={'sm:flex mt-4 sm:flex-row justify-end'}>
                     <ButtonBar>
