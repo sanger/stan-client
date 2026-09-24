@@ -1531,7 +1531,7 @@ export type MutationFlagLabwareArgs = {
  * These typically require a user with the suitable permission for the particular request.
  */
 export type MutationLibraryConArgs = {
-  request: Array<LibraryConRequest>;
+  requests: Array<LibraryConRequest>;
 };
 
 
@@ -4947,7 +4947,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 export type LogoutMutation = { __typename?: 'Mutation', logout?: string | null };
 
 export type PerformLibraryConstructionMutationVariables = Exact<{
-  request: Array<LibraryConRequest>;
+  requests: Array<LibraryConRequest>;
 }>;
 
 
@@ -7100,8 +7100,8 @@ export const LogoutDocument = gql`
 }
     `;
 export const PerformLibraryConstructionDocument = gql`
-    mutation PerformLibraryConstruction($request: [LibraryConRequest!]!) {
-  libraryCon(request: $request) {
+    mutation PerformLibraryConstruction($requests: [LibraryConRequest!]!) {
+  libraryCon(requests: $requests) {
     operations {
       id
     }

@@ -141,7 +141,7 @@ export const Visium3LibraryConstruction = () => {
         submitForm: fromPromise(({ input }) => {
           if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.PerformLibraryConstruction({
-            request: { ...input.event.values }
+            requests: input.event.values
           });
         })
       }

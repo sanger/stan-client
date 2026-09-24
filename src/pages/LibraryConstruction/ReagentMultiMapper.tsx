@@ -90,7 +90,7 @@ export const ReagentMultiMapper = () => {
         return `bg-${basicBgSourceSlotColorPerPlateType}-300`;
       }
 
-      if (slot?.samples?.length) {
+      if (slot?.samples?.length > 0) {
         return `bg-${basicBgSourceSlotColorPerPlateType}-500`;
       }
     },
@@ -225,12 +225,12 @@ export const ReagentMultiMapper = () => {
     });
 
     if (reagentPlate) {
-      reagentPlate.slots
-        .filter((slot) => slot.used)
-        .forEach((slot) => {
-          const target = labware.slots.find((s) => s.address === slot.address);
-          if (target) target.samples = [];
-        });
+      labware.slots.forEach((slot) => {
+        const reagentSlot = reagentPlate.slots.find((s) => s.address === slot.address);
+        if (!reagentSlot || reagentSlot.used) {
+          slot.samples = [];
+        }
+      });
     }
 
     return labware;
