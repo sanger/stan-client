@@ -412,7 +412,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
 
   const sourceTableColumnsConfig = useMemo(() => {
     const discardSourceColumn: ExtraColumnType = {
-      header: 'Discard Source',
+      header: 'Discard Labware',
       cell: ({ row }) => <DiscardSourceCell row={row} />
     };
     const removeSampleColumn: ExtraColumnType = {
@@ -421,7 +421,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
       cell: ({ row }) => <RemoveSampleCell row={row} />
     };
     return {
-      extraColumns: [discardSourceColumn, removeSampleColumn],
+      extraColumns: [removeSampleColumn, discardSourceColumn],
       showLastKnownSectionNumberColumn: false
     };
   }, []);
