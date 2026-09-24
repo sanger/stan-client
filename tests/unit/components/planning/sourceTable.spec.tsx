@@ -115,6 +115,14 @@ describe('SourceTable', () => {
         'Unscan STAN-200'
       ]);
     });
+
+    it('explains that layouts already using the labware keep its samples', () => {
+      renderSourceTable([]);
+      expect(screen.getByRole('button', { name: 'Unscan STAN-100' })).toHaveAttribute(
+        'title',
+        'Unscan STAN-100. Layouts already using it keep its samples.'
+      );
+    });
   });
 
   describe('when labware cannot be unscanned', () => {
