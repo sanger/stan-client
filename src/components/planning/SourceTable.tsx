@@ -69,7 +69,7 @@ export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTab
         <div>Replicate</div>
         {showLastKnownSectionNumberColumn && <div>Last Known Section Number</div>}
         {extraColumns && extraColumns.map((col, index) => <div key={`header-${index}`}>{col.header}</div>)}
-        <div></div>
+        {removeLabwareCallBack && <div>Unscan</div>}
       </div>
       {Object.keys(sources).map((barcode) =>
         sources[barcode].map((sample, index) => (
@@ -92,7 +92,15 @@ export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTab
 
             {removeLabwareCallBack && (
               <div>
-                {index === 0 ? <RemoveButton type={'button'} onClick={() => removeLabwareCallBack(barcode)} /> : ''}
+                {index === 0 ? (
+                  <RemoveButton
+                    type={'button'}
+                    aria-label={`Unscan ${barcode}`}
+                    onClick={() => removeLabwareCallBack(barcode)}
+                  />
+                ) : (
+                  ''
+                )}
               </div>
             )}
           </div>
