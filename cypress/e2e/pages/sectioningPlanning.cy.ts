@@ -92,11 +92,31 @@ describe('Sectioning Planning', () => {
   });
 
   describe('Labware Layout', () => {
-    context('when labware layout is added', () => {
+    context('custom layout', () => {
       before(() => {
-        cy.findByText('+ Add Labware').click();
+        selectOption('labware-type', 'SuperFrost Plus slide');
       });
 
+      it('enables the user to select the number of columns', () => {
+        cy.findByTestId('selectedLabwareNumColumns').should('be.visible');
+      });
+
+      it('enables the user to select the number of rows', () => {
+        cy.findByTestId('selectedLabwareNumRows').should('be.visible');
+      });
+
+      context('when the user creates a custom layout', () => {
+        before(() => {
+          cy.findByTestId('selectedLabwareNumColumns').clear().type('2');
+          cy.findByTestId('selectedLabwareNumRows').clear().type('3');
+          cy.findByText('+ Add Labware').click();
+        });
+        it('displays the labware layout as the user specification', () => {
+          cy.findAllByTestId('slot').should('have.length', 6);
+        });
+      });
+    });
+    context('when labware layout is added', () => {
       it('has a disabled Create Labware button', () => {
         cy.findByRole('button', { name: /Create Labware/i }).should('be.disabled');
       });

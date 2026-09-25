@@ -4,15 +4,14 @@ import { uniqueId } from 'lodash';
 import BlueButton from '../buttons/BlueButton';
 import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
 import { castDraft, produce } from '../../dependencies/immer';
-import { multiSampleBlockLabwareFactory, unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
+import { customLayoutLabwareFactory, unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
-import { buildSampleColors } from '../../lib/helpers/labwareHelper';
+import { buildSampleColors, isCustomSizeLabwareType } from '../../lib/helpers/labwareHelper';
 import Heading from '../Heading';
 import { getNumberOfDaysBetween } from '../../lib/helpers';
 import Warning from '../notifications/Warning';
 import { useScrollToRef } from '../../lib/hooks';
 import { SourceTable, SourceTableColumnsConfig } from './SourceTable';
-import { isMultiSampleBlockLabware } from '../originalSampleProcessing/blockProcessing/BlockProcessing';
 
 /**
  * The props passed to the Planner component
@@ -139,6 +138,8 @@ type Action<M> =
       labwareLayout: NewFlaggedLabwareLayout;
       numLabwareAdd: number;
       sectionThickness: number;
+      numColumns: number;
+      numRows: number;
     }
   | { type: 'REMOVE_LABWARE_PLAN'; cid: string }
   | { type: 'PLAN_COMPLETE'; cid: string; plan: M };
@@ -238,8 +239,8 @@ export default function Planner<M>({
     if (!selectedLabwareType) {
       return;
     }
-    if (isMultiSampleBlockLabware(selectedLabwareType.name as LabwareTypeName)) {
-      return multiSampleBlockLabwareFactory(
+    if (isCustomSizeLabwareType(selectedLabwareType.name as LabwareTypeName)) {
+      return customLayoutLabwareFactory(
         selectedLabwareType.name as LabwareTypeName,
         selectedLabwareNumColumns!,
         selectedLabwareNumRows!
@@ -266,10 +267,20 @@ export default function Planner<M>({
       type: 'ADD_LABWARE_PLAN',
       labwareLayout: selectedLabwareLayout,
       numLabwareAdd: numPlansToCreate ?? 1,
-      sectionThickness: sectionThickness ?? 0.5
+      sectionThickness: sectionThickness ?? 0.5,
+      numColumns: selectedLabwareNumColumns ?? selectedLabwareLayout.numColumns,
+      numRows: selectedLabwareNumRows ?? selectedLabwareLayout.numRows
     });
     scrollToRef();
-  }, [selectedLabwareLayout, numPlansToCreate, dispatch, scrollToRef, sectionThickness]);
+  }, [
+    selectedLabwareLayout,
+    numPlansToCreate,
+    dispatch,
+    scrollToRef,
+    sectionThickness,
+    selectedLabwareNumColumns,
+    selectedLabwareNumRows
+  ]);
 
   /**
    * Handler for the onDeleteButtonClick event of a LabwarePlan

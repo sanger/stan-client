@@ -17,7 +17,7 @@ import Planner, { PlanChangedProps } from '../../components/planning/Planner';
 import { selectOptionValues } from '../../components/forms';
 import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
 import PromptOnLeave from '../../components/notifications/PromptOnLeave';
-import { convertLabwareToFlaggedLabware } from '../../lib/helpers/labwareHelper';
+import { convertLabwareToFlaggedLabware, isCustomSizeLabwareType } from '../../lib/helpers/labwareHelper';
 
 /**
  * Types of labware the user is allowed to section onto
@@ -45,6 +45,10 @@ function Plan() {
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
 
   const [selectedLabwareType, setSelectedLabwareType] = React.useState<string>(LabwareTypeName.TUBE);
+
+  const [selectedLabwareNumColumns, setSelectedLabwareNumColumns] = React.useState<number>(1);
+
+  const [selectedLabwareNumRows, setSelectedLabwareNumRows] = React.useState<number>(1);
 
   const [numLabware, setNumLabware] = React.useState<number>(1);
 
@@ -99,36 +103,70 @@ function Plan() {
 
   const buildPlanCreationSettings = React.useCallback(() => {
     return (
-      <div className="mt-4 grid grid-cols-3 gap-x-2 gap-y-1 text-center">
-        <div className="text-gray-500">Labware type</div>
-        <div className="text-gray-500">Number of labware</div>
-        <div className="text-gray-500">Section Thickness</div>
-        <CustomReactSelect
-          dataTestId={'labware-type'}
-          handleChange={(val) => setSelectedLabwareType((val as OptionType).label)}
-          value={selectedLabwareType}
-          options={selectOptionValues(allowedLabwareTypes, 'name', 'name')}
-        />
-        <input
-          type="number"
-          className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
-          onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
-          value={numLabware}
-          data-testid={'numLabware'}
-          min={1}
-        />
-        <input
-          type="number"
-          className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
-          onChange={(e) => setSectionThickness(Number(e.currentTarget.value))}
-          value={sectionThickness}
-          data-testid={'sectionThickness'}
-          min={0.5}
-          step={0.5}
-        />
+      <div>
+        <div className="mt-4 grid grid-cols-3 gap-x-2 gap-y-1 text-center">
+          <div className="text-gray-500">Labware type</div>
+          <div className="text-gray-500">Number of labware</div>
+          <div className="text-gray-500">Section Thickness</div>
+          <CustomReactSelect
+            dataTestId={'labware-type'}
+            handleChange={(val) => setSelectedLabwareType((val as OptionType).label)}
+            value={selectedLabwareType}
+            options={selectOptionValues(allowedLabwareTypes, 'name', 'name')}
+          />
+          <input
+            type="number"
+            className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
+            onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
+            value={numLabware}
+            data-testid={'numLabware'}
+            min={1}
+          />
+          <input
+            type="number"
+            className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
+            onChange={(e) => setSectionThickness(Number(e.currentTarget.value))}
+            value={sectionThickness}
+            data-testid={'sectionThickness'}
+            min={0.5}
+            step={0.5}
+          />
+        </div>
+        {selectedLabwareType && isCustomSizeLabwareType(selectedLabwareType as LabwareTypeName) && (
+          <div className="mt-4 grid grid-cols-3 gap-x-2 gap-y-1 text-center">
+            <div className="text-gray-500">Number of Columns</div>
+            <div className="text-gray-500">Number of Rows</div>
+            <div></div>
+            <input
+              type="number"
+              className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
+              onChange={(e) => setSelectedLabwareNumColumns(Number(e.currentTarget.value))}
+              value={selectedLabwareNumColumns}
+              data-testid={'selectedLabwareNumColumns'}
+              min={1}
+            />
+            <input
+              type="number"
+              className="block h-10 border border-gray-300 bg-white rounded-md shadow-xs focus:outline-hidden focus:ring-sdb-100 focus:border-sdb-100"
+              onChange={(e) => setSelectedLabwareNumRows(Number(e.currentTarget.value))}
+              value={selectedLabwareNumRows}
+              data-testid={'selectedLabwareNumRows'}
+              min={1}
+            />
+          </div>
+        )}
       </div>
     );
-  }, [allowedLabwareTypes, setSelectedLabwareType, selectedLabwareType, setNumLabware, numLabware, sectionThickness]);
+  }, [
+    allowedLabwareTypes,
+    setSelectedLabwareType,
+    selectedLabwareType,
+    setNumLabware,
+    numLabware,
+    sectionThickness,
+    selectedLabwareNumColumns,
+    selectedLabwareNumRows
+  ]);
 
   return (
     <AppShell>
@@ -145,6 +183,8 @@ function Plan() {
             onPlanChanged={handlePlanChange}
             buildPlanCreationSettings={buildPlanCreationSettings}
             buildPlanLayouts={buildPlanLayouts}
+            selectedLabwareNumColumns={selectedLabwareNumColumns}
+            selectedLabwareNumRows={selectedLabwareNumRows}
           />
         </div>
       </AppShell.Main>
