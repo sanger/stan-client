@@ -230,6 +230,164 @@ describe('Block Processing', () => {
       });
     });
   });
+  describe('Discarding source labware and removing source samples', () => {
+    context('when no source sample is used in a layout', () => {
+      before(() => {
+        scanPotSources();
+      });
+
+      it('disables Discard Labware and Remove Sample', () => {
+        cy.findByTestId('discard-source-STAN-3100').should('be.disabled');
+        [31001, 31002, 31003].forEach((sampleId) =>
+          cy.findByTestId(`remove-sample-STAN-3100-${sampleId}`).should('be.disabled')
+        );
+      });
+
+      it('shows no source changes notice', () => {
+        cy.findByTestId('source-changes').should('not.exist');
+      });
+    });
+
+    context('when two samples of a source are used in layouts', () => {
+      before(() => {
+        scanPotSources();
+        planBlocksFromPot();
+      });
+
+      it('enables Discard Labware for that source only', () => {
+        cy.findByTestId('discard-source-STAN-3100').should('be.enabled');
+        cy.findByTestId('discard-source-STAN-3200').should('be.disabled');
+      });
+
+      it('enables Remove Sample for the used samples only', () => {
+        cy.findByTestId('remove-sample-STAN-3100-31001').should('be.enabled');
+        cy.findByTestId('remove-sample-STAN-3100-31002').should('be.enabled');
+        cy.findByTestId('remove-sample-STAN-3100-31003').should('be.disabled');
+      });
+
+      context('when the used samples are selected for removal', () => {
+        before(() => {
+          cy.findByTestId('remove-sample-STAN-3100-31001').click();
+          cy.findByTestId('remove-sample-STAN-3100-31002').click();
+        });
+
+        it('lists the samples to be removed', () => {
+          cy.findByTestId('source-changes').should(
+            'contain.text',
+            'Samples EXT-3100-A, EXT-3100-B will be removed from labware STAN-3100'
+          );
+        });
+      });
+
+      context('when the source is selected for discard', () => {
+        before(() => {
+          cy.findByTestId('discard-source-STAN-3100').click();
+        });
+
+        it('clears and disables Remove Sample for that source', () => {
+          [31001, 31002, 31003].forEach((sampleId) =>
+            cy.findByTestId(`remove-sample-STAN-3100-${sampleId}`).should('be.disabled').and('not.be.checked')
+          );
+        });
+
+        it('lists the labware to be discarded instead', () => {
+          cy.findByTestId('source-changes')
+            .should('contain.text', 'Labware STAN-3100 will be discarded')
+            .and('not.contain.text', 'will be removed');
+        });
+      });
+
+      context('when the source is no longer selected for discard', () => {
+        before(() => {
+          cy.findByTestId('discard-source-STAN-3100').click();
+        });
+
+        it('enables Remove Sample again without restoring the cleared selection', () => {
+          cy.findByTestId('remove-sample-STAN-3100-31001').should('be.enabled').and('not.be.checked');
+          cy.findByTestId('remove-sample-STAN-3100-31002').should('be.enabled').and('not.be.checked');
+          cy.findByTestId('source-changes').should('not.exist');
+        });
+      });
+
+      context('when the layout using a selected sample is deleted', () => {
+        before(() => {
+          cy.findByTestId('remove-sample-STAN-3100-31001').click();
+          cy.findByTestId('remove-sample-STAN-3100-31002').click();
+          cy.findAllByText('Delete Layout').eq(1).click();
+        });
+
+        it('disables and clears Remove Sample for that sample', () => {
+          cy.findByTestId('remove-sample-STAN-3100-31002').should('be.disabled').and('not.be.checked');
+          cy.findByTestId('source-changes')
+            .should('contain.text', 'Sample EXT-3100-A will be removed from labware STAN-3100')
+            .and('not.contain.text', 'EXT-3100-B');
+        });
+
+        it('does not restore the selection when the sample is used again', () => {
+          addLabware('Tube');
+          editLayoutWithSamples(1, ['EXT-3100-B']);
+          cy.findByTestId('remove-sample-STAN-3100-31002').should('be.enabled').and('not.be.checked');
+        });
+      });
+
+      context('when a source with selected samples is unscanned', () => {
+        before(() => {
+          cy.findByRole('button', { name: 'Unscan STAN-3100' }).click();
+        });
+
+        it('still lists the samples to be removed, as layouts keep using them', () => {
+          cy.findByTestId('remove-sample-STAN-3100-31001').should('not.exist');
+          cy.findByTestId('source-changes').should(
+            'contain.text',
+            'Sample EXT-3100-A will be removed from labware STAN-3100'
+          );
+        });
+      });
+    });
+
+    context('when saving with samples selected for removal', () => {
+      let request: PerformTissueBlockMutationVariables['request'] | undefined;
+      before(() => {
+        scanPotSources();
+        capturePerformTissueBlockRequest((captured) => (request = captured));
+        planBlocksFromPot();
+        cy.findByTestId('remove-sample-STAN-3100-31001').click();
+        cy.findByTestId('remove-sample-STAN-3100-31002').click();
+        saveBlocks();
+      });
+
+      it('requests removal of the selected samples and no discard', () => {
+        cy.findByText('Block labware generation complete').should('be.visible');
+        cy.wrap(null).should(() => {
+          expect(request?.removedSourceSampleIds).to.deep.equal([
+            { barcode: 'STAN-3100', sampleId: 31001 },
+            { barcode: 'STAN-3100', sampleId: 31002 }
+          ]);
+          expect(request?.discardSourceBarcodes).to.deep.equal([]);
+        });
+      });
+    });
+
+    context('when saving with the source selected for discard', () => {
+      let request: PerformTissueBlockMutationVariables['request'] | undefined;
+      before(() => {
+        scanPotSources();
+        capturePerformTissueBlockRequest((captured) => (request = captured));
+        planBlocksFromPot();
+        cy.findByTestId('discard-source-STAN-3100').click();
+        saveBlocks();
+      });
+
+      it('requests discard of the source and no sample removal', () => {
+        cy.findByText('Block labware generation complete').should('be.visible');
+        cy.wrap(null).should(() => {
+          expect(request?.discardSourceBarcodes).to.deep.equal(['STAN-3100']);
+          expect(request?.removedSourceSampleIds).to.deep.equal([]);
+        });
+      });
+    });
+  });
+
   describe('API Requests', () => {
     context('when request is successful', () => {
       context('when I click Save', () => {
@@ -367,5 +525,92 @@ const fillInTheForm = () => {
   cy.findAllByText('Barcode').last().type('FF10153223');
   editLayout(1, ['STAN-111'], ['A1']);
 
+  cy.findByRole('button', { name: /Save/i }).click();
+};
+
+/**
+ * Scans a Pot (STAN-3100) holding three original samples, and a Pot (STAN-3200) holding one.
+ * Reloads the page first, so any request handlers added with worker.use must be added afterwards.
+ */
+const scanPotSources = () => {
+  const potType = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.POT);
+  const buildSample = (id: number, externalName: string, replicate: string) =>
+    sampleFactory.build({ id }, { associations: { tissue: tissueFactory.build({ externalName, replicate }) } });
+  createLabwareFromParams({
+    barcode: 'STAN-3100',
+    labwareType: potType,
+    slots: [
+      slotFactory.build(
+        { address: 'A1' },
+        {
+          associations: {
+            samples: [
+              buildSample(31001, 'EXT-3100-A', '1'),
+              buildSample(31002, 'EXT-3100-B', '2'),
+              buildSample(31003, 'EXT-3100-C', '3')
+            ]
+          }
+        }
+      )
+    ]
+  });
+  createLabwareFromParams({
+    barcode: 'STAN-3200',
+    labwareType: potType,
+    slots: [
+      slotFactory.build({ address: 'A1' }, { associations: { samples: [buildSample(32001, 'EXT-3200-A', '4')] } })
+    ]
+  });
+  cy.reload();
+  scanInput('STAN-3100');
+  scanInput('STAN-3200');
+};
+
+/** Makes a Tube block from each of the first two samples of STAN-3100 */
+const planBlocksFromPot = () => {
+  addLabware('Tube', '2');
+  editLayoutWithSamples(0, ['EXT-3100-A']);
+  editLayoutWithSamples(1, ['EXT-3100-B']);
+};
+
+/** Places the source samples with the given external names in the layout's slots, starting at A1 */
+const editLayoutWithSamples = (layoutIndex: number, externalNames: Array<string>) => {
+  cy.findAllByText('Edit Layout').eq(layoutIndex).click();
+  cy.findByRole('dialog').within(() => {
+    externalNames.forEach((externalName, indx) => {
+      cy.findAllByText(externalName).first().click();
+      cy.findByText(`A${indx + 1}`).click();
+    });
+    cy.findByText('Done').click();
+  });
+};
+
+/** Responds to PerformTissueBlock with a new Tube, handing the request to the given callback */
+const capturePerformTissueBlockRequest = (
+  onRequest: (request: PerformTissueBlockMutationVariables['request']) => void
+) => {
+  cy.msw().then(({ worker, graphql }) => {
+    const labwareType = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.TUBE);
+    worker.use(
+      graphql.mutation<PerformTissueBlockMutation, PerformTissueBlockMutationVariables>(
+        'PerformTissueBlock',
+        ({ variables }) => {
+          onRequest(variables.request);
+          return HttpResponse.json({
+            data: {
+              performTissueBlock: {
+                labware: [labwareFactory.build({ labwareType, barcode: 'STAN-3300' })],
+                operations: []
+              }
+            }
+          });
+        }
+      )
+    );
+  });
+};
+
+const saveBlocks = () => {
+  selectSGPNumber('SGP1008');
   cy.findByRole('button', { name: /Save/i }).click();
 };

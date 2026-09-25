@@ -25,6 +25,8 @@ export const extractSourceSamplesFromLabware = (
 export type ExtraColumnType = {
   header: string;
   cell: ({ row }: { row: Row<SampleDataTableRow> }) => JSX.Element;
+  // Render the cell on every sample row, rather than only on the first row of each labware
+  perSample?: boolean;
 };
 
 export type SourceTableColumnsConfig = {
@@ -67,7 +69,7 @@ export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTab
         <div>Replicate</div>
         {showLastKnownSectionNumberColumn && <div>Last Known Section Number</div>}
         {extraColumns && extraColumns.map((col, index) => <div key={`header-${index}`}>{col.header}</div>)}
-        <div></div>
+        {removeLabwareCallBack && <div>Unscan</div>}
       </div>
       {Object.keys(sources).map((barcode) =>
         sources[barcode].map((sample, index) => (
@@ -82,14 +84,25 @@ export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTab
               <div data-testid="block-highest-section">{sample.blockHighestSection}</div>
             )}
             {extraColumns &&
-              index === 0 &&
               extraColumns.map((col, idx) => (
-                <div key={`cell-${idx}`}>{col.cell({ row: { original: sample } as Row<SampleDataTableRow> })}</div>
+                <div key={`cell-${idx}`}>
+                  {(col.perSample || index === 0) && col.cell({ row: { original: sample } as Row<SampleDataTableRow> })}
+                </div>
               ))}
 
             {removeLabwareCallBack && (
               <div>
-                {index === 0 ? <RemoveButton type={'button'} onClick={() => removeLabwareCallBack(barcode)} /> : ''}
+                {index === 0 ? (
+                  <RemoveButton
+                    type={'button'}
+                    aria-label={`Unscan ${barcode}`}
+                    // Unscanning does not remove the labware's samples from layouts already using them
+                    title={`Unscan ${barcode}. Layouts already using it keep its samples.`}
+                    onClick={() => removeLabwareCallBack(barcode)}
+                  />
+                ) : (
+                  ''
+                )}
               </div>
             )}
           </div>
