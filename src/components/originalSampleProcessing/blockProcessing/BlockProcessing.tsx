@@ -36,6 +36,7 @@ import { fromPromise } from 'xstate';
 import { SampleDataTableRow } from '../../dataTableColumns/sampleColumns';
 import { Row } from 'react-table';
 import { ExtraColumnType } from '../../planning/SourceTable';
+import { isCustomSizeLabwareType } from '../../../lib/helpers/labwareHelper';
 
 /**
  * Used as Formik's values
@@ -70,10 +71,6 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
 
 type BlockProcessingParams = {
   readonly processingInfo?: GetBlockProcessingInfoQuery;
-};
-
-export const isMultiSampleBlockLabware = (labwareTypeName: LabwareTypeName) => {
-  return [LabwareTypeName.PROVIASETTE, LabwareTypeName.CASSETTE].includes(labwareTypeName);
 };
 
 export default function BlockProcessing({ processingInfo }: BlockProcessingParams) {
@@ -204,7 +201,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
             options={selectOptionValues(allowedLabwareTypes, 'name', 'name')}
           />
         </div>
-        {isMultiSampleBlockLabware(selectedLabwareType as LabwareTypeName) && (
+        {isCustomSizeLabwareType(selectedLabwareType as LabwareTypeName) && (
           <div className="grid grid-cols-2 gap-x-4 mt-2">
             <div className="text-gray-500">Number of columns</div>
             <div className="text-gray-500">Number of rows</div>

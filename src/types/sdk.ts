@@ -176,6 +176,12 @@ export type AnalyserScanData = {
   workNumberXeniumStudyIds: Array<WorkNumberXeniumStudyId>;
 };
 
+/** A barcode and a sample id. */
+export type BarcodeSampleId = {
+  barcode: Scalars['String']['input'];
+  sampleId: Scalars['Int']['input'];
+};
+
 /** Biological risk assessment number. */
 export type BioRisk = {
   __typename?: 'BioRisk';
@@ -864,6 +870,20 @@ export type LabwareWithSlotCommentsRequest = {
   barcode: Scalars['String']['input'];
 };
 
+/** A request to record dual index and amplification ops. */
+export type LibraryConRequest = {
+  /** The barcode of the labware. */
+  labwareBarcode: Scalars['String']['input'];
+  /** The type of reagent plate involved. */
+  reagentPlateType?: InputMaybe<Scalars['String']['input']>;
+  /** The transfers from aliquot slots to destination slots. */
+  reagentTransfers: Array<ReagentTransfer>;
+  /** The measurement to record on slots in the destination. */
+  slotMeasurements: Array<SlotMeasurementRequest>;
+  /** The work number to associate with these operations. */
+  workNumber: Scalars['String']['input'];
+};
+
 /** A request to record transfer, dual index and amplification ops. */
 export type LibraryPrepRequest = {
   /** The one destination labware for this request, and the description of what is transferred into it. */
@@ -1024,6 +1044,8 @@ export type Mutation = {
   extract: OperationResult;
   /** Flag labware. */
   flagLabware: OperationResult;
+  /** Perform library con request. */
+  libraryCon: OperationResult;
   /** Perform library prep request. */
   libraryPrep: OperationResult;
   /** Log in with the given credentials. */
@@ -1507,6 +1529,15 @@ export type MutationExtractArgs = {
  */
 export type MutationFlagLabwareArgs = {
   request: FlagLabwareRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationLibraryConArgs = {
+  requests: Array<LibraryConRequest>;
 };
 
 
@@ -2498,6 +2529,10 @@ export type PlanRequestLabware = {
   labwareType: Scalars['String']['input'];
   /** The lot number of the new labware, if any. */
   lotNumber?: InputMaybe<Scalars['String']['input']>;
+  /** Optional number of columns for custom-size labware. */
+  numColumns?: InputMaybe<Scalars['Int']['input']>;
+  /** Optional number of rows for custom-size labware. */
+  numRows?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** A description of a source slot in a plan request. */
@@ -4299,6 +4334,8 @@ export type TissueBlockRequest = {
   discardSourceBarcodes?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The labware (blocks) being created by this request. */
   labware: Array<TissueBlockLabware>;
+  /** Which samples need to be removed from the source labware? */
+  removedSourceSampleIds?: InputMaybe<Array<BarcodeSampleId>>;
   /** The work number associated with this request. */
   workNumber?: InputMaybe<Scalars['String']['input']>;
 };

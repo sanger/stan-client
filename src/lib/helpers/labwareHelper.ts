@@ -297,3 +297,13 @@ export const sectionGroupsBySample = (
   });
   return Object.values(sectionGroups).map((section, index) => ({ ...section, sectionGroupId: index }));
 };
+
+export const isCustomSizeLabwareType = (labwareTypeName: LabwareTypeName): boolean => {
+  return [
+    LabwareTypeName.PROVIASETTE,
+    LabwareTypeName.CASSETTE,
+    LabwareTypeName.XENIUM,
+    LabwareTypeName.SUPER_FROST_PLUS_SLIDE,
+    LabwareTypeName.SCHOTT_SLIDE
+  ].includes(labwareTypeName);
+};

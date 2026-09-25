@@ -51,6 +51,30 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
   return (
     <div>
       {children}
+      {layoutPlan?.destinationLabware &&
+        layoutPlan?.destinationLabware.numColumns > 10 &&
+        layoutPlan?.sources &&
+        layoutPlan?.sources?.length > 0 && (
+          <div className="mt-2 grid gap-2 grid-cols-6">
+            {layoutPlan.sources.map((source, i) => (
+              <div key={i} className="">
+                <span
+                  onClick={() => {
+                    actor.send(selectSource(source));
+                  }}
+                  className={`${
+                    isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'
+                  } ${layoutPlan.sampleColors.get(
+                    source.sampleId
+                  )} text-center inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
+                >
+                  <p>{source.labware.barcode}</p>
+                  <p>{source.tissue?.externalName}</p>
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       <div className="my-6 md:flex md:flex-row md:items-centre md:justify-around">
         <div>
           {layoutPlan?.destinationLabware && (
@@ -79,27 +103,30 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
             />
           )}
         </div>
-        {layoutPlan?.sources && layoutPlan?.sources?.length > 0 && (
-          <div className="mt-2 grid gap-2 grid-cols-3">
-            {layoutPlan.sources.map((source, i) => (
-              <div key={i} className="">
-                <span
-                  onClick={() => {
-                    actor.send(selectSource(source));
-                  }}
-                  className={`${
-                    isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'
-                  } ${layoutPlan.sampleColors.get(
-                    source.sampleId
-                  )} text-center inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
-                >
-                  <p>{source.labware.barcode}</p>
-                  <p>{source.tissue?.externalName}</p>
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+        {layoutPlan?.destinationLabware &&
+          layoutPlan?.destinationLabware.numColumns < 11 &&
+          layoutPlan?.sources &&
+          layoutPlan?.sources?.length > 0 && (
+            <div className="mt-2 grid gap-2 grid-cols-3">
+              {layoutPlan.sources.map((source, i) => (
+                <div key={i} className="">
+                  <span
+                    onClick={() => {
+                      actor.send(selectSource(source));
+                    }}
+                    className={`${
+                      isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'
+                    } ${layoutPlan.sampleColors.get(
+                      source.sampleId
+                    )} text-center inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
+                  >
+                    <p>{source.labware.barcode}</p>
+                    <p>{source.tissue?.externalName}</p>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
       </div>
     </div>
   );
