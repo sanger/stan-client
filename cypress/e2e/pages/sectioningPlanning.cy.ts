@@ -112,7 +112,11 @@ describe('Sectioning Planning', () => {
           cy.findByText('+ Add Labware').click();
         });
         it('displays the labware layout as the user specification', () => {
-          cy.findAllByTestId('slot').should('have.length', 6);
+          cy.findAllByTestId('labware-')
+            .first()
+            .within(() => {
+              cy.findAllByTestId('slot').should('have.length', 6);
+            });
         });
       });
     });
