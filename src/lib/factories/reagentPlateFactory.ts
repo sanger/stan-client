@@ -10,8 +10,8 @@ export default Factory.define<ReagentPlateFieldsFragment>(({ params }) => ({
   numColumns: params.numColumns ?? 12,
   slots:
     params.slots ??
-    slotFactory.buildList(96).map((slot) => ({
-      address: slot.address,
-      used: true
+    slotFactory.buildList(96).map((_slot, index) => ({
+      address: `${String.fromCharCode(65 + Math.floor(index / 12))}${(index % 12) + 1}`,
+      used: false
     }))
 }));
