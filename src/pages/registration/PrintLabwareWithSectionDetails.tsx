@@ -7,20 +7,27 @@ import { SampleDataTableRow } from '../../components/dataTableColumns/sampleColu
 import Table, { TableBody, TableHead, TableHeader } from '../../components/Table';
 import React from 'react';
 
-export const PrintLabwareWithSampleDetails = ({ labware }: { labware: Array<LabwareFieldsFragment> }) => {
+export const PrintLabwareWithSectionDetails = ({ labware }: { labware: Array<LabwareFieldsFragment> }) => {
   const samplesDataRow = React.useCallback((labware: LabwareFieldsFragment): SampleDataTableRow[] => {
-    return labware.slots.flatMap((slot) => {
-      return slot.samples.map((sample) => {
-        return {
+    const seen = new Set<string>();
+    const result: SampleDataTableRow[] = [];
+
+    for (const slot of labware.slots) {
+      for (const sample of slot.samples) {
+        const key = `${labware.barcode}-${sample.tissue?.externalName}-${sample.section}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        result.push({
           ...sample,
           barcode: labware.barcode,
           labwareType: labware.labwareType,
           slotAddress: slot.address
-        };
-      });
-    });
-  }, []);
+        });
+      }
+    }
 
+    return result;
+  }, []);
   const { handleOnPrint, handleOnPrintError, printResult, currentPrinter, handleOnPrinterChange } = usePrinters();
 
   return (
