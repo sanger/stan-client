@@ -107,8 +107,8 @@ describe('Sectioning Planning', () => {
 
       context('when the user creates a custom layout', () => {
         before(() => {
-          cy.findByTestId('selectedLabwareNumColumns').clear().type('2');
-          cy.findByTestId('selectedLabwareNumRows').clear().type('3');
+          cy.findByTestId('selectedLabwareNumColumns').clear().type('2').should('have.value', '02');
+          cy.findByTestId('selectedLabwareNumRows').clear().type('3').should('have.value', '03');
           cy.findByText('+ Add Labware').click();
         });
         it('displays the labware layout as the user specification', () => {
