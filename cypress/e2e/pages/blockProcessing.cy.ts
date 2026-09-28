@@ -302,17 +302,18 @@ describe('Block Processing', () => {
           cy.findByTestId('discard-source-STAN-3100').click();
         });
 
-        it('enables Remove Sample again without restoring the cleared selection', () => {
-          cy.findByTestId('remove-sample-STAN-3100-31001').should('be.enabled').and('not.be.checked');
-          cy.findByTestId('remove-sample-STAN-3100-31002').should('be.enabled').and('not.be.checked');
-          cy.findByTestId('source-changes').should('not.exist');
+        it('enables Remove Sample again and restores the selection', () => {
+          cy.findByTestId('remove-sample-STAN-3100-31001').should('be.enabled').and('be.checked');
+          cy.findByTestId('remove-sample-STAN-3100-31002').should('be.enabled').and('be.checked');
+          cy.findByTestId('source-changes').should(
+            'contain.text',
+            'Samples EXT-3100-A, EXT-3100-B will be removed from labware STAN-3100'
+          );
         });
       });
 
       context('when the layout using a selected sample is deleted', () => {
         before(() => {
-          cy.findByTestId('remove-sample-STAN-3100-31001').click();
-          cy.findByTestId('remove-sample-STAN-3100-31002').click();
           cy.findAllByText('Delete Layout').eq(1).click();
         });
 
