@@ -284,7 +284,7 @@ describe('Block Processing', () => {
           cy.findByTestId('discard-source-STAN-3100').click();
         });
 
-        it('clears and disables Remove Sample for that source', () => {
+        it('disables Remove Sample for that source', () => {
           [31001, 31002, 31003].forEach((sampleId) =>
             cy.findByTestId(`remove-sample-STAN-3100-${sampleId}`).should('be.disabled').and('not.be.checked')
           );
