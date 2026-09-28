@@ -135,7 +135,8 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
             numColumns: outputLabware.labwareType.numColumns,
             numRows: outputLabware.labwareType.numRows
           };
-          return { ...prev, plans: new Map(prev.plans).set(cid, updatedPlan) };
+          const next = { ...prev, plans: new Map(prev.plans).set(cid, updatedPlan) };
+          return { ...next, ...pruneUnusedSourceChanges(next) };
         });
       });
       return () => subscription.unsubscribe();
