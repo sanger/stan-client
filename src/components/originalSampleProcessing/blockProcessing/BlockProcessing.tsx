@@ -17,7 +17,7 @@ import columns from '../../dataTableColumns/labwareColumns';
 import * as Yup from 'yup';
 import { Form, Formik, useFormikContext } from 'formik';
 import BlockProcessingLabwarePlan from './BlockProcessingLabwarePlan';
-import { Dictionary, groupBy, isEqual, mapValues } from 'lodash';
+import { Dictionary, groupBy, mapValues } from 'lodash';
 import Heading from '../../Heading';
 import Planner from '../../planning/Planner';
 import createFormMachine from '../../../lib/machines/form/formMachine';
@@ -146,22 +146,6 @@ export const describeSourceChanges = (formData: BlockFormData): string[] => {
         .join(', ')} will be removed from labware ${barcode}`
   );
   return [...discards, ...removals];
-};
-
-/** Keeps discards and removals in step with the plans, e.g. when a layout is edited or deleted */
-const PruneUnusedSourceChanges = () => {
-  const { values, setValues } = useFormikContext<BlockFormData>();
-  React.useEffect(() => {
-    // Plans may be mutated in place (e.g. deleting a layout), so check on any change of values
-    const current: SourceChanges = {
-      discardSources: values.discardSources ?? {},
-      removedSamples: values.removedSamples ?? {}
-    };
-    if (!isEqual(pruneUnusedSourceChanges(values), current)) {
-      setValues((prev) => ({ ...prev, ...pruneUnusedSourceChanges(prev) }));
-    }
-  }, [values, setValues]);
-  return null;
 };
 
 const SourceChangesNotice = () => {
@@ -485,7 +469,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                   {serverError && (
                     <Warning message={'Failed to perform block labware generation'} error={serverError} />
                   )}
-                  <PruneUnusedSourceChanges />
                   <SourceChangesNotice />
 
                   <motion.div variants={variants.fadeInWithLift} className={'sm:flex mt-4 sm:flex-row justify-end'}>
