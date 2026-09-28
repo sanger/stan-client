@@ -183,7 +183,7 @@ const SourceChangesNotice = () => {
 
 /**
  * A source labware can only be discarded once it is used to make a block.
- * Discarding it clears any samples selected for removal from it.
+ * Discarding it disables, but keeps, any samples selected for removal from it, so they return if the discard is unticked.
  */
 const DiscardSourceCell = ({ row }: { row: Row<SampleDataTableRow> }) => {
   const { values, setFieldValue } = useFormikContext<BlockFormData>();
@@ -199,12 +199,7 @@ const DiscardSourceCell = ({ row }: { row: Row<SampleDataTableRow> }) => {
       disabled={disabled}
       checked={!disabled && !!values.discardSources?.[barcode]}
       onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const discard = e.target.checked;
-        await setFieldValue('discardSources', { ...values.discardSources, [barcode]: discard });
-        if (discard) {
-          const { [barcode]: _, ...removedSamples } = values.removedSamples ?? {};
-          await setFieldValue('removedSamples', removedSamples);
-        }
+        await setFieldValue('discardSources', { ...values.discardSources, [barcode]: e.target.checked });
       }}
     />
   );
