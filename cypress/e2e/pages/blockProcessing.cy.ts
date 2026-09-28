@@ -346,6 +346,25 @@ describe('Block Processing', () => {
       });
     });
 
+    context('when a layout is edited so it no longer uses a selected sample', () => {
+      before(() => {
+        scanPotSources();
+        planBlocksFromPot();
+        cy.findByTestId('remove-sample-STAN-3100-31002').click();
+        emptyLayoutSlot(1, 0);
+      });
+
+      it('disables and clears Remove Sample for that sample', () => {
+        cy.findByTestId('remove-sample-STAN-3100-31002').should('be.disabled').and('not.be.checked');
+        cy.findByTestId('source-changes').should('not.exist');
+      });
+
+      it('does not restore the selection when the sample is used again', () => {
+        editLayoutWithSamples(1, ['EXT-3100-B']);
+        cy.findByTestId('remove-sample-STAN-3100-31002').should('be.enabled').and('not.be.checked');
+      });
+    });
+
     context('when saving with samples selected for removal', () => {
       let request: PerformTissueBlockMutationVariables['request'] | undefined;
       before(() => {
@@ -582,6 +601,15 @@ const editLayoutWithSamples = (layoutIndex: number, externalNames: Array<string>
       cy.findAllByText(externalName).first().click();
       cy.findByText(`A${indx + 1}`).click();
     });
+    cy.findByText('Done').click();
+  });
+};
+
+/** Empties the given slot of the layout, as clicking a filled slot empties it */
+const emptyLayoutSlot = (layoutIndex: number, slotIndex: number) => {
+  cy.findAllByText('Edit Layout').eq(layoutIndex).click();
+  cy.findByRole('dialog').within(() => {
+    cy.findAllByTestId('slot').eq(slotIndex).click();
     cy.findByText('Done').click();
   });
 };
