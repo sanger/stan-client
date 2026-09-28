@@ -120,7 +120,10 @@ export const buildTissueBlockRequest = (formData: BlockFormData): TissueBlockReq
 
 type SourceChanges = Pick<BlockFormData, 'discardSources' | 'removedSamples'>;
 
-/** Drops discards and removals of sources that are no longer used to make a block */
+/**
+ * Clears Discard and Remove ticks for labware and samples no longer used by any layout.
+ * Called when a layout is deleted or edited, see BlockProcessingLabwarePlan.
+ */
 export const pruneUnusedSourceChanges = ({ discardSources, removedSamples, plans }: BlockFormData): SourceChanges => ({
   discardSources: mapValues(discardSources ?? {}, (discard, barcode) => discard && isSourceLabwareUsed(plans, barcode)),
   removedSamples: mapValues(removedSamples ?? {}, (sampleIds, barcode) =>
