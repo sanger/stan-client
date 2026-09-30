@@ -19,6 +19,8 @@ import CustomReactSelect, { OptionType } from '../../components/forms/CustomReac
 import PromptOnLeave from '../../components/notifications/PromptOnLeave';
 import { convertLabwareToFlaggedLabware, isCustomSizeLabwareType } from '../../lib/helpers/labwareHelper';
 
+export const MAX_CUSTOM_LAYOUT_ROWS = 20;
+export const MAX_CUSTOM_LAYOUT_COLUMNS = 20;
 /**
  * Types of labware the user is allowed to section onto
  */
@@ -144,6 +146,7 @@ function Plan() {
               value={selectedLabwareNumColumns}
               data-testid={'selectedLabwareNumColumns'}
               min={1}
+              max={MAX_CUSTOM_LAYOUT_COLUMNS}
             />
             <input
               type="number"
@@ -152,6 +155,7 @@ function Plan() {
               value={selectedLabwareNumRows}
               data-testid={'selectedLabwareNumRows'}
               min={1}
+              max={MAX_CUSTOM_LAYOUT_ROWS}
             />
           </div>
         )}
