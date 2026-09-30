@@ -54,6 +54,8 @@ type WorkSelectProps = {
   worksInfoOptions?: Array<WorkInfo>;
 
   preventEnterKeyDefault?: boolean;
+
+  disabled?: boolean;
 };
 
 export type WorkInfo = {
@@ -93,7 +95,8 @@ export default function WorkNumberSelect({
   emptyOption = true,
   requiredField = true,
   worksInfoOptions,
-  preventEnterKeyDefault = true
+  preventEnterKeyDefault = true,
+  disabled = false
 }: WorkSelectProps) {
   /**
    * State for holding work based on the list criteria -'workNumberType'
@@ -181,6 +184,7 @@ export default function WorkNumberSelect({
         value={workNumber}
         aria-label="work-number"
         preventEnterKeyDefault={preventEnterKeyDefault}
+        isDisabled={disabled}
       />
       {!name && error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
       <div className={'flex flex-row flex-wrap whitespace-normal gap-2 py-2 w-full max-w-full overflow-hidden'}>

@@ -283,6 +283,12 @@ function AppShell({ children }: AppShellParams) {
                       }
                     />
                     <NavLinkMenuItem
+                      caption={"3' Library Construction"}
+                      path={'/lab/libraryConstruction'}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={"Record the dual index plate, and the cdna conc of the Visium 3'."}
+                    />
+                    <NavLinkMenuItem
                       caption={'Visium Permeabilisation'}
                       path={'/lab/visium_perm'}
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}

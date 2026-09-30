@@ -68,6 +68,7 @@ import reviseWorkNumber from './handlers/WorkNumberHandlers';
 import operationHandlers from './handlers/operationHandlers';
 import cellClassHandlers from './handlers/cellClassHandlers';
 import proteinPanelHandlers from './handlers/proteinPanelHandlers';
+import visium3LibraryConstructionHandlers from './handlers/visium3LibraryConstructionHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -137,5 +138,6 @@ export const handlers = [
   ...reviseWorkNumber,
   ...operationHandlers,
   ...cellClassHandlers,
-  ...proteinPanelHandlers
+  ...proteinPanelHandlers,
+  ...visium3LibraryConstructionHandlers
 ];
