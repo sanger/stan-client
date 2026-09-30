@@ -10,7 +10,9 @@
     background-color: oklch(72.3% 0.219 149.579);
   }
 }
-
+.grid-cols-7 {
+  @apply grid-cols-7;
+}
 .grid-cols-8 {
   @apply grid-cols-8;
 }
@@ -31,6 +33,24 @@
 }
 .grid-cols-14 {
   @apply grid-cols-14;
+}
+.grid-cols-15 {
+  @apply grid-cols-15;
+}
+.grid-cols-16 {
+  @apply grid-cols-16;
+}
+.grid-cols-17 {
+  @apply grid-cols-17;
+}
+.grid-cols-18 {
+  @apply grid-cols-18;
+}
+.grid-cols-19 {
+  @apply grid-cols-19;
+}
+.grid-cols-20 {
+  @apply grid-cols-20;
 }
 
 .grid-cols-location-2 {
