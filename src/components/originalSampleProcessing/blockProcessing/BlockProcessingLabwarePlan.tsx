@@ -16,7 +16,7 @@ import { useFormikContext } from 'formik';
 import Warning from '../../notifications/Warning';
 import FormikInput from '../../forms/Input';
 import { createLabwarePlanMachine } from '../../planning/labwarePlan.machine';
-import { BlockFormData, TissueBlockContentForm } from './BlockProcessing';
+import { BlockFormData, pruneUnusedSourceChanges, TissueBlockContentForm } from './BlockProcessing';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 import { selectOptionValues } from '../../forms';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../Table';
@@ -135,7 +135,8 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
             numColumns: outputLabware.labwareType.numColumns,
             numRows: outputLabware.labwareType.numRows
           };
-          return { ...prev, plans: new Map(prev.plans).set(cid, updatedPlan) };
+          const next = { ...prev, plans: new Map(prev.plans).set(cid, updatedPlan) };
+          return { ...next, ...pruneUnusedSourceChanges(next) };
         });
       });
       return () => subscription.unsubscribe();
@@ -171,7 +172,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                     onClick={async () => {
                       await setValues((prev) => {
                         prev.plans.delete(cid);
-                        return { ...prev };
+                        return { ...prev, ...pruneUnusedSourceChanges(prev) };
                       });
                       onDelete(cid);
                     }}

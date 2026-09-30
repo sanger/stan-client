@@ -31,7 +31,7 @@ const FormikInput = ({
     {
       'bg-white block  w-full disabled:bg-gray-200': type !== 'checkbox',
       'h-10': type !== 'checkbox' && type !== 'textarea',
-      "h-8 w-8 border border-gray-500 appearance-none checked:before:content-['✔'] checked:before:text-white checked:before:flex checked:before:items-center checked:before:justify-center":
+      "h-8 w-8 border border-gray-500 appearance-none disabled:bg-gray-200 checked:before:content-['✔'] checked:before:text-white checked:before:flex checked:before:items-center checked:before:justify-center":
         type === 'checkbox'
     },
     defaultInputClassNames
