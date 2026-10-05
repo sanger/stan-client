@@ -116,9 +116,11 @@ describe('SourceTable', () => {
       ]);
     });
 
-    it('falls back to a generic label when no header is given', () => {
+    it('leaves the header blank and the button unlabelled when no header is given', () => {
       renderSourceTable([], { callback: jest.fn() });
-      expect(screen.getByRole('button', { name: 'Remove STAN-100' })).toBeInTheDocument();
+      const [header] = Array.from(screen.getByTestId('source-table').children);
+      expect(header.lastElementChild).toHaveTextContent(/^$/);
+      screen.getAllByRole('button').forEach((button) => expect(button).not.toHaveAttribute('aria-label'));
     });
 
     it('calls back with the barcode when clicked', () => {

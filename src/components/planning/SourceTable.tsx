@@ -103,7 +103,7 @@ export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTab
                 {index === 0 ? (
                   <RemoveButton
                     type={'button'}
-                    aria-label={`${removeLabware.header || 'Remove'} ${barcode}`}
+                    aria-label={removeLabware.header ? `${removeLabware.header} ${barcode}` : undefined}
                     title={removeLabware.disabledReason?.(barcode)}
                     disabled={!!removeLabware.disabledReason?.(barcode)}
                     onClick={() => removeLabware.callback(barcode)}
