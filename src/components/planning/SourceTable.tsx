@@ -33,6 +33,8 @@ export type RemoveLabwareConfig = {
   callback: (barcode: string) => void;
   // Column header and button label; left blank if not given, so pages that don't opt in are unaffected
   header?: string;
+  // Returns why removal is disabled for this barcode, shown as the button's tooltip, or undefined to allow it
+  disabledReason?: (barcode: string) => string | undefined;
 };
 
 export type SourceTableColumnsConfig = {
@@ -102,6 +104,8 @@ export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTab
                   <RemoveButton
                     type={'button'}
                     aria-label={`${removeLabware.header || 'Remove'} ${barcode}`}
+                    title={removeLabware.disabledReason?.(barcode)}
+                    disabled={!!removeLabware.disabledReason?.(barcode)}
                     onClick={() => removeLabware.callback(barcode)}
                   />
                 ) : (

@@ -450,7 +450,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
               });
             }}
           >
-            {({ setFieldValue, isValid }) => (
+            {({ setFieldValue, isValid, values }) => (
               <Form>
                 <motion.div variants={variants.fadeInWithLift} className="space-y-10">
                   <motion.div variants={variants.fadeInWithLift}>
@@ -464,7 +464,16 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                     selectedLabwareType={allowedLabwareTypes.find((lt) => lt.name === selectedLabwareType)}
                     numPlansToCreate={numLabware}
                     buildPlanLayouts={buildPlanLayouts}
-                    sourceTableConfig={{ ...sourceTableColumnsConfig, removeLabware: { header: 'Unscan' } }}
+                    sourceTableConfig={{
+                      ...sourceTableColumnsConfig,
+                      removeLabware: {
+                        header: 'Unscan',
+                        disabledReason: (barcode) =>
+                          isSourceLabwareUsed(values.plans, barcode)
+                            ? `Remove ${barcode} from all layouts before unscanning.`
+                            : undefined
+                      }
+                    }}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                     selectedLabwareNumColumns={selectedLabwareNumColumns}
                     selectedLabwareNumRows={selectedLabwareNumRows}

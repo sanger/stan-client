@@ -90,14 +90,14 @@ describe('SourceTable', () => {
 
   describe('when per labware and per sample columns are combined', () => {
     it('renders the same number of cells in every row as there are headers', () => {
-      renderSourceTable([perLabwareColumn, perSampleColumn]);
+      renderSourceTable([perLabwareColumn, perSampleColumn], { callback: jest.fn(), header: 'Unscan' });
       const [header, ...rows] = Array.from(screen.getByTestId('source-table').children);
       expect(rows).toHaveLength(4);
       rows.forEach((row) => expect(row.children).toHaveLength(header.children.length));
     });
 
     it('keeps each cell under its own column', () => {
-      renderSourceTable([perLabwareColumn, perSampleColumn]);
+      renderSourceTable([perLabwareColumn, perSampleColumn], { callback: jest.fn(), header: 'Unscan' });
       const [header, ...rows] = Array.from(screen.getByTestId('source-table').children);
       const perSampleColumnIndex = Array.from(header.children).findIndex((cell) => cell.textContent === 'Per Sample');
       rows.forEach((row) =>
@@ -129,7 +129,24 @@ describe('SourceTable', () => {
     });
   });
 
-  describe('when labware cannot be removed', () => {
+  describe('when removal is disabled for a labware', () => {
+    it('disables its button and explains why in the tooltip, leaving other labware unaffected', () => {
+      renderSourceTable([], {
+        callback: jest.fn(),
+        header: 'Unscan',
+        disabledReason: (barcode) => (barcode === 'STAN-100' ? 'STAN-100 is used in a layout' : undefined)
+      });
+      expect(screen.getByRole('button', { name: 'Unscan STAN-100' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Unscan STAN-100' })).toHaveAttribute(
+        'title',
+        'STAN-100 is used in a layout'
+      );
+      expect(screen.getByRole('button', { name: 'Unscan STAN-200' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Unscan STAN-200' })).not.toHaveAttribute('title');
+    });
+  });
+
+  describe('when no remove-labware config is given', () => {
     it('shows no remove column', () => {
       render(<SourceTable sourceLabware={sourceLabware} />);
       expect(screen.queryByRole('button')).not.toBeInTheDocument();

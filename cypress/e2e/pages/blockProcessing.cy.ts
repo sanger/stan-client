@@ -331,17 +331,28 @@ describe('Block Processing', () => {
         });
       });
 
-      context('when a source with selected samples is unscanned', () => {
+      context('when the source is still used in a layout', () => {
+        it('disables Unscan and explains why', () => {
+          cy.findByRole('button', { name: 'Unscan STAN-3100' })
+            .should('be.disabled')
+            .and('have.attr', 'title', 'Remove STAN-3100 from all layouts before unscanning.');
+        });
+      });
+
+      context('when the source is no longer used in any layout', () => {
         before(() => {
-          cy.findByRole('button', { name: 'Unscan STAN-3100' }).click();
+          // Both remaining layouts only use samples from STAN-3100 at this point
+          cy.findAllByText('Delete Layout').eq(1).click();
+          cy.findAllByText('Delete Layout').eq(0).click();
         });
 
-        it('still lists the samples to be removed, as layouts keep using them', () => {
-          cy.findByTestId('remove-sample-STAN-3100-31001').should('not.exist');
-          cy.findByTestId('source-changes').should(
-            'contain.text',
-            'Sample EXT-3100-A will be removed from labware STAN-3100'
-          );
+        it('enables Unscan', () => {
+          cy.findByRole('button', { name: 'Unscan STAN-3100' }).should('be.enabled');
+        });
+
+        it('removes the source labware from the table when clicked', () => {
+          cy.findByRole('button', { name: 'Unscan STAN-3100' }).click();
+          cy.findByTestId('source-table').should('not.contain.text', 'STAN-3100');
         });
       });
     });
