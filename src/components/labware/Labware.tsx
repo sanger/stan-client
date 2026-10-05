@@ -278,9 +278,10 @@ const Labware = ({
 
   const gridClasses = classNames(
     {
-      'px-12 gap-4 md:px-3 md:gap-1': numColumns <= 3,
-      'px-10 gap-3 md:px-2 md:gap-1': numColumns > 3 && numColumns <= 5,
-      'px-6 gap-2 md:px-1 md:gap-1': numColumns > 6
+      'px-12 gap-4': numColumns <= 3,
+      'px-10 gap-3': numColumns > 3 && numColumns <= 5,
+      'px-6 gap-2': numColumns > 6,
+      'gap-6': numColumns > 8
     },
 
     `${grid} py-4 select-none md:py-1`
@@ -403,11 +404,13 @@ const Labware = ({
   };
 
   const slotSizeProps = useMemo(() => {
-    const count = LabwareDirection.Horizontal ? numRows : numColumns;
-    if (count > 6) return { size: 'size-16', parentDivSize: 'size-17', textSize: 'text-[10px]' };
-    if (count > 3) return { size: 'size-18', parentDivSize: 'size-19', textSize: ' text-[11px]' };
-    return { size: 'size-20', parentDivSize: 'size-21', textSize: 'text-xs' };
-  }, [numColumns, numRows]);
+    const count = labwareDirection && labwareDirection === LabwareDirection.Horizontal ? numRows : numColumns;
+    if (count > 18) return { size: 'size-[3.25rem]', parentDivSize: 'size-[3.5rem]', textSize: 'text-[10px]' };
+    if (count > 12) return { size: 'size-[3.5rem]', parentDivSize: 'size-[3.75rem]', textSize: 'text-[10px]' };
+    if (count > 6) return { size: 'size-[4rem]', parentDivSize: 'size-[4.25rem]', textSize: 'text-[10px]' };
+    if (count > 3) return { size: 'size-[4.5rem]', parentDivSize: 'size-[4.75rem]', textSize: ' text-[11px]' };
+    return { size: 'size-[5rem]', parentDivSize: 'size-[5.25rem]', textSize: 'text-xs' };
+  }, [numColumns, numRows, labwareDirection]);
 
   return (
     <div className={'flex flex-row'} data-testid={`labware-${labware.barcode ?? ''}`}>

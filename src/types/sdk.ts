@@ -176,6 +176,12 @@ export type AnalyserScanData = {
   workNumberXeniumStudyIds: Array<WorkNumberXeniumStudyId>;
 };
 
+/** A barcode and a sample id. */
+export type BarcodeSampleId = {
+  barcode: Scalars['String']['input'];
+  sampleId: Scalars['Int']['input'];
+};
+
 /** Biological risk assessment number. */
 export type BioRisk = {
   __typename?: 'BioRisk';
@@ -2523,6 +2529,10 @@ export type PlanRequestLabware = {
   labwareType: Scalars['String']['input'];
   /** The lot number of the new labware, if any. */
   lotNumber?: InputMaybe<Scalars['String']['input']>;
+  /** Optional number of columns for custom-size labware. */
+  numColumns?: InputMaybe<Scalars['Int']['input']>;
+  /** Optional number of rows for custom-size labware. */
+  numRows?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** A description of a source slot in a plan request. */
@@ -4324,6 +4334,8 @@ export type TissueBlockRequest = {
   discardSourceBarcodes?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The labware (blocks) being created by this request. */
   labware: Array<TissueBlockLabware>;
+  /** Which samples need to be removed from the source labware? */
+  removedSourceSampleIds?: InputMaybe<Array<BarcodeSampleId>>;
   /** The work number associated with this request. */
   workNumber?: InputMaybe<Scalars['String']['input']>;
 };
