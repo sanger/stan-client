@@ -29,10 +29,16 @@ export type ExtraColumnType = {
   perSample?: boolean;
 };
 
+export type RemoveLabwareConfig = {
+  callback: (barcode: string) => void;
+  // Column header and button label; left blank if not given, so pages that don't opt in are unaffected
+  header?: string;
+};
+
 export type SourceTableColumnsConfig = {
   extraColumns?: Array<ExtraColumnType>;
   showLastKnownSectionNumberColumn?: boolean;
-  removeLabwareCallBack?: (barcode: string) => void;
+  removeLabware?: RemoveLabwareConfig;
 };
 
 type SourceTableProps = {
@@ -41,7 +47,7 @@ type SourceTableProps = {
 };
 
 export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTableProps) => {
-  const { showLastKnownSectionNumberColumn = true, extraColumns, removeLabwareCallBack } = columnTableConfig;
+  const { showLastKnownSectionNumberColumn = true, extraColumns, removeLabware } = columnTableConfig;
 
   const sources = React.useMemo(() => {
     return extractSourceSamplesFromLabware(sourceLabware);
@@ -50,11 +56,11 @@ export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTab
   const gridColsNumber = React.useMemo(() => {
     const fixedColNumber = 3; // Barcode, External ID, Replicate
     let gridColsNumber = fixedColNumber;
-    if (removeLabwareCallBack) gridColsNumber = fixedColNumber + 1;
+    if (removeLabware) gridColsNumber = fixedColNumber + 1;
     if (extraColumns) gridColsNumber = gridColsNumber + extraColumns.length;
     if (showLastKnownSectionNumberColumn) gridColsNumber = gridColsNumber + 1;
     return gridColsNumber;
-  }, [showLastKnownSectionNumberColumn, extraColumns, removeLabwareCallBack]);
+  }, [showLastKnownSectionNumberColumn, extraColumns, removeLabware]);
 
   if (sourceLabware.length === 0) return null;
 
@@ -69,7 +75,7 @@ export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTab
         <div>Replicate</div>
         {showLastKnownSectionNumberColumn && <div>Last Known Section Number</div>}
         {extraColumns && extraColumns.map((col, index) => <div key={`header-${index}`}>{col.header}</div>)}
-        {removeLabwareCallBack && <div>Unscan</div>}
+        {removeLabware && <div>{removeLabware.header ?? ''}</div>}
       </div>
       {Object.keys(sources).map((barcode) =>
         sources[barcode].map((sample, index) => (
@@ -90,15 +96,13 @@ export const SourceTable = ({ sourceLabware, columnTableConfig = {} }: SourceTab
                 </div>
               ))}
 
-            {removeLabwareCallBack && (
+            {removeLabware && (
               <div>
                 {index === 0 ? (
                   <RemoveButton
                     type={'button'}
-                    aria-label={`Unscan ${barcode}`}
-                    // Unscanning does not remove the labware's samples from layouts already using them
-                    title={`Unscan ${barcode}. Layouts already using it keep its samples.`}
-                    onClick={() => removeLabwareCallBack(barcode)}
+                    aria-label={`${removeLabware.header || 'Remove'} ${barcode}`}
+                    onClick={() => removeLabware.callback(barcode)}
                   />
                 ) : (
                   ''

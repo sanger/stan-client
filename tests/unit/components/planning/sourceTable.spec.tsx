@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { ExtraColumnType, SourceTable } from '../../../../src/components/planning/SourceTable';
+import { ExtraColumnType, RemoveLabwareConfig, SourceTable } from '../../../../src/components/planning/SourceTable';
 import labwareFactory from '../../../../src/lib/factories/labwareFactory';
 import { slotFactory } from '../../../../src/lib/factories/slotFactory';
 import { sampleFactory, tissueFactory } from '../../../../src/lib/factories/sampleFactory';
@@ -46,14 +46,14 @@ const perSampleColumn: ExtraColumnType = {
   cell: ({ row }) => <span data-testid={`per-sample-${row.original.barcode}-${row.original.id}`} />
 };
 
-const renderSourceTable = (extraColumns: ExtraColumnType[]) =>
+const renderSourceTable = (extraColumns: ExtraColumnType[], removeLabware?: RemoveLabwareConfig) =>
   render(
     <SourceTable
       sourceLabware={sourceLabware}
       columnTableConfig={{
         extraColumns,
         showLastKnownSectionNumberColumn: false,
-        removeLabwareCallBack: jest.fn()
+        removeLabware
       }}
     />
   );
@@ -106,9 +106,9 @@ describe('SourceTable', () => {
     });
   });
 
-  describe('when labware can be unscanned', () => {
-    it('shows an Unscan column with a button on the first row of each labware', () => {
-      renderSourceTable([]);
+  describe('when labware can be removed', () => {
+    it('shows a column, headed and labelled with the configured header, with a button on the first row of each labware', () => {
+      renderSourceTable([], { callback: jest.fn(), header: 'Unscan' });
       expect(screen.getByText('Unscan')).toBeInTheDocument();
       expect(screen.getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual([
         'Unscan STAN-100',
@@ -116,19 +116,22 @@ describe('SourceTable', () => {
       ]);
     });
 
-    it('explains that layouts already using the labware keep its samples', () => {
-      renderSourceTable([]);
-      expect(screen.getByRole('button', { name: 'Unscan STAN-100' })).toHaveAttribute(
-        'title',
-        'Unscan STAN-100. Layouts already using it keep its samples.'
-      );
+    it('falls back to a generic label when no header is given', () => {
+      renderSourceTable([], { callback: jest.fn() });
+      expect(screen.getByRole('button', { name: 'Remove STAN-100' })).toBeInTheDocument();
+    });
+
+    it('calls back with the barcode when clicked', () => {
+      const callback = jest.fn();
+      renderSourceTable([], { callback, header: 'Unscan' });
+      screen.getByRole('button', { name: 'Unscan STAN-100' }).click();
+      expect(callback).toHaveBeenCalledWith('STAN-100');
     });
   });
 
-  describe('when labware cannot be unscanned', () => {
-    it('shows no Unscan column', () => {
+  describe('when labware cannot be removed', () => {
+    it('shows no remove column', () => {
       render(<SourceTable sourceLabware={sourceLabware} />);
-      expect(screen.queryByText('Unscan')).not.toBeInTheDocument();
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
       const [header, ...rows] = Array.from(screen.getByTestId('source-table').children);
       rows.forEach((row) => expect(row.children).toHaveLength(header.children.length));

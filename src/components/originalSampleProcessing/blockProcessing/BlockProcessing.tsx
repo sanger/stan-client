@@ -464,7 +464,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                     selectedLabwareType={allowedLabwareTypes.find((lt) => lt.name === selectedLabwareType)}
                     numPlansToCreate={numLabware}
                     buildPlanLayouts={buildPlanLayouts}
-                    sourceTableConfig={sourceTableColumnsConfig}
+                    sourceTableConfig={{ ...sourceTableColumnsConfig, removeLabware: { header: 'Unscan' } }}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                     selectedLabwareNumColumns={selectedLabwareNumColumns}
                     selectedLabwareNumRows={selectedLabwareNumRows}
