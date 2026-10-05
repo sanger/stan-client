@@ -136,7 +136,7 @@ export const reIndexAndRenameRegions = (regions: Region[], runName: string, barc
         roi:
           region.sectionGroups.length === 1 && region.sectionGroups[0].source.tissue?.externalName
             ? region.sectionGroups[0].source.tissue.externalName
-            : [barcode, runName, `Region${++index}`].filter(Boolean).join('_')
+            : [`Region${++index}`, barcode, runName].filter(Boolean).join('_')
       }))
   );
 };
