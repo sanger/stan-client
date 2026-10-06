@@ -625,25 +625,16 @@ const emptyLayoutSlot = (layoutIndex: number, slotIndex: number) => {
   });
 };
 
-/** Responds to PerformTissueBlock with a new Tube, handing the request to the given callback */
+/** Hands the PerformTissueBlock request to the given callback, leaving the default mock to respond */
 const capturePerformTissueBlockRequest = (
   onRequest: (request: PerformTissueBlockMutationVariables['request']) => void
 ) => {
   cy.msw().then(({ worker, graphql }) => {
-    const labwareType = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.TUBE);
     worker.use(
       graphql.mutation<PerformTissueBlockMutation, PerformTissueBlockMutationVariables>(
         'PerformTissueBlock',
         ({ variables }) => {
           onRequest(variables.request);
-          return HttpResponse.json({
-            data: {
-              performTissueBlock: {
-                labware: [labwareFactory.build({ labwareType, barcode: 'STAN-3300' })],
-                operations: []
-              }
-            }
-          });
         }
       )
     );
