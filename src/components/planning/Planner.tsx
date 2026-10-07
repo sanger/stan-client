@@ -11,7 +11,7 @@ import Heading from '../Heading';
 import { getNumberOfDaysBetween } from '../../lib/helpers';
 import Warning from '../notifications/Warning';
 import { useScrollToRef } from '../../lib/hooks';
-import { SourceTable, SourceTableColumnsConfig } from './SourceTable';
+import { RemoveLabwareConfig, SourceTable, SourceTableColumnsConfig } from './SourceTable';
 
 /**
  * The props passed to the Planner component
@@ -46,8 +46,11 @@ type PlannerProps<M> = {
     scrollRef?: React.MutableRefObject<HTMLDivElement | null>
   ) => JSX.Element;
 
-  // Holds columns config of the SourceTable component as requires different columns for different pages
-  sourceTableConfig?: SourceTableColumnsConfig;
+  // Holds columns config of the SourceTable component as requires different columns for different pages.
+  // removeLabware's callback is supplied by Planner itself, so callers only configure its appearance/eligibility.
+  sourceTableConfig?: Omit<SourceTableColumnsConfig, 'removeLabware'> & {
+    removeLabware?: Omit<RemoveLabwareConfig, 'callback'>;
+  };
 
   /**
    * Callback to render the component to display configuration setting to add a labware plan.
@@ -337,12 +340,15 @@ export default function Planner<M>({
         onAdd={onAddLabware}
         enableFlaggedLabwareCheck
       >
-        {({ removeLabware }) => (
+        {({ removeLabware: unscanLabware }) => (
           <SourceTable
             sourceLabware={state.sourceLabware}
             columnTableConfig={{
               ...sourceTableConfig,
-              removeLabwareCallBack: removeLabware
+              removeLabware: {
+                ...sourceTableConfig?.removeLabware,
+                callback: unscanLabware
+              }
             }}
           />
         )}
