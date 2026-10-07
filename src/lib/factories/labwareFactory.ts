@@ -78,16 +78,16 @@ const labwareFactory = Factory.define<Labware>(({ sequence, params, associations
 });
 export default labwareFactory;
 
-export const multiSampleBlockLabwareFactory = (blockTypeName: LabwareTypeName, numColumns: number, numRows: number) => {
+export const customLayoutLabwareFactory = (labwareTypeName: LabwareTypeName, numColumns: number, numRows: number) => {
   return unregisteredLabwareFactory.associations({
     numColumns,
     numRows,
     labwareType: labwareTypeFactory
       .params({
-        name: blockTypeName,
+        name: labwareTypeName,
         numColumns,
         numRows,
-        labelType: labelTypeFactory.build({ name: `${blockTypeName} Label` })
+        labelType: labelTypeFactory.build({ name: `${labwareTypeName} Label` })
       })
       .build()
   });

@@ -1,6 +1,6 @@
 import { ActorRef, assign, createMachine, fromPromise } from 'xstate';
 import { LabwareFlaggedFieldsFragment, Maybe, PlanMutation, PlanRequestLabware, SlideCosting } from '../../types/sdk';
-import { LabwareTypeName, ServerErrors } from '../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout, ServerErrors } from '../../types/stan';
 import { LayoutPlan, PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
 import { stanCore } from '../../lib/sdk';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
@@ -201,7 +201,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
                 return undefined;
               }
               const planRequestLabware = buildPlanRequestLabware({
-                destinationLabwareTypeName: context.layoutPlan.destinationLabware.labwareType.name,
+                destinationLabware: context.layoutPlan.destinationLabware,
                 ...event
               });
               return {
@@ -352,7 +352,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
   );
 
 type BuildPlanRequestLabwareParams = {
-  destinationLabwareTypeName: string;
+  destinationLabware: NewFlaggedLabwareLayout;
   plannedActions: Array<PlannedSectionDetails>;
   barcode?: string;
   lotNumber?: string;
@@ -361,13 +361,15 @@ type BuildPlanRequestLabwareParams = {
 
 function buildPlanRequestLabware({
   barcode,
-  destinationLabwareTypeName,
+  destinationLabware,
   plannedActions,
   lotNumber,
   costing
 }: BuildPlanRequestLabwareParams): PlanRequestLabware {
   return {
-    labwareType: destinationLabwareTypeName,
+    labwareType: destinationLabware.labwareType.name,
+    numColumns: destinationLabware.labwareType.numColumns,
+    numRows: destinationLabware.labwareType.numRows,
     barcode,
     lotNumber,
     costing,

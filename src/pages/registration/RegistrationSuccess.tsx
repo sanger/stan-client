@@ -11,9 +11,9 @@ import AppShell from '../../components/AppShell';
 import { Column } from 'react-table';
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 import { SampleDataTableRow } from '../../components/dataTableColumns/sampleColumns';
-import { PrintLabwareWithSampleDetails } from './PrintLabwareWithSampleDetails';
 import DataTable from '../../components/DataTable';
 import LabelPrinter from '../../components/LabelPrinter';
+import { PrintLabwareWithSectionDetails } from './PrintLabwareWithSectionDetails';
 
 /**Represent an object containing LabwareFieldsFragment member**/
 export interface LabwareContainType extends Object {
@@ -68,7 +68,7 @@ const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFie
 
           {isSectionRegistration &&
             labwareGroupedByType.map((labwareByType: LabwareFieldsFragment[]) => (
-              <PrintLabwareWithSampleDetails labware={labwareByType} />
+              <PrintLabwareWithSectionDetails labware={labwareByType} />
             ))}
 
           {!isSectionRegistration && (
