@@ -119,7 +119,7 @@ describe('Xenium Analyser', () => {
           cy.findByTestId('STAN-0611-regions-table').get('tbody tr').should('have.length', 40);
         });
         it('updates the region name accordingly', () => {
-          cy.findByText('STAN-0611_Region1').should('be.visible');
+          cy.findByText('Region1_STAN-0611').should('be.visible');
         });
       });
 
@@ -139,7 +139,7 @@ describe('Xenium Analyser', () => {
           cy.findByTestId('STAN-0611-regions-table').get('tbody tr').should('have.length', 41);
         });
         it('renames the region of interest with the sample external id', () => {
-          cy.findByText('STAN-0611_Region1').should('not.exist');
+          cy.findByText('Region1_STAN-0611').should('not.exist');
         });
       });
     });
