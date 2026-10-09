@@ -6,6 +6,7 @@ import {
   RecordStainResultMutationVariables
 } from '../../types/sdk';
 import commentRepository from '../repositories/commentRepository';
+import { createLabware } from './labwareHandlers';
 
 const stainingQCHandlers = [
   graphql.query<GetStainingQcInfoQuery, GetStainingQcInfoQueryVariables>('GetStainingQCInfo', () => {
@@ -16,9 +17,13 @@ const stainingQCHandlers = [
     });
   }),
 
-  graphql.mutation<RecordStainResultMutation, RecordStainResultMutationVariables>('RecordStainResult', () => {
-    return HttpResponse.json({ data: { recordStainResult: { operations: [{ id: 1 }] } } });
-  })
+  graphql.mutation<RecordStainResultMutation, RecordStainResultMutationVariables>(
+    'RecordStainResult',
+    ({ variables }) => {
+      const labware = variables.request.labwareResults.map((labwareResult) => createLabware(labwareResult.barcode));
+      return HttpResponse.json({ data: { recordStainResult: { operations: [{ id: 1 }], labware } } });
+    }
+  )
 ];
 
 export default stainingQCHandlers;
