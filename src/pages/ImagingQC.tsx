@@ -23,9 +23,10 @@ import { useCollection } from '../lib/hooks/useCollection';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { fromPromise } from 'xstate';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import WhiteButton from '../components/buttons/WhiteButton';
+import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 
 type StainingQCProps = {
   info: GetStainingQcInfoQuery;
@@ -126,6 +127,9 @@ export default function ImagingQC({ info }: StainingQCProps) {
     const params: string = operations.map((operation) => `id=${operation.id}`).join('&');
     return `/imageqc?${params}&type=xlsx`;
   }, [submissionResult?.recordStainResult]);
+
+  const navigate = useNavigate();
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -225,12 +229,24 @@ export default function ImagingQC({ info }: StainingQCProps) {
           show={current.matches('submitted')}
           message={`${qcType} complete`}
           additionalButtons={
-            <WhiteButton>
-              <a className="focus:outline-hidden" download={`imaging_log.xlsx`} href={downloadImagingLogsLink}>
-                <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
-                Download Imaging Logs
-              </a>
-            </WhiteButton>
+            <>
+              <WhiteButton
+                type="button"
+                className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                onClick={() => {
+                  createSessionStorageForLabwareAwaiting(submissionResult!.recordStainResult.labware);
+                  navigate('/store');
+                }}
+              >
+                Store
+              </WhiteButton>
+              <WhiteButton>
+                <a className="focus:outline-hidden" download={`imaging_log.xlsx`} href={downloadImagingLogsLink}>
+                  <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
+                  Download Imaging Logs
+                </a>
+              </WhiteButton>
+            </>
           }
         >
           <p>

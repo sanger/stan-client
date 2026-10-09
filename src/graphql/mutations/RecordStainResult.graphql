@@ -3,5 +3,8 @@ mutation RecordStainResult($request: ResultRequest!) {
     operations {
       id
     }
+    labware {
+      ...LabwareFields
+    }
   }
 }
