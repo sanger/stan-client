@@ -45,8 +45,7 @@ export const selectOption = async (dataTestId: string, optionValue: string, inde
   const input = within(selectDiv).getByRole('combobox', { hidden: true });
   await waitFor(() => expect(input).toBeInTheDocument());
   await userEvent.type(input, '{arrowDown}');
-  const option = within(selectDiv).getAllByText(optionValue)[0];
-  await waitFor(() => expect(option).toBeInTheDocument());
+  const option = await waitFor(() => within(selectDiv).getAllByText(optionValue)[0]);
   await userEvent.click(option);
 };
 export const shouldDisplayValue = (dataTestId: string, value: string, index?: number) => {

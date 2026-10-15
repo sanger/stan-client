@@ -59,12 +59,14 @@ describe('Orientation QC', () => {
   });
 
   it('should display the selected SGP number in summary', async () => {
-    await waitFor(() => selectSGPNumber('SGP1008'));
-    expect(screen.getByTestId('summary-sgp')).toHaveTextContent('The selected SGP number is SGP1008');
+    await selectSGPNumber('SGP1008');
+    await waitFor(() =>
+      expect(screen.getByTestId('summary-sgp')).toHaveTextContent('The selected SGP number is SGP1008')
+    );
   });
 
   it('should display the embedding orientation when labware is scanned ', async () => {
-    await waitFor(() => scanLabware('STAN-3111'));
+    await scanLabware('STAN-3111');
     await waitFor(() => {
       expect(screen.queryByText('Embedding Orientation')).toBeInTheDocument();
       shouldHaveOption('orientation', 'Correct');
@@ -75,31 +77,34 @@ describe('Orientation QC', () => {
   });
 
   it('should display the embedded orientation in summary', async () => {
-    await waitFor(() => scanLabware('STAN-3111'));
-    await waitFor(() => selectOption('orientation', 'Correct'));
+    await scanLabware('STAN-3111');
+    await screen.findByTestId('orientation');
+    await selectOption('orientation', 'Correct');
     await waitFor(() =>
       expect(screen.getByTestId('summary-orientation')).toHaveTextContent('The embedding orientation is Correct')
     );
   });
 
   it('should disable Submit button when all required fields are not selected', async () => {
-    await waitFor(() => selectSGPNumber('SGP1008'));
-    await waitFor(() => scanLabware('STAN-3111'));
+    await selectSGPNumber('SGP1008');
+    await scanLabware('STAN-3111');
+    await screen.findByTestId('orientation');
     expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled();
   });
 
   it('should enable Submit button  when all fields are selected', async () => {
-    await waitFor(() => selectSGPNumber('SGP1008'));
-    await waitFor(() => scanLabware('STAN-3111'));
-    await waitFor(() => selectOption('orientation', 'Correct'));
-    expect(screen.getByRole('button', { name: 'Submit' })).toBeEnabled();
+    await selectSGPNumber('SGP1008');
+    await scanLabware('STAN-3111');
+    await screen.findByTestId('orientation');
+    await selectOption('orientation', 'Correct');
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Submit' })).toBeEnabled());
   });
 
   it('should only allow scanning of block labware', async () => {
-    await waitFor(() => scanLabware('STAN-3112'));
+    await scanLabware('STAN-3112');
+    await waitFor(() => expect(screen.getByText('Labware STAN-3112 is not a block labware.')).toBeInTheDocument());
     expect(screen.queryByText('Embedding Orientation')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled();
-    expect(screen.getByText('Labware STAN-3112 is not a block labware.')).toBeInTheDocument();
     expect(screen.getByText('No labware scanned.')).toBeInTheDocument();
   });
 });
