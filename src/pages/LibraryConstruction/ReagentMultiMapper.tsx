@@ -20,7 +20,7 @@ import Heading from '../../components/Heading';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../components/Table';
 import LabwareScanner from '../../components/labwareScanner/LabwareScanner';
 import Label from '../../components/forms/Label';
-import CustomReactSelect from '../../components/forms/CustomReactSelect';
+import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
 import { PLATE_TYPES } from '../../components/libraryGeneration/DualIndexPlateComponent';
 import MutedText from '../../components/MutedText';
 import ScanInput from '../../components/scanInput/ScanInput';
@@ -271,6 +271,15 @@ export const ReagentMultiMapper = () => {
                       value: plateType
                     };
                   })}
+                  onChange={async (val) => {
+                    const selectedPlateType = (val as OptionType).value;
+                    await setFieldValue('reagentPlateType', selectedPlateType);
+                    if (selectedPlateType !== ReagentPlateType.DualIndexTTSetA) {
+                      setUserInputWarnings(
+                        `For this operation, a plate of type ${ReagentPlateType.DualIndexTTSetA} is expected`
+                      );
+                    }
+                  }}
                 />
               </Label>
               <MutedText>Select a dual index plate type to start</MutedText>
