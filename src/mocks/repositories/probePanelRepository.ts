@@ -8,6 +8,10 @@ seeds.push(probePanelFactory.build({ type: ProbeType.Xenium, name: 'Xenium APT g
 seeds.push(probePanelFactory.build({ type: ProbeType.Xenium, name: 'Xenium ABCFX8 mBrain 100g gene panel' }));
 seeds.push(probePanelFactory.build({ type: ProbeType.Xenium, name: 'Xenium Human Colon Gene Expression Panel' }));
 
+seeds.push(probePanelFactory.build({ type: ProbeType.Atera, name: 'Atera APT gene expression panel' }));
+seeds.push(probePanelFactory.build({ type: ProbeType.Atera, name: 'Atera ABCFX8 mBrain 100g gene panel' }));
+seeds.push(probePanelFactory.build({ type: ProbeType.Atera, name: 'Atera Human Colon Gene Expression Panel' }));
+
 seeds.push(probePanelFactory.build({ enabled: false }));
 seeds.push(probePanelFactory.build({ type: ProbeType.Cytassist, name: 'CytAssist APT gene expression panel' }));
 seeds.push(probePanelFactory.build({ type: ProbeType.Cytassist, name: 'CytAssist ABCFX8 mBrain 100g gene panel' }));
