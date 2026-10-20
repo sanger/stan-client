@@ -161,7 +161,7 @@ export const Visium3LibraryConstruction = () => {
         <AppShell.Title>Visium 3' Library Construction </AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
-        <div className="mx-auto">
+        <div className="mx-auto max-w-screen-2xl">
           <div className="mb-8">
             {serverError && (
               <div ref={warningRef}>

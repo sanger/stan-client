@@ -9,8 +9,8 @@ import { stanCore } from '../../lib/sdk';
 import warningToast from '../../components/notifications/WarningToast';
 import { toast } from 'react-toastify';
 import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
-import DataTable from '../../components/DataTable';
-import { Column, Row } from 'react-table';
+import DataTable, { ColumnWithAllCapitalProp } from '../../components/DataTable';
+import { Row } from 'react-table';
 import { Input } from '../../components/forms/Input';
 import { LabwareFlaggedFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
 import Labware from '../../components/labware/Labware';
@@ -97,59 +97,64 @@ export const CycleRecorder = () => {
     });
   }, [values.libraryConst, setValues]);
 
-  const recordCycleDataTableColumns: Array<Column<CycleRecorderTableProps>> = [
-    {
-      Header: 'Address',
-      accessor: 'address'
-    },
-    {
-      Header: 'External ID',
-      accessor: 'externalId'
-    },
-    {
-      Header: 'Section Number',
-      accessor: 'sectionNumber'
-    },
-    {
-      Header: 'cDNA Concentration',
-      accessor: 'cDNAConcentration'
-    },
-    {
-      Header: 'Cycles',
-      Cell: ({ row }: { row: Row<CycleRecorderTableProps> }) => {
-        return (
-          <Input
-            data-testid="cycles-input"
-            type="number"
-            step={1}
-            value={row.original.cycles}
-            onChange={async (e) => {
-              await setValues((prevValues) => ({
-                ...prevValues,
-                libraryConst: prevValues.libraryConst.map((prevLibrary) => {
-                  if (prevLibrary.labware.barcode === row.original.barcode) {
-                    return {
-                      ...prevLibrary,
-                      slotMeasurements: prevLibrary.slotMeasurements
-                        .filter(
-                          (measurement) =>
-                            !(measurement.name === 'cycles' && measurement.address === row.original.address)
-                        )
-                        .concat({
-                          name: 'cycles',
-                          address: row.original.address,
-                          value: e.currentTarget.value
-                        })
-                    };
-                  } else return prevLibrary;
-                })
-              }));
-            }}
-          />
-        );
+  // Columns must be memoized: a new Cell component identity on each render remounts the input and drops focus
+  const recordCycleDataTableColumns = useMemo<Array<ColumnWithAllCapitalProp<CycleRecorderTableProps>>>(
+    () => [
+      {
+        Header: 'Address',
+        accessor: 'address'
+      },
+      {
+        Header: 'External ID',
+        accessor: 'externalId'
+      },
+      {
+        Header: 'Section Number',
+        accessor: 'sectionNumber'
+      },
+      {
+        Header: 'cDNA CONCENTRATION (pg/\u00B5l)', //pg/μL
+        accessor: 'cDNAConcentration',
+        allCapital: false
+      },
+      {
+        Header: 'Cycles',
+        Cell: ({ row }: { row: Row<CycleRecorderTableProps> }) => {
+          return (
+            <Input
+              data-testid="cycles-input"
+              type="number"
+              step={1}
+              value={row.original.cycles}
+              onChange={async (e) => {
+                await setValues((prevValues) => ({
+                  ...prevValues,
+                  libraryConst: prevValues.libraryConst.map((prevLibrary) => {
+                    if (prevLibrary.labware.barcode === row.original.barcode) {
+                      return {
+                        ...prevLibrary,
+                        slotMeasurements: prevLibrary.slotMeasurements
+                          .filter(
+                            (measurement) =>
+                              !(measurement.name === 'cycles' && measurement.address === row.original.address)
+                          )
+                          .concat({
+                            name: 'cycles',
+                            address: row.original.address,
+                            value: e.currentTarget.value
+                          })
+                      };
+                    } else return prevLibrary;
+                  })
+                }));
+              }}
+            />
+          );
+        }
       }
-    }
-  ];
+    ],
+    [setValues]
+  );
 
   const constructRecordCycleDataTableData = useMemo((): Map<
     LabwareFlaggedFieldsFragment,
@@ -198,12 +203,16 @@ export const CycleRecorder = () => {
       <Heading level={3}>Record Cycles</Heading>
       {Array.from(constructRecordCycleDataTableData.entries()).map(([labware, labwareMeasurement], index) => (
         <div key={labware.barcode} className="border border-gray-300 rounded-lg p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Labware
-              labware={labware}
-              slotColor={(address, slot) => getDestinationSlotColorCb(labware, address, slot)}
-            />
-            <DataTable columns={recordCycleDataTableColumns} data={labwareMeasurement} />
+          <div className="grid grid-cols-5 gap-4">
+            <div className="col-span-2">
+              <Labware
+                labware={labware}
+                slotColor={(address, slot) => getDestinationSlotColorCb(labware, address, slot)}
+              />
+            </div>
+            <div className="col-span-3">
+              <DataTable columns={recordCycleDataTableColumns} data={labwareMeasurement} />
+            </div>
           </div>
         </div>
       ))}

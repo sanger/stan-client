@@ -4,7 +4,7 @@ import Table, { TableBody, TableCell, TableHead, TableHeader } from './Table';
 import { motion } from '../dependencies/motion';
 import { Input } from './forms/Input';
 
-type ColumnWithAllCapitalProp<T extends object = {}> = Column<T> & {
+export type ColumnWithAllCapitalProp<T extends object = {}> = Column<T> & {
   allCapital?: boolean;
 };
 interface DataTableProps<T extends object> {

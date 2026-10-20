@@ -121,24 +121,3 @@ export const TableCell: React.FC<
     </td>
   );
 };
-
-type Props = {
-  children: string | ReactNode | ReactNode[];
-  className?: string;
-};
-export const TabelSubHeader: React.FC<Props> = ({ children, className, ...rest }) => {
-  const baseClasses = 'flex text-xs font-medium text-gray-500 uppercase';
-  const classNames = `${baseClasses} ${className ?? ''}`.trim();
-  return (
-    <div className={classNames} {...rest}>
-      {children}
-    </div>
-  );
-};
-export const TabelCentredCell: React.FC<Props> = ({ children, ...rest }) => {
-  return (
-    <div className="flex items-center justify-center" {...rest}>
-      {children}
-    </div>
-  );
-};
