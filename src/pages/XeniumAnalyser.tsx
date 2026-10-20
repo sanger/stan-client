@@ -219,13 +219,13 @@ const XeniumAnalyser = () => {
     lotNumberA: Yup.string()
       .required('Decoding reagent A lot number is a required field')
       .label('A Lot Number')
-      .max(32, 'Decoding reagent lot number should be a string of up to 32 letters and numbers.')
-      .matches(/^[A-Za-z0-9]+$/, 'Decoding reagent lot number should be a string of letters and numbers.'),
+      .max(32, 'Decoding reagent lot number should be no more than 32 characters long.')
+      .matches(/^[-A-Za-z0-9]+$/, 'Decoding reagent lot number should be a string of letters, numbers and hyphens.'),
     lotNumberB: Yup.string()
       .required('Decoding reagent B lot number is a required field')
       .label('B Lot Number')
-      .max(32, 'Decoding reagent lot number should be a string of up to 32 letters and numbers.')
-      .matches(/^[A-Za-z0-9]+$/, 'Decoding reagent lot number should be a string of letters and numbers.'),
+      .max(32, 'Decoding reagent lot number should be no more than 32 characters long.')
+      .matches(/^[-A-Za-z0-9]+$/, 'Decoding reagent lot number should be a string of letters, numbers and hyphens.'),
     cellSegmentationLot: Yup.string()
       .optional()
       .label('Cell segmentation lot number')
