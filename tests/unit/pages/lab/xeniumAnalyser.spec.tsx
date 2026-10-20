@@ -99,21 +99,21 @@ describe('Xenium analyser', () => {
             expect(screen.getByText('Decoding reagent lot number is a required field')).toBeVisible();
           });
         });
-        it('should display an error message when entered value is more than 20 characters', () => {
+        it('should display an error message when entered value is more than 32 characters', () => {
           waitFor(async () => {
-            await userEvent.type(screen.getByTestId('lotNumberA'), new Array(22).join('a'));
+            await userEvent.type(screen.getByTestId('lotNumberA'), 'a'.repeat(33));
             await userEvent.tab();
             expect(
-              screen.getByText('Decoding reagent lot number should be a string of up to 32 letters and numbers.')
+              screen.getByText('Decoding reagent lot number should be no more than 32 characters long.')
             ).toBeVisible();
           });
         });
-        it('should display an error message when entered value contains any characters other than letters and numbers', () => {
+        it('should display an error message when entered value contains invalid characters', () => {
           waitFor(async () => {
             await userEvent.type(screen.getByTestId('lotNumberA'), 'a*456bh');
             await userEvent.tab();
             expect(
-              screen.getByText('Decoding reagent lot number should be a string of letters and numbers.')
+              screen.getByText('Decoding reagent lot number should be a string of letters, numbers and hyphens.')
             ).toBeVisible();
           });
         });
