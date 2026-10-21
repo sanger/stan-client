@@ -232,7 +232,7 @@ export default function ImagingQC({ info }: StainingQCProps) {
             <>
               <WhiteButton
                 type="button"
-                className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                className="w-full text-base sm:ml-3 sm:w-auto sm:text:sm"
                 onClick={() => {
                   createSessionStorageForLabwareAwaiting(submissionResult!.recordStainResult.labware);
                   navigate('/store');
