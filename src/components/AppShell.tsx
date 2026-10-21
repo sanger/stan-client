@@ -557,7 +557,7 @@ function AppShell({ children }: AppShellParams) {
                     </div>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Probe Hybridisation</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/probe_hybridisation_cytassist">
+                      <StanMobileNavLink to="/lab/probe_hybridisation_atera">
                         Probe Hybridisation Atera
                       </StanMobileNavLink>
                       <StanMobileNavLink to="/lab/probe_hybridisation_cytassist">

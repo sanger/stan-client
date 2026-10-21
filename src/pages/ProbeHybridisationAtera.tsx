@@ -369,7 +369,7 @@ const ProbeHybridisationAtera: React.FC = () => {
         Yup.object().shape({
           labware: Yup.object().required(),
           workNumber: Yup.string().required('SGP Number is a required field').label('SGP Number'),
-          kitCosting: Yup.string().oneOf(Object.values(SlideCosting)).required('Probe kit costing is a required field'),
+          kitCosting: Yup.string().oneOf(Object.values(SlideCosting)).required('kit costing is a required field'),
           samplePrepReagentLot: Yup.string().matches(
             /^\d{6}$/,
             'Sample Prep Reagent Lot should be a string of 6 digits'

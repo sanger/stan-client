@@ -263,7 +263,7 @@ const RouteLayout = () => {
                   commentCategory: 'sample prep reagent type',
                   includeDisabled: false
                 }),
-                await stanCore.GetProbePanels({ type: ProbeType.Atera })
+                stanCore.GetProbePanels({ type: ProbeType.Atera })
               ]);
               return {
                 probePanels: probePanels.probePanels,
