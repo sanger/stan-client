@@ -5132,7 +5132,7 @@ export type RecordStainResultMutationVariables = Exact<{
 }>;
 
 
-export type RecordStainResultMutation = { __typename?: 'Mutation', recordStainResult: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
+export type RecordStainResultMutation = { __typename?: 'Mutation', recordStainResult: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }>, labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, frozen: boolean, created: string, numRows: number, numColumns: number, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', id: number, address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number, section?: string | null, blockHighestSection?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage?: LifeStage | null }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } }, hmdmc?: { __typename?: 'Hmdmc', hmdmc: string } | null, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }> } };
 
 export type RecordVisiumQcMutationVariables = Exact<{
   request: ResultRequest;
@@ -7422,9 +7422,16 @@ export const RecordStainResultDocument = gql`
     operations {
       id
     }
+    labware {
+      ...LabwareFields
+    }
   }
 }
-    `;
+    ${LabwareFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}
+${SlotFieldsFragmentDoc}
+${SampleFieldsFragmentDoc}
+${TissueFieldsFragmentDoc}`;
 export const RecordVisiumQcDocument = gql`
     mutation RecordVisiumQC($request: ResultRequest!) {
   recordVisiumQC(request: $request) {
