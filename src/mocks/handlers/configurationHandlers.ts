@@ -1,5 +1,5 @@
 import { graphql, HttpResponse } from 'msw';
-import { GetConfigurationQuery, GetConfigurationQueryVariables, ProbeType } from '../../types/sdk';
+import { GetConfigurationQuery, GetConfigurationQueryVariables } from '../../types/sdk';
 import releaseDestinationRepository from '../repositories/releaseDestinationRepository';
 import releaseRecipientRepository from '../repositories/releaseRecipientRepository';
 import commentRepository from '../repositories/commentRepository';
@@ -43,9 +43,7 @@ const configurationHandlers = [
         programs: programRepository.findAll(),
         omeroProjects: omeroProjectRepository.findAll(),
         dnapStudies: dnapStudyRepository.findAll(),
-        xeniumProbePanels: probePanelRepository.findAll().filter((panel) => panel.type === ProbeType.Xenium),
-        cytassistProbePanels: probePanelRepository.findAll().filter((panel) => panel.type === ProbeType.Cytassist),
-        spikeProbePanels: probePanelRepository.findAll().filter((panel) => panel.type === ProbeType.Spike),
+        probePanels: probePanelRepository.findAll(),
         bioRisks: bioRiskRepository.findAll(),
         tissueTypes: tissueTypeRepository.findAll(),
         cellClasses: cellClassRepository.findAll(),

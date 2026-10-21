@@ -3254,7 +3254,7 @@ export type QueryProbeHybSlotsArgs = {
  */
 export type QueryProbePanelsArgs = {
   includeDisabled?: InputMaybe<Scalars['Boolean']['input']>;
-  type: ProbeType;
+  type?: InputMaybe<ProbeType>;
 };
 
 
@@ -5805,7 +5805,7 @@ export type GetCommentsQuery = { __typename?: 'Query', comments: Array<{ __typen
 export type GetConfigurationQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetConfigurationQuery = { __typename?: 'Query', destructionReasons: Array<{ __typename?: 'DestructionReason', id: number, text: string, enabled: boolean }>, comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }>, hmdmcs: Array<{ __typename?: 'Hmdmc', hmdmc: string, enabled: boolean }>, species: Array<{ __typename?: 'Species', name: string, enabled: boolean }>, fixatives: Array<{ __typename?: 'Fixative', name: string, enabled: boolean }>, releaseDestinations: Array<{ __typename?: 'ReleaseDestination', name: string, enabled: boolean }>, releaseRecipients: Array<{ __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean }>, projects: Array<{ __typename?: 'Project', name: string, enabled: boolean }>, costCodes: Array<{ __typename?: 'CostCode', code: string, enabled: boolean }>, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, equipments: Array<{ __typename?: 'Equipment', id: number, name: string, category: string, enabled: boolean }>, users: Array<{ __typename?: 'User', username: string, role: UserRole }>, solutions: Array<{ __typename?: 'Solution', name: string, enabled: boolean }>, xeniumProbePanels: Array<{ __typename?: 'ProbePanel', name: string, enabled: boolean, type: ProbeType }>, cytassistProbePanels: Array<{ __typename?: 'ProbePanel', name: string, enabled: boolean, type: ProbeType }>, spikeProbePanels: Array<{ __typename?: 'ProbePanel', name: string, enabled: boolean, type: ProbeType }>, programs: Array<{ __typename?: 'Program', name: string, enabled: boolean }>, omeroProjects: Array<{ __typename?: 'OmeroProject', name: string, enabled: boolean }>, dnapStudies: Array<{ __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean }>, bioRisks: Array<{ __typename?: 'BioRisk', code: string, enabled: boolean }>, tissueTypes: Array<{ __typename?: 'TissueType', name: string, code: string, spatialLocations: Array<{ __typename?: 'SpatialLocation', code: number, name: string }> }>, cellClasses: Array<{ __typename?: 'CellClass', name: string, enabled: boolean }>, proteinPanels: Array<{ __typename?: 'ProteinPanel', name: string, enabled: boolean }>, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> };
+export type GetConfigurationQuery = { __typename?: 'Query', destructionReasons: Array<{ __typename?: 'DestructionReason', id: number, text: string, enabled: boolean }>, comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }>, hmdmcs: Array<{ __typename?: 'Hmdmc', hmdmc: string, enabled: boolean }>, species: Array<{ __typename?: 'Species', name: string, enabled: boolean }>, fixatives: Array<{ __typename?: 'Fixative', name: string, enabled: boolean }>, releaseDestinations: Array<{ __typename?: 'ReleaseDestination', name: string, enabled: boolean }>, releaseRecipients: Array<{ __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean }>, projects: Array<{ __typename?: 'Project', name: string, enabled: boolean }>, costCodes: Array<{ __typename?: 'CostCode', code: string, enabled: boolean }>, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, equipments: Array<{ __typename?: 'Equipment', id: number, name: string, category: string, enabled: boolean }>, users: Array<{ __typename?: 'User', username: string, role: UserRole }>, solutions: Array<{ __typename?: 'Solution', name: string, enabled: boolean }>, probePanels: Array<{ __typename?: 'ProbePanel', name: string, enabled: boolean, type: ProbeType }>, programs: Array<{ __typename?: 'Program', name: string, enabled: boolean }>, omeroProjects: Array<{ __typename?: 'OmeroProject', name: string, enabled: boolean }>, dnapStudies: Array<{ __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean }>, bioRisks: Array<{ __typename?: 'BioRisk', code: string, enabled: boolean }>, tissueTypes: Array<{ __typename?: 'TissueType', name: string, code: string, spatialLocations: Array<{ __typename?: 'SpatialLocation', code: number, name: string }> }>, cellClasses: Array<{ __typename?: 'CellClass', name: string, enabled: boolean }>, proteinPanels: Array<{ __typename?: 'ProteinPanel', name: string, enabled: boolean }>, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> };
 
 export type GetDestroyInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -8492,13 +8492,7 @@ export const GetConfigurationDocument = gql`
   solutions(includeDisabled: true) {
     ...SolutionFields
   }
-  xeniumProbePanels: probePanels(type: xenium, includeDisabled: true) {
-    ...ProbePanelFields
-  }
-  cytassistProbePanels: probePanels(type: cytassist, includeDisabled: true) {
-    ...ProbePanelFields
-  }
-  spikeProbePanels: probePanels(type: spike, includeDisabled: true) {
+  probePanels: probePanels(includeDisabled: true) {
     ...ProbePanelFields
   }
   programs(includeDisabled: true) {
