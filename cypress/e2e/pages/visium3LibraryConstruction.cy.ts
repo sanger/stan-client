@@ -1,7 +1,7 @@
-import { selectOption, selectSGPNumber, shouldBeDisabled, shouldBeEnabled } from '../shared/customReactSelect.cy';
+import { selectSGPNumber, shouldBeDisabled, shouldBeEnabled } from '../shared/customReactSelect.cy';
 import {
-  FindMeasurementByBarcodeAndNameQuery,
-  FindMeasurementByBarcodeAndNameQueryVariables,
+  FindMeasurementValueFromLabwareOrAncestorQuery,
+  FindMeasurementValueFromLabwareOrAncestorQueryVariables,
   FindReagentPlateQuery,
   FindReagentPlateQueryVariables,
   PerformLibraryConstructionMutation,
@@ -47,19 +47,8 @@ describe('Visium 3 Library Construction', () => {
   describe('Reagent Transfer Step', () => {
     describe('Dual Index Plate', () => {
       describe('On page load', () => {
-        it('disables dual index plate scanner', () => {
-          cy.findByTestId('source-scan-input').should('be.disabled');
-        });
-        it('enables the plate type select box', () => {
-          shouldBeEnabled('source-plate-type');
-        });
-        describe('on selecting the plate type', () => {
-          before(() => {
-            selectOption('source-plate-type', 'Dual Index TT Set A');
-          });
-          it('enables dual index plate scanner once the plate type is selected', () => {
-            cy.findByTestId('source-scan-input').should('be.enabled');
-          });
+        it('enables dual index plate scanner', () => {
+          cy.findByTestId('source-scan-input').should('be.enabled');
         });
       });
       describe('on scanning dual index plate', () => {
@@ -155,6 +144,8 @@ describe('Visium 3 Library Construction', () => {
     describe('Reagent transfer', () => {
       describe('When transferring reagents', () => {
         before(() => {
+          removeReagentPlate();
+          cy.findByTestId('source-scan-input').clear().type('543767897643212345678653{enter}');
           transferReagent({
             reagentPlateBarcode: '543767897643212345678653',
             reagentAddress: 'A2',
@@ -233,16 +224,16 @@ describe('Visium 3 Library Construction', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.query<FindMeasurementByBarcodeAndNameQuery, FindMeasurementByBarcodeAndNameQueryVariables>(
-              'FindMeasurementByBarcodeAndName',
-              () => {
-                return HttpResponse.json({
-                  data: {
-                    measurementValueFromLabwareOrParent: []
-                  }
-                });
-              }
-            )
+            graphql.query<
+              FindMeasurementValueFromLabwareOrAncestorQuery,
+              FindMeasurementValueFromLabwareOrAncestorQueryVariables
+            >('FindMeasurementValueFromLabwareOrAncestor', () => {
+              return HttpResponse.json({
+                data: {
+                  measurementValueFromLabwareOrAncestor: []
+                }
+              });
+            })
           );
         });
         cy.findByTestId('record-cycle-button').click();
