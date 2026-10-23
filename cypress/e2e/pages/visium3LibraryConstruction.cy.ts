@@ -1,7 +1,7 @@
-import { selectOption, selectSGPNumber, shouldBeDisabled, shouldBeEnabled } from '../shared/customReactSelect.cy';
+import { selectSGPNumber, shouldBeDisabled, shouldBeEnabled } from '../shared/customReactSelect.cy';
 import {
-  FindMeasurementByBarcodeAndNameQuery,
-  FindMeasurementByBarcodeAndNameQueryVariables,
+  FindMeasurementValueFromLabwareOrAncestorQuery,
+  FindMeasurementValueFromLabwareOrAncestorQueryVariables,
   FindReagentPlateQuery,
   FindReagentPlateQueryVariables,
   PerformLibraryConstructionMutation,
@@ -224,16 +224,16 @@ describe('Visium 3 Library Construction', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.query<FindMeasurementByBarcodeAndNameQuery, FindMeasurementByBarcodeAndNameQueryVariables>(
-              'FindMeasurementByBarcodeAndName',
-              () => {
-                return HttpResponse.json({
-                  data: {
-                    measurementValueFromLabwareOrParent: []
-                  }
-                });
-              }
-            )
+            graphql.query<
+              FindMeasurementValueFromLabwareOrAncestorQuery,
+              FindMeasurementValueFromLabwareOrAncestorQueryVariables
+            >('FindMeasurementValueFromLabwareOrAncestor', () => {
+              return HttpResponse.json({
+                data: {
+                  measurementValueFromLabwareOrAncestor: []
+                }
+              });
+            })
           );
         });
         cy.findByTestId('record-cycle-button').click();
