@@ -1,0 +1,5 @@
+mutation UpdateWorkAteraStudy($workNumber: String!, $ssStudyId: Int) {
+    updateWorkAteraStudy(workNumber: $workNumber, ssStudyId: $ssStudyId) {
+        ...WorkFields
+    }
+}

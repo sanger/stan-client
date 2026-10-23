@@ -72,7 +72,8 @@ type WorkRowProps = {
 
 export enum Studies {
   DNAP_STUDY = 'dnapStudy',
-  XENIUM_STUDY = 'xeniumStudy'
+  XENIUM_STUDY = 'xeniumStudy',
+  ATERA_STUDY = 'ateraStudy'
 }
 
 /**
@@ -199,18 +200,13 @@ export default function WorkRow({
   );
 
   const handleUpdateWorkStudyId = useCallback(
-    (ssStudyId: number, studyType: Studies.XENIUM_STUDY | Studies.DNAP_STUDY) => {
-      if (studyType === Studies.DNAP_STUDY) {
-        send({
-          type: 'UPDATE_DNAP_PROJECT',
-          ssStudyId
-        });
-      } else if (studyType === Studies.XENIUM_STUDY) {
-        send({
-          type: 'UPDATE_XENIUM_STUDY_ID',
-          ssStudyId
-        });
-      }
+    (ssStudyId: number, studyType: Studies) => {
+      const eventTypeByStudy: Record<Studies, WorkRowEvent['type']> = {
+        [Studies.DNAP_STUDY]: 'UPDATE_DNAP_PROJECT',
+        [Studies.XENIUM_STUDY]: 'UPDATE_XENIUM_STUDY_ID',
+        [Studies.ATERA_STUDY]: 'UPDATE_ATERA_STUDY_ID'
+      };
+      send({ type: eventTypeByStudy[studyType], ssStudyId } as WorkRowEvent);
     },
     [send]
   );
@@ -405,11 +401,7 @@ export default function WorkRow({
     );
   };
 
-  const renderWorkSsStudyField = (
-    workNumber: string,
-    ssStudy: DnapStudy | undefined,
-    studyType: Studies.XENIUM_STUDY | Studies.DNAP_STUDY
-  ) => {
+  const renderWorkSsStudyField = (workNumber: string, ssStudy: DnapStudy | undefined, studyType: Studies) => {
     return (
       <div className="grid grid-flow-row auto-rows-max">
         <Input
@@ -550,6 +542,9 @@ export default function WorkRow({
         <TableCell>{work.workRequester?.username}</TableCell>
         <TableCell>{work.project.name}</TableCell>
         <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
+        <TableCell colSpan={2}>
+          {renderWorkSsStudyField(work.workNumber, work.ateraStudy ?? undefined, Studies.ATERA_STUDY)}
+        </TableCell>
         <TableCell colSpan={2}>
           {renderWorkSsStudyField(work.workNumber, work.dnapStudy ?? undefined, Studies.DNAP_STUDY)}
         </TableCell>
