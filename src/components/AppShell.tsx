@@ -309,14 +309,15 @@ function AppShell({ children }: AppShellParams) {
                     />
                   </Menu>
                   <Menu
-                    caption={'Xenium'}
+                    caption={'Cell Segmentation'}
                     icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Recording Xenium run information'}
+                    description={'Recording Cell Segmentation and QC'}
                   >
                     <NavLinkMenuItem
                       caption={'Cell Segmentation'}
                       path={'/lab/cell_segmentation'}
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Recording Cell Segmentation'}
                     />
                     <NavLinkMenuItem
                       caption={'Cell Segmentation QC'}
@@ -324,6 +325,12 @@ function AppShell({ children }: AppShellParams) {
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording Cell Segmentation QC'}
                     />
+                  </Menu>
+                  <Menu
+                    caption={'Xenium'}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Recording Xenium run information'}
+                  >
                     <NavLinkMenuItem
                       caption={'Xenium Analyser'}
                       path={'/lab/xenium_analyser'}
