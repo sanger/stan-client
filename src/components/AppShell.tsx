@@ -579,10 +579,13 @@ function AppShell({ children }: AppShellParams) {
                       </StanMobileNavLink>
                     </div>
 
-                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Xenium</h4>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Cell Segmentation</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/cell_segmentation">Cell Segmentation</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/cell_segmentation_qc">Cell Segmentation QC</StanMobileNavLink>
+                    </div>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Xenium</h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/xenium_analyser">Xenium Analyser</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/xenium_qc">Xenium Analyser QC</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/xenium_metrics">Xenium Metrics</StanMobileNavLink>
