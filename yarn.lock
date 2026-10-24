@@ -2238,15 +2238,15 @@
     tslib "^2.8.1"
 
 "@graphql-tools/executor-legacy-ws@^1.1.15":
-  version "1.1.15"
-  resolved "https://registry.yarnpkg.com/@graphql-tools/executor-legacy-ws/-/executor-legacy-ws-1.1.15.tgz#7ea4a1bc86751e2e6332f8a42e48309d9c7d84e9"
-  integrity sha512-5VM5m/WQWoIj2GKXuOUvhtzkm11g/rbKYOiLvur6AxD59FdLwVwDisWvarj8rsZ1NUedK312fD22vpKjc2m+dw==
+  version "1.1.39"
+  resolved "https://registry.yarnpkg.com/@graphql-tools/executor-legacy-ws/-/executor-legacy-ws-1.1.39.tgz#50f1435b1d69c7438285a16cf59765b5a8354663"
+  integrity sha512-bwGaqKlcjk9GurbMl5XkegWmbDWna+kFbnExyPwEkxDtKijDIZSZ0LC10ya99sBYXu4RQNjQaEjfBzvGMbuKWA==
   dependencies:
-    "@graphql-tools/utils" "^10.8.4"
-    "@types/ws" "^8.0.0"
+    "@graphql-tools/utils" "^12.1.0"
+    "@types/ws" "^8.18.2"
     isomorphic-ws "^5.0.0"
     tslib "^2.4.0"
-    ws "^8.17.1"
+    ws "^8.21.3"
 
 "@graphql-tools/executor@^1.3.10":
   version "1.4.4"
@@ -2436,6 +2436,16 @@
     "@whatwg-node/promise-helpers" "^1.0.0"
     cross-inspect "1.0.1"
     dset "^3.1.4"
+    tslib "^2.4.0"
+
+"@graphql-tools/utils@^12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@graphql-tools/utils/-/utils-12.1.0.tgz#49cf4eea2887075d11d4baf6a20f057ea7530130"
+  integrity sha512-+mOuIX7u83/BHG0L9JviMzKid1j35cxOWhLoox47TXHAJ6Tnn30RgrmEQPmk1FhmaQbhJEcwYBDVyieUvZopJw==
+  dependencies:
+    "@graphql-typed-document-node/core" "^3.1.1"
+    "@whatwg-node/promise-helpers" "^2.0.0"
+    cross-inspect "1.0.1"
     tslib "^2.4.0"
 
 "@graphql-tools/utils@^8.8.0":
@@ -5800,6 +5810,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/ws@^8.18.2":
+  version "8.18.2"
+  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-8.18.2.tgz#25d6321b30ef0fddf6cc7052b4eef9ce4e412b6e"
+  integrity sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w==
+  dependencies:
+    "@types/node" "*"
+
 "@types/yargs-parser@*":
   version "21.0.3"
   resolved "https://registry.yarnpkg.com/@types/yargs-parser/-/yargs-parser-21.0.3.tgz#815e30b786d2e8f0dcd85fd5bcf5e1a04d008f15"
@@ -6416,6 +6433,13 @@
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/@whatwg-node/promise-helpers/-/promise-helpers-1.2.4.tgz#4f62d48e27059e8e655add21faa82d177abf5a0c"
   integrity sha512-daEUfaHbaMuAcor+FPAVK+pOCSzsAYhK6LN1y81EcakdqQEPQvjm74PTmfwfv8POg8pw4RyCv9LXB1e+mQDwqg==
+  dependencies:
+    tslib "^2.6.3"
+
+"@whatwg-node/promise-helpers@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@whatwg-node/promise-helpers/-/promise-helpers-2.0.0.tgz#93a89655355bbd5d7e2b0d64fc93a88224d7030e"
+  integrity sha512-/i9CS0Z96o+cPwaYoAyVxAThDiUX1wV3tDmNWPJbn+vtdR+JftuCDg1NGCXBrzIYVDGkJ8uT6ctwmrBOUzOpKQ==
   dependencies:
     tslib "^2.6.3"
 
@@ -20866,6 +20890,11 @@ ws@^8.11.0, ws@^8.13.0, ws@^8.17.1, ws@^8.2.3:
   version "8.18.1"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.1.tgz#ea131d3784e1dfdff91adb0a4a116b127515e3cb"
   integrity sha512-RKW2aJZMXeMxVpnZ6bck+RswznaxmzdULiBr6KY7XkTnW8uvt0iT9H5DkHUChXrc+uurzwa0rVI16n/Xzjdz1w==
+
+ws@^8.21.3:
+  version "8.22.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.22.0.tgz#40f16e1d7588ac0575041be5c49b8eb261c28e73"
+  integrity sha512-Ydggc987+RO0AnWtZ/7Wq9FtNvcrL1b/RO0ud9mWjUPgDrsAAwQSF51sm2hm1XofbU/4jkpGEsLFsZZxU+1DOg==
 
 xlsx@^0.18.5:
   version "0.18.5"
