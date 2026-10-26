@@ -202,7 +202,7 @@ const LabwareProbeSettingsPanel: React.FC<{
                   value={labwareProbeSettings.samplePrepReagentType}
                   emptyOption={true}
                   dataTestId={`sample-prep-reagent-type-${labwareProbeSettings.labware.barcode}`}
-                  options={selectOptionValues(samplePrepReagentTypes, 'text', 'id')}
+                  options={selectOptionValues(samplePrepReagentTypes, 'text', 'text')}
                 />
               </div>
               <div>
@@ -550,7 +550,7 @@ const ProbeHybridisationAtera: React.FC = () => {
                                             }}
                                             emptyOption={true}
                                             dataTestId="sample-prep-reagent-type"
-                                            options={selectOptionValues(samplePrepReagentTypes, 'text', 'id')}
+                                            options={selectOptionValues(samplePrepReagentTypes, 'text', 'text')}
                                           />
                                         </div>
                                         <div>
