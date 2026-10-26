@@ -266,6 +266,7 @@ export const ReagentMultiMapper = () => {
                   onScan={async (value) => {
                     await setFieldValue('reagentPlate', await getReagentPlate(value));
                   }}
+                  disabled={!!values.reagentPlate}
                 />
                 <MutedText>Add source labware using the scan input above</MutedText>
               </Label>
