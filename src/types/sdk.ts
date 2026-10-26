@@ -4464,10 +4464,11 @@ export type VisiumPermData = {
 /** Work that can be used to collect together operations done on related samples for a particular purpose. */
 export type Work = {
   __typename?: 'Work';
-  /** The DNAP study associated with this work, if any. */
+  /** The atera study for this work, if any. */
   ateraStudy?: Maybe<DnapStudy>;
   /** The cost code responsible for paying for this work. */
   costCode: CostCode;
+  /** The DNAP study associated with this work, if any. */
   dnapStudy?: Maybe<DnapStudy>;
   /** The faculty lead for this work, if any. */
   facultyLead?: Maybe<ReleaseDestination>;

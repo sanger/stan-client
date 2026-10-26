@@ -408,6 +408,31 @@ describe('Work Allocation', () => {
     });
   });
 
+  context('Atera study ', () => {
+    context('Adding a valid Atera study id to an existing work', () => {
+      before(() => {
+        cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
+        cy.findByTestId('SGP1012-ateraStudy').clear().type('13').blur();
+      });
+
+      it('displays the Atera Study name ', () => {
+        cy.findByText('S9013 DNAP Study name 13').should('be.visible');
+      });
+    });
+
+    context('Setting the Atera study to a non valid study id', () => {
+      before(() => {
+        cy.findByTestId('SGP1012-ateraStudy').clear().type('312').blur();
+      });
+      it('displays an error message', () => {
+        cy.findByText('Unknown Sequencescape study id: 312').should('be.visible');
+      });
+      it('keeps the previous atera study', () => {
+        cy.findByText('S9013 DNAP Study name 13').should('be.visible');
+      });
+    });
+  });
+
   /*
   describe("Comments are shown or hidden dependent on chosen new status", () => {
     before(() => {
