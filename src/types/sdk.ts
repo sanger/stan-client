@@ -2608,6 +2608,8 @@ export type ProbeOperationLabware = {
   probes: Array<ProbeLot>;
   /** Reagent lot number. */
   reagentLot?: InputMaybe<Scalars['String']['input']>;
+  /** Comment id indicating the sample prep reagent type. */
+  reagentTypeCommentId?: InputMaybe<Scalars['Int']['input']>;
   /** The name of the spike probe, if used. */
   spike?: InputMaybe<Scalars['String']['input']>;
   /** The work number of the operation on this labware. */
@@ -2639,6 +2641,7 @@ export type ProbePanel = {
 export enum ProbeType {
   Xenium = 'xenium',
   Cytassist = 'cytassist',
+  Atera = 'atera',
   Spike = 'spike'
 }
 

@@ -66,6 +66,7 @@ import { ReviseWorkNumber } from '../pages/ReviseWorkNumber/ReviseWorkNumber';
 import { ReassignRequestNumber } from '../pages/ReassignRequestNumber';
 import ProbeHybridisationCytAssist from '../pages/ProbeHybridisationCytAssist/ProbeHybridisationCytAssist';
 import { Visium3LibraryConstruction } from '../pages/LibraryConstruction/Visium3LibraryConstruction';
+import ProbeHybridisationAtera from '../pages/ProbeHybridisationAtera';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -252,6 +253,25 @@ const RouteLayout = () => {
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/lab/visium_analysis" element={<VisiumAnalysis />} />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/probe_hybridisation_atera"
+            loader={async () => {
+              const [comments, probePanels] = await Promise.all([
+                stanCore.GetComments({
+                  commentCategory: 'sample prep reagent type',
+                  includeDisabled: false
+                }),
+                stanCore.GetProbePanels({ type: ProbeType.Atera })
+              ]);
+              return {
+                probePanels: probePanels.probePanels,
+                samplePrepReagentTypes: comments.comments
+              };
+            }}
+            element={<ProbeHybridisationAtera />}
+          />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
