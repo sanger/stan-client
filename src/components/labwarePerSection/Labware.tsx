@@ -31,7 +31,7 @@ import BarcodeIcon from '../icons/BarcodeIcon';
 import BubleChatIcon from '../icons/BubleChatIcon';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
 import { sectionGroupsBySample } from '../../lib/helpers/labwareHelper';
-import { Region } from '../../pages/XeniumAnalyser';
+import { Region } from '../xeniumAnalyser/analyser.types';
 
 export interface LabwareProps {
   /**

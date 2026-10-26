@@ -4,7 +4,6 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import {
   AnalyserLabware,
   AnalyserRequest,
-  AnalyserScanDataFieldsFragment,
   CassettePosition,
   EquipmentFieldsFragment,
   LabwareFieldsFragment,
@@ -40,43 +39,12 @@ import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
 import { findUploadedFiles } from '../lib/services/fileService';
-import { compareAddresses, firstAddress, sectionGroupsBySample } from '../lib/helpers/labwareHelper';
+import { sectionGroupsBySample } from '../lib/helpers/labwareHelper';
 import Label from '../components/forms/Label';
 import PinkButton from '../components/buttons/PinkButton';
 import Modal, { ModalBody, ModalFooter } from '../components/Modal';
-import RegionDefiner from '../components/xeniumAnalyser/RegionDefiner';
-import { PlannedSectionDetails } from '../lib/machines/layout/layoutContext';
-
-export type Region = {
-  roi: string;
-  colorIndexNumber?: number;
-  sectionGroups: Array<PlannedSectionDetails>;
-};
-
-export type AnalyserLabwareForm = {
-  labware: LabwareFlaggedFieldsFragment;
-  hybridisation: boolean;
-  workNumber: string;
-  hasSgpNumberLink?: boolean;
-  position?: CassettePosition;
-  regions: Array<Region>;
-  analyserScanData?: AnalyserScanDataFieldsFragment;
-  /**
-   * Temporarily stores the color index selected by the user while defining
-   * a new region in the RegionDefiner component.
-   *
-   * This value is cleared once region creation or removal is completed.
-   */
-  selectedRegionColorIndex?: number;
-
-  /**
-   * Temporarily stores the set of slot / section addresses selected by the user
-   * when creating or modifying a region in the RegionDefiner component.
-   *
-   * This value is cleared after the region operation completes.
-   */
-  selectedAddresses?: Set<string>;
-};
+import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
+import { AnalyserLabwareForm } from '../components/xeniumAnalyser/analyser.types';
 
 export type XeniumAnalyserFormValues = {
   lotNumberA: string;
@@ -113,32 +81,6 @@ const formInitialValues: XeniumAnalyserFormValues = {
 type BarcodeDisplayerProps = {
   barcode: string;
   warningMessage?: string;
-};
-
-export const reIndexAndRenameRegions = (regions: Region[], runName: string, barcode: string): Array<Region> => {
-  let index = 0;
-  return (
-    [...regions]
-      // Sort section groups within each region and sort regions — in one pass
-      .map((reg) => ({
-        ...reg,
-        sectionGroups: [...reg.sectionGroups].sort((a, b) =>
-          compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses))
-        )
-      }))
-      // Sort regions by their first section group's first address
-      .sort((a, b) =>
-        compareAddresses(firstAddress(a.sectionGroups[0].addresses), firstAddress(b.sectionGroups[0].addresses))
-      )
-      // Rename in the same final pass
-      .map((region) => ({
-        ...region,
-        roi:
-          region.sectionGroups.length === 1 && region.sectionGroups[0].source.tissue?.externalName
-            ? region.sectionGroups[0].source.tissue.externalName
-            : [`Region${++index}`, barcode, runName].filter(Boolean).join('_')
-      }))
-  );
 };
 
 const LabwareAnalyserTable = (labwareForm: AnalyserLabwareForm) => {
