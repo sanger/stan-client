@@ -57,15 +57,15 @@ export const CycleRecorder = () => {
       if (processedBarcodes.current.has(libraryConst.labware.barcode)) return;
       processedBarcodes.current.add(libraryConst.labware.barcode);
       stanCore
-        .FindMeasurementByBarcodeAndName({
+        .FindMeasurementValueFromLabwareOrAncestor({
           barcode: libraryConst.labware.barcode,
           measurementName: 'cDNA concentration'
         })
         .then(async (result) => {
           if (
             result &&
-            result.measurementValueFromLabwareOrParent &&
-            result.measurementValueFromLabwareOrParent.length > 0
+            result.measurementValueFromLabwareOrAncestor &&
+            result.measurementValueFromLabwareOrAncestor.length > 0
           ) {
             await setValues((prevValues) => ({
               ...prevValues,
@@ -75,7 +75,7 @@ export const CycleRecorder = () => {
                     ...prevLibrary,
                     slotMeasurements: [
                       ...prevLibrary.slotMeasurements,
-                      ...result.measurementValueFromLabwareOrParent.map((measurement) => ({
+                      ...result.measurementValueFromLabwareOrAncestor.map((measurement) => ({
                         address: measurement.address,
                         value: measurement.string,
                         name: 'cDNA concentration'

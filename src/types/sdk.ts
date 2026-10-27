@@ -2771,6 +2771,8 @@ export type Query = {
   listFiles: Array<StanFile>;
   /** Get the specified storage location. */
   location: Location;
+  /** Get named measurement values for each slot from the indicated labware or any of its ancestor labware. */
+  measurementValueFromLabwareOrAncestor: Array<AddressString>;
   /** Get named measurement values for each slot from the indicated labware or its parent labware. */
   measurementValueFromLabwareOrParent: Array<AddressString>;
   /** Get all the mediums available. */
@@ -3168,6 +3170,16 @@ export type QueryListFilesArgs = {
  */
 export type QueryLocationArgs = {
   locationBarcode: Scalars['String']['input'];
+};
+
+
+/**
+ * Get information from the application.
+ * These typically require no user privilege.
+ */
+export type QueryMeasurementValueFromLabwareOrAncestorArgs = {
+  barcode: Scalars['String']['input'];
+  name: Scalars['String']['input'];
 };
 
 
@@ -5680,6 +5692,14 @@ export type FindMeasurementByBarcodeAndNameQueryVariables = Exact<{
 
 
 export type FindMeasurementByBarcodeAndNameQuery = { __typename?: 'Query', measurementValueFromLabwareOrParent: Array<{ __typename?: 'AddressString', address: string, string: string }> };
+
+export type FindMeasurementValueFromLabwareOrAncestorQueryVariables = Exact<{
+  barcode: Scalars['String']['input'];
+  measurementName: Scalars['String']['input'];
+}>;
+
+
+export type FindMeasurementValueFromLabwareOrAncestorQuery = { __typename?: 'Query', measurementValueFromLabwareOrAncestor: Array<{ __typename?: 'AddressString', address: string, string: string }> };
 
 export type FindPassFailsQueryVariables = Exact<{
   barcode: Scalars['String']['input'];
@@ -8236,6 +8256,14 @@ export const FindMeasurementByBarcodeAndNameDocument = gql`
   }
 }
     `;
+export const FindMeasurementValueFromLabwareOrAncestorDocument = gql`
+    query FindMeasurementValueFromLabwareOrAncestor($barcode: String!, $measurementName: String!) {
+  measurementValueFromLabwareOrAncestor(barcode: $barcode, name: $measurementName) {
+    address
+    string
+  }
+}
+    `;
 export const FindPassFailsDocument = gql`
     query FindPassFails($barcode: String!, $operationType: String!) {
   passFails(barcode: $barcode, operationType: $operationType) {
@@ -9403,6 +9431,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     FindMeasurementByBarcodeAndName(variables: FindMeasurementByBarcodeAndNameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<FindMeasurementByBarcodeAndNameQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindMeasurementByBarcodeAndNameQuery>(FindMeasurementByBarcodeAndNameDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindMeasurementByBarcodeAndName', 'query', variables);
+    },
+    FindMeasurementValueFromLabwareOrAncestor(variables: FindMeasurementValueFromLabwareOrAncestorQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<FindMeasurementValueFromLabwareOrAncestorQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<FindMeasurementValueFromLabwareOrAncestorQuery>(FindMeasurementValueFromLabwareOrAncestorDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindMeasurementValueFromLabwareOrAncestor', 'query', variables);
     },
     FindPassFails(variables: FindPassFailsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<FindPassFailsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindPassFailsQuery>(FindPassFailsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindPassFails', 'query', variables);

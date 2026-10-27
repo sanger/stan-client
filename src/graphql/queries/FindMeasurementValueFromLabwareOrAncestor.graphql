@@ -1,0 +1,6 @@
+query FindMeasurementValueFromLabwareOrAncestor($barcode: String!, $measurementName: String!) {
+  measurementValueFromLabwareOrAncestor(barcode: $barcode, name: $measurementName) {
+    address
+    string
+  }
+}
