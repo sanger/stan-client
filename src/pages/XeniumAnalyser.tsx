@@ -507,24 +507,24 @@ const XeniumAnalyser = () => {
                                 />
                               </div>
                             </AnalyserLabwarePanel>
-                            <Modal show={values.activeRegionDefinerLabwareIndex > -1}>
-                              <ModalBody>
-                                <RegionDefiner labwareIndex={values.activeRegionDefinerLabwareIndex} />
-                              </ModalBody>
-                              <ModalFooter>
-                                <BlueButton
-                                  type="button"
-                                  className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-                                  onClick={async () => {
-                                    await setFieldValue('activeRegionDefinerLabwareIndex', -1);
-                                  }}
-                                >
-                                  Done
-                                </BlueButton>
-                              </ModalFooter>
-                            </Modal>
                           </motion.div>
                         ))}
+                      <Modal show={values.activeRegionDefinerLabwareIndex > -1}>
+                        <ModalBody>
+                          <RegionDefiner labwareIndex={values.activeRegionDefinerLabwareIndex} />
+                        </ModalBody>
+                        <ModalFooter>
+                          <BlueButton
+                            type="button"
+                            className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+                            onClick={async () => {
+                              await setFieldValue('activeRegionDefinerLabwareIndex', -1);
+                            }}
+                          >
+                            Done
+                          </BlueButton>
+                        </ModalFooter>
+                      </Modal>
                       <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
                         <BlueButton type="submit" disabled={!isValid}>
                           Save
