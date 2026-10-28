@@ -23,7 +23,7 @@ import FormikInput, { FormikCheckbox, Input } from '../components/forms/Input';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
-import { GridDirection, objectKeys } from '../lib/helpers';
+import { objectKeys } from '../lib/helpers';
 import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { selectOptionValues } from '../components/forms';
@@ -33,7 +33,6 @@ import { lotRegx } from './ProbeHybridisationXenium';
 import { joinUnique, samplesFromLabwareOrSLot } from '../components/dataTableColumns';
 import RemoveButton from '../components/buttons/RemoveButton';
 import PassIcon from '../components/icons/PassIcon';
-import Labware from '../components/labwarePerSection/Labware';
 import Panel from '../components/Panel';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
@@ -41,11 +40,9 @@ import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
 import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
 import { sectionGroupsBySample } from '../lib/helpers/labwareHelper';
 import Label from '../components/forms/Label';
-import PinkButton from '../components/buttons/PinkButton';
 import Modal, { ModalBody, ModalFooter } from '../components/Modal';
 import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
-import RegionsTable from '../components/xeniumAnalyser/RegionsTable';
-import LabwareWorkNumber from '../components/xeniumAnalyser/LabwareWorkNumber';
+import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
 import { AnalyserLabwareForm } from '../components/xeniumAnalyser/analyser.types';
 
 export type XeniumAnalyserFormValues = {
@@ -488,54 +485,27 @@ const XeniumAnalyser = () => {
                         .filter((lw) => lw.hybridisation)
                         .map((lw, lwIndex) => (
                           <motion.div variants={variants.fadeInWithLift} className="mt-4" key={lw.labware.barcode}>
-                            <div className="grid grid-cols-4 gap-x-2">
-                              <div className="flex flex-col items-center space-y-8">
-                                <Labware
-                                  labware={lw.labware}
-                                  gridDirection={GridDirection.LeftUp}
-                                  regions={lw.regions}
-                                  onSlotClick={async () => {
-                                    await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
-                                  }}
+                            <AnalyserLabwarePanel
+                              labwareIndex={lwIndex}
+                              onDefineRegions={async () => {
+                                await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
+                              }}
+                              onRoiBlur={async (barcode) => {
+                                await setFieldValue('barcodeDisplayerProps', { barcode });
+                              }}
+                            >
+                              <div>
+                                <label>Cassette Position</label>
+                                <CustomReactSelect
+                                  options={objectKeys(CassettePosition).map((val) => {
+                                    return { value: val, label: val };
+                                  })}
+                                  name={`labware.${lwIndex}.position`}
+                                  dataTestId={`${lw.labware.barcode}-position`}
+                                  emptyOption={true}
                                 />
-                                <PinkButton
-                                  data-testid={'define-regions-button'}
-                                  onClick={async () => {
-                                    await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
-                                  }}
-                                >
-                                  Define Regions
-                                </PinkButton>
                               </div>
-                              <div className="col-span-3">
-                                <div className="grid grid-cols-7 gap-x-2">
-                                  <div className="col-span-1">
-                                    <div className="grid grid-rows-3 ">
-                                      <LabwareWorkNumber labwareIndex={lwIndex} />
-                                      <div>
-                                        <label>Cassette Position</label>
-                                        <CustomReactSelect
-                                          options={objectKeys(CassettePosition).map((val) => {
-                                            return { value: val, label: val };
-                                          })}
-                                          name={`labware.${lwIndex}.position`}
-                                          dataTestId={`${lw.labware.barcode}-position`}
-                                          emptyOption={true}
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="col-span-6" data-testid={`${lw.labware.barcode}-regions-table`}>
-                                    <RegionsTable
-                                      labwareIndex={lwIndex}
-                                      onRoiBlur={async (barcode) => {
-                                        await setFieldValue('barcodeDisplayerProps', { barcode });
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                            </AnalyserLabwarePanel>
                             <Modal show={values.activeRegionDefinerLabwareIndex > -1}>
                               <ModalBody>
                                 <RegionDefiner labwareIndex={values.activeRegionDefinerLabwareIndex} />
