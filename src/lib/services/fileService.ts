@@ -16,3 +16,13 @@ export async function findUploadedFiles(workNumbers: string[]): Promise<FileFiel
   }
   return response.listFiles;
 }
+
+/**
+ * Check whether any file has been uploaded to the SGP folder of a workNumber
+ * @param workNumber the workNumber whose folder to check
+ * @return true if at least one file has been uploaded, otherwise false
+ */
+export async function hasUploadedFilesInSgpFolder(workNumber: string): Promise<boolean> {
+  const files = await findUploadedFiles([workNumber]);
+  return files.length > 0;
+}

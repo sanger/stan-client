@@ -37,6 +37,37 @@ describe('Xenium Analyser', () => {
       cy.findByTestId('removeButton').click();
     });
   });
+  describe('when labware without probe hybridisation is scanned before labware with it', () => {
+    before(() => {
+      //FindLatestOperationQuery should return null for STAN-0611 only
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>(
+            'FindLatestOperation',
+            ({ variables }) => {
+              return HttpResponse.json({
+                data: {
+                  findLatestOp: variables.barcode === 'STAN-0611' ? null : { id: 1 }
+                }
+              });
+            }
+          )
+        );
+      });
+      cy.get('#labwareScanInput').clear().type('STAN-0611{enter}');
+      cy.findByTextContent('No probe hybridisation recorded for STAN-0611').should('be.visible');
+      cy.get('#labwareScanInput').clear().type('STAN-0612{enter}');
+    });
+    it('shows the details of the labware with probe hybridisation', () => {
+      cy.findByTestId('STAN-0612-workNumber').should('exist');
+      cy.findByTestId('STAN-0612-regions-table').should('exist');
+      cy.findByTestId('STAN-0611-regions-table').should('not.exist');
+    });
+    after(() => {
+      cy.findAllByTestId('removeButton').eq(1).click();
+      cy.findByTestId('removeButton').click();
+    });
+  });
   describe('When a labware is scanned', () => {
     before(() => {
       cy.get('#labwareScanInput').clear().type('STAN-0611{enter}');
@@ -156,6 +187,12 @@ describe('Xenium Analyser', () => {
     });
     it('should disable any further labware scanning', () => {
       cy.get('#labwareScanInput').should('be.disabled');
+    });
+    it('opens one region definer when Define Regions is clicked', () => {
+      cy.findAllByTestId('define-regions-button').eq(1).click();
+      cy.findAllByRole('dialog').should('have.length', 1);
+      cy.findByRole('button', { name: 'Done' }).click();
+      cy.findByRole('dialog').should('not.exist');
     });
   });
   describe('When  two labware are scanned and one is removed', () => {

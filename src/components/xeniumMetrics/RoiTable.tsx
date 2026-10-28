@@ -5,7 +5,7 @@ import { LabwareFlaggedFieldsFragment, RoiFieldsFragment } from '../../types/sdk
 import { alphaNumericSortDefault } from '../../types/stan';
 import { sectionGroupsBySample } from '../../lib/helpers/labwareHelper';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
-import { Region } from '../../pages/XeniumAnalyser';
+import { Region } from '../xeniumAnalyser/analyser.types';
 
 type RoiTableProps<T extends RoiFieldsFragment> = {
   actionColumn?: Column<T>;

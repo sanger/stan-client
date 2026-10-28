@@ -4,7 +4,6 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import {
   AnalyserLabware,
   AnalyserRequest,
-  AnalyserScanDataFieldsFragment,
   CassettePosition,
   EquipmentFieldsFragment,
   LabwareFieldsFragment,
@@ -24,59 +23,27 @@ import FormikInput, { FormikCheckbox, Input } from '../components/forms/Input';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
-import { GridDirection, objectKeys } from '../lib/helpers';
+import { objectKeys } from '../lib/helpers';
 import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
-import { FormikErrorMessage, selectOptionValues } from '../components/forms';
-import { Link, useLoaderData, useNavigate } from 'react-router-dom';
+import { selectOptionValues } from '../components/forms';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { fromPromise } from 'xstate';
 import { lotRegx } from './ProbeHybridisationXenium';
 import { joinUnique, samplesFromLabwareOrSLot } from '../components/dataTableColumns';
 import RemoveButton from '../components/buttons/RemoveButton';
 import PassIcon from '../components/icons/PassIcon';
-import Labware from '../components/labwarePerSection/Labware';
 import Panel from '../components/Panel';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
-import { findUploadedFiles } from '../lib/services/fileService';
-import { compareAddresses, firstAddress, sectionGroupsBySample } from '../lib/helpers/labwareHelper';
+import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
+import { sectionGroupsBySample } from '../lib/helpers/labwareHelper';
 import Label from '../components/forms/Label';
-import PinkButton from '../components/buttons/PinkButton';
 import Modal, { ModalBody, ModalFooter } from '../components/Modal';
-import RegionDefiner from '../components/xeniumAnalyser/RegionDefiner';
-import { PlannedSectionDetails } from '../lib/machines/layout/layoutContext';
-
-export type Region = {
-  roi: string;
-  colorIndexNumber?: number;
-  sectionGroups: Array<PlannedSectionDetails>;
-};
-
-export type AnalyserLabwareForm = {
-  labware: LabwareFlaggedFieldsFragment;
-  hybridisation: boolean;
-  workNumber: string;
-  hasSgpNumberLink?: boolean;
-  position?: CassettePosition;
-  regions: Array<Region>;
-  analyserScanData?: AnalyserScanDataFieldsFragment;
-  /**
-   * Temporarily stores the color index selected by the user while defining
-   * a new region in the RegionDefiner component.
-   *
-   * This value is cleared once region creation or removal is completed.
-   */
-  selectedRegionColorIndex?: number;
-
-  /**
-   * Temporarily stores the set of slot / section addresses selected by the user
-   * when creating or modifying a region in the RegionDefiner component.
-   *
-   * This value is cleared after the region operation completes.
-   */
-  selectedAddresses?: Set<string>;
-};
+import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
+import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
+import { AnalyserLabwareForm } from '../components/xeniumAnalyser/analyser.types';
 
 export type XeniumAnalyserFormValues = {
   lotNumberA: string;
@@ -113,32 +80,6 @@ const formInitialValues: XeniumAnalyserFormValues = {
 type BarcodeDisplayerProps = {
   barcode: string;
   warningMessage?: string;
-};
-
-export const reIndexAndRenameRegions = (regions: Region[], runName: string, barcode: string): Array<Region> => {
-  let index = 0;
-  return (
-    [...regions]
-      // Sort section groups within each region and sort regions — in one pass
-      .map((reg) => ({
-        ...reg,
-        sectionGroups: [...reg.sectionGroups].sort((a, b) =>
-          compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses))
-        )
-      }))
-      // Sort regions by their first section group's first address
-      .sort((a, b) =>
-        compareAddresses(firstAddress(a.sectionGroups[0].addresses), firstAddress(b.sectionGroups[0].addresses))
-      )
-      // Rename in the same final pass
-      .map((region) => ({
-        ...region,
-        roi:
-          region.sectionGroups.length === 1 && region.sectionGroups[0].source.tissue?.externalName
-            ? region.sectionGroups[0].source.tissue.externalName
-            : [`Region${++index}`, barcode, runName].filter(Boolean).join('_')
-      }))
-  );
 };
 
 const LabwareAnalyserTable = (labwareForm: AnalyserLabwareForm) => {
@@ -342,11 +283,6 @@ const XeniumAnalyser = () => {
     [labwareRegions, stanCore]
   );
 
-  const hasUploadedFilesInSgpFolder = async (workNumber: string): Promise<boolean> => {
-    const files = await findUploadedFiles([workNumber]);
-    return files.length > 0;
-  };
-
   return (
     <AppShell>
       <AppShell.Header>
@@ -546,182 +482,49 @@ const XeniumAnalyser = () => {
                         </div>
                       </motion.div>
                       {values.labware
-                        .filter((lw) => lw.hybridisation)
-                        .map((lw, lwIndex) => (
+                        .map((lw, lwIndex) => ({ lw, lwIndex }))
+                        .filter(({ lw }) => lw.hybridisation)
+                        .map(({ lw, lwIndex }) => (
                           <motion.div variants={variants.fadeInWithLift} className="mt-4" key={lw.labware.barcode}>
-                            <div className="grid grid-cols-4 gap-x-2">
-                              <div className="flex flex-col items-center space-y-8">
-                                <Labware
-                                  labware={lw.labware}
-                                  gridDirection={GridDirection.LeftUp}
-                                  regions={lw.regions}
-                                  onSlotClick={async () => {
-                                    await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
-                                  }}
+                            <AnalyserLabwarePanel
+                              labwareIndex={lwIndex}
+                              onDefineRegions={async () => {
+                                await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
+                              }}
+                              onRoiBlur={async (barcode) => {
+                                await setFieldValue('barcodeDisplayerProps', { barcode });
+                              }}
+                            >
+                              <div>
+                                <label>Cassette Position</label>
+                                <CustomReactSelect
+                                  options={objectKeys(CassettePosition).map((val) => {
+                                    return { value: val, label: val };
+                                  })}
+                                  name={`labware.${lwIndex}.position`}
+                                  dataTestId={`${lw.labware.barcode}-position`}
+                                  emptyOption={true}
                                 />
-                                <PinkButton
-                                  data-testid={'define-regions-button'}
-                                  onClick={async () => {
-                                    await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
-                                  }}
-                                >
-                                  Define Regions
-                                </PinkButton>
                               </div>
-                              <div className="col-span-3">
-                                <div className="grid grid-cols-7 gap-x-2">
-                                  <div className="col-span-1">
-                                    <div className="grid grid-rows-3 ">
-                                      <div>
-                                        <label>SGP Number</label>
-                                        <WorkNumberSelect
-                                          name={`labware.${lwIndex}.workNumber`}
-                                          dataTestId={`${lw.labware.barcode}-workNumber`}
-                                          onWorkNumberChange={async (_workNumber) => {
-                                            const workNumber = _workNumber.trim();
-                                            const hasSgpNumberLink =
-                                              workNumber.length > 0
-                                                ? await hasUploadedFilesInSgpFolder(workNumber)
-                                                : false;
-                                            await setValues((prev) => ({
-                                              ...prev,
-                                              labware: prev.labware.map((lw, index) =>
-                                                index !== lwIndex
-                                                  ? lw
-                                                  : {
-                                                      ...lw,
-                                                      workNumber,
-                                                      hasSgpNumberLink,
-                                                      regions: reIndexAndRenameRegions(
-                                                        lw.regions,
-                                                        prev.runName,
-                                                        lw.labware.barcode
-                                                      )
-                                                    }
-                                              )
-                                            }));
-                                          }}
-                                          workNumber={values.labware[lwIndex]?.workNumber}
-                                          requiredField={true}
-                                        />
-                                        {lw.hasSgpNumberLink && (
-                                          <div
-                                            className="mt-5 flex-row whitespace-nowrap"
-                                            data-testid="sgp-folder-link"
-                                          >
-                                            <Link
-                                              className="text-indigo-800 hover:text-indigo-900 active:text-indigo-950 font-semibold hover:underline"
-                                              to={`/file_manager?workNumber=${values.labware[lwIndex]?.workNumber}`}
-                                              target="_blank"
-                                            >
-                                              {`${values.labware[lwIndex]?.workNumber} Folder Link`}
-                                            </Link>
-                                          </div>
-                                        )}
-                                        <FormikErrorMessage name={`labware.${lwIndex}.workNumber`} />
-                                      </div>
-                                      <div>
-                                        <label>Cassette Position</label>
-                                        <CustomReactSelect
-                                          options={objectKeys(CassettePosition).map((val) => {
-                                            return { value: val, label: val };
-                                          })}
-                                          name={`labware.${lwIndex}.position`}
-                                          dataTestId={`${lw.labware.barcode}-position`}
-                                          emptyOption={true}
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="col-span-6" data-testid={`${lw.labware.barcode}-regions-table`}>
-                                    <Table>
-                                      <TableHead>
-                                        <tr>
-                                          <TableHeader>Region</TableHeader>
-                                          <TableHeader>External Id</TableHeader>
-                                          <TableHeader>Section Number</TableHeader>
-                                          <TableHeader>Address(es)</TableHeader>
-                                        </tr>
-                                      </TableHead>
-                                      <TableBody>
-                                        {values.labware[lwIndex].regions.map((region, regionIndex) => (
-                                          <tr key={`region-row-${regionIndex}`}>
-                                            <TableCell className="break-words align-top">
-                                              <div className="grid grid-cols-1">
-                                                <FormikInput
-                                                  label={''}
-                                                  type="textarea"
-                                                  as="textarea"
-                                                  data-testid={`${lw.labware.barcode}-${regionIndex}-roi`}
-                                                  name={`labware[${lwIndex}].regions[${regionIndex}].roi`}
-                                                  onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                                                    const barcode = e.target.value.trim();
-                                                    if (barcode.length !== 0) {
-                                                      await setFieldValue('barcodeDisplayerProps', { barcode });
-                                                    }
-                                                  }}
-                                                />
-                                              </div>
-                                            </TableCell>
-                                            <TableCell className="break-words align-top">
-                                              <div className="grid grid-cols-1">
-                                                {region.sectionGroups.map((section, index) => {
-                                                  return (
-                                                    <label className="py-1" key={`externalName-${index}`}>
-                                                      {section.source.tissue?.externalName}
-                                                    </label>
-                                                  );
-                                                })}
-                                              </div>
-                                            </TableCell>
-                                            <TableCell className="break-words align-top">
-                                              <div className="grid grid-cols-1">
-                                                {region.sectionGroups.map((section, index) => {
-                                                  return (
-                                                    <label className="py-1" key={`section-${index}`}>
-                                                      {section.source.newSection}
-                                                    </label>
-                                                  );
-                                                })}
-                                              </div>
-                                            </TableCell>
-                                            <TableCell>
-                                              <div className="grid grid-cols-1 text-wrap">
-                                                {region.sectionGroups.map((section, index) => {
-                                                  return (
-                                                    <label className="py-1" key={`addresses-${index}`}>
-                                                      {Array.from(section.addresses).join(', ')}
-                                                    </label>
-                                                  );
-                                                })}
-                                              </div>
-                                            </TableCell>
-                                          </tr>
-                                        ))}
-                                      </TableBody>
-                                    </Table>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <Modal show={values.activeRegionDefinerLabwareIndex > -1}>
-                              <ModalBody>
-                                <RegionDefiner labwareIndex={values.activeRegionDefinerLabwareIndex} />
-                              </ModalBody>
-                              <ModalFooter>
-                                <BlueButton
-                                  type="button"
-                                  className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-                                  onClick={async () => {
-                                    await setFieldValue('activeRegionDefinerLabwareIndex', -1);
-                                  }}
-                                >
-                                  Done
-                                </BlueButton>
-                              </ModalFooter>
-                            </Modal>
+                            </AnalyserLabwarePanel>
                           </motion.div>
                         ))}
+                      <Modal show={values.activeRegionDefinerLabwareIndex > -1}>
+                        <ModalBody>
+                          <RegionDefiner labwareIndex={values.activeRegionDefinerLabwareIndex} />
+                        </ModalBody>
+                        <ModalFooter>
+                          <BlueButton
+                            type="button"
+                            className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+                            onClick={async () => {
+                              await setFieldValue('activeRegionDefinerLabwareIndex', -1);
+                            }}
+                          >
+                            Done
+                          </BlueButton>
+                        </ModalFooter>
+                      </Modal>
                       <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
                         <BlueButton type="submit" disabled={!isValid}>
                           Save

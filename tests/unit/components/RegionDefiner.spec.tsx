@@ -1,4 +1,5 @@
-import { AnalyserLabwareForm, Region, XeniumAnalyserFormValues } from '../../../src/pages/XeniumAnalyser';
+import { XeniumAnalyserFormValues } from '../../../src/pages/XeniumAnalyser';
+import { AnalyserLabwareForm, Region } from '../../../src/components/xeniumAnalyser/analyser.types';
 import { Formik } from 'formik';
 import RegionDefiner from '../../../src/components/xeniumAnalyser/RegionDefiner';
 import { act, cleanup, fireEvent, render, RenderResult } from '@testing-library/react';

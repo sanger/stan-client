@@ -3,19 +3,41 @@ import Labware from '../labwarePerSection/Labware';
 import { FormikErrors, useFormikContext } from 'formik';
 import { GridDirection, REGION_BORDER_COLORS } from '../../lib/helpers';
 import Heading from '../Heading';
-import {
-  AnalyserLabwareForm,
-  Region,
-  reIndexAndRenameRegions,
-  XeniumAnalyserFormValues
-} from '../../pages/XeniumAnalyser';
+import { AnalyserLabwareForm, Region, RegionDefinerFormValues } from './analyser.types';
 import { LabwareImperativeRef } from '../labware/Labware';
 import warningToast from '../notifications/WarningToast';
 import { toast } from 'react-toastify';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
+import { compareAddresses, firstAddress } from '../../lib/helpers/labwareHelper';
 
 type RegionDefinerProps = {
   labwareIndex: number;
+};
+
+export const reIndexAndRenameRegions = (regions: Region[], runName: string, barcode: string): Array<Region> => {
+  let index = 0;
+  return (
+    [...regions]
+      // Sort section groups within each region and sort regions — in one pass
+      .map((reg) => ({
+        ...reg,
+        sectionGroups: [...reg.sectionGroups].sort((a, b) =>
+          compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses))
+        )
+      }))
+      // Sort regions by their first section group's first address
+      .sort((a, b) =>
+        compareAddresses(firstAddress(a.sectionGroups[0].addresses), firstAddress(b.sectionGroups[0].addresses))
+      )
+      // Rename in the same final pass
+      .map((region) => ({
+        ...region,
+        roi:
+          region.sectionGroups.length === 1 && region.sectionGroups[0].source.tissue?.externalName
+            ? region.sectionGroups[0].source.tissue.externalName
+            : [`Region${++index}`, barcode, runName].filter(Boolean).join('_')
+      }))
+  );
 };
 
 function isLabwareErrorObject(err: unknown): err is FormikErrors<AnalyserLabwareForm> {
@@ -23,7 +45,7 @@ function isLabwareErrorObject(err: unknown): err is FormikErrors<AnalyserLabware
 }
 
 const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
-  const { values, errors, setFieldValue, setFieldError, setValues } = useFormikContext<XeniumAnalyserFormValues>();
+  const { values, errors, setFieldValue, setFieldError, setValues } = useFormikContext<RegionDefinerFormValues>();
 
   const analyserLabware = values.labware[labwareIndex];
 
