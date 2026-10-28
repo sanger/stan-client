@@ -26,8 +26,8 @@ import CustomReactSelect from '../components/forms/CustomReactSelect';
 import { GridDirection, objectKeys } from '../lib/helpers';
 import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
-import { FormikErrorMessage, selectOptionValues } from '../components/forms';
-import { Link, useLoaderData, useNavigate } from 'react-router-dom';
+import { selectOptionValues } from '../components/forms';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { fromPromise } from 'xstate';
 import { lotRegx } from './ProbeHybridisationXenium';
 import { joinUnique, samplesFromLabwareOrSLot } from '../components/dataTableColumns';
@@ -38,13 +38,14 @@ import Panel from '../components/Panel';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
-import { findUploadedFiles } from '../lib/services/fileService';
+import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
 import { sectionGroupsBySample } from '../lib/helpers/labwareHelper';
 import Label from '../components/forms/Label';
 import PinkButton from '../components/buttons/PinkButton';
 import Modal, { ModalBody, ModalFooter } from '../components/Modal';
 import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
 import RegionsTable from '../components/xeniumAnalyser/RegionsTable';
+import LabwareWorkNumber from '../components/xeniumAnalyser/LabwareWorkNumber';
 import { AnalyserLabwareForm } from '../components/xeniumAnalyser/analyser.types';
 
 export type XeniumAnalyserFormValues = {
@@ -285,11 +286,6 @@ const XeniumAnalyser = () => {
     [labwareRegions, stanCore]
   );
 
-  const hasUploadedFilesInSgpFolder = async (workNumber: string): Promise<boolean> => {
-    const files = await findUploadedFiles([workNumber]);
-    return files.length > 0;
-  };
-
   return (
     <AppShell>
       <AppShell.Header>
@@ -515,54 +511,7 @@ const XeniumAnalyser = () => {
                                 <div className="grid grid-cols-7 gap-x-2">
                                   <div className="col-span-1">
                                     <div className="grid grid-rows-3 ">
-                                      <div>
-                                        <label>SGP Number</label>
-                                        <WorkNumberSelect
-                                          name={`labware.${lwIndex}.workNumber`}
-                                          dataTestId={`${lw.labware.barcode}-workNumber`}
-                                          onWorkNumberChange={async (_workNumber) => {
-                                            const workNumber = _workNumber.trim();
-                                            const hasSgpNumberLink =
-                                              workNumber.length > 0
-                                                ? await hasUploadedFilesInSgpFolder(workNumber)
-                                                : false;
-                                            await setValues((prev) => ({
-                                              ...prev,
-                                              labware: prev.labware.map((lw, index) =>
-                                                index !== lwIndex
-                                                  ? lw
-                                                  : {
-                                                      ...lw,
-                                                      workNumber,
-                                                      hasSgpNumberLink,
-                                                      regions: reIndexAndRenameRegions(
-                                                        lw.regions,
-                                                        prev.runName,
-                                                        lw.labware.barcode
-                                                      )
-                                                    }
-                                              )
-                                            }));
-                                          }}
-                                          workNumber={values.labware[lwIndex]?.workNumber}
-                                          requiredField={true}
-                                        />
-                                        {lw.hasSgpNumberLink && (
-                                          <div
-                                            className="mt-5 flex-row whitespace-nowrap"
-                                            data-testid="sgp-folder-link"
-                                          >
-                                            <Link
-                                              className="text-indigo-800 hover:text-indigo-900 active:text-indigo-950 font-semibold hover:underline"
-                                              to={`/file_manager?workNumber=${values.labware[lwIndex]?.workNumber}`}
-                                              target="_blank"
-                                            >
-                                              {`${values.labware[lwIndex]?.workNumber} Folder Link`}
-                                            </Link>
-                                          </div>
-                                        )}
-                                        <FormikErrorMessage name={`labware.${lwIndex}.workNumber`} />
-                                      </div>
+                                      <LabwareWorkNumber labwareIndex={lwIndex} />
                                       <div>
                                         <label>Cassette Position</label>
                                         <CustomReactSelect
