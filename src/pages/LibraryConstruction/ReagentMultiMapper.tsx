@@ -20,8 +20,6 @@ import Heading from '../../components/Heading';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../components/Table';
 import LabwareScanner from '../../components/labwareScanner/LabwareScanner';
 import Label from '../../components/forms/Label';
-import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
-import { PLATE_TYPES } from '../../components/libraryGeneration/DualIndexPlateComponent';
 import MutedText from '../../components/MutedText';
 import ScanInput from '../../components/scanInput/ScanInput';
 import WorkNumberSelect from '../../components/WorkNumberSelect';
@@ -217,6 +215,7 @@ export const ReagentMultiMapper = () => {
         `Reagent plate with barcode ${barcode} is not of type Dual Index TT Set A. Found ${reagentPlate.plateType} instead.`
       );
     }
+
     const labware = labwareFactory.build({
       barcode: reagentPlate?.barcode ?? barcode,
       labwareType: dualIndexPlateType,
@@ -232,6 +231,7 @@ export const ReagentMultiMapper = () => {
         }
       });
     }
+    await setFieldValue('reagentPlateType', reagentPlate ? reagentPlate.plateType : ReagentPlateType.DualIndexTTSetA);
 
     return labware;
   };
@@ -259,31 +259,6 @@ export const ReagentMultiMapper = () => {
         <div>
           <div className="space-y-4">
             <Heading level={4}>Dual Index Plate</Heading>
-            <div className="w-1/2 mt-4 mb-4">
-              <Label name="Plate Type">
-                <CustomReactSelect
-                  emptyOption
-                  dataTestId={'source-plate-type'}
-                  name="reagentPlateType"
-                  options={PLATE_TYPES.map((plateType) => {
-                    return {
-                      label: plateType,
-                      value: plateType
-                    };
-                  })}
-                  onChange={async (val) => {
-                    const selectedPlateType = (val as OptionType).value;
-                    await setFieldValue('reagentPlateType', selectedPlateType);
-                    if (selectedPlateType !== ReagentPlateType.DualIndexTTSetA) {
-                      setUserInputWarnings(
-                        `For this operation, a plate of type ${ReagentPlateType.DualIndexTTSetA} is expected`
-                      );
-                    }
-                  }}
-                />
-              </Label>
-              <MutedText>Select a dual index plate type to start</MutedText>
-            </div>
             <div className="w-1/2">
               <Label name="Dual Index Plate">
                 <ScanInput
@@ -291,7 +266,7 @@ export const ReagentMultiMapper = () => {
                   onScan={async (value) => {
                     await setFieldValue('reagentPlate', await getReagentPlate(value));
                   }}
-                  disabled={values.reagentPlateType === '' || values.reagentPlate !== undefined}
+                  disabled={!!values.reagentPlate}
                 />
                 <MutedText>Add source labware using the scan input above</MutedText>
               </Label>
