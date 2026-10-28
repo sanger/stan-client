@@ -482,8 +482,9 @@ const XeniumAnalyser = () => {
                         </div>
                       </motion.div>
                       {values.labware
-                        .filter((lw) => lw.hybridisation)
-                        .map((lw, lwIndex) => (
+                        .map((lw, lwIndex) => ({ lw, lwIndex }))
+                        .filter(({ lw }) => lw.hybridisation)
+                        .map(({ lw, lwIndex }) => (
                           <motion.div variants={variants.fadeInWithLift} className="mt-4" key={lw.labware.barcode}>
                             <AnalyserLabwarePanel
                               labwareIndex={lwIndex}
