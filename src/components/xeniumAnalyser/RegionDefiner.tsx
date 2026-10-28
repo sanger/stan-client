@@ -3,8 +3,7 @@ import Labware from '../labwarePerSection/Labware';
 import { FormikErrors, useFormikContext } from 'formik';
 import { GridDirection, REGION_BORDER_COLORS } from '../../lib/helpers';
 import Heading from '../Heading';
-import { XeniumAnalyserFormValues } from '../../pages/XeniumAnalyser';
-import { AnalyserLabwareForm, Region } from './analyser.types';
+import { AnalyserLabwareForm, Region, RegionDefinerFormValues } from './analyser.types';
 import { LabwareImperativeRef } from '../labware/Labware';
 import warningToast from '../notifications/WarningToast';
 import { toast } from 'react-toastify';
@@ -46,7 +45,7 @@ function isLabwareErrorObject(err: unknown): err is FormikErrors<AnalyserLabware
 }
 
 const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
-  const { values, errors, setFieldValue, setFieldError, setValues } = useFormikContext<XeniumAnalyserFormValues>();
+  const { values, errors, setFieldValue, setFieldError, setValues } = useFormikContext<RegionDefinerFormValues>();
 
   const analyserLabware = values.labware[labwareIndex];
 

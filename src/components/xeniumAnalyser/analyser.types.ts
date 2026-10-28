@@ -31,3 +31,9 @@ export type AnalyserLabwareForm = {
    */
   selectedAddresses?: Set<string>;
 };
+
+/** The form values the RegionDefiner component reads and updates */
+export type RegionDefinerFormValues = {
+  runName: string;
+  labware: Array<AnalyserLabwareForm>;
+};
