@@ -188,6 +188,12 @@ describe('Xenium Analyser', () => {
     it('should disable any further labware scanning', () => {
       cy.get('#labwareScanInput').should('be.disabled');
     });
+    it('opens one region definer when Define Regions is clicked', () => {
+      cy.findAllByTestId('define-regions-button').eq(1).click();
+      cy.findAllByRole('dialog').should('have.length', 1);
+      cy.findByRole('button', { name: 'Done' }).click();
+      cy.findByRole('dialog').should('not.exist');
+    });
   });
   describe('When  two labware are scanned and one is removed', () => {
     before(() => {
