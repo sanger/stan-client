@@ -44,6 +44,7 @@ import Label from '../components/forms/Label';
 import PinkButton from '../components/buttons/PinkButton';
 import Modal, { ModalBody, ModalFooter } from '../components/Modal';
 import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
+import RegionsTable from '../components/xeniumAnalyser/RegionsTable';
 import { AnalyserLabwareForm } from '../components/xeniumAnalyser/analyser.types';
 
 export type XeniumAnalyserFormValues = {
@@ -576,72 +577,12 @@ const XeniumAnalyser = () => {
                                     </div>
                                   </div>
                                   <div className="col-span-6" data-testid={`${lw.labware.barcode}-regions-table`}>
-                                    <Table>
-                                      <TableHead>
-                                        <tr>
-                                          <TableHeader>Region</TableHeader>
-                                          <TableHeader>External Id</TableHeader>
-                                          <TableHeader>Section Number</TableHeader>
-                                          <TableHeader>Address(es)</TableHeader>
-                                        </tr>
-                                      </TableHead>
-                                      <TableBody>
-                                        {values.labware[lwIndex].regions.map((region, regionIndex) => (
-                                          <tr key={`region-row-${regionIndex}`}>
-                                            <TableCell className="break-words align-top">
-                                              <div className="grid grid-cols-1">
-                                                <FormikInput
-                                                  label={''}
-                                                  type="textarea"
-                                                  as="textarea"
-                                                  data-testid={`${lw.labware.barcode}-${regionIndex}-roi`}
-                                                  name={`labware[${lwIndex}].regions[${regionIndex}].roi`}
-                                                  onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                                                    const barcode = e.target.value.trim();
-                                                    if (barcode.length !== 0) {
-                                                      await setFieldValue('barcodeDisplayerProps', { barcode });
-                                                    }
-                                                  }}
-                                                />
-                                              </div>
-                                            </TableCell>
-                                            <TableCell className="break-words align-top">
-                                              <div className="grid grid-cols-1">
-                                                {region.sectionGroups.map((section, index) => {
-                                                  return (
-                                                    <label className="py-1" key={`externalName-${index}`}>
-                                                      {section.source.tissue?.externalName}
-                                                    </label>
-                                                  );
-                                                })}
-                                              </div>
-                                            </TableCell>
-                                            <TableCell className="break-words align-top">
-                                              <div className="grid grid-cols-1">
-                                                {region.sectionGroups.map((section, index) => {
-                                                  return (
-                                                    <label className="py-1" key={`section-${index}`}>
-                                                      {section.source.newSection}
-                                                    </label>
-                                                  );
-                                                })}
-                                              </div>
-                                            </TableCell>
-                                            <TableCell>
-                                              <div className="grid grid-cols-1 text-wrap">
-                                                {region.sectionGroups.map((section, index) => {
-                                                  return (
-                                                    <label className="py-1" key={`addresses-${index}`}>
-                                                      {Array.from(section.addresses).join(', ')}
-                                                    </label>
-                                                  );
-                                                })}
-                                              </div>
-                                            </TableCell>
-                                          </tr>
-                                        ))}
-                                      </TableBody>
-                                    </Table>
+                                    <RegionsTable
+                                      labwareIndex={lwIndex}
+                                      onRoiBlur={async (barcode) => {
+                                        await setFieldValue('barcodeDisplayerProps', { barcode });
+                                      }}
+                                    />
                                   </div>
                                 </div>
                               </div>
