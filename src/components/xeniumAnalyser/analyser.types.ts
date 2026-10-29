@@ -32,6 +32,12 @@ export type AnalyserLabwareForm = {
   selectedAddresses?: Set<string>;
 };
 
+/** The form values that adding a scanned labware reads and updates */
+export type AnalyserScanFormValues = {
+  workNumberAll: string;
+  labware: Array<AnalyserLabwareForm>;
+};
+
 /** The form values the RegionDefiner component reads and updates */
 export type RegionDefinerFormValues = {
   runName: string;

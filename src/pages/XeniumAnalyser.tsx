@@ -1,4 +1,4 @@
-import React, { SetStateAction, useContext } from 'react';
+import React, { useContext } from 'react';
 import { StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
 import {
@@ -7,7 +7,6 @@ import {
   CassettePosition,
   EquipmentFieldsFragment,
   LabwareFieldsFragment,
-  LabwareFlaggedFieldsFragment,
   RecordAnalyserMutation
 } from '../types/sdk';
 import { useMachine } from '@xstate/react';
@@ -38,11 +37,11 @@ import WhiteButton from '../components/buttons/WhiteButton';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
 import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
-import { sectionGroupsBySample } from '../lib/helpers/labwareHelper';
 import Label from '../components/forms/Label';
 import Modal, { ModalBody, ModalFooter } from '../components/Modal';
 import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
 import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
+import { createTableDataForSlots } from '../components/xeniumAnalyser/analyserScan';
 import { AnalyserLabwareForm } from '../components/xeniumAnalyser/analyser.types';
 
 export type XeniumAnalyserFormValues = {
@@ -209,80 +208,6 @@ const XeniumAnalyser = () => {
       .min(1)
   });
 
-  /**
-   * Builds a list of labware regions.
-   * Initially, each section group is assigned to its own region.
-   */
-  const labwareRegions = React.useCallback((lw: LabwareFlaggedFieldsFragment) => {
-    const sectionGroups = sectionGroupsBySample(lw);
-    return Object.values(sectionGroups).map((sectionGroup, index) => ({
-      roi: sectionGroup.source.tissue?.externalName ?? `Region${index + 1}`,
-      sectionGroups: [sectionGroup]
-    }));
-  }, []);
-
-  /**This creates the slot related information for the labware */
-  const createTableDataForSlots = React.useCallback(
-    (
-      labware: LabwareFlaggedFieldsFragment,
-      setValues: (values: SetStateAction<XeniumAnalyserFormValues>, shouldValidate?: boolean) => {},
-      values: XeniumAnalyserFormValues
-    ) => {
-      const setLabwareSampleData = async (lw: LabwareFlaggedFieldsFragment) => {
-        try {
-          /**Check if the images were been uploaded to the sgp folder**/
-          const hasSgpNumberLink =
-            values.workNumberAll.length > 0 ? await hasUploadedFilesInSgpFolder(values.workNumberAll) : false;
-          /**Validate whether probe hybridisation has been recorded on this labware**/
-          const latestOp = await stanCore
-            .FindLatestOperation({ barcode: lw.barcode, operationType: 'Probe hybridisation Xenium' })
-            .then((res) => res.findLatestOp);
-          /**If probe hybridisation has been recorded, get the sample positions,otherwise return**/
-          if (latestOp) {
-            stanCore.GetAnalyserScanData({ barcode: labware.barcode }).then((res) => {
-              setValues((prev) => {
-                const analyserLabware: AnalyserLabwareForm | undefined = prev.labware.find(
-                  (lw) => lw.labware.barcode === labware.barcode
-                );
-                if (analyserLabware) {
-                  analyserLabware.analyserScanData = res.analyserScanData;
-                } else {
-                  prev.labware.push({
-                    labware,
-                    hybridisation: true,
-                    workNumber: values.workNumberAll,
-                    hasSgpNumberLink,
-                    position: undefined,
-                    regions: labwareRegions(labware),
-                    analyserScanData: res.analyserScanData
-                  });
-                }
-                return { ...prev };
-              });
-            });
-          } else {
-            setValues((prev) => {
-              prev.labware.push({
-                labware,
-                hybridisation: false,
-                workNumber: values.workNumberAll,
-                hasSgpNumberLink,
-                position: undefined,
-                regions: labwareRegions(labware)
-              });
-              return { ...prev };
-            });
-            return;
-          }
-        } catch (e) {
-          return;
-        }
-      };
-      setLabwareSampleData(labware);
-    },
-    [labwareRegions, stanCore]
-  );
-
   return (
     <AppShell>
       <AppShell.Header>
@@ -347,7 +272,7 @@ const XeniumAnalyser = () => {
                       limit={2}
                       onAdd={(labware) => {
                         /**If labware scanned not already displayed, add to list**/
-                        createTableDataForSlots(labware, setValues, values);
+                        createTableDataForSlots(stanCore, 'Probe hybridisation Xenium', labware, setValues, values);
                       }}
                       onRemove={async (labware) => {
                         await setValues((prev) => {
