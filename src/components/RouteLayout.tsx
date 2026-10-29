@@ -35,6 +35,7 @@ import VisiumPerm from '../pages/VisiumPerm';
 import VisiumAnalysis from '../pages/VisiumAnalysis';
 import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
 import XeniumAnalyser from '../pages/XeniumAnalyser';
+import AteraRun from '../pages/AteraRun';
 import CytAssist from '../pages/CytAssist';
 import Staining from '../pages/Staining';
 import ImagingQC from '../pages/ImagingQC';
@@ -310,6 +311,9 @@ const RouteLayout = () => {
             }}
             element={<XeniumAnalyser />}
           />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/lab/atera_run" element={<AteraRun />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/lab/xenium_metrics" element={<XeniumMetrics />} />
