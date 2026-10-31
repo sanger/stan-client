@@ -1,5 +1,6 @@
 import { assign, createMachine, fromPromise } from 'xstate';
 import {
+  UpdateWorkAteraStudyMutation,
   UpdateWorkDnapStudyMutation,
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumOriginalSamplesMutation,
@@ -67,6 +68,7 @@ export type WorkRowEvent =
   | { type: 'UPDATE_WORK_TYPES'; workTypes: string[] }
   | { type: 'UPDATE_DNAP_PROJECT'; ssStudyId: number }
   | { type: 'UPDATE_XENIUM_STUDY_ID'; ssStudyId: number }
+  | { type: 'UPDATE_ATERA_STUDY_ID'; ssStudyId: number }
   | { type: 'xstate.done.actor.updateWorkStatus'; output: UpdateWorkStatusMutation }
   | { type: 'xstate.done.actor.updateWorkNumBlocks'; output: UpdateWorkNumBlocksMutation }
   | { type: 'xstate.done.actor.updateWorkNumSlides'; output: UpdateWorkNumSlidesMutation }
@@ -76,6 +78,8 @@ export type WorkRowEvent =
   | { type: 'xstate.done.actor.updateWorkTypes'; output: UpdateWorkTypesMutation }
   | { type: 'xstate.done.actor.updateWorkDnapProject'; output: UpdateWorkDnapStudyMutation }
   | { type: 'xstate.error.actor.updateWorkDnapProject'; error: ClientError }
+  | { type: 'xstate.done.actor.updateWorkAteraStudyId'; output: UpdateWorkAteraStudyMutation }
+  | { type: 'xstate.error.actor.updateWorkAteraStudyId'; error: ClientError }
   | { type: 'xstate.done.actor.updateWorkXeniumStudyId'; output: UpdateWorkXeniumStudyMutation }
   | { type: 'xstate.error.actor.updateWorkXeniumStudyId'; error: ClientError }
   | { type: 'xstate.done.actor.updateWorkNumOriginalSamples'; output: UpdateWorkNumOriginalSamplesMutation }
@@ -119,7 +123,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_TREATMENT_TYPES: 'editTreatmentTypes',
             UPDATE_WORK_TYPES: 'updateWorkTypes',
             UPDATE_DNAP_PROJECT: 'updateDnapProject',
-            UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
+            UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId',
+            UPDATE_ATERA_STUDY_ID: 'updateWorkAteraStudyId'
           }
         },
         active: {
@@ -137,7 +142,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_TREATMENT_TYPES: 'editTreatmentTypes',
             UPDATE_WORK_TYPES: 'updateWorkTypes',
             UPDATE_DNAP_PROJECT: 'updateDnapProject',
-            UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
+            UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId',
+            UPDATE_ATERA_STUDY_ID: 'updateWorkAteraStudyId'
           }
         },
         paused: {
@@ -155,7 +161,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_TREATMENT_TYPES: 'editTreatmentTypes',
             UPDATE_WORK_TYPES: 'updateWorkTypes',
             UPDATE_DNAP_PROJECT: 'updateDnapProject',
-            UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId'
+            UPDATE_XENIUM_STUDY_ID: 'updateWorkXeniumStudyId',
+            UPDATE_ATERA_STUDY_ID: 'updateWorkAteraStudyId'
           }
         },
         completed: {
@@ -354,6 +361,32 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
               actions: 'assignServerError'
             }
           }
+        },
+        updateWorkAteraStudyId: {
+          invoke: {
+            src: fromPromise(({ input }) => {
+              if (input) return stanCore.UpdateWorkAteraStudy(input);
+              return Promise.reject();
+            }),
+            input: ({ context, event }) => {
+              if ('ssStudyId' in event) {
+                return {
+                  workNumber: context.workWithComment.work.workNumber,
+                  ssStudyId: event.ssStudyId
+                };
+              }
+              return undefined;
+            },
+            id: 'updateWorkAteraStudyId',
+            onDone: {
+              actions: 'assignWorkAteraStudyId',
+              target: 'deciding'
+            },
+            onError: {
+              target: 'deciding',
+              actions: 'assignServerError'
+            }
+          }
         }
       }
     },
@@ -433,6 +466,15 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             draft.isInvokeActorDone = true;
           });
         }),
+        assignWorkAteraStudyId: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateWorkAteraStudyId') return context;
+          return produce(context, (draft) => {
+            draft.workWithComment.work = event.output.updateWorkAteraStudy;
+            draft.serverSuccess =
+              'Atera study successfully updated to ' + event.output.updateWorkAteraStudy.ateraStudy!.name;
+            draft.isInvokeActorDone = true;
+          });
+        }),
         toggleEditMode: assign(({ context, event }) => {
           return { ...context, editModeEnabled: !context.editModeEnabled };
         }),
@@ -440,6 +482,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
           if (
             event.type === 'xstate.error.actor.updateWorkDnapProject' ||
             event.type === 'xstate.error.actor.updateWorkXeniumStudyId' ||
+            event.type === 'xstate.error.actor.updateWorkAteraStudyId' ||
             event.type === 'xstate.error.actor.updateWorkTypes'
           )
             return { ...context, serverErrors: castDraft(event.error) };
