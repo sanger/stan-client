@@ -5,6 +5,7 @@ import {
   GetAnalyserScanDataQueryVariables
 } from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
+import { shouldOptionsHaveLength } from '../shared/customReactSelect.cy';
 
 describe('Atera Run', () => {
   before(() => {
@@ -14,6 +15,9 @@ describe('Atera Run', () => {
   describe('On load', () => {
     it('displays the correct title', () => {
       cy.get('h1').should('have.text', 'Atera Run');
+    });
+    it('does not display the run details', () => {
+      cy.findByText('Run Details').should('not.exist');
     });
   });
 
@@ -97,6 +101,34 @@ describe('Atera Run', () => {
     });
     it('enables labware scanning', () => {
       cy.get('#labwareScanInput').should('be.enabled');
+    });
+  });
+
+  describe('Run details', () => {
+    it('displays the run details fields', () => {
+      cy.findByText('Run Details').should('be.visible');
+      ['performed', 'equipmentId', 'workNumberAll', 'runName', 'is-repeat-run', 'workTypeCommentId'].forEach(
+        (testId) => {
+          cy.findByTestId(testId).should('exist');
+        }
+      );
+    });
+    it('offers only the Atera equipment', () => {
+      shouldOptionsHaveLength('equipmentId', 3);
+      cy.findByTestId('equipmentId').within(() => {
+        cy.findByText('Atera 1').should('exist');
+        cy.findByText('Atera 2').should('exist');
+      });
+    });
+    it('offers the four run worktypes', () => {
+      shouldOptionsHaveLength('workTypeCommentId', 5);
+      cy.findByTestId('workTypeCommentId').within(() => {
+        ['Atera WTA 4 slides', 'Atera WTA 2 slides', 'Atera Select 2 slides', 'Atera Select 4 slides'].forEach(
+          (workType) => {
+            cy.findByText(workType).should('exist');
+          }
+        );
+      });
     });
   });
 });
