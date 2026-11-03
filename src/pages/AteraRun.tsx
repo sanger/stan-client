@@ -21,13 +21,22 @@ import CustomReactSelect from '../components/forms/CustomReactSelect';
 import { selectOptionValues } from '../components/forms';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
-import { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
+import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
+import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
 import { createTableDataForSlots } from '../components/xeniumAnalyser/analyserScan';
 import { AnalyserLabwareForm } from '../components/xeniumAnalyser/analyser.types';
+import Modal, { ModalBody, ModalFooter } from '../components/Modal';
+import BlueButton from '../components/buttons/BlueButton';
+import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
 
 type LoaderData = {
   equipments: Array<EquipmentFieldsFragment>;
   workTypes: Array<CommentFieldsFragment>;
+};
+
+type BarcodeDisplayerProps = {
+  barcode: string;
+  warningMessage?: string;
 };
 
 export type AteraRunFormValues = {
@@ -37,7 +46,12 @@ export type AteraRunFormValues = {
   runName: string;
   repeat: boolean;
   workNumberAll: string;
+  /**
+   * The index of the labware whose regions the RegionDefiner is open for, or -1 when it is closed.
+   */
+  activeRegionDefinerLabwareIndex: number;
   labware: Array<AnalyserLabwareForm>;
+  barcodeDisplayerProps?: BarcodeDisplayerProps;
 };
 
 const formInitialValues: AteraRunFormValues = {
@@ -47,6 +61,7 @@ const formInitialValues: AteraRunFormValues = {
   runName: '',
   repeat: false,
   workNumberAll: '',
+  activeRegionDefinerLabwareIndex: -1,
   labware: []
 };
 
@@ -103,7 +118,32 @@ const AteraRun = () => {
       .required()
       .label('Run Name')
       .max(32, 'Run name should be a string of maximum length 32')
-      .matches(/^[A-Za-z0-9_\- ]+$/, 'Run name should only contain letters, numbers, underscores, hyphens and spaces')
+      .matches(/^[A-Za-z0-9_\- ]+$/, 'Run name should only contain letters, numbers, underscores, hyphens and spaces'),
+    activeRegionDefinerLabwareIndex: Yup.number(),
+    labware: Yup.array()
+      .of(
+        Yup.object().shape({
+          hybridisation: Yup.boolean(),
+          workNumber: Yup.string().required().label('SGP Number'),
+          selectedRegionColorIndex: Yup.number(),
+          selectedAddresses: Yup.array(),
+          regions: Yup.array()
+            .of(
+              Yup.object().shape({
+                roi: Yup.string()
+                  .required('Region of interest is a required field')
+                  .label('ROI')
+                  .max(64, 'Region of interest field should be string of maximum length 64'),
+                sectionGroups: Yup.array().min(1).required('At least one section group per region'),
+                colorIndexNumber: Yup.number()
+              })
+            )
+            .required()
+            .min(1)
+        })
+      )
+      .required()
+      .min(1)
   });
 
   return (
@@ -119,7 +159,7 @@ const AteraRun = () => {
               validationSchema={validationSchema}
               onSubmit={() => {}}
             >
-              {({ values, setValues }) => (
+              {({ values, setValues, setFieldValue }) => (
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
                     <Heading level={3}>Labware</Heading>
@@ -158,88 +198,136 @@ const AteraRun = () => {
                     </LabwareScanner>
                   </motion.div>
                   {values.labware.length > 0 && values.labware.some((lw) => lw.hybridisation) && (
-                    <motion.div variants={variants.fadeInWithLift} className="space-y-4 py-4">
-                      <Heading level={3}>Run Details</Heading>
-                      <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
-                        <div className={'flex flex-col'}>
-                          <FormikInput
-                            label={'Time'}
-                            data-testid={'performed'}
-                            type="datetime-local"
-                            name={'performed'}
-                          />
-                        </div>
-                        <div className={'flex flex-col'}>
-                          <CustomReactSelect
-                            label={'Equipment'}
-                            options={selectOptionValues(equipments, 'name', 'id')}
-                            name="equipmentId"
-                            dataTestId="equipmentId"
-                            emptyOption={true}
-                          />
-                        </div>
-                        <div className={'flex flex-col'}>
-                          <WorkNumberSelect
-                            label={'SGP Number'}
-                            name={'workNumberAll'}
-                            dataTestId={'workNumberAll'}
-                            onWorkNumberChange={async (_workNumber) => {
-                              const workNumber = _workNumber.trim();
-                              const hasSgpNumberLink =
-                                workNumber.length > 0 ? await hasUploadedFilesInSgpFolder(workNumber) : false;
-                              await setValues((prev) => {
-                                return {
-                                  ...prev,
-                                  workNumberAll: workNumber,
-                                  labware: prev.labware.map((lw) => ({
-                                    ...lw,
-                                    workNumber,
-                                    hasSgpNumberLink,
-                                    regions: reIndexAndRenameRegions(lw.regions, prev.runName, lw.labware.barcode)
-                                  }))
-                                };
-                              });
-                            }}
-                            requiredField={false}
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
-                        <div className="flex flex-row">
-                          <div className="w-1/2">
+                    <>
+                      <motion.div variants={variants.fadeInWithLift} className="space-y-4 py-4">
+                        <Heading level={3}>Run Details</Heading>
+                        <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
+                          <div className={'flex flex-col'}>
                             <FormikInput
-                              label={'Run Name'}
-                              data-testid={'runName'}
-                              type="text"
-                              name={'runName'}
-                              onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                                const runName = e.target.value;
-                                await setValues((prev) => ({
-                                  ...prev,
-                                  runName,
-                                  labware: prev.labware.map((lw) => ({
-                                    ...lw,
-                                    regions: reIndexAndRenameRegions(lw.regions, runName, lw.labware.barcode)
-                                  }))
-                                }));
-                              }}
+                              label={'Time'}
+                              data-testid={'performed'}
+                              type="datetime-local"
+                              name={'performed'}
                             />
                           </div>
-                          <div>
-                            <FormikCheckbox name="repeat" dataTestId="is-repeat-run" label="Is a repeat run" />
+                          <div className={'flex flex-col'}>
+                            <CustomReactSelect
+                              label={'Equipment'}
+                              options={selectOptionValues(equipments, 'name', 'id')}
+                              name="equipmentId"
+                              dataTestId="equipmentId"
+                              emptyOption={true}
+                            />
+                          </div>
+                          <div className={'flex flex-col'}>
+                            <WorkNumberSelect
+                              label={'SGP Number'}
+                              name={'workNumberAll'}
+                              dataTestId={'workNumberAll'}
+                              onWorkNumberChange={async (_workNumber) => {
+                                const workNumber = _workNumber.trim();
+                                const hasSgpNumberLink =
+                                  workNumber.length > 0 ? await hasUploadedFilesInSgpFolder(workNumber) : false;
+                                await setValues((prev) => {
+                                  return {
+                                    ...prev,
+                                    workNumberAll: workNumber,
+                                    labware: prev.labware.map((lw) => ({
+                                      ...lw,
+                                      workNumber,
+                                      hasSgpNumberLink,
+                                      regions: reIndexAndRenameRegions(lw.regions, prev.runName, lw.labware.barcode)
+                                    }))
+                                  };
+                                });
+                              }}
+                              requiredField={false}
+                            />
                           </div>
                         </div>
-                        <div className={'flex flex-col'}>
-                          <CustomReactSelect
-                            label={'Run Worktype'}
-                            options={selectOptionValues(workTypes, 'text', 'id')}
-                            name="workTypeCommentId"
-                            dataTestId="workTypeCommentId"
-                            emptyOption={true}
-                          />
+                        <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
+                          <div className="flex flex-row">
+                            <div className="w-1/2">
+                              <FormikInput
+                                label={'Run Name'}
+                                data-testid={'runName'}
+                                type="text"
+                                name={'runName'}
+                                onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                  const runName = e.target.value;
+                                  await setValues((prev) => ({
+                                    ...prev,
+                                    runName,
+                                    labware: prev.labware.map((lw) => ({
+                                      ...lw,
+                                      regions: reIndexAndRenameRegions(lw.regions, runName, lw.labware.barcode)
+                                    }))
+                                  }));
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <FormikCheckbox name="repeat" dataTestId="is-repeat-run" label="Is a repeat run" />
+                            </div>
+                          </div>
+                          <div className={'flex flex-col'}>
+                            <CustomReactSelect
+                              label={'Run Worktype'}
+                              options={selectOptionValues(workTypes, 'text', 'id')}
+                              name="workTypeCommentId"
+                              dataTestId="workTypeCommentId"
+                              emptyOption={true}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
+                      </motion.div>
+                      {values.labware
+                        .map((lw, lwIndex) => ({ lw, lwIndex }))
+                        .filter(({ lw }) => lw.hybridisation)
+                        .map(({ lw, lwIndex }) => (
+                          <motion.div variants={variants.fadeInWithLift} className="mt-4" key={lw.labware.barcode}>
+                            <AnalyserLabwarePanel
+                              labwareIndex={lwIndex}
+                              onDefineRegions={async () => {
+                                await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
+                              }}
+                              onRoiBlur={async (barcode) => {
+                                await setFieldValue('barcodeDisplayerProps', { barcode });
+                              }}
+                            />
+                          </motion.div>
+                        ))}
+                      <Modal show={values.activeRegionDefinerLabwareIndex > -1}>
+                        <ModalBody>
+                          <RegionDefiner labwareIndex={values.activeRegionDefinerLabwareIndex} />
+                        </ModalBody>
+                        <ModalFooter>
+                          <BlueButton
+                            type="button"
+                            className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+                            onClick={async () => {
+                              await setFieldValue('activeRegionDefinerLabwareIndex', -1);
+                            }}
+                          >
+                            Done
+                          </BlueButton>
+                        </ModalFooter>
+                      </Modal>
+                    </>
+                  )}
+                  {values.barcodeDisplayerProps && (
+                    <BarcodeDisplayer
+                      barcode={values.barcodeDisplayerProps.barcode}
+                      warningMessage={values.barcodeDisplayerProps.warningMessage}
+                      header={'Scan the region barcode into your machine'}
+                      show={true}
+                      onClose={async () => {
+                        await setValues((prev) => ({
+                          ...prev,
+                          barcodeDisplayerProps: undefined
+                        }));
+                      }}
+                    />
                   )}
                 </Form>
               )}
