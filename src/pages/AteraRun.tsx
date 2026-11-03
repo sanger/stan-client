@@ -1,6 +1,9 @@
 import React, { useContext } from 'react';
 import { Form, Formik } from 'formik';
+import * as Yup from 'yup';
+import { useLoaderData } from 'react-router-dom';
 import { StanCoreContext } from '../lib/sdk';
+import { CommentFieldsFragment, EquipmentFieldsFragment } from '../types/sdk';
 import AppShell from '../components/AppShell';
 import Warning from '../components/notifications/Warning';
 import { motion } from '../dependencies/motion';
@@ -13,15 +16,36 @@ import RemoveButton from '../components/buttons/RemoveButton';
 import PassIcon from '../components/icons/PassIcon';
 import FailIcon from '../components/icons/FailIcon';
 import Panel from '../components/Panel';
+import FormikInput, { FormikCheckbox } from '../components/forms/Input';
+import CustomReactSelect from '../components/forms/CustomReactSelect';
+import { selectOptionValues } from '../components/forms';
+import WorkNumberSelect from '../components/WorkNumberSelect';
+import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
+import { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
 import { createTableDataForSlots } from '../components/xeniumAnalyser/analyserScan';
 import { AnalyserLabwareForm } from '../components/xeniumAnalyser/analyser.types';
 
+type LoaderData = {
+  equipments: Array<EquipmentFieldsFragment>;
+  workTypes: Array<CommentFieldsFragment>;
+};
+
 export type AteraRunFormValues = {
+  performed: string;
+  equipmentId: number | undefined;
+  workTypeCommentId: number | undefined;
+  runName: string;
+  repeat: boolean;
   workNumberAll: string;
   labware: Array<AnalyserLabwareForm>;
 };
 
 const formInitialValues: AteraRunFormValues = {
+  performed: '',
+  equipmentId: undefined,
+  workTypeCommentId: undefined,
+  runName: '',
+  repeat: false,
   workNumberAll: '',
   labware: []
 };
@@ -68,7 +92,19 @@ const LabwareAteraRunTable = (labwareForm: AnalyserLabwareForm) => {
 };
 
 const AteraRun = () => {
+  const { equipments, workTypes } = useLoaderData() as LoaderData;
   const stanCore = useContext(StanCoreContext);
+  const validationSchema = Yup.object().shape({
+    performed: Yup.date().required('Time is a required field').label('Time'),
+    equipmentId: Yup.number().required('Equipment is a required field').label('Equipment'),
+    workTypeCommentId: Yup.number().required('Run worktype is a required field').label('Run worktype'),
+    runName: Yup.string()
+      .trim()
+      .required()
+      .label('Run Name')
+      .max(32, 'Run name should be a string of maximum length 32')
+      .matches(/^[A-Za-z0-9_\- ]+$/, 'Run name should only contain letters, numbers, underscores, hyphens and spaces')
+  });
 
   return (
     <AppShell>
@@ -78,7 +114,11 @@ const AteraRun = () => {
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           <div className={'flex flex-col space-y-6'}>
-            <Formik<AteraRunFormValues> initialValues={formInitialValues} onSubmit={() => {}}>
+            <Formik<AteraRunFormValues>
+              initialValues={formInitialValues}
+              validationSchema={validationSchema}
+              onSubmit={() => {}}
+            >
               {({ values, setValues }) => (
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
@@ -117,6 +157,90 @@ const AteraRun = () => {
                       }
                     </LabwareScanner>
                   </motion.div>
+                  {values.labware.length > 0 && values.labware.some((lw) => lw.hybridisation) && (
+                    <motion.div variants={variants.fadeInWithLift} className="space-y-4 py-4">
+                      <Heading level={3}>Run Details</Heading>
+                      <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
+                        <div className={'flex flex-col'}>
+                          <FormikInput
+                            label={'Time'}
+                            data-testid={'performed'}
+                            type="datetime-local"
+                            name={'performed'}
+                          />
+                        </div>
+                        <div className={'flex flex-col'}>
+                          <CustomReactSelect
+                            label={'Equipment'}
+                            options={selectOptionValues(equipments, 'name', 'id')}
+                            name="equipmentId"
+                            dataTestId="equipmentId"
+                            emptyOption={true}
+                          />
+                        </div>
+                        <div className={'flex flex-col'}>
+                          <WorkNumberSelect
+                            label={'SGP Number'}
+                            name={'workNumberAll'}
+                            dataTestId={'workNumberAll'}
+                            onWorkNumberChange={async (_workNumber) => {
+                              const workNumber = _workNumber.trim();
+                              const hasSgpNumberLink =
+                                workNumber.length > 0 ? await hasUploadedFilesInSgpFolder(workNumber) : false;
+                              await setValues((prev) => {
+                                return {
+                                  ...prev,
+                                  workNumberAll: workNumber,
+                                  labware: prev.labware.map((lw) => ({
+                                    ...lw,
+                                    workNumber,
+                                    hasSgpNumberLink,
+                                    regions: reIndexAndRenameRegions(lw.regions, prev.runName, lw.labware.barcode)
+                                  }))
+                                };
+                              });
+                            }}
+                            requiredField={false}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
+                        <div className="flex flex-row">
+                          <div className="w-1/2">
+                            <FormikInput
+                              label={'Run Name'}
+                              data-testid={'runName'}
+                              type="text"
+                              name={'runName'}
+                              onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                const runName = e.target.value;
+                                await setValues((prev) => ({
+                                  ...prev,
+                                  runName,
+                                  labware: prev.labware.map((lw) => ({
+                                    ...lw,
+                                    regions: reIndexAndRenameRegions(lw.regions, runName, lw.labware.barcode)
+                                  }))
+                                }));
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <FormikCheckbox name="repeat" dataTestId="is-repeat-run" label="Is a repeat run" />
+                          </div>
+                        </div>
+                        <div className={'flex flex-col'}>
+                          <CustomReactSelect
+                            label={'Run Worktype'}
+                            options={selectOptionValues(workTypes, 'text', 'id')}
+                            name="workTypeCommentId"
+                            dataTestId="workTypeCommentId"
+                            emptyOption={true}
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </Form>
               )}
             </Formik>

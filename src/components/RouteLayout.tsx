@@ -313,7 +313,20 @@ const RouteLayout = () => {
           />
         </Route>
         <Route element={<AuthLayout />}>
-          <Route path="/lab/atera_run" element={<AteraRun />} />
+          <Route
+            path="/lab/atera_run"
+            loader={async () => {
+              const [equipments, workTypes] = await Promise.all([
+                stanCore.GetEquipments({ category: 'atera' }),
+                stanCore.GetComments({ commentCategory: 'Atera run work type', includeDisabled: false })
+              ]);
+              return {
+                equipments: equipments.equipments,
+                workTypes: workTypes.comments
+              };
+            }}
+            element={<AteraRun />}
+          />
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/lab/xenium_metrics" element={<XeniumMetrics />} />
