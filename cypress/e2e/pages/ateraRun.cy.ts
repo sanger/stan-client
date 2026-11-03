@@ -5,7 +5,7 @@ import {
   GetAnalyserScanDataQueryVariables
 } from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
-import { shouldOptionsHaveLength } from '../shared/customReactSelect.cy';
+import { selectOption, shouldDisplaySelectedValue, shouldOptionsHaveLength } from '../shared/customReactSelect.cy';
 
 describe('Atera Run', () => {
   before(() => {
@@ -128,6 +128,60 @@ describe('Atera Run', () => {
             cy.findByText(workType).should('exist');
           }
         );
+      });
+    });
+  });
+
+  describe('Labware details', () => {
+    it('displays the SGP number and regions only for the labware with probe hybridisation Atera', () => {
+      ['STAN-0612', 'STAN-0613'].forEach((barcode) => {
+        cy.findByTestId(`${barcode}-workNumber`).should('exist');
+        cy.findByTestId(`${barcode}-regions-table`).should('exist');
+      });
+      cy.findByTestId('STAN-0611-workNumber').should('not.exist');
+      cy.findByTestId('STAN-0611-regions-table').should('not.exist');
+    });
+
+    context('when an SGP number is selected for all labware', () => {
+      before(() => {
+        selectOption('workNumberAll', 'SGP1008');
+      });
+      it('sets the SGP number of each labware', () => {
+        shouldDisplaySelectedValue('STAN-0612-workNumber', 'SGP1008');
+        shouldDisplaySelectedValue('STAN-0613-workNumber', 'SGP1008');
+      });
+    });
+
+    context('when a region of interest is set', () => {
+      before(() => {
+        // Dismiss any open react-select/menu overlays before typing in.
+        cy.get('body').click(0, 0);
+        cy.findByTestId('STAN-0612-0-roi')
+          .scrollIntoView()
+          .clear({ force: true })
+          .type('123456789', { force: true })
+          .blur();
+      });
+      after(() => {
+        cy.findByTestId('closeBarcodeDisplayer').click();
+      });
+      it('displays the region barcode to scan into the machine', () => {
+        cy.findByText('Scan the region barcode into your machine').should('be.visible');
+        cy.findByTestId('2d-barcode').contains('123456789');
+      });
+    });
+
+    context('when Define Regions is clicked', () => {
+      before(() => {
+        cy.findAllByTestId('define-regions-button').eq(1).click();
+      });
+      it('opens one region definer', () => {
+        cy.findAllByRole('dialog').should('have.length', 1);
+        cy.findByText('Set Regions').should('be.visible');
+      });
+      it('closes it when Done is clicked', () => {
+        cy.findByRole('button', { name: 'Done' }).click();
+        cy.findByRole('dialog').should('not.exist');
       });
     });
   });
