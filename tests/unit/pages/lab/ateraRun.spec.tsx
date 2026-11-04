@@ -40,6 +40,13 @@ const pasteRunName = async (runName: string) => {
   await userEvent.tab();
 };
 
+//Replaces the run name in one change, as each change validates and renders the whole page
+const replaceRunName = async (runName: string) => {
+  await userEvent.tripleClick(screen.getByTestId('runName'));
+  await userEvent.paste(runName);
+  await userEvent.tab();
+};
+
 describe('Atera Run', () => {
   describe('Run name', () => {
     beforeEach(async () => {
@@ -61,26 +68,26 @@ describe('Atera Run', () => {
     it('shows an error when it is longer than 32 characters, and not when it is 32', async () => {
       await pasteRunName('a'.repeat(33));
       expect(await screen.findByText(TOO_LONG_MESSAGE)).toBeVisible();
-      await userEvent.clear(screen.getByTestId('runName'));
-      await screen.findByText(REQUIRED_MESSAGE);
-      await pasteRunName('a'.repeat(32));
-      await waitFor(() => expect(screen.queryByText(REQUIRED_MESSAGE)).not.toBeInTheDocument());
-      expect(screen.queryByText(TOO_LONG_MESSAGE)).not.toBeInTheDocument();
+      await replaceRunName('a'.repeat(32));
+      await waitFor(() => expect(screen.queryByText(TOO_LONG_MESSAGE)).not.toBeInTheDocument());
     });
 
     it('shows an error when it contains other characters than letters, numbers, underscores, hyphens and spaces', async () => {
-      await typeRunName('run/1');
+      await pasteRunName('run/1');
       expect(await screen.findByText(INVALID_CHARACTERS_MESSAGE)).toBeVisible();
     });
 
-    it('accepts letters, numbers, underscores, hyphens and spaces, keeping the spaces as typed', async () => {
-      await typeRunName('run/1');
+    it('accepts letters, numbers, underscores, hyphens and spaces', async () => {
+      await pasteRunName('run/1');
       await screen.findByText(INVALID_CHARACTERS_MESSAGE);
-      await userEvent.clear(screen.getByTestId('runName'));
-      await screen.findByText(REQUIRED_MESSAGE);
-      await typeRunName('Run_1-a b');
-      await waitFor(() => expect(screen.queryByText(REQUIRED_MESSAGE)).not.toBeInTheDocument());
-      expect(screen.queryByText(INVALID_CHARACTERS_MESSAGE)).not.toBeInTheDocument();
+      await replaceRunName('Run_1-a b');
+      await waitFor(() => expect(screen.queryByText(INVALID_CHARACTERS_MESSAGE)).not.toBeInTheDocument());
+    });
+
+    it('keeps a space typed at the end of the run name', async () => {
+      await pasteRunName('Run_1-a');
+      //Type the space, as that is where trimming on each key would lose it
+      await typeRunName(' b');
       expect(screen.getByTestId('runName')).toHaveValue('Run_1-a b');
     });
   });
