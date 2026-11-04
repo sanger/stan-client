@@ -35,6 +35,7 @@ import VisiumPerm from '../pages/VisiumPerm';
 import VisiumAnalysis from '../pages/VisiumAnalysis';
 import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
 import XeniumAnalyser from '../pages/XeniumAnalyser';
+import AteraRun from '../pages/AteraRun';
 import CytAssist from '../pages/CytAssist';
 import Staining from '../pages/Staining';
 import ImagingQC from '../pages/ImagingQC';
@@ -309,6 +310,22 @@ const RouteLayout = () => {
               return res.equipments;
             }}
             element={<XeniumAnalyser />}
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/atera_run"
+            loader={async () => {
+              const [equipments, workTypes] = await Promise.all([
+                stanCore.GetEquipments({ category: 'atera' }),
+                stanCore.GetComments({ commentCategory: 'Atera run work type', includeDisabled: false })
+              ]);
+              return {
+                equipments: equipments.equipments,
+                workTypes: workTypes.comments
+              };
+            }}
+            element={<AteraRun />}
           />
         </Route>
         <Route element={<AuthLayout />}>
