@@ -45,7 +45,7 @@ const Table: React.FC<TableProps> = ({ children, tableClassName, isFixed, ...res
   const fixedClassNames = isFixed ? 'table-fixed w-full' : 'min-w-full';
 
   return (
-    <div className={'flex flex-col overflow-auto max-h-screen' + tableClassName} datatype="table-wrapper">
+    <div className={`flex flex-col overflow-auto max-h-screen ${tableClassName}`} datatype="table-wrapper">
       <div className="py-2 align-middle inline-block min-w-full">
         <div className="shadow-md border-b border-gray-200 sm:rounded-lg">
           <table className={`divide-y divide-gray-200 ${fixedClassNames}`} {...rest}>
