@@ -133,7 +133,9 @@ export type AnalyserLabware = {
   barcode: Scalars['String']['input'];
   /** Decoding consumables lot number. */
   decodingConsumablesLot?: InputMaybe<Scalars['String']['input']>;
-  /** The cassette position for the labware. Required for Xenium analyser; not used for Atera run. */
+  /** The index of the cassette in the machine. */
+  index?: InputMaybe<Scalars['Int']['input']>;
+  /** The cassette position for the labware. */
   position?: InputMaybe<CassettePosition>;
   /** The sample regions of interest in this labware. */
   samples: Array<SampleRoi>;
