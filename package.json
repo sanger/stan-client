@@ -78,7 +78,7 @@
     "build-storybook": "export SET NODE_OPTIONS=--openssl-legacy-provider  && sb build -s public",
     "deploy-storybook": "storybook-to-ghpages",
     "format": "prettier --write .",
-    "lint": "npx eslint . --ext .ts,.tsx,.graphql"
+    "lint": "npx eslint . --ext .ts,.tsx"
   },
   "eslintConfig": {
     "extends": "react-app"
