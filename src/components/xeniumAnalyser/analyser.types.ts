@@ -13,6 +13,8 @@ export type AnalyserLabwareForm = {
   workNumber: string;
   hasSgpNumberLink?: boolean;
   position?: CassettePosition;
+  /** Atera's cassette position (1 to 4); Xenium uses position instead */
+  index?: number;
   regions: Array<Region>;
   analyserScanData?: AnalyserScanDataFieldsFragment;
   /**

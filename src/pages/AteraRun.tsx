@@ -65,6 +65,9 @@ const formInitialValues: AteraRunFormValues = {
   labware: []
 };
 
+/**The Atera cassette dock has four positions, numbered from the left**/
+const ateraCassettePositions = [1, 2, 3, 4];
+
 const LabwareAteraRunTable = (labwareForm: AnalyserLabwareForm) => {
   const samples = samplesFromLabwareOrSLot(labwareForm.labware);
   const scanData = labwareForm.analyserScanData;
@@ -125,6 +128,15 @@ const AteraRun = () => {
         Yup.object().shape({
           hybridisation: Yup.boolean(),
           workNumber: Yup.string().required().label('SGP Number'),
+          index: Yup.number()
+            .required('Cassette Position is a required field')
+            .test('unique', 'Cassette Position is used by more than one slide', (index, context) => {
+              if (context.from && context.from.length > 1) {
+                const values = context.from[1].value as AteraRunFormValues;
+                return values.labware.filter((lw) => lw.index === index).length < 2;
+              }
+              return true;
+            }),
           selectedRegionColorIndex: Yup.number(),
           selectedAddresses: Yup.array(),
           regions: Yup.array()
@@ -294,7 +306,20 @@ const AteraRun = () => {
                               onRoiBlur={async (barcode) => {
                                 await setFieldValue('barcodeDisplayerProps', { barcode });
                               }}
-                            />
+                            >
+                              <div>
+                                <label>Cassette Position</label>
+                                <CustomReactSelect
+                                  options={ateraCassettePositions.map((position) => ({
+                                    value: String(position),
+                                    label: String(position)
+                                  }))}
+                                  name={`labware.${lwIndex}.index`}
+                                  dataTestId={`${lw.labware.barcode}-position`}
+                                  valueAsNumber={true}
+                                />
+                              </div>
+                            </AnalyserLabwarePanel>
                           </motion.div>
                         ))}
                       <Modal show={values.activeRegionDefinerLabwareIndex > -1}>
