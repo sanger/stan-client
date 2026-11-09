@@ -184,5 +184,35 @@ describe('Atera Run', () => {
         cy.findByRole('dialog').should('not.exist');
       });
     });
+
+    context('Cassette position', () => {
+      it('offers the positions 1 to 4', () => {
+        shouldOptionsHaveLength('STAN-0612-position', 4);
+        // Close the menu before the next test.
+        cy.get('body').click(0, 0);
+      });
+
+      context('when two labware have the same position', () => {
+        before(() => {
+          selectOption('STAN-0612-position', '1');
+          selectOption('STAN-0613-position', '1');
+          // Leave the select, so it shows its error.
+          cy.get('body').click(0, 0);
+        });
+        it('shows an error on both', () => {
+          cy.findAllByText('Cassette Position is used by more than one slide').should('have.length', 2);
+        });
+      });
+
+      context('when one of them is changed', () => {
+        before(() => {
+          selectOption('STAN-0613-position', '2');
+          cy.get('body').click(0, 0);
+        });
+        it('no longer shows the error', () => {
+          cy.findByText('Cassette Position is used by more than one slide').should('not.exist');
+        });
+      });
+    });
   });
 });

@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import AteraRun from '../../../../src/pages/AteraRun';
-import { scanLabware } from '../../../generic/utilities';
+import { scanLabware, selectFocusBlur } from '../../../generic/utilities';
 import { enableMapSet } from 'immer';
 
 beforeEach(() => {
@@ -48,17 +48,24 @@ const replaceRunName = async (runName: string) => {
 };
 
 describe('Atera Run', () => {
-  describe('Run name', () => {
-    beforeEach(async () => {
-      render(
-        <BrowserRouter>
-          <AteraRun />
-        </BrowserRouter>
-      );
-      await scanLabware('STAN-011');
-      await screen.findByText('Run Details');
-    });
+  beforeEach(async () => {
+    render(
+      <BrowserRouter>
+        <AteraRun />
+      </BrowserRouter>
+    );
+    await scanLabware('STAN-011');
+    await screen.findByText('Run Details');
+  });
 
+  describe('Cassette position', () => {
+    it('is required', async () => {
+      await selectFocusBlur('STAN-011-position');
+      expect(await screen.findByText('Cassette Position is a required field')).toBeVisible();
+    });
+  });
+
+  describe('Run name', () => {
     it('is required', async () => {
       await userEvent.click(screen.getByTestId('runName'));
       await userEvent.tab();
