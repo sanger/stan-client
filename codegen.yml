@@ -6,15 +6,11 @@ config:
     Address: string
     Timestamp: string
     Date: string
-  sort: true
   arrayInputCoercion: false
 
 generates:
   src/types/sdk.ts:
-    plugins:
-      - 'typescript'
-      - 'typescript-operations'
-      - 'typescript-graphql-request'
+    plugins: ['typescript-operations']
     config:
       gqlImport: graphql-request#gql
       dedupeFragments: true
