@@ -16,7 +16,7 @@ const shouldDrawSlideWithA1AndBarcodeAtTheBottom = (barcode: string) => {
       .last()
       .should('have.attr', 'data-testid', 'slot-wrapper-A1')
       .then(($a1) => {
-        cy.contains(barcode).should(($barcode) => {
+        cy.contains<HTMLElement>(barcode).should(($barcode) => {
           expect($barcode[0].getBoundingClientRect().top).to.be.at.least($a1[0].getBoundingClientRect().bottom);
         });
       });
