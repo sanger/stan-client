@@ -275,27 +275,38 @@ describe('Atera Run', () => {
     });
 
     context('when there is a server error', () => {
+      let request: AnalyserRequest | undefined;
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>('RecordAnalyser', () => {
-              return HttpResponse.json({
-                errors: [
-                  {
-                    message: 'Exception while fetching data (/recordAnalyser) : The operation could not be validated.',
-                    extensions: {
-                      problems: ['Run name already used: "Run 123"']
+            graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>(
+              'RecordAnalyser',
+              ({ variables }) => {
+                request = variables.request;
+                return HttpResponse.json({
+                  errors: [
+                    {
+                      message:
+                        'Exception while fetching data (/recordAnalyser) : The operation could not be validated.',
+                      extensions: {
+                        problems: ['Run name already used: "Run 123"']
+                      }
                     }
-                  }
-                ]
-              });
-            })
+                  ]
+                });
+              }
+            )
           );
         });
         cy.findByRole('button', { name: 'Save' }).click();
       });
       it('shows the error', () => {
         cy.findByTextContent('Run name already used: "Run 123"').should('be.visible');
+      });
+      it('sends repeat as false, as Is a repeat run is not ticked', () => {
+        cy.wrap(null).should(() => {
+          expect(request).to.include({ repeat: false });
+        });
       });
     });
 
@@ -313,18 +324,20 @@ describe('Atera Run', () => {
             )
           );
         });
+        //Ticked only for this save, so it records a repeat run
+        cy.findByTestId('is-repeat-run').check();
         cy.findByRole('button', { name: 'Save' }).click();
       });
       it('shows a success message', () => {
         cy.findByText('Atera run recorded on all labware').should('be.visible');
       });
-      it('records an Atera run with the run details, the run name trimmed and no lots', () => {
+      it('records a repeat Atera run with the run details, the run name trimmed and no lots', () => {
         cy.wrap(null).should(() => {
           expect(request).to.include({
             operationType: 'Atera run',
             performed: '2020-01-01 10:00:00',
             runName: 'Run 123',
-            repeat: false
+            repeat: true
           });
           expect(request!.equipmentId).to.be.a('number');
           expect(request!.workTypeCommentId).to.be.a('number');
