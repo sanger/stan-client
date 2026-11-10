@@ -58,6 +58,12 @@ describe('Atera Run', () => {
     await screen.findByText('Run Details');
   });
 
+  describe('Slide count', () => {
+    it('warns when the run has 1 slide, without stopping the run', async () => {
+      expect(await screen.findByText('This run has 1 slide. Atera runs usually have 2 or 4.')).toBeVisible();
+    });
+  });
+
   describe('Cassette position', () => {
     it('is required', async () => {
       await selectFocusBlur('STAN-011-position');

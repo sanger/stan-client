@@ -80,6 +80,9 @@ describe('Atera Run', () => {
       cy.findAllByTestId('passIcon').should('have.length', 1);
       cy.findAllByTestId('failIcon').should('have.length', 1);
     });
+    it('does not warn about the number of slides when the run has 2', () => {
+      cy.findByText(/Atera runs usually have 2 or 4/).should('not.exist');
+    });
   });
 
   describe('When four labware are scanned', () => {
@@ -89,6 +92,9 @@ describe('Atera Run', () => {
     });
     it('disables any further labware scanning', () => {
       cy.get('#labwareScanInput').should('be.disabled');
+    });
+    it('warns that the run has 3 slides, counting only those with probe hybridisation Atera', () => {
+      cy.findByText('This run has 3 slides. Atera runs usually have 2 or 4.').should('be.visible');
     });
   });
 
@@ -101,6 +107,9 @@ describe('Atera Run', () => {
     });
     it('enables labware scanning', () => {
       cy.get('#labwareScanInput').should('be.enabled');
+    });
+    it('no longer warns about the number of slides', () => {
+      cy.findByText(/Atera runs usually have 2 or 4/).should('not.exist');
     });
   });
 
