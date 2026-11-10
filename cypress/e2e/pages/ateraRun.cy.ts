@@ -1,8 +1,11 @@
 import {
+  AnalyserRequest,
   FindLatestOperationQuery,
   FindLatestOperationQueryVariables,
   GetAnalyserScanDataQuery,
-  GetAnalyserScanDataQueryVariables
+  GetAnalyserScanDataQueryVariables,
+  RecordAnalyserMutation,
+  RecordAnalyserMutationVariables
 } from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
 import { selectOption, shouldDisplaySelectedValue, shouldOptionsHaveLength } from '../shared/customReactSelect.cy';
@@ -243,6 +246,92 @@ describe('Atera Run', () => {
         });
         it('no longer shows the error', () => {
           cy.findByText('Cassette Position is used by more than one slide').should('not.exist');
+        });
+      });
+    });
+  });
+
+  describe('On save', () => {
+    before(() => {
+      //Remove the labware without probe hybridisation, which can't be saved
+      cy.findAllByTestId('removeButton').eq(0).click();
+      cy.findByTextContent('No probe hybridisation recorded for STAN-0611').should('not.exist');
+      cy.findByTestId('performed').clear().type('2020-01-01T10:00').blur();
+      selectOption('equipmentId', 'Atera 1');
+      selectOption('workTypeCommentId', 'Atera WTA 2 slides');
+      //Ends with a space, which the save leaves out
+      cy.findByTestId('runName').clear().type('Run 123 ').blur();
+    });
+
+    context('when there is a server error', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>('RecordAnalyser', () => {
+              return HttpResponse.json({
+                errors: [
+                  {
+                    message: 'Exception while fetching data (/recordAnalyser) : The operation could not be validated.',
+                    extensions: {
+                      problems: ['Run name already used: "Run 123"']
+                    }
+                  }
+                ]
+              });
+            })
+          );
+        });
+        cy.findByRole('button', { name: 'Save' }).click();
+      });
+      it('shows the error', () => {
+        cy.findByTextContent('Run name already used: "Run 123"').should('be.visible');
+      });
+    });
+
+    context('when there is no server error', () => {
+      let request: AnalyserRequest | undefined;
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>(
+              'RecordAnalyser',
+              ({ variables }) => {
+                request = variables.request;
+                return HttpResponse.json({ data: { recordAnalyser: { operations: [{ id: 1 }] } } });
+              }
+            )
+          );
+        });
+        cy.findByRole('button', { name: 'Save' }).click();
+      });
+      it('shows a success message', () => {
+        cy.findByText('Atera run recorded on all labware').should('be.visible');
+      });
+      it('records an Atera run with the run details, the run name trimmed and no lots', () => {
+        cy.wrap(null).should(() => {
+          expect(request).to.include({
+            operationType: 'Atera run',
+            performed: '2020-01-01 10:00:00',
+            runName: 'Run 123',
+            repeat: false
+          });
+          expect(request!.equipmentId).to.be.a('number');
+          expect(request!.workTypeCommentId).to.be.a('number');
+          expect(request).not.to.have.any.keys('lotNumberA', 'lotNumberB', 'cellSegmentationLot');
+        });
+      });
+      it('sends each labware with its SGP number, cassette position and samples, and no left or right position', () => {
+        cy.wrap(null).should(() => {
+          expect(
+            request!.labware.map(({ barcode, workNumber, index }) => ({ barcode, workNumber, index }))
+          ).to.deep.equal([
+            { barcode: 'STAN-0612', workNumber: 'SGP1008', index: 1 },
+            { barcode: 'STAN-0613', workNumber: 'SGP1008', index: 2 }
+          ]);
+          request!.labware.forEach((lw) => {
+            expect(lw).not.to.have.property('position');
+            expect(lw.samples).to.have.length.above(0);
+          });
         });
       });
     });
