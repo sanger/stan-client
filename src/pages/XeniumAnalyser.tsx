@@ -42,7 +42,7 @@ import Modal, { ModalBody, ModalFooter } from '../components/Modal';
 import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
 import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
 import { createTableDataForSlots } from '../components/xeniumAnalyser/analyserScan';
-import { AnalyserLabwareForm } from '../components/xeniumAnalyser/analyser.types';
+import { AnalyserLabwareForm, xeniumSlideLayout } from '../components/xeniumAnalyser/analyser.types';
 
 export type XeniumAnalyserFormValues = {
   lotNumberA: string;
@@ -413,6 +413,7 @@ const XeniumAnalyser = () => {
                           <motion.div variants={variants.fadeInWithLift} className="mt-4" key={lw.labware.barcode}>
                             <AnalyserLabwarePanel
                               labwareIndex={lwIndex}
+                              slideLayout={xeniumSlideLayout}
                               onDefineRegions={async () => {
                                 await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
                               }}
@@ -436,7 +437,10 @@ const XeniumAnalyser = () => {
                         ))}
                       <Modal show={values.activeRegionDefinerLabwareIndex > -1}>
                         <ModalBody>
-                          <RegionDefiner labwareIndex={values.activeRegionDefinerLabwareIndex} />
+                          <RegionDefiner
+                            labwareIndex={values.activeRegionDefinerLabwareIndex}
+                            slideLayout={xeniumSlideLayout}
+                          />
                         </ModalBody>
                         <ModalFooter>
                           <BlueButton

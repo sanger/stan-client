@@ -1,9 +1,9 @@
 import React, { useCallback, useRef } from 'react';
 import Labware from '../labwarePerSection/Labware';
 import { FormikErrors, useFormikContext } from 'formik';
-import { GridDirection, REGION_BORDER_COLORS } from '../../lib/helpers';
+import { REGION_BORDER_COLORS } from '../../lib/helpers';
 import Heading from '../Heading';
-import { AnalyserLabwareForm, Region, RegionDefinerFormValues } from './analyser.types';
+import { AnalyserLabwareForm, Region, RegionDefinerFormValues, SlideLayout } from './analyser.types';
 import { LabwareImperativeRef } from '../labware/Labware';
 import warningToast from '../notifications/WarningToast';
 import { toast } from 'react-toastify';
@@ -12,6 +12,8 @@ import { compareAddresses, firstAddress } from '../../lib/helpers/labwareHelper'
 
 type RegionDefinerProps = {
   labwareIndex: number;
+  /** How the slide is drawn on this page's machine */
+  slideLayout: SlideLayout;
 };
 
 export const reIndexAndRenameRegions = (regions: Region[], runName: string, barcode: string): Array<Region> => {
@@ -44,7 +46,7 @@ function isLabwareErrorObject(err: unknown): err is FormikErrors<AnalyserLabware
   return typeof err === 'object' && err !== null;
 }
 
-const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
+const RegionDefiner = ({ labwareIndex, slideLayout }: RegionDefinerProps) => {
   const { values, errors, setFieldValue, setFieldError, setValues } = useFormikContext<RegionDefinerFormValues>();
 
   const analyserLabware = values.labware[labwareIndex];
@@ -318,7 +320,8 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
                 labwareRef.current = el;
               }
             }}
-            gridDirection={GridDirection.LeftUp}
+            gridDirection={slideLayout.gridDirection}
+            barcodeInfoPosition={slideLayout.barcodeInfoPosition}
             labware={analyserLabware.labware}
             selectionMode={'multi'}
             selectable={'non_empty'}

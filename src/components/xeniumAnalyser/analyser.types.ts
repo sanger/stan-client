@@ -1,5 +1,15 @@
 import { AnalyserScanDataFieldsFragment, CassettePosition, LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
+import { GridDirection, Position } from '../../lib/helpers';
+
+/** How a slide is drawn: the order of its slots, and where its barcode goes (below the slide if not given) */
+export type SlideLayout = {
+  gridDirection: GridDirection;
+  barcodeInfoPosition?: Position;
+};
+
+/** Xenium analyser: the slide turned 180 degrees (A1 at the bottom right), with the barcode below it */
+export const xeniumSlideLayout: SlideLayout = { gridDirection: GridDirection.LeftUp };
 
 export type Region = {
   roi: string;

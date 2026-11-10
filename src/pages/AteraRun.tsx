@@ -24,7 +24,7 @@ import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
 import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
 import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
 import { createTableDataForSlots } from '../components/xeniumAnalyser/analyserScan';
-import { AnalyserLabwareForm } from '../components/xeniumAnalyser/analyser.types';
+import { AnalyserLabwareForm, xeniumSlideLayout } from '../components/xeniumAnalyser/analyser.types';
 import Modal, { ModalBody, ModalFooter } from '../components/Modal';
 import BlueButton from '../components/buttons/BlueButton';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
@@ -309,6 +309,7 @@ const AteraRun = () => {
                           <motion.div variants={variants.fadeInWithLift} className="mt-4" key={lw.labware.barcode}>
                             <AnalyserLabwarePanel
                               labwareIndex={lwIndex}
+                              slideLayout={xeniumSlideLayout}
                               onDefineRegions={async () => {
                                 await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
                               }}
@@ -333,7 +334,10 @@ const AteraRun = () => {
                         ))}
                       <Modal show={values.activeRegionDefinerLabwareIndex > -1}>
                         <ModalBody>
-                          <RegionDefiner labwareIndex={values.activeRegionDefinerLabwareIndex} />
+                          <RegionDefiner
+                            labwareIndex={values.activeRegionDefinerLabwareIndex}
+                            slideLayout={xeniumSlideLayout}
+                          />
                         </ModalBody>
                         <ModalFooter>
                           <BlueButton

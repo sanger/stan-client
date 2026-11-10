@@ -1,5 +1,5 @@
 import { XeniumAnalyserFormValues } from '../../../src/pages/XeniumAnalyser';
-import { AnalyserLabwareForm, Region } from '../../../src/components/xeniumAnalyser/analyser.types';
+import { AnalyserLabwareForm, Region, xeniumSlideLayout } from '../../../src/components/xeniumAnalyser/analyser.types';
 import { Formik } from 'formik';
 import RegionDefiner from '../../../src/components/xeniumAnalyser/RegionDefiner';
 import { act, cleanup, fireEvent, render, RenderResult } from '@testing-library/react';
@@ -81,7 +81,7 @@ const renderRegionDefiner = ({ selectedAddresses, selectedRegionColorIndex, regi
     <Formik initialValues={formValues({ selectedAddresses, selectedRegionColorIndex, regions })} onSubmit={jest.fn()}>
       {({ values }) => {
         labwareRegions = values['labware'][labwareIndex].regions;
-        return <RegionDefiner labwareIndex={labwareIndex} />;
+        return <RegionDefiner labwareIndex={labwareIndex} slideLayout={xeniumSlideLayout} />;
       }}
     </Formik>
   );

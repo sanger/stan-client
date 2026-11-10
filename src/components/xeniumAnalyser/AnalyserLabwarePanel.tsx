@@ -2,13 +2,14 @@ import React from 'react';
 import { useFormikContext } from 'formik';
 import Labware from '../labwarePerSection/Labware';
 import PinkButton from '../buttons/PinkButton';
-import { GridDirection } from '../../lib/helpers';
 import LabwareWorkNumber from './LabwareWorkNumber';
 import RegionsTable from './RegionsTable';
-import { RegionDefinerFormValues } from './analyser.types';
+import { RegionDefinerFormValues, SlideLayout } from './analyser.types';
 
 type AnalyserLabwarePanelProps = {
   labwareIndex: number;
+  /** How the slide is drawn on this page's machine */
+  slideLayout: SlideLayout;
   /** Called when the user clicks a slot or the Define Regions button */
   onDefineRegions: () => Promise<void>;
   /** Called with the trimmed region name when a region name field loses focus and is not empty */
@@ -17,7 +18,13 @@ type AnalyserLabwarePanelProps = {
   children?: React.ReactNode;
 };
 
-const AnalyserLabwarePanel = ({ labwareIndex, onDefineRegions, onRoiBlur, children }: AnalyserLabwarePanelProps) => {
+const AnalyserLabwarePanel = ({
+  labwareIndex,
+  slideLayout,
+  onDefineRegions,
+  onRoiBlur,
+  children
+}: AnalyserLabwarePanelProps) => {
   const { values } = useFormikContext<RegionDefinerFormValues>();
   const analyserLabware = values.labware[labwareIndex];
 
@@ -26,7 +33,8 @@ const AnalyserLabwarePanel = ({ labwareIndex, onDefineRegions, onRoiBlur, childr
       <div className="flex flex-col items-center space-y-8">
         <Labware
           labware={analyserLabware.labware}
-          gridDirection={GridDirection.LeftUp}
+          gridDirection={slideLayout.gridDirection}
+          barcodeInfoPosition={slideLayout.barcodeInfoPosition}
           regions={analyserLabware.regions}
           onSlotClick={onDefineRegions}
         />
