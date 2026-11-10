@@ -1,9 +1,18 @@
 import React, { useContext } from 'react';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useMachine } from '@xstate/react';
+import { fromPromise } from 'xstate';
 import { StanCoreContext } from '../lib/sdk';
-import { CommentFieldsFragment, EquipmentFieldsFragment } from '../types/sdk';
+import {
+  AnalyserRequest,
+  CommentFieldsFragment,
+  EquipmentFieldsFragment,
+  LabwareFieldsFragment,
+  RecordAnalyserMutation
+} from '../types/sdk';
+import createFormMachine from '../lib/machines/form/formMachine';
 import AppShell from '../components/AppShell';
 import Warning from '../components/notifications/Warning';
 import { motion } from '../dependencies/motion';
@@ -24,10 +33,14 @@ import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
 import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
 import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
 import { createTableDataForSlots } from '../components/xeniumAnalyser/analyserScan';
+import { regionSamples } from '../components/xeniumAnalyser/analyserRequest';
 import { AnalyserLabwareForm, ateraSlideLayout } from '../components/xeniumAnalyser/analyser.types';
 import Modal, { ModalBody, ModalFooter } from '../components/Modal';
 import BlueButton from '../components/buttons/BlueButton';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
+import OperationCompleteModal from '../components/modal/OperationCompleteModal';
+import WhiteButton from '../components/buttons/WhiteButton';
+import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 
 type LoaderData = {
   equipments: Array<EquipmentFieldsFragment>;
@@ -120,7 +133,22 @@ const LabwareAteraRunTable = (labwareForm: AnalyserLabwareForm) => {
 
 const AteraRun = () => {
   const { equipments, workTypes } = useLoaderData() as LoaderData;
+  const navigate = useNavigate();
   const stanCore = useContext(StanCoreContext);
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<AnalyserRequest, RecordAnalyserMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.RecordAnalyser({
+            request: { ...input.event.values }
+          });
+        })
+      }
+    });
+  }, [stanCore]);
+  const [current, send] = useMachine(formMachine);
+  const { serverError, submissionResult } = current.context;
   const validationSchema = Yup.object().shape({
     performed: Yup.date().required('Time is a required field').label('Time'),
     equipmentId: Yup.number().required('Equipment is a required field').label('Equipment'),
@@ -175,12 +203,33 @@ const AteraRun = () => {
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           <div className={'flex flex-col space-y-6'}>
+            {serverError && <Warning error={serverError} />}
             <Formik<AteraRunFormValues>
               initialValues={formInitialValues}
               validationSchema={validationSchema}
-              onSubmit={() => {}}
+              onSubmit={async (values) => {
+                send({
+                  type: 'SUBMIT_FORM',
+                  values: {
+                    operationType: 'Atera run',
+                    performed: values.performed.replace('T', ' ') + ':00',
+                    //The selects keep ids as strings
+                    equipmentId: Number(values.equipmentId),
+                    workTypeCommentId: Number(values.workTypeCommentId),
+                    //The form keeps the run name as typed, so it is trimmed here
+                    runName: values.runName.trim(),
+                    repeat: values.repeat,
+                    labware: values.labware.map((lw) => ({
+                      barcode: lw.labware.barcode,
+                      workNumber: lw.workNumber,
+                      index: lw.index,
+                      samples: regionSamples(lw.regions)
+                    }))
+                  }
+                });
+              }}
             >
-              {({ values, setValues, setFieldValue }) => (
+              {({ values, setValues, isValid, setFieldValue }) => (
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
                     <Heading level={3}>Labware</Heading>
@@ -352,8 +401,37 @@ const AteraRun = () => {
                         </ModalFooter>
                       </Modal>
                       <SlideCountWarning slideCount={values.labware.filter((lw) => lw.hybridisation).length} />
+                      <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
+                        <BlueButton type="submit" disabled={!isValid}>
+                          Save
+                        </BlueButton>
+                      </div>
                     </>
                   )}
+                  <OperationCompleteModal
+                    show={submissionResult !== undefined}
+                    message={'Atera run recorded on all labware'}
+                    additionalButtons={
+                      <WhiteButton
+                        type="button"
+                        style={{ marginLeft: 'auto' }}
+                        className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                        onClick={() => {
+                          createSessionStorageForLabwareAwaiting(
+                            values.labware.map((analyserLabware) => analyserLabware.labware as LabwareFieldsFragment)
+                          );
+                          navigate('/store');
+                        }}
+                      >
+                        Store
+                      </WhiteButton>
+                    }
+                  >
+                    <p>
+                      If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
+                      the Home screen.
+                    </p>
+                  </OperationCompleteModal>
                   {values.barcodeDisplayerProps && (
                     <BarcodeDisplayer
                       barcode={values.barcodeDisplayerProps.barcode}
