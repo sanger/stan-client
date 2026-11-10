@@ -251,6 +251,13 @@ describe('Atera Run', () => {
     });
   });
 
+  describe('Save', () => {
+    it('is disabled while labware without probe hybridisation is scanned, naming the labware to remove', () => {
+      cy.findByText('Remove STAN-0611 to save: no probe hybridisation recorded').should('be.visible');
+      cy.findByRole('button', { name: 'Save' }).should('be.disabled');
+    });
+  });
+
   describe('On save', () => {
     before(() => {
       //Remove the labware without probe hybridisation, which can't be saved
@@ -261,6 +268,10 @@ describe('Atera Run', () => {
       selectOption('workTypeCommentId', 'Atera WTA 2 slides');
       //Ends with a space, which the save leaves out
       cy.findByTestId('runName').clear().type('Run 123 ').blur();
+    });
+
+    it('no longer asks to remove any labware', () => {
+      cy.findByText(/to save: no probe hybridisation recorded/).should('not.exist');
     });
 
     context('when there is a server error', () => {
