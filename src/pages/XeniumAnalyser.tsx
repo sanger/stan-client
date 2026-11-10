@@ -42,6 +42,7 @@ import Modal, { ModalBody, ModalFooter } from '../components/Modal';
 import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
 import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
 import { createTableDataForSlots } from '../components/xeniumAnalyser/analyserScan';
+import { regionSamples } from '../components/xeniumAnalyser/analyserRequest';
 import { AnalyserLabwareForm, xeniumSlideLayout } from '../components/xeniumAnalyser/analyser.types';
 
 export type XeniumAnalyserFormValues = {
@@ -222,23 +223,12 @@ const XeniumAnalyser = () => {
               validationSchema={validationSchema}
               onSubmit={async (values) => {
                 const labwareROIData: AnalyserLabware[] = values.labware.map((lw) => {
-                  const labwareSections = values.labware.find((ls) => ls.labware.barcode === lw.labware.barcode);
                   return {
                     barcode: lw.labware.barcode,
                     workNumber: lw.workNumber,
                     decodingConsumablesLot: values.decodingConsumablesLot,
                     position: lw.position?.toLowerCase() === 'left' ? CassettePosition.Left : CassettePosition.Right,
-                    samples: labwareSections
-                      ? labwareSections?.regions!.flatMap((region) =>
-                          region.sectionGroups.flatMap((section) =>
-                            Array.from(section.addresses).flatMap((address) => ({
-                              address,
-                              sampleId: section.source.sampleId,
-                              roi: region.roi
-                            }))
-                          )
-                        )
-                      : []
+                    samples: regionSamples(lw.regions)
                   };
                 });
                 send({
