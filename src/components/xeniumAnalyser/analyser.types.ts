@@ -11,6 +11,12 @@ export type SlideLayout = {
 /** Xenium analyser: the slide turned 180 degrees (A1 at the bottom right), with the barcode below it */
 export const xeniumSlideLayout: SlideLayout = { gridDirection: GridDirection.LeftUp };
 
+/** Atera run: the slide sits the opposite way round to Xenium (A1 at the top left), with the barcode above it */
+export const ateraSlideLayout: SlideLayout = {
+  gridDirection: GridDirection.RightDown,
+  barcodeInfoPosition: Position.TopRight
+};
+
 export type Region = {
   roi: string;
   colorIndexNumber?: number;
