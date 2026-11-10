@@ -9,6 +9,20 @@ import {
 } from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
 
+//A1 is the last slot and the barcode is below it, as the slide sits in the Xenium analyser
+const shouldDrawSlideWithA1AndBarcodeAtTheBottom = (barcode: string) => {
+  cy.findByTestId(`labware-${barcode}`).within(() => {
+    cy.findAllByTestId(/^slot-wrapper-/)
+      .last()
+      .should('have.attr', 'data-testid', 'slot-wrapper-A1')
+      .then(($a1) => {
+        cy.contains(barcode).should(($barcode) => {
+          expect($barcode[0].getBoundingClientRect().top).to.be.at.least($a1[0].getBoundingClientRect().bottom);
+        });
+      });
+  });
+};
+
 describe('Xenium Analyser', () => {
   before(() => {
     cy.visit('/lab/xenium_analyser');
@@ -77,6 +91,9 @@ describe('Xenium Analyser', () => {
       //Table should display barcode of labware scanned
       cy.findAllByRole('table').contains('td', 'STAN-0611');
     });
+    it('draws the slide with A1 and the barcode at the bottom', () => {
+      shouldDrawSlideWithA1AndBarcodeAtTheBottom('STAN-0611');
+    });
     context('when a region of interest is set', () => {
       before(() => {
         // Dismiss any open react-select/menu overlays before typing in.
@@ -130,6 +147,11 @@ describe('Xenium Analyser', () => {
       });
       it('displays regions definer component', () => {
         cy.findByText('Set Regions').should('be.visible');
+      });
+      it('draws the region definer slide with A1 and the barcode at the bottom', () => {
+        cy.findByRole('dialog').within(() => {
+          shouldDrawSlideWithA1AndBarcodeAtTheBottom('STAN-0611');
+        });
       });
       describe('creating a new region', () => {
         before(() => {

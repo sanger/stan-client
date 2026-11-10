@@ -7,6 +7,20 @@ import {
 import { HttpResponse } from 'msw';
 import { selectOption, shouldDisplaySelectedValue, shouldOptionsHaveLength } from '../shared/customReactSelect.cy';
 
+//A1 is the first slot and the barcode is above it, as the slide sits in the Atera
+const shouldDrawSlideWithA1AndBarcodeAtTheTop = (barcode: string) => {
+  cy.findByTestId(`labware-${barcode}`).within(() => {
+    cy.findAllByTestId(/^slot-wrapper-/)
+      .first()
+      .should('have.attr', 'data-testid', 'slot-wrapper-A1')
+      .then(($a1) => {
+        cy.contains(barcode).should(($barcode) => {
+          expect($barcode[0].getBoundingClientRect().bottom).to.be.at.most($a1[0].getBoundingClientRect().top);
+        });
+      });
+  });
+};
+
 describe('Atera Run', () => {
   before(() => {
     cy.visit('/lab/atera_run');
@@ -142,6 +156,10 @@ describe('Atera Run', () => {
   });
 
   describe('Labware details', () => {
+    it('draws each slide with A1 and the barcode at the top', () => {
+      shouldDrawSlideWithA1AndBarcodeAtTheTop('STAN-0612');
+      shouldDrawSlideWithA1AndBarcodeAtTheTop('STAN-0613');
+    });
     it('displays the SGP number and regions only for the labware with probe hybridisation Atera', () => {
       ['STAN-0612', 'STAN-0613'].forEach((barcode) => {
         cy.findByTestId(`${barcode}-workNumber`).should('exist');
@@ -187,6 +205,11 @@ describe('Atera Run', () => {
       it('opens one region definer', () => {
         cy.findAllByRole('dialog').should('have.length', 1);
         cy.findByText('Set Regions').should('be.visible');
+      });
+      it('draws the slide with A1 and the barcode at the top', () => {
+        cy.findByRole('dialog').within(() => {
+          shouldDrawSlideWithA1AndBarcodeAtTheTop('STAN-0613');
+        });
       });
       it('closes it when Done is clicked', () => {
         cy.findByRole('button', { name: 'Done' }).click();
