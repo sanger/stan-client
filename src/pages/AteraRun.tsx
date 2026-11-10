@@ -68,6 +68,15 @@ const formInitialValues: AteraRunFormValues = {
 /**The Atera cassette dock has four positions, numbered from the left**/
 const ateraCassettePositions = [1, 2, 3, 4];
 
+/**Atera takes 1 to 4 slides, but the lab runs 2 or 4, so an odd number of slides only gets a warning**/
+const SlideCountWarning = ({ slideCount }: { slideCount: number }) =>
+  slideCount % 2 === 1 ? (
+    <Warning
+      className="mt-4"
+      message={`This run has ${slideCount} ${slideCount === 1 ? 'slide' : 'slides'}. Atera runs usually have 2 or 4.`}
+    />
+  ) : null;
+
 const LabwareAteraRunTable = (labwareForm: AnalyserLabwareForm) => {
   const samples = samplesFromLabwareOrSLot(labwareForm.labware);
   const scanData = labwareForm.analyserScanData;
@@ -338,6 +347,7 @@ const AteraRun = () => {
                           </BlueButton>
                         </ModalFooter>
                       </Modal>
+                      <SlideCountWarning slideCount={values.labware.filter((lw) => lw.hybridisation).length} />
                     </>
                   )}
                   {values.barcodeDisplayerProps && (
