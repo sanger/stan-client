@@ -30,7 +30,10 @@ import CustomReactSelect from '../components/forms/CustomReactSelect';
 import { ErrorMessage, selectOptionValues } from '../components/forms';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
-import RegionDefiner, { reIndexAndRenameAteraRegions } from '../components/xeniumAnalyser/RegionDefiner';
+import RegionDefiner, {
+  ateraRegionNamePattern,
+  reIndexAndRenameAteraRegions
+} from '../components/xeniumAnalyser/RegionDefiner';
 import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
 import { createTableDataForSlots } from '../components/xeniumAnalyser/analyserScan';
 import { regionSamples } from '../components/xeniumAnalyser/analyserRequest';
@@ -80,9 +83,6 @@ const formInitialValues: AteraRunFormValues = {
 
 /**The Atera cassette dock has four positions, numbered from the left**/
 const ateraCassettePositions = [1, 2, 3, 4];
-
-/**The Atera only accepts letters and numbers in region names**/
-const ateraRegionNamePattern = /^[A-Za-z0-9]+$/;
 
 /**Labware without probe hybridisation can't be saved, so this names the labware to remove before saving**/
 const RemoveLabwareMessage = ({ barcodes }: { barcodes: Array<string> }) =>
@@ -191,7 +191,11 @@ const AteraRun = () => {
                 roi: Yup.string()
                   .required('Region of interest is a required field')
                   .label('ROI')
-                  .max(64, 'Region of interest field should be string of maximum length 64'),
+                  .max(64, 'Region of interest field should be string of maximum length 64')
+                  .matches(
+                    ateraRegionNamePattern,
+                    'Region names can only contain letters and numbers, without spaces, dashes or underscores'
+                  ),
                 sectionGroups: Yup.array().min(1).required('At least one section group per region'),
                 colorIndexNumber: Yup.number()
               })

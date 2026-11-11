@@ -220,6 +220,24 @@ describe('Atera Run', () => {
         cy.findByTestId('STAN-0612-1-roi').should('have.value', 'Region-1');
         cy.findByText('Scan the region barcode into your machine').should('not.exist');
       });
+      it('shows that region names can only have letters and numbers', () => {
+        cy.findByText(
+          'Region names can only contain letters and numbers, without spaces, dashes or underscores'
+        ).should('be.visible');
+      });
+      context('when the name is corrected', () => {
+        before(() => {
+          cy.findByTestId('STAN-0612-1-roi').clear({ force: true }).type('Region1', { force: true }).blur();
+        });
+        after(() => {
+          cy.findByTestId('closeBarcodeDisplayer').click();
+        });
+        it('no longer shows the error', () => {
+          cy.findByText(
+            'Region names can only contain letters and numbers, without spaces, dashes or underscores'
+          ).should('not.exist');
+        });
+      });
     });
 
     context('when Define Regions is clicked', () => {

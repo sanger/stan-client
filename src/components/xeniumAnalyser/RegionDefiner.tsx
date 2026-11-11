@@ -43,12 +43,15 @@ export const reIndexAndRenameRegions = (regions: Region[], runName: string, barc
   }));
 };
 
+/** The Atera only accepts letters and numbers in region names */
+export const ateraRegionNamePattern = /^[A-Za-z0-9]+$/;
+
 /**
  * Atera run: names the regions Region1<barcode>, Region2<barcode>, … in slot order, without the run name or external names.
- * The Atera only accepts letters and numbers in region names, so anything else is left out of the barcode (STAN-0611 -> STAN0611).
+ * Characters the Atera rejects in region names are left out of the barcode (STAN-0611 -> STAN0611).
  */
 export const reIndexAndRenameAteraRegions = (regions: Region[], _runName: string, barcode: string): Array<Region> => {
-  const barcodeLettersAndNumbers = barcode.replace(/[^A-Za-z0-9]/g, '');
+  const barcodeLettersAndNumbers = [...barcode].filter((character) => ateraRegionNamePattern.test(character)).join('');
   return sortRegionsByAddress(regions).map((region, index) => ({
     ...region,
     roi: `Region${index + 1}${barcodeLettersAndNumbers}`
