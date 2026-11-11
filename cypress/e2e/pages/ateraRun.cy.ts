@@ -206,6 +206,22 @@ describe('Atera Run', () => {
       });
     });
 
+    context('when a region name the Atera rejects is set', () => {
+      before(() => {
+        // Dismiss any open react-select/menu overlays before typing in.
+        cy.get('body').click(0, 0);
+        cy.findByTestId('STAN-0612-1-roi')
+          .scrollIntoView()
+          .clear({ force: true })
+          .type('Region-1', { force: true }) //Not allowed on Atera: region names can only have letters and numbers
+          .blur();
+      });
+      it('does not display a region barcode, as the name has a dash', () => {
+        cy.findByTestId('STAN-0612-1-roi').should('have.value', 'Region-1');
+        cy.findByText('Scan the region barcode into your machine').should('not.exist');
+      });
+    });
+
     context('when Define Regions is clicked', () => {
       before(() => {
         cy.findAllByTestId('define-regions-button').eq(1).click();

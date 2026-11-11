@@ -81,6 +81,9 @@ const formInitialValues: AteraRunFormValues = {
 /**The Atera cassette dock has four positions, numbered from the left**/
 const ateraCassettePositions = [1, 2, 3, 4];
 
+/**The Atera only accepts letters and numbers in region names**/
+const ateraRegionNamePattern = /^[A-Za-z0-9]+$/;
+
 /**Labware without probe hybridisation can't be saved, so this names the labware to remove before saving**/
 const RemoveLabwareMessage = ({ barcodes }: { barcodes: Array<string> }) =>
   barcodes.length > 0 ? (
@@ -381,7 +384,10 @@ const AteraRun = () => {
                                 await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
                               }}
                               onRoiBlur={async (barcode) => {
-                                await setFieldValue('barcodeDisplayerProps', { barcode });
+                                //A barcode for a name the Atera rejects would be no use on the machine
+                                if (ateraRegionNamePattern.test(barcode)) {
+                                  await setFieldValue('barcodeDisplayerProps', { barcode });
+                                }
                               }}
                             >
                               <div>
