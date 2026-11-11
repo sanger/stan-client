@@ -133,10 +133,12 @@ describe('Xenium Analyser', () => {
           .clear({ force: true })
           .type('123456789 ', { force: true }) //Core rejects a region name with a space at the start or end
           .blur();
-        cy.findByTestId('closeBarcodeDisplayer').click();
       });
       it('shows that a region of interest should not start or end with a space', () => {
         cy.findByText('Region of interest should not start or end with a space').should('be.visible');
+      });
+      it('does not display the region barcode', () => {
+        cy.findByText('Scan the region barcode into your machine').should('not.exist');
       });
     });
     context('when a region of interest starts with a space', () => {
@@ -148,10 +150,12 @@ describe('Xenium Analyser', () => {
           .clear({ force: true })
           .type(' 123456789', { force: true }) //Core rejects a region name with a space at the start or end
           .blur();
-        cy.findByTestId('closeBarcodeDisplayer').click();
       });
       it('shows that a region of interest should not start or end with a space', () => {
         cy.findAllByText('Region of interest should not start or end with a space').should('have.length', 2);
+      });
+      it('does not display the region barcode', () => {
+        cy.findByText('Scan the region barcode into your machine').should('not.exist');
       });
     });
 

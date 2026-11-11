@@ -6,7 +6,7 @@ import { RegionDefinerFormValues } from './analyser.types';
 
 type RegionsTableProps = {
   labwareIndex: number;
-  /** Called with the trimmed region name when a region name field loses focus and is not empty */
+  /** Called with the region name when a region name field loses focus, unless it is empty or starts or ends with a space */
   onRoiBlur: (roi: string) => Promise<void>;
 };
 
@@ -39,8 +39,9 @@ const RegionsTable = ({ labwareIndex, onRoiBlur }: RegionsTableProps) => {
                   //Formik's handleBlur is still called first, so the field is marked touched and its validation error shows.
                   onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
                     handleBlur(e);
-                    const roi = e.target.value.trim();
-                    if (roi.length !== 0) {
+                    const roi = e.target.value;
+                    //No region barcode for an empty name, or for one with a space at either end, which neither page accepts
+                    if (roi.trim().length !== 0 && roi === roi.trim()) {
                       await onRoiBlur(roi);
                     }
                   }}

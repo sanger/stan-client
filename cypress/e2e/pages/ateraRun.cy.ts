@@ -240,6 +240,26 @@ describe('Atera Run', () => {
       });
     });
 
+    context('when a region name ends with a space', () => {
+      before(() => {
+        // Dismiss any open react-select/menu overlays before typing in.
+        cy.get('body').click(0, 0);
+        cy.findByTestId('STAN-0612-1-roi')
+          .scrollIntoView()
+          .clear({ force: true })
+          .type('Region1 ', { force: true }) //Not allowed on Atera: the space at the end
+          .blur();
+      });
+      it('shows that region names can only have letters and numbers', () => {
+        cy.findByText(
+          'Region names can only contain letters and numbers, without spaces, dashes or underscores'
+        ).should('be.visible');
+      });
+      it('does not display the region barcode for the name without its space', () => {
+        cy.findByText('Scan the region barcode into your machine').should('not.exist');
+      });
+    });
+
     context('when Define Regions is clicked', () => {
       before(() => {
         cy.findAllByTestId('define-regions-button').eq(1).click();
