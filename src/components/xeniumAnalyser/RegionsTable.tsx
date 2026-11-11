@@ -11,7 +11,7 @@ type RegionsTableProps = {
 };
 
 const RegionsTable = ({ labwareIndex, onRoiBlur }: RegionsTableProps) => {
-  const { values } = useFormikContext<RegionDefinerFormValues>();
+  const { values, handleBlur } = useFormikContext<RegionDefinerFormValues>();
   const analyserLabware = values.labware[labwareIndex];
 
   return (
@@ -35,7 +35,10 @@ const RegionsTable = ({ labwareIndex, onRoiBlur }: RegionsTableProps) => {
                   as="textarea"
                   data-testid={`${analyserLabware.labware.barcode}-${regionIndex}-roi`}
                   name={`labware[${labwareIndex}].regions[${regionIndex}].roi`}
+                  //Replaces Formik's onBlur, so that leaving the field calls onRoiBlur (the page shows the region barcode pop-up).
+                  //Formik's handleBlur is still called first, so the field is marked touched and its validation error shows.
                   onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleBlur(e);
                     const roi = e.target.value.trim();
                     if (roi.length !== 0) {
                       await onRoiBlur(roi);

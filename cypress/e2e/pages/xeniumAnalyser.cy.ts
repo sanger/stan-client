@@ -114,6 +114,16 @@ describe('Xenium Analyser', () => {
         cy.findByTestId('2d-barcode').contains('123456789');
       });
     });
+    context('when a region of interest is cleared', () => {
+      before(() => {
+        // Dismiss any open react-select/menu overlays before typing in.
+        cy.get('body').click(0, 0);
+        cy.findByTestId('STAN-0611-1-roi').scrollIntoView().clear({ force: true }).blur();
+      });
+      it('shows that a region of interest is required', () => {
+        cy.findByText('Region of interest is a required field').should('be.visible');
+      });
+    });
 
     describe('When a SGP number is set', () => {
       context('when a SGP number with previously uploaded file is selected', () => {
