@@ -4,12 +4,14 @@ import Labware from '../labwarePerSection/Labware';
 import PinkButton from '../buttons/PinkButton';
 import LabwareWorkNumber from './LabwareWorkNumber';
 import RegionsTable from './RegionsTable';
-import { RegionDefinerFormValues, SlideLayout } from './analyser.types';
+import { RegionDefinerFormValues, RegionNaming, SlideLayout } from './analyser.types';
 
 type AnalyserLabwarePanelProps = {
   labwareIndex: number;
   /** How the slide is drawn on this page's machine */
   slideLayout: SlideLayout;
+  /** How this page names the slide's regions */
+  renameRegions: RegionNaming;
   /** Called when the user clicks a slot or the Define Regions button */
   onDefineRegions: () => Promise<void>;
   /** Called with the trimmed region name when a region name field loses focus and is not empty */
@@ -21,6 +23,7 @@ type AnalyserLabwarePanelProps = {
 const AnalyserLabwarePanel = ({
   labwareIndex,
   slideLayout,
+  renameRegions,
   onDefineRegions,
   onRoiBlur,
   children
@@ -46,7 +49,7 @@ const AnalyserLabwarePanel = ({
         <div className="grid grid-cols-7 gap-x-2">
           <div className="col-span-1">
             <div className="grid grid-rows-3 ">
-              <LabwareWorkNumber labwareIndex={labwareIndex} />
+              <LabwareWorkNumber labwareIndex={labwareIndex} renameRegions={renameRegions} />
               {children}
             </div>
           </div>

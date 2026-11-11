@@ -1,7 +1,10 @@
 import { XeniumAnalyserFormValues } from '../../../src/pages/XeniumAnalyser';
 import { AnalyserLabwareForm, Region, xeniumSlideLayout } from '../../../src/components/xeniumAnalyser/analyser.types';
 import { Formik } from 'formik';
-import RegionDefiner from '../../../src/components/xeniumAnalyser/RegionDefiner';
+import RegionDefiner, {
+  reIndexAndRenameAteraRegions,
+  reIndexAndRenameRegions
+} from '../../../src/components/xeniumAnalyser/RegionDefiner';
 import { act, cleanup, fireEvent, render, RenderResult } from '@testing-library/react';
 
 import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHandlers';
@@ -81,7 +84,13 @@ const renderRegionDefiner = ({ selectedAddresses, selectedRegionColorIndex, regi
     <Formik initialValues={formValues({ selectedAddresses, selectedRegionColorIndex, regions })} onSubmit={jest.fn()}>
       {({ values }) => {
         labwareRegions = values['labware'][labwareIndex].regions;
-        return <RegionDefiner labwareIndex={labwareIndex} slideLayout={xeniumSlideLayout} />;
+        return (
+          <RegionDefiner
+            labwareIndex={labwareIndex}
+            slideLayout={xeniumSlideLayout}
+            renameRegions={reIndexAndRenameRegions}
+          />
+        );
       }}
     </Formik>
   );
@@ -211,5 +220,14 @@ describe('RegionDefiner component', () => {
         expect(labwareRegions).toHaveLength(2);
       });
     });
+  });
+});
+
+describe('reIndexAndRenameAteraRegions', () => {
+  it('names the regions Region1<barcode>, Region2<barcode>, … in slot order, without the run name, the external names or the dash in the barcode', () => {
+    const regions = labwareAnalyser({}).regions;
+    const renamed = reIndexAndRenameAteraRegions([...regions].reverse(), 'Run 123', 'STAN-6116');
+    expect(renamed.map((region) => region.roi)).toEqual(regions.map((_, index) => `Region${index + 1}STAN6116`));
+    expect(renamed.map((region) => region.sectionGroups)).toEqual(regions.map((region) => region.sectionGroups));
   });
 });

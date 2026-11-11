@@ -30,7 +30,7 @@ import CustomReactSelect from '../components/forms/CustomReactSelect';
 import { ErrorMessage, selectOptionValues } from '../components/forms';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
-import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
+import RegionDefiner, { reIndexAndRenameAteraRegions } from '../components/xeniumAnalyser/RegionDefiner';
 import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
 import { createTableDataForSlots } from '../components/xeniumAnalyser/analyserScan';
 import { regionSamples } from '../components/xeniumAnalyser/analyserRequest';
@@ -249,7 +249,14 @@ const AteraRun = () => {
                     <LabwareScanner
                       limit={4}
                       onAdd={(labware) => {
-                        createTableDataForSlots(stanCore, 'Probe hybridisation Atera', labware, setValues, values);
+                        createTableDataForSlots(
+                          stanCore,
+                          'Probe hybridisation Atera',
+                          labware,
+                          setValues,
+                          values,
+                          reIndexAndRenameAteraRegions
+                        );
                       }}
                       onRemove={async (labware) => {
                         await setValues((prev) => {
@@ -312,7 +319,11 @@ const AteraRun = () => {
                                       ...lw,
                                       workNumber,
                                       hasSgpNumberLink,
-                                      regions: reIndexAndRenameRegions(lw.regions, prev.runName, lw.labware.barcode)
+                                      regions: reIndexAndRenameAteraRegions(
+                                        lw.regions,
+                                        prev.runName,
+                                        lw.labware.barcode
+                                      )
                                     }))
                                   };
                                 });
@@ -336,7 +347,7 @@ const AteraRun = () => {
                                     runName,
                                     labware: prev.labware.map((lw) => ({
                                       ...lw,
-                                      regions: reIndexAndRenameRegions(lw.regions, runName, lw.labware.barcode)
+                                      regions: reIndexAndRenameAteraRegions(lw.regions, runName, lw.labware.barcode)
                                     }))
                                   }));
                                 }}
@@ -365,6 +376,7 @@ const AteraRun = () => {
                             <AnalyserLabwarePanel
                               labwareIndex={lwIndex}
                               slideLayout={ateraSlideLayout}
+                              renameRegions={reIndexAndRenameAteraRegions}
                               onDefineRegions={async () => {
                                 await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
                               }}
@@ -392,6 +404,7 @@ const AteraRun = () => {
                           <RegionDefiner
                             labwareIndex={values.activeRegionDefinerLabwareIndex}
                             slideLayout={ateraSlideLayout}
+                            renameRegions={reIndexAndRenameAteraRegions}
                           />
                         </ModalBody>
                         <ModalFooter>

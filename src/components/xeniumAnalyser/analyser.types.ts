@@ -23,6 +23,9 @@ export type Region = {
   sectionGroups: Array<PlannedSectionDetails>;
 };
 
+/** How a page names a slide's regions: returns them sorted by slot address, each with its name */
+export type RegionNaming = (regions: Array<Region>, runName: string, barcode: string) => Array<Region>;
+
 export type AnalyserLabwareForm = {
   labware: LabwareFlaggedFieldsFragment;
   hybridisation: boolean;
@@ -53,6 +56,7 @@ export type AnalyserLabwareForm = {
 /** The form values that adding a scanned labware reads and updates */
 export type AnalyserScanFormValues = {
   workNumberAll: string;
+  runName: string;
   labware: Array<AnalyserLabwareForm>;
 };
 

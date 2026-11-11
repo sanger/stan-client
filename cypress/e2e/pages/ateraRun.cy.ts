@@ -171,6 +171,11 @@ describe('Atera Run', () => {
       cy.findByTestId('STAN-0611-workNumber').should('not.exist');
       cy.findByTestId('STAN-0611-regions-table').should('not.exist');
     });
+    it('names the regions Region1, Region2, … followed by the barcode without its dash', () => {
+      cy.findByTestId('STAN-0612-0-roi').should('have.value', 'Region1STAN0612');
+      cy.findByTestId('STAN-0612-1-roi').should('have.value', 'Region2STAN0612');
+      cy.findByTestId('STAN-0613-0-roi').should('have.value', 'Region1STAN0613');
+    });
 
     context('when an SGP number is selected for all labware', () => {
       before(() => {
@@ -217,6 +222,23 @@ describe('Atera Run', () => {
       it('closes it when Done is clicked', () => {
         cy.findByRole('button', { name: 'Done' }).click();
         cy.findByRole('dialog').should('not.exist');
+      });
+    });
+
+    context('when two slots are grouped into a region', () => {
+      before(() => {
+        cy.findAllByTestId('define-regions-button').eq(1).click();
+        cy.findByTestId('region-color-0').click();
+        cy.findByTestId('labware-region-definer-container').within(() => {
+          cy.findByText('A1').click();
+          cy.findByText('B1').click({ cmdKey: true });
+        });
+        cy.findByTestId('create-update-region-button').click();
+        cy.findByRole('button', { name: 'Done' }).click();
+      });
+      it('names the regions Region1, Region2, … again, in slot order', () => {
+        cy.findByTestId('STAN-0613-0-roi').should('have.value', 'Region1STAN0613');
+        cy.findByTestId('STAN-0613-1-roi').should('have.value', 'Region2STAN0613');
       });
     });
 
@@ -342,6 +364,11 @@ describe('Atera Run', () => {
           expect(request!.equipmentId).to.be.a('number');
           expect(request!.workTypeCommentId).to.be.a('number');
           expect(request).not.to.have.any.keys('lotNumberA', 'lotNumberB', 'cellSegmentationLot');
+        });
+      });
+      it('sends the region names without the run name', () => {
+        cy.wrap(null).should(() => {
+          expect(request!.labware.map((lw) => lw.samples[0].roi)).to.deep.equal(['Region1STAN0612', 'Region1STAN0613']);
         });
       });
       it('sends each labware with its SGP number, cassette position and samples, and no left or right position', () => {

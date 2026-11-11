@@ -2,7 +2,7 @@ import { SetStateAction } from 'react';
 import { LabwareFlaggedFieldsFragment, Sdk } from '../../types/sdk';
 import { sectionGroupsBySample } from '../../lib/helpers/labwareHelper';
 import { hasUploadedFilesInSgpFolder } from '../../lib/services/fileService';
-import { AnalyserLabwareForm, AnalyserScanFormValues, Region } from './analyser.types';
+import { AnalyserLabwareForm, AnalyserScanFormValues, Region, RegionNaming } from './analyser.types';
 
 /**
  * Builds a list of labware regions.
@@ -22,8 +22,12 @@ export const createTableDataForSlots = <T extends AnalyserScanFormValues>(
   probeHybridisationOperationType: string,
   labware: LabwareFlaggedFieldsFragment,
   setValues: (values: SetStateAction<T>, shouldValidate?: boolean) => {},
-  values: T
+  values: T,
+  /** How the page names the scanned slide's regions; without it, they keep the names labwareRegions gives (Xenium) */
+  renameRegions?: RegionNaming
 ) => {
+  const initialRegions = (runName: string): Array<Region> =>
+    renameRegions ? renameRegions(labwareRegions(labware), runName, labware.barcode) : labwareRegions(labware);
   const setLabwareSampleData = async (lw: LabwareFlaggedFieldsFragment) => {
     try {
       /**Check if the images were been uploaded to the sgp folder**/
@@ -49,7 +53,7 @@ export const createTableDataForSlots = <T extends AnalyserScanFormValues>(
                 workNumber: values.workNumberAll,
                 hasSgpNumberLink,
                 position: undefined,
-                regions: labwareRegions(labware),
+                regions: initialRegions(prev.runName),
                 analyserScanData: res.analyserScanData
               });
             }
@@ -64,7 +68,7 @@ export const createTableDataForSlots = <T extends AnalyserScanFormValues>(
             workNumber: values.workNumberAll,
             hasSgpNumberLink,
             position: undefined,
-            regions: labwareRegions(labware)
+            regions: initialRegions(prev.runName)
           });
           return { ...prev };
         });

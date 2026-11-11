@@ -404,6 +404,7 @@ const XeniumAnalyser = () => {
                             <AnalyserLabwarePanel
                               labwareIndex={lwIndex}
                               slideLayout={xeniumSlideLayout}
+                              renameRegions={reIndexAndRenameRegions}
                               onDefineRegions={async () => {
                                 await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
                               }}
@@ -430,6 +431,7 @@ const XeniumAnalyser = () => {
                           <RegionDefiner
                             labwareIndex={values.activeRegionDefinerLabwareIndex}
                             slideLayout={xeniumSlideLayout}
+                            renameRegions={reIndexAndRenameRegions}
                           />
                         </ModalBody>
                         <ModalFooter>
