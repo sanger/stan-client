@@ -196,7 +196,13 @@ const XeniumAnalyser = () => {
                 roi: Yup.string()
                   .required('Region of interest is a required field')
                   .label('ROI')
-                  .max(64, 'Region of interest field should be string of maximum length 64'),
+                  .max(64, 'Region of interest field should be string of maximum length 64')
+                  //Core rejects these, and the region barcode pop-up would show the name without the space
+                  .test(
+                    'no-end-spaces',
+                    'Region of interest should not start or end with a space',
+                    (roi) => !roi || roi.trim() === roi
+                  ),
                 sectionGroups: Yup.array().min(1).required('At least one section group per region'),
                 colorIndexNumber: Yup.number()
               })

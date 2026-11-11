@@ -124,6 +124,36 @@ describe('Xenium Analyser', () => {
         cy.findByText('Region of interest is a required field').should('be.visible');
       });
     });
+    context('when a region of interest ends with a space', () => {
+      before(() => {
+        // Dismiss any open react-select/menu overlays before typing in.
+        cy.get('body').click(0, 0);
+        cy.findByTestId('STAN-0611-2-roi')
+          .scrollIntoView()
+          .clear({ force: true })
+          .type('123456789 ', { force: true }) //Core rejects a region name with a space at the start or end
+          .blur();
+        cy.findByTestId('closeBarcodeDisplayer').click();
+      });
+      it('shows that a region of interest should not start or end with a space', () => {
+        cy.findByText('Region of interest should not start or end with a space').should('be.visible');
+      });
+    });
+    context('when a region of interest starts with a space', () => {
+      before(() => {
+        // Dismiss any open react-select/menu overlays before typing in.
+        cy.get('body').click(0, 0);
+        cy.findByTestId('STAN-0611-3-roi')
+          .scrollIntoView()
+          .clear({ force: true })
+          .type(' 123456789', { force: true }) //Core rejects a region name with a space at the start or end
+          .blur();
+        cy.findByTestId('closeBarcodeDisplayer').click();
+      });
+      it('shows that a region of interest should not start or end with a space', () => {
+        cy.findAllByText('Region of interest should not start or end with a space').should('have.length', 2);
+      });
+    });
 
     describe('When a SGP number is set', () => {
       context('when a SGP number with previously uploaded file is selected', () => {
