@@ -224,10 +224,34 @@ describe('RegionDefiner component', () => {
 });
 
 describe('reIndexAndRenameAteraRegions', () => {
-  it('names the regions Region1<barcode>, Region2<barcode>, … in slot order, without the run name, the external names or the dash in the barcode', () => {
-    const regions = labwareAnalyser({}).regions;
+  //A region of one section per given slot, each from tissue with the given external name
+  const region = (addresses: Array<string>, externalName?: string): Region => ({
+    roi: '',
+    sectionGroups: addresses.map((address) => ({
+      source: {
+        sampleId: 1,
+        labware: labware,
+        newSection: '1',
+        tissue: { ...labware.slots[0].samples[0].tissue, externalName }
+      },
+      addresses: new Set([address])
+    }))
+  });
+
+  it('names a region of one section after its external name, and grouped sections Region1<barcode>, Region2<barcode>, ... in slot order, without the run name or the characters the Atera rejects', () => {
+    const regions = [
+      region(['A1'], 'EXT-1_A'),
+      region(['B1', 'C1'], 'EXT-1_A'),
+      //no external name, so named like grouped sections
+      region(['D1']),
+      region(['E1', 'F1'], 'EXT-1_A')
+    ];
     const renamed = reIndexAndRenameAteraRegions([...regions].reverse(), 'Run 123', 'STAN-6116');
-    expect(renamed.map((region) => region.roi)).toEqual(regions.map((_, index) => `Region${index + 1}STAN6116`));
-    expect(renamed.map((region) => region.sectionGroups)).toEqual(regions.map((region) => region.sectionGroups));
+    expect(renamed.map((region) => region.roi)).toEqual([
+      'EXT1A',
+      'Region1STAN6116',
+      'Region2STAN6116',
+      'Region3STAN6116'
+    ]);
   });
 });

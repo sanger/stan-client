@@ -46,16 +46,27 @@ export const reIndexAndRenameRegions = (regions: Region[], runName: string, barc
 /** The Atera only accepts letters and numbers in region names */
 export const ateraRegionNamePattern = /^[A-Za-z0-9]+$/;
 
+/** Leaves out the characters the Atera rejects in region names (STAN-0611 -> STAN0611) */
+const ateraLettersAndNumbers = (text: string): string =>
+  [...text].filter((character) => ateraRegionNamePattern.test(character)).join('');
+
 /**
- * Atera run: names the regions Region1<barcode>, Region2<barcode>, … in slot order, without the run name or external names.
- * Characters the Atera rejects in region names are left out of the barcode (STAN-0611 -> STAN0611).
+ * Atera run: as on Xenium analyser, a region of one section is named after its sample's external name,
+ * and grouped sections are named Region1<barcode>, Region2<barcode>, ... in slot order, without the run name.
+ * Characters the Atera rejects are left out (EXT-1_A -> EXT1A, STAN-0611 -> STAN0611).
  */
 export const reIndexAndRenameAteraRegions = (regions: Region[], _runName: string, barcode: string): Array<Region> => {
-  const barcodeLettersAndNumbers = [...barcode].filter((character) => ateraRegionNamePattern.test(character)).join('');
-  return sortRegionsByAddress(regions).map((region, index) => ({
-    ...region,
-    roi: `Region${index + 1}${barcodeLettersAndNumbers}`
-  }));
+  let index = 0;
+  return sortRegionsByAddress(regions).map((region) => {
+    const externalName = ateraLettersAndNumbers(region.sectionGroups[0].source.tissue?.externalName ?? '');
+    return {
+      ...region,
+      roi:
+        region.sectionGroups.length === 1 && externalName
+          ? externalName
+          : `Region${++index}${ateraLettersAndNumbers(barcode)}`
+    };
+  });
 };
 
 function isLabwareErrorObject(err: unknown): err is FormikErrors<AnalyserLabwareForm> {
