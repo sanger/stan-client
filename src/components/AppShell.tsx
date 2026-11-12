@@ -343,6 +343,18 @@ function AppShell({ children }: AppShellParams) {
                       description={'Recording region of interest metrics for Xenium slides'}
                     />
                   </Menu>
+                  <Menu
+                    caption={'Atera'}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Recording Atera run information'}
+                  >
+                    <NavLinkMenuItem
+                      caption={'Atera Run'}
+                      path={'/lab/atera_run'}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Recording Atera run information'}
+                    />
+                  </Menu>
                 </Menu>
               </Authenticated>
               <Authenticated role={UserRole.Enduser}>
@@ -579,6 +591,11 @@ function AppShell({ children }: AppShellParams) {
                       <StanMobileNavLink to="/lab/xenium_analyser">Xenium Analyser</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/xenium_qc">Xenium Analyser QC</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/xenium_metrics">Xenium Metrics</StanMobileNavLink>
+                    </div>
+
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Atera</h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
+                      <StanMobileNavLink to="/lab/atera_run">Atera Run</StanMobileNavLink>
                     </div>
                   </div>
                   <Authenticated role={UserRole.Enduser}>
