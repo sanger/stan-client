@@ -4,15 +4,13 @@ import { Link } from 'react-router-dom';
 import WorkNumberSelect from '../WorkNumberSelect';
 import { FormikErrorMessage } from '../forms';
 import { hasUploadedFilesInSgpFolder } from '../../lib/services/fileService';
-import { RegionDefinerFormValues, RegionNaming } from './analyser.types';
+import { RegionDefinerFormValues } from './analyser.types';
 
 type LabwareWorkNumberProps = {
   labwareIndex: number;
-  /** How this page names the slide's regions */
-  renameRegions: RegionNaming;
 };
 
-const LabwareWorkNumber = ({ labwareIndex, renameRegions }: LabwareWorkNumberProps) => {
+const LabwareWorkNumber = ({ labwareIndex }: LabwareWorkNumberProps) => {
   const { values, setValues } = useFormikContext<RegionDefinerFormValues>();
   const analyserLabware = values.labware[labwareIndex];
 
@@ -32,8 +30,7 @@ const LabwareWorkNumber = ({ labwareIndex, renameRegions }: LabwareWorkNumberPro
                 : {
                     ...lw,
                     workNumber,
-                    hasSgpNumberLink,
-                    regions: renameRegions(lw.regions, prev.runName, lw.labware.barcode)
+                    hasSgpNumberLink
                   }
             )
           }));

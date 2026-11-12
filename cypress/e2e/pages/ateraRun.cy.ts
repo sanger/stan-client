@@ -264,6 +264,11 @@ describe('Atera Run', () => {
           .type('Region1 ', { force: true }) //Not allowed on Atera: the space at the end
           .blur();
       });
+      after(() => {
+        //Put back a name that can be saved, as nothing renames the regions before saving
+        cy.findByTestId('STAN-0612-1-roi').clear({ force: true }).type('Region1', { force: true }).blur();
+        cy.findByTestId('closeBarcodeDisplayer').click();
+      });
       it('shows that region names can only have letters and numbers', () => {
         cy.findByText(
           'Region names can only contain letters and numbers, without spaces, dashes or underscores'
@@ -434,9 +439,9 @@ describe('Atera Run', () => {
           expect(request).not.to.have.any.keys('lotNumberA', 'lotNumberB', 'cellSegmentationLot');
         });
       });
-      it('sends the region names without the run name', () => {
+      it('sends the region names without the run name, keeping the name typed before the run name', () => {
         cy.wrap(null).should(() => {
-          expect(request!.labware.map((lw) => lw.samples[0].roi)).to.deep.equal(['EXT1A', 'Region1STAN0613']);
+          expect(request!.labware.map((lw) => lw.samples[0].roi)).to.deep.equal(['123456789', 'Region1STAN0613']);
         });
       });
       it('sends each labware with its SGP number, cassette position and samples, and no left or right position', () => {

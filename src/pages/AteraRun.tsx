@@ -324,12 +324,7 @@ const AteraRun = () => {
                                     labware: prev.labware.map((lw) => ({
                                       ...lw,
                                       workNumber,
-                                      hasSgpNumberLink,
-                                      regions: reIndexAndRenameAteraRegions(
-                                        lw.regions,
-                                        prev.runName,
-                                        lw.labware.barcode
-                                      )
+                                      hasSgpNumberLink
                                     }))
                                   };
                                 });
@@ -341,23 +336,7 @@ const AteraRun = () => {
                         <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
                           <div className="flex flex-row">
                             <div className="w-1/2">
-                              <FormikInput
-                                label={'Run Name'}
-                                data-testid={'runName'}
-                                type="text"
-                                name={'runName'}
-                                onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                                  const runName = e.target.value;
-                                  await setValues((prev) => ({
-                                    ...prev,
-                                    runName,
-                                    labware: prev.labware.map((lw) => ({
-                                      ...lw,
-                                      regions: reIndexAndRenameAteraRegions(lw.regions, runName, lw.labware.barcode)
-                                    }))
-                                  }));
-                                }}
-                              />
+                              <FormikInput label={'Run Name'} data-testid={'runName'} type="text" name={'runName'} />
                             </div>
                             <div>
                               <FormikCheckbox name="repeat" dataTestId="is-repeat-run" label="Is a repeat run" />
@@ -386,7 +365,6 @@ const AteraRun = () => {
                             <AnalyserLabwarePanel
                               labwareIndex={lwIndex}
                               slideLayout={ATERA_SLIDE_LAYOUT}
-                              renameRegions={reIndexAndRenameAteraRegions}
                               onDefineRegions={async () => {
                                 await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
                               }}

@@ -330,12 +330,7 @@ const XeniumAnalyser = () => {
                                     labware: prev.labware.map((lw) => ({
                                       ...lw,
                                       workNumber,
-                                      hasSgpNumberLink,
-                                      regions: reIndexAndRenameXeniumRegions(
-                                        lw.regions,
-                                        prev.runName,
-                                        lw.labware.barcode
-                                      )
+                                      hasSgpNumberLink
                                     }))
                                   };
                                 });
@@ -418,7 +413,6 @@ const XeniumAnalyser = () => {
                             <AnalyserLabwarePanel
                               labwareIndex={lwIndex}
                               slideLayout={XENIUM_SLIDE_LAYOUT}
-                              renameRegions={reIndexAndRenameXeniumRegions}
                               onDefineRegions={async () => {
                                 await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
                               }}
