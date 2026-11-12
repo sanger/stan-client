@@ -35,8 +35,9 @@ const RegionsTable = ({ labwareIndex, onRoiBlur }: RegionsTableProps) => {
                   as="textarea"
                   data-testid={`${analyserLabware.labware.barcode}-${regionIndex}-roi`}
                   name={`labware[${labwareIndex}].regions[${regionIndex}].roi`}
-                  //This onBlur replaces Formik's own (Field puts our props after its own),
-                  //so handleBlur is called to mark the field touched, which shows its error
+                  //Leaving the field does two things: Formik's handleBlur shows the field's validation message,
+                  //and our check below prevents showing the region barcode for a name that can't be saved.
+                  //Field passes our props after its own, so this onBlur replaces Formik's, and handleBlur is called here.
                   onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
                     handleBlur(e);
                     const roi = e.target.value;
