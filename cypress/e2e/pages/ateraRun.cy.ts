@@ -1,5 +1,7 @@
 import {
   AnalyserRequest,
+  FindFlaggedLabwareQuery,
+  FindFlaggedLabwareQueryVariables,
   FindLatestOperationQuery,
   FindLatestOperationQueryVariables,
   GetAnalyserScanDataQuery,
@@ -9,6 +11,7 @@ import {
 } from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
 import { selectOption, shouldDisplaySelectedValue, shouldOptionsHaveLength } from '../shared/customReactSelect.cy';
+import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHandlers';
 
 //A1 is the first slot and the barcode is above it, as the slide sits in the Atera
 const shouldDrawSlideWithA1AndBarcodeAtTheTop = (barcode: string) => {
@@ -42,6 +45,17 @@ describe('Atera Run', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
+          //Every sample's external name is EXT-1_A, so a region of one section is named EXT1A
+          graphql.query<FindFlaggedLabwareQuery, FindFlaggedLabwareQueryVariables>(
+            'FindFlaggedLabware',
+            ({ variables }) => {
+              const labware = createFlaggedLabware(variables.barcode);
+              labware.slots.forEach((slot) =>
+                slot.samples.forEach((sample) => (sample.tissue = { ...sample.tissue, externalName: 'EXT-1_A' }))
+              );
+              return HttpResponse.json({ data: { labwareFlagged: labware } });
+            }
+          ),
           //Probe hybridisation Atera is recorded on every labware except STAN-0611
           graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>(
             'FindLatestOperation',
@@ -171,10 +185,10 @@ describe('Atera Run', () => {
       cy.findByTestId('STAN-0611-workNumber').should('not.exist');
       cy.findByTestId('STAN-0611-regions-table').should('not.exist');
     });
-    it('names the regions Region1, Region2, … followed by the barcode without its dash', () => {
-      cy.findByTestId('STAN-0612-0-roi').should('have.value', 'Region1STAN0612');
-      cy.findByTestId('STAN-0612-1-roi').should('have.value', 'Region2STAN0612');
-      cy.findByTestId('STAN-0613-0-roi').should('have.value', 'Region1STAN0613');
+    it('names each region of one section after its external name, without the dash and underscore', () => {
+      cy.findByTestId('STAN-0612-0-roi').should('have.value', 'EXT1A');
+      cy.findByTestId('STAN-0612-1-roi').should('have.value', 'EXT1A');
+      cy.findByTestId('STAN-0613-0-roi').should('have.value', 'EXT1A');
     });
 
     context('when an SGP number is selected for all labware', () => {
@@ -290,9 +304,9 @@ describe('Atera Run', () => {
         cy.findByTestId('create-update-region-button').click();
         cy.findByRole('button', { name: 'Done' }).click();
       });
-      it('names the regions Region1, Region2, … again, in slot order', () => {
+      it('names the grouped sections Region1 followed by the barcode without its dash, and the next region after its external name', () => {
         cy.findByTestId('STAN-0613-0-roi').should('have.value', 'Region1STAN0613');
-        cy.findByTestId('STAN-0613-1-roi').should('have.value', 'Region2STAN0613');
+        cy.findByTestId('STAN-0613-1-roi').should('have.value', 'EXT1A');
       });
     });
 
@@ -422,7 +436,7 @@ describe('Atera Run', () => {
       });
       it('sends the region names without the run name', () => {
         cy.wrap(null).should(() => {
-          expect(request!.labware.map((lw) => lw.samples[0].roi)).to.deep.equal(['Region1STAN0612', 'Region1STAN0613']);
+          expect(request!.labware.map((lw) => lw.samples[0].roi)).to.deep.equal(['EXT1A', 'Region1STAN0613']);
         });
       });
       it('sends each labware with its SGP number, cassette position and samples, and no left or right position', () => {
