@@ -15,7 +15,7 @@ const RegionsTable = ({ labwareIndex, onRoiBlur }: RegionsTableProps) => {
   const analyserLabware = values.labware[labwareIndex];
 
   return (
-    <Table>
+    <Table tableClassName="border border-gray-400 rounded-md">
       <TableHead>
         <tr>
           <TableHeader>Region</TableHeader>

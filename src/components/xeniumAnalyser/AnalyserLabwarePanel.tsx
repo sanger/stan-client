@@ -5,6 +5,8 @@ import PinkButton from '../buttons/PinkButton';
 import LabwareWorkNumber from './LabwareWorkNumber';
 import RegionsTable from './RegionsTable';
 import { RegionDefinerFormValues, RegionNaming, SlideLayout } from './analyser.types';
+import Panel from '../Panel';
+import { FlaggedBarcodeLink } from '../dataTableColumns/labwareColumns';
 
 type AnalyserLabwarePanelProps = {
   labwareIndex: number;
@@ -16,7 +18,7 @@ type AnalyserLabwarePanelProps = {
   onDefineRegions: () => Promise<void>;
   /** Called with the trimmed region name when a region name field loses focus and is not empty */
   onRoiBlur: (roi: string) => Promise<void>;
-  /** Fields specific to an operation, shown below the SGP number (e.g. the Xenium cassette position) */
+  /** Fields specific to an operation, shown next to the SGP number (e.g. the Xenium cassette position) */
   children?: React.ReactNode;
 };
 
@@ -30,35 +32,36 @@ const AnalyserLabwarePanel = ({
 }: AnalyserLabwarePanelProps) => {
   const { values } = useFormikContext<RegionDefinerFormValues>();
   const analyserLabware = values.labware[labwareIndex];
+  //A slide with fewer than 10 columns sits beside its regions table; a wider one sits above it
+  const gridLayoutClassName = analyserLabware.labware.numColumns < 10 ? 'grid grid-cols-2 gap-x-2' : '';
 
   return (
-    <div className="grid grid-cols-4 gap-x-2">
-      <div className="flex flex-col items-center space-y-8">
-        <Labware
-          labware={analyserLabware.labware}
-          gridDirection={slideLayout.gridDirection}
-          barcodeInfoPosition={slideLayout.barcodeInfoPosition}
-          regions={analyserLabware.regions}
-          onSlotClick={onDefineRegions}
-        />
-        <PinkButton data-testid={'define-regions-button'} onClick={onDefineRegions}>
-          Define Regions
-        </PinkButton>
+    <Panel>
+      <div className="grid justify-items-end">
+        {FlaggedBarcodeLink(analyserLabware.labware.barcode, analyserLabware.labware.flagPriority)}
       </div>
-      <div className="col-span-3">
-        <div className="grid grid-cols-7 gap-x-2">
-          <div className="col-span-1">
-            <div className="grid grid-rows-3 ">
-              <LabwareWorkNumber labwareIndex={labwareIndex} renameRegions={renameRegions} />
-              {children}
-            </div>
-          </div>
-          <div className="col-span-6" data-testid={`${analyserLabware.labware.barcode}-regions-table`}>
-            <RegionsTable labwareIndex={labwareIndex} onRoiBlur={onRoiBlur} />
-          </div>
+      <div className="grid grid-cols-4 gap-x-4 mb-4">
+        <LabwareWorkNumber labwareIndex={labwareIndex} renameRegions={renameRegions} />
+        {children}
+      </div>
+      <div className={gridLayoutClassName}>
+        <div className="flex flex-col items-center space-y-8 mb-4">
+          <Labware
+            labware={analyserLabware.labware}
+            gridDirection={slideLayout.gridDirection}
+            barcodeInfoPosition={slideLayout.barcodeInfoPosition}
+            regions={analyserLabware.regions}
+            onSlotClick={onDefineRegions}
+          />
+          <PinkButton data-testid={'define-regions-button'} onClick={onDefineRegions}>
+            Define Regions
+          </PinkButton>
+        </div>
+        <div data-testid={`${analyserLabware.labware.barcode}-regions-table`}>
+          <RegionsTable labwareIndex={labwareIndex} onRoiBlur={onRoiBlur} />
         </div>
       </div>
-    </div>
+    </Panel>
   );
 };
 
