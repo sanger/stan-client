@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import AteraRun from '../../../../src/pages/AteraRun';
-import { scanLabware, selectFocusBlur } from '../../../generic/utilities';
+import { selectFocusBlur } from '../../../generic/utilities';
 import { enableMapSet } from 'immer';
 
 beforeEach(() => {
@@ -28,9 +28,11 @@ const REQUIRED_MESSAGE = 'Run Name is a required field';
 const TOO_LONG_MESSAGE = 'Run name should be a string of maximum length 32';
 const INVALID_CHARACTERS_MESSAGE = 'Run name should only contain letters, numbers, underscores, hyphens and spaces';
 
-const typeRunName = async (runName: string) => {
-  await userEvent.type(screen.getByTestId('runName'), runName);
-  await userEvent.tab();
+//Pastes the barcode in one go, as typing it one key at a time renders the page for each key, which is slow on CI
+const scanLabwareByPasting = async (barcode: string) => {
+  await userEvent.click(screen.getByTestId('input'));
+  await userEvent.paste(barcode);
+  await userEvent.keyboard('{Enter}');
 };
 
 //Pastes in one go, as typing a long run name one key at a time is slow
@@ -54,7 +56,7 @@ describe('Atera Run', () => {
         <AteraRun />
       </BrowserRouter>
     );
-    await scanLabware('STAN-011');
+    await scanLabwareByPasting('STAN-011');
     await screen.findByText('Run Details');
   });
 
@@ -98,9 +100,11 @@ describe('Atera Run', () => {
     });
 
     it('keeps a space typed at the end of the run name', async () => {
-      await pasteRunName('Run_1-a');
-      //Type the space, as that is where trimming on each key would lose it
-      await typeRunName(' b');
+      await userEvent.click(screen.getByTestId('runName'));
+      await userEvent.paste('Run_1-a');
+      //Type the space, as that is where trimming on each key would lose it.
+      //No tab out of the field, as each blur validates and renders the whole page, which is slow on CI.
+      await userEvent.keyboard(' b');
       expect(screen.getByTestId('runName')).toHaveValue('Run_1-a b');
     });
   });
