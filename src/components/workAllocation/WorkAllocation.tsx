@@ -16,7 +16,7 @@ import CustomReactSelect from '../forms/CustomReactSelect';
 import FormikInput from '../forms/Input';
 import DownloadIcon from '../icons/DownloadIcon';
 import { Authenticated } from '../Authenticated';
-import { Form, Formik } from 'formik';
+import { Form, Formik, FormikHelpers } from 'formik';
 import WorkRow from './WorkRow';
 import { selectOptionValues } from '../forms';
 import LoadingSpinner from '../icons/LoadingSpinner';
@@ -244,6 +244,8 @@ export default function WorkAllocation() {
       .optional()
       .label('Omero Project'),
     ssStudyId: Yup.string().label('DNAP study ID').optional(),
+    xeniumStudyId: Yup.string().label('Xenium study ID').optional(),
+    ateraStudyId: Yup.string().label('Atera study ID').optional(),
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
     numSlides: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
@@ -263,6 +265,47 @@ export default function WorkAllocation() {
       setAddNewOmeroProject(false);
     }
   });
+
+  type StudyInputDivProps = {
+    label: string;
+    formikStudyId: 'ssStudyId' | 'xeniumStudyId' | 'ateraStudyId';
+    formikStudyName: 'studyName' | 'xeniumStudyName' | 'ateraStudyName';
+    values: WorkAllocationFormValues;
+    setFieldValue: FormikHelpers<WorkAllocationFormValues>['setFieldValue'];
+  };
+
+  /** Plain render function (not a hook) so it always reflects the current Formik values. */
+  const StudyInputDiv = ({ label, formikStudyId, formikStudyName, values, setFieldValue }: StudyInputDivProps) => (
+    <div className="md:flex-grow">
+      <FormikInput
+        type={'number'}
+        label={label}
+        name={formikStudyId}
+        value={values[formikStudyId]}
+        onChange={async (e: React.ChangeEvent<HTMLSelectElement>) => {
+          const ssId = Number(e.currentTarget.value);
+          stanCore
+            .GetDnapStudy({ ssId: ssId })
+            .then(async (study) => {
+              await setFieldValue(formikStudyName, study && study.dnapStudy ? study.dnapStudy.name : 'undefined');
+            })
+            .catch(async () => {
+              await setFieldValue(formikStudyName, 'undefined');
+            });
+          await setFieldValue(formikStudyId, e.currentTarget.value);
+        }}
+      />
+      {values[formikStudyName] && values[formikStudyId] && (
+        <div className="flex-row whitespace-nowrap space-x-2 p-0">
+          {values[formikStudyName] === 'undefined' ? (
+            <Pill color="pink">Unknown Sequencescape study id</Pill>
+          ) : (
+            <Pill color="blue">{values[formikStudyName]}</Pill>
+          )}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div>
@@ -531,72 +574,27 @@ export default function WorkAllocation() {
                     min={0}
                   />
                 </div>
-                <div className="md:flex-grow">
-                  <FormikInput
-                    type={'number'}
-                    label="DNAP study ID"
-                    name="ssStudyId"
-                    value={values.ssStudyId}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      const ssId = Number(e.currentTarget.value);
-                      stanCore
-                        .GetDnapStudy({ ssId: ssId })
-                        .then((study) => {
-                          if (study && study.dnapStudy) {
-                            setFieldValue('studyName', study.dnapStudy.name);
-                          } else {
-                            setFieldValue('studyName', 'undefined');
-                          }
-                        })
-                        .catch((e) => {
-                          setFieldValue('studyName', 'undefined');
-                        });
-                      setFieldValue('ssStudyId', e.currentTarget.value);
-                    }}
-                  />
-                  {values.studyName && values.ssStudyId && (
-                    <div className="flex-row whitespace-nowrap space-x-2 p-0">
-                      {values.studyName === 'undefined' ? (
-                        <Pill color="pink">Unknown Sequencescape study id</Pill>
-                      ) : (
-                        <Pill color="blue">{values.studyName}</Pill>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="md:flex-grow">
-                  <FormikInput
-                    type={'number'}
-                    label="Xenium study ID"
-                    name="xeniumStudyId"
-                    value={values.xeniumStudyId}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      const ssId = Number(e.currentTarget.value);
-                      stanCore
-                        .GetDnapStudy({ ssId: ssId })
-                        .then((study) => {
-                          if (study && study.dnapStudy) {
-                            setFieldValue('xeniumStudyName', study.dnapStudy.name);
-                          } else {
-                            setFieldValue('xeniumStudyName', 'undefined');
-                          }
-                        })
-                        .catch((e) => {
-                          setFieldValue('xeniumStudyName', 'undefined');
-                        });
-                      setFieldValue('xeniumStudyId', e.currentTarget.value);
-                    }}
-                  />
-                  {values.xeniumStudyName && values.xeniumStudyId && (
-                    <div className="flex-row whitespace-nowrap space-x-2 p-0">
-                      {values.xeniumStudyName === 'undefined' ? (
-                        <Pill color="pink">Unknown Sequencescape study id</Pill>
-                      ) : (
-                        <Pill color="blue">{values.xeniumStudyName}</Pill>
-                      )}
-                    </div>
-                  )}
-                </div>
+                {StudyInputDiv({
+                  label: 'Atera study ID',
+                  formikStudyId: 'ateraStudyId',
+                  formikStudyName: 'ateraStudyName',
+                  values,
+                  setFieldValue
+                })}
+                {StudyInputDiv({
+                  label: 'DNAP study ID',
+                  formikStudyId: 'ssStudyId',
+                  formikStudyName: 'studyName',
+                  values,
+                  setFieldValue
+                })}
+                {StudyInputDiv({
+                  label: 'Xenium study ID',
+                  formikStudyId: 'xeniumStudyId',
+                  formikStudyName: 'xeniumStudyName',
+                  values,
+                  setFieldValue
+                })}
                 <div className="md:flex-grow">
                   <CustomReactSelect
                     label="Faculty lead"
@@ -690,6 +688,9 @@ export default function WorkAllocation() {
                         Project (cost code description)
                       </TableHeader>
                       <TableHeader sortProps={getTableSortProps('Omero Project')}>Omero Project</TableHeader>
+                      <TableHeader colSpan={2} sortProps={getTableSortProps('Atera Study ID')}>
+                        Atera Study ID
+                      </TableHeader>
                       <TableHeader colSpan={2} sortProps={getTableSortProps('DNAP Study ID')}>
                         DNAP Study ID
                       </TableHeader>
