@@ -17,7 +17,7 @@ const IconButton: React.FC<IconButtonProps> = ({ children, disabled = false, dat
   );
 
   return (
-    <button {...rest} className={buttonClassNames} data-testid={dataTestId ?? ''}>
+    <button type={'button'} {...rest} className={buttonClassNames} data-testid={dataTestId ?? ''}>
       {children}
     </button>
   );
