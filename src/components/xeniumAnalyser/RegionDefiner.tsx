@@ -32,7 +32,7 @@ const sortRegionsByAddress = (regions: Region[]): Array<Region> =>
       compareAddresses(firstAddress(a.sectionGroups[0].addresses), firstAddress(b.sectionGroups[0].addresses))
     );
 
-export const reIndexAndRenameRegions = (regions: Region[], runName: string, barcode: string): Array<Region> => {
+export const reIndexAndRenameXeniumRegions = (regions: Region[], runName: string, barcode: string): Array<Region> => {
   let index = 0;
   return sortRegionsByAddress(regions).map((region) => ({
     ...region,
@@ -44,11 +44,11 @@ export const reIndexAndRenameRegions = (regions: Region[], runName: string, barc
 };
 
 /** The Atera only accepts letters and numbers in region names */
-export const ateraRegionNamePattern = /^[A-Za-z0-9]+$/;
+export const ATERA_REGION_NAME_PATTERN = /^[A-Za-z0-9]+$/;
 
 /** Leaves out the characters the Atera rejects in region names (STAN-0611 -> STAN0611) */
 const ateraLettersAndNumbers = (text: string): string =>
-  [...text].filter((character) => ateraRegionNamePattern.test(character)).join('');
+  [...text].filter((character) => ATERA_REGION_NAME_PATTERN.test(character)).join('');
 
 /**
  * Atera run: as on Xenium analyser, a region of one section is named after its sample's external name,

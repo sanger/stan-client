@@ -31,13 +31,13 @@ import { ErrorMessage, selectOptionValues } from '../components/forms';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
 import RegionDefiner, {
-  ateraRegionNamePattern,
+  ATERA_REGION_NAME_PATTERN,
   reIndexAndRenameAteraRegions
 } from '../components/xeniumAnalyser/RegionDefiner';
 import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
 import { createTableDataForSlots } from '../components/xeniumAnalyser/analyserScan';
 import { regionSamples } from '../components/xeniumAnalyser/analyserRequest';
-import { AnalyserLabwareForm, ateraSlideLayout } from '../components/xeniumAnalyser/analyser.types';
+import { AnalyserLabwareForm, ATERA_SLIDE_LAYOUT } from '../components/xeniumAnalyser/analyser.types';
 import Modal, { ModalBody, ModalFooter } from '../components/Modal';
 import BlueButton from '../components/buttons/BlueButton';
 import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
@@ -82,7 +82,7 @@ const formInitialValues: AteraRunFormValues = {
 };
 
 /**The Atera cassette dock has four positions, numbered from the left**/
-const ateraCassettePositions = [1, 2, 3, 4];
+const ATERA_CASSETTE_POSITIONS = [1, 2, 3, 4];
 
 /**Labware without probe hybridisation can't be saved, so this names the labware to remove before saving**/
 const RemoveLabwareMessage = ({ barcodes }: { barcodes: Array<string> }) =>
@@ -193,7 +193,7 @@ const AteraRun = () => {
                   .label('ROI')
                   .max(64, 'Region of interest field should be string of maximum length 64')
                   .matches(
-                    ateraRegionNamePattern,
+                    ATERA_REGION_NAME_PATTERN,
                     'Region names can only contain letters and numbers, without spaces, dashes or underscores'
                   ),
                 sectionGroups: Yup.array().min(1).required('At least one section group per region'),
@@ -314,8 +314,7 @@ const AteraRun = () => {
                               label={'SGP Number'}
                               name={'workNumberAll'}
                               dataTestId={'workNumberAll'}
-                              onWorkNumberChange={async (_workNumber) => {
-                                const workNumber = _workNumber.trim();
+                              onWorkNumberChange={async (workNumber) => {
                                 const hasSgpNumberLink =
                                   workNumber.length > 0 ? await hasUploadedFilesInSgpFolder(workNumber) : false;
                                 await setValues((prev) => {
@@ -386,14 +385,14 @@ const AteraRun = () => {
                           >
                             <AnalyserLabwarePanel
                               labwareIndex={lwIndex}
-                              slideLayout={ateraSlideLayout}
+                              slideLayout={ATERA_SLIDE_LAYOUT}
                               renameRegions={reIndexAndRenameAteraRegions}
                               onDefineRegions={async () => {
                                 await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
                               }}
                               onRoiBlur={async (barcode) => {
                                 //A barcode for a name the Atera rejects would be no use on the machine
-                                if (ateraRegionNamePattern.test(barcode)) {
+                                if (ATERA_REGION_NAME_PATTERN.test(barcode)) {
                                   await setFieldValue('barcodeDisplayerProps', { barcode });
                                 }
                               }}
@@ -401,7 +400,7 @@ const AteraRun = () => {
                               <div>
                                 <label>Cassette Position</label>
                                 <CustomReactSelect
-                                  options={ateraCassettePositions.map((position) => ({
+                                  options={ATERA_CASSETTE_POSITIONS.map((position) => ({
                                     value: String(position),
                                     label: String(position)
                                   }))}
@@ -417,7 +416,7 @@ const AteraRun = () => {
                         <ModalBody>
                           <RegionDefiner
                             labwareIndex={values.activeRegionDefinerLabwareIndex}
-                            slideLayout={ateraSlideLayout}
+                            slideLayout={ATERA_SLIDE_LAYOUT}
                             renameRegions={reIndexAndRenameAteraRegions}
                           />
                         </ModalBody>

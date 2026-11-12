@@ -22,8 +22,7 @@ const LabwareWorkNumber = ({ labwareIndex, renameRegions }: LabwareWorkNumberPro
       <WorkNumberSelect
         name={`labware.${labwareIndex}.workNumber`}
         dataTestId={`${analyserLabware.labware.barcode}-workNumber`}
-        onWorkNumberChange={async (_workNumber) => {
-          const workNumber = _workNumber.trim();
+        onWorkNumberChange={async (workNumber) => {
           const hasSgpNumberLink = workNumber.length > 0 ? await hasUploadedFilesInSgpFolder(workNumber) : false;
           await setValues((prev) => ({
             ...prev,

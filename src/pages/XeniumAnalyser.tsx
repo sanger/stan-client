@@ -39,11 +39,11 @@ import { BarcodeDisplayer } from '../components/modal/BarcodeDisplayer';
 import { hasUploadedFilesInSgpFolder } from '../lib/services/fileService';
 import Label from '../components/forms/Label';
 import Modal, { ModalBody, ModalFooter } from '../components/Modal';
-import RegionDefiner, { reIndexAndRenameRegions } from '../components/xeniumAnalyser/RegionDefiner';
+import RegionDefiner, { reIndexAndRenameXeniumRegions } from '../components/xeniumAnalyser/RegionDefiner';
 import AnalyserLabwarePanel from '../components/xeniumAnalyser/AnalyserLabwarePanel';
 import { createTableDataForSlots } from '../components/xeniumAnalyser/analyserScan';
 import { regionSamples } from '../components/xeniumAnalyser/analyserRequest';
-import { AnalyserLabwareForm, xeniumSlideLayout } from '../components/xeniumAnalyser/analyser.types';
+import { AnalyserLabwareForm, XENIUM_SLIDE_LAYOUT } from '../components/xeniumAnalyser/analyser.types';
 
 export type XeniumAnalyserFormValues = {
   lotNumberA: string;
@@ -331,7 +331,11 @@ const XeniumAnalyser = () => {
                                       ...lw,
                                       workNumber,
                                       hasSgpNumberLink,
-                                      regions: reIndexAndRenameRegions(lw.regions, prev.runName, lw.labware.barcode)
+                                      regions: reIndexAndRenameXeniumRegions(
+                                        lw.regions,
+                                        prev.runName,
+                                        lw.labware.barcode
+                                      )
                                     }))
                                   };
                                 });
@@ -356,7 +360,7 @@ const XeniumAnalyser = () => {
                                       runName,
                                       labware: prev.labware.map((lw) => ({
                                         ...lw,
-                                        regions: reIndexAndRenameRegions(lw.regions, runName, lw.labware.barcode)
+                                        regions: reIndexAndRenameXeniumRegions(lw.regions, runName, lw.labware.barcode)
                                       }))
                                     }));
                                   }
@@ -413,8 +417,8 @@ const XeniumAnalyser = () => {
                           >
                             <AnalyserLabwarePanel
                               labwareIndex={lwIndex}
-                              slideLayout={xeniumSlideLayout}
-                              renameRegions={reIndexAndRenameRegions}
+                              slideLayout={XENIUM_SLIDE_LAYOUT}
+                              renameRegions={reIndexAndRenameXeniumRegions}
                               onDefineRegions={async () => {
                                 await setFieldValue('activeRegionDefinerLabwareIndex', lwIndex);
                               }}
@@ -440,8 +444,8 @@ const XeniumAnalyser = () => {
                         <ModalBody>
                           <RegionDefiner
                             labwareIndex={values.activeRegionDefinerLabwareIndex}
-                            slideLayout={xeniumSlideLayout}
-                            renameRegions={reIndexAndRenameRegions}
+                            slideLayout={XENIUM_SLIDE_LAYOUT}
+                            renameRegions={reIndexAndRenameXeniumRegions}
                           />
                         </ModalBody>
                         <ModalFooter>

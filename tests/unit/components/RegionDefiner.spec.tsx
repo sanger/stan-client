@@ -1,9 +1,13 @@
 import { XeniumAnalyserFormValues } from '../../../src/pages/XeniumAnalyser';
-import { AnalyserLabwareForm, Region, xeniumSlideLayout } from '../../../src/components/xeniumAnalyser/analyser.types';
+import {
+  AnalyserLabwareForm,
+  Region,
+  XENIUM_SLIDE_LAYOUT
+} from '../../../src/components/xeniumAnalyser/analyser.types';
 import { Formik } from 'formik';
 import RegionDefiner, {
   reIndexAndRenameAteraRegions,
-  reIndexAndRenameRegions
+  reIndexAndRenameXeniumRegions
 } from '../../../src/components/xeniumAnalyser/RegionDefiner';
 import { act, cleanup, fireEvent, render, RenderResult } from '@testing-library/react';
 
@@ -87,8 +91,8 @@ const renderRegionDefiner = ({ selectedAddresses, selectedRegionColorIndex, regi
         return (
           <RegionDefiner
             labwareIndex={labwareIndex}
-            slideLayout={xeniumSlideLayout}
-            renameRegions={reIndexAndRenameRegions}
+            slideLayout={XENIUM_SLIDE_LAYOUT}
+            renameRegions={reIndexAndRenameXeniumRegions}
           />
         );
       }}
