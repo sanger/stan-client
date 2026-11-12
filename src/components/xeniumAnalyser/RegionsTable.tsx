@@ -35,13 +35,14 @@ const RegionsTable = ({ labwareIndex, onRoiBlur }: RegionsTableProps) => {
                   as="textarea"
                   data-testid={`${analyserLabware.labware.barcode}-${regionIndex}-roi`}
                   name={`labware[${labwareIndex}].regions[${regionIndex}].roi`}
-                  //Replaces Formik's onBlur, so that leaving the field calls onRoiBlur (the page shows the region barcode pop-up).
-                  //Formik's handleBlur is still called first, so the field is marked touched and its validation error shows.
+                  //This onBlur replaces Formik's own (Field puts our props after its own),
+                  //so handleBlur is called to mark the field touched, which shows its error
                   onBlur={async (e: React.ChangeEvent<HTMLInputElement>) => {
                     handleBlur(e);
                     const roi = e.target.value;
-                    //No region barcode for an empty name, or for one with a space at either end, which neither page accepts
-                    if (roi.trim().length !== 0 && roi === roi.trim()) {
+                    //Show the region barcode only for a name that can be saved:
+                    //not empty, and no space at the start or end (core rejects those)
+                    if (roi && roi === roi.trim()) {
                       await onRoiBlur(roi);
                     }
                   }}

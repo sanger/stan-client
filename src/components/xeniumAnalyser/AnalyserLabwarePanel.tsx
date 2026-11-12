@@ -14,7 +14,7 @@ type AnalyserLabwarePanelProps = {
   slideLayout: SlideLayout;
   /** Called when the user clicks a slot or the Define Regions button */
   onDefineRegions: () => Promise<void>;
-  /** Called with the trimmed region name when a region name field loses focus and is not empty */
+  /** Called with the region name when a region name field loses focus, unless it is empty or starts or ends with a space */
   onRoiBlur: (roi: string) => Promise<void>;
   /** Fields specific to an operation, shown next to the SGP number (e.g. the Xenium cassette position) */
   children?: React.ReactNode;
