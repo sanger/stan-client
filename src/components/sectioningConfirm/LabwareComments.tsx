@@ -35,61 +35,58 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
   const sectionDetail = findPlannedActionBySectionGroupId(layoutPlan.plannedActions, sectionGroupId);
   if (!sectionDetail) return null;
   return (
-    <div className="flex flex-row items-start justify-start gap-x-2">
-      <div className="flex flex-col">
-        <div className={'grid grid-cols-5 gap-x-1 gap-y-2'}>
-          {sectionNumberDisplay !== SectionNumberSetting.HIDE && (
-            <>
-              <Input
-                type="text"
-                data-testid={'external-name'}
-                value={sectionDetail.source.tissue?.externalName ?? ''}
-                disabled={true}
-              />
-              <Input
-                type="text"
-                data-testid={'section-number'}
-                value={sectionDetail.source.newSection}
-                min={1}
-                disabled={sectionNumberDisplay === SectionNumberSetting.DISABLE}
-                onChange={(e) => onSectionNumberChange(sectionDetail.addresses, e.target.value)}
-              />
-              <Input
-                type="text"
-                data-testid={'section-addresses'}
-                value={Array.from(sectionDetail.addresses).join(', ')}
-                min={1}
-                disabled={true}
-              />
-              <Input
-                type="number"
-                data-testid={'section-thickness'}
-                value={sectionDetail.source.sampleThickness}
-                min={0.5}
-                step={0.5}
-                onChange={(e) => {
-                  onSectionThicknessChange(sectionDetail.addresses, e.target.value);
-                }}
-              />
-              <div className={'flex flex-col'}>
-                <CustomReactSelect
-                  value={sectionDetail.source.commentIds?.map((comment) => comment + '')}
-                  isDisabled={disabledComment}
-                  handleChange={(options) => {
-                    const optionsValues = Array.isArray(options)
-                      ? options.map((option) => option.value)
-                      : [(options as OptionType).value];
-                    onCommentChange(optionsValues);
-                  }}
-                  className={'w-full'}
-                  isMulti
-                  options={selectOptionValues(comments, 'text', 'id')}
-                />
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+    <div className="grid grid-cols-5 gap-x-1 gap-y-2">
+      {sectionNumberDisplay !== SectionNumberSetting.HIDE && (
+        <>
+          <div
+            data-testid="external-name"
+            className="min-h-[38px] ring-sdb-100 opacity-75 border border-gray-300'
+                px-3 py-2 whitespace-pre-wrap break-words bg-gray-200 rounded-md shadow-sm"
+          >
+            {sectionDetail.source.tissue?.externalName ?? ''}
+          </div>
+          <Input
+            type="text"
+            data-testid={'section-number'}
+            value={sectionDetail.source.newSection}
+            min={1}
+            disabled={sectionNumberDisplay === SectionNumberSetting.DISABLE}
+            onChange={(e) => onSectionNumberChange(sectionDetail.addresses, e.target.value)}
+          />
+          <div
+            data-testid={'section-addresses'}
+            className="min-h-[38px] ring-sdb-100 opacity-75 border border-gray-300'
+                px-3 py-2 whitespace-pre-wrap break-words bg-gray-200 rounded-md shadow-sm"
+          >
+            {Array.from(sectionDetail.addresses).join(', ')}
+          </div>
+          <Input
+            type="number"
+            data-testid={'section-thickness'}
+            value={sectionDetail.source.sampleThickness}
+            min={0.5}
+            step={0.5}
+            onChange={(e) => {
+              onSectionThicknessChange(sectionDetail.addresses, e.target.value);
+            }}
+          />
+          <div className={'flex flex-col'}>
+            <CustomReactSelect
+              value={sectionDetail.source.commentIds?.map((comment) => comment + '')}
+              isDisabled={disabledComment}
+              handleChange={(options) => {
+                const optionsValues = Array.isArray(options)
+                  ? options.map((option) => option.value)
+                  : [(options as OptionType).value];
+                onCommentChange(optionsValues);
+              }}
+              className={'w-full'}
+              isMulti
+              options={selectOptionValues(comments, 'text', 'id')}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };
