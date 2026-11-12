@@ -12,7 +12,7 @@ import {
 } from '../types/sdk';
 import EntityManager from '../components/entityManager/EntityManager';
 import Heading from '../components/Heading';
-import { groupBy } from 'lodash';
+import { capitalize, groupBy } from 'lodash';
 import StyledLink from '../components/StyledLink';
 import { StanCoreContext } from '../lib/sdk';
 import { TabList } from '../components/TabbedPane';
@@ -31,6 +31,7 @@ export default function Configuration() {
   const stanCore = useContext(StanCoreContext);
   const groupedComments = groupBy(configuration.comments, 'category');
   const groupedEquipments = groupBy(configuration.equipments, 'category');
+  const groupedProbePanels = groupBy(configuration.probePanels, 'type');
 
   //Listed in alphabetical order
   const configElements = [
@@ -321,81 +322,34 @@ export default function Configuration() {
 
       /**Probe Panels**/
       <div className="space-y-8">
-        <div data-testid="config">
-          <Heading level={2}>Probe Panels - CytAssist</Heading>
-          <p className="mt-3 mb-6 text-lg" />
-          <EntityManager
-            initialEntities={configuration.cytassistProbePanels}
-            displayKeyColumnName={'name'}
-            valueColumnName={'enabled'}
-            onChangeValue={(entity, value) => {
-              const enabled = typeof value === 'boolean' ? value : false;
-              return stanCore
-                .SetProbePanelEnabled({
-                  enabled,
-                  name: entity.name,
-                  type: ProbeType.Cytassist
-                })
-                .then((res) => res.setProbePanelEnabled);
-            }}
-            onCreate={(name) =>
-              stanCore.AddProbePanel({ type: ProbeType.Cytassist, name }).then((res) => res.addProbePanel)
-            }
-            valueFieldComponentInfo={{
-              type: 'CHECKBOX'
-            }}
-          />
-        </div>
-        <div data-testid="config">
-          <Heading level={2}>Probe Panels - Spike</Heading>
-          <p className="mt-3 mb-6 text-lg" />
-          <EntityManager
-            initialEntities={configuration.spikeProbePanels}
-            displayKeyColumnName={'name'}
-            valueColumnName={'enabled'}
-            onChangeValue={(entity, value) => {
-              const enabled = typeof value === 'boolean' ? value : false;
-              return stanCore
-                .SetProbePanelEnabled({
-                  enabled,
-                  name: entity.name,
-                  type: ProbeType.Spike
-                })
-                .then((res) => res.setProbePanelEnabled);
-            }}
-            onCreate={(name) =>
-              stanCore.AddProbePanel({ type: ProbeType.Spike, name }).then((res) => res.addProbePanel)
-            }
-            valueFieldComponentInfo={{
-              type: 'CHECKBOX'
-            }}
-          />
-        </div>
-        <div data-testid="config">
-          <Heading level={2}>Probe Panels - Xenium</Heading>
-          <p className="mt-3 mb-6 text-lg" />
-          <EntityManager
-            initialEntities={configuration.xeniumProbePanels}
-            displayKeyColumnName={'name'}
-            valueColumnName={'enabled'}
-            onChangeValue={(entity, value) => {
-              const enabled = typeof value === 'boolean' ? value : false;
-              return stanCore
-                .SetProbePanelEnabled({
-                  enabled,
-                  name: entity.name,
-                  type: ProbeType.Xenium
-                })
-                .then((res) => res.setProbePanelEnabled);
-            }}
-            onCreate={(name) =>
-              stanCore.AddProbePanel({ type: ProbeType.Xenium, name }).then((res) => res.addProbePanel)
-            }
-            valueFieldComponentInfo={{
-              type: 'CHECKBOX'
-            }}
-          />
-        </div>
+        {Object.keys(groupedProbePanels)
+          .sort((a, b) => alphaNumericSortDefault(a.toLowerCase(), b.toLowerCase()))
+          .map((type) => (
+            <div key={type} data-testid="probe-panels" className="space-y-3">
+              <Heading level={2}>{capitalize(type)} Probe Panels</Heading>
+              <EntityManager
+                initialEntities={groupedProbePanels[type]}
+                displayKeyColumnName={'name'}
+                valueColumnName={'enabled'}
+                onChangeValue={async (entity, value) => {
+                  const enabled = typeof value === 'boolean' ? value : false;
+                  return stanCore
+                    .SetProbePanelEnabled({
+                      enabled,
+                      name: entity.name,
+                      type: type as ProbeType
+                    })
+                    .then((res) => res.setProbePanelEnabled);
+                }}
+                onCreate={async (name) =>
+                  stanCore.AddProbePanel({ type: type as ProbeType, name }).then((res) => res.addProbePanel)
+                }
+                valueFieldComponentInfo={{
+                  type: 'CHECKBOX'
+                }}
+              />
+            </div>
+          ))}
       </div>,
 
       /**Programs**/
@@ -744,7 +698,8 @@ export default function Configuration() {
     handleRefreshReprojectedEntries,
     loading,
     dnapStudies,
-    numberOfDnapStudies
+    numberOfDnapStudies,
+    groupedProbePanels
   ]);
 
   return (
