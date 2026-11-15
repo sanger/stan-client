@@ -36,6 +36,8 @@ export type AnalyserLabwareForm = {
   index?: number;
   regions: Array<Region>;
   analyserScanData?: AnalyserScanDataFieldsFragment;
+  /** Why the slide's details couldn't be fetched from core when it was scanned */
+  fetchError?: string;
   /**
    * Temporarily stores the color index selected by the user while defining
    * a new region in the RegionDefiner component.

@@ -1,5 +1,7 @@
 import { SetStateAction } from 'react';
+import { ClientError } from 'graphql-request';
 import { LabwareFlaggedFieldsFragment, Sdk } from '../../types/sdk';
+import { extractServerErrors } from '../../types/stan';
 import { sectionGroupsBySample } from '../../lib/helpers/labwareHelper';
 import { hasUploadedFilesInSgpFolder } from '../../lib/services/fileService';
 import { AnalyserLabwareForm, AnalyserScanFormValues, Region, RegionNaming } from './analyser.types';
@@ -39,7 +41,7 @@ export const createTableDataForSlots = <T extends AnalyserScanFormValues>(
         .then((res) => res.findLatestOp);
       /**If probe hybridisation has been recorded, get the sample positions,otherwise return**/
       if (latestOp) {
-        stanCore.GetAnalyserScanData({ barcode: labware.barcode }).then((res) => {
+        await stanCore.GetAnalyserScanData({ barcode: labware.barcode }).then((res) => {
           setValues((prev) => {
             const analyserLabware: AnalyserLabwareForm | undefined = prev.labware.find(
               (lw) => lw.labware.barcode === labware.barcode
@@ -75,7 +77,22 @@ export const createTableDataForSlots = <T extends AnalyserScanFormValues>(
         return;
       }
     } catch (e) {
-      return;
+      //Still add the slide, so the page says why, it can be removed and scanned again,
+      //and it can't be saved, as for a slide without probe hybridisation
+      const reason = e instanceof ClientError && e.response.errors ? extractServerErrors(e).message : null;
+      setValues((prev) => {
+        prev.labware.push({
+          labware,
+          hybridisation: false,
+          workNumber: values.workNumberAll,
+          position: undefined,
+          regions: initialRegions(prev.runName),
+          fetchError: `Could not get the details of ${labware.barcode}${
+            reason ? `: ${reason}` : ''
+          }. Remove it and scan it again.`
+        });
+        return { ...prev };
+      });
     }
   };
   setLabwareSampleData(labware);

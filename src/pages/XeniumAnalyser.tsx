@@ -261,7 +261,7 @@ const XeniumAnalyser = () => {
                       .filter((lw) => !lw.hybridisation)
                       .map((lw) => (
                         <Warning key={`war-${lw.labware.barcode}`}>
-                          No probe hybridisation recorded for {lw.labware.barcode}
+                          {lw.fetchError ?? `No probe hybridisation recorded for ${lw.labware.barcode}`}
                         </Warning>
                       ))}
                     <LabwareScanner
