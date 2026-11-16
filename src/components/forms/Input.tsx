@@ -15,6 +15,7 @@ interface FormikInputProps {
   displayTag?: string;
   info?: React.ReactNode;
   preventEnterKeyDefault?: boolean;
+  dataTestId?: string;
 }
 
 const FormikInput = ({
@@ -25,6 +26,7 @@ const FormikInput = ({
   info,
   preventEnterKeyDefault = true,
   className,
+  dataTestId,
   ...rest
 }: FormikInputProps) => {
   const inputClassNames = classNames(
@@ -42,7 +44,7 @@ const FormikInput = ({
         <Label name={label} displayTag={displayTag} info={info} className={'whitespace-nowrap'}>
           <Field
             type={type}
-            data-testid={label}
+            data-testid={dataTestId ?? label}
             className={inputClassNames}
             name={name}
             onKeyDown={preventEnterKeyDefault ? onPreventEnterKeyDefault : undefined}
