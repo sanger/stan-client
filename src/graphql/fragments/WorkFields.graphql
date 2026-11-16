@@ -19,6 +19,9 @@ fragment WorkFields on Work {
   omeroProject {
     ...OmeroProjectFields
   }
+  ateraStudy {
+    ...DnapStudyFields
+  }
   dnapStudy {
     ...DnapStudyFields
   }
