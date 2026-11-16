@@ -51,6 +51,31 @@ describe('Xenium Analyser', () => {
       cy.findByTestId('removeButton').click();
     });
   });
+  describe('when core gives an error for a scanned labware', () => {
+    before(() => {
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', () => {
+            return HttpResponse.json({
+              errors: [{ message: 'Exception while fetching data (/findLatestOp) : Core is down' }]
+            });
+          })
+        );
+      });
+    });
+    it('shows the labware with the reason, so it can be removed and scanned again', () => {
+      cy.get('#labwareScanInput').clear().type('STAN-0611{enter}');
+      cy.findByText('Could not get the details of STAN-0611: Core is down. Remove it and scan it again.').should(
+        'be.visible'
+      );
+      cy.findByTestId('removeButton').should('exist');
+      cy.findByText('Analyser Details').should('not.exist');
+    });
+    after(() => {
+      //The next describe scans STAN-0611 again
+      cy.findByTestId('removeButton').click();
+    });
+  });
   describe('when labware without probe hybridisation is scanned before labware with it', () => {
     before(() => {
       //FindLatestOperationQuery should return null for STAN-0611 only

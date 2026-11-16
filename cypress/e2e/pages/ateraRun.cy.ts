@@ -144,6 +144,42 @@ describe('Atera Run', () => {
     });
   });
 
+  describe('When core gives an error for a scanned labware', () => {
+    before(() => {
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.query<GetAnalyserScanDataQuery, GetAnalyserScanDataQueryVariables>('GetAnalyserScanData', () => {
+            return HttpResponse.json({
+              errors: [{ message: 'Exception while fetching data (/analyserScanData) : Core is down' }]
+            });
+          })
+        );
+      });
+      cy.get('#labwareScanInput').clear().type('STAN-0615{enter}');
+    });
+    it('shows the labware with the reason, without its details', () => {
+      cy.findByText('Could not get the details of STAN-0615: Core is down. Remove it and scan it again.').should(
+        'be.visible'
+      );
+      cy.findByTestId('STAN-0615-position').should('not.exist');
+    });
+    context('when it is removed and scanned again', () => {
+      before(() => {
+        cy.findAllByTestId('removeButton').eq(3).click();
+        cy.get('#labwareScanInput').clear().type('STAN-0615{enter}');
+      });
+      after(() => {
+        //Removed, so the rest of the spec has the same three labware
+        cy.findAllByTestId('removeButton').eq(3).click();
+        cy.findByText('STAN-0615').should('not.exist');
+      });
+      it('shows its details', () => {
+        cy.findByTestId('STAN-0615-position').should('exist');
+        cy.findByText(/Could not get the details of STAN-0615/).should('not.exist');
+      });
+    });
+  });
+
   describe('Run details', () => {
     it('displays the run details fields', () => {
       cy.findByText('Run Details').should('be.visible');
