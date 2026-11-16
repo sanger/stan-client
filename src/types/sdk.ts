@@ -133,8 +133,10 @@ export type AnalyserLabware = {
   barcode: Scalars['String']['input'];
   /** Decoding consumables lot number. */
   decodingConsumablesLot?: InputMaybe<Scalars['String']['input']>;
+  /** The index of the cassette in the machine. */
+  index?: InputMaybe<Scalars['Int']['input']>;
   /** The cassette position for the labware. */
-  position: CassettePosition;
+  position?: InputMaybe<CassettePosition>;
   /** The sample regions of interest in this labware. */
   samples: Array<SampleRoi>;
   /** The work number for the labware. */
@@ -150,9 +152,9 @@ export type AnalyserRequest = {
   /** The labware involved in this request. */
   labware: Array<AnalyserLabware>;
   /** The lot number for the decoding reagents A. */
-  lotNumberA: Scalars['String']['input'];
+  lotNumberA?: InputMaybe<Scalars['String']['input']>;
   /** The lot number for the decoding reagents B. */
-  lotNumberB: Scalars['String']['input'];
+  lotNumberB?: InputMaybe<Scalars['String']['input']>;
   /** The name of the operation type to record. */
   operationType: Scalars['String']['input'];
   /** The time at which this operation was performed. */
@@ -161,6 +163,8 @@ export type AnalyserRequest = {
   repeat?: InputMaybe<Scalars['Boolean']['input']>;
   /** The run name. */
   runName: Scalars['String']['input'];
+  /** Comment id for the work type. */
+  workTypeCommentId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** Information to show when a user scans in labware for the analyser op. */
@@ -172,6 +176,8 @@ export type AnalyserScanData = {
   cellSegmentationRecorded: Scalars['Boolean']['output'];
   /** The names of probes recorded on the labware. */
   probes: Array<Scalars['String']['output']>;
+  /** The work numbers and atera study ids linked to the labware. */
+  workNumberAteraStudyIds: Array<WorkNumberAteraStudyId>;
   /** The work numbers and xenium study ids linked to the labware. */
   workNumberXeniumStudyIds: Array<WorkNumberXeniumStudyId>;
 };
@@ -4522,6 +4528,15 @@ export type Work = {
   workTypes: Array<WorkType>;
   /** The xenium study for this work, if any. */
   xeniumStudy?: Maybe<DnapStudy>;
+};
+
+/** A work number and a possible atera study sequencescape id. */
+export type WorkNumberAteraStudyId = {
+  __typename?: 'WorkNumberAteraStudyId';
+  /** The sequencescape ID of an atera study, if the work is linked to one. */
+  ateraStudyId?: Maybe<Scalars['Int']['output']>;
+  /** A work number. */
+  workNumber: Scalars['String']['output'];
 };
 
 /** A work number and a possible xenium study sequencescape id. */
