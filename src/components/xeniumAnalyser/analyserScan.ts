@@ -41,6 +41,7 @@ export const createTableDataForSlots = <T extends AnalyserScanFormValues>(
         .then((res) => res.findLatestOp);
       /**If probe hybridisation has been recorded, get the sample positions,otherwise return**/
       if (latestOp) {
+        //Awaited so that if core fails, the error reaches the catch below and the slide is shown with the reason
         await stanCore.GetAnalyserScanData({ barcode: labware.barcode }).then((res) => {
           setValues((prev) => {
             const analyserLabware: AnalyserLabwareForm | undefined = prev.labware.find(
