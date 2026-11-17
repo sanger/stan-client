@@ -412,7 +412,11 @@ describe('Work Allocation', () => {
     context('Adding a valid Atera study id to an existing work', () => {
       before(() => {
         cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
-        cy.findByTestId('SGP1012-ateraStudy').clear().type('13').blur();
+        cy.findByTestId('SGP1012-ateraStudy')
+          .scrollIntoView()
+          .clear({ force: true })
+          .type('13', { force: true })
+          .blur();
       });
 
       it('displays the Atera Study name ', () => {
@@ -422,7 +426,11 @@ describe('Work Allocation', () => {
 
     context('Setting the Atera study to a non valid study id', () => {
       before(() => {
-        cy.findByTestId('SGP1012-ateraStudy').clear().type('312').blur();
+        cy.findByTestId('SGP1012-ateraStudy')
+          .scrollIntoView()
+          .clear({ force: true })
+          .type('312', { force: true })
+          .blur();
       });
       it('displays an error message', () => {
         cy.findByText('Unknown Sequencescape study id: 312').should('be.visible');
