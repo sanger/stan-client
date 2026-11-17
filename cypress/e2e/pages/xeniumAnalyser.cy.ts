@@ -9,6 +9,20 @@ import {
 } from '../../../src/types/sdk';
 import { HttpResponse } from 'msw';
 
+//A1 is the last slot and the barcode is below it, as the slide sits in the Xenium analyser
+const shouldDrawSlideWithA1AndBarcodeAtTheBottom = (barcode: string) => {
+  cy.findByTestId(`labware-${barcode}`).within(() => {
+    cy.findAllByTestId(/^slot-wrapper-/)
+      .last()
+      .should('have.attr', 'data-testid', 'slot-wrapper-A1')
+      .then(($a1) => {
+        cy.contains<HTMLElement>(barcode).should(($barcode) => {
+          expect($barcode[0].getBoundingClientRect().top).to.be.at.least($a1[0].getBoundingClientRect().bottom);
+        });
+      });
+  });
+};
+
 describe('Xenium Analyser', () => {
   before(() => {
     cy.visit('/lab/xenium_analyser');
@@ -37,6 +51,37 @@ describe('Xenium Analyser', () => {
       cy.findByTestId('removeButton').click();
     });
   });
+  describe('when labware without probe hybridisation is scanned before labware with it', () => {
+    before(() => {
+      //FindLatestOperationQuery should return null for STAN-0611 only
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>(
+            'FindLatestOperation',
+            ({ variables }) => {
+              return HttpResponse.json({
+                data: {
+                  findLatestOp: variables.barcode === 'STAN-0611' ? null : { id: 1 }
+                }
+              });
+            }
+          )
+        );
+      });
+      cy.get('#labwareScanInput').clear().type('STAN-0611{enter}');
+      cy.findByTextContent('No probe hybridisation recorded for STAN-0611').should('be.visible');
+      cy.get('#labwareScanInput').clear().type('STAN-0612{enter}');
+    });
+    it('shows the details of the labware with probe hybridisation', () => {
+      cy.findByTestId('STAN-0612-workNumber').should('exist');
+      cy.findByTestId('STAN-0612-regions-table').should('exist');
+      cy.findByTestId('STAN-0611-regions-table').should('not.exist');
+    });
+    after(() => {
+      cy.findAllByTestId('removeButton').eq(1).click();
+      cy.findByTestId('removeButton').click();
+    });
+  });
   describe('When a labware is scanned', () => {
     before(() => {
       cy.get('#labwareScanInput').clear().type('STAN-0611{enter}');
@@ -45,6 +90,9 @@ describe('Xenium Analyser', () => {
       cy.findAllByRole('table').eq(0).should('have.length.above', 0);
       //Table should display barcode of labware scanned
       cy.findAllByRole('table').contains('td', 'STAN-0611');
+    });
+    it('draws the slide with A1 and the barcode at the bottom', () => {
+      shouldDrawSlideWithA1AndBarcodeAtTheBottom('STAN-0611');
     });
     context('when a region of interest is set', () => {
       before(() => {
@@ -64,6 +112,50 @@ describe('Xenium Analyser', () => {
       });
       it('the barcodeDisplayer contains the roi barcode', () => {
         cy.findByTestId('2d-barcode').contains('123456789');
+      });
+    });
+    context('when a region of interest is cleared', () => {
+      before(() => {
+        // Dismiss any open react-select/menu overlays before typing in.
+        cy.get('body').click(0, 0);
+        cy.findByTestId('STAN-0611-1-roi').scrollIntoView().clear({ force: true }).blur();
+      });
+      it('shows that a region of interest is required', () => {
+        cy.findByText('Region of interest is a required field').should('be.visible');
+      });
+    });
+    context('when a region of interest ends with a space', () => {
+      before(() => {
+        // Dismiss any open react-select/menu overlays before typing in.
+        cy.get('body').click(0, 0);
+        cy.findByTestId('STAN-0611-2-roi')
+          .scrollIntoView()
+          .clear({ force: true })
+          .type('123456789 ', { force: true }) //Core rejects a region name with a space at the start or end
+          .blur();
+      });
+      it('shows that a region of interest should not start or end with a space', () => {
+        cy.findByText('Region of interest should not start or end with a space').should('be.visible');
+      });
+      it('does not display the region barcode', () => {
+        cy.findByText('Scan the region barcode into your machine').should('not.exist');
+      });
+    });
+    context('when a region of interest starts with a space', () => {
+      before(() => {
+        // Dismiss any open react-select/menu overlays before typing in.
+        cy.get('body').click(0, 0);
+        cy.findByTestId('STAN-0611-3-roi')
+          .scrollIntoView()
+          .clear({ force: true })
+          .type(' 123456789', { force: true }) //Core rejects a region name with a space at the start or end
+          .blur();
+      });
+      it('shows that a region of interest should not start or end with a space', () => {
+        cy.findAllByText('Region of interest should not start or end with a space').should('have.length', 2);
+      });
+      it('does not display the region barcode', () => {
+        cy.findByText('Scan the region barcode into your machine').should('not.exist');
       });
     });
 
@@ -99,6 +191,11 @@ describe('Xenium Analyser', () => {
       });
       it('displays regions definer component', () => {
         cy.findByText('Set Regions').should('be.visible');
+      });
+      it('draws the region definer slide with A1 and the barcode at the bottom', () => {
+        cy.findByRole('dialog').within(() => {
+          shouldDrawSlideWithA1AndBarcodeAtTheBottom('STAN-0611');
+        });
       });
       describe('creating a new region', () => {
         before(() => {
@@ -156,6 +253,12 @@ describe('Xenium Analyser', () => {
     });
     it('should disable any further labware scanning', () => {
       cy.get('#labwareScanInput').should('be.disabled');
+    });
+    it('opens one region definer when Define Regions is clicked', () => {
+      cy.findAllByTestId('define-regions-button').eq(1).click();
+      cy.findAllByRole('dialog').should('have.length', 1);
+      cy.findByRole('button', { name: 'Done' }).click();
+      cy.findByRole('dialog').should('not.exist');
     });
   });
   describe('When  two labware are scanned and one is removed', () => {
