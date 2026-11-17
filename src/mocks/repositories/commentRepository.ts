@@ -204,6 +204,14 @@ const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({
     category: 'qPCR results',
     text: 'Potential to work'
+  }),
+  commentFactory.build({
+    category: 'sample prep reagent type',
+    text: 'FFPE'
+  }),
+  commentFactory.build({
+    category: 'sample prep reagent type',
+    text: 'Fresh frozen'
   })
 ];
 
