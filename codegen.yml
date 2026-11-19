@@ -32,4 +32,3 @@ generates:
         Timestamp: string
         Date: string
       arrayInputCoercion: false
-

@@ -18,33 +18,27 @@ jest.mock('../../../src/lib/sdk', () => ({
             {
               workNumber: 'WORK_1',
               project: {
-                __typename: 'Project',
                 name: 'Project 1'
               },
               workRequester: {
-                __typename: 'ReleaseRecipient',
                 username: 'User 1'
               }
             },
             {
               workNumber: 'WORK_2',
               project: {
-                __typename: 'Project',
                 name: 'Project 2'
               },
               workRequester: {
-                __typename: 'ReleaseRecipient',
                 username: 'User 2'
               }
             },
             {
               workNumber: 'WORK_3',
               project: {
-                __typename: 'Project',
                 name: 'Project 3'
               },
               workRequester: {
-                __typename: 'ReleaseRecipient',
                 username: 'User 3'
               }
             }
@@ -59,11 +53,9 @@ jest.mock('../../../src/lib/sdk', () => ({
             {
               workNumber: 'WORK_1',
               project: {
-                __typename: 'Project',
                 name: 'Project 1'
               },
               workRequester: {
-                __typename: 'ReleaseRecipient',
                 username: 'User 1'
               },
               status: WorkStatus.Active
@@ -72,11 +64,9 @@ jest.mock('../../../src/lib/sdk', () => ({
             {
               workNumber: 'WORK_3',
               project: {
-                __typename: 'Project',
                 name: 'Project 3'
               },
               workRequester: {
-                __typename: 'ReleaseRecipient',
                 username: 'User 3'
               },
               status: WorkStatus.Failed
@@ -84,11 +74,9 @@ jest.mock('../../../src/lib/sdk', () => ({
             {
               workNumber: 'WORK_2',
               project: {
-                __typename: 'Project',
                 name: 'Project 2'
               },
               workRequester: {
-                __typename: 'ReleaseRecipient',
                 username: 'User 2'
               },
               status: WorkStatus.Active

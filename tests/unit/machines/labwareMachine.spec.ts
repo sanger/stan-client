@@ -222,13 +222,13 @@ describe('labwareMachine', () => {
                 numColumns: 1,
                 created: new Date().toISOString(),
                 state: LabwareState.Active,
-                __typename: 'Labware',
                 labwareType: {
-                  __typename: 'LabwareType',
                   name: 'Proviasette',
                   numRows: 1,
-                  numColumns: 1
+                  numColumns: 1,
+                  labelType: null
                 },
+                externalBarcode: null,
                 barcode: `${barcode}`,
                 slots: [
                   {
@@ -238,13 +238,13 @@ describe('labwareMachine', () => {
                     block: false,
                     samples: [
                       {
-                        __typename: 'Sample',
                         id: 1,
+                        section: null,
+                        blockHighestSection: null,
                         bioState: {
                           name: 'Blah'
                         },
                         tissue: {
-                          __typename: 'Tissue',
                           externalName: 'External 1',
                           replicate: '5',
                           donor: {
@@ -258,13 +258,15 @@ describe('labwareMachine', () => {
                             name: 'None',
                             enabled: false
                           },
+                          hmdmc: null,
                           spatialLocation: {
                             name: 'Upper pole',
                             code: 3,
                             tissueType: {
                               name: 'Lung'
                             }
-                          }
+                          },
+                          collectionDate: null
                         }
                       }
                     ]

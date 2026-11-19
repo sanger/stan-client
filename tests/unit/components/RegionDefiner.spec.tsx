@@ -229,7 +229,7 @@ describe('RegionDefiner component', () => {
 
 describe('reIndexAndRenameAteraRegions', () => {
   //A region of one section per given slot, each from tissue with the given external name
-  const region = (addresses: Array<string>, externalName?: string): Region => ({
+  const region = (addresses: Array<string>, externalName: string | null): Region => ({
     roi: '',
     sectionGroups: addresses.map((address) => ({
       source: {
@@ -247,7 +247,7 @@ describe('reIndexAndRenameAteraRegions', () => {
       region(['A1'], 'EXT-1_A'),
       region(['B1', 'C1'], 'EXT-1_A'),
       //no external name, so named like grouped sections
-      region(['D1']),
+      region(['D1'], null),
       region(['E1', 'F1'], 'EXT-1_A')
     ];
     const renamed = reIndexAndRenameAteraRegions([...regions].reverse(), 'Run 123', 'STAN-6116');

@@ -108,7 +108,7 @@ describe('WorkProgressSummaryInput.tsx', () => {
           } catch (e) {
             expect(e).toEqual(
               new ValidationError(
-                'searchValues[0] must be one of the following values: unstarted, active, paused, completed, failed, withdrawn'
+                'searchValues[0] must be one of the following values: active, completed, failed, paused, unstarted, withdrawn'
               )
             );
           }
