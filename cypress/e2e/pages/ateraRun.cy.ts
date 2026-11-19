@@ -13,15 +13,15 @@ import { HttpResponse } from 'msw';
 import { selectOption, shouldDisplaySelectedValue, shouldOptionsHaveLength } from '../shared/customReactSelect.cy';
 import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHandlers';
 
-//A1 is the first slot and the barcode is above it, as the slide sits in the Atera
-const shouldDrawSlideWithA1AndBarcodeAtTheTop = (barcode: string) => {
+//A1 is the last slot and the barcode is below it, as the slide sits in the Atera, the same way as in the Xenium analyser
+const shouldDrawSlideWithA1AndBarcodeAtTheBottom = (barcode: string) => {
   cy.findByTestId(`labware-${barcode}`).within(() => {
     cy.findAllByTestId(/^slot-wrapper-/)
-      .first()
+      .last()
       .should('have.attr', 'data-testid', 'slot-wrapper-A1')
       .then(($a1) => {
         cy.contains<HTMLElement>(barcode).should(($barcode) => {
-          expect($barcode[0].getBoundingClientRect().bottom).to.be.at.most($a1[0].getBoundingClientRect().top);
+          expect($barcode[0].getBoundingClientRect().top).to.be.at.least($a1[0].getBoundingClientRect().bottom);
         });
       });
   });
@@ -209,9 +209,9 @@ describe('Atera Run', () => {
   });
 
   describe('Labware details', () => {
-    it('draws each slide with A1 and the barcode at the top', () => {
-      shouldDrawSlideWithA1AndBarcodeAtTheTop('STAN-0612');
-      shouldDrawSlideWithA1AndBarcodeAtTheTop('STAN-0613');
+    it('draws each slide with A1 and the barcode at the bottom', () => {
+      shouldDrawSlideWithA1AndBarcodeAtTheBottom('STAN-0612');
+      shouldDrawSlideWithA1AndBarcodeAtTheBottom('STAN-0613');
     });
     it('displays the SGP number and regions only for the labware with probe hybridisation Atera', () => {
       ['STAN-0612', 'STAN-0613'].forEach((barcode) => {
@@ -323,9 +323,9 @@ describe('Atera Run', () => {
         cy.findAllByRole('dialog').should('have.length', 1);
         cy.findByText('Set Regions').should('be.visible');
       });
-      it('draws the slide with A1 and the barcode at the top', () => {
+      it('draws the slide with A1 and the barcode at the bottom', () => {
         cy.findByRole('dialog').within(() => {
-          shouldDrawSlideWithA1AndBarcodeAtTheTop('STAN-0613');
+          shouldDrawSlideWithA1AndBarcodeAtTheBottom('STAN-0613');
         });
       });
       it('closes it when Done is clicked', () => {
