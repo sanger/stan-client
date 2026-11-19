@@ -194,7 +194,7 @@ const AteraRun = () => {
                   .max(64, 'Region of interest field should be string of maximum length 64')
                   .matches(
                     ATERA_REGION_NAME_PATTERN,
-                    'Region names can only contain letters and numbers, without spaces, dashes or underscores'
+                    'Region names can only contain letters, numbers, dashes and underscores'
                   ),
                 sectionGroups: Yup.array().min(1).required('At least one section group per region'),
                 colorIndexNumber: Yup.number()

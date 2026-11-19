@@ -45,7 +45,7 @@ describe('Atera Run', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          //Every sample's external name is EXT-1_A, so a region of one section is named EXT1A
+          //Every sample's external name is EXT-1_A, so a region of one section is named EXT-1_A
           graphql.query<FindFlaggedLabwareQuery, FindFlaggedLabwareQueryVariables>(
             'FindFlaggedLabware',
             ({ variables }) => {
@@ -221,10 +221,10 @@ describe('Atera Run', () => {
       cy.findByTestId('STAN-0611-workNumber').should('not.exist');
       cy.findByTestId('STAN-0611-regions-table').should('not.exist');
     });
-    it('names each region of one section after its external name, without the dash and underscore', () => {
-      cy.findByTestId('STAN-0612-0-roi').should('have.value', 'EXT1A');
-      cy.findByTestId('STAN-0612-1-roi').should('have.value', 'EXT1A');
-      cy.findByTestId('STAN-0613-0-roi').should('have.value', 'EXT1A');
+    it('names each region of one section after its external name, keeping the dash and underscore', () => {
+      cy.findByTestId('STAN-0612-0-roi').should('have.value', 'EXT-1_A');
+      cy.findByTestId('STAN-0612-1-roi').should('have.value', 'EXT-1_A');
+      cy.findByTestId('STAN-0613-0-roi').should('have.value', 'EXT-1_A');
     });
 
     context('when an SGP number is selected for all labware', () => {
@@ -263,29 +263,28 @@ describe('Atera Run', () => {
         cy.findByTestId('STAN-0612-1-roi')
           .scrollIntoView()
           .clear({ force: true })
-          .type('Region-1', { force: true }) //Not allowed on Atera: region names can only have letters and numbers
+          .type('Region.1', { force: true }) //Not allowed on Atera: only letters, numbers, dashes and underscores
           .blur();
       });
-      it('does not display a region barcode, as the name has a dash', () => {
-        cy.findByTestId('STAN-0612-1-roi').should('have.value', 'Region-1');
+      it('does not display a region barcode, as the name has a full stop', () => {
+        cy.findByTestId('STAN-0612-1-roi').should('have.value', 'Region.1');
         cy.findByText('Scan the region barcode into your machine').should('not.exist');
       });
-      it('shows that region names can only have letters and numbers', () => {
-        cy.findByText(
-          'Region names can only contain letters and numbers, without spaces, dashes or underscores'
-        ).should('be.visible');
+      it('shows which characters region names can have', () => {
+        cy.findByText('Region names can only contain letters, numbers, dashes and underscores').should('be.visible');
       });
-      context('when the name is corrected', () => {
+      context('when the name is corrected to one with a dash and an underscore', () => {
         before(() => {
-          cy.findByTestId('STAN-0612-1-roi').clear({ force: true }).type('Region1', { force: true }).blur();
+          cy.findByTestId('STAN-0612-1-roi').clear({ force: true }).type('Region-1_2', { force: true }).blur();
         });
         after(() => {
           cy.findByTestId('closeBarcodeDisplayer').click();
         });
         it('no longer shows the error', () => {
-          cy.findByText(
-            'Region names can only contain letters and numbers, without spaces, dashes or underscores'
-          ).should('not.exist');
+          cy.findByText('Region names can only contain letters, numbers, dashes and underscores').should('not.exist');
+        });
+        it('displays the region barcode to scan into the machine', () => {
+          cy.findByTestId('2d-barcode').contains('Region-1_2');
         });
       });
     });
@@ -305,10 +304,8 @@ describe('Atera Run', () => {
         cy.findByTestId('STAN-0612-1-roi').clear({ force: true }).type('Region1', { force: true }).blur();
         cy.findByTestId('closeBarcodeDisplayer').click();
       });
-      it('shows that region names can only have letters and numbers', () => {
-        cy.findByText(
-          'Region names can only contain letters and numbers, without spaces, dashes or underscores'
-        ).should('be.visible');
+      it('shows which characters region names can have', () => {
+        cy.findByText('Region names can only contain letters, numbers, dashes and underscores').should('be.visible');
       });
       it('does not display the region barcode for the name without its space', () => {
         cy.findByText('Scan the region barcode into your machine').should('not.exist');
@@ -345,9 +342,9 @@ describe('Atera Run', () => {
         cy.findByTestId('create-update-region-button').click();
         cy.findByRole('button', { name: 'Done' }).click();
       });
-      it('names the grouped sections Region1 followed by the barcode without its dash, and the next region after its external name', () => {
-        cy.findByTestId('STAN-0613-0-roi').should('have.value', 'Region1STAN0613');
-        cy.findByTestId('STAN-0613-1-roi').should('have.value', 'EXT1A');
+      it('names the grouped sections Region1_ followed by the barcode, and the next region after its external name', () => {
+        cy.findByTestId('STAN-0613-0-roi').should('have.value', 'Region1_STAN-0613');
+        cy.findByTestId('STAN-0613-1-roi').should('have.value', 'EXT-1_A');
       });
     });
 
@@ -477,7 +474,7 @@ describe('Atera Run', () => {
       });
       it('sends the region names without the run name, keeping the name typed before the run name', () => {
         cy.wrap(null).should(() => {
-          expect(request!.labware.map((lw) => lw.samples[0].roi)).to.deep.equal(['123456789', 'Region1STAN0613']);
+          expect(request!.labware.map((lw) => lw.samples[0].roi)).to.deep.equal(['123456789', 'Region1_STAN-0613']);
         });
       });
       it('sends each labware with its SGP number, cassette position and samples, and no left or right position', () => {

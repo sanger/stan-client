@@ -43,31 +43,19 @@ export const reIndexAndRenameXeniumRegions = (regions: Region[], runName: string
   }));
 };
 
-/** The Atera only accepts letters and numbers in region names */
-export const ATERA_REGION_NAME_PATTERN = /^[A-Za-z0-9]+$/;
-
-/** Leaves out the characters the Atera rejects in region names (STAN-0611 -> STAN0611) */
-const ateraLettersAndNumbers = (text: string): string =>
-  [...text].filter((character) => ATERA_REGION_NAME_PATTERN.test(character)).join('');
+/** The Atera accepts letters, numbers, dashes and underscores in region names, and nothing else */
+export const ATERA_REGION_NAME_PATTERN = /^[A-Za-z0-9_-]+$/;
 
 /**
- * Atera run: as on Xenium analyser, a region of one section is named after its sample's external name,
- * and grouped sections are named Region1<barcode>, Region2<barcode>, ... in slot order, without the run name.
- * Characters the Atera rejects are left out (EXT-1_A -> EXT1A, STAN-0611 -> STAN0611).
+ * Atera run: named as on Xenium analyser, without the run name. A region of one section is named after
+ * its sample's external name, and grouped sections Region1_<barcode>, Region2_<barcode>, ... in slot order.
+ * External names can have full stops, which become underscores, as the lab already does on Xenium (0.25 -> 0_25).
  */
-export const reIndexAndRenameAteraRegions = (regions: Region[], _runName: string, barcode: string): Array<Region> => {
-  let index = 0;
-  return sortRegionsByAddress(regions).map((region) => {
-    const externalName = ateraLettersAndNumbers(region.sectionGroups[0].source.tissue?.externalName ?? '');
-    return {
-      ...region,
-      roi:
-        region.sectionGroups.length === 1 && externalName
-          ? externalName
-          : `Region${++index}${ateraLettersAndNumbers(barcode)}`
-    };
-  });
-};
+export const reIndexAndRenameAteraRegions = (regions: Region[], _runName: string, barcode: string): Array<Region> =>
+  reIndexAndRenameXeniumRegions(regions, '', barcode).map((region) => ({
+    ...region,
+    roi: region.roi.replaceAll('.', '_')
+  }));
 
 function isLabwareErrorObject(err: unknown): err is FormikErrors<AnalyserLabwareForm> {
   return typeof err === 'object' && err !== null;
