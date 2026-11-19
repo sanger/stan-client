@@ -18,6 +18,8 @@ import {
   GetWorkNumbersQuery,
   GetWorkNumbersQueryVariables,
   OmeroProject,
+  UpdateWorkAteraStudyMutation,
+  UpdateWorkAteraStudyMutationVariables,
   UpdateWorkDnapStudyMutation,
   UpdateWorkDnapStudyMutationVariables,
   UpdateWorkNumBlocksMutation,
@@ -139,6 +141,8 @@ const workHandlers = [
       ? omeroProjectRepository.find('name', variables.omeroProject)
       : undefined;
     const dnapStudy = variables.ssStudyId ? dnapStudyRepository.find('ssId', variables.ssStudyId) : undefined;
+    const ateraStudy = variables.ateraStudyId ? dnapStudyRepository.find('ssId', variables.ateraStudyId) : undefined;
+    const xeniumStudy = variables.xeniumStudyId ? dnapStudyRepository.find('ssId', variables.xeniumStudyId) : undefined;
     const facultyLead = variables.facultyLead
       ? ReleaseDestinationRepository.find('name', variables.facultyLead)
       : undefined;
@@ -173,7 +177,18 @@ const workHandlers = [
         numOriginalSamples: variables.numOriginalSamples
       },
       {
-        associations: { workTypes, costCode, project, program, workRequester, omeroProject, dnapStudy, facultyLead },
+        associations: {
+          workTypes,
+          costCode,
+          project,
+          program,
+          workRequester,
+          omeroProject,
+          dnapStudy,
+          xeniumStudy,
+          ateraStudy,
+          facultyLead
+        },
         transient: { isRnD: variables.prefix === 'R&D' }
       }
     );
@@ -333,7 +348,28 @@ const workHandlers = [
     }
     work.workTypes = workTypes;
     return HttpResponse.json({ data: { updateWorkWorkTypes: work } }, { status: 200 });
-  })
+  }),
+
+  graphql.mutation<UpdateWorkAteraStudyMutation, UpdateWorkAteraStudyMutationVariables>(
+    'UpdateWorkAteraStudy',
+    ({ variables }) => {
+      const work = workRepository.find('workNumber', variables.workNumber);
+      if (!work) {
+        return HttpResponse.json({ errors: [{ message: `Work ${variables.workNumber} not found` }] }, { status: 404 });
+      }
+      let dnapStudy = dnapStudyRepository.find('ssId', variables.ssStudyId!);
+
+      if (!dnapStudy) {
+        return HttpResponse.json(
+          { errors: [{ message: `Unknown Sequencescape study id: ${variables.ssStudyId}` }] },
+          { status: 404 }
+        );
+      }
+      work.ateraStudy = dnapStudy;
+      workRepository.save(work);
+      return HttpResponse.json({ data: { updateWorkAteraStudy: work } }, { status: 200 });
+    }
+  )
 ];
 
 export default workHandlers;

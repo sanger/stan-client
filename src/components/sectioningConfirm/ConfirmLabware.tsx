@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useMachine, useSelector } from '@xstate/react';
 import variants from '../../lib/motionVariants';
 import Labware from '../labware/Labware';
@@ -99,7 +99,12 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       removePlan(layoutPlan.destinationLabware.barcode!);
     }
   }, [mode, setNotifyDelete, removePlan, layoutPlan.destinationLabware.barcode, sectionNumberEnabled]);
-
+  const labwareCommentsGridLayoutClassName = useMemo(() => {
+    if (labware.numColumns < 10) {
+      return 'grid grid-cols-3';
+    }
+    return '';
+  }, [labware]);
   return (
     <motion.div
       variants={variants.fadeInWithLift}
@@ -129,7 +134,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       </div>
       <div
         data-testid={`div-slide-${labware.barcode}`}
-        className={`${sectionNumberEnabled && 'md:grid md:grid-cols-3'}`}
+        className={`${sectionNumberEnabled} && ${labwareCommentsGridLayoutClassName}`}
       >
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
@@ -141,7 +146,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
           />
         </div>
         {sectionNumberEnabled && (
-          <div className="p-4 space-y-2 space-x-2 col-span-2 bg-gray-100">
+          <div className="p-4 space-y-2 space-x-2 col-span-2 bg-gray-100 ml-4">
             <Heading level={3} showBorder={false}>
               Comments
             </Heading>

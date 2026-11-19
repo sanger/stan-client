@@ -233,6 +233,12 @@ function AppShell({ children }: AppShellParams) {
                     description={'Recording Probe hybridisation'}
                   >
                     <NavLinkMenuItem
+                      caption={'Probe Hybridisation Atera'}
+                      path={'/lab/probe_hybridisation_atera'}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Recording Probe hybridisation for Atera slides.'}
+                    />
+                    <NavLinkMenuItem
                       caption={'Probe Hybridisation CytAssist'}
                       path={'/lab/probe_hybridisation_cytassist'}
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
@@ -309,14 +315,15 @@ function AppShell({ children }: AppShellParams) {
                     />
                   </Menu>
                   <Menu
-                    caption={'Xenium'}
+                    caption={'Cell Segmentation'}
                     icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Recording Xenium run information'}
+                    description={'Recording Cell Segmentation and QC'}
                   >
                     <NavLinkMenuItem
                       caption={'Cell Segmentation'}
                       path={'/lab/cell_segmentation'}
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Recording Cell Segmentation'}
                     />
                     <NavLinkMenuItem
                       caption={'Cell Segmentation QC'}
@@ -324,6 +331,12 @@ function AppShell({ children }: AppShellParams) {
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording Cell Segmentation QC'}
                     />
+                  </Menu>
+                  <Menu
+                    caption={'Xenium'}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Recording Xenium run information'}
+                  >
                     <NavLinkMenuItem
                       caption={'Xenium Analyser'}
                       path={'/lab/xenium_analyser'}
@@ -341,6 +354,18 @@ function AppShell({ children }: AppShellParams) {
                       path={'/lab/xenium_metrics'}
                       icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording region of interest metrics for Xenium slides'}
+                    />
+                  </Menu>
+                  <Menu
+                    caption={'Atera'}
+                    icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Recording Atera run information'}
+                  >
+                    <NavLinkMenuItem
+                      caption={'Atera Run'}
+                      path={'/lab/atera_run'}
+                      icon={<LabwareIcon className="shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Recording Atera run information'}
                     />
                   </Menu>
                 </Menu>
@@ -551,6 +576,9 @@ function AppShell({ children }: AppShellParams) {
                     </div>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Probe Hybridisation</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
+                      <StanMobileNavLink to="/lab/probe_hybridisation_atera">
+                        Probe Hybridisation Atera
+                      </StanMobileNavLink>
                       <StanMobileNavLink to="/lab/probe_hybridisation_cytassist">
                         Probe Hybridisation CytAssist
                       </StanMobileNavLink>
@@ -572,13 +600,21 @@ function AppShell({ children }: AppShellParams) {
                       </StanMobileNavLink>
                     </div>
 
-                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Xenium</h4>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Cell Segmentation</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/cell_segmentation">Cell Segmentation</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/cell_segmentation_qc">Cell Segmentation QC</StanMobileNavLink>
+                    </div>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Xenium</h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/xenium_analyser">Xenium Analyser</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/xenium_qc">Xenium Analyser QC</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/xenium_metrics">Xenium Metrics</StanMobileNavLink>
+                    </div>
+
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Atera</h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
+                      <StanMobileNavLink to="/lab/atera_run">Atera Run</StanMobileNavLink>
                     </div>
                   </div>
                   <Authenticated role={UserRole.Enduser}>
