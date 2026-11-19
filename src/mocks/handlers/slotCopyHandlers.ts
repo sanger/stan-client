@@ -28,6 +28,9 @@ const savedSlotCopy: SlotCopyLoad = {
   cassetteLot: '123456',
   costing: SlideCosting.Sgp,
   sources: [],
+  barcode: null,
+  bioState: null,
+  executionType: null,
   contents: [
     {
       sourceBarcode: 'STAN-1410',
@@ -60,9 +63,7 @@ const slotCopyHandlers = [
     );
 
     const payload: SlotCopyMutation = {
-      __typename: 'Mutation',
       slotCopy: {
-        __typename: 'OperationResult',
         labware: newLabwareArr.map((labware) => buildLabwareFragment(labware))
       }
     };
@@ -71,7 +72,6 @@ const slotCopyHandlers = [
 
   graphql.mutation<SaveSlotCopyMutation, SaveSlotCopyMutationVariables>('SaveSlotCopy', ({ variables }) => {
     const payload: SaveSlotCopyMutation = {
-      __typename: 'Mutation',
       saveSlotCopy: savedSlotCopy
     };
     return HttpResponse.json({ data: payload }, { status: 200 });

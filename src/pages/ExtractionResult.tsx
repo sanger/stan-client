@@ -109,8 +109,9 @@ export default function ExtractionResult() {
                     extractResult: {
                       labware: lw.lw,
                       passFail: lw.result,
-                      concentration: lw.concentration,
-                      commentId: lw.commentId
+                      concentration: lw.concentration ?? null,
+                      commentId: lw.commentId,
+                      result: null
                     }
                   };
                 })

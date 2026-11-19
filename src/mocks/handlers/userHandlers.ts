@@ -27,7 +27,6 @@ const userHandlers = [
       data: {
         login: {
           user: {
-            __typename: 'User',
             username,
             role: UserRole.Normal
           }
@@ -51,7 +50,6 @@ const userHandlers = [
       return HttpResponse.json({
         data: {
           user: {
-            __typename: 'User',
             username: 'jb1',
             role: UserRole.Normal
           }
@@ -61,7 +59,6 @@ const userHandlers = [
       return HttpResponse.json({
         data: {
           user: {
-            __typename: 'User',
             username: currentUser,
             role: UserRole.Normal
           }
@@ -101,7 +98,6 @@ const userHandlers = [
         data: {
           registerAsEndUser: {
             user: {
-              __typename: 'User',
               username,
               role: UserRole.Enduser
             }

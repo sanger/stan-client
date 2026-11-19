@@ -5,7 +5,6 @@ import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 const printers = labwareTypeInstances.reduce<GetPrintersQuery['printers']>((memo, labwareType) => {
   if (labwareType.labelType?.name) {
     memo.push({
-      __typename: 'Printer',
       labelTypes: [
         {
           name: labwareType.labelType.name
@@ -15,7 +14,6 @@ const printers = labwareTypeInstances.reduce<GetPrintersQuery['printers']>((memo
     });
 
     memo.push({
-      __typename: 'Printer',
       labelTypes: [
         {
           name: labwareType.labelType.name
@@ -25,7 +23,6 @@ const printers = labwareTypeInstances.reduce<GetPrintersQuery['printers']>((memo
     });
   }
   memo.push({
-    __typename: 'Printer',
     labelTypes: [
       {
         name: 'Label Type 1'

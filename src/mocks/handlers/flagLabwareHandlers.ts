@@ -91,13 +91,11 @@ export const createFlaggedLabware = (barcode: string): LabwareFlaggedFieldsFragm
     flaggedLabware.flagged = true;
     flaggedLabware.flagPriority = FlagPriority.Note;
   }
-  flaggedLabware.__typename = 'LabwareFlagged';
   return flaggedLabware;
 };
 
 export const buildFlaggedLabwareFragment = (lw: Labware): LabwareFlaggedFieldsFragment => {
   const labware = buildLabwareFragment(lw) as LabwareFlaggedFieldsFragment;
   labware.flagged = lw.barcode.endsWith('00');
-  labware.__typename = 'LabwareFlagged';
   return labware;
 };

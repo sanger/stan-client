@@ -1,16 +1,35 @@
 overwrite: true
 schema: ${GRAPHQL_SCHEMA_PATH}
 documents: 'src/**/*.graphql'
-config:
-  scalars:
-    Address: string
-    Timestamp: string
-    Date: string
-  arrayInputCoercion: false
 
 generates:
+  src/types/schema-types.ts:
+    plugins:
+      - typescript
+    config:
+      scalars:
+        Address: string
+        Timestamp: string
+        Date: string
+      avoidOptionals:
+        object: true
+        field: true
+        inputValue: false
+        defaultValue: false
+
   src/types/sdk.ts:
-    plugins: ['typescript-operations']
+    plugins:
+      - add:
+          content: "export * from './schema-types';"
+      - typescript-operations
+      - typescript-graphql-request
     config:
       gqlImport: graphql-request#gql
-      dedupeFragments: true
+      importSchemaTypesFrom: 'src/types/schema-types.ts'
+      namespacedImportName: Types
+      scalars:
+        Address: string
+        Timestamp: string
+        Date: string
+      arrayInputCoercion: false
+
