@@ -23,6 +23,8 @@ describe('Add External ID page', () => {
   context('when form is submitted without filling the form', () => {
     before(() => {
       cy.get('#labwareScanInput').type('STAN-4311{enter}');
+      //Wait for the labware to load before submitting. If Submit is clicked first, the error shows but goes away when the labware loads
+      cy.get("input[name='sectionExternalNames[0].externalName']").should('be.visible');
       cy.findByRole('button', { name: 'Submit' }).click();
     });
 
