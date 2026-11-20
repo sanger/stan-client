@@ -37,6 +37,7 @@ const planHandlers = [
               const labware = JSON.parse(labwareJson);
 
               return {
+                sectioningOrder: 1,
                 sampleThickness: '1,5',
                 newSection: uniqueId(),
                 sample: {
@@ -74,8 +75,7 @@ const planHandlers = [
         data: {
           plan: {
             labware: plan.labware,
-            operations: plan.operations,
-            __typename: 'PlanResult'
+            operations: plan.operations
           }
         }
       });
@@ -125,19 +125,15 @@ export function findPlanData(sourceLabware: Labware, destinationLabware: Labware
       destination: buildFlaggedLabwareFragment(destinationLabware),
       plan: {
         operationType: {
-          __typename: 'OperationType',
           name: 'Section'
         },
         planActions: [
           {
-            __typename: 'PlanAction',
             sectioningOrder: 3,
             source: {
-              __typename: 'Slot',
               address: 'A1',
               samples: [
                 {
-                  __typename: 'Sample',
                   id: sourceLabware.slots[0].samples[0].id,
                   tissue: sourceLabware.slots[0].samples[0].tissue
                 }
@@ -145,12 +141,10 @@ export function findPlanData(sourceLabware: Labware, destinationLabware: Labware
               labwareId: sourceLabware.id
             },
             destination: {
-              __typename: 'Slot',
               labwareId: destinationLabware.id,
               address: 'A1'
             },
             sample: {
-              __typename: 'Sample',
               id: sourceLabware.slots[0].samples[0].id
             },
             newSection: '3',

@@ -2,6 +2,7 @@ import { graphql, HttpResponse } from 'msw';
 import {
   ExtractResultQuery,
   ExtractResultQueryVariables,
+  FlagPriority,
   LabwareFlaggedFieldsFragment,
   PassFail
 } from '../../types/sdk';
@@ -19,7 +20,11 @@ const extractionResultHandlers = [
     });
     newLabware.barcode = variables.barcode;
 
-    const labwareFlagged: LabwareFlaggedFieldsFragment = { ...newLabware, __typename: 'LabwareFlagged', flagged: true };
+    const labwareFlagged: LabwareFlaggedFieldsFragment = {
+      ...newLabware,
+      flagPriority: FlagPriority.Note,
+      flagged: true
+    };
     return HttpResponse.json({
       data: {
         extractResult: { result: PassFail.Pass, labware: labwareFlagged, concentration: '1.3' }

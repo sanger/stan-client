@@ -41,7 +41,8 @@ export const locationItemFactory = Factory.define<StoredItem>(({ sequence, param
     __typename: 'StoredItem',
     barcode: `STAN-${sequence + 1000}`,
     location: locationFactory.build(),
-    address: params.address ?? null
+    address: params.address ?? null,
+    addressIndex: params.addressIndex ?? null
   };
 
   if (associations.location) {

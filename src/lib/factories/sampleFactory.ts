@@ -34,7 +34,8 @@ export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(({ params, 
   hmdmc: associations.hmdmc ?? hmdmcFactory.build(),
   medium: associations.medium ?? mediumFactory.build(),
   fixative: associations.fixative ?? fixativeFactory.build(),
-  cellClass: associations.cellClass ?? cellClassFactory.build()
+  cellClass: associations.cellClass ?? cellClassFactory.build(),
+  collectionDate: associations.collectionDate ?? faker.date.past().toISOString()
 }));
 
 export const bioStateFactory: Factory<BioState> = Factory.define<BioState>(({ params, sequence }) => ({

@@ -4,7 +4,10 @@
   "private": true,
   "proxy": "http://localhost:8080/",
   "dependencies": {
+    "@parcel/watcher": "^2.6.0",
     "@react-aria/tabs": "^3.9.7",
+    "@react-stately/tabs": "^3.9.1",
+    "@react-stately/collections": "^3.13.1",
     "@sanger/ui-styling": "^4.3.0",
     "@storybook/react-webpack5": "^7.6.3",
     "@tailwindcss/aspect-ratio": "^0.4.2",
@@ -77,8 +80,7 @@
     "build-storybook": "export SET NODE_OPTIONS=--openssl-legacy-provider  && sb build -s public",
     "deploy-storybook": "storybook-to-ghpages",
     "format": "prettier --write .",
-    "lint": "npx eslint . --ext .ts,.tsx",
-    "postinstall": "patch-package"
+    "lint": "npx eslint . --ext .ts,.tsx"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -100,10 +102,10 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@craco/craco": "^7.1.0",
     "@faker-js/faker": "^8.3.1",
-    "@graphql-codegen/cli": "^5.0.2",
-    "@graphql-codegen/typescript": "^4.0.2",
-    "@graphql-codegen/typescript-graphql-request": "^6.1.0",
-    "@graphql-codegen/typescript-operations": "^4.1.0",
+    "@graphql-codegen/cli": "^8.0.0",
+    "@graphql-codegen/typescript": "^7.0.1",
+    "@graphql-codegen/typescript-graphql-request": "^8.0.2",
+    "@graphql-codegen/typescript-operations": "^7.0.1",
     "@storybook/addon-actions": "^7.6.3",
     "@storybook/addon-essentials": "^7.6.3",
     "@storybook/addon-links": "^7.6.3",

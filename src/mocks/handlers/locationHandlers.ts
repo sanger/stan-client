@@ -46,7 +46,7 @@ const locationHandlers = [
   graphql.mutation<StoreBarcodeMutation, StoreBarcodeMutationVariables>('StoreBarcode', ({ variables }) => {
     let item;
     try {
-      item = locationRepository.storeBarcode(variables.barcode, variables.locationBarcode, variables.address);
+      item = locationRepository.storeBarcode(variables.barcode, variables.locationBarcode, variables.address ?? null);
     } catch (e) {
       return HttpResponse.json({ errors: [{ message: (e as Error).message }] }, { status: 400 });
     }
@@ -181,7 +181,6 @@ function addLocationHierarchy(barcode: string, linkedLocation: LinkedLocationFie
 
 export function locationResponse(location: Location): LocationFieldsFragment {
   return {
-    __typename: 'Location',
     barcode: location.barcode,
     fixedName: location.fixedName,
     customName: location.customName,
@@ -191,7 +190,6 @@ export function locationResponse(location: Location): LocationFieldsFragment {
     leaf: location.leaf,
     parent: location.parent
       ? {
-          __typename: 'LinkedLocation',
           barcode: location.parent.barcode,
           fixedName: location.parent.fixedName,
           customName: location.parent.customName
@@ -199,19 +197,16 @@ export function locationResponse(location: Location): LocationFieldsFragment {
       : null,
     size: location.size
       ? {
-          __typename: 'Size',
           numRows: location.size.numRows,
           numColumns: location.size.numColumns
         }
       : null,
     stored: location.stored.map((item) => ({
-      __typename: 'StoredItem',
       barcode: item.barcode,
       address: item.address
     })),
     children: location.children.map((child) => {
       return {
-        __typename: 'LinkedLocation',
         barcode: child.barcode,
         fixedName: child.fixedName,
         customName: child.customName,

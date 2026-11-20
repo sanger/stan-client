@@ -14,8 +14,8 @@ const FormikProps = {
 };
 
 const probePanels: ProbePanelFieldsFragment[] = [
-  { name: 'Custom breast', __typename: 'ProbePanel', enabled: true, type: ProbeType.Xenium },
-  { name: 'Custom brain', __typename: 'ProbePanel', enabled: true, type: ProbeType.Xenium }
+  { name: 'Custom breast', enabled: true, type: ProbeType.Xenium },
+  { name: 'Custom brain', enabled: true, type: ProbeType.Xenium }
 ];
 describe('ProbeAddPanel', () => {
   describe('On Mount', () => {

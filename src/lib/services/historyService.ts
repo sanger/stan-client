@@ -12,8 +12,7 @@ const initHistory: HistoryFieldsFragment = {
   entries: [],
   labware: [],
   samples: [],
-  flagBarcodes: [],
-  __typename: 'History'
+  flagBarcodes: []
 };
 
 export type HistoryService = {

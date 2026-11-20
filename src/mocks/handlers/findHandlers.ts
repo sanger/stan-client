@@ -58,7 +58,8 @@ export function buildFindResult(numRecords: number, maxRecords: number): FindRes
 
   const labwareLocations = _.sampleSize(labware, locationCount).map((labware) => ({
     labwareId: labware.id,
-    locationId: _.sample(locations)?.id ?? 1
+    locationId: _.sample(locations)?.id ?? 1,
+    address: faker.location.street()
   }));
 
   return {

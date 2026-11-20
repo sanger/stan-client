@@ -24,16 +24,17 @@ export default Factory.define<WorkFieldsFragment, { isRnD: boolean }>(
       costCode: associations.costCode ?? costCodeFactory.build(),
       project: associations.project ?? projectFactory.build(),
       program: associations.program ?? programFactory.build(),
-      facultyLead: associations.facultyLead ?? undefined,
+      facultyLead: associations.facultyLead ?? null,
       status: params.status ?? WorkStatus.Unstarted,
-      numBlocks: params.numBlocks,
-      numSlides: params.numSlides,
-      numOriginalSamples: params.numOriginalSamples,
+      numBlocks: params.numBlocks ?? Math.ceil(Math.random() * 10),
+      numSlides: params.numSlides ?? Math.ceil(Math.random() * 10),
+      numOriginalSamples: params.numOriginalSamples ?? Math.ceil(Math.random() * 10),
       workNumber: workNumber,
       omeroProject: associations.omeroProject ?? omeroProjectFactory.build(),
       dnapStudy: associations.dnapStudy ?? dnapStudyFactory.build(),
-      xeniumStudy: associations.xeniumStudy ?? undefined,
-      priority: params.priority ?? undefined,
+      xeniumStudy: associations.xeniumStudy ?? null,
+      ateraStudy: associations.ateraStudy ?? null,
+      priority: params.priority ?? null,
       treatmentTypes: params.treatmentTypes ?? []
     };
   }
