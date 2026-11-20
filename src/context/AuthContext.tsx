@@ -68,8 +68,6 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     checkCurrentUser();
   }, [stanCore, setAuthState, setIsLoading]);
 
-  const userRoles = Object.values(UserRole);
-
   /**
    * Sets the AuthState
    * @param userInfo
@@ -110,12 +108,21 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
    */
   const userRoleIncludes = useCallback(
     (role: UserRole): boolean => {
+      // Role hierarchy: higher number = more privileges
+      // Admin can do everything, Normal can record work, Enduser can request work, Disabled can do nothing
+      const roleHierarchy: Record<UserRole, number> = {
+        [UserRole.Admin]: 3,
+        [UserRole.Normal]: 2,
+        [UserRole.Enduser]: 1,
+        [UserRole.Disabled]: 0
+      };
+
       if (!authState?.user) {
         return false;
       }
-      return userRoles.indexOf(authState.user.role) >= userRoles.indexOf(role);
+      return roleHierarchy[authState.user.role] >= roleHierarchy[role];
     },
-    [authState, userRoles]
+    [authState]
   );
 
   return (
