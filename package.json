@@ -4,10 +4,10 @@
   "private": true,
   "proxy": "http://localhost:8080/",
   "dependencies": {
-    "@parcel/watcher": "^2.6.0",
     "@react-aria/tabs": "^3.9.7",
-    "@react-stately/tabs": "^3.9.1",
     "@react-stately/collections": "^3.13.1",
+    "@react-stately/tabs": "^3.9.1",
+    "@react-types/tabs": "^3.4.0",
     "@sanger/ui-styling": "^4.3.0",
     "@storybook/react-webpack5": "^7.6.3",
     "@tailwindcss/aspect-ratio": "^0.4.2",
