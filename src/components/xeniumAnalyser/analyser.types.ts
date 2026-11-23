@@ -11,11 +11,8 @@ export type SlideLayout = {
 /** Xenium analyser: the slide turned 180 degrees (A1 at the bottom right), with the barcode below it */
 export const XENIUM_SLIDE_LAYOUT: SlideLayout = { gridDirection: GridDirection.LeftUp };
 
-/** Atera run: the slide sits the opposite way round to Xenium (A1 at the top left), with the barcode above it */
-export const ATERA_SLIDE_LAYOUT: SlideLayout = {
-  gridDirection: GridDirection.RightDown,
-  barcodeInfoPosition: Position.TopRight
-};
+/** Atera run: the slide sits in the Atera the same way as in the Xenium analyser (A1 at the bottom right, barcode below) */
+export const ATERA_SLIDE_LAYOUT: SlideLayout = XENIUM_SLIDE_LAYOUT;
 
 export type Region = {
   roi: string;
