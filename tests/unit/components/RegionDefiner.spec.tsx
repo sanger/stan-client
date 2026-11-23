@@ -248,7 +248,7 @@ describe('reIndexAndRenameAteraRegions', () => {
       region(['A1'], 'EXT-1_28.09.26_A'),
       region(['B1', 'C1'], 'EXT-1_28.09.26_A'),
       //no external name, so named like grouped sections
-      region(['D1']),
+      region(['D1'], null),
       region(['E1', 'F1'], 'EXT-1_28.09.26_A')
     ];
     const renamed = reIndexAndRenameAteraRegions([...regions].reverse(), 'Run 123', 'STAN-6116');
