@@ -1,13 +1,13 @@
-/** Internal type. DO NOT USE DIRECTLY. */
-type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-/** Internal type. DO NOT USE DIRECTLY. */
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import type * as Types from './schema-types';
 
 import { GraphQLClient, type RequestOptions } from 'graphql-request';
 import { gql } from 'graphql-request';
 export * from './schema-types';
 type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 export type ActionFieldsFragment = { operationId: number, source: { id: number, address: string, labwareId: number, samples: Array<{ id: number, section: string | null, blockHighestSection: number | null, tissue: { externalName: string | null, replicate: string | null, collectionDate: string | null, donor: { donorName: string, lifeStage: Types.LifeStage | null }, spatialLocation: { code: number, name: string, tissueType: { name: string } }, hmdmc: { hmdmc: string } | null, medium: { name: string }, fixative: { name: string, enabled: boolean } }, bioState: { name: string } }> }, destination: { id: number, address: string, labwareId: number, samples: Array<{ id: number, section: string | null, blockHighestSection: number | null, tissue: { externalName: string | null, replicate: string | null, collectionDate: string | null, donor: { donorName: string, lifeStage: Types.LifeStage | null }, spatialLocation: { code: number, name: string, tissueType: { name: string } }, hmdmc: { hmdmc: string } | null, medium: { name: string }, fixative: { name: string, enabled: boolean } }, bioState: { name: string } }> }, sample: { id: number, section: string | null, blockHighestSection: number | null, tissue: { externalName: string | null, replicate: string | null, collectionDate: string | null, donor: { donorName: string, lifeStage: Types.LifeStage | null }, spatialLocation: { code: number, name: string, tissueType: { name: string } }, hmdmc: { hmdmc: string } | null, medium: { name: string }, fixative: { name: string, enabled: boolean } }, bioState: { name: string } } };
 
 export type AddressPermDataFieldsFragment = { address: string, controlType: Types.ControlType | null, seconds: number | null, selected: boolean };

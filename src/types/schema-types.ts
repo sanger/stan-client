@@ -389,8 +389,8 @@ export type ConfirmSectionRequest = {
 
 /** A type of control. */
 export enum ControlType {
-  Negative = 'negative',
-  Positive = 'positive'
+  Positive = 'positive',
+  Negative = 'negative'
 }
 
 /** A cost code that work can be associated with. */
@@ -606,8 +606,8 @@ export type FlagLabwareRequest = {
 
 /** Priority of labware flags. */
 export enum FlagPriority {
-  Flag = 'flag',
-  Note = 'note'
+  Note = 'note',
+  Flag = 'flag'
 }
 
 /** Summary of a particular labware flag. */
@@ -630,10 +630,10 @@ export type GraphSvg = {
 
 /** A traversal order for a grid. */
 export enum GridDirection {
-  /** Down the leftmost column, then right to the next column, etc. */
-  DownRight = 'DownRight',
   /** Right across the top row, then down to the next row, etc. */
   RightDown = 'RightDown',
+  /** Down the leftmost column, then right to the next column, etc. */
+  DownRight = 'DownRight',
   /** Right across the bottom row, then up to the next row, etc. */
   RightUp = 'RightUp',
   /** Up the leftmost column, then right to the next column, etc. */
@@ -830,20 +830,20 @@ export type LabwareSolutionName = {
 
 /** The state of an item of labware. */
 export enum LabwareState {
-  /** The labware contains samples and can be used as a source in operations. */
-  Active = 'active',
-  /** The labware has been destroyed for a specific reason. */
-  Destroyed = 'destroyed',
-  /** The labware has been used and discarded. */
-  Discarded = 'discarded',
   /** The labware contains no samples. */
   Empty = 'empty',
-  /** The labware is frozen. */
-  Frozen = 'frozen',
+  /** The labware contains samples and can be used as a source in operations. */
+  Active = 'active',
+  /** The labware has been used and discarded. */
+  Discarded = 'discarded',
   /** The labware has been given out to another team or organisation. */
   Released = 'released',
+  /** The labware has been destroyed for a specific reason. */
+  Destroyed = 'destroyed',
   /** The labware has been used but may still be stored. */
-  Used = 'used'
+  Used = 'used',
+  /** The labware is frozen. */
+  Frozen = 'frozen'
 }
 
 /** A type of labware, such as slides and tubes. */
@@ -899,8 +899,8 @@ export type LibraryPrepRequest = {
 /** A stage of life that an individual has reached when tissue is collected. */
 export enum LifeStage {
   Adult = 'adult',
-  Fetal = 'fetal',
-  Paediatric = 'paediatric'
+  Paediatric = 'paediatric',
+  Fetal = 'fetal'
 }
 
 /** Information about a storage location, without links to other locations and items. */
@@ -2449,8 +2449,8 @@ export type ParaffinProcessingRequest = {
 
 /** A pass or fail result. */
 export enum PassFail {
-  Fail = 'fail',
-  Pass = 'pass'
+  Pass = 'pass',
+  Fail = 'fail'
 }
 
 /** The permeabilisation data for a particular slot address. */
@@ -2648,10 +2648,10 @@ export type ProbePanel = {
 
 /** Type of probe. */
 export enum ProbeType {
-  Atera = 'atera',
+  Xenium = 'xenium',
   Cytassist = 'cytassist',
-  Spike = 'spike',
-  Xenium = 'xenium'
+  Atera = 'atera',
+  Spike = 'spike'
 }
 
 /** A program that work can be associated with. */
@@ -4208,9 +4208,9 @@ export type Species = {
 
 /** The panel used with a stain. */
 export enum StainPanel {
-  Marker = 'marker',
+  Positive = 'positive',
   Negative = 'negative',
-  Positive = 'positive'
+  Marker = 'marker'
 }
 
 /** A request to record stains on some labware. */
@@ -4425,14 +4425,14 @@ export type User = {
 
 /** The levels of user privilege. */
 export enum UserRole {
-  /** User can record work and can perform admin actions. */
-  Admin = 'admin',
   /** User cannot record anything. */
   Disabled = 'disabled',
   /** User can request work. */
   Enduser = 'enduser',
   /** User can record work. */
-  Normal = 'normal'
+  Normal = 'normal',
+  /** User can record work and can perform admin actions. */
+  Admin = 'admin'
 }
 
 /** Info about the app version. */
@@ -4553,19 +4553,19 @@ export type WorkProgressTimestamp = {
 
 /** The possible statuses of work. */
 export enum WorkStatus {
+  /** This is the initial status of new work. */
+  Unstarted = 'unstarted',
   /**
    * The work has been started, or resumed following a pause.
    * Work must be in this status for operations to be recorded in it.
    */
   Active = 'active',
+  /** The work has been paused (for some particular reason) by a user. */
+  Paused = 'paused',
   /** The work has been completed successfully. This is a final status. */
   Completed = 'completed',
   /** The work has failed (for some particular reason). This is a final status. */
   Failed = 'failed',
-  /** The work has been paused (for some particular reason) by a user. */
-  Paused = 'paused',
-  /** This is the initial status of new work. */
-  Unstarted = 'unstarted',
   /** The work has been withdrawn (for some particular reason). This is a final status. */
   Withdrawn = 'withdrawn'
 }
