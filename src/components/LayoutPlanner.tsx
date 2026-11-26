@@ -26,8 +26,8 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
 
   const labwareRef = useRef<LabwareImperativeRef>();
 
-  // A source already on this slide shows its slide colour; one not placed
-  // yet is plain
+  // Source buttons match the slide: a sample placed on this slide gets its
+  // slide colour, and a sample not placed yet gets a white button
   const slideColors = buildSlideSampleColors(layoutPlan);
   const sourceButtonColor = (sampleId: number) => {
     const bgColor = slideColors.get(sampleId);
