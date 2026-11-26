@@ -268,6 +268,48 @@ export function disabledBackgroundColorClassNames() {
   return cycle(COLORS.map((color) => `bg-${color}-200`));
 }
 
+/**
+ * Colours for the samples in a plan, in the order samples get them.
+ * Each colour is as far as possible from the ones before it, for normal
+ * and colour-blind vision, so the first few are the most distinct.
+ * textColor keeps a label readable on the colour.
+ * The colours are defined in src/styles/tailwind.css.
+ */
+export const SAMPLE_COLORS: Array<{ bgColor: string; textColor: string }> = [
+  { bgColor: 'bg-sample-1', textColor: 'text-white' },
+  { bgColor: 'bg-sample-2', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-3', textColor: 'text-white' },
+  { bgColor: 'bg-sample-4', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-5', textColor: 'text-white' },
+  { bgColor: 'bg-sample-6', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-7', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-8', textColor: 'text-white' },
+  { bgColor: 'bg-sample-9', textColor: 'text-white' },
+  { bgColor: 'bg-sample-10', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-11', textColor: 'text-white' },
+  { bgColor: 'bg-sample-12', textColor: 'text-white' },
+  { bgColor: 'bg-sample-13', textColor: 'text-white' },
+  { bgColor: 'bg-sample-14', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-15', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-16', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-17', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-18', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-19', textColor: 'text-white' },
+  { bgColor: 'bg-sample-20', textColor: 'text-white' },
+  { bgColor: 'bg-sample-21', textColor: 'text-white' },
+  { bgColor: 'bg-sample-22', textColor: 'text-white' },
+  { bgColor: 'bg-sample-23', textColor: 'text-white' },
+  { bgColor: 'bg-sample-24', textColor: 'text-white' }
+];
+
+/**
+ * Returns the text colour that goes with a sample colour,
+ * or undefined if bgColor isn't one of SAMPLE_COLORS
+ */
+export function sampleTextColor(bgColor?: string): string | undefined {
+  return SAMPLE_COLORS.find((color) => color.bgColor === bgColor)?.textColor;
+}
+
 export const SECTION_GROUPS_BG_COLORS = [
   'bg-red-300',
   'bg-orange-300',

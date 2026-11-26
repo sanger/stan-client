@@ -5,7 +5,7 @@ import { LayoutContext, LayoutEvents } from '../lib/machines/layout';
 import { removeSourceFromSlotDest, selectDestination, selectSource } from '../lib/machines/layout/layoutEvents';
 import { buildSlotColor, buildSlotText } from '../pages/sectioning';
 import { ActorRef, MachineSnapshot } from 'xstate';
-import { Position } from '../lib/helpers';
+import { Position, sampleTextColor } from '../lib/helpers';
 import warningToast from './notifications/WarningToast';
 import { toast } from 'react-toastify';
 
@@ -66,7 +66,9 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
                     isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'
                   } ${layoutPlan.sampleColors.get(
                     source.sampleId
-                  )} text-center inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
+                  )} text-center inline-block py-1 px-2 rounded-full text-xs ${
+                    sampleTextColor(layoutPlan.sampleColors.get(source.sampleId)) ?? 'text-white'
+                  } font-semibold cursor-pointer select-none`}
                 >
                   <p>{source.labware.barcode}</p>
                   <p>{source.tissue?.externalName}</p>
@@ -118,7 +120,9 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
                       isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'
                     } ${layoutPlan.sampleColors.get(
                       source.sampleId
-                    )} text-center inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
+                    )} text-center inline-block py-1 px-2 rounded-full text-xs ${
+                      sampleTextColor(layoutPlan.sampleColors.get(source.sampleId)) ?? 'text-white'
+                    } font-semibold cursor-pointer select-none`}
                   >
                     <p>{source.labware.barcode}</p>
                     <p>{source.tissue?.externalName}</p>
