@@ -5,7 +5,7 @@
   --default-ring-width: 3px;
   --default-ring-color: var(--color-blue-500);
 
-  /* Sample colours for planning, in the order samples get them.
+  /* Sample colours for a slide, given out in slot order.
      See SAMPLE_COLORS in src/lib/helpers.ts */
   --color-sample-1: #3300cc;
   --color-sample-2: #55ff00;

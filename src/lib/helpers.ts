@@ -269,9 +269,10 @@ export function disabledBackgroundColorClassNames() {
 }
 
 /**
- * Colours for the samples in a plan, in the order samples get them.
- * Each colour is as far as possible from the ones before it, for normal
- * and colour-blind vision, so the first few are the most distinct.
+ * Colours for the samples on a slide, given out in slot order.
+ * Each colour is as far as possible from the ones before it, for typical
+ * colour vision and for colour blindness, so the first few are the most
+ * distinct.
  * textColor keeps a label readable on the colour.
  * The colours are defined in src/styles/tailwind.css.
  */
@@ -319,11 +320,16 @@ export const SAMPLE_COLORS: Array<{ bgColor: string; textColor: string }> = [
 ];
 
 /**
+ * Shared by the samples after the last of SAMPLE_COLORS on a slide
+ */
+export const SAMPLE_OVERFLOW_COLOR = { bgColor: 'bg-gray-500', textColor: 'text-white' };
+
+/**
  * Returns the text colour that goes with a sample colour,
- * or undefined if bgColor isn't one of SAMPLE_COLORS
+ * or undefined if bgColor isn't a sample colour
  */
 export function sampleTextColor(bgColor?: string): string | undefined {
-  return SAMPLE_COLORS.find((color) => color.bgColor === bgColor)?.textColor;
+  return [...SAMPLE_COLORS, SAMPLE_OVERFLOW_COLOR].find((color) => color.bgColor === bgColor)?.textColor;
 }
 
 export const SECTION_GROUPS_BG_COLORS = [
