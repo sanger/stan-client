@@ -100,7 +100,6 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
     (
       plans: Map<string, { labware: NewFlaggedLabwareLayout }>,
       sourceLabware: LabwareFlaggedFieldsFragment[],
-      sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,
       confirmAction?: (cid: string, plan: undefined) => void,
       scrollRef?: React.MutableRefObject<HTMLDivElement | null>
@@ -151,7 +150,6 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
                             potProcessInfo={processingInfo!}
                             outputLabware={lwPlan.plan!}
                             sourceLabware={sourceLabware}
-                            sampleColors={sampleColors}
                             onDelete={deleteAction}
                             rowIndex={rowIndx - 1}
                             fixative={selectedFixative}

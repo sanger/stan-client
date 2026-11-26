@@ -258,7 +258,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
     (
       plans: Map<string, { labware: NewFlaggedLabwareLayout; sectionThickness?: number }>,
       sourceLabware: LabwareFlaggedFieldsFragment[],
-      sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,
       confirmAction?: (cid: string, plan: undefined) => void,
       scrollRef?: React.MutableRefObject<HTMLDivElement | null>
@@ -294,7 +293,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                         blockProcessInfo={processingInfo!}
                         outputLabware={lwPlan.plan!}
                         sourceLabware={sourceLabware}
-                        sampleColors={sampleColors}
                         onDelete={deleteAction}
                         ref={
                           labwareType === selectedLabwareType && indx === labwarePlans.length - numLabware

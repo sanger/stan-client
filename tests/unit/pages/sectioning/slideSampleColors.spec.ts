@@ -10,7 +10,7 @@ const placed = (sampleId: number, ...addresses: string[]): PlannedSectionDetails
 });
 
 const slide = (...plannedActions: PlannedSectionDetails[]) =>
-  ({ sources: [], sampleColors: new Map(), plannedActions }) as unknown as LayoutPlan;
+  ({ sources: [], plannedActions }) as unknown as LayoutPlan;
 
 describe('buildSlideSampleColors', () => {
   it('gives each different sample the next colour, in slot order', () => {

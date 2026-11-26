@@ -21,7 +21,6 @@ export interface LayoutPlan {
   /**
    * Map of sample ID to hex color
    */
-  sampleColors: Map<number, string>;
 
   // An array of planned actions. Although the UI currently allows only one
   // source per slot, we now need to support multiple actions per plan.

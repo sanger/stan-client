@@ -15,7 +15,6 @@ import { LabwareTypeName } from '../../types/stan';
 import { ClientError } from 'graphql-request';
 import { produce } from '../../dependencies/immer';
 import { SectionNumberMode } from './SectioningConfirm';
-import { buildSampleColors } from '../../lib/helpers/labwareHelper';
 import { findPlannedActionBySlotAddresses } from './confirmLabware.machine';
 
 type SectioningConfirmContext = {
@@ -523,7 +522,6 @@ const findPlanActionByDestinationAddress = (
  * @param sourceLabwares the list of all source labware
  */
 function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array<LabwareFlaggedFieldsFragment>) {
-  const sampleColors = buildSampleColors(sourceLabwares);
   const layoutPlans: Array<LayoutPlan> = plans.map((plan) => {
     const plannedSectionGroups: Record<string, PlannedSectionDetails> = {};
     const sources: Array<Source> = [];
@@ -550,7 +548,6 @@ function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array
     });
     return {
       destinationLabware: plan.planData.destination,
-      sampleColors,
       sources: sources,
       plannedActions: Object.values(plannedSectionGroups),
       operationType: 'sectioning'

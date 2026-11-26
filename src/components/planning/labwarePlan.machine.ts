@@ -6,7 +6,6 @@ import { stanCore } from '../../lib/sdk';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 import { PlanMutationWithGroups } from '../../pages/sectioning/Plan';
 import { convertLabwareTypeToSourceType, isPlanningByLabware, SourceUniqueBy } from './LabwarePlan';
-import { SAMPLE_COLORS } from '../../lib/helpers';
 
 //region Events
 type CreateLabwareEvent = {
@@ -50,7 +49,6 @@ type AssignSelectedSectionId = {
 type UpdateSources = {
   type: 'UPDATE_SOURCES';
   sources: Array<LabwareFlaggedFieldsFragment>;
-  sampleColors?: Map<number, string>;
   sectionThickness?: number;
 };
 
@@ -254,24 +252,9 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           // check the used sample colors and assign an unused one to the newly added source samples.
           // Added sources should be included in both the existing plans and the new ones.
           if (addedSources.length > 0) {
-            const sampleColors = new Map(context.layoutPlan.sampleColors);
-            const usedColors = new Set(sampleColors.values());
-            addedSources.forEach((source) => {
-              if (!sampleColors.has(source.sampleId)) {
-                // The first colour this plan isn't using yet.
-                // When every colour is in use, the sample gets none.
-                const color = SAMPLE_COLORS.find(({ bgColor }) => !usedColors.has(bgColor))?.bgColor;
-                if (color) {
-                  sampleColors.set(source.sampleId, color);
-                  usedColors.add(color);
-                }
-              }
-            });
-
             const layoutPlan = {
               ...context.layoutPlan,
-              sources,
-              sampleColors
+              sources
             };
             // Forward the updated layoutPlan to the spawned layoutMachine (if it exists)
             if (context.layoutMachine) {

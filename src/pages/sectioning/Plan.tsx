@@ -80,7 +80,6 @@ function Plan() {
   const buildPlanLayouts = (
     plans: Map<string, { labware: NewFlaggedLabwareLayout; sectionThickness?: number }>,
     sourceLabware: LabwareFlaggedFieldsFragment[],
-    sampleColors: Map<number, string>,
     deleteAction: (cid: string) => void,
     confirmAction?: (cid: string, plan: PlanMutationWithGroups) => void
   ) => {
@@ -91,7 +90,6 @@ function Plan() {
             key={cid}
             cid={cid}
             outputLabware={newLabwareParams.labware}
-            sampleColors={sampleColors}
             operationType={'Section'}
             sourceLabware={sourceLabware}
             onDeleteButtonClick={deleteAction}

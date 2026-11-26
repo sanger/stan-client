@@ -10,7 +10,7 @@ import { LabwareType } from '../../../../src/types/sdk';
 import { createLabwarePlanMachine } from '../../../../src/components/planning/labwarePlan.machine';
 import { createActor } from 'xstate';
 import { buildSlideSampleColors } from '../../../../src/pages/sectioning';
-import { buildPlanSampleColors, convertLabwareToFlaggedLabware } from '../../../../src/lib/helpers/labwareHelper';
+import { convertLabwareToFlaggedLabware } from '../../../../src/lib/helpers/labwareHelper';
 
 beforeAll(() => {
   enableMapSet();
@@ -114,7 +114,6 @@ describe('When all the fields are correctly field', () => {
       const machine = createLabwarePlanMachine(
         buildInitialLayoutPlan(
           [buildFlaggedLabware(LabwareTypeName.TUBE)],
-          sampleColors,
           buildFlaggedLabware(LabwareTypeName.TUBE, 'STAN-124'),
           'plan'
         )
@@ -255,7 +254,6 @@ describe('When a 7th block is scanned into a Xenium plan', () => {
     const machine = createLabwarePlanMachine(
       buildInitialLayoutPlan(
         firstBlock,
-        buildPlanSampleColors(firstBlock),
         buildFlaggedLabware(LabwareTypeName.XENIUM, 'STAN-124'),
         'Section',
         sectionThickness.toString()
@@ -270,7 +268,6 @@ describe('When a 7th block is scanned into a Xenium plan', () => {
       service.send({
         type: 'UPDATE_SOURCES',
         sources: sourceLabware,
-        sampleColors: buildPlanSampleColors(sourceLabware),
         sectionThickness
       });
     }
@@ -318,7 +315,6 @@ const renderLabwarePlan = (outputLabwareType: string) => {
         key="labwarePlan"
         cid="labwarePlan"
         outputLabware={buildFlaggedLabware(outputLabwareType, 'STAN-124')}
-        sampleColors={sampleColors}
         operationType={'Section'}
         sourceLabware={[buildFlaggedLabware(LabwareTypeName.TUBE)]}
         onDeleteButtonClick={jest.fn()}
@@ -328,17 +324,6 @@ const renderLabwarePlan = (outputLabwareType: string) => {
     </div>
   );
 };
-
-const sampleColors = new Map([
-  [7797, 'red'],
-  [7798, 'green'],
-  [7799, 'indigo'],
-  [7800, 'pink'],
-  [7801, 'blue'],
-  [7802, 'purple'],
-  [7803, 'red'],
-  [7804, 'green']
-]);
 
 const buildFlaggedLabware = (labwareTypeName: string, barcode = 'STAN-123') => {
   return convertLabwareToFlaggedLabware([

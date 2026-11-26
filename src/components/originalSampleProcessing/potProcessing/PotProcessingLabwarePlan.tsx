@@ -32,10 +32,6 @@ type PotProcessingLabwarePlanProps = {
    */
   potProcessInfo: GetPotProcessingInfoQuery;
   /**
-   * Colours to represent source labware
-   */
-  sampleColors: Map<number, string>;
-  /**
    * Call back handler for  delete layout operation
    * @param cid - unique id for a labware plan created
    */
@@ -55,7 +51,6 @@ type PotProcessingLabwarePlanProps = {
  */
 function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFlaggedFieldsFragment>,
-  sampleColors: Map<number, string>,
   outputLabware: NewFlaggedLabwareLayout
 ) {
   return {
@@ -71,7 +66,6 @@ function buildInitialLayoutPlan(
         })
       )
     ),
-    sampleColors,
     destinationLabware: outputLabware,
     plannedActions:
       sourceLabware.length > 0
@@ -90,10 +84,10 @@ function buildInitialLayoutPlan(
 }
 
 const PotProcessingLabwarePlan = React.forwardRef<HTMLDivElement, PotProcessingLabwarePlanProps>(
-  ({ cid, outputLabware, potProcessInfo, sourceLabware, sampleColors, onDelete, rowIndex, fixative }, ref) => {
+  ({ cid, outputLabware, potProcessInfo, sourceLabware, onDelete, rowIndex, fixative }, ref) => {
     const labwarePlanMachine = React.useMemo(() => {
-      return createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware));
-    }, [sourceLabware, sampleColors, outputLabware]);
+      return createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, outputLabware));
+    }, [sourceLabware, outputLabware]);
     const [current] = useMachine(labwarePlanMachine);
     const { requestError, layoutPlan } = current.context;
     const { values, setFieldValue } = useFormikContext<PotFormData>();

@@ -6,7 +6,7 @@ import {
   LabwareType,
   SlotFieldsFragment
 } from '../../types/sdk';
-import { backgroundColorClassNames, SAMPLE_COLORS } from '../helpers';
+import { backgroundColorClassNames } from '../helpers';
 import { orderBy } from 'lodash';
 import { Addressable, LabwareTypeName } from '../../types/stan';
 import * as slotHelper from './slotHelper';
@@ -49,26 +49,6 @@ export function buildSampleColors(
     labwareSamples(labware).forEach((value) => {
       if (!sampleColors.has(value.sample.id)) {
         sampleColors.set(value.sample.id, colors.next().value);
-      }
-    });
-  });
-  return sampleColors;
-}
-
-/**
- * Returns a Map of sample ID to a colour from SAMPLE_COLORS, given in the
- * order the samples appear. Samples after the last colour get none.
- *
- * @param labwares list of labwares to get colours for
- */
-export function buildPlanSampleColors(
-  labwares: LabwareFieldsFragment[] | LabwareFlaggedFieldsFragment[]
-): Map<number, string> {
-  const sampleColors = new Map<number, string>();
-  labwares.forEach((labware) => {
-    labwareSamples(labware).forEach((value) => {
-      if (!sampleColors.has(value.sample.id) && sampleColors.size < SAMPLE_COLORS.length) {
-        sampleColors.set(value.sample.id, SAMPLE_COLORS[sampleColors.size].bgColor);
       }
     });
   });
