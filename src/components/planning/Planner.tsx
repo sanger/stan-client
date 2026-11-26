@@ -6,7 +6,7 @@ import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
 import { castDraft, produce } from '../../dependencies/immer';
 import { customLayoutLabwareFactory, unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
-import { buildSampleColors, isCustomSizeLabwareType } from '../../lib/helpers/labwareHelper';
+import { buildPlanSampleColors, isCustomSizeLabwareType } from '../../lib/helpers/labwareHelper';
 import Heading from '../Heading';
 import { getNumberOfDaysBetween } from '../../lib/helpers';
 import Warning from '../notifications/Warning';
@@ -308,7 +308,7 @@ export default function Planner<M>({
    * Used by various components to keep the same samples the same colours within different components.
    */
   const sampleColors: Map<number, string> = React.useMemo(() => {
-    return buildSampleColors(state.sourceLabware);
+    return buildPlanSampleColors(state.sourceLabware);
   }, [state.sourceLabware]);
 
   /**

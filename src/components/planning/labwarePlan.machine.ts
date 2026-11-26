@@ -6,7 +6,7 @@ import { stanCore } from '../../lib/sdk';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 import { PlanMutationWithGroups } from '../../pages/sectioning/Plan';
 import { convertLabwareTypeToSourceType, isPlanningByLabware, SourceUniqueBy } from './LabwarePlan';
-import { backgroundColorClassNames } from '../../lib/helpers';
+import { SAMPLE_COLORS } from '../../lib/helpers';
 
 //region Events
 type CreateLabwareEvent = {
@@ -254,18 +254,16 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           // check the used sample colors and assign an unused one to the newly added source samples.
           // Added sources should be included in both the existing plans and the new ones.
           if (addedSources.length > 0) {
-            const colors = backgroundColorClassNames();
             const sampleColors = new Map(context.layoutPlan.sampleColors);
             const usedColors = new Set(sampleColors.values());
             addedSources.forEach((source) => {
               if (!sampleColors.has(source.sampleId)) {
-                let next = colors.next().value;
-                while (next && usedColors.has(next)) {
-                  next = colors.next().value;
-                }
-                if (next) {
-                  sampleColors.set(source.sampleId, next);
-                  usedColors.add(next);
+                // The first colour this plan isn't using yet.
+                // When every colour is in use, the sample gets none.
+                const color = SAMPLE_COLORS.find(({ bgColor }) => !usedColors.has(bgColor))?.bgColor;
+                if (color) {
+                  sampleColors.set(source.sampleId, color);
+                  usedColors.add(color);
                 }
               }
             });
