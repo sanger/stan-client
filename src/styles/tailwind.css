@@ -39,6 +39,14 @@
   --color-sample-30: #5588dd;
   --color-sample-31: #cc88cc;
   --color-sample-32: #cc8888;
+  --color-sample-33: #dd0055;
+  --color-sample-34: #33aa33;
+  --color-sample-35: #005577;
+  --color-sample-36: #880033;
+  --color-sample-37: #ff44ff;
+  --color-sample-38: #aa3300;
+  --color-sample-39: #883388;
+  --color-sample-40: #9922ff;
 }
 .hover\:bg-green-600 {
   &:hover {

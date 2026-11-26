@@ -307,7 +307,15 @@ export const SAMPLE_COLORS: Array<{ bgColor: string; textColor: string }> = [
   { bgColor: 'bg-sample-29', textColor: 'text-white' },
   { bgColor: 'bg-sample-30', textColor: 'text-gray-900' },
   { bgColor: 'bg-sample-31', textColor: 'text-gray-900' },
-  { bgColor: 'bg-sample-32', textColor: 'text-gray-900' }
+  { bgColor: 'bg-sample-32', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-33', textColor: 'text-white' },
+  { bgColor: 'bg-sample-34', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-35', textColor: 'text-white' },
+  { bgColor: 'bg-sample-36', textColor: 'text-white' },
+  { bgColor: 'bg-sample-37', textColor: 'text-gray-900' },
+  { bgColor: 'bg-sample-38', textColor: 'text-white' },
+  { bgColor: 'bg-sample-39', textColor: 'text-white' },
+  { bgColor: 'bg-sample-40', textColor: 'text-white' }
 ];
 
 /**
