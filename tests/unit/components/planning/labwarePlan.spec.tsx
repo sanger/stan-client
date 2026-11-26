@@ -9,6 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { LabwareType } from '../../../../src/types/sdk';
 import { createLabwarePlanMachine } from '../../../../src/components/planning/labwarePlan.machine';
 import { createActor } from 'xstate';
+import { buildSlideSampleColors } from '../../../../src/pages/sectioning';
 import { buildPlanSampleColors, convertLabwareToFlaggedLabware } from '../../../../src/lib/helpers/labwareHelper';
 
 beforeAll(() => {
@@ -245,7 +246,7 @@ describe('Fields validations', () => {
   });
 });
 describe('When a 7th block is scanned into a Xenium plan', () => {
-  it('gives the 7th block a colour', () => {
+  it('gives the 7th block its own colour once placed', () => {
     // As on the Sectioning - Plan page: scan a block, add a Xenium slide,
     // then scan the other blocks one at a time
     const blocks = [1, 2, 3, 4, 5, 6, 7].map((n) => buildBlock(`STAN-B${n}`));
@@ -274,8 +275,19 @@ describe('When a 7th block is scanned into a Xenium plan', () => {
       });
     }
 
+    // Place each block in its own slot, A1 to B3, as on the slide
+    const { layoutPlan } = service.getSnapshot().context;
+    const slideColors = buildSlideSampleColors({
+      ...layoutPlan,
+      plannedActions: layoutPlan.sources.map((source, i) => ({
+        source,
+        addresses: new Set([String.fromCharCode(65 + Math.floor(i / 4)) + ((i % 4) + 1)])
+      }))
+    });
+
     const seventhSampleId = blocks[6].slots[0].samples[0].id;
-    expect(service.getSnapshot().context.layoutPlan.sampleColors.get(seventhSampleId)).toBeDefined();
+    expect(layoutPlan.sources.map((source) => source.sampleId)).toContain(seventhSampleId);
+    expect(new Set(slideColors.values()).size).toBe(7);
   });
 });
 const expectDisplayNumberOfLabwareAndSectionThicknessInputs = () => {
