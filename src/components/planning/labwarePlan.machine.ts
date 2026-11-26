@@ -248,8 +248,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           const addedSources = [
             ...new Set(sources.filter((source) => !oldSources.some((s) => s.sampleId === source.sampleId)))
           ];
-          // When the user adds a new source,
-          // check the used sample colors and assign an unused one to the newly added source samples.
+          // When the user adds a new source, add it to the plan's sources.
           // Added sources should be included in both the existing plans and the new ones.
           if (addedSources.length > 0) {
             const layoutPlan = {

@@ -18,10 +18,6 @@ export interface LayoutPlan {
    */
   destinationLabware: NewFlaggedLabwareLayout;
 
-  /**
-   * Map of sample ID to hex color
-   */
-
   // An array of planned actions. Although the UI currently allows only one
   // source per slot, we now need to support multiple actions per plan.
   // For tube sectioning, the user selects the source per labware (not per sample),

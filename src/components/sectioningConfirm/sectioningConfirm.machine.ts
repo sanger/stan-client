@@ -288,7 +288,7 @@ export function createSectioningConfirmMachine() {
           /**New plans are added, so create LayoutPlan for all new plans and add to the list*/
           if (addedPlans.length > 0) {
             /**Create the layoutPlans for all newly added plans**/
-            const layoutPlans = buildLayoutPlans(addedPlans, context.sourceLabware);
+            const layoutPlans = buildLayoutPlans(addedPlans);
             updatedLayoutPlans = [...updatedLayoutPlans, ...layoutPlans];
           }
           return produce(context, (draft) => {
@@ -519,9 +519,8 @@ const findPlanActionByDestinationAddress = (
  * Convert the structure that comes back from core into lists of {@link LayoutPlan LayoutPlans}
  *
  * @param plans the list of plans to confirm
- * @param sourceLabwares the list of all source labware
  */
-function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array<LabwareFlaggedFieldsFragment>) {
+function buildLayoutPlans(plans: Array<FindPlanDataQuery>) {
   const layoutPlans: Array<LayoutPlan> = plans.map((plan) => {
     const plannedSectionGroups: Record<string, PlannedSectionDetails> = {};
     const sources: Array<Source> = [];
