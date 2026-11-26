@@ -6,7 +6,6 @@ import { stanCore } from '../../lib/sdk';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 import { PlanMutationWithGroups } from '../../pages/sectioning/Plan';
 import { convertLabwareTypeToSourceType, isPlanningByLabware, SourceUniqueBy } from './LabwarePlan';
-import { backgroundColorClassNames } from '../../lib/helpers';
 
 //region Events
 type CreateLabwareEvent = {
@@ -50,7 +49,6 @@ type AssignSelectedSectionId = {
 type UpdateSources = {
   type: 'UPDATE_SOURCES';
   sources: Array<LabwareFlaggedFieldsFragment>;
-  sampleColors?: Map<number, string>;
   sectionThickness?: number;
 };
 
@@ -250,30 +248,12 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           const addedSources = [
             ...new Set(sources.filter((source) => !oldSources.some((s) => s.sampleId === source.sampleId)))
           ];
-          // When the user adds a new source,
-          // check the used sample colors and assign an unused one to the newly added source samples.
+          // When the user adds a new source, add it to the plan's sources.
           // Added sources should be included in both the existing plans and the new ones.
           if (addedSources.length > 0) {
-            const colors = backgroundColorClassNames();
-            const sampleColors = new Map(context.layoutPlan.sampleColors);
-            const usedColors = new Set(sampleColors.values());
-            addedSources.forEach((source) => {
-              if (!sampleColors.has(source.sampleId)) {
-                let next = colors.next().value;
-                while (next && usedColors.has(next)) {
-                  next = colors.next().value;
-                }
-                if (next) {
-                  sampleColors.set(source.sampleId, next);
-                  usedColors.add(next);
-                }
-              }
-            });
-
             const layoutPlan = {
               ...context.layoutPlan,
-              sources,
-              sampleColors
+              sources
             };
             // Forward the updated layoutPlan to the spawned layoutMachine (if it exists)
             if (context.layoutMachine) {

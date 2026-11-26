@@ -6,7 +6,7 @@ import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
 import { castDraft, produce } from '../../dependencies/immer';
 import { customLayoutLabwareFactory, unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
-import { buildSampleColors, isCustomSizeLabwareType } from '../../lib/helpers/labwareHelper';
+import { isCustomSizeLabwareType } from '../../lib/helpers/labwareHelper';
 import Heading from '../Heading';
 import { getNumberOfDaysBetween } from '../../lib/helpers';
 import Warning from '../notifications/Warning';
@@ -40,7 +40,6 @@ type PlannerProps<M> = {
   buildPlanLayouts: (
     layout: Map<string, { labware: NewFlaggedLabwareLayout; sectionThickness?: number }>, //All layouts created
     sourceLabware: LabwareFlaggedFieldsFragment[],
-    sampleColors: Map<number, string>,
     deleteAction: (cid: string) => void,
     confirmAction?: (cid: string, plan: M) => void,
     scrollRef?: React.MutableRefObject<HTMLDivElement | null>
@@ -304,14 +303,6 @@ export default function Planner<M>({
   );
 
   /**
-   * A map of sample ID to Tailwind CSS colours.
-   * Used by various components to keep the same samples the same colours within different components.
-   */
-  const sampleColors: Map<number, string> = React.useMemo(() => {
-    return buildSampleColors(state.sourceLabware);
-  }, [state.sourceLabware]);
-
-  /**
    *  Find all labwares having fetal waste samples with collection date less than 12 weeks after scanning
    */
   const fetalSampleWarningLabware = React.useMemo(
@@ -362,14 +353,7 @@ export default function Planner<M>({
       )}
 
       {/**Render plans using the callback method (passed as props) so that it will be done by the parent component**/}
-      {buildPlanLayouts(
-        state.labwarePlans,
-        state.sourceLabware,
-        sampleColors,
-        onLabwarePlanDelete,
-        onLabwarePlanComplete,
-        scrollRef
-      )}
+      {buildPlanLayouts(state.labwarePlans, state.sourceLabware, onLabwarePlanDelete, onLabwarePlanComplete, scrollRef)}
       <div ref={scrollRef} className="my-4 max-w-2xl mx-auto p-2 rounded-md bg-gray-100">
         <p className="my-3 text-gray-800 text-sm text-center leading-normal">
           Once <span className="font-bold text-gray-900">all source labware</span> has been scanned, select a type of

@@ -3,9 +3,9 @@ import { isEqual } from 'lodash';
 import Labware, { LabwareImperativeRef } from './labware/Labware';
 import { LayoutContext, LayoutEvents } from '../lib/machines/layout';
 import { removeSourceFromSlotDest, selectDestination, selectSource } from '../lib/machines/layout/layoutEvents';
-import { buildSlotColor, buildSlotText } from '../pages/sectioning';
+import { buildSlideSampleColors, buildSlotColor, buildSlotText } from '../pages/sectioning';
 import { ActorRef, MachineSnapshot } from 'xstate';
-import { Position } from '../lib/helpers';
+import { Position, sampleTextColor } from '../lib/helpers';
 import warningToast from './notifications/WarningToast';
 import { toast } from 'react-toastify';
 
@@ -25,6 +25,14 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
   }, [actor]);
 
   const labwareRef = useRef<LabwareImperativeRef>();
+
+  // Source buttons match the slide: a sample placed on this slide gets its
+  // slide colour, and a sample not placed yet gets a white button
+  const slideColors = buildSlideSampleColors(layoutPlan);
+  const sourceButtonColor = (sampleId: number) => {
+    const bgColor = slideColors.get(sampleId);
+    return bgColor ? `${bgColor} ${sampleTextColor(bgColor)}` : 'bg-white border border-gray-500 text-gray-900';
+  };
 
   const deselectLabwareSlots = React.useCallback(() => {
     labwareRef.current?.deselectAll();
@@ -62,11 +70,9 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
                   onClick={() => {
                     actor.send(selectSource(source));
                   }}
-                  className={`${
-                    isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'
-                  } ${layoutPlan.sampleColors.get(
+                  className={`${isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'} ${sourceButtonColor(
                     source.sampleId
-                  )} text-center inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
+                  )} text-center inline-block py-1 px-2 rounded-full text-xs font-semibold cursor-pointer select-none`}
                 >
                   <p>{source.labware.barcode}</p>
                   <p>{source.tissue?.externalName}</p>
@@ -116,9 +122,9 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
                     }}
                     className={`${
                       isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'
-                    } ${layoutPlan.sampleColors.get(
+                    } ${sourceButtonColor(
                       source.sampleId
-                    )} text-center inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
+                    )} text-center inline-block py-1 px-2 rounded-full text-xs font-semibold cursor-pointer select-none`}
                   >
                     <p>{source.labware.barcode}</p>
                     <p>{source.tissue?.externalName}</p>

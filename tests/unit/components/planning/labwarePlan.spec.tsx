@@ -9,6 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { LabwareType } from '../../../../src/types/sdk';
 import { createLabwarePlanMachine } from '../../../../src/components/planning/labwarePlan.machine';
 import { createActor } from 'xstate';
+import { buildSlideSampleColors } from '../../../../src/pages/sectioning';
 import { convertLabwareToFlaggedLabware } from '../../../../src/lib/helpers/labwareHelper';
 
 beforeAll(() => {
@@ -113,7 +114,6 @@ describe('When all the fields are correctly field', () => {
       const machine = createLabwarePlanMachine(
         buildInitialLayoutPlan(
           [buildFlaggedLabware(LabwareTypeName.TUBE)],
-          sampleColors,
           buildFlaggedLabware(LabwareTypeName.TUBE, 'STAN-124'),
           'plan'
         )
@@ -244,6 +244,49 @@ describe('Fields validations', () => {
     });
   });
 });
+describe('When a 7th block is scanned into a Xenium plan', () => {
+  it('gives the 7th block its own colour once placed', () => {
+    // As on the Sectioning - Plan page: scan a block, add a Xenium slide,
+    // then scan the other blocks one at a time
+    const blocks = [1, 2, 3, 4, 5, 6, 7].map((n) => buildBlock(`STAN-B${n}`));
+    const sectionThickness = 0.5;
+    const firstBlock = blocks.slice(0, 1);
+    const machine = createLabwarePlanMachine(
+      buildInitialLayoutPlan(
+        firstBlock,
+        buildFlaggedLabware(LabwareTypeName.XENIUM, 'STAN-124'),
+        'Section',
+        sectionThickness.toString()
+      )
+    );
+    const service = createActor(machine).start();
+
+    // Scan blocks 2 to 7, sending what LabwarePlan sends each time
+    // the source table changes
+    for (let scanned = 2; scanned <= blocks.length; scanned++) {
+      const sourceLabware = blocks.slice(0, scanned);
+      service.send({
+        type: 'UPDATE_SOURCES',
+        sources: sourceLabware,
+        sectionThickness
+      });
+    }
+
+    // Place each block in its own slot, A1 to B3, as on the slide
+    const { layoutPlan } = service.getSnapshot().context;
+    const slideColors = buildSlideSampleColors({
+      ...layoutPlan,
+      plannedActions: layoutPlan.sources.map((source, i) => ({
+        source,
+        addresses: new Set([String.fromCharCode(65 + Math.floor(i / 4)) + ((i % 4) + 1)])
+      }))
+    });
+
+    const seventhSampleId = blocks[6].slots[0].samples[0].id;
+    expect(layoutPlan.sources.map((source) => source.sampleId)).toContain(seventhSampleId);
+    expect(new Set(slideColors.values()).size).toBe(7);
+  });
+});
 const expectDisplayNumberOfLabwareAndSectionThicknessInputs = () => {
   expect(screen.getByTestId('Number of Labware')).toHaveValue(2);
   expect(screen.getByTestId('Section Thickness')).toHaveValue(3);
@@ -272,7 +315,6 @@ const renderLabwarePlan = (outputLabwareType: string) => {
         key="labwarePlan"
         cid="labwarePlan"
         outputLabware={buildFlaggedLabware(outputLabwareType, 'STAN-124')}
-        sampleColors={sampleColors}
         operationType={'Section'}
         sourceLabware={[buildFlaggedLabware(LabwareTypeName.TUBE)]}
         onDeleteButtonClick={jest.fn()}
@@ -283,23 +325,23 @@ const renderLabwarePlan = (outputLabwareType: string) => {
   );
 };
 
-const sampleColors = new Map([
-  [7797, 'red'],
-  [7798, 'green'],
-  [7799, 'indigo'],
-  [7800, 'pink'],
-  [7801, 'blue'],
-  [7802, 'purple'],
-  [7803, 'red'],
-  [7804, 'green']
-]);
-
 const buildFlaggedLabware = (labwareTypeName: string, barcode = 'STAN-123') => {
   return convertLabwareToFlaggedLabware([
     labwareFactory.build({
       labwareType: labwareType(labwareTypeName),
       barcode
     })
+  ])[0];
+};
+
+// A Proviasette block holding one sample. Core's Proviasette has one slot;
+// the labware type fixture has 10 x 10.
+const buildBlock = (barcode: string) => {
+  return convertLabwareToFlaggedLabware([
+    labwareFactory.build(
+      { labwareType: { ...labwareType(LabwareTypeName.PROVIASETTE)!, numRows: 1, numColumns: 1 }, barcode },
+      { transient: { samplesPerSlot: 1 } }
+    )
   ])[0];
 };
 

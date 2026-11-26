@@ -4,6 +4,49 @@
 @theme {
   --default-ring-width: 3px;
   --default-ring-color: var(--color-blue-500);
+
+  /* Sample colours for a slide, given out in slot order.
+     See SAMPLE_COLORS in src/lib/helpers.ts */
+  --color-sample-1: #3300cc;
+  --color-sample-2: #55ff00;
+  --color-sample-3: #ee0000;
+  --color-sample-4: #55aadd;
+  --color-sample-5: #880066;
+  --color-sample-6: #bb44ff;
+  --color-sample-7: #ccaa33;
+  --color-sample-8: #008855;
+  --color-sample-9: #5566aa;
+  --color-sample-10: #ff66aa;
+  --color-sample-11: #773300;
+  --color-sample-12: #7711ee;
+  --color-sample-13: #cc0099;
+  --color-sample-14: #bb6688;
+  --color-sample-15: #33cc77;
+  --color-sample-16: #9988ff;
+  --color-sample-17: #889966;
+  --color-sample-18: #dd7722;
+  --color-sample-19: #553388;
+  --color-sample-20: #996622;
+  --color-sample-21: #885577;
+  --color-sample-22: #006644;
+  --color-sample-23: #8811aa;
+  --color-sample-24: #aa0033;
+  --color-sample-25: #bb66cc;
+  --color-sample-26: #8855cc;
+  --color-sample-27: #bbcc00;
+  --color-sample-28: #00aaaa;
+  --color-sample-29: #4444cc;
+  --color-sample-30: #5588dd;
+  --color-sample-31: #cc88cc;
+  --color-sample-32: #cc8888;
+  --color-sample-33: #dd0055;
+  --color-sample-34: #33aa33;
+  --color-sample-35: #005577;
+  --color-sample-36: #880033;
+  --color-sample-37: #ff44ff;
+  --color-sample-38: #aa3300;
+  --color-sample-39: #883388;
+  --color-sample-40: #9922ff;
 }
 .hover\:bg-green-600 {
   &:hover {
@@ -137,7 +180,7 @@
 .bg-blue-500 {
   background-color: oklch(66.26% 0.1358 246.81);
 }
-.bg-purple-200 {
+.bg-blue-200 {
   background-color: oklch(89.6% 0.0484 232.92);
 }
 

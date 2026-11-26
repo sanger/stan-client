@@ -40,10 +40,6 @@ type BlockProcessingLabwarePlanProps = {
    */
   blockProcessInfo: GetBlockProcessingInfoQuery;
   /**
-   * Colours to represent source labware
-   */
-  sampleColors: Map<number, string>;
-  /**
    * Call back handler for  delete layout operation
    * @param cid - unique id for a labware plan created
    */
@@ -55,13 +51,11 @@ type BlockProcessingLabwarePlanProps = {
  */
 function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFlaggedFieldsFragment>,
-  sampleColors: Map<number, string>,
   outputLabware: NewFlaggedLabwareLayout,
   operationType?: string
 ) {
   return {
     sources: convertLabwareTypeToSourceType(sourceLabware),
-    sampleColors,
     destinationLabware: outputLabware,
     plannedActions: [],
     operationType
@@ -77,10 +71,10 @@ function validatePreBarcode(value: string) {
 }
 
 const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcessingLabwarePlanProps>(
-  ({ cid, outputLabware, blockProcessInfo, sourceLabware, sampleColors, onDelete }, ref) => {
+  ({ cid, outputLabware, blockProcessInfo, sourceLabware, onDelete }, ref) => {
     const labwarePlanMachine = React.useMemo(() => {
-      return createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware));
-    }, [sourceLabware, sampleColors, outputLabware]);
+      return createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, outputLabware));
+    }, [sourceLabware, outputLabware]);
     const [current, send, actor] = useMachine(labwarePlanMachine);
     const { requestError, layoutPlan } = current.context;
     const { layoutMachine } = current.context;

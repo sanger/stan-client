@@ -1,6 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { brightenColor } from '../../lib/helpers/tailwindHelper';
+import { sampleTextColor } from '../../lib/helpers';
 import { LabwareProps } from './Labware';
 import { SlotFieldsFragment } from '../../types/sdk';
 import CrossOverIcon from '../icons/CrossOverIcon';
@@ -45,7 +46,7 @@ export function Slot({
       'transition duration-150 ease-in-out cursor-pointer': onClick && !isCleanedOut,
       'hover:bg-gray-200': onClick && !bgColor && !isCleanedOut,
       [`hover:${brightenColor(bgColor)}`]: onClick && bgColor && !isCleanedOut,
-      [`${bgColor} text-gray-100`]: bgColor,
+      [`${bgColor} ${sampleTextColor(bgColor) ?? 'text-gray-100'}`]: bgColor,
       'bg-gray-100 text-gray-800': !bgColor,
       'ring-3 ring-pink-600 ring-offset-2': selected,
       'border border-gray-800': !selected

@@ -48,8 +48,6 @@ type LabwarePlanProps = {
 
   operationType: string;
 
-  sampleColors: Map<number, string>;
-
   /** Specified section thickness when setting the plan */
   sectionThickness: number;
   /**
@@ -74,24 +72,12 @@ export const isPlanningByLabware = (labwareType: LabwareType, operationType?: st
 };
 
 const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
-  (
-    {
-      cid,
-      outputLabware,
-      onDeleteButtonClick,
-      onComplete,
-      sampleColors,
-      operationType,
-      sourceLabware,
-      sectionThickness
-    },
-    ref
-  ) => {
+  ({ cid, outputLabware, onDeleteButtonClick, onComplete, operationType, sourceLabware, sectionThickness }, ref) => {
     const labwarePlanMachine = React.useMemo(() => {
       return createLabwarePlanMachine(
-        buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware, operationType, sectionThickness.toString())
+        buildInitialLayoutPlan(sourceLabware, outputLabware, operationType, sectionThickness.toString())
       );
-    }, [sourceLabware, sampleColors, outputLabware, sectionThickness, operationType]);
+    }, [sourceLabware, outputLabware, sectionThickness, operationType]);
     const [current, send, service] = useMachine(labwarePlanMachine);
 
     useEffect(() => {
@@ -108,11 +94,10 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
         send({
           type: 'UPDATE_SOURCES',
           sources: sourceLabware,
-          sampleColors,
           sectionThickness
         });
       }
-    }, [sourceLabware, sampleColors, send, current.context.layoutPlan.sources.length, sectionThickness]);
+    }, [sourceLabware, send, current.context.layoutPlan.sources.length, sectionThickness]);
 
     const { handleOnPrint, handleOnPrintError, handleOnPrinterChange, printResult, currentPrinter } = usePrinters();
 
@@ -613,7 +598,6 @@ export const convertLabwareTypeToSourceType = (
 };
 export function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFlaggedFieldsFragment>,
-  sampleColors: Map<number, string>,
   outputLabware: NewFlaggedLabwareLayout,
   operationType: string,
   globalSectionThickness?: string
@@ -623,7 +607,6 @@ export function buildInitialLayoutPlan(
     : convertLabwareTypeToSourceType(sourceLabware, globalSectionThickness);
   return {
     sources,
-    sampleColors,
     destinationLabware: outputLabware,
     plannedActions: [],
     operationType
