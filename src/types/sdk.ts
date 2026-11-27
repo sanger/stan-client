@@ -133,8 +133,10 @@ export type AnalyserLabware = {
   barcode: Scalars['String']['input'];
   /** Decoding consumables lot number. */
   decodingConsumablesLot?: InputMaybe<Scalars['String']['input']>;
+  /** The index of the cassette in the machine. */
+  index?: InputMaybe<Scalars['Int']['input']>;
   /** The cassette position for the labware. */
-  position: CassettePosition;
+  position?: InputMaybe<CassettePosition>;
   /** The sample regions of interest in this labware. */
   samples: Array<SampleRoi>;
   /** The work number for the labware. */
@@ -150,9 +152,9 @@ export type AnalyserRequest = {
   /** The labware involved in this request. */
   labware: Array<AnalyserLabware>;
   /** The lot number for the decoding reagents A. */
-  lotNumberA: Scalars['String']['input'];
+  lotNumberA?: InputMaybe<Scalars['String']['input']>;
   /** The lot number for the decoding reagents B. */
-  lotNumberB: Scalars['String']['input'];
+  lotNumberB?: InputMaybe<Scalars['String']['input']>;
   /** The name of the operation type to record. */
   operationType: Scalars['String']['input'];
   /** The time at which this operation was performed. */
@@ -161,6 +163,8 @@ export type AnalyserRequest = {
   repeat?: InputMaybe<Scalars['Boolean']['input']>;
   /** The run name. */
   runName: Scalars['String']['input'];
+  /** Comment id for the work type. */
+  workTypeCommentId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** Information to show when a user scans in labware for the analyser op. */
@@ -172,6 +176,8 @@ export type AnalyserScanData = {
   cellSegmentationRecorded: Scalars['Boolean']['output'];
   /** The names of probes recorded on the labware. */
   probes: Array<Scalars['String']['output']>;
+  /** The work numbers and atera study ids linked to the labware. */
+  workNumberAteraStudyIds: Array<WorkNumberAteraStudyId>;
   /** The work numbers and xenium study ids linked to the labware. */
   workNumberXeniumStudyIds: Array<WorkNumberXeniumStudyId>;
 };
@@ -1184,6 +1190,8 @@ export type Mutation = {
   updateDnapStudies: Array<DnapStudy>;
   /** Update a release recipient fullName. */
   updateReleaseRecipientFullName: ReleaseRecipient;
+  /** Update the Atera study of a work. */
+  updateWorkAteraStudy: Work;
   /** Update the DNAP study of a work. */
   updateWorkDnapStudy: Work;
   /** Update the number of blocks field in a work. */
@@ -1479,6 +1487,7 @@ export type MutationConfirmSectionArgs = {
  * These typically require a user with the suitable permission for the particular request.
  */
 export type MutationCreateWorkArgs = {
+  ateraStudyId?: InputMaybe<Scalars['Int']['input']>;
   costCode: Scalars['String']['input'];
   facultyLead: Scalars['String']['input'];
   numBlocks?: InputMaybe<Scalars['Int']['input']>;
@@ -2171,6 +2180,16 @@ export type MutationUpdateReleaseRecipientFullNameArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
+export type MutationUpdateWorkAteraStudyArgs = {
+  ssStudyId?: InputMaybe<Scalars['Int']['input']>;
+  workNumber: Scalars['String']['input'];
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
 export type MutationUpdateWorkDnapStudyArgs = {
   ssStudyId?: InputMaybe<Scalars['Int']['input']>;
   workNumber: Scalars['String']['input'];
@@ -2608,6 +2627,8 @@ export type ProbeOperationLabware = {
   probes: Array<ProbeLot>;
   /** Reagent lot number. */
   reagentLot?: InputMaybe<Scalars['String']['input']>;
+  /** Comment id indicating the sample prep reagent type. */
+  reagentTypeCommentId?: InputMaybe<Scalars['Int']['input']>;
   /** The name of the spike probe, if used. */
   spike?: InputMaybe<Scalars['String']['input']>;
   /** The work number of the operation on this labware. */
@@ -2639,6 +2660,7 @@ export type ProbePanel = {
 export enum ProbeType {
   Xenium = 'xenium',
   Cytassist = 'cytassist',
+  Atera = 'atera',
   Spike = 'spike'
 }
 
@@ -3266,7 +3288,7 @@ export type QueryProbeHybSlotsArgs = {
  */
 export type QueryProbePanelsArgs = {
   includeDisabled?: InputMaybe<Scalars['Boolean']['input']>;
-  type: ProbeType;
+  type?: InputMaybe<ProbeType>;
 };
 
 
@@ -4460,6 +4482,8 @@ export type VisiumPermData = {
 /** Work that can be used to collect together operations done on related samples for a particular purpose. */
 export type Work = {
   __typename?: 'Work';
+  /** The atera study for this work, if any. */
+  ateraStudy?: Maybe<DnapStudy>;
   /** The cost code responsible for paying for this work. */
   costCode: CostCode;
   /** The DNAP study associated with this work, if any. */
@@ -4504,6 +4528,15 @@ export type Work = {
   workTypes: Array<WorkType>;
   /** The xenium study for this work, if any. */
   xeniumStudy?: Maybe<DnapStudy>;
+};
+
+/** A work number and a possible atera study sequencescape id. */
+export type WorkNumberAteraStudyId = {
+  __typename?: 'WorkNumberAteraStudyId';
+  /** The sequencescape ID of an atera study, if the work is linked to one. */
+  ateraStudyId?: Maybe<Scalars['Int']['output']>;
+  /** A work number. */
+  workNumber: Scalars['String']['output'];
 };
 
 /** A work number and a possible xenium study sequencescape id. */
@@ -4704,9 +4737,9 @@ export type TreatmentTypeFieldsFragment = { __typename?: 'TreatmentType', name: 
 
 export type UserFieldsFragment = { __typename?: 'User', username: string, role: UserRole };
 
-export type WorkFieldsFragment = { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> };
+export type WorkFieldsFragment = { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> };
 
-export type WorkProgressFieldsFragment = { __typename?: 'WorkProgress', mostRecentOperation?: string | null, workComment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> }, timestamps: Array<{ __typename?: 'WorkProgressTimestamp', type: string, timestamp: string }> };
+export type WorkProgressFieldsFragment = { __typename?: 'WorkProgress', mostRecentOperation?: string | null, workComment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> }, timestamps: Array<{ __typename?: 'WorkProgressTimestamp', type: string, timestamp: string }> };
 
 export type WorkProgressTimeStampFieldFragment = { __typename?: 'WorkProgressTimestamp', type: string, timestamp: string };
 
@@ -4714,7 +4747,7 @@ export type WorkSummaryGroupFieldsFragment = { __typename?: 'WorkSummaryGroup', 
 
 export type WorkTypeFieldsFragment = { __typename?: 'WorkType', name: string, enabled: boolean };
 
-export type WorkWithCommentFieldsFragment = { __typename?: 'WorkWithComment', comment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+export type WorkWithCommentFieldsFragment = { __typename?: 'WorkWithComment', comment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type AddBioRiskMutationVariables = Exact<{
   code: Scalars['String']['input'];
@@ -4922,12 +4955,13 @@ export type CreateWorkMutationVariables = Exact<{
   omeroProject?: InputMaybe<Scalars['String']['input']>;
   ssStudyId?: InputMaybe<Scalars['Int']['input']>;
   xeniumStudyId?: InputMaybe<Scalars['Int']['input']>;
+  ateraStudyId?: InputMaybe<Scalars['Int']['input']>;
   treatmentTypes?: InputMaybe<Array<Scalars['String']['input']>>;
   facultyLead: Scalars['String']['input'];
 }>;
 
 
-export type CreateWorkMutation = { __typename?: 'Mutation', createWork: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+export type CreateWorkMutation = { __typename?: 'Mutation', createWork: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type DestroyMutationVariables = Exact<{
   request: DestroyRequest;
@@ -5453,13 +5487,21 @@ export type UpdateReleaseRecipientFullNameMutationVariables = Exact<{
 
 export type UpdateReleaseRecipientFullNameMutation = { __typename?: 'Mutation', updateReleaseRecipientFullName: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } };
 
+export type UpdateWorkAteraStudyMutationVariables = Exact<{
+  workNumber: Scalars['String']['input'];
+  ssStudyId?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type UpdateWorkAteraStudyMutation = { __typename?: 'Mutation', updateWorkAteraStudy: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+
 export type UpdateWorkDnapStudyMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
   ssStudyId?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type UpdateWorkDnapStudyMutation = { __typename?: 'Mutation', updateWorkDnapStudy: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+export type UpdateWorkDnapStudyMutation = { __typename?: 'Mutation', updateWorkDnapStudy: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type UpdateWorkNumBlocksMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
@@ -5467,7 +5509,7 @@ export type UpdateWorkNumBlocksMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkNumBlocksMutation = { __typename?: 'Mutation', updateWorkNumBlocks: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+export type UpdateWorkNumBlocksMutation = { __typename?: 'Mutation', updateWorkNumBlocks: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type UpdateWorkNumOriginalSamplesMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
@@ -5475,7 +5517,7 @@ export type UpdateWorkNumOriginalSamplesMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkNumOriginalSamplesMutation = { __typename?: 'Mutation', updateWorkNumOriginalSamples: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+export type UpdateWorkNumOriginalSamplesMutation = { __typename?: 'Mutation', updateWorkNumOriginalSamples: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type UpdateWorkNumSlidesMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
@@ -5483,7 +5525,7 @@ export type UpdateWorkNumSlidesMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkNumSlidesMutation = { __typename?: 'Mutation', updateWorkNumSlides: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+export type UpdateWorkNumSlidesMutation = { __typename?: 'Mutation', updateWorkNumSlides: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type UpdateWorkOmeroProjectMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
@@ -5491,7 +5533,7 @@ export type UpdateWorkOmeroProjectMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkOmeroProjectMutation = { __typename?: 'Mutation', updateWorkOmeroProject: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+export type UpdateWorkOmeroProjectMutation = { __typename?: 'Mutation', updateWorkOmeroProject: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type UpdateWorkPriorityMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
@@ -5499,7 +5541,7 @@ export type UpdateWorkPriorityMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkPriorityMutation = { __typename?: 'Mutation', updateWorkPriority: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+export type UpdateWorkPriorityMutation = { __typename?: 'Mutation', updateWorkPriority: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type UpdateWorkStatusMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
@@ -5508,7 +5550,7 @@ export type UpdateWorkStatusMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkStatusMutation = { __typename?: 'Mutation', updateWorkStatus: { __typename?: 'WorkWithComment', comment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } } };
+export type UpdateWorkStatusMutation = { __typename?: 'Mutation', updateWorkStatus: { __typename?: 'WorkWithComment', comment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } } };
 
 export type UpdateWorkTreatmentTypesMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
@@ -5516,7 +5558,7 @@ export type UpdateWorkTreatmentTypesMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkTreatmentTypesMutation = { __typename?: 'Mutation', updateWorkTreatmentTypes: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+export type UpdateWorkTreatmentTypesMutation = { __typename?: 'Mutation', updateWorkTreatmentTypes: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type UpdateWorkTypesMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
@@ -5524,7 +5566,7 @@ export type UpdateWorkTypesMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkTypesMutation = { __typename?: 'Mutation', updateWorkWorkTypes: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+export type UpdateWorkTypesMutation = { __typename?: 'Mutation', updateWorkWorkTypes: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type UpdateWorkXeniumStudyMutationVariables = Exact<{
   workNumber: Scalars['String']['input'];
@@ -5532,7 +5574,7 @@ export type UpdateWorkXeniumStudyMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkXeniumStudyMutation = { __typename?: 'Mutation', updateWorkXeniumStudy: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
+export type UpdateWorkXeniumStudyMutation = { __typename?: 'Mutation', updateWorkXeniumStudy: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } };
 
 export type VisiumAnalysisMutationVariables = Exact<{
   request: VisiumAnalysisRequest;
@@ -5767,14 +5809,14 @@ export type FindWorkProgressQueryVariables = Exact<{
 }>;
 
 
-export type FindWorkProgressQuery = { __typename?: 'Query', workProgress: Array<{ __typename?: 'WorkProgress', mostRecentOperation?: string | null, workComment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> }, timestamps: Array<{ __typename?: 'WorkProgressTimestamp', type: string, timestamp: string }> }> };
+export type FindWorkProgressQuery = { __typename?: 'Query', workProgress: Array<{ __typename?: 'WorkProgress', mostRecentOperation?: string | null, workComment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> }, timestamps: Array<{ __typename?: 'WorkProgressTimestamp', type: string, timestamp: string }> }> };
 
 export type FindWorksCreatedByQueryVariables = Exact<{
   username: Scalars['String']['input'];
 }>;
 
 
-export type FindWorksCreatedByQuery = { __typename?: 'Query', worksCreatedBy: Array<{ __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> }> };
+export type FindWorksCreatedByQuery = { __typename?: 'Query', worksCreatedBy: Array<{ __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> }> };
 
 export type GetAllWorkInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5825,7 +5867,7 @@ export type GetCommentsQuery = { __typename?: 'Query', comments: Array<{ __typen
 export type GetConfigurationQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetConfigurationQuery = { __typename?: 'Query', destructionReasons: Array<{ __typename?: 'DestructionReason', id: number, text: string, enabled: boolean }>, comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }>, hmdmcs: Array<{ __typename?: 'Hmdmc', hmdmc: string, enabled: boolean }>, species: Array<{ __typename?: 'Species', name: string, enabled: boolean }>, fixatives: Array<{ __typename?: 'Fixative', name: string, enabled: boolean }>, releaseDestinations: Array<{ __typename?: 'ReleaseDestination', name: string, enabled: boolean }>, releaseRecipients: Array<{ __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean }>, projects: Array<{ __typename?: 'Project', name: string, enabled: boolean }>, costCodes: Array<{ __typename?: 'CostCode', code: string, enabled: boolean }>, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, equipments: Array<{ __typename?: 'Equipment', id: number, name: string, category: string, enabled: boolean }>, users: Array<{ __typename?: 'User', username: string, role: UserRole }>, solutions: Array<{ __typename?: 'Solution', name: string, enabled: boolean }>, xeniumProbePanels: Array<{ __typename?: 'ProbePanel', name: string, enabled: boolean, type: ProbeType }>, cytassistProbePanels: Array<{ __typename?: 'ProbePanel', name: string, enabled: boolean, type: ProbeType }>, spikeProbePanels: Array<{ __typename?: 'ProbePanel', name: string, enabled: boolean, type: ProbeType }>, programs: Array<{ __typename?: 'Program', name: string, enabled: boolean }>, omeroProjects: Array<{ __typename?: 'OmeroProject', name: string, enabled: boolean }>, dnapStudies: Array<{ __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean }>, bioRisks: Array<{ __typename?: 'BioRisk', code: string, enabled: boolean }>, tissueTypes: Array<{ __typename?: 'TissueType', name: string, code: string, spatialLocations: Array<{ __typename?: 'SpatialLocation', code: number, name: string }> }>, cellClasses: Array<{ __typename?: 'CellClass', name: string, enabled: boolean }>, proteinPanels: Array<{ __typename?: 'ProteinPanel', name: string, enabled: boolean }>, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> };
+export type GetConfigurationQuery = { __typename?: 'Query', destructionReasons: Array<{ __typename?: 'DestructionReason', id: number, text: string, enabled: boolean }>, comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }>, hmdmcs: Array<{ __typename?: 'Hmdmc', hmdmc: string, enabled: boolean }>, species: Array<{ __typename?: 'Species', name: string, enabled: boolean }>, fixatives: Array<{ __typename?: 'Fixative', name: string, enabled: boolean }>, releaseDestinations: Array<{ __typename?: 'ReleaseDestination', name: string, enabled: boolean }>, releaseRecipients: Array<{ __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean }>, projects: Array<{ __typename?: 'Project', name: string, enabled: boolean }>, costCodes: Array<{ __typename?: 'CostCode', code: string, enabled: boolean }>, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, equipments: Array<{ __typename?: 'Equipment', id: number, name: string, category: string, enabled: boolean }>, users: Array<{ __typename?: 'User', username: string, role: UserRole }>, solutions: Array<{ __typename?: 'Solution', name: string, enabled: boolean }>, probePanels: Array<{ __typename?: 'ProbePanel', name: string, enabled: boolean, type: ProbeType }>, programs: Array<{ __typename?: 'Program', name: string, enabled: boolean }>, omeroProjects: Array<{ __typename?: 'OmeroProject', name: string, enabled: boolean }>, dnapStudies: Array<{ __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean }>, bioRisks: Array<{ __typename?: 'BioRisk', code: string, enabled: boolean }>, tissueTypes: Array<{ __typename?: 'TissueType', name: string, code: string, spatialLocations: Array<{ __typename?: 'SpatialLocation', code: number, name: string }> }>, cellClasses: Array<{ __typename?: 'CellClass', name: string, enabled: boolean }>, proteinPanels: Array<{ __typename?: 'ProteinPanel', name: string, enabled: boolean }>, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> };
 
 export type GetDestroyInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6078,7 +6120,7 @@ export type GetWorkAllocationInfoQueryVariables = Exact<{
 }>;
 
 
-export type GetWorkAllocationInfoQuery = { __typename?: 'Query', projects: Array<{ __typename?: 'Project', name: string, enabled: boolean }>, programs: Array<{ __typename?: 'Program', name: string, enabled: boolean }>, costCodes: Array<{ __typename?: 'CostCode', code: string, enabled: boolean }>, worksWithComments: Array<{ __typename?: 'WorkWithComment', comment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } }>, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }>, releaseRecipients: Array<{ __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean }>, omeroProjects: Array<{ __typename?: 'OmeroProject', name: string, enabled: boolean }>, dnapStudies: Array<{ __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean }>, releaseDestinations: Array<{ __typename?: 'ReleaseDestination', name: string, enabled: boolean }>, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> };
+export type GetWorkAllocationInfoQuery = { __typename?: 'Query', projects: Array<{ __typename?: 'Project', name: string, enabled: boolean }>, programs: Array<{ __typename?: 'Program', name: string, enabled: boolean }>, costCodes: Array<{ __typename?: 'CostCode', code: string, enabled: boolean }>, worksWithComments: Array<{ __typename?: 'WorkWithComment', comment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, program: { __typename?: 'Program', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, omeroProject?: { __typename?: 'OmeroProject', name: string, enabled: boolean } | null, ateraStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, dnapStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, xeniumStudy?: { __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean } | null, facultyLead?: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } | null, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> } }>, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }>, releaseRecipients: Array<{ __typename?: 'ReleaseRecipient', username: string, fullName?: string | null, enabled: boolean }>, omeroProjects: Array<{ __typename?: 'OmeroProject', name: string, enabled: boolean }>, dnapStudies: Array<{ __typename?: 'DnapStudy', ssId: number, name: string, enabled: boolean }>, releaseDestinations: Array<{ __typename?: 'ReleaseDestination', name: string, enabled: boolean }>, treatmentTypes: Array<{ __typename?: 'TreatmentType', name: string, enabled: boolean }> };
 
 export type GetWorkNumbersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6698,6 +6740,9 @@ export const WorkFieldsFragmentDoc = gql`
   omeroProject {
     ...OmeroProjectFields
   }
+  ateraStudy {
+    ...DnapStudyFields
+  }
   dnapStudy {
     ...DnapStudyFields
   }
@@ -7026,7 +7071,7 @@ ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
 ${TissueFieldsFragmentDoc}`;
 export const CreateWorkDocument = gql`
-    mutation CreateWork($prefix: String!, $workTypes: [String!]!, $workRequester: String!, $project: String!, $program: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int, $numOriginalSamples: Int, $omeroProject: String, $ssStudyId: Int, $xeniumStudyId: Int, $treatmentTypes: [String!], $facultyLead: String!) {
+    mutation CreateWork($prefix: String!, $workTypes: [String!]!, $workRequester: String!, $project: String!, $program: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int, $numOriginalSamples: Int, $omeroProject: String, $ssStudyId: Int, $xeniumStudyId: Int, $ateraStudyId: Int, $treatmentTypes: [String!], $facultyLead: String!) {
   createWork(
     prefix: $prefix
     workTypes: $workTypes
@@ -7040,6 +7085,7 @@ export const CreateWorkDocument = gql`
     omeroProject: $omeroProject
     ssStudyId: $ssStudyId
     xeniumStudyId: $xeniumStudyId
+    ateraStudyId: $ateraStudyId
     treatmentTypes: $treatmentTypes
     facultyLead: $facultyLead
   ) {
@@ -7803,6 +7849,22 @@ export const UpdateReleaseRecipientFullNameDocument = gql`
   }
 }
     ${ReleaseRecipientFieldsFragmentDoc}`;
+export const UpdateWorkAteraStudyDocument = gql`
+    mutation UpdateWorkAteraStudy($workNumber: String!, $ssStudyId: Int) {
+  updateWorkAteraStudy(workNumber: $workNumber, ssStudyId: $ssStudyId) {
+    ...WorkFields
+  }
+}
+    ${WorkFieldsFragmentDoc}
+${ReleaseRecipientFieldsFragmentDoc}
+${ProjectFieldsFragmentDoc}
+${ProgramFieldsFragmentDoc}
+${CostCodeFieldsFragmentDoc}
+${WorkTypeFieldsFragmentDoc}
+${OmeroProjectFieldsFragmentDoc}
+${DnapStudyFieldsFragmentDoc}
+${ReleaseDestinationFieldsFragmentDoc}
+${TreatmentTypeFieldsFragmentDoc}`;
 export const UpdateWorkDnapStudyDocument = gql`
     mutation UpdateWorkDnapStudy($workNumber: String!, $ssStudyId: Int) {
   updateWorkDnapStudy(workNumber: $workNumber, ssStudyId: $ssStudyId) {
@@ -8520,13 +8582,7 @@ export const GetConfigurationDocument = gql`
   solutions(includeDisabled: true) {
     ...SolutionFields
   }
-  xeniumProbePanels: probePanels(type: xenium, includeDisabled: true) {
-    ...ProbePanelFields
-  }
-  cytassistProbePanels: probePanels(type: cytassist, includeDisabled: true) {
-    ...ProbePanelFields
-  }
-  spikeProbePanels: probePanels(type: spike, includeDisabled: true) {
+  probePanels: probePanels(includeDisabled: true) {
     ...ProbePanelFields
   }
   programs(includeDisabled: true) {
@@ -9338,6 +9394,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     UpdateReleaseRecipientFullName(variables: UpdateReleaseRecipientFullNameMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<UpdateReleaseRecipientFullNameMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateReleaseRecipientFullNameMutation>(UpdateReleaseRecipientFullNameDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateReleaseRecipientFullName', 'mutation', variables);
+    },
+    UpdateWorkAteraStudy(variables: UpdateWorkAteraStudyMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<UpdateWorkAteraStudyMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkAteraStudyMutation>(UpdateWorkAteraStudyDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkAteraStudy', 'mutation', variables);
     },
     UpdateWorkDnapStudy(variables: UpdateWorkDnapStudyMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<UpdateWorkDnapStudyMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkDnapStudyMutation>(UpdateWorkDnapStudyDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkDnapStudy', 'mutation', variables);

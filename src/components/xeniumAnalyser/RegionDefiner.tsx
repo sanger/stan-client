@@ -1,29 +1,68 @@
 import React, { useCallback, useRef } from 'react';
 import Labware from '../labwarePerSection/Labware';
 import { FormikErrors, useFormikContext } from 'formik';
-import { GridDirection, REGION_BORDER_COLORS } from '../../lib/helpers';
+import { REGION_BORDER_COLORS } from '../../lib/helpers';
 import Heading from '../Heading';
-import {
-  AnalyserLabwareForm,
-  Region,
-  reIndexAndRenameRegions,
-  XeniumAnalyserFormValues
-} from '../../pages/XeniumAnalyser';
+import { AnalyserLabwareForm, Region, RegionDefinerFormValues, RegionNaming, SlideLayout } from './analyser.types';
 import { LabwareImperativeRef } from '../labware/Labware';
 import warningToast from '../notifications/WarningToast';
 import { toast } from 'react-toastify';
 import { PlannedSectionDetails } from '../../lib/machines/layout/layoutContext';
+import { compareAddresses, firstAddress } from '../../lib/helpers/labwareHelper';
 
 type RegionDefinerProps = {
   labwareIndex: number;
+  /** How the slide is drawn on this page's machine */
+  slideLayout: SlideLayout;
+  /** How this page names the slide's regions */
+  renameRegions: RegionNaming;
 };
+
+const sortRegionsByAddress = (regions: Region[]): Array<Region> =>
+  [...regions]
+    // Sort section groups within each region and sort regions — in one pass
+    .map((reg) => ({
+      ...reg,
+      sectionGroups: [...reg.sectionGroups].sort((a, b) =>
+        compareAddresses(firstAddress(a.addresses), firstAddress(b.addresses))
+      )
+    }))
+    // Sort regions by their first section group's first address
+    .sort((a, b) =>
+      compareAddresses(firstAddress(a.sectionGroups[0].addresses), firstAddress(b.sectionGroups[0].addresses))
+    );
+
+export const reIndexAndRenameXeniumRegions = (regions: Region[], runName: string, barcode: string): Array<Region> => {
+  let index = 0;
+  return sortRegionsByAddress(regions).map((region) => ({
+    ...region,
+    roi:
+      region.sectionGroups.length === 1 && region.sectionGroups[0].source.tissue?.externalName
+        ? region.sectionGroups[0].source.tissue.externalName
+        : [`Region${++index}`, barcode, runName.trim()].filter(Boolean).join('_')
+  }));
+};
+
+/** The Atera accepts letters, numbers, dashes and underscores in region names, and nothing else */
+export const ATERA_REGION_NAME_PATTERN = /^[A-Za-z0-9_-]+$/;
+
+/**
+ * Atera run: named as on Xenium analyser, without the run name. A region of one section is named after
+ * its sample's external name, and grouped sections Region1_<barcode>, Region2_<barcode>, ... in slot order.
+ * External names can have full stops, which become underscores, as the lab already does on Xenium (0.25 -> 0_25).
+ */
+export const reIndexAndRenameAteraRegions = (regions: Region[], _runName: string, barcode: string): Array<Region> =>
+  reIndexAndRenameXeniumRegions(regions, '', barcode).map((region) => ({
+    ...region,
+    roi: region.roi.replaceAll('.', '_')
+  }));
 
 function isLabwareErrorObject(err: unknown): err is FormikErrors<AnalyserLabwareForm> {
   return typeof err === 'object' && err !== null;
 }
 
-const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
-  const { values, errors, setFieldValue, setFieldError, setValues } = useFormikContext<XeniumAnalyserFormValues>();
+const RegionDefiner = ({ labwareIndex, slideLayout, renameRegions }: RegionDefinerProps) => {
+  const { values, errors, setFieldValue, setFieldError, setValues } = useFormikContext<RegionDefinerFormValues>();
 
   const analyserLabware = values.labware[labwareIndex];
 
@@ -167,7 +206,7 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
               ...labware,
               selectedAddresses: undefined,
               selectedRegionColorIndex: undefined,
-              regions: reIndexAndRenameRegions(regions, runName, labware.labware.barcode)
+              regions: renameRegions(regions, runName, labware.labware.barcode)
             }
           : labware
       )
@@ -233,7 +272,7 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
           ? {
               ...labware,
               selectedRegionColorIndex: undefined,
-              regions: reIndexAndRenameRegions(
+              regions: renameRegions(
                 [...remainingRegions, ...splitSectionsIntoRegions],
                 values.runName,
                 labware.labware.barcode
@@ -296,7 +335,8 @@ const RegionDefiner = ({ labwareIndex }: RegionDefinerProps) => {
                 labwareRef.current = el;
               }
             }}
-            gridDirection={GridDirection.LeftUp}
+            gridDirection={slideLayout.gridDirection}
+            barcodeInfoPosition={slideLayout.barcodeInfoPosition}
             labware={analyserLabware.labware}
             selectionMode={'multi'}
             selectable={'non_empty'}

@@ -35,6 +35,7 @@ import VisiumPerm from '../pages/VisiumPerm';
 import VisiumAnalysis from '../pages/VisiumAnalysis';
 import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
 import XeniumAnalyser from '../pages/XeniumAnalyser';
+import AteraRun from '../pages/AteraRun';
 import CytAssist from '../pages/CytAssist';
 import Staining from '../pages/Staining';
 import ImagingQC from '../pages/ImagingQC';
@@ -66,6 +67,7 @@ import { ReviseWorkNumber } from '../pages/ReviseWorkNumber/ReviseWorkNumber';
 import { ReassignRequestNumber } from '../pages/ReassignRequestNumber';
 import ProbeHybridisationCytAssist from '../pages/ProbeHybridisationCytAssist/ProbeHybridisationCytAssist';
 import { Visium3LibraryConstruction } from '../pages/LibraryConstruction/Visium3LibraryConstruction';
+import ProbeHybridisationAtera from '../pages/ProbeHybridisationAtera';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -255,6 +257,25 @@ const RouteLayout = () => {
         </Route>
         <Route element={<AuthLayout />}>
           <Route
+            path="/lab/probe_hybridisation_atera"
+            loader={async () => {
+              const [comments, probePanels] = await Promise.all([
+                stanCore.GetComments({
+                  commentCategory: 'sample prep reagent type',
+                  includeDisabled: false
+                }),
+                stanCore.GetProbePanels({ type: ProbeType.Atera })
+              ]);
+              return {
+                probePanels: probePanels.probePanels,
+                samplePrepReagentTypes: comments.comments
+              };
+            }}
+            element={<ProbeHybridisationAtera />}
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
             path="/lab/probe_hybridisation_xenium"
             loader={async () => {
               return await stanCore.GetProbePanels({ type: ProbeType.Xenium });
@@ -309,6 +330,22 @@ const RouteLayout = () => {
               return res.equipments;
             }}
             element={<XeniumAnalyser />}
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/atera_run"
+            loader={async () => {
+              const [equipments, workTypes] = await Promise.all([
+                stanCore.GetEquipments({ category: 'atera' }),
+                stanCore.GetComments({ commentCategory: 'Atera run work type', includeDisabled: false })
+              ]);
+              return {
+                equipments: equipments.equipments,
+                workTypes: workTypes.comments
+              };
+            }}
+            element={<AteraRun />}
           />
         </Route>
         <Route element={<AuthLayout />}>

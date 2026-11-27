@@ -1,6 +1,15 @@
-import { AnalyserLabwareForm, Region, XeniumAnalyserFormValues } from '../../../src/pages/XeniumAnalyser';
+import { XeniumAnalyserFormValues } from '../../../src/pages/XeniumAnalyser';
+import {
+  AnalyserLabwareForm,
+  Region,
+  XENIUM_SLIDE_LAYOUT
+} from '../../../src/components/xeniumAnalyser/analyser.types';
 import { Formik } from 'formik';
-import RegionDefiner from '../../../src/components/xeniumAnalyser/RegionDefiner';
+import RegionDefiner, {
+  ATERA_REGION_NAME_PATTERN,
+  reIndexAndRenameAteraRegions,
+  reIndexAndRenameXeniumRegions
+} from '../../../src/components/xeniumAnalyser/RegionDefiner';
 import { act, cleanup, fireEvent, render, RenderResult } from '@testing-library/react';
 
 import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHandlers';
@@ -80,7 +89,13 @@ const renderRegionDefiner = ({ selectedAddresses, selectedRegionColorIndex, regi
     <Formik initialValues={formValues({ selectedAddresses, selectedRegionColorIndex, regions })} onSubmit={jest.fn()}>
       {({ values }) => {
         labwareRegions = values['labware'][labwareIndex].regions;
-        return <RegionDefiner labwareIndex={labwareIndex} />;
+        return (
+          <RegionDefiner
+            labwareIndex={labwareIndex}
+            slideLayout={XENIUM_SLIDE_LAYOUT}
+            renameRegions={reIndexAndRenameXeniumRegions}
+          />
+        );
       }}
     </Formik>
   );
@@ -211,4 +226,49 @@ describe('RegionDefiner component', () => {
       });
     });
   });
+});
+
+describe('reIndexAndRenameAteraRegions', () => {
+  //A region of one section per given slot, each from tissue with the given external name
+  const region = (addresses: Array<string>, externalName?: string): Region => ({
+    roi: '',
+    sectionGroups: addresses.map((address) => ({
+      source: {
+        sampleId: 1,
+        labware: labware,
+        newSection: '1',
+        tissue: { ...labware.slots[0].samples[0].tissue, externalName }
+      },
+      addresses: new Set([address])
+    }))
+  });
+
+  it('names a region of one section after its external name with full stops as underscores, and grouped sections Region1_<barcode>, Region2_<barcode>, ... in slot order, without the run name', () => {
+    const regions = [
+      region(['A1'], 'EXT-1_28.09.26_A'),
+      region(['B1', 'C1'], 'EXT-1_28.09.26_A'),
+      //no external name, so named like grouped sections
+      region(['D1']),
+      region(['E1', 'F1'], 'EXT-1_28.09.26_A')
+    ];
+    const renamed = reIndexAndRenameAteraRegions([...regions].reverse(), 'Run 123', 'STAN-6116');
+    expect(renamed.map((region) => region.roi)).toEqual([
+      'EXT-1_28_09_26_A',
+      'Region1_STAN-6116',
+      'Region2_STAN-6116',
+      'Region3_STAN-6116'
+    ]);
+  });
+});
+
+describe('ATERA_REGION_NAME_PATTERN', () => {
+  it.each(['Region1', 'Region1_STAN-6116', 'EXT-1_28_09_26_A'])('accepts %s', (name) => {
+    expect(ATERA_REGION_NAME_PATTERN.test(name)).toBe(true);
+  });
+  it.each(['EXT-1_28.09.26_A', 'Region 1', 'Region1 ', ' Region1', 'Region#1', 'Region/1', ''])(
+    'rejects "%s"',
+    (name) => {
+      expect(ATERA_REGION_NAME_PATTERN.test(name)).toBe(false);
+    }
+  );
 });

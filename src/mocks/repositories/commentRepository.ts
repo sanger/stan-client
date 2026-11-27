@@ -141,6 +141,22 @@ const seeds: Array<CommentFieldsFragment> = [
     text: 'Run paused due to error, but retry permitted completion'
   }),
   commentFactory.build({
+    category: 'Atera run work type',
+    text: 'Atera WTA 4 slides'
+  }),
+  commentFactory.build({
+    category: 'Atera run work type',
+    text: 'Atera WTA 2 slides'
+  }),
+  commentFactory.build({
+    category: 'Atera run work type',
+    text: 'Atera Select 2 slides'
+  }),
+  commentFactory.build({
+    category: 'Atera run work type',
+    text: 'Atera Select 4 slides'
+  }),
+  commentFactory.build({
     category: 'Probe QC',
     text: 'Section detached'
   }),
@@ -204,6 +220,14 @@ const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({
     category: 'qPCR results',
     text: 'Potential to work'
+  }),
+  commentFactory.build({
+    category: 'sample prep reagent type',
+    text: 'FFPE'
+  }),
+  commentFactory.build({
+    category: 'sample prep reagent type',
+    text: 'Fresh frozen'
   })
 ];
 
