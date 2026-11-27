@@ -140,6 +140,247 @@
 .bg-purple-200 {
   background-color: oklch(89.6% 0.0484 232.92);
 }
+/* Sample colours, see COLORS in src/lib/helpers.ts */
+.bg-sample-1-500 {
+  background-color: #3300cc;
+}
+.bg-sample-1-200 {
+  background-color: #ccbff2;
+}
+.bg-sample-2-500 {
+  background-color: #ee0000;
+}
+.bg-sample-2-200 {
+  background-color: #fbbfbf;
+}
+.bg-sample-3-500 {
+  background-color: #880066;
+}
+.bg-sample-3-200 {
+  background-color: #e1bfd9;
+}
+.bg-sample-4-500 {
+  background-color: #008855;
+}
+.bg-sample-4-200 {
+  background-color: #bfe1d5;
+}
+.bg-sample-5-500 {
+  background-color: #5566aa;
+}
+.bg-sample-5-200 {
+  background-color: #d5d9ea;
+}
+.bg-sample-6-500 {
+  background-color: #773300;
+}
+.bg-sample-6-200 {
+  background-color: #ddccbf;
+}
+.bg-sample-7-500 {
+  background-color: #7711ee;
+}
+.bg-sample-7-200 {
+  background-color: #ddc4fb;
+}
+.bg-sample-8-500 {
+  background-color: #cc0099;
+}
+.bg-sample-8-200 {
+  background-color: #f2bfe6;
+}
+.bg-sample-9-500 {
+  background-color: #553388;
+}
+.bg-sample-9-200 {
+  background-color: #d5cce1;
+}
+.bg-sample-10-500 {
+  background-color: #996622;
+}
+.bg-sample-10-200 {
+  background-color: #e6d9c8;
+}
+.bg-sample-11-500 {
+  background-color: #885577;
+}
+.bg-sample-11-200 {
+  background-color: #e1d5dd;
+}
+.bg-sample-12-500 {
+  background-color: #006644;
+}
+.bg-sample-12-200 {
+  background-color: #bfd9d0;
+}
+.bg-sample-13-500 {
+  background-color: #8811aa;
+}
+.bg-sample-13-200 {
+  background-color: #e1c4ea;
+}
+.bg-sample-14-500 {
+  background-color: #aa0033;
+}
+.bg-sample-14-200 {
+  background-color: #eabfcc;
+}
+.bg-sample-15-500 {
+  background-color: #8855cc;
+}
+.bg-sample-15-200 {
+  background-color: #e1d5f2;
+}
+.bg-sample-16-500 {
+  background-color: #4444cc;
+}
+.bg-sample-16-200 {
+  background-color: #d0d0f2;
+}
+.bg-sample-17-500 {
+  background-color: #dd0055;
+}
+.bg-sample-17-200 {
+  background-color: #f7bfd5;
+}
+.bg-sample-18-500 {
+  background-color: #005577;
+}
+.bg-sample-18-200 {
+  background-color: #bfd5dd;
+}
+.bg-sample-19-500 {
+  background-color: #880033;
+}
+.bg-sample-19-200 {
+  background-color: #e1bfcc;
+}
+.bg-sample-20-500 {
+  background-color: #aa3300;
+}
+.bg-sample-20-200 {
+  background-color: #eaccbf;
+}
+.bg-sample-21-500 {
+  background-color: #883388;
+}
+.bg-sample-21-200 {
+  background-color: #e1cce1;
+}
+.bg-sample-22-500 {
+  background-color: #9922ff;
+}
+.bg-sample-22-200 {
+  background-color: #e6c8ff;
+}
+.bg-sample-23-500 {
+  background-color: #55ff00;
+}
+.bg-sample-23-200 {
+  background-color: #d5ffbf;
+}
+.bg-sample-24-500 {
+  background-color: #55aadd;
+}
+.bg-sample-24-200 {
+  background-color: #d5eaf7;
+}
+.bg-sample-25-500 {
+  background-color: #bb44ff;
+}
+.bg-sample-25-200 {
+  background-color: #eed0ff;
+}
+.bg-sample-26-500 {
+  background-color: #ccaa33;
+}
+.bg-sample-26-200 {
+  background-color: #f2eacc;
+}
+.bg-sample-27-500 {
+  background-color: #ff66aa;
+}
+.bg-sample-27-200 {
+  background-color: #ffd9ea;
+}
+.bg-sample-28-500 {
+  background-color: #bb6688;
+}
+.bg-sample-28-200 {
+  background-color: #eed9e1;
+}
+.bg-sample-29-500 {
+  background-color: #33cc77;
+}
+.bg-sample-29-200 {
+  background-color: #ccf2dd;
+}
+.bg-sample-30-500 {
+  background-color: #9988ff;
+}
+.bg-sample-30-200 {
+  background-color: #e6e1ff;
+}
+.bg-sample-31-500 {
+  background-color: #889966;
+}
+.bg-sample-31-200 {
+  background-color: #e1e6d9;
+}
+.bg-sample-32-500 {
+  background-color: #dd7722;
+}
+.bg-sample-32-200 {
+  background-color: #f7ddc8;
+}
+.bg-sample-33-500 {
+  background-color: #bb66cc;
+}
+.bg-sample-33-200 {
+  background-color: #eed9f2;
+}
+.bg-sample-34-500 {
+  background-color: #bbcc00;
+}
+.bg-sample-34-200 {
+  background-color: #eef2bf;
+}
+.bg-sample-35-500 {
+  background-color: #00aaaa;
+}
+.bg-sample-35-200 {
+  background-color: #bfeaea;
+}
+.bg-sample-36-500 {
+  background-color: #5588dd;
+}
+.bg-sample-36-200 {
+  background-color: #d5e1f7;
+}
+.bg-sample-37-500 {
+  background-color: #cc88cc;
+}
+.bg-sample-37-200 {
+  background-color: #f2e1f2;
+}
+.bg-sample-38-500 {
+  background-color: #cc8888;
+}
+.bg-sample-38-200 {
+  background-color: #f2e1e1;
+}
+.bg-sample-39-500 {
+  background-color: #33aa33;
+}
+.bg-sample-39-200 {
+  background-color: #cceacc;
+}
+.bg-sample-40-500 {
+  background-color: #ff44ff;
+}
+.bg-sample-40-200 {
+  background-color: #ffd0ff;
+}
 
 /* prod theme colors */
 .border-sdb-100 {

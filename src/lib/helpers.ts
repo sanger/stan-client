@@ -258,7 +258,8 @@ export function buildAddresses(size: SizeInput, direction: GridDirection = GridD
 /**
  * Create a generator for cycling through a list of colors
  */
-const COLORS = ['red', 'green', 'indigo', 'pink', 'blue', 'purple'];
+// Their classes, bg-sample-N-500 and -200, are in src/styles/tailwind.css
+const COLORS = Array.from({ length: 40 }, (_, i) => `sample-${i + 1}`);
 
 export function backgroundColorClassNames() {
   return cycle(COLORS.map((color) => `bg-${color}-500`));
