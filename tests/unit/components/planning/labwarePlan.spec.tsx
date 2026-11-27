@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { LabwareType } from '../../../../src/types/sdk';
 import { createLabwarePlanMachine } from '../../../../src/components/planning/labwarePlan.machine';
 import { createActor } from 'xstate';
-import { convertLabwareToFlaggedLabware } from '../../../../src/lib/helpers/labwareHelper';
+import { buildSampleColors, convertLabwareToFlaggedLabware } from '../../../../src/lib/helpers/labwareHelper';
 
 beforeAll(() => {
   enableMapSet();
@@ -244,6 +244,41 @@ describe('Fields validations', () => {
     });
   });
 });
+describe('When a 7th block is scanned into a Xenium plan', () => {
+  it('lets the 7th block into the plan', () => {
+    // As on the Sectioning - Plan page: scan a block, add a Xenium slide,
+    // then scan the other blocks one at a time
+    const blocks = [1, 2, 3, 4, 5, 6, 7].map((n) => buildBlock(`STAN-B${n}`));
+    const sectionThickness = 0.5;
+    const firstBlock = blocks.slice(0, 1);
+    const machine = createLabwarePlanMachine(
+      buildInitialLayoutPlan(
+        firstBlock,
+        buildSampleColors(firstBlock),
+        buildFlaggedLabware(LabwareTypeName.XENIUM, 'STAN-124'),
+        'Section',
+        sectionThickness.toString()
+      )
+    );
+    const service = createActor(machine).start();
+
+    // Scan blocks 2 to 7, sending what LabwarePlan sends each time
+    // the source table changes
+    for (let scanned = 2; scanned <= blocks.length; scanned++) {
+      const sourceLabware = blocks.slice(0, scanned);
+      service.send({
+        type: 'UPDATE_SOURCES',
+        sources: sourceLabware,
+        sampleColors: buildSampleColors(sourceLabware),
+        sectionThickness
+      });
+    }
+
+    const seventhSampleId = blocks[6].slots[0].samples[0].id;
+    const { layoutPlan } = service.getSnapshot().context;
+    expect(layoutPlan.sources.map((source) => source.sampleId)).toContain(seventhSampleId);
+  });
+});
 const expectDisplayNumberOfLabwareAndSectionThicknessInputs = () => {
   expect(screen.getByTestId('Number of Labware')).toHaveValue(2);
   expect(screen.getByTestId('Section Thickness')).toHaveValue(3);
@@ -300,6 +335,17 @@ const buildFlaggedLabware = (labwareTypeName: string, barcode = 'STAN-123') => {
       labwareType: labwareType(labwareTypeName),
       barcode
     })
+  ])[0];
+};
+
+// A Proviasette block holding one sample. Core's Proviasette has one slot;
+// the labware type fixture has 10 x 10.
+const buildBlock = (barcode: string) => {
+  return convertLabwareToFlaggedLabware([
+    labwareFactory.build(
+      { labwareType: { ...labwareType(LabwareTypeName.PROVIASETTE)!, numRows: 1, numColumns: 1 }, barcode },
+      { transient: { samplesPerSlot: 1 } }
+    )
   ])[0];
 };
 
