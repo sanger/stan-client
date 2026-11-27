@@ -2,7 +2,7 @@ import { Factory } from 'fishery';
 import { cloneDeep, padStart } from 'lodash';
 import type { LinkedLocation, Location, Size, StoredItem } from '../../types/sdk';
 
-const locationFactory = Factory.define<Location>(({ sequence, params, afterBuild, associations }) => {
+const locationFactory = Factory.define<Location>(({ sequence, params }) => {
   const barcode = `STO-${padStart(String(sequence), 3, '0')}`;
 
   const location: Location = {
@@ -41,7 +41,8 @@ export const locationItemFactory = Factory.define<StoredItem>(({ sequence, param
     __typename: 'StoredItem',
     barcode: `STAN-${sequence + 1000}`,
     location: locationFactory.build(),
-    address: params.address ?? null
+    address: params.address ?? null,
+    addressIndex: params.addressIndex ?? null
   };
 
   if (associations.location) {

@@ -29,7 +29,7 @@ class LocationRepository implements Repository<Location> {
     }, []);
   }
 
-  storeBarcode(barcode: string, locationBarcode: string, address?: string | undefined | null): StoredItem {
+  storeBarcode(barcode: string, locationBarcode: string, address: string | null): StoredItem {
     const newLocation = this.locations.get(locationBarcode);
     if (!newLocation) {
       throw new Error(`Location with barcode ${locationBarcode} not found`);
@@ -43,7 +43,8 @@ class LocationRepository implements Repository<Location> {
     const newItem: StoredItem = {
       barcode,
       address,
-      location: newLocation
+      location: newLocation,
+      addressIndex: newLocation.stored.length
     };
 
     newLocation.stored.push(newItem);
@@ -68,8 +69,9 @@ class LocationRepository implements Repository<Location> {
     storedItems.forEach((storeItem) => {
       const newItem: StoredItem = {
         barcode: storeItem.barcode,
-        address: storeItem.address,
-        location: newLocation
+        address: storeItem.address ?? null,
+        location: newLocation,
+        addressIndex: newLocation.stored.length
       };
 
       newLocation.stored.push(newItem);

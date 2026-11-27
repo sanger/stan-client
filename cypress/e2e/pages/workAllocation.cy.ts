@@ -127,9 +127,9 @@ describe('Work Allocation', () => {
       "Entering a value in 'Number of blocks', 'Number of slides' and 'Number of original samples' cells in table",
       () => {
         before(() => {
-          cy.findByTestId('SGP1008-block').type('1');
-          cy.findByTestId('SGP1008-slide').type('2');
-          cy.findByTestId('SGP1008-originalSamples').type('3').blur();
+          cy.findByTestId('SGP1008-block').clear().type('1');
+          cy.findByTestId('SGP1008-slide').clear().type('2');
+          cy.findByTestId('SGP1008-originalSamples').clear().type('3').blur();
         });
 
         it('updates the number of blocks', () => {

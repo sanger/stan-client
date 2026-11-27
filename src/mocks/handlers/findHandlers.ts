@@ -51,14 +51,15 @@ export function buildFindResult(numRecords: number, maxRecords: number): FindRes
   const locationCount = _.random(numRecordsReturned);
   const locations = [...Array(locationCount)].map(() =>
     locationFactory.build({
-      fixedName: faker.location.countryCode(),
-      customName: _.sample([faker.location.street(), null])
+      fixedName: faker.string.alpha({ length: 10 }),
+      customName: _.sample(['Cold Room', 'Freezer A', 'Sample Reception', 'Storage Room', 'Lab Bench 1'])
     })
   );
 
   const labwareLocations = _.sampleSize(labware, locationCount).map((labware) => ({
     labwareId: labware.id,
-    locationId: _.sample(locations)?.id ?? 1
+    locationId: _.sample(locations)?.id ?? 1,
+    address: null
   }));
 
   return {

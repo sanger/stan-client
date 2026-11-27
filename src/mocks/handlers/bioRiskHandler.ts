@@ -14,11 +14,12 @@ import { isEnabled } from '../../lib/helpers';
 import bioRiskRepository from '../repositories/bioRiskRepository';
 import bioRiskFactory from '../../lib/factories/bioRiskFactory';
 import labwareFactory from '../../lib/factories/labwareFactory';
+import { faker } from '@faker-js/faker';
 
 const bioRiskHandler = [
   graphql.mutation<AddBioRiskMutation, AddBioRiskMutationVariables>('AddBioRisk', ({ variables }) => {
     const bioRisk = bioRiskFactory.build({
-      code: variables.code
+      code: variables.code ?? faker.lorem.word()
     });
     bioRiskRepository.save(bioRisk);
     return HttpResponse.json({ data: { addBioRisk: bioRisk } }, { status: 200 });

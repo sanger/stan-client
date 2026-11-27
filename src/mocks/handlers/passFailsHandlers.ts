@@ -23,7 +23,8 @@ const passFailHandlers = [
               slotPassFails: [
                 {
                   address: 'A1',
-                  result: PassFail.Pass
+                  result: PassFail.Pass,
+                  comment: null
                 },
                 {
                   address: 'A2',
@@ -32,7 +33,8 @@ const passFailHandlers = [
                 },
                 {
                   address: 'B1',
-                  result: PassFail.Pass
+                  result: PassFail.Pass,
+                  comment: null
                 },
                 {
                   address: 'B2',

@@ -89,10 +89,8 @@ const workProgressHandlers = [
     }
     return HttpResponse.json({
       data: {
-        __typename: 'Query',
         workProgress: filteredWorks.map((work) => {
           return {
-            __typename: 'WorkProgress',
             work: {
               ...work,
               workNumber: workNumber ?? work.workNumber,
@@ -105,6 +103,7 @@ const workProgressHandlers = [
                 enabled: true
               }
             },
+            mostRecentOperation: null,
             timestamps: buildWorkProgressTimeStamps(),
             workComment: buildWorkComment(work)
           };

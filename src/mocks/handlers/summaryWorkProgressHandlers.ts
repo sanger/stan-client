@@ -7,13 +7,11 @@ const workProgressSummaryHandlers = [
   graphql.query<GetWorkSummaryQuery, GetWorkSummaryQueryVariables>('GetWorkSummary', () => {
     return HttpResponse.json({
       data: {
-        __typename: 'Query',
         worksSummary: {
           workSummaryGroups: workTypeRepository.findAll().map((workType, index) => {
             let keys = objectKeys(WorkStatus);
             keys = keys.filter((key) => key !== 'Failed');
             return {
-              __typename: 'WorkSummaryGroup',
               workType: workType,
               status: WorkStatus[keys[index % keys.length]],
               numWorks: generateRandomIntegerInRange(1, 10),

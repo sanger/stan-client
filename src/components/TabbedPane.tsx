@@ -1,7 +1,6 @@
 import React from 'react';
-import { AriaTabListProps } from '@react-types/tabs';
 import { TabListState, useTabListState } from '@react-stately/tabs';
-import { useTab, useTabList, useTabPanel } from '@react-aria/tabs';
+import { AriaTabListProps, useTab, useTabList, useTabPanel } from '@react-aria/tabs';
 import { Node } from '@react-types/shared';
 
 type TabItemProps<T extends object> = {

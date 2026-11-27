@@ -29,7 +29,7 @@ describe('Orientation QC', () => {
           if (barcode === 'STAN-3112') {
             labware.slots = [labware.slots[0]];
             labware.slots[0].samples = [labware.slots[0].samples[0]];
-            labware.slots[0].samples[0].blockHighestSection = undefined;
+            labware.slots[0].samples[0].blockHighestSection = null;
           }
           const payload: FindFlaggedLabwareQuery = {
             labwareFlagged: labware

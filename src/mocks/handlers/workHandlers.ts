@@ -81,8 +81,8 @@ const workHandlers = [
             return {
               work,
               comment: [WorkStatus.Failed, WorkStatus.Paused, WorkStatus.Withdrawn].includes(work.status)
-                ? sample(comments)?.text
-                : undefined
+                ? sample(comments)?.text ?? null
+                : null
             };
           }),
           treatmentTypes: [],
@@ -203,7 +203,7 @@ const workHandlers = [
     let comment = null;
 
     if (variables.commentId) {
-      comment = commentRepository.find('id', variables.commentId)?.text;
+      comment = commentRepository.find('id', variables.commentId)?.text ?? null;
     }
 
     if (!work) {
@@ -222,7 +222,7 @@ const workHandlers = [
       if (!work) {
         return HttpResponse.json({ errors: [{ message: `Work ${variables.workNumber} not found` }] }, { status: 404 });
       }
-      work.numBlocks = variables.numBlocks;
+      work.numBlocks = variables.numBlocks ?? 0;
       workRepository.save(work);
       return HttpResponse.json({ data: { updateWorkNumBlocks: work } }, { status: 200 });
     }
@@ -235,7 +235,7 @@ const workHandlers = [
       if (!work) {
         return HttpResponse.json({ errors: [{ message: `Work ${variables.workNumber} not found` }] }, { status: 404 });
       }
-      work.numSlides = variables.numSlides;
+      work.numSlides = variables.numSlides ?? 0;
       workRepository.save(work);
       return HttpResponse.json({ data: { updateWorkNumSlides: work } }, { status: 200 });
     }
@@ -248,7 +248,7 @@ const workHandlers = [
       if (!work) {
         return HttpResponse.json({ errors: [{ message: `Work ${variables.workNumber} not found` }] }, { status: 404 });
       }
-      work.priority = variables.priority;
+      work.priority = variables.priority ?? null;
       workRepository.save(work);
       return HttpResponse.json({ data: { updateWorkPriority: work } }, { status: 200 });
     }

@@ -15,7 +15,7 @@ const reagentTransferHandlers = [
   ),
 
   graphql.query<FindReagentPlateQuery, FindLabwareQueryVariables>('FindReagentPlate', () => {
-    return HttpResponse.json({ data: { reagentPlate: undefined } }, { status: 200 });
+    return HttpResponse.json({ data: { reagentPlate: null } }, { status: 200 });
   })
 ];
 

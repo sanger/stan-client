@@ -92,7 +92,6 @@ export function emptySlots(labware: LabwareFieldsFragment): Array<SlotFieldsFrag
  */
 export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
   return {
-    __typename: 'Labware',
     id: labware.id,
     barcode: labware.barcode,
     externalBarcode: labware.externalBarcode,
@@ -105,14 +104,12 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
     numColumns: labware.numColumns ?? labware.labwareType.numColumns,
     frozen: labware.frozen ?? false,
     labwareType: {
-      __typename: 'LabwareType',
       name: labware.labwareType.name,
       numRows: labware.labwareType.numRows,
       numColumns: labware.labwareType.numColumns,
       labelType: labware.labwareType.labelType
     },
     slots: labware.slots.map((slot) => ({
-      __typename: 'Slot',
       id: slot.id,
       address: slot.address,
       labwareId: slot.labwareId,
@@ -120,39 +117,33 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
         id: sample.id,
         section: sample.section,
         bioState: {
-          __typename: 'BioState',
           name: sample.bioState.name
         },
         tissue: {
           donor: {
             donorName: sample.tissue.donor.donorName,
-            lifeStage: sample.tissue.donor.lifeStage,
-            __typename: 'Donor'
+            lifeStage: sample.tissue.donor.lifeStage
           },
+          collectionDate: null,
           externalName: sample.tissue.externalName,
+          hmdmc: null,
           spatialLocation: {
             tissueType: {
-              name: sample.tissue.spatialLocation.tissueType.name,
-              __typename: 'TissueType'
+              name: sample.tissue.spatialLocation.tissueType.name
             },
             name: sample.tissue.spatialLocation.name,
-            code: sample.tissue.spatialLocation.code,
-            __typename: 'SpatialLocation'
+            code: sample.tissue.spatialLocation.code
           },
           replicate: sample.tissue.replicate,
           medium: {
-            name: sample.tissue.medium.name,
-            __typename: 'Medium'
+            name: sample.tissue.medium.name
           },
           fixative: {
             name: sample.tissue.fixative.name,
-            enabled: sample.tissue.fixative.enabled,
-            __typename: 'Fixative'
-          },
-          __typename: 'Tissue'
+            enabled: sample.tissue.fixative.enabled
+          }
         },
-        blockHighestSection: sample.blockHighestSection,
-        __typename: 'Sample'
+        blockHighestSection: sample.blockHighestSection
       }))
     }))
   };
@@ -233,7 +224,7 @@ export const hasSamples = (labware: LabwareFieldsFragment | LabwareFlaggedFields
  * @returns An array of Flagged Labware objects with the 'flagged' property set to false.
  */
 export const convertLabwareToFlaggedLabware = (labware: LabwareFieldsFragment[]): LabwareFlaggedFieldsFragment[] => {
-  return labware.map((lw) => ({ __typename: 'LabwareFlagged', flagged: false, ...lw }) as LabwareFlaggedFieldsFragment);
+  return labware.map((lw) => ({ flagged: false, ...lw }) as LabwareFlaggedFieldsFragment);
 };
 
 /**

@@ -13,10 +13,12 @@ const mocklocationParentContextValue: LocationParentContextType = {
     barcode: 'STO-001',
     stored: [
       {
-        barcode: 'STAN-3111'
+        barcode: 'STAN-3111',
+        address: null
       },
       {
-        barcode: 'STAN-3112'
+        barcode: 'STAN-3112',
+        address: null
       }
     ],
     size: {
@@ -25,11 +27,16 @@ const mocklocationParentContextValue: LocationParentContextType = {
     },
     numStored: 0,
     leaf: false,
-    children: []
+    children: [],
+    fixedName: null,
+    customName: null,
+    address: null,
+    direction: null,
+    parent: null
   },
   addressToItemMap: new Map([
-    ['A1', { barcode: 'STAN-3111' }],
-    ['A2', { barcode: 'STAN-3112' }]
+    ['A1', { barcode: 'STAN-3111', address: null }],
+    ['A2', { barcode: 'STAN-3112', address: null }]
   ]),
   locationAddresses: new Map([
     ['A1', 1],
